@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 interface CompanyLogoProps {
   ticker: string
   name: string
-  logoUrl?: string
-  domain?: string
+  logoUrl?: string | null
+  domain?: string | null
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   className?: string
 }

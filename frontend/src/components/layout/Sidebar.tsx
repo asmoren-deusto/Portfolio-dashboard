@@ -9,6 +9,7 @@ import {
   Sun,
   Moon,
   X,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -17,7 +18,7 @@ import { useMarketIndices } from '@/api/queries'
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Visión General' },
-  { to: '/market', icon: Globe, label: 'Mercado (Heatmap)' },
+  { to: '/market', icon: Globe, label: 'Mercado' },
   { to: '/positions', icon: Layers, label: 'Posiciones' },
   { to: '/analytics', icon: TrendingUp, label: 'Analítica' },
   { to: '/transactions', icon: List, label: 'Operaciones' },
@@ -26,7 +27,7 @@ const NAV = [
 interface SidebarProps {}
 
 export function Sidebar({}: SidebarProps) {
-  const { theme, setTheme, mobileSidebarOpen, setMobileSidebarOpen } = useAppStore()
+  const { theme, setTheme, mobileSidebarOpen, setMobileSidebarOpen, currentUser, logout } = useAppStore()
   const { data: indicesData, dataUpdatedAt } = useMarketIndices()
 
   // Live timestamp: prefer server's cache_timestamp, fall back to React Query's dataUpdatedAt
@@ -127,8 +128,36 @@ export function Sidebar({}: SidebarProps) {
           ))}
         </nav>
 
-        {/* Footer with Permanent Theme Selector */}
-        <div className="border-t border-slate-100 dark:border-white/[0.06] p-3 space-y-3">
+        {/* Footer with User Card & Permanent Theme Selector */}
+        <div className="border-t border-slate-100 dark:border-white/[0.06] p-3 space-y-2.5">
+          {/* Active User Card */}
+          {currentUser && (
+            <div className="p-2 rounded-xl bg-slate-100/90 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06] flex items-center justify-between gap-2 shadow-2xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] text-white bg-gradient-to-tr ${currentUser.color} shrink-0 shadow-xs`}
+                >
+                  {currentUser.avatar}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                    {currentUser.name}
+                  </div>
+                  <div className="text-[9.5px] text-slate-600 dark:text-slate-400 font-medium truncate">
+                    {currentUser.badge}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-white dark:hover:bg-white/[0.06] transition-colors shrink-0"
+                title="Cerrar sesión / Salir"
+              >
+                <LogOut size={13} />
+              </button>
+            </div>
+          )}
+
           {/* Theme Segmented Switcher */}
           <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06]">
             <button

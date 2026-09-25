@@ -29,6 +29,7 @@ import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { fmt } from '@/lib/utils'
+import { useAppStore } from '@/store/appStore'
 
 import {
   usePortfolioSummary,
@@ -44,6 +45,7 @@ import {
 type AllocMode = 'asset' | 'type'
 
 export function OverviewPage() {
+  const { currentUser } = useAppStore()
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
@@ -78,9 +80,13 @@ export function OverviewPage() {
       {/* Unified High-End Header */}
       <Header
         title="Visión General"
-        subtitle="Resumen ejecutivo del patrimonio, evolución de rentabilidad y asignación global."
-        badge="Cartera MyInvestor"
-        badgeColor="blue"
+        subtitle={
+          currentUser
+            ? `${currentUser.strategy} • ${currentUser.broker}`
+            : 'Resumen ejecutivo del patrimonio, evolución de rentabilidad y asignación global.'
+        }
+        badge={currentUser ? `Cartera ${currentUser.name.split(' ')[0]}` : 'Cartera MyInvestor'}
+        badgeColor={currentUser?.isDemo ? 'blue' : 'emerald'}
         showPeriodSelector
       />
 

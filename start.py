@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Portfolio Dashboard — Dev startup script.
-Starts the FastAPI backend and opens the frontend in the browser.
+Portfolio Dashboard — Startup Script.
+Starts the FastAPI backend (serving both API and compiled React frontend)
+and opens the dashboard in your default browser.
 """
 import subprocess
 import sys
@@ -10,38 +11,61 @@ import webbrowser
 import time
 import threading
 
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 def open_browser():
-    """Open frontend after a short delay."""
-    time.sleep(2)
-    webbrowser.open("http://localhost:8000/docs")  # API docs
-    # Open the frontend HTML directly (no Node needed)
-    frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "frontend", "index.html"))
-    webbrowser.open(f"file:///{frontend_path.replace(os.sep, '/')}")
+    """Open dashboard after server starts."""
+    time.sleep(2.5)
+    try:
+        webbrowser.open("http://localhost:8000")
+    except Exception:
+        pass
 
 if __name__ == "__main__":
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    backend_dir = os.path.join(root_dir, "backend")
+
     # Ensure data directory exists
-    os.makedirs("data", exist_ok=True)
+    os.makedirs(os.path.join(root_dir, "data"), exist_ok=True)
+    os.makedirs(os.path.join(backend_dir, "data"), exist_ok=True)
 
     # Copy .env.example if .env doesn't exist
-    if not os.path.exists(".env") and os.path.exists(".env.example"):
+    env_file = os.path.join(root_dir, ".env")
+    env_example = os.path.join(root_dir, ".env.example")
+    if not os.path.exists(env_file) and os.path.exists(env_example):
         import shutil
-        shutil.copy(".env.example", ".env")
-        print("📄 Created .env from .env.example")
+        shutil.copy(env_example, env_file)
+        print("[INFO] Created .env from .env.example")
 
-    print("🚀 Starting Portfolio Dashboard backend...")
-    print("   API:      http://localhost:8000")
-    print("   API docs: http://localhost:8000/docs")
-    print("   Frontend: Open frontend/index.html in your browser")
-    print("   Press Ctrl+C to stop\n")
+    # Select virtualenv Python if available
+    venv_py_win = os.path.join(backend_dir, "venv", "Scripts", "python.exe")
+    venv_py_nix = os.path.join(backend_dir, "venv", "bin", "python")
 
-    # Open browser after delay
+    if os.path.exists(venv_py_win):
+        python = venv_py_win
+    elif os.path.exists(venv_py_nix):
+        python = venv_py_nix
+    else:
+        python = sys.executable
+
+    print("==================================================")
+    print(" [*] Portfolio Dashboard")
+    print("==================================================")
+    print(" [>] Aplicacion Web: http://localhost:8000")
+    print(" [>] Documentacion:  http://localhost:8000/docs")
+    print(" [>] Frontend Dev:   http://localhost:5173 (opcional)")
+    print("==================================================")
+    print(" Presione Ctrl+C para detener el servidor.\n")
+
     threading.Thread(target=open_browser, daemon=True).start()
-
-    # Run uvicorn
-    python = sys.executable
-    backend_dir = os.path.join(os.path.dirname(__file__), "backend")
 
     subprocess.run(
         [python, "-m", "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"],
         cwd=backend_dir,
     )
+

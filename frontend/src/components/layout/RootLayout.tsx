@@ -4,10 +4,12 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/store/appStore'
 import { useEffect } from 'react'
 import { Menu, TrendingUp } from 'lucide-react'
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
+import { LoginPage } from '@/pages/LoginPage'
 
 export function RootLayout() {
   const location = useLocation()
-  const { theme, toggleMobileSidebar } = useAppStore()
+  const { theme, toggleMobileSidebar, currentUser } = useAppStore()
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -18,6 +20,11 @@ export function RootLayout() {
       document.documentElement.classList.remove('dark')
     }
   }, [theme])
+
+  // If no user is logged in, show the Login and profile selection experience
+  if (!currentUser) {
+    return <LoginPage />
+  }
 
   return (
     <div className="relative flex min-h-screen bg-[#f8fafc] text-slate-800 dark:bg-[#090d16] dark:text-slate-100 overflow-x-hidden selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-blue-500/30 dark:selection:text-blue-200 transition-colors duration-200">
@@ -53,18 +60,9 @@ export function RootLayout() {
         </header>
 
         <main className="flex flex-1 flex-col gap-4 px-4 py-3 sm:px-6 sm:py-4 md:px-7 md:py-4.5">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-1 flex-col"
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

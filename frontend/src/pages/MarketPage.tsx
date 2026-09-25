@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import {
   Search,
   LayoutGrid,
@@ -13,6 +13,7 @@ import {
   ArrowUpDown,
   Filter,
   Sparkles,
+  Columns2,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMarketQuotes, type MarketStock } from '@/api/queries'
@@ -22,6 +23,7 @@ import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockCard } from '@/components/market/StockCard'
 import { StockTableRow } from '@/components/market/StockTableRow'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
+import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { fmt } from '@/lib/utils'
 
 const INDEX_TABS = [
@@ -33,15 +35,50 @@ const INDEX_TABS = [
 ]
 
 type SortOption = 'market_cap_desc' | 'change_pct_desc' | 'change_pct_asc' | 'volume_desc' | 'price_desc'
-type ViewMode = 'heatmap' | 'grid' | 'table'
+type ViewMode = 'split' | 'heatmap' | 'grid' | 'table'
 
 export const MarketPage: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState<string>('Todos')
   const [selectedSector, setSelectedSector] = useState<string>('Todos')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortBy, setSortBy] = useState<SortOption>('market_cap_desc')
-  const [viewMode, setViewMode] = useState<ViewMode>('heatmap')
+  const [viewMode, setViewMode] = useState<ViewMode>('split')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
+
+  // Height synchronization between Heatmap and Stock List in split view
+  const heatmapContainerRef = useRef<HTMLDivElement>(null)
+  const [heatmapHeight, setHeatmapHeight] = useState<number>(760)
+  const [isXl, setIsXl] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth >= 1280 : true)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsXl(window.innerWidth >= 1280)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  useEffect(() => {
+    if (viewMode !== 'split') return
+    const el = heatmapContainerRef.current
+    if (!el) return
+
+    const updateHeight = () => {
+      if (heatmapContainerRef.current) {
+        const h = heatmapContainerRef.current.offsetHeight
+        if (h > 200) {
+          setHeatmapHeight(h)
+        }
+      }
+    }
+
+    updateHeight()
+    const ro = new ResizeObserver(() => {
+      updateHeight()
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [viewMode])
 
   const { data, isLoading, isFetching, refetch } = useMarketQuotes(selectedIndex)
 
@@ -313,16 +350,28 @@ export const MarketPage: React.FC = () => {
               <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
             </div>
 
-            {/* View Mode Switcher (Heatmap / Grid / Table) */}
+            {/* View Mode Switcher (Dual / Heatmap / Grid / Table) */}
             <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.08]">
               <button
-                onClick={() => setViewMode('heatmap')}
+                onClick={() => setViewMode('split')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  viewMode === 'split'
+                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                }`}
+                title="Vista dual: listado y heatmap paralelos"
+              >
+                <Columns2 className="w-3.5 h-3.5" />
+                <span>Dual</span>
+              </button>
+              <button
+                onClick={() => setViewMode('heatmap')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   viewMode === 'heatmap'
                     ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
-                title="Mapa de calor interactivo (Heatmap)"
+                title="Mapa de calor interactivo completo"
               >
                 <Layers className="w-3.5 h-3.5" />
                 <span>Heatmap</span>
@@ -377,11 +426,7 @@ export const MarketPage: React.FC = () => {
           ))}
         </div>
       ) : filteredStocks.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-12 text-center rounded-2xl bg-[#111625]/60 border border-white/[0.05]"
-        >
+        <div className="p-12 text-center rounded-2xl bg-[#111625]/60 border border-white/[0.05]">
           <Building2 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
           <h3 className="text-base font-semibold text-slate-300">
             No se encontraron acciones
@@ -389,7 +434,175 @@ export const MarketPage: React.FC = () => {
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
             Prueba a modificar los filtros de búsqueda, cambiar de índice o restablecer el sector.
           </p>
-        </motion.div>
+        </div>
+      ) : viewMode === 'split' ? (
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+          {/* Left Column: Interactive Stock List — Explicit Height Synchronized with Heatmap */}
+          <div
+            style={{ height: isXl && heatmapHeight ? `${heatmapHeight}px` : '760px' }}
+            className="xl:col-span-5 rounded-2xl bg-white/95 dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col"
+          >
+            <div className="px-4 py-3 border-b border-slate-200/80 dark:border-white/[0.06] flex items-center justify-between bg-slate-50/70 dark:bg-white/[0.02] shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <List className="w-3.5 h-3.5" />
+                </div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                  Listado de Cotizadas
+                </h3>
+              </div>
+              <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.05] px-2 py-0.5 rounded-full border border-slate-200/60 dark:border-white/[0.06]">
+                {filteredStocks.length} valores
+              </span>
+            </div>
+            {/* Table */}
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <table className="w-full table-fixed text-left">
+                <colgroup>
+                  <col className="w-[42%]" />
+                  <col className="w-[18%]" />
+                  <col className="w-[14%]" />
+                  <col className="hidden lg:table-column w-[14%]" />
+                  <col className="hidden xl:table-column w-[12%]" />
+                </colgroup>
+                <thead className="sticky top-0 z-10 bg-slate-50/95 dark:bg-[#111625]/95 backdrop-blur-sm border-b border-slate-200/80 dark:border-white/[0.06]">
+                  <tr>
+                    <th className="px-3 py-1.5 text-left text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Empresa</th>
+                    <th className="px-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Precio</th>
+                    <th className="px-2 pr-3 lg:pr-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Var. %</th>
+                    <th className="hidden lg:table-cell px-2 pr-3 xl:pr-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Vol / Cap</th>
+                    <th className="hidden xl:table-cell px-2 pr-3 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Rango día</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100/80 dark:divide-white/[0.03]">
+                  {filteredStocks.map((stock) => {
+                    const isPositive = (stock.change_pct ?? 0) >= 0
+                    const isSelected = selectedStock?.ticker === stock.ticker
+                    const rangePct =
+                      stock.day_high != null && stock.day_low != null && stock.day_high !== stock.day_low && stock.price != null
+                        ? Math.max(0, Math.min(1, (stock.price - stock.day_low) / (stock.day_high - stock.day_low)))
+                        : null
+
+                    return (
+                      <tr
+                        key={stock.ticker}
+                        onClick={() => setSelectedStock(stock)}
+                        className={`transition-all cursor-pointer group ${
+                          isSelected
+                            ? 'bg-blue-50/90 dark:bg-blue-500/10'
+                            : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        {/* Empresa */}
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <CompanyLogo
+                              ticker={stock.ticker}
+                              name={stock.name}
+                              domain={stock.domain}
+                              logoUrl={stock.logo_url}
+                              size="md"
+                            />
+                            <div className="min-w-0 overflow-hidden">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-sm text-slate-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors whitespace-nowrap">
+                                  {stock.ticker}
+                                </span>
+                                <span className="hidden sm:inline text-[10.5px] font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/[0.05] px-1 py-px rounded truncate max-w-[60px]">
+                                  {stock.sector}
+                                </span>
+                              </div>
+                              <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
+                                {stock.name}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Precio */}
+                        <td className="px-2 py-2.5 text-right">
+                          <div className="font-bold font-mono text-[13px] text-slate-950 dark:text-white whitespace-nowrap">
+                            {fmt.price(stock.price, stock.currency)}
+                          </div>
+                          {stock.change != null && (
+                            <div className={`text-[11px] font-mono font-semibold leading-tight mt-0.5 ${
+                              isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                            }`}>
+                              {isPositive ? '+' : ''}{stock.change.toFixed(2)}
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Var % */}
+                        <td className="px-2 pr-3 lg:pr-2 py-2.5 text-right">
+                          <span className={`inline-block font-mono text-xs font-bold px-1.5 py-0.5 rounded-md whitespace-nowrap ${
+                            stock.change_pct === null || stock.change_pct === undefined
+                              ? 'text-slate-500 bg-slate-100 dark:bg-white/[0.05]'
+                              : isPositive
+                              ? 'text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/15'
+                              : 'text-rose-700 bg-rose-500/10 dark:text-rose-400 dark:bg-rose-500/15'
+                          }`}>
+                            {stock.change_pct != null
+                              ? `${isPositive ? '+' : ''}${stock.change_pct.toFixed(2)}%`
+                              : '—'}
+                          </span>
+                        </td>
+
+                        {/* Vol / Cap */}
+                        <td className="hidden lg:table-cell px-2 pr-3 xl:pr-2 py-2.5 text-right">
+                          <span className="text-[11px] font-mono font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap block">
+                            {fmt.volume(stock.volume)}
+                          </span>
+                          {stock.market_cap != null ? (
+                            <span className="text-[10px] font-mono text-slate-500 dark:text-slate-500 whitespace-nowrap block mt-0.5">
+                              {fmt.marketCap(stock.market_cap, stock.currency)}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono text-slate-400 dark:text-slate-600 block">—</span>
+                          )}
+                        </td>
+
+                        {/* Rango día */}
+                        <td className="hidden xl:table-cell px-2 pr-3 py-2.5">
+                          {rangePct !== null ? (
+                            <div className="flex flex-col gap-1">
+                              <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${isPositive ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                                  style={{ width: `${rangePct * 100}%` }}
+                                />
+                              </div>
+                              <div className="flex justify-between w-full">
+                                <span className="text-[9.5px] font-mono text-slate-400 dark:text-slate-600">
+                                  {stock.day_low?.toFixed(1)}
+                                </span>
+                                <span className="text-[9.5px] font-mono text-slate-400 dark:text-slate-600">
+                                  {stock.day_high?.toFixed(1)}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-400 dark:text-slate-600">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Right Column: Heatmap */}
+          <div ref={heatmapContainerRef} className="xl:col-span-7 w-full min-w-0">
+            <MarketHeatmap
+              stocks={filteredStocks}
+              onSelectStock={(stock) => setSelectedStock(stock)}
+              selectedSector={selectedSector}
+              onSectorChange={setSelectedSector}
+            />
+          </div>
+        </div>
       ) : viewMode === 'heatmap' ? (
         <motion.div
           initial={{ opacity: 0, y: 6 }}

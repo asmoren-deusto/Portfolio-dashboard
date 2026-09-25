@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { PALETTE, fmt } from '@/lib/utils'
 import type { Position } from '@/lib/mockData'
@@ -17,44 +17,59 @@ const TYPE_LABELS: Record<string, string> = {
   crypto: 'Cripto',
 }
 
-
-
 export function AllocationChart({ positions, mode = 'asset' }: AllocationChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+
+  if (!positions || positions.length === 0) {
+    return (
+      <div className="flex h-[245px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+        Sin datos de asignación
+      </div>
+    )
+  }
 
   let data: { name: string; fullName: string; value: number; pct: number }[]
 
   if (mode === 'type') {
     const groups: Record<string, number> = {}
     positions.forEach((p) => {
-      groups[p.asset_type] = (groups[p.asset_type] ?? 0) + p.current_value
+      const type = p.asset_type || 'fund'
+      groups[type] = (groups[type] ?? 0) + (p.current_value ?? 0)
     })
-    const total = Object.values(groups).reduce((s, v) => s + v, 0)
+    const totalGroup = Object.values(groups).reduce((s, v) => s + v, 0)
     data = Object.entries(groups).map(([k, v]) => {
       const label = TYPE_LABELS[k] ?? k
       return {
         name: label,
         fullName: label,
         value: v,
-        pct: total > 0 ? (v / total) * 100 : 0,
+        pct: totalGroup > 0 ? (v / totalGroup) * 100 : 0,
       }
     })
   } else {
     data = positions.map((p) => ({
-      name: p.name,
-      fullName: p.name,
-      value: p.current_value,
-      pct: p.weight,
+      name: p.name || p.isin,
+      fullName: p.name || p.isin,
+      value: p.current_value ?? 0,
+      pct: p.weight ?? 0,
     }))
   }
 
-  const total = data.reduce((s, d) => s + d.value, 0)
+  const total = data.reduce((s, d) => s + (d.value ?? 0), 0)
+  if (total <= 0) {
+    return (
+      <div className="flex h-[245px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+        Sin datos de asignación
+      </div>
+    )
+  }
+
   const hoveredItem = hoveredIndex !== null && data[hoveredIndex] ? data[hoveredIndex] : null
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 min-w-0">
       {/* Donut Chart Container */}
-      <div className="relative flex items-center justify-center">
+      <div className="relative flex items-center justify-center w-full min-h-[245px]">
         <ResponsiveContainer width="100%" height={245}>
           <PieChart>
             <Pie
@@ -67,7 +82,7 @@ export function AllocationChart({ positions, mode = 'asset' }: AllocationChartPr
               dataKey="value"
               strokeWidth={0}
               animationBegin={0}
-              animationDuration={600}
+              animationDuration={500}
               onMouseEnter={(_, index) => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
@@ -84,7 +99,6 @@ export function AllocationChart({ positions, mode = 'asset' }: AllocationChartPr
                 />
               ))}
             </Pie>
-
           </PieChart>
         </ResponsiveContainer>
 
@@ -99,7 +113,7 @@ export function AllocationChart({ positions, mode = 'asset' }: AllocationChartPr
                 {fmt.currency(hoveredItem.value)}
               </span>
               <span className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
-                {hoveredItem.pct.toFixed(1)}%
+                {(hoveredItem.pct ?? 0).toFixed(1)}%
               </span>
             </>
           ) : (
@@ -125,13 +139,11 @@ export function AllocationChart({ positions, mode = 'asset' }: AllocationChartPr
           const isOtherHovered = hoveredIndex !== null && !isHovered
 
           return (
-            <motion.div
+            <div
               key={d.name + i}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: isOtherHovered ? 0.45 : 1, y: 0 }}
-              transition={{ duration: 0.15 }}
               onMouseEnter={() => setHoveredIndex(i)}
               onMouseLeave={() => setHoveredIndex(null)}
+              style={{ opacity: isOtherHovered ? 0.45 : 1, transition: 'opacity 0.15s ease' }}
               className={`flex items-center gap-1.5 py-1 px-1.5 rounded-lg transition-colors cursor-pointer ${
                 isHovered
                   ? 'bg-slate-100/90 dark:bg-white/10 ring-1 ring-slate-200/90 dark:ring-white/10'
@@ -162,9 +174,9 @@ export function AllocationChart({ positions, mode = 'asset' }: AllocationChartPr
                     : 'font-semibold text-slate-800 dark:text-slate-200'
                 }`}
               >
-                {d.pct.toFixed(1)}%
+                {(d.pct ?? 0).toFixed(1)}%
               </span>
-            </motion.div>
+            </div>
           )
         })}
       </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { RefreshCw, Sun, Moon } from 'lucide-react'
+import { RefreshCw, Sun, Moon, User, ChevronDown, Check, LogOut, ShieldCheck } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
@@ -31,9 +31,10 @@ export function Header({
   showPeriodSelector = false,
   children,
 }: HeaderProps) {
-  const { period, setPeriod, useMock, theme, toggleTheme } = useAppStore()
+  const { period, setPeriod, useMock, theme, toggleTheme, currentUser, users, switchUser, logout } = useAppStore()
   const queryClient = useQueryClient()
   const [spinning, setSpinning] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const handleRefresh = async () => {
     setSpinning(true)
@@ -53,29 +54,24 @@ export function Header({
       {/* Title & Subtitle */}
       <div>
         <div className="flex items-center gap-2.5 flex-wrap">
-          <motion.h1
-            key={title}
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white"
-          >
+          <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
             {title}
-          </motion.h1>
+          </h1>
 
           {badge && (
             <span
               className={cn(
-                'inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-sm',
+                'inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full border shadow-sm',
                 badgeColorStyles
               )}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+              <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
               {badge}
             </span>
           )}
 
           {useMock && !badge && (
-            <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-1.5 py-px rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
               Demo Data
             </span>
           )}
@@ -116,6 +112,114 @@ export function Header({
                 <span className="relative z-10">{p.label}</span>
               </button>
             ))}
+          </div>
+        )}
+
+        {/* User Account / Profile Dropdown Menu */}
+        {currentUser && (
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-sm text-xs font-semibold transition-all dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:border-white/10 dark:text-slate-200 active:scale-95"
+              title="Perfil activo y cambio de usuario"
+            >
+              <div
+                className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] text-white bg-gradient-to-tr ${currentUser.color} shadow-xs shrink-0`}
+              >
+                {currentUser.avatar}
+              </div>
+              <div className="flex flex-col text-left leading-tight hidden sm:flex">
+                <span className="font-bold text-[11px] text-slate-900 dark:text-white max-w-[110px] truncate">
+                  {currentUser.name}
+                </span>
+                <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium">
+                  {currentUser.badge}
+                </span>
+              </div>
+              <ChevronDown size={13} className="text-slate-400" />
+            </button>
+
+            {/* Dropdown Menu */}
+            {userMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setUserMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-[#111625] border border-slate-200/90 dark:border-white/[0.08] shadow-2xl z-50 p-2 text-xs">
+                  {/* Active user header */}
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04] mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs text-white bg-gradient-to-tr ${currentUser.color} shadow-xs shrink-0`}
+                      >
+                        {currentUser.avatar}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-slate-900 dark:text-white truncate">
+                          {currentUser.name}
+                        </div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                          {currentUser.email}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-white/[0.04] text-[10px] text-slate-600 dark:text-slate-400 font-medium">
+                      Estrategia: <span className="font-bold text-slate-800 dark:text-slate-200">{currentUser.strategy}</span>
+                    </div>
+                  </div>
+
+                  {/* Switch Profile Section */}
+                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Cambiar de Inversor
+                  </div>
+
+                  <div className="space-y-0.5">
+                    {users.map((u) => {
+                      const isSelected = u.id === currentUser.id
+                      return (
+                        <button
+                          key={u.id}
+                          onClick={() => {
+                            switchUser(u.id)
+                            setUserMenuOpen(false)
+                          }}
+                          className={`w-full flex items-center justify-between p-2 rounded-xl text-left font-medium transition-colors ${
+                            isSelected
+                              ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 font-bold'
+                              : 'hover:bg-slate-100/80 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div
+                              className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-[9px] text-white bg-gradient-to-tr ${u.color}`}
+                            >
+                              {u.avatar}
+                            </div>
+                            <span className="truncate">{u.name}</span>
+                          </div>
+                          {isSelected && <Check size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Logout Button */}
+                  <div className="mt-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false)
+                        logout()
+                      }}
+                      className="w-full flex items-center gap-2 p-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 font-semibold transition-colors"
+                    >
+                      <LogOut size={13} />
+                      <span>Cerrar sesión / Salir</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 

@@ -273,7 +273,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
                 Mapa de Calor del Mercado
               </h2>
-              <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                 Heatmap S&P 500 / Global
               </span>
             </div>

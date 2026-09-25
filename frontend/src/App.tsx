@@ -6,6 +6,7 @@ import { PositionsPage } from '@/pages/PositionsPage'
 import { AnalyticsPage } from '@/pages/AnalyticsPage'
 import { TransactionsPage } from '@/pages/TransactionsPage'
 import { MarketPage } from '@/pages/MarketPage'
+import { LoginPage } from '@/pages/LoginPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
       { path: 'assets',          element: <MarketPage /> },
       { path: '*',               element: <Navigate to="/" /> },
     ],
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
   },
 ])
 

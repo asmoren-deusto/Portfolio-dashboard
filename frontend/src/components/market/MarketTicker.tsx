@@ -24,9 +24,47 @@ function getAssetDomain(name: string, ticker: string): string {
 }
 
 function getAssetLogo(name: string, ticker: string): string | undefined {
-  if (name.includes('BTC') || ticker.includes('BTC')) return 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
-  if (name.includes('Oro') || ticker === 'GC=F') return 'https://img.icons8.com/color/48/gold-bars.png'
-  if (name.includes('Brent') || ticker === 'BZ=F') return 'https://img.icons8.com/color/48/oil-industry.png'
+  // Crypto (preserved as requested)
+  if (name.includes('BTC') || ticker.includes('BTC'))
+    return 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+
+  // Commodities: classic gold bars & clean petroleum
+  if (name.includes('Oro') || ticker === 'GC=F')
+    return 'https://img.icons8.com/color/48/gold-bars.png'
+  if (name.includes('Brent') || ticker === 'BZ=F')
+    return 'https://img.icons8.com/color/48/oil-industry.png'
+
+  // US Indices:
+  // NASDAQ (preserved as requested)
+  if (name.includes('NASDAQ') || ticker === '^IXIC')
+    return 'https://logo.clearbit.com/nasdaq.com'
+  // S&P 500: clean official S&P Global logo
+  if (name.includes('S&P') || ticker === '^GSPC')
+    return 'https://logo.clearbit.com/spglobal.com'
+
+  // Global / MSCI World: World / UN international emblem
+  if (name.includes('MSCI') || ticker === 'URTH' || ticker === 'EEM')
+    return 'https://flagcdn.com/w80/un.png'
+
+  // European Indices:
+  // IBEX 35: Flag of Spain 🇪🇸 (crisp high-res, matching forex currency style)
+  if (name.includes('IBEX') || ticker === '^IBEX')
+    return 'https://flagcdn.com/w80/es.png'
+  // Euro Stoxx 50: Flag of the European Union 🇪🇺
+  if (name.includes('Stoxx') || ticker === '^STOXX50E')
+    return 'https://flagcdn.com/w80/eu.png'
+
+  // Asian Indices:
+  // Nikkei 225: Flag of Japan 🇯🇵 (crisp high-res)
+  if (name.includes('Nikkei') || ticker === '^N225')
+    return 'https://flagcdn.com/w80/jp.png'
+
+  // Forex currencies (preserved as requested)
+  if (name.includes('EUR/USD') || ticker === 'EURUSD=X')
+    return 'https://flagcdn.com/w80/us.png'
+  if (name.includes('EUR/JPY') || ticker === 'EURJPY=X')
+    return 'https://flagcdn.com/w80/jp.png'
+
   return undefined
 }
 
@@ -103,9 +141,9 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   const effectiveState = isForeign && (state === 'POST' || state === 'POSTPOST') ? 'CLOSED' : state
 
   const labels: Record<string, string> = {
-    PRE: 'Pre-mercado',
-    POST: 'Post-mercado',
-    POSTPOST: 'Post-mercado',
+    PRE: 'Pre',
+    POST: 'Post',
+    POSTPOST: 'Post',
     CLOSED: 'Cerrado',
   }
   const colors: Record<string, string> = {
@@ -116,7 +154,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   }
   const cls = colors[effectiveState] || colors.CLOSED
   return (
-    <span className={`text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border ${cls}`}>
+    <span className={`inline-flex items-center ml-1 text-[8px] font-bold uppercase tracking-wide px-1 py-px rounded border leading-none align-middle ${cls}`}>
       {labels[effectiveState] || effectiveState}
     </span>
   )
@@ -149,10 +187,18 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   const isUsPre = usState === 'PRE'
   const isUsPost = usState === 'POST' || usState === 'POSTPOST'
 
+  // Status label: US market is 9:30-16:00 ET = 15:30-22:00 UTC
+  // Pre-market: 04:00-09:30 ET = 10:00-15:30 UTC
+  // Post-market: 16:00-20:00 ET = 22:00-02:00 UTC (next day)
+  // Overnight (02:00-04:00 UTC) = truly closed, yfinance returns PRE erroneously
+  const nowUTC = new Date()
+  const utcHour = nowUTC.getUTCHours() + nowUTC.getUTCMinutes() / 60
+
   const mainStatusLabel =
     usState === 'REGULAR' ? 'En Vivo' :
-    isUsPre ? 'Pre-mercado' :
-    isUsPost ? 'Post-mercado' :
+    (usState === 'POST' || usState === 'POSTPOST') ? 'Post-mercado' :
+    (usState === 'PRE' && utcHour >= 10 && utcHour < 15.5) ? 'Pre-mercado' :
+    (usState === 'PRE' && (utcHour >= 22 || utcHour < 2)) ? 'Post-mercado' :
     'En Vivo'
 
   // Last updated = from cache_timestamp if available, else most recent per-ticker timestamp
@@ -218,7 +264,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     tabIndex={0}
                     key={`${idx.name}-${index}`}
                     onClick={() => handleCardClick(idx)}
-                    className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-blue-500/40 cursor-pointer active:scale-[0.98]"
+                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-blue-500/40 cursor-pointer active:scale-[0.98]"
                   >
                     <CompanyLogo
                       ticker={idx.ticker || idx.name}
@@ -227,38 +273,34 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                       logoUrl={logo}
                       size="xs"
                     />
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-medium text-slate-600 hover:text-blue-600 transition-colors dark:text-slate-300 dark:hover:text-blue-400">
-                          {idx.name}
-                        </span>
-                        <MarketStateBadge state={state} name={idx.name} />
-                      </div>
-                      <span className="text-xs font-bold text-slate-900 tracking-tight dark:text-white mt-0.5 tabular-nums">
+                    {/* Name + price — always exactly 2 lines, no extra rows */}
+                    <div className="flex flex-col justify-center min-w-0">
+                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap leading-none">
+                        {idx.name}
+                        {state !== 'REGULAR' && (
+                          <MarketStateBadge state={state} name={idx.name} />
+                        )}
+                      </span>
+                      <span className="text-[11.5px] font-bold text-slate-900 tracking-tight dark:text-white mt-[3px] tabular-nums leading-none whitespace-nowrap">
                         {idx.price != null ? fmtPrice(idx.price) : '—'}
                       </span>
-                      {extPrice != null && state !== 'REGULAR' && (
-                        <span className="text-[9.5px] text-slate-400 dark:text-slate-500 tabular-nums">
-                          Reg. {fmtPrice(idx.regular_price ?? idx.price)}
-                        </span>
-                      )}
                     </div>
 
+                    {/* Change % badge — fixed height, no extra lines */}
                     <div
-                      className={`flex items-center gap-1 text-[11.5px] font-semibold tabular-nums px-1.5 py-0.5 rounded-lg border shadow-xs ${
+                      className={`flex items-center gap-0.5 text-[11px] font-semibold tabular-nums px-1.5 py-0.5 rounded-md border shrink-0 ${
                         isPos
                           ? 'text-emerald-800 bg-emerald-50/90 border-emerald-300/80 dark:text-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/20'
                           : 'text-rose-800 bg-rose-50/90 border-rose-300/80 dark:text-rose-300 dark:bg-rose-500/10 dark:border-rose-500/20'
                       }`}
                     >
                       {isPos ? (
-                        <TrendingUp className="w-3 h-3 stroke-[2] text-emerald-700 dark:text-emerald-300" />
+                        <TrendingUp className="w-2.5 h-2.5 stroke-[2.5]" />
                       ) : (
-                        <TrendingDown className="w-3 h-3 stroke-[2] text-rose-700 dark:text-rose-300" />
+                        <TrendingDown className="w-2.5 h-2.5 stroke-[2.5]" />
                       )}
                       <span>
-                        {isPos ? '+' : ''}
-                        {idx.change_pct?.toFixed(2)}%
+                        {isPos ? '+' : ''}{idx.change_pct?.toFixed(2)}%
                       </span>
                     </div>
                   </div>

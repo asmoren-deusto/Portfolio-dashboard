@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -22,7 +21,6 @@ export function KpiCard({
   change,
   changePositive,
   hero,
-  delay = 0,
   className,
   icon,
 }: KpiCardProps) {
@@ -34,10 +32,7 @@ export function KpiCard({
       : 'text-rose-700 bg-rose-500/10 border-rose-500/20 dark:text-rose-400 dark:bg-rose-500/15 dark:border-rose-500/25'
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay, ease: [0.16, 1, 0.3, 1] }}
+    <div
       className={cn(
         'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5',
         'bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:shadow-md',
@@ -71,14 +66,9 @@ export function KpiCard({
         /* Hero Mode: Value, Badge and Subtitle arranged horizontally */
         <div className="flex items-baseline justify-between gap-3 min-w-0">
           <div className="flex items-baseline gap-2.5 sm:gap-3 flex-wrap min-w-0">
-            <motion.div
-              key={value}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-2xl sm:text-[26px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0"
-            >
+            <div className="text-2xl sm:text-[26px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
               {value}
-            </motion.div>
+            </div>
 
             {change && (
               <span
@@ -108,14 +98,9 @@ export function KpiCard({
       ) : (
         /* Regular KPI Card: Value and Subtitle placed side-by-side to minimize height */
         <div className="flex items-baseline gap-2 min-w-0">
-          <motion.div
-            key={value}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0"
-          >
+          <div className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
             {value}
-          </motion.div>
+          </div>
 
           {change && (
             <span
@@ -145,6 +130,6 @@ export function KpiCard({
           )}
         </div>
       )}
-    </motion.div>
+    </div>
   )
 }
