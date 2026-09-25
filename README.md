@@ -84,6 +84,24 @@ npm run dev
 ```
 La aplicación web estará disponible en `http://localhost:5173`.
 
+### 4. Despliegue con Docker y Portainer (Recomendado para servidores)
+
+Puedes desplegar la aplicación completa (backend FastAPI + frontend React compilado en un solo contenedor optimizado) mediante **Docker Compose** o **Portainer Stacks**:
+
+#### Desde Portainer:
+1. Ve a tu panel de **Portainer** -> **Stacks** -> **Add stack**.
+2. Dale un nombre al stack (ej: `portfolio-dashboard`).
+3. Elige el método de despliegue:
+   - **Repository** (Automático): Introduce la URL de tu repositorio Git (`https://github.com/asmoren-deusto/Portfolio-dashboard.git`), rama `main` y ruta de Compose `docker-compose.yml`. Activa *Automatic updates / Polling* si deseas auto-despliegue en cada commit.
+   - **Web Editor**: Pega directamente el contenido del archivo `docker-compose.yml`.
+4. Pulsa **Deploy the stack**.
+
+#### Desde terminal con Docker Compose:
+```bash
+docker compose up -d --build
+```
+La aplicación quedará ejecutándose en segundo plano en el puerto `8000` con el volumen `portfolio_data` para persistencia continua de la base de datos SQLite.
+
 ---
 
 ## ⚙️ Estructura del Proyecto

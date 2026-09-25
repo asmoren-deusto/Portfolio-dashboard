@@ -189,7 +189,6 @@ export const LoginPage: React.FC = () => {
                 <div className="grid grid-cols-1 gap-2.5">
                   {users.map((u) => {
                     const isDemo = u.isDemo
-                    const pnlPositive = (u.summary.total_pnl ?? 0) >= 0
 
                     return (
                       <div
@@ -204,7 +203,11 @@ export const LoginPage: React.FC = () => {
                         <div className="flex items-center gap-3.5 min-w-0">
                           {/* Avatar */}
                           <div
-                            className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm text-white shadow-sm shrink-0 bg-gradient-to-tr ${u.color}`}
+                            className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm text-white shadow-sm shrink-0 ring-1 ring-black/10 dark:ring-white/10"
+                            style={{
+                              background: u.bgGradient || 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+                              backgroundColor: '#059669',
+                            }}
                           >
                             {u.avatar}
                           </div>
@@ -231,22 +234,11 @@ export const LoginPage: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Right side stats + action */}
-                        <div className="flex items-center gap-3 sm:gap-4 shrink-0 pl-2">
-                          <div className="text-right">
-                            <div className="font-bold font-mono text-sm text-slate-950 dark:text-white">
-                              {fmt.currency(u.summary.total_value)}
-                            </div>
-                            <div
-                              className={`text-[11px] font-mono font-semibold ${
-                                pnlPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                              }`}
-                            >
-                              {pnlPositive ? '+' : ''}
-                              {fmt.pct(u.summary.total_pnl_pct)}
-                            </div>
-                          </div>
-
+                        {/* Right side access action */}
+                        <div className="flex items-center gap-2.5 shrink-0 pl-2">
+                          <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors hidden sm:inline">
+                            Acceder
+                          </span>
                           <div className="w-8 h-8 rounded-xl bg-white dark:bg-white/[0.08] border border-slate-200/90 dark:border-white/[0.08] flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all shadow-xs">
                             <ArrowRight size={14} />
                           </div>

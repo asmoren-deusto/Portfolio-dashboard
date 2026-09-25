@@ -1,0 +1,30 @@
+services:
+  portfolio-dashboard:
+    image: portfolio-dashboard:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: portfolio-dashboard
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - TZ=Europe/Madrid
+      - ENVIRONMENT=production
+      - DB_PATH=/app/data/portfolio.db
+      - ALPHA_VANTAGE_KEY=${ALPHA_VANTAGE_KEY:-}
+    volumes:
+      # Volumen persistente para la base de datos SQLite y datos
+      - portfolio_data:/app/data
+      # Si prefieres una ruta local en tu servidor (Bind Mount), descomenta esta línea:
+      # - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  portfolio_data:
+    name: portfolio_data

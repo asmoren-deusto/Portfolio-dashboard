@@ -464,6 +464,7 @@ export interface UserProfile {
   broker: string
   isDemo: boolean
   color: string
+  bgGradient?: string
   summary: PortfolioSummary
   positions: Position[]
   analytics: Analytics
@@ -482,7 +483,8 @@ const DEMO_USER: UserProfile = {
   badge: 'Demo (Mock)',
   broker: 'MyInvestor / Scalable',
   isDemo: true,
-  color: 'from-blue-600 to-indigo-600',
+  color: 'bg-blue-600 text-white',
+  bgGradient: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
   summary: MOCK_SUMMARY,
   positions: MOCK_POSITIONS,
   analytics: MOCK_ANALYTICS,
@@ -651,7 +653,8 @@ const ASIER_USER: UserProfile = {
   badge: 'Cartera Principal',
   broker: 'MyInvestor & Trade Republic',
   isDemo: false,
-  color: 'from-emerald-600 to-teal-600',
+  color: 'bg-emerald-600 text-white',
+  bgGradient: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
   summary: {
     total_value: 186420.00,
     total_invested: 100212.40,
@@ -829,7 +832,8 @@ const LAURA_USER: UserProfile = {
   badge: 'Cartera Boglehead',
   broker: 'MyInvestor',
   isDemo: false,
-  color: 'from-violet-600 to-purple-600',
+  color: 'bg-violet-600 text-white',
+  bgGradient: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
   summary: {
     total_value: 74380.50,
     total_invested: 62116.30,

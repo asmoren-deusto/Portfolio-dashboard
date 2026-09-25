@@ -168,7 +168,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       badge: 'Personal',
       broker: 'MyInvestor',
       isDemo: false,
-      color: 'from-blue-600 to-indigo-600',
+      color: 'bg-indigo-600 text-white',
+      bgGradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
       summary: {
         total_value: initialBalance,
         total_invested: invested,

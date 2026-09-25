@@ -135,7 +135,11 @@ export function Sidebar({}: SidebarProps) {
             <div className="p-2 rounded-xl bg-slate-100/90 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06] flex items-center justify-between gap-2 shadow-2xs">
               <div className="flex items-center gap-2 min-w-0">
                 <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] text-white bg-gradient-to-tr ${currentUser.color} shrink-0 shadow-xs`}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] text-white shrink-0 shadow-xs ring-1 ring-black/10 dark:ring-white/10"
+                  style={{
+                    background: currentUser.bgGradient || 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+                    backgroundColor: '#059669',
+                  }}
                 >
                   {currentUser.avatar}
                 </div>

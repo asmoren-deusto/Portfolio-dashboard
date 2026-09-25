@@ -124,7 +124,11 @@ export function Header({
               title="Perfil activo y cambio de usuario"
             >
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] text-white bg-gradient-to-tr ${currentUser.color} shadow-xs shrink-0`}
+                className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] text-white shadow-xs shrink-0 ring-1 ring-black/10 dark:ring-white/10"
+                style={{
+                  background: currentUser.bgGradient || 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+                  backgroundColor: '#059669',
+                }}
               >
                 {currentUser.avatar}
               </div>
@@ -151,7 +155,11 @@ export function Header({
                   <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04] mb-2">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs text-white bg-gradient-to-tr ${currentUser.color} shadow-xs shrink-0`}
+                        className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs text-white shadow-xs shrink-0 ring-1 ring-black/10 dark:ring-white/10"
+                        style={{
+                          background: currentUser.bgGradient || 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+                          backgroundColor: '#059669',
+                        }}
                       >
                         {currentUser.avatar}
                       </div>
@@ -192,7 +200,11 @@ export function Header({
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <div
-                              className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-[9px] text-white bg-gradient-to-tr ${u.color}`}
+                              className="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[9px] text-white shrink-0 ring-1 ring-black/10 dark:ring-white/10"
+                              style={{
+                                background: u.bgGradient || 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+                                backgroundColor: '#059669',
+                              }}
                             >
                               {u.avatar}
                             </div>
