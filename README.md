@@ -100,7 +100,7 @@ Puedes desplegar la aplicación completa (backend FastAPI + frontend React compi
 ```bash
 docker compose up -d --build
 ```
-La aplicación quedará ejecutándose en segundo plano en el puerto `8000` con el volumen `portfolio_data` para persistencia continua de la base de datos SQLite.
+La aplicación quedará ejecutándose en segundo plano en el puerto `8050` (http://IP-SERVIDOR:8050) con el volumen `portfolio_data` para persistencia continua de la base de datos SQLite.
 
 ---
 
