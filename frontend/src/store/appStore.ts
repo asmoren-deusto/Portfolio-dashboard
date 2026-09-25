@@ -67,9 +67,9 @@ function getStoredUsers(): UserProfile[] {
   return INITIAL_USER_PROFILES
 }
 
-// Load active user session
+// Load active user session (returns null if no session is cached)
 function getStoredActiveUser(): UserProfile | null {
-  if (typeof window === 'undefined') return INITIAL_USER_PROFILES[0]
+  if (typeof window === 'undefined') return null
   try {
     const activeId = localStorage.getItem('portfolio_active_user_id')
     if (activeId) {
@@ -77,10 +77,10 @@ function getStoredActiveUser(): UserProfile | null {
       const found = allUsers.find((u) => u.id === activeId)
       if (found) return found
     }
-    // Default to Demo user on initial load
-    return INITIAL_USER_PROFILES[0]
+    // No session cached -> Return null so user is redirected to Login
+    return null
   } catch {
-    return INITIAL_USER_PROFILES[0]
+    return null
   }
 }
 

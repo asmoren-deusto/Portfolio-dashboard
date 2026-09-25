@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   TrendingUp,
@@ -20,7 +20,14 @@ import { fmt } from '@/lib/utils'
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
-  const { users, login, createUser } = useAppStore()
+  const { users, login, createUser, currentUser } = useAppStore()
+
+  // If already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/', { replace: true })
+    }
+  }, [currentUser, navigate])
 
   const [activeTab, setActiveTab] = useState<'profiles' | 'form' | 'new'>('profiles')
   const [email, setEmail] = useState('')

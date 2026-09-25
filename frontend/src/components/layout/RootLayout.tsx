@@ -1,11 +1,10 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, Navigate } from 'react-router-dom'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/store/appStore'
 import { useEffect } from 'react'
 import { Menu, TrendingUp } from 'lucide-react'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
-import { LoginPage } from '@/pages/LoginPage'
 
 export function RootLayout() {
   const location = useLocation()
@@ -21,9 +20,9 @@ export function RootLayout() {
     }
   }, [theme])
 
-  // If no user is logged in, show the Login and profile selection experience
+  // If no user is logged in, redirect to /login
   if (!currentUser) {
-    return <LoginPage />
+    return <Navigate to="/login" replace />
   }
 
   return (
