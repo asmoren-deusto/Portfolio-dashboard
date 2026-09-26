@@ -17,7 +17,7 @@ export function AssetBadge({ type, className }: BadgeProps) {
   const cfg = configs[type] ?? configs.fund
   return (
     <span className={cn(
-      'inline-block rounded-md border px-2 py-0.5 text-xs font-semibold uppercase tracking-wider',
+      'inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide leading-none shadow-2xs',
       cfg.bg, cfg.text, cfg.border, className
     )}>
       {cfg.label}
