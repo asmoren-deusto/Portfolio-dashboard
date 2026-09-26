@@ -249,10 +249,10 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 backdrop-blur-md px-4 py-2.5 dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14] transition-colors duration-200">
+      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 backdrop-blur-md px-3.5 py-1.5 dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14] transition-colors duration-200">
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
-          <div className="flex items-center gap-2 pl-1 pr-3.5 border-r border-slate-200/90 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#111625]/90">
+          <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/90 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#111625]/90">
             <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute -inset-0.5 rounded-full bg-emerald-500 opacity-70" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
@@ -271,13 +271,13 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           </div>
 
           {/* Marquee Ticker Track (Rotates slowly, pauses on hover) */}
-          <div className="relative flex-1 overflow-hidden ml-2.5 py-1.5 group">
+          <div className="relative flex-1 overflow-hidden ml-2 py-0.5 group">
             {/* Subtle fade edges for smooth transition */}
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#111625]/90 to-transparent z-10" />
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#111625]/90 to-transparent z-10" />
 
             {/* Seamless scrolling marquee track */}
-            <div className="animate-ticker-marquee flex items-center gap-2.5 pt-1 pb-0.5">
+            <div className="animate-ticker-marquee flex items-center gap-2 pt-0.5 pb-0.5">
               {[...rawIndices, ...rawIndices].map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
@@ -293,7 +293,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     tabIndex={0}
                     key={`${idx.name}-${index}`}
                     onClick={() => handleCardClick(idx)}
-                    className="relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-blue-500/40 cursor-pointer active:scale-[0.98]"
+                    className="relative flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-blue-500/40 cursor-pointer active:scale-[0.98]"
                   >
                     {/* Floating Overlaid State Badge (Upper-right corner) */}
                     {state !== 'REGULAR' && (
