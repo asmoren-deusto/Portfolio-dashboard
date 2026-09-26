@@ -401,7 +401,13 @@ export function PositionsPage() {
 
                         {/* Precio actual */}
                         <td className="px-4 py-3.5 text-right tabular-nums font-mono text-slate-900 dark:text-slate-100 font-bold">
-                          {fmt.currency(p.current_price)}
+                          <div>{fmt.currency(p.current_price)}</div>
+                          {(() => {
+                            const raw = p.price_date || p.last_updated
+                            if (!raw) return null
+                            const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                            return <div className="text-[10.5px] font-normal text-slate-500 dark:text-slate-400">{dateOnly}</div>
+                          })()}
                         </td>
 
                         {/* Valor Actual */}
@@ -512,6 +518,12 @@ export function PositionsPage() {
                     <div>
                       <span className="text-slate-600 dark:text-slate-400 font-medium block">Precio NAV:</span>
                       <span className="text-slate-900 dark:text-slate-200 font-bold">{fmt.currency(p.current_price)}</span>
+                      {(() => {
+                        const raw = p.price_date || p.last_updated
+                        if (!raw) return null
+                        const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                        return <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-normal">({dateOnly})</span>
+                      })()}
                     </div>
                     <div>
                       <span className="text-slate-600 dark:text-slate-400 font-medium block">Coste Medio:</span>

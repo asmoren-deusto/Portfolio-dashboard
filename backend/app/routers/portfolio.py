@@ -133,8 +133,8 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
             "invested_amount": round(pos["invested_amount"], 2),
             "unrealized_pnl": round(pnl, 2),
             "unrealized_pnl_pct": round(pnl_pct, 2),
-            "last_updated": datetime.now().isoformat(),
-            "price_date": price_date,
+            "last_updated": price_date or datetime.now().strftime("%Y-%m-%d"),
+            "price_date": price_date or datetime.now().strftime("%Y-%m-%d"),
         })
 
     # Add weight

@@ -17,6 +17,7 @@ export interface Position {
   unrealized_pnl_pct: number
   weight: number
   last_updated?: string | null
+  price_date?: string | null
 }
 
 export interface PortfolioSummary {

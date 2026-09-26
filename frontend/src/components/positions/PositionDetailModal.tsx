@@ -402,6 +402,12 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                 <span className="text-xs sm:text-sm font-bold font-mono text-slate-950 dark:text-white mt-0.5 block truncate">
                   {fmt.currency(position.current_price)}
                 </span>
+                {(() => {
+                  const raw = position.price_date || position.last_updated
+                  if (!raw) return null
+                  const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                  return <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Fecha: {dateOnly}</span>
+                })()}
               </div>
 
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.04]">

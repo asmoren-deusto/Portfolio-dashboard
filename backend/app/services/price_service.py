@@ -27,37 +27,51 @@ async def get_price_with_date(
     db = None,
 ) -> tuple[Optional[float], Optional[str]]:
     """
-    Get current NAV and date for an asset.
+    Get current NAV and date for an asset dynamically.
     Order of precedence:
-      0. In-memory cache (if valid)
-      1. DB PriceCache (manual overrides / verified MyInvestor entries)
-      2. Quefondos (Spanish/European fund liquidation value with date)
-      3. Yahoo Finance (fast closing prices with date)
-      4. Morningstar (fallback)
+      1. In-memory cache (if valid within 15 min TTL)
+      2. Live fetch from Quefondos (primary official fund page)
+      3. Live fetch from Yahoo Finance (using ticker)
+      4. Database PriceCache fallback (cached historical NAV)
+      5. Morningstar public search
     """
-    # 1. DB PriceCache check first (manual overrides / verified entries take precedence)
-    if db is not None:
-        try:
-            from app.models import PriceCache
-            entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
-            if entry and entry.price > 0:
-                _price_cache[isin] = {"price": entry.price, "date": entry.date, "ts": datetime.now()}
-                return entry.price, entry.date
-        except Exception as e:
-            logger.warning(f"Error querying PriceCache for {isin}: {e}")
-
     if _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
     price = None
     price_date = None
 
-    # 2. Try Quefondos by ISIN (reliable for European/Spanish funds)
+    # 1. Try Quefondos by ISIN (live official fund page)
     price, price_date = await _fetch_quefondos_price(isin)
 
-    # 3. Fallback: Yahoo Finance if ticker provided or no Quefondos price
+    # 2. Try Yahoo Finance if ticker provided or Quefondos failed
     if price is None and ticker:
         price, price_date = await _fetch_yahoo_price(ticker)
+
+    # If successfully fetched from live provider, persist to DB PriceCache & in-memory cache
+    if price is not None and db is not None:
+        try:
+            from app.models import PriceCache
+            target_date = price_date or datetime.now().strftime("%Y-%m-%d")
+            existing = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == target_date).first()
+            if existing:
+                existing.price = price
+            else:
+                db.add(PriceCache(isin=isin, date=target_date, price=price, currency="EUR", source="live"))
+            db.commit()
+        except Exception as e:
+            logger.warning(f"Error persisting live price for {isin}: {e}")
+
+    # 3. Fallback to DB PriceCache if live fetch failed
+    if price is None and db is not None:
+        try:
+            from app.models import PriceCache
+            entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+            if entry and entry.price > 0:
+                price = entry.price
+                price_date = entry.date
+        except Exception as e:
+            logger.warning(f"Error querying PriceCache fallback for {isin}: {e}")
 
     # 4. Fallback: Morningstar by ISIN
     if price is None:
@@ -99,36 +113,30 @@ async def _fetch_quefondos_price(isin: str) -> tuple[Optional[float], Optional[s
     """Fetch NAV and date from Quefondos public fund page."""
     try:
         url = f"https://www.quefondos.com/es/fondos/ficha/index.html?isin={isin}"
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-        async with httpx.AsyncClient(timeout=8) as client:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        async with httpx.AsyncClient(timeout=8, follow_redirects=True) as client:
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
                 price = None
                 date_str = None
 
-                m_date = re.search(r"Valor liquidativo.*?(\d{2}/\d{2}/\d{4}).*?([\d\.]+,\d+)\s*EUR", resp.text, re.DOTALL | re.IGNORECASE)
-                if m_date:
-                    date_str = m_date.group(1)
-                    price = float(m_date.group(2).replace(".", "").replace(",", "."))
-                else:
-                    m = re.search(r"Valor liquidativo.*?([\d\.]+,\d+)\s*EUR", resp.text, re.DOTALL | re.IGNORECASE)
-                    if m:
-                        price = float(m.group(1).replace(".", "").replace(",", "."))
-                    else:
-                        m2 = re.search(r"<span>([\d\.]+,\d+)\s*EUR</span>", resp.text, re.IGNORECASE)
-                        if m2:
-                            price = float(m2.group(1).replace(".", "").replace(",", "."))
+                m_price = re.search(r"Valor liquidativo:.*?([\d\.]+,\d+)\s*EUR", resp.text, re.DOTALL | re.IGNORECASE)
+                if m_price:
+                    price = float(m_price.group(1).replace(".", "").replace(",", "."))
 
+                m_date = re.search(r"Valor liquidativo:.*?Fecha:.*?(\d{2}/\d{2}/\d{4})", resp.text, re.DOTALL | re.IGNORECASE)
+                if m_date:
+                    parts = m_date.group(1).split("/")
+                    if len(parts) == 3:
+                        date_str = f"{parts[2]}-{parts[1]}-{parts[0]}"
+                else:
                     dates = re.findall(r"\b(\d{2}/\d{2}/\d{4})\b", resp.text)
                     if dates:
-                        date_str = dates[0]
-
-                if price is not None:
-                    # Convert dd/mm/yyyy to yyyy-mm-dd if needed
-                    if date_str and "/" in date_str:
-                        parts = date_str.split("/")
+                        parts = dates[0].split("/")
                         if len(parts) == 3:
                             date_str = f"{parts[2]}-{parts[1]}-{parts[0]}"
+
+                if price is not None:
                     return price, date_str
     except Exception as e:
         logger.warning(f"Quefondos error for {isin}: {e}")

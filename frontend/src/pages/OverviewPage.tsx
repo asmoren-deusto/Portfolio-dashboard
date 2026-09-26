@@ -368,7 +368,16 @@ export function OverviewPage() {
                       {fmt.currency(p.current_value)}
                     </td>
                     <td className="py-2.5 px-2.5 text-right font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                      {p.last_updated ? format(parseISO(p.last_updated), 'dd/MM/yyyy') : p.asset_type === 'fund' ? '24/09/2026' : '25/09/2026'}
+                      {(() => {
+                        const raw = p.price_date || p.last_updated
+                        if (!raw) return '—'
+                        try {
+                          const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                          return format(parseISO(dateOnly), 'dd/MM/yyyy')
+                        } catch {
+                          return raw
+                        }
+                      })()}
                     </td>
                     <td className="py-2.5 px-2.5 text-right">
                       <div className="flex flex-col items-end">
@@ -451,7 +460,16 @@ export function OverviewPage() {
                       {fmt.currency(p.current_value)}
                     </td>
                     <td className="py-2.5 px-2.5 text-right font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                      {p.last_updated ? format(parseISO(p.last_updated), 'dd/MM/yyyy') : p.asset_type === 'fund' ? '24/09/2026' : '25/09/2026'}
+                      {(() => {
+                        const raw = p.price_date || p.last_updated
+                        if (!raw) return '—'
+                        try {
+                          const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                          return format(parseISO(dateOnly), 'dd/MM/yyyy')
+                        } catch {
+                          return raw
+                        }
+                      })()}
                     </td>
                     <td className="py-2.5 px-2.5 text-right">
                       <div className="flex flex-col items-end">
