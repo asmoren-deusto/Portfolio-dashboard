@@ -178,7 +178,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   return (
     <span
       title={tooltips[effectiveState] || effectiveState}
-      className={`absolute -top-1 right-0.5 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1.5px] rounded-full border shadow-2xs leading-none backdrop-blur-xs select-none ${cls}`}
+      className={`absolute -top-1.5 right-0.5 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1.5px] rounded-full border shadow-2xs leading-none backdrop-blur-xs select-none ${cls}`}
     >
       {labels[effectiveState] || effectiveState}
     </span>
@@ -271,13 +271,13 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           </div>
 
           {/* Marquee Ticker Track (Rotates slowly, pauses on hover) */}
-          <div className="relative flex-1 overflow-hidden ml-2 py-0.5 group">
+          <div className="relative flex-1 overflow-hidden ml-2 py-1 group">
             {/* Subtle fade edges for smooth transition */}
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#111625]/90 to-transparent z-10" />
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#111625]/90 to-transparent z-10" />
 
             {/* Seamless scrolling marquee track */}
-            <div className="animate-ticker-marquee flex items-center gap-2 pt-0.5 pb-0.5">
+            <div className="animate-ticker-marquee flex items-center gap-2 pt-1 pb-0.5">
               {[...rawIndices, ...rawIndices].map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
