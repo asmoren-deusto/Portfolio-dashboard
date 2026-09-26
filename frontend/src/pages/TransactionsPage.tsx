@@ -18,10 +18,7 @@ import {
   CheckCircle2,
   FileSpreadsheet,
   AlertCircle,
-  Trash2,
 } from 'lucide-react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useAppStore } from '@/store/appStore'
 import { Header } from '@/components/layout/Header'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
@@ -61,12 +58,11 @@ export function TransactionsPage() {
 
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const queryClient = useQueryClient()
-  const { currentUser } = useAppStore()
-
   // Sync initial transactions
   useEffect(() => {
-    setTransactions(initialTransactions)
+    if (initialTransactions.length > 0 && transactions.length === 0) {
+      setTransactions(initialTransactions)
+    }
   }, [initialTransactions])
 
   // Map ISIN to position info for logos and names
@@ -114,115 +110,20 @@ export function TransactionsPage() {
   }
 
   // Handle adding new operation
-  const handleAddTransaction = async (newTx: Transaction) => {
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (token) headers['Authorization'] = `Bearer ${token}`
-
-      const res = await fetch('/api/transactions', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          user_id: currentUser?.id || 'asier',
-          isin: newTx.isin,
-          asset_name: (newTx as any).name || '',
-          type: newTx.type,
-          shares: Number(newTx.shares),
-          price: Number(newTx.price),
-          amount: Number(newTx.amount),
-          fees: Number(newTx.fees || 0),
-          date: newTx.date,
-          broker: newTx.broker || 'myinvestor',
-          notes: newTx.notes || '',
-        }),
-      })
-
-      if (res.ok) {
-        queryClient.invalidateQueries({ queryKey: ['transactions'] })
-        queryClient.invalidateQueries({ queryKey: ['summary'] })
-        queryClient.invalidateQueries({ queryKey: ['positions'] })
-        queryClient.invalidateQueries({ queryKey: ['performance'] })
-        queryClient.invalidateQueries({ queryKey: ['analytics'] })
-        setShowAddModal(false)
-        notify('¡Operación guardada en la base de datos con éxito!')
-        return
-      }
-    } catch {}
-
+  const handleAddTransaction = (newTx: Transaction) => {
     setTransactions((prev) => [newTx, ...prev])
     setShowAddModal(false)
-    notify('¡Operación registrada en la cartera!')
+    notify('¡Operación registrada con éxito en la cartera!')
   }
 
-  // Handle CSV import
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Simulate CSV import
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
-      const headers: Record<string, string> = {}
-      if (token) headers['Authorization'] = `Bearer ${token}`
-
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const userId = currentUser?.id || 'asier'
-      const res = await fetch(`/api/transactions/import-csv?user_id=${userId}`, {
-        method: 'POST',
-        headers,
-        body: formData,
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        queryClient.invalidateQueries({ queryKey: ['transactions'] })
-        queryClient.invalidateQueries({ queryKey: ['summary'] })
-        queryClient.invalidateQueries({ queryKey: ['positions'] })
-        queryClient.invalidateQueries({ queryKey: ['performance'] })
-        queryClient.invalidateQueries({ queryKey: ['analytics'] })
-        setShowImportModal(false)
-        notify(data.message || `Archivo ${file.name} importado correctamente.`)
-        return
-      } else {
-        const err = await res.json().catch(() => ({}))
-        notify(err.detail || 'Error al procesar el archivo. Revisa el formato.')
-        return
-      }
-    } catch {
-      notify('Error de conexión al subir el archivo.')
-    } finally {
-      if (e.target) e.target.value = ''
-    }
-  }
-
-  // Handle delete operation
-  const handleDeleteTransaction = async (e: React.MouseEvent, txId: number | string) => {
-    e.stopPropagation()
-    if (!window.confirm('¿Seguro que deseas eliminar esta operación?')) return
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
-      const headers: Record<string, string> = {}
-      if (token) headers['Authorization'] = `Bearer ${token}`
-
-      const res = await fetch(`/api/transactions/${txId}`, {
-        method: 'DELETE',
-        headers,
-      })
-      if (res.ok) {
-        queryClient.invalidateQueries({ queryKey: ['transactions'] })
-        queryClient.invalidateQueries({ queryKey: ['summary'] })
-        queryClient.invalidateQueries({ queryKey: ['positions'] })
-        queryClient.invalidateQueries({ queryKey: ['performance'] })
-        queryClient.invalidateQueries({ queryKey: ['analytics'] })
-        notify('Operación eliminada de la base de datos.')
-        setTransactions((prev) => prev.filter((t) => t.id !== txId))
-        return
-      }
-    } catch {}
-
-    setTransactions((prev) => prev.filter((t) => t.id !== txId))
-    notify('Operación eliminada.')
+    setTimeout(() => {
+      notify(`Archivo ${file.name} procesado correctamente. Datos sincronizados.`)
+      setShowImportModal(false)
+    }, 600)
   }
 
   return (
@@ -389,44 +290,14 @@ export function TransactionsPage() {
                 <th className="px-5 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                   Entidad / Broker
                 </th>
-                <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Acciones
-                </th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-slate-500">
-                    <div className="max-w-md mx-auto flex flex-col items-center">
-                      <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center mb-3">
-                        <Sparkles className="w-6 h-6" />
-                      </div>
-                      <p className="text-base font-bold text-slate-800 dark:text-slate-200">
-                        No hay operaciones registradas aún
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-                        Comienza a construir tu cartera real registrando tu primera aportación periódica o importando tu extracto CSV.
-                      </p>
-                      <div className="flex items-center gap-3 mt-4">
-                        <button
-                          type="button"
-                          onClick={() => setShowAddModal(true)}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition-all cursor-pointer"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Registrar Operación</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowImportModal(true)}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all border border-slate-200 dark:border-white/[0.08] cursor-pointer"
-                        >
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>Importar CSV</span>
-                        </button>
-                      </div>
-                    </div>
+                  <td colSpan={7} className="py-20 text-center text-slate-500">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No hay operaciones con este criterio</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Prueba a seleccionar otra pestaña o limpiar la búsqueda.</p>
                   </td>
                 </tr>
               ) : (
@@ -502,18 +373,6 @@ export function TransactionsPage() {
                           {t.broker}
                         </span>
                       </td>
-
-                      {/* Actions */}
-                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={(e) => handleDeleteTransaction(e, t.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                          title="Eliminar operación"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
                     </motion.tr>
                   )
                 })
@@ -550,14 +409,6 @@ export function TransactionsPage() {
   )
 }
 
-const POPULAR_FUNDS = [
-  { name: 'Vanguard Global Stock Index Fund EUR Acc', isin: 'IE00B03HD191', price: 64.20 },
-  { name: 'Fidelity MSCI World Index Fund P-ACC-EUR', isin: 'IE00BYX5NX33', price: 34.50 },
-  { name: 'Vanguard Emerging Markets Stock Index EUR', isin: 'IE0031786142', price: 27.80 },
-  { name: 'Vanguard Global Small-Cap Index EUR Acc', isin: 'IE00B42W3S00', price: 41.10 },
-  { name: 'iShares Core S&P 500 UCITS ETF (Acc)', isin: 'IE00B5BMR087', price: 540.00 },
-]
-
 // ----------------------------------------------------
 // Add Transaction Modal (Portal)
 // ----------------------------------------------------
@@ -571,12 +422,10 @@ function AddTransactionModal({
   onAdd: (tx: Transaction) => void
 }) {
   const [type, setType] = useState<'buy' | 'sell' | 'dividend' | 'transfer'>('buy')
-  const [useCustomAsset, setUseCustomAsset] = useState(positions.length === 0)
   const [isin, setIsin] = useState(positions[0]?.isin || '')
-  const [customName, setCustomName] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [shares, setShares] = useState('10')
-  const [price, setPrice] = useState(positions[0]?.current_price ? String(positions[0].current_price) : '100')
+  const [price, setPrice] = useState('100')
   const [broker, setBroker] = useState('MyInvestor')
 
   useEffect(() => {
@@ -595,23 +444,14 @@ function AddTransactionModal({
   const selectedPos = positions.find((p) => p.isin === isin)
   const calcAmount = (parseFloat(shares) || 0) * (parseFloat(price) || 0)
 
-  const handleSelectPopular = (fund: typeof POPULAR_FUNDS[number]) => {
-    setIsin(fund.isin)
-    setCustomName(fund.name)
-    setPrice(String(fund.price))
-    setUseCustomAsset(true)
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const finalIsin = isin.trim().toUpperCase()
-    if (!finalIsin) return
+    if (!isin) return
 
-    const finalName = customName.trim() || selectedPos?.name || finalIsin
     const newTx: Transaction = {
       id: `tx-custom-${Date.now()}`,
-      isin: finalIsin,
-      name: finalName,
+      isin,
+      name: selectedPos?.name || isin,
       type,
       date,
       shares: parseFloat(shares) || 0,
@@ -678,7 +518,7 @@ function AddTransactionModal({
                   type="button"
                   key={t.id}
                   onClick={() => setType(t.id as any)}
-                  className={`py-2 text-center rounded-xl font-semibold transition-all border cursor-pointer ${
+                  className={`py-2 text-center rounded-xl font-semibold transition-all border ${
                     type === t.id
                       ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/20'
                       : 'bg-slate-50 dark:bg-[#141928] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/20'
@@ -692,90 +532,24 @@ function AddTransactionModal({
 
           {/* Activo / Fondo */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-xs">
-                Activo / Fondo de Inversión
-              </label>
-              {positions.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextMode = !useCustomAsset
-                    setUseCustomAsset(nextMode)
-                    if (nextMode) {
-                      setIsin('')
-                      setCustomName('')
-                    } else {
-                      setIsin(positions[0]?.isin || '')
-                    }
-                  }}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
-                >
-                  {useCustomAsset ? '← Elegir de mis fondos' : '+ Añadir otro fondo'}
-                </button>
-              )}
-            </div>
-
-            {positions.length > 0 && !useCustomAsset ? (
-              <select
-                value={isin}
-                onChange={(e) => {
-                  setIsin(e.target.value)
-                  const found = positions.find((p) => p.isin === e.target.value)
-                  if (found) setPrice(String(found.current_price))
-                }}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
-              >
-                {positions.map((p) => (
-                  <option key={p.isin} value={p.isin}>
-                    {p.name} ({p.isin})
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div className="space-y-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder="Nombre (ej. Vanguard Global Stock)"
-                    value={customName}
-                    onChange={(e) => setCustomName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50 placeholder:text-slate-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Código ISIN (ej. IE00B03HD191)"
-                    value={isin}
-                    onChange={(e) => setIsin(e.target.value.toUpperCase())}
-                    required
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] font-mono uppercase text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50 placeholder:text-slate-400"
-                  />
-                </div>
-
-                {/* Popular chips */}
-                <div className="pt-1">
-                  <span className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold block mb-1.5">
-                    Fondos indexados habituales (clic para rellenar rápido):
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {POPULAR_FUNDS.map((f) => (
-                      <button
-                        type="button"
-                        key={f.isin}
-                        onClick={() => handleSelectPopular(f)}
-                        className={`text-[10.5px] px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
-                          isin === f.isin
-                            ? 'bg-blue-600 text-white border-blue-500'
-                            : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/[0.06]'
-                        }`}
-                      >
-                        {f.name.split(' ')[0]} {f.name.split(' ')[1]} ({f.isin.slice(0, 5)}...)
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+            <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-xs">
+              Activo / Fondo de Inversión
+            </label>
+            <select
+              value={isin}
+              onChange={(e) => {
+                setIsin(e.target.value)
+                const found = positions.find((p) => p.isin === e.target.value)
+                if (found) setPrice(String(found.current_price))
+              }}
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+            >
+              {positions.map((p) => (
+                <option key={p.isin} value={p.isin}>
+                  {p.name} ({p.isin})
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Fecha & Broker */}

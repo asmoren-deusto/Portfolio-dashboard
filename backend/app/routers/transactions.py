@@ -1,4 +1,4 @@
-"""Transactions router — CRUD + CSV import."""
+"""Transactions router — CRUD + CSV/Excel import."""
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 import logging
@@ -21,19 +21,20 @@ def get_transactions(user_id: str = "asier", db: Session = Depends(get_db)):
 @router.post("", response_model=TransactionOut)
 def create_transaction(tx: TransactionCreate, db: Session = Depends(get_db)):
     """Add a single transaction manually."""
-    data = tx.model_dump(exclude={"asset_name"})
+    data = tx.model_dump()
+    asset_name = data.pop("asset_name", None) or f"Fondo {tx.isin}"
     if not data.get("user_id"):
         data["user_id"] = "asier"
+
     db_tx = Transaction(**data)
     db.add(db_tx)
 
-    # Auto-create asset entry if missing, or update name if provided
-    asset_name = tx.asset_name or f"Fondo {tx.isin}"
+    # Auto-create asset entry if missing or update default name
     existing = db.query(Asset).filter(Asset.isin == tx.isin).first()
     if not existing:
         db.add(Asset(isin=tx.isin, name=asset_name, asset_type="fund"))
-    elif tx.asset_name and (existing.name.startswith("Asset ") or existing.name.startswith("Fund ") or existing.name.startswith("Fondo ")):
-        existing.name = tx.asset_name
+    elif asset_name and (existing.name.startswith("Asset ") or existing.name.startswith("Fund ") or existing.name.startswith("Fondo ")):
+        existing.name = asset_name
 
     db.commit()
     db.refresh(db_tx)
@@ -54,7 +55,7 @@ def delete_transaction(tx_id: int, db: Session = Depends(get_db)):
 @router.post("/import-csv")
 async def import_csv(file: UploadFile = File(...), user_id: str = "asier", db: Session = Depends(get_db)):
     """
-    Import transactions from a MyInvestor CSV export.
+    Import transactions from MyInvestor CSV or Excel export.
     Auto-detects column names and Spanish number formatting.
     """
     allowed_exts = (".csv", ".txt", ".xlsx", ".xls", ".tsv")
@@ -70,19 +71,22 @@ async def import_csv(file: UploadFile = File(...), user_id: str = "asier", db: S
     if not transactions:
         raise HTTPException(
             status_code=422,
-            detail="No se encontraron operaciones válidas en el archivo. Asegúrate de que el archivo contiene las columnas de Fecha, ISIN, Títulos o Importe.",
+            detail="No se encontraron operaciones válidas en el archivo. Asegúrate de que contiene las columnas de Fecha, ISIN, Títulos o Importe.",
         )
 
     imported = 0
     skipped = 0
+    seen_assets = {a.isin for a in db.query(Asset).all()}
 
     for tx_data in transactions:
         tx_data["user_id"] = user_id
         asset_name = tx_data.pop("name", "")
+        isin = tx_data["isin"]
+
         # Skip duplicates (same isin + date + amount + user_id)
         existing = db.query(Transaction).filter(
             Transaction.user_id == user_id,
-            Transaction.isin == tx_data["isin"],
+            Transaction.isin == isin,
             Transaction.date == tx_data["date"],
             Transaction.amount == tx_data["amount"],
         ).first()
@@ -95,11 +99,13 @@ async def import_csv(file: UploadFile = File(...), user_id: str = "asier", db: S
         db.add(db_tx)
 
         # Auto-create or update asset
-        asset = db.query(Asset).filter(Asset.isin == tx_data["isin"]).first()
-        if not asset:
-            db.add(Asset(isin=tx_data["isin"], name=asset_name or f"Fondo {tx_data['isin']}", asset_type="fund"))
-        elif asset_name and (asset.name.startswith("Asset ") or asset.name.startswith("Fund ") or asset.name.startswith("Fondo ")):
-            asset.name = asset_name
+        if isin not in seen_assets:
+            db.add(Asset(isin=isin, name=asset_name or f"Fondo {isin}", asset_type="fund"))
+            seen_assets.add(isin)
+        elif asset_name:
+            asset = db.query(Asset).filter(Asset.isin == isin).first()
+            if asset and (asset.name.startswith("Asset ") or asset.name.startswith("Fund ") or asset.name.startswith("Fondo ")):
+                asset.name = asset_name
 
         imported += 1
 
@@ -108,5 +114,5 @@ async def import_csv(file: UploadFile = File(...), user_id: str = "asier", db: S
         "imported": imported,
         "skipped": skipped,
         "total": len(transactions),
-        "message": f"Successfully imported {imported} transactions ({skipped} duplicates skipped)",
+        "message": f"Se han importado correctamente {imported} operaciones ({skipped} duplicadas omitidas).",
     }

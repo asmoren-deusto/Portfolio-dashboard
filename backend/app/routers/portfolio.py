@@ -69,8 +69,8 @@ async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(ge
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         price = await get_current_price(isin, ticker)
-        if price:
-            total_value += pos["shares"] * price
+        effective_price = price if (price and price > 0) else pos["avg_cost"]
+        total_value += pos["shares"] * effective_price
         total_invested += pos["invested_amount"]
 
     total_pnl = total_value - total_invested
@@ -106,9 +106,9 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
         currency = asset.currency if asset else "EUR"
 
         price = await get_current_price(isin, ticker)
-        current_value = pos["shares"] * price if price else None
-        if current_value:
-            total_value += current_value
+        display_price = price if (price and price > 0) else pos["avg_cost"]
+        current_value = pos["shares"] * display_price
+        total_value += current_value
 
         position_data.append({
             "isin": isin,
@@ -117,13 +117,13 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
             "currency": currency,
             "shares": round(pos["shares"], 6),
             "avg_cost": round(pos["avg_cost"], 4),
-            "current_price": price,
-            "current_value": round(current_value, 2) if current_value else None,
+            "current_price": round(display_price, 4),
+            "current_value": round(current_value, 2),
             "invested_amount": round(pos["invested_amount"], 2),
-            "unrealized_pnl": round(current_value - pos["invested_amount"], 2) if current_value else None,
+            "unrealized_pnl": round(current_value - pos["invested_amount"], 2),
             "unrealized_pnl_pct": round(
                 (current_value - pos["invested_amount"]) / pos["invested_amount"] * 100, 2
-            ) if current_value and pos["invested_amount"] > 0 else None,
+            ) if pos["invested_amount"] > 0 else 0.0,
             "last_updated": datetime.now().isoformat(),
         })
 

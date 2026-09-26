@@ -1,13 +1,13 @@
 """
-CSV / Excel importer for MyInvestor and Spanish brokers format.
-Supports:
-- CSV (semicolon, comma, tab separated)
-- Excel (.xlsx, .xls)
-- Encoding: UTF-8 (with/without BOM), Latin-1, Windows-1252
-- Automatic detection of header row (skipping metadata/title lines)
-- Flexible column matching for Spanish financial terms
-- Automatic ISIN regex fallback if column is unlabelled
-- Automatic calculation of missing shares or price
+CSV and Excel transaction importer for MyInvestor, Inversis, Degiro and Spanish brokers.
+Handles:
+- Formats like 'Órdenes' (Fecha de la orden, ISIN, Importe estimado con EUR, Nº de participaciones, Estado)
+- Formats like 'Movimientos' / 'Extractos'
+- Skips non-executed orders (Cancelada, Rechazada, Anulada)
+- Automatic delimiter and header detection
+- Automatic currency/formatting cleanup (EUR, $, mixed comma/dot decimals)
+- Price calculation from Amount / Shares
+- Friendly name mapping for common ISINs
 """
 import csv
 import io
@@ -19,6 +19,23 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 ISIN_REGEX = re.compile(r"\b([A-Z]{2}[A-Z0-9]{9}\d)\b")
+
+KNOWN_FUNDS: dict[str, str] = {
+    "ES0112611001": "Azvalor Internacional FI",
+    "IE000QAZP7L2": "iShares Emerging Markets Index (IE) S Acc EUR",
+    "IE000ZYRH0Q7": "iShares Developed World Index (IE) S Acc EUR",
+    "IE00BM95B621": "Polar Capital Global Technology Fund R Acc",
+    "IE00BYX5NH74": "Fidelity MSCI Japan Index Fund",
+    "LU0261952682": "Fidelity Euro 50 Index Fund A-ACC-EUR",
+    "LU0302296495": "DNB Fund - Technology",
+    "LU1623762843": "Carmignac Portfolio Credit A EUR Acc",
+    "LU2145461757": "Robeco Capital Growth - Robeco Smart Energy D EUR",
+    "IE00B03HD191": "Vanguard Global Stock Index Fund EUR Acc",
+    "IE00BYX5NX33": "Fidelity MSCI World Index Fund P-ACC-EUR",
+    "IE0031786142": "Vanguard Emerging Markets Stock Index Fund EUR Acc",
+    "IE00B42W3S00": "Vanguard Global Small-Cap Index Fund EUR Acc",
+    "IE00B5BMR087": "iShares Core S&P 500 UCITS ETF (Acc)",
+}
 
 
 def _clean_str(s: any) -> str:
@@ -43,6 +60,8 @@ def _match_column(col_name: any) -> str | None:
         return "price"
     if any(k in c for k in ["importe", "efectivo", "total", "amount", "valoracion", "neto"]):
         return "amount"
+    if any(k in c for k in ["estado", "status"]):
+        return "status"
     if any(k in c for k in ["tipo", "operacion", "concepto", "movimiento", "clase", "type"]):
         return "type"
     if any(k in c for k in ["fondo", "nombre", "descripcion", "producto", "activo", "instrumento", "valor"]):
@@ -54,7 +73,6 @@ def _parse_date(date_str: any) -> str | None:
     if not date_str:
         return None
     s = str(date_str).strip()
-    # If date contains time e.g. "2024-03-20 12:00:00" or "20/03/2024 10:15"
     s = s.split()[0].replace("/", "-")
     parts = s.split("-")
     if len(parts) == 3:
@@ -91,13 +109,12 @@ def _parse_number(val: any) -> float:
         return 0.0
     if isinstance(val, (int, float)):
         return float(val)
-    s = str(val).strip().replace("€", "").replace("%", "").replace("$", "").replace(" ", "").strip()
+    # Strip currency units and symbols
+    s = re.sub(r"(?i)(eur|usd|gbp|chf|€|\$|%)", "", str(val)).strip().replace(" ", "")
     if not s:
         return 0.0
-    is_neg = False
-    if s.startswith("-") or (s.startswith("(") and s.endswith(")")):
-        is_neg = True
-        s = s.strip("-()")
+    is_neg = s.startswith("-") or (s.startswith("(") and s.endswith(")"))
+    s = s.strip("-()")
     if "." in s and "," in s:
         s = s.replace(".", "").replace(",", ".")
     elif "," in s:
@@ -160,9 +177,9 @@ def parse_myinvestor_csv(content: bytes | str, filename: str = "") -> list[dict]
     sep = ";"
     for i, line in enumerate(lines[:25]):
         l_lower = line.lower()
-        if "isin" in l_lower or (("fecha" in l_lower or "date" in l_lower) and any(w in l_lower for w in ["operac", "part", "titul", "import"])):
+        if "isin" in l_lower or (("fecha" in l_lower or "date" in l_lower) and any(w in l_lower for w in ["orden", "operac", "part", "titul", "import"])):
             header_idx = i
-            # Determine separator from header line
+            # Determine separator
             counts = {";": line.count(";"), ",": line.count(","), "\t": line.count("\t")}
             sep = max(counts, key=counts.get)
             if counts[sep] == 0:
@@ -170,7 +187,6 @@ def parse_myinvestor_csv(content: bytes | str, filename: str = "") -> list[dict]
             break
 
     if header_idx == -1:
-        # Fallback to first line
         header_idx = 0
         sep = ";" if lines[0].count(";") >= lines[0].count(",") else ("," if lines[0].count(",") > 0 else "\t")
 
@@ -183,7 +199,7 @@ def parse_myinvestor_csv(content: bytes | str, filename: str = "") -> list[dict]
         return []
 
     raw_headers = rows[0]
-    col_mapping = {}
+    col_mapping: dict[str, int] = {}
     for col_idx, h in enumerate(raw_headers):
         field = _match_column(h)
         if field and field not in col_mapping:
@@ -222,7 +238,7 @@ def _parse_excel(content: bytes) -> list[dict]:
     header_idx = -1
     for i in range(min(25, len(df))):
         row_str = " ".join([str(val).lower() for val in df.iloc[i] if pd.notna(val)])
-        if "isin" in row_str or (("fecha" in row_str or "date" in row_str) and any(w in row_str for w in ["operac", "part", "titul", "import"])):
+        if "isin" in row_str or (("fecha" in row_str or "date" in row_str) and any(w in row_str for w in ["orden", "operac", "part", "titul", "import"])):
             header_idx = i
             break
 
@@ -230,7 +246,7 @@ def _parse_excel(content: bytes) -> list[dict]:
         header_idx = 0
 
     raw_headers = [str(x) if pd.notna(x) else "" for x in df.iloc[header_idx]]
-    col_mapping = {}
+    col_mapping: dict[str, int] = {}
     for col_idx, h in enumerate(raw_headers):
         field = _match_column(h)
         if field and field not in col_mapping:
@@ -258,8 +274,12 @@ def _build_tx_from_cells(row: list[str], col_mapping: dict[str, int]) -> dict | 
             return str(row[idx]).strip()
         return ""
 
+    # Check status if present (skip cancelled/rejected orders)
+    status = get_val("status").lower()
+    if status and any(cancelled in status for cancelled in ["cancelad", "rechazad", "anulad"]):
+        return None
+
     isin = get_val("isin").upper()
-    # If ISIN not in designated column, search row values with regex
     if not isin or len(isin) < 12:
         for cell in row:
             m = ISIN_REGEX.search(str(cell))
@@ -270,19 +290,22 @@ def _build_tx_from_cells(row: list[str], col_mapping: dict[str, int]) -> dict | 
     if not isin or len(isin) < 12:
         return None
 
+    # Determine name
     name = get_val("name")
     if not name:
-        # Check if another cell has fund name
+        name = KNOWN_FUNDS.get(isin, "")
+    if not name:
         for cell in row:
             c_str = str(cell).strip()
             if len(c_str) > 4 and isin not in c_str and not _parse_date(c_str) and _parse_number(c_str) == 0:
                 name = c_str
                 break
+    if not name:
+        name = f"Fondo {isin}"
 
     date_str = get_val("date")
     parsed_date = _parse_date(date_str)
     if not parsed_date:
-        # Default to today if date not present (e.g. current positions export)
         parsed_date = datetime.now().strftime("%Y-%m-%d")
 
     raw_type = get_val("type")
@@ -300,7 +323,7 @@ def _build_tx_from_cells(row: list[str], col_mapping: dict[str, int]) -> dict | 
     elif amount == 0 and shares > 0 and price > 0:
         amount = round(shares * price, 2)
 
-    if shares == 0 and amount == 0:
+    if shares == 0 or amount == 0:
         return None
 
     return {
@@ -313,5 +336,5 @@ def _build_tx_from_cells(row: list[str], col_mapping: dict[str, int]) -> dict | 
         "fees": 0.0,
         "date": parsed_date,
         "broker": "myinvestor",
-        "notes": "Imported from file",
+        "notes": f"Imported: {status}" if status else "Imported from file",
     }
