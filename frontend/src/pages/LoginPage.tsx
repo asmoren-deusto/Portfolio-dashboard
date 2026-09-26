@@ -34,13 +34,29 @@ export const LoginPage: React.FC = () => {
 
   const preselectedUserId = (location.state as { selectedUserId?: string } | null)?.selectedUserId
 
+  // If user arrives with preselected demo, log in instantly without password
+  useEffect(() => {
+    if (preselectedUserId === 'demo') {
+      login('demo')
+      navigate('/', { replace: true })
+    }
+  }, [preselectedUserId, login, navigate])
+
   const [activeTab, setActiveTab] = useState<'profiles' | 'form' | 'new'>('profiles')
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(() => {
-    if (preselectedUserId) {
+    if (preselectedUserId && preselectedUserId !== 'demo') {
       return users.find((u) => u.id === preselectedUserId) || null
     }
     return null
   })
+
+  // Failsafe: if demo profile is somehow selected, log in instantly
+  useEffect(() => {
+    if (selectedProfile && (selectedProfile.id === 'demo' || selectedProfile.isDemo)) {
+      login('demo')
+      navigate('/', { replace: true })
+    }
+  }, [selectedProfile, login, navigate])
 
   // Mode for setting/changing password on a profile
   const [isSettingPassword, setIsSettingPassword] = useState(false)

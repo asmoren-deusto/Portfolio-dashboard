@@ -75,8 +75,14 @@ function getStoredUsers(): UserProfile[] {
     const pwdRaw = localStorage.getItem('portfolio_user_passwords')
     if (pwdRaw) {
       const pwdMap: Record<string, { hash: string; salt: string }> = JSON.parse(pwdRaw)
+      if (pwdMap['demo']) {
+        delete pwdMap['demo']
+        try {
+          localStorage.setItem('portfolio_user_passwords', JSON.stringify(pwdMap))
+        } catch {}
+      }
       list = list.map((u) => {
-        if (pwdMap[u.id]) {
+        if (u.id !== 'demo' && !u.isDemo && pwdMap[u.id]) {
           return {
             ...u,
             passwordHash: pwdMap[u.id].hash,
@@ -89,6 +95,18 @@ function getStoredUsers(): UserProfile[] {
   } catch {
     // fallback
   }
+
+  // Ensure demo user never carries password credentials
+  list = list.map((u) => {
+    if (u.id === 'demo' || u.isDemo) {
+      return {
+        ...u,
+        passwordHash: undefined,
+        passwordSalt: undefined,
+      }
+    }
+    return u
+  })
 
   // Always exclude 'laura'
   return list.filter((u) => u.id !== 'laura')

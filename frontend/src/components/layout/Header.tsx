@@ -32,7 +32,7 @@ export function Header({
   showPeriodSelector = false,
   children,
 }: HeaderProps) {
-  const { period, setPeriod, useMock, theme, toggleTheme, currentUser, users, logout } = useAppStore()
+  const { period, setPeriod, useMock, theme, toggleTheme, currentUser, users, login, logout } = useAppStore()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [spinning, setSpinning] = useState(false)
@@ -196,6 +196,10 @@ export function Header({
                               return
                             }
                             setUserMenuOpen(false)
+                            if (u.id === 'demo' || u.isDemo) {
+                              login('demo')
+                              return
+                            }
                             logout()
                             navigate('/login', { state: { selectedUserId: u.id } })
                           }}
