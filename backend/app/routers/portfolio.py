@@ -43,6 +43,7 @@ def _get_all_transactions(db: Session, user_id: str = "asier") -> list[dict]:
             "amount": t.amount,
             "date": t.date,
             "broker": t.broker,
+            "notes": t.notes,
         }
         for t in rows
     ]

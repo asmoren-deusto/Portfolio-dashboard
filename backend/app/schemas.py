@@ -92,6 +92,7 @@ class PortfolioSummary(BaseModel):
 class PerformancePoint(BaseModel):
     date: str
     value: float
+    invested: Optional[float] = None
 
 
 class PricePoint(BaseModel):

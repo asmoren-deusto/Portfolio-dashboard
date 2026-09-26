@@ -25,12 +25,11 @@ async def get_price_with_date(
     isin: str,
     ticker: str | None = None,
     db = None,
-    force: bool = False,
 ) -> tuple[Optional[float], Optional[str]]:
     """
     Get current NAV and date for an asset dynamically.
     Order of precedence:
-      1. In-memory cache (if valid within 15 min TTL and not force)
+      1. In-memory cache (if valid within 15 min TTL)
       2. Direct Official Gestora Website (e.g. Azvalor official website for ES011261...)
       3. Financial Times Markets (official European institutional fund tearsheet feed)
       4. Live fetch from Quefondos (Spanish distributor fund page)
@@ -38,7 +37,7 @@ async def get_price_with_date(
       6. Database PriceCache fallback (cached historical NAV)
       7. Morningstar public search
     """
-    if not force and _is_cache_valid(isin):
+    if _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
     price = None

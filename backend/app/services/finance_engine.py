@@ -105,8 +105,29 @@ def calculate_portfolio_value_series(
                 price = pos.get("avg_cost", 0)
             total += pos["shares"] * price
 
+        # Account for cash in transit during internal fund transfers (traspasos internos).
+        # A sale for traspaso takes 3-4 business days to be booked into the destination fund.
+        traspaso_sells = sum(tx["amount"] for tx in active_tx if tx["type"] == "sell" and "traspaso" in (tx.get("notes") or "").lower())
+        traspaso_buys = sum(tx["amount"] for tx in active_tx if tx["type"] == "buy" and "traspaso" in (tx.get("notes") or "").lower())
+        cash_in_transit = max(0.0, traspaso_sells - traspaso_buys)
+        total += cash_in_transit
+
+        # Cumulative net external capital contributed (Dinero aportado durante el tiempo)
+        net_invested = 0.0
+        for tx in active_tx:
+            is_traspaso = "traspaso" in (tx.get("notes") or "").lower()
+            if not is_traspaso:
+                if tx["type"] == "buy":
+                    net_invested += tx["amount"]
+                elif tx["type"] == "sell":
+                    net_invested -= tx["amount"]
+
         if total > 0:
-            portfolio_values.append({"date": d_str, "value": round(total, 2)})
+            portfolio_values.append({
+                "date": d_str,
+                "value": round(total, 2),
+                "invested": round(net_invested, 2),
+            })
 
     return portfolio_values
 

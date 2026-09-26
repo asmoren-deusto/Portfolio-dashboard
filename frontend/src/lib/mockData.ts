@@ -59,6 +59,7 @@ export interface PricePoint {
   date: string
   value: number
   price?: number
+  invested?: number
 }
 
 export const MOCK_SUMMARY: PortfolioSummary = {
@@ -334,10 +335,14 @@ export function generateRealisticPerformanceSeries(
   finalValues[days] = endVal
 
   for (let t = 0; t <= days; t++) {
+    const invBase = startVal * 0.85
+    const invEnd = endVal * 0.84
+    const invVal = Math.round((invBase + (invEnd - invBase) * (t / days)) * 100) / 100
     points.push({
       date: dates[t],
       value: finalValues[t],
       price: finalValues[t],
+      invested: invVal,
     })
   }
 
