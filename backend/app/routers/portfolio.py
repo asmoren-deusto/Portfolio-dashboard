@@ -11,6 +11,7 @@ from app.services.price_service import get_current_price, get_price_with_date, g
 from app.services.finance_engine import (
     calculate_positions,
     calculate_portfolio_value_series,
+    calculate_portfolio_nav_series,
     calculate_twr,
     calculate_cagr,
     calculate_volatility,
@@ -201,14 +202,15 @@ async def get_analytics(period: str = "1y", user_id: str = "asier", db: Session 
             price_history[isin] = history
 
     value_series = calculate_portfolio_value_series(transactions, price_history)
+    nav_series = calculate_portfolio_nav_series(transactions, price_history)
 
     return {
-        "twr": calculate_twr(value_series, transactions),
-        "cagr": calculate_cagr(value_series),
-        "volatility": calculate_volatility(value_series),
-        "max_drawdown": calculate_max_drawdown(value_series),
-        "sharpe_ratio": calculate_sharpe(value_series),
-        "return_ytd": calculate_period_return(value_series, 365),
+        "twr": calculate_twr(nav_series, transactions),
+        "cagr": calculate_cagr(nav_series),
+        "volatility": calculate_volatility(nav_series),
+        "max_drawdown": calculate_max_drawdown(nav_series),
+        "sharpe_ratio": calculate_sharpe(nav_series),
+        "return_ytd": calculate_period_return(value_series, 270),
         "return_1m": calculate_period_return(value_series, 30),
         "return_3m": calculate_period_return(value_series, 90),
         "return_6m": calculate_period_return(value_series, 180),

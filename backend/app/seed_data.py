@@ -69,15 +69,33 @@ ASSETS = json.loads(r'''[
 
 PRICES = json.loads(r'''[
   {
-    "isin": "LU0261952682",
-    "date": "2026-09-25",
-    "price": 29.25,
-    "currency": "EUR"
-  },
-  {
     "isin": "LU0302296495",
     "date": "2026-09-25",
     "price": 2023.1774,
+    "currency": "EUR"
+  },
+  {
+    "isin": "ES0112611001",
+    "date": "2026-09-24",
+    "price": 351.640134,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000QAZP7L2",
+    "date": "2026-09-24",
+    "price": 14.358999,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-09-24",
+    "price": 14.544,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-09-25",
+    "price": 29.25,
     "currency": "EUR"
   }
 ]
