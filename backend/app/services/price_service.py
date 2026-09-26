@@ -30,10 +30,12 @@ async def get_price_with_date(
     Get current NAV and date for an asset dynamically.
     Order of precedence:
       1. In-memory cache (if valid within 15 min TTL)
-      2. Live fetch from Quefondos (primary official fund page)
-      3. Live fetch from Yahoo Finance (using ticker)
-      4. Database PriceCache fallback (cached historical NAV)
-      5. Morningstar public search
+      2. Direct Official Gestora Website (e.g. Azvalor official website for ES011261...)
+      3. Financial Times Markets (official European institutional fund tearsheet feed)
+      4. Live fetch from Quefondos (Spanish distributor fund page)
+      5. Live fetch from Yahoo Finance (using ticker)
+      6. Database PriceCache fallback (cached historical NAV)
+      7. Morningstar public search
     """
     if _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
@@ -41,10 +43,19 @@ async def get_price_with_date(
     price = None
     price_date = None
 
-    # 1. Try Quefondos by ISIN (live official fund page)
-    price, price_date = await _fetch_quefondos_price(isin)
+    # 1. Try Direct Official Gestora (Azvalor website)
+    if isin.startswith("ES011261"):
+        price, price_date = await _fetch_azvalor_official(isin)
 
-    # 2. Try Yahoo Finance if ticker provided or Quefondos failed
+    # 2. Try Financial Times Markets (official European fund data provider)
+    if price is None:
+        price, price_date = await _fetch_ft_official(isin)
+
+    # 3. Try Quefondos by ISIN
+    if price is None:
+        price, price_date = await _fetch_quefondos_price(isin)
+
+    # 4. Try Yahoo Finance if ticker provided or previous scrapers failed
     if price is None and ticker:
         price, price_date = await _fetch_yahoo_price(ticker)
 
@@ -62,7 +73,7 @@ async def get_price_with_date(
         except Exception as e:
             logger.warning(f"Error persisting live price for {isin}: {e}")
 
-    # 3. Fallback to DB PriceCache if live fetch failed
+    # 5. Fallback to DB PriceCache if live fetch failed
     if price is None and db is not None:
         try:
             from app.models import PriceCache
@@ -73,7 +84,7 @@ async def get_price_with_date(
         except Exception as e:
             logger.warning(f"Error querying PriceCache fallback for {isin}: {e}")
 
-    # 4. Fallback: Morningstar by ISIN
+    # 6. Fallback: Morningstar by ISIN
     if price is None:
         price = await _fetch_morningstar_price(isin)
         if price:
@@ -85,10 +96,80 @@ async def get_price_with_date(
     return price, price_date
 
 
+
 async def get_current_price(isin: str, ticker: str | None = None, db = None) -> Optional[float]:
     """Get current price for an asset (float only)."""
     price, _ = await get_price_with_date(isin, ticker, db=db)
     return price
+
+
+async def _fetch_azvalor_official(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """Fetch official NAV and date directly from Azvalor website (azvalor.com/valores-liquidativos/)."""
+    fund_keywords = {
+        "ES0112611001": "internacional",
+        "ES0112609005": "iberia",
+        "ES0112612009": "capital",
+        "ES0112613007": "blue chips",
+        "ES0112614005": "managers",
+    }
+    kw = fund_keywords.get(isin)
+    if not kw and not isin.startswith("ES011261"):
+        return None, None
+    kw = kw or "internacional"
+
+    try:
+        url = "https://www.azvalor.com/valores-liquidativos/"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        async with httpx.AsyncClient(timeout=10, follow_redirects=True) as client:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 200:
+                rows = re.findall(
+                    r'<td[^>]*class=[\'"]nombre[\'"][^>]*>\s*([^<]+?)\s*</td>\s*<td[^>]*>\s*(\d{2}/\d{2}/\d{4})\s*</td>\s*<td[^>]*>\s*([\d\.,]+)',
+                    resp.text,
+                )
+                for name, d_str, p_str in rows:
+                    if kw in name.lower():
+                        dt = datetime.strptime(d_str, "%d/%m/%Y").strftime("%Y-%m-%d")
+                        clean_p = p_str.replace(".", "").replace(",", ".") if ("," in p_str and "." in p_str) else p_str.replace(",", ".")
+                        return float(clean_p), dt
+    except Exception as e:
+        logger.warning(f"Azvalor official scraping error for {isin}: {e}")
+    return None, None
+
+
+async def _fetch_ft_official(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Fetch latest official NAV and date from Financial Times Markets fund tearsheets.
+    FT receives direct daily NAV feeds reported by European fund managers (Fidelity, Blackrock, DNB, etc.).
+    """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    }
+    for url in [
+        f"https://markets.ft.com/data/funds/tearsheet/summary?s={isin}:EUR",
+        f"https://markets.ft.com/data/funds/tearsheet/summary?s={isin}",
+    ]:
+        try:
+            async with httpx.AsyncClient(timeout=8, follow_redirects=True) as client:
+                resp = await client.get(url, headers=headers)
+                if resp.status_code == 200 and "mod-ui-data-list__value" in resp.text:
+                    p_match = re.search(r'class="mod-ui-data-list__value">([0-9\.,]+)</span>', resp.text)
+                    d_match = re.search(r'as of ([A-Za-z]+ \d{1,2} \d{4})', resp.text)
+                    if p_match:
+                        price = float(p_match.group(1).replace(",", ""))
+                        date_str = None
+                        if d_match:
+                            try:
+                                date_str = datetime.strptime(d_match.group(1), "%b %d %Y").strftime("%Y-%m-%d")
+                            except Exception:
+                                date_str = None
+                        return price, date_str
+        except Exception as e:
+            logger.warning(f"Financial Times tearsheet error for {isin} ({url}): {e}")
+    return None, None
 
 
 async def _fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]]:
