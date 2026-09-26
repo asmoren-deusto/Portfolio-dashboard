@@ -160,7 +160,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
     PRE: 'Pre',
     POST: 'Post',
     POSTPOST: 'Post',
-    CLOSED: 'Cerr',
+    CLOSED: 'Closed',
   }
   const tooltips: Record<string, string> = {
     PRE: 'Pre-mercado',
