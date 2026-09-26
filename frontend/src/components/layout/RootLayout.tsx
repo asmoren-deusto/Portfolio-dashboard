@@ -45,10 +45,10 @@ export function RootLayout() {
               <Menu size={20} />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-sm">
-                <TrendingUp size={16} />
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/20">
+                <TrendingUp size={16} strokeWidth={2.5} />
               </div>
-              <span className="font-semibold text-sm tracking-tight text-slate-900 dark:text-white">
+              <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white">
                 Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
               </span>
             </div>

@@ -64,19 +64,14 @@ export function Sidebar({}: SidebarProps) {
         )}
       >
         {/* Logo & Mobile Close Button */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.06] px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-500/25">
-              <TrendingUp size={16} className="text-white" strokeWidth={2.5} />
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.06] px-4 py-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
+              <TrendingUp size={18} strokeWidth={2.5} />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[16px] font-bold tracking-tight text-slate-950 dark:bg-gradient-to-r dark:from-white dark:to-slate-300 dark:bg-clip-text dark:text-transparent">
-                Mi Portfolio
-              </span>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-400 uppercase tracking-wider">
-                Dashboard
-              </span>
-            </div>
+            <span className="font-bold text-[17px] tracking-tight text-slate-950 dark:text-white">
+              Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
+            </span>
           </div>
 
           {/* Close button on mobile */}
