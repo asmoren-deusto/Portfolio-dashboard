@@ -46,7 +46,28 @@ async def health():
     return {"status": "ok", "version": "1.0.0"}
 
 
-# Serve frontend static files (production)
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
-if os.path.exists(STATIC_DIR):
-    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+# Serve frontend static files (production) & SPA fallback for client-side routing
+STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist"))
+ASSETS_DIR = os.path.join(STATIC_DIR, "assets")
+
+if os.path.isdir(ASSETS_DIR):
+    app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
+
+
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    # Do not intercept API endpoints
+    if full_path.startswith("api/"):
+        return {"detail": "API endpoint not found"}
+
+    # If file exists on disk (e.g. favicon.ico, manifest.json, etc.)
+    file_path = os.path.join(STATIC_DIR, full_path)
+    if full_path and os.path.isfile(file_path):
+        return FileResponse(file_path)
+
+    # SPA fallback: return index.html so React Router handles the route (/market, /positions, etc.)
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+
+    return {"detail": "Frontend build not found. Please build the frontend."}
