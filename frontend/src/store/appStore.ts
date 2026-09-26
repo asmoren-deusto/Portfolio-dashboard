@@ -5,6 +5,7 @@ import {
   getUserProfileById,
   generateRealisticPerformanceSeries,
 } from '@/lib/mockData'
+import { hashPassword, verifyPassword } from '@/lib/security'
 
 export type Period = '1mo' | '3mo' | '6mo' | '1y' | '2y' | '5y'
 export type Theme = 'light' | 'dark'
@@ -31,8 +32,9 @@ interface AppState {
   users: UserProfile[]
   login: (userId: string, password?: string) => boolean
   logout: () => void
-  switchUser: (userId: string) => void
-  createUser: (name: string, email: string, strategy: string, initialBalance?: number) => UserProfile
+  switchUser: (userId: string, password?: string) => boolean
+  createUser: (name: string, email: string, strategy: string, initialBalance?: number, password?: string) => UserProfile
+  changePassword: (userId: string, oldPassword: string, newPassword: string) => { success: boolean; error?: string }
 }
 
 function applyTheme(theme: Theme) {
@@ -113,10 +115,17 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUser: initialUser,
   users: getStoredUsers(),
 
-  login: (userId: string) => {
+  login: (userId: string, password?: string) => {
     const state = get()
     const target = state.users.find((u) => u.id === userId) || INITIAL_USER_PROFILES.find((u) => u.id === userId)
     if (!target) return false
+
+    // Require and verify cryptographic salted password
+    if (target.passwordHash && target.passwordSalt) {
+      if (!password) return false
+      const isValid = verifyPassword(password, target.passwordHash, target.passwordSalt)
+      if (!isValid) return false
+    }
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('portfolio_active_user_id', target.id)
@@ -138,11 +147,17 @@ export const useAppStore = create<AppState>((set, get) => ({
     })
   },
 
-  switchUser: (userId: string) => {
-    get().login(userId)
+  switchUser: (userId: string, password?: string) => {
+    return get().login(userId, password)
   },
 
-  createUser: (name: string, email: string, strategy: string, initialBalance = 50000) => {
+  createUser: (
+    name: string,
+    email: string,
+    strategy: string,
+    initialBalance = 50000,
+    password = ''
+  ) => {
     const id = `user-${Date.now()}`
     const initials = name
       .split(' ')
@@ -158,6 +173,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     const userSeries1y = generateRealisticPerformanceSeries(365, invested, initialBalance, Date.now() % 500)
     const userSeries5y = generateRealisticPerformanceSeries(1825, invested * 0.6, initialBalance, Date.now() % 500)
 
+    // Hash password with cryptographically secure salt and 2000 rounds of key stretching
+    const { hash, salt } = hashPassword(password || 'inversor1234')
+
     const newUser: UserProfile = {
       id,
       name,
@@ -170,6 +188,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       isDemo: false,
       color: 'bg-indigo-600 text-white',
       bgGradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+      passwordSalt: salt,
+      passwordHash: hash,
       summary: {
         total_value: initialBalance,
         total_invested: invested,
@@ -287,5 +307,42 @@ export const useAppStore = create<AppState>((set, get) => ({
     })
 
     return newUser
+  },
+
+  changePassword: (userId: string, oldPassword: string, newPassword: string) => {
+    const state = get()
+    const target = state.users.find((u) => u.id === userId)
+    if (!target) return { success: false, error: 'Usuario no encontrado.' }
+
+    if (target.passwordHash && target.passwordSalt) {
+      if (!verifyPassword(oldPassword, target.passwordHash, target.passwordSalt)) {
+        return { success: false, error: 'La contraseña actual no es correcta.' }
+      }
+    }
+
+    const { hash, salt } = hashPassword(newPassword)
+    const updatedUser: UserProfile = {
+      ...target,
+      passwordHash: hash,
+      passwordSalt: salt,
+    }
+
+    const updatedUsers = state.users.map((u) => (u.id === userId ? updatedUser : u))
+
+    if (typeof window !== 'undefined') {
+      try {
+        const customOnly = updatedUsers.filter((u) => !INITIAL_USER_PROFILES.some((p) => p.id === u.id))
+        localStorage.setItem('portfolio_custom_users', JSON.stringify(customOnly))
+      } catch {
+        // storage limit
+      }
+    }
+
+    set({
+      users: updatedUsers,
+      currentUser: state.currentUser?.id === userId ? updatedUser : state.currentUser,
+    })
+
+    return { success: true }
   },
 }))

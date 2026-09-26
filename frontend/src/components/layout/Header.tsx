@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { RefreshCw, Sun, Moon, User, ChevronDown, Check, LogOut, ShieldCheck } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
@@ -31,7 +32,8 @@ export function Header({
   showPeriodSelector = false,
   children,
 }: HeaderProps) {
-  const { period, setPeriod, useMock, theme, toggleTheme, currentUser, users, switchUser, logout } = useAppStore()
+  const { period, setPeriod, useMock, theme, toggleTheme, currentUser, users, logout } = useAppStore()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [spinning, setSpinning] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -189,8 +191,13 @@ export function Header({
                         <button
                           key={u.id}
                           onClick={() => {
-                            switchUser(u.id)
+                            if (isSelected) {
+                              setUserMenuOpen(false)
+                              return
+                            }
                             setUserMenuOpen(false)
+                            logout()
+                            navigate('/login', { state: { selectedUserId: u.id } })
                           }}
                           className={`w-full flex items-center justify-between p-2 rounded-xl text-left font-medium transition-colors ${
                             isSelected
@@ -222,6 +229,7 @@ export function Header({
                       onClick={() => {
                         setUserMenuOpen(false)
                         logout()
+                        navigate('/login')
                       }}
                       className="w-full flex items-center gap-2 p-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 font-semibold transition-colors"
                     >

@@ -465,6 +465,8 @@ export interface UserProfile {
   isDemo: boolean
   color: string
   bgGradient?: string
+  passwordHash?: string
+  passwordSalt?: string
   summary: PortfolioSummary
   positions: Position[]
   analytics: Analytics
@@ -485,6 +487,8 @@ const DEMO_USER: UserProfile = {
   isDemo: true,
   color: 'bg-blue-600 text-white',
   bgGradient: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+  passwordSalt: '7f3a8b1c4d9e0f21',
+  passwordHash: 'd85e322dea74de622c3d8b8da84da8d5dd7c4b39a19f11fd019dd1ecb32598be',
   summary: MOCK_SUMMARY,
   positions: MOCK_POSITIONS,
   analytics: MOCK_ANALYTICS,
@@ -655,6 +659,8 @@ const ASIER_USER: UserProfile = {
   isDemo: false,
   color: 'bg-emerald-600 text-white',
   bgGradient: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+  passwordSalt: '3b8e1f0a9c2d5e74',
+  passwordHash: '36e6963fe2672f4810bd96db87196db6cf772d53aeb98995389774d5949fd574',
   summary: {
     total_value: 186420.00,
     total_invested: 100212.40,
@@ -834,6 +840,8 @@ const LAURA_USER: UserProfile = {
   isDemo: false,
   color: 'bg-violet-600 text-white',
   bgGradient: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
+  passwordSalt: '9d1a4e7c2f5b8e03',
+  passwordHash: '61a39502357ed3830957bd75d45510f961f9e1541d102764f09dc2509c5d6a81',
   summary: {
     total_value: 74380.50,
     total_invested: 62116.30,
