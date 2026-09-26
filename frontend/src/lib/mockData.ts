@@ -659,8 +659,6 @@ const ASIER_USER: UserProfile = {
   isDemo: false,
   color: 'bg-emerald-600 text-white',
   bgGradient: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
-  passwordSalt: '3b8e1f0a9c2d5e74',
-  passwordHash: '36e6963fe2672f4810bd96db87196db6cf772d53aeb98995389774d5949fd574',
   summary: {
     total_value: 186420.00,
     total_invested: 100212.40,
@@ -908,7 +906,6 @@ const LAURA_USER: UserProfile = {
 export const INITIAL_USER_PROFILES: UserProfile[] = [
   DEMO_USER,
   ASIER_USER,
-  LAURA_USER,
 ]
 
 export function getUserProfileById(id: string, customProfiles: UserProfile[] = []): UserProfile {

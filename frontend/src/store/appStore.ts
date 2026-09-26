@@ -34,6 +34,7 @@ interface AppState {
   logout: () => void
   switchUser: (userId: string, password?: string) => boolean
   createUser: (name: string, email: string, strategy: string, initialBalance?: number, password?: string) => UserProfile
+  setUserPassword: (userId: string, newPassword: string) => boolean
   changePassword: (userId: string, oldPassword: string, newPassword: string) => { success: boolean; error?: string }
 }
 
@@ -56,17 +57,41 @@ applyTheme(savedTheme)
 
 // Load custom user profiles if saved
 function getStoredUsers(): UserProfile[] {
-  if (typeof window === 'undefined') return INITIAL_USER_PROFILES
+  let list = INITIAL_USER_PROFILES
+  if (typeof window === 'undefined') return list
+
   try {
     const raw = localStorage.getItem('portfolio_custom_users')
     if (raw) {
-      const custom = JSON.parse(raw)
-      return [...INITIAL_USER_PROFILES, ...custom]
+      const custom: UserProfile[] = JSON.parse(raw)
+      list = [...INITIAL_USER_PROFILES, ...custom.filter((u) => u.id !== 'laura')]
     }
   } catch {
     // fallback
   }
-  return INITIAL_USER_PROFILES
+
+  // Load custom password overrides (e.g. Asier Moreno custom password)
+  try {
+    const pwdRaw = localStorage.getItem('portfolio_user_passwords')
+    if (pwdRaw) {
+      const pwdMap: Record<string, { hash: string; salt: string }> = JSON.parse(pwdRaw)
+      list = list.map((u) => {
+        if (pwdMap[u.id]) {
+          return {
+            ...u,
+            passwordHash: pwdMap[u.id].hash,
+            passwordSalt: pwdMap[u.id].salt,
+          }
+        }
+        return u
+      })
+    }
+  } catch {
+    // fallback
+  }
+
+  // Always exclude 'laura'
+  return list.filter((u) => u.id !== 'laura')
 }
 
 // Load active user session (returns null if no session is cached)
@@ -74,12 +99,15 @@ function getStoredActiveUser(): UserProfile | null {
   if (typeof window === 'undefined') return null
   try {
     const activeId = localStorage.getItem('portfolio_active_user_id')
+    if (activeId === 'laura') {
+      localStorage.removeItem('portfolio_active_user_id')
+      return null
+    }
     if (activeId) {
       const allUsers = getStoredUsers()
       const found = allUsers.find((u) => u.id === activeId)
       if (found) return found
     }
-    // No session cached -> Return null so user is redirected to Login
     return null
   } catch {
     return null
@@ -344,5 +372,39 @@ export const useAppStore = create<AppState>((set, get) => ({
     })
 
     return { success: true }
+  },
+
+  setUserPassword: (userId: string, newPassword: string) => {
+    const { hash, salt } = hashPassword(newPassword)
+    const state = get()
+    const target = state.users.find((u) => u.id === userId)
+    if (!target) return false
+
+    const updatedUser: UserProfile = {
+      ...target,
+      passwordHash: hash,
+      passwordSalt: salt,
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('portfolio_user_passwords')
+        const map = raw ? JSON.parse(raw) : {}
+        map[userId] = { hash, salt }
+        localStorage.setItem('portfolio_user_passwords', JSON.stringify(map))
+        localStorage.setItem('portfolio_active_user_id', userId)
+      } catch {
+        // storage limit
+      }
+    }
+
+    const updatedUsers = state.users.map((u) => (u.id === userId ? updatedUser : u))
+    set({
+      users: updatedUsers,
+      currentUser: updatedUser,
+      useMock: updatedUser.isDemo,
+    })
+
+    return true
   },
 }))

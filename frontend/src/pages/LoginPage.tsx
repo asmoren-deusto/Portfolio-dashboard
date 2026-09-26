@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   TrendingUp,
-  ShieldCheck,
   User,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
   Lock,
   Unlock,
   Mail,
@@ -15,7 +13,8 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  Shield,
+  CheckCircle2,
+  Key,
 } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { type UserProfile } from '@/lib/mockData'
@@ -24,7 +23,7 @@ import { fmt } from '@/lib/utils'
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { users, login, createUser, currentUser } = useAppStore()
+  const { users, login, createUser, setUserPassword, currentUser } = useAppStore()
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
@@ -43,6 +42,12 @@ export const LoginPage: React.FC = () => {
     return null
   })
 
+  // Mode for setting/changing password on a profile
+  const [isSettingPassword, setIsSettingPassword] = useState(false)
+  const [profileNewPassword, setProfileNewPassword] = useState('')
+  const [profileConfirmPassword, setProfileConfirmPassword] = useState('')
+  const [showProfileNewPassword, setShowProfileNewPassword] = useState(false)
+
   // Profile Unlock State
   const [profilePassword, setProfilePassword] = useState('')
   const [showProfilePassword, setShowProfilePassword] = useState(false)
@@ -58,29 +63,36 @@ export const LoginPage: React.FC = () => {
   const [newEmail, setNewEmail] = useState('')
   const [newStrategy, setNewStrategy] = useState('Cartera Indexada Global')
   const [newBalance, setNewBalance] = useState<number>(50000)
-  const [newPassword, setNewPassword] = useState('')
-  const [newConfirmPassword, setNewConfirmPassword] = useState('')
-  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [newUserPassword, setNewUserPassword] = useState('')
+  const [newUserConfirmPassword, setNewUserConfirmPassword] = useState('')
+  const [showNewUserPassword, setShowNewUserPassword] = useState(false)
 
-  // Clear errors when switching tabs
-  const handleTabChange = (tab: 'profiles' | 'form' | 'new') => {
-    setActiveTab(tab)
-    setError(null)
-  }
-
+  // When selectedProfile changes, check if it already has a password set
   const handleSelectProfile = (u: UserProfile) => {
     setSelectedProfile(u)
     setProfilePassword('')
+    setProfileNewPassword('')
+    setProfileConfirmPassword('')
     setError(null)
+    // If the profile has no password set (like Asier initially), open setup mode
+    setIsSettingPassword(!u.passwordHash)
   }
 
   const handleBackToProfiles = () => {
     setSelectedProfile(null)
     setProfilePassword('')
+    setProfileNewPassword('')
+    setProfileConfirmPassword('')
+    setIsSettingPassword(false)
     setError(null)
   }
 
-  // Handle password unlock for selected profile
+  const handleTabChange = (tab: 'profiles' | 'form' | 'new') => {
+    setActiveTab(tab)
+    setError(null)
+  }
+
+  // Handle password unlock for existing password
   const handleUnlockProfile = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -88,7 +100,7 @@ export const LoginPage: React.FC = () => {
     if (!selectedProfile) return
 
     if (!profilePassword.trim()) {
-      setError('Por favor introduce la contraseña del perfil.')
+      setError('Por favor introduce la contraseña.')
       return
     }
 
@@ -100,7 +112,32 @@ export const LoginPage: React.FC = () => {
     }
   }
 
-  // Handle form login (email + password)
+  // Handle setting a custom password for a profile (e.g. Asier Moreno)
+  const handleSaveProfilePassword = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+
+    if (!selectedProfile) return
+
+    if (!profileNewPassword || profileNewPassword.length < 4) {
+      setError('La contraseña debe tener al menos 4 caracteres.')
+      return
+    }
+
+    if (profileNewPassword !== profileConfirmPassword) {
+      setError('Las contraseñas no coinciden. Por favor, revísalas.')
+      return
+    }
+
+    const ok = setUserPassword(selectedProfile.id, profileNewPassword)
+    if (ok) {
+      navigate('/')
+    } else {
+      setError('No se pudo guardar la contraseña. Inténtalo de nuevo.')
+    }
+  }
+
+  // Handle direct form login (email + password)
   const handleFormLogin = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -132,7 +169,7 @@ export const LoginPage: React.FC = () => {
     }
   }
 
-  // Handle create new profile with secure password
+  // Handle create new profile
   const handleCreateNewUser = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -142,13 +179,13 @@ export const LoginPage: React.FC = () => {
       return
     }
 
-    if (!newPassword || newPassword.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres por seguridad.')
+    if (!newUserPassword || newUserPassword.length < 4) {
+      setError('La contraseña debe tener al menos 4 caracteres.')
       return
     }
 
-    if (newPassword !== newConfirmPassword) {
-      setError('Las contraseñas no coinciden. Por favor verifícalas.')
+    if (newUserPassword !== newUserConfirmPassword) {
+      setError('Las contraseñas no coinciden.')
       return
     }
 
@@ -157,7 +194,7 @@ export const LoginPage: React.FC = () => {
       newEmail.trim() || `${newName.toLowerCase().replace(/\s+/g, '')}@portfoliopro.app`,
       newStrategy,
       newBalance,
-      newPassword
+      newUserPassword
     )
 
     if (created) {
@@ -191,10 +228,10 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-            Espacio de Inversión Seguro
+            Espacio de Inversión
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto mt-1">
-            Acceso protegido con cifrado criptográfico con sal y key-stretching para salvaguardar tus posiciones financieras.
+            Gestiona y monitoriza tu cartera de inversiones, fondos indexados y rentabilidad en tiempo real.
           </p>
         </div>
 
@@ -247,7 +284,7 @@ export const LoginPage: React.FC = () => {
               </div>
             )}
 
-            {/* TAB 1: Fast Profile Selector with Password Unlock */}
+            {/* TAB 1: Profile Selector with Password Unlock */}
             {activeTab === 'profiles' && (
               <div>
                 {!selectedProfile ? (
@@ -255,11 +292,7 @@ export const LoginPage: React.FC = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between pb-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                        Selecciona un perfil para desbloquear
-                      </span>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                        <Lock size={12} className="text-emerald-500" />
-                        Acceso protegido
+                        Selecciona un perfil de inversor
                       </span>
                     </div>
 
@@ -311,14 +344,12 @@ export const LoginPage: React.FC = () => {
                               </div>
                             </div>
 
-                            {/* Right side access action */}
-                            <div className="flex items-center gap-2.5 shrink-0 pl-2">
-                              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors hidden sm:inline flex items-center gap-1">
-                                <Lock size={12} />
-                                Desbloquear
-                              </span>
-                              <div className="w-8 h-8 rounded-xl bg-white dark:bg-white/[0.08] border border-slate-200/90 dark:border-white/[0.08] flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all shadow-xs">
-                                <ArrowRight size={14} />
+                            {/* Right side unlock button: icon strictly on the left of text */}
+                            <div className="flex items-center gap-2 shrink-0 pl-2">
+                              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-white/[0.08] border border-slate-200/90 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all text-xs font-semibold shadow-xs">
+                                <Lock size={13} className="shrink-0" />
+                                <span>Desbloquear</span>
+                                <ArrowRight size={13} className="shrink-0 opacity-70 group-hover:translate-x-0.5 transition-transform" />
                               </div>
                             </div>
                           </div>
@@ -328,8 +359,8 @@ export const LoginPage: React.FC = () => {
 
                     {/* Helpful Note */}
                     <div className="pt-2 text-center">
-                      <p className="text-[11.5px] text-slate-600 dark:text-slate-400">
-                        🔒 Las carteras requieren contraseña criptográfica para asegurar la privacidad del patrimonio.
+                      <p className="text-[11.5px] text-slate-500 dark:text-slate-400">
+                        💡 Puedes alternar entre perfiles o carteras en cualquier momento desde el menú superior.
                       </p>
                     </div>
                   </div>
@@ -378,78 +409,150 @@ export const LoginPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Unlock Form */}
-                    <form onSubmit={handleUnlockProfile} className="space-y-4 pt-1">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                            <Lock size={13} className="text-blue-500" />
-                            <span>Contraseña de acceso para este perfil</span>
-                          </label>
-
-                          {selectedProfile.isDemo ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setProfilePassword('demo1234')
-                                setError(null)
-                              }}
-                              className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                            >
-                              Autocompletar (demo1234)
-                            </button>
-                          ) : selectedProfile.id === 'asier' ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setProfilePassword('asier1234')
-                                setError(null)
-                              }}
-                              className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
-                            >
-                              Autocompletar (asier1234)
-                            </button>
-                          ) : selectedProfile.id === 'laura' ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setProfilePassword('laura1234')
-                                setError(null)
-                              }}
-                              className="text-[11px] font-semibold text-violet-600 dark:text-violet-400 hover:underline"
-                            >
-                              Autocompletar (laura1234)
-                            </button>
-                          ) : null}
+                    {/* Form: Setting a new password OR entering existing password */}
+                    {isSettingPassword ? (
+                      /* SETUP PASSWORD MODE (for Asier Moreno on initial setup or password reset) */
+                      <form onSubmit={handleSaveProfilePassword} className="space-y-4 pt-1">
+                        <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-500/20 text-xs text-blue-800 dark:text-blue-300">
+                          <p className="font-semibold text-blue-900 dark:text-blue-200">
+                            {selectedProfile.passwordHash ? 'Modificar contraseña' : 'Crea tu contraseña de acceso'}
+                          </p>
+                          <p className="text-[11.5px] mt-0.5 text-blue-700 dark:text-blue-300/80">
+                            Introduce la contraseña que utilizarás para entrar en la cartera de {selectedProfile.name}.
+                          </p>
                         </div>
 
-                        <div className="relative">
-                          <input
-                            type={showProfilePassword ? 'text' : 'password'}
-                            value={profilePassword}
-                            onChange={(e) => setProfilePassword(e.target.value)}
-                            placeholder="Introduce la contraseña para desbloquear..."
-                            autoFocus
-                            className="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
-                          />
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            Nueva contraseña
+                          </label>
+                          <div className="relative">
+                            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            <input
+                              type={showProfileNewPassword ? 'text' : 'password'}
+                              value={profileNewPassword}
+                              onChange={(e) => setProfileNewPassword(e.target.value)}
+                              placeholder="Mínimo 4 caracteres..."
+                              autoFocus
+                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowProfileNewPassword(!showProfileNewPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            >
+                              {showProfileNewPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            Confirmar contraseña
+                          </label>
+                          <div className="relative">
+                            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            <input
+                              type={showProfileNewPassword ? 'text' : 'password'}
+                              value={profileConfirmPassword}
+                              onChange={(e) => setProfileConfirmPassword(e.target.value)}
+                              placeholder="Repite la contraseña..."
+                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-1">
+                          {selectedProfile.passwordHash && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsSettingPassword(false)
+                                setError(null)
+                              }}
+                              className="w-1/3 py-2.5 rounded-xl border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] text-xs font-semibold transition-colors"
+                            >
+                              Cancelar
+                            </button>
+                          )}
                           <button
-                            type="button"
-                            onClick={() => setShowProfilePassword(!showProfilePassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            type="submit"
+                            className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                           >
-                            {showProfilePassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                            <CheckCircle2 size={15} />
+                            <span>Guardar Contraseña y Acceder</span>
                           </button>
                         </div>
-                      </div>
+                      </form>
+                    ) : (
+                      /* UNLOCK MODE (for existing password) */
+                      <form onSubmit={handleUnlockProfile} className="space-y-4 pt-1">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                              Contraseña de acceso
+                            </label>
 
-                      <button
-                        type="submit"
-                        className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
-                      >
-                        <Unlock size={14} />
-                        <span>Desbloquear Cartera</span>
-                      </button>
-                    </form>
+                            {selectedProfile.isDemo && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setProfilePassword('demo1234')
+                                  setError(null)
+                                }}
+                                className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                              >
+                                Autocompletar (demo1234)
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="relative">
+                            {/* Icon strictly on the left inside the input */}
+                            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            <input
+                              type={showProfilePassword ? 'text' : 'password'}
+                              value={profilePassword}
+                              onChange={(e) => setProfilePassword(e.target.value)}
+                              placeholder="Introduce tu contraseña..."
+                              autoFocus
+                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowProfilePassword(!showProfilePassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            >
+                              {showProfilePassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Submit button: unlock icon on the left */}
+                        <button
+                          type="submit"
+                          className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                        >
+                          <Unlock size={15} />
+                          <span>Desbloquear Cartera</span>
+                        </button>
+
+                        {/* Change / Reset password option */}
+                        <div className="text-center pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsSettingPassword(true)
+                              setError(null)
+                            }}
+                            className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
+                          >
+                            <Key size={12} />
+                            <span>Cambiar o restablecer contraseña</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
                   </div>
                 )}
               </div>
@@ -459,24 +562,25 @@ export const LoginPage: React.FC = () => {
             {activeTab === 'form' && (
               <form onSubmit={handleFormLogin} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <Mail size={13} className="text-blue-500" />
-                    <span>Correo electrónico</span>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Correo electrónico
                   </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="demo@portfoliopro.app o asier@portfoliopro.app"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
-                  />
+                  <div className="relative">
+                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="demo@portfoliopro.app o asier@portfoliopro.app"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Lock size={13} className="text-blue-500" />
-                      <span>Contraseña</span>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Contraseña
                     </label>
                     <button
                       type="button"
@@ -487,12 +591,13 @@ export const LoginPage: React.FC = () => {
                     </button>
                   </div>
                   <div className="relative">
+                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                     />
                     <button
                       type="button"
@@ -508,13 +613,13 @@ export const LoginPage: React.FC = () => {
                   type="submit"
                   className="w-full mt-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                 >
+                  <Unlock size={15} />
                   <span>Iniciar Sesión</span>
-                  <ArrowRight size={14} />
                 </button>
               </form>
             )}
 
-            {/* TAB 3: Create New Profile with Encrypted Password */}
+            {/* TAB 3: Create New Profile */}
             {activeTab === 'new' && (
               <form onSubmit={handleCreateNewUser} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -578,56 +683,45 @@ export const LoginPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Secure Password Fields */}
+                {/* Password Fields */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Lock size={12} className="text-emerald-500" />
-                      <span>Contraseña maestra</span>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Contraseña
                     </label>
                     <div className="relative">
+                      <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                       <input
-                        type={showNewPassword ? 'text' : 'password'}
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
-                        className="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                        type={showNewUserPassword ? 'text' : 'password'}
+                        value={newUserPassword}
+                        onChange={(e) => setNewUserPassword(e.target.value)}
+                        placeholder="Mínimo 4 caracteres"
+                        className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                       />
                       <button
                         type="button"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        onClick={() => setShowNewUserPassword(!showNewUserPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                       >
-                        {showNewPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        {showNewUserPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                       </button>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Lock size={12} className="text-emerald-500" />
-                      <span>Confirmar contraseña</span>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Confirmar contraseña
                     </label>
-                    <input
-                      type={showNewPassword ? 'text' : 'password'}
-                      value={newConfirmPassword}
-                      onChange={(e) => setNewConfirmPassword(e.target.value)}
-                      placeholder="Repite la contraseña"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Cryptographic Protection Banner */}
-                <div className="p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-2.5">
-                  <Shield size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <p className="font-semibold text-emerald-900 dark:text-emerald-200">
-                      Almacenamiento Criptográfico FIPS 180-4
-                    </p>
-                    <p className="text-[11px] leading-relaxed text-emerald-700 dark:text-emerald-400">
-                      Tu contraseña nunca se guarda en texto plano: se deriva con un salt aleatorio único de 16 bytes y 2.000 iteraciones de key-stretching para máxima protección.
-                    </p>
+                    <div className="relative">
+                      <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        type={showNewUserPassword ? 'text' : 'password'}
+                        value={newUserConfirmPassword}
+                        onChange={(e) => setNewUserConfirmPassword(e.target.value)}
+                        placeholder="Repite la contraseña"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -636,24 +730,18 @@ export const LoginPage: React.FC = () => {
                   className="w-full mt-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                 >
                   <PlusCircle size={15} />
-                  <span>Crear Perfil Seguro e Iniciar Sesión</span>
+                  <span>Crear Perfil e Iniciar Sesión</span>
                 </button>
               </form>
             )}
           </div>
         </div>
 
-        {/* Security / Technology footer */}
-        <div className="flex items-center justify-center gap-4 mt-6 text-xs text-slate-600 dark:text-slate-400 font-medium">
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck size={14} className="text-emerald-500" />
-            <span>Cifrado SHA-256 + Salt activo</span>
-          </span>
+        {/* Footer */}
+        <div className="flex items-center justify-center gap-2 mt-6 text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <span>PortfolioPro v2.4</span>
           <span>•</span>
-          <span className="flex items-center gap-1.5">
-            <Sparkles size={13} className="text-blue-500" />
-            <span>Simulación estocástica activa</span>
-          </span>
+          <span>Plataforma de Inversión y Análisis de Carteras</span>
         </div>
       </div>
     </div>
