@@ -148,14 +148,25 @@ function fmtUpdated(iso: string | null): string {
 /** Badge for extended-hours state */
 function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   if (state === 'REGULAR') return null
-  const isForeign = name?.includes('Nikkei') || name?.includes('IBEX') || name?.includes('Stoxx') || name?.includes('DAX')
+  const isForeign =
+    name?.includes('Nikkei') ||
+    name?.includes('IBEX') ||
+    name?.includes('Stoxx') ||
+    name === 'Euro 50' ||
+    name?.includes('DAX')
   const effectiveState = isForeign && (state === 'POST' || state === 'POSTPOST') ? 'CLOSED' : state
 
   const labels: Record<string, string> = {
     PRE: 'Pre',
     POST: 'Post',
     POSTPOST: 'Post',
-    CLOSED: 'Cerrado',
+    CLOSED: 'Cerr',
+  }
+  const tooltips: Record<string, string> = {
+    PRE: 'Pre-mercado',
+    POST: 'Post-mercado',
+    POSTPOST: 'Post-mercado',
+    CLOSED: 'Mercado Cerrado',
   }
   const colors: Record<string, string> = {
     PRE: 'bg-amber-50 text-amber-700 border-amber-300/70 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20',
@@ -165,7 +176,10 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   }
   const cls = colors[effectiveState] || colors.CLOSED
   return (
-    <span className={`inline-flex items-center ml-1 text-[8px] font-bold uppercase tracking-wide px-1 py-px rounded border leading-none align-middle ${cls}`}>
+    <span
+      title={tooltips[effectiveState] || effectiveState}
+      className={`inline-flex items-center ml-1 text-[7.5px] font-bold uppercase tracking-tight px-1 py-px rounded border leading-none align-middle ${cls}`}
+    >
       {labels[effectiveState] || effectiveState}
     </span>
   )
