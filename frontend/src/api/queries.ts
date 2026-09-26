@@ -30,6 +30,7 @@ async function get<T>(path: string): Promise<T> {
 // ── Summary ────────────────────────────────────────────────────────────────────
 export function usePortfolioSummary() {
   const { useMock, period, currentUser } = useAppStore()
+  const userId = currentUser?.id || 'asier'
   const userSummary = currentUser?.summary ?? MOCK_SUMMARY
 
   return useQuery<PortfolioSummary>({
@@ -37,7 +38,7 @@ export function usePortfolioSummary() {
     queryFn: () =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userSummary)
-        : get<PortfolioSummary>('/portfolio/summary').catch(() => userSummary),
+        : get<PortfolioSummary>(`/portfolio/summary?user_id=${userId}`).catch(() => userSummary),
     initialData: userSummary,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
@@ -48,6 +49,7 @@ export function usePortfolioSummary() {
 // ── Positions ─────────────────────────────────────────────────────────────────
 export function usePositions() {
   const { useMock, currentUser } = useAppStore()
+  const userId = currentUser?.id || 'asier'
   const userPositions = currentUser?.positions ?? MOCK_POSITIONS
 
   return useQuery<Position[]>({
@@ -55,7 +57,7 @@ export function usePositions() {
     queryFn: () =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userPositions)
-        : get<Position[]>('/portfolio/positions').catch(() => userPositions),
+        : get<Position[]>(`/portfolio/positions?user_id=${userId}`).catch(() => userPositions),
     initialData: userPositions,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
@@ -65,6 +67,7 @@ export function usePositions() {
 // ── Performance ────────────────────────────────────────────────────────────────
 export function usePerformance() {
   const { useMock, period, currentUser } = useAppStore()
+  const userId = currentUser?.id || 'asier'
   const userPerf = currentUser?.performance ?? MOCK_PERFORMANCE
   const userPoints = userPerf[period] ?? userPerf['1y'] ?? []
 
@@ -73,7 +76,7 @@ export function usePerformance() {
     queryFn: (): Promise<PricePoint[]> =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userPoints)
-        : get<PricePoint[]>(`/portfolio/performance?period=${period}`).catch(() => userPoints),
+        : get<PricePoint[]>(`/portfolio/performance?period=${period}&user_id=${userId}`).catch(() => userPoints),
     initialData: userPoints,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
@@ -83,6 +86,7 @@ export function usePerformance() {
 // ── Analytics ──────────────────────────────────────────────────────────────────
 export function useAnalytics() {
   const { useMock, period, currentUser } = useAppStore()
+  const userId = currentUser?.id || 'asier'
   const userAnalytics = currentUser?.analytics ?? MOCK_ANALYTICS
 
   return useQuery<Analytics>({
@@ -90,7 +94,7 @@ export function useAnalytics() {
     queryFn: () =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userAnalytics)
-        : get<Analytics>(`/portfolio/analytics?period=${period}`).catch(() => userAnalytics),
+        : get<Analytics>(`/portfolio/analytics?period=${period}&user_id=${userId}`).catch(() => userAnalytics),
     initialData: userAnalytics,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
@@ -100,6 +104,7 @@ export function useAnalytics() {
 // ── Transactions ───────────────────────────────────────────────────────────────
 export function useTransactions() {
   const { useMock, currentUser } = useAppStore()
+  const userId = currentUser?.id || 'asier'
   const userTx = currentUser?.transactions ?? MOCK_TRANSACTIONS
 
   return useQuery<Transaction[]>({
@@ -107,7 +112,7 @@ export function useTransactions() {
     queryFn: () =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userTx)
-        : get<Transaction[]>('/transactions').catch(() => userTx),
+        : get<Transaction[]>(`/transactions?user_id=${userId}`).catch(() => userTx),
     initialData: userTx,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60,

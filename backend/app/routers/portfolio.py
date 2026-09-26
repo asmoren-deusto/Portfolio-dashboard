@@ -23,8 +23,11 @@ router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 logger = logging.getLogger(__name__)
 
 
-def _get_all_transactions(db: Session) -> list[dict]:
-    rows = db.query(Transaction).order_by(Transaction.date).all()
+def _get_all_transactions(db: Session, user_id: str = "asier") -> list[dict]:
+    query = db.query(Transaction)
+    if user_id:
+        query = query.filter(Transaction.user_id == user_id)
+    rows = query.order_by(Transaction.date).all()
     return [
         {
             "id": t.id,
@@ -45,9 +48,9 @@ def _get_asset(db: Session, isin: str) -> Asset | None:
 
 
 @router.get("/summary", response_model=PortfolioSummary)
-async def get_portfolio_summary(db: Session = Depends(get_db)):
+async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(get_db)):
     """Return overall portfolio KPIs."""
-    transactions = _get_all_transactions(db)
+    transactions = _get_all_transactions(db, user_id)
     if not transactions:
         return PortfolioSummary(
             total_value=0,
@@ -84,9 +87,9 @@ async def get_portfolio_summary(db: Session = Depends(get_db)):
 
 
 @router.get("/positions", response_model=list[PositionOut])
-async def get_positions(db: Session = Depends(get_db)):
+async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
     """Return all current positions with live prices."""
-    transactions = _get_all_transactions(db)
+    transactions = _get_all_transactions(db, user_id)
     if not transactions:
         return []
 
@@ -136,9 +139,9 @@ async def get_positions(db: Session = Depends(get_db)):
 
 
 @router.get("/performance", response_model=list[PerformancePoint])
-async def get_performance(period: str = "1y", db: Session = Depends(get_db)):
+async def get_performance(period: str = "1y", user_id: str = "asier", db: Session = Depends(get_db)):
     """Return portfolio value time series."""
-    transactions = _get_all_transactions(db)
+    transactions = _get_all_transactions(db, user_id)
     if not transactions:
         return []
 
@@ -158,9 +161,9 @@ async def get_performance(period: str = "1y", db: Session = Depends(get_db)):
 
 
 @router.get("/analytics")
-async def get_analytics(period: str = "1y", db: Session = Depends(get_db)):
+async def get_analytics(period: str = "1y", user_id: str = "asier", db: Session = Depends(get_db)):
     """Return all computed risk/return metrics."""
-    transactions = _get_all_transactions(db)
+    transactions = _get_all_transactions(db, user_id)
     if not transactions:
         return {}
 

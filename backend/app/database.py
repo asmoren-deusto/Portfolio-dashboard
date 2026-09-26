@@ -29,7 +29,18 @@ def get_db():
 def init_db():
     from app.models import Asset, Transaction, PriceCache, User  # noqa
     Base.metadata.create_all(bind=engine)
+    _migrate_schema()
     _seed_default_users()
+
+
+def _migrate_schema():
+    with engine.connect() as conn:
+        try:
+            columns = [c[1] for c in conn.exec_driver_sql("PRAGMA table_info(transactions)").fetchall()]
+            if columns and "user_id" not in columns:
+                conn.exec_driver_sql("ALTER TABLE transactions ADD COLUMN user_id VARCHAR(50) DEFAULT 'asier'")
+        except Exception:
+            pass
 
 
 def _seed_default_users():

@@ -27,6 +27,7 @@ class AssetOut(AssetBase):
 
 # ── Transaction schemas ────────────────────────────────────────────────────────
 class TransactionBase(BaseModel):
+    user_id: Optional[str] = "asier"
     isin: str
     type: str          # buy | sell | dividend | transfer
     shares: float
@@ -39,7 +40,7 @@ class TransactionBase(BaseModel):
 
 
 class TransactionCreate(TransactionBase):
-    pass
+    asset_name: Optional[str] = None
 
 
 class TransactionOut(TransactionBase):

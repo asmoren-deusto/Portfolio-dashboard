@@ -38,6 +38,7 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String(50), default="asier")
     isin = Column(String(12), nullable=False)
     type = Column(String(10), nullable=False)   # buy | sell | dividend | transfer
     shares = Column(Float, nullable=False)

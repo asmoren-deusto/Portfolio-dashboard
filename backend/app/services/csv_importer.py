@@ -102,6 +102,7 @@ def _parse_row(row: dict) -> dict | None:
 
     return {
         "isin": normalized.get("isin", "").upper().strip(),
+        "name": normalized.get("name", "").strip(),
         "type": tx_type,
         "shares": abs(shares),
         "price": abs(price),
