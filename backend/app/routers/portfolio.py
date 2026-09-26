@@ -25,9 +25,13 @@ logger = logging.getLogger(__name__)
 
 def _get_all_transactions(db: Session, user_id: str = "asier") -> list[dict]:
     query = db.query(Transaction)
+    rows = []
     if user_id:
-        query = query.filter(Transaction.user_id == user_id)
-    rows = query.order_by(Transaction.date).all()
+        rows = query.filter(Transaction.user_id == user_id).order_by(Transaction.date).all()
+    if not rows and user_id != "demo":
+        rows = query.filter(Transaction.user_id == "asier").order_by(Transaction.date).all()
+    if not rows:
+        rows = query.order_by(Transaction.date).all()
     return [
         {
             "id": t.id,

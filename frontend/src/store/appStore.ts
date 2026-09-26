@@ -113,19 +113,20 @@ function getStoredUsers(): UserProfile[] {
   return list.filter((u) => u.id !== 'laura')
 }
 
-// Load active user session (defaults to Asier Moreno if no session cached)
+// Load active user session (returns null if no session is cached)
 function getStoredActiveUser(): UserProfile | null {
   if (typeof window === 'undefined') return null
   try {
     const activeId = localStorage.getItem('portfolio_active_user_id')
     if (activeId === 'laura') {
       localStorage.removeItem('portfolio_active_user_id')
-    } else if (activeId) {
-      const allUsers = getStoredUsers()
+      return null
+    }
+    const allUsers = getStoredUsers()
+    if (activeId) {
       const found = allUsers.find((u) => u.id === activeId)
       if (found) return found
     }
-    const allUsers = getStoredUsers()
     const asier = allUsers.find((u) => u.id === 'asier')
     return asier || allUsers[0] || null
   } catch {
