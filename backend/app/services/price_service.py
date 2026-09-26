@@ -28,13 +28,12 @@ async def get_current_price(isin: str, ticker: str | None = None) -> Optional[fl
 
     price = None
 
-    # 1. Try Yahoo Finance if ticker provided
-    if ticker:
-        price = await _fetch_yahoo_price(ticker)
+    # 1. Try Quefondos by ISIN first (exact Spanish/European fund NAV matching MyInvestor)
+    price = await _fetch_quefondos_price(isin)
 
-    # 2. Fallback: Quefondos by ISIN (highly reliable for European/Spanish funds)
-    if price is None:
-        price = await _fetch_quefondos_price(isin)
+    # 2. Fallback: Yahoo Finance if ticker provided
+    if price is None and ticker:
+        price = await _fetch_yahoo_price(ticker)
 
     # 3. Fallback: Morningstar by ISIN
     if price is None:
@@ -67,9 +66,13 @@ async def _fetch_quefondos_price(isin: str) -> Optional[float]:
         async with httpx.AsyncClient(timeout=8) as client:
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
-                m = re.search(r"Valor liquidativo.*?>([\d,]+)\s*EUR", resp.text)
+                m = re.search(r"Valor liquidativo.*?([\d\.]+,\d+)\s*EUR", resp.text, re.DOTALL | re.IGNORECASE)
                 if m:
-                    val_str = m.group(1).replace(",", ".")
+                    val_str = m.group(1).replace(".", "").replace(",", ".")
+                    return float(val_str)
+                m2 = re.search(r"<span>([\d\.]+,\d+)\s*EUR</span>", resp.text, re.IGNORECASE)
+                if m2:
+                    val_str = m2.group(1).replace(".", "").replace(",", ".")
                     return float(val_str)
     except Exception as e:
         logger.warning(f"Quefondos error for {isin}: {e}")
