@@ -178,7 +178,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   return (
     <span
       title={tooltips[effectiveState] || effectiveState}
-      className={`absolute -top-1.5 right-0.5 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1.5px] rounded-full border shadow-2xs leading-none backdrop-blur-xs select-none ${cls}`}
+      className={`absolute -top-1.5 right-1 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1.5px] rounded-full border shadow-2xs leading-none backdrop-blur-xs select-none ${cls}`}
     >
       {labels[effectiveState] || effectiveState}
     </span>
