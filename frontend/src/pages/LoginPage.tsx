@@ -23,7 +23,7 @@ import { fmt } from '@/lib/utils'
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { users, login, createUser, setUserPassword, currentUser } = useAppStore()
+  const { users, login, createUser, setUserPassword, changePassword, currentUser } = useAppStore()
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
@@ -44,6 +44,8 @@ export const LoginPage: React.FC = () => {
 
   // Mode for setting/changing password on a profile
   const [isSettingPassword, setIsSettingPassword] = useState(false)
+  const [profileCurrentPassword, setProfileCurrentPassword] = useState('')
+  const [showProfileCurrentPassword, setShowProfileCurrentPassword] = useState(false)
   const [profileNewPassword, setProfileNewPassword] = useState('')
   const [profileConfirmPassword, setProfileConfirmPassword] = useState('')
   const [showProfileNewPassword, setShowProfileNewPassword] = useState(false)
@@ -71,6 +73,7 @@ export const LoginPage: React.FC = () => {
   const handleSelectProfile = (u: UserProfile) => {
     setSelectedProfile(u)
     setProfilePassword('')
+    setProfileCurrentPassword('')
     setProfileNewPassword('')
     setProfileConfirmPassword('')
     setError(null)
@@ -81,6 +84,7 @@ export const LoginPage: React.FC = () => {
   const handleBackToProfiles = () => {
     setSelectedProfile(null)
     setProfilePassword('')
+    setProfileCurrentPassword('')
     setProfileNewPassword('')
     setProfileConfirmPassword('')
     setIsSettingPassword(false)
@@ -119,6 +123,34 @@ export const LoginPage: React.FC = () => {
 
     if (!selectedProfile) return
 
+    // If profile already has a password, verify current password first!
+    if (selectedProfile.passwordHash) {
+      if (!profileCurrentPassword) {
+        setError('Por favor introduce tu contraseña actual para confirmar tu identidad.')
+        return
+      }
+
+      if (!profileNewPassword || profileNewPassword.length < 4) {
+        setError('La nueva contraseña debe tener al menos 4 caracteres.')
+        return
+      }
+
+      if (profileNewPassword !== profileConfirmPassword) {
+        setError('Las nuevas contraseñas no coinciden. Por favor, revísalas.')
+        return
+      }
+
+      const res = changePassword(selectedProfile.id, profileCurrentPassword, profileNewPassword)
+      if (!res.success) {
+        setError(res.error || 'La contraseña actual no es correcta.')
+        return
+      }
+
+      navigate('/')
+      return
+    }
+
+    // Initial password configuration (first time setup)
     if (!profileNewPassword || profileNewPassword.length < 4) {
       setError('La contraseña debe tener al menos 4 caracteres.')
       return
@@ -415,12 +447,40 @@ export const LoginPage: React.FC = () => {
                       <form onSubmit={handleSaveProfilePassword} className="space-y-4 pt-1">
                         <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-500/20 text-xs text-blue-800 dark:text-blue-300">
                           <p className="font-semibold text-blue-900 dark:text-blue-200">
-                            {selectedProfile.passwordHash ? 'Modificar contraseña' : 'Crea tu contraseña de acceso'}
+                            {selectedProfile.passwordHash ? 'Modificar contraseña de acceso' : 'Crea tu contraseña de acceso'}
                           </p>
                           <p className="text-[11.5px] mt-0.5 text-blue-700 dark:text-blue-300/80">
-                            Introduce la contraseña que utilizarás para entrar en la cartera de {selectedProfile.name}.
+                            {selectedProfile.passwordHash
+                              ? 'Introduce tu contraseña actual para confirmar tu identidad antes de establecer la nueva.'
+                              : `Introduce la contraseña que utilizarás para entrar en la cartera de ${selectedProfile.name}.`}
                           </p>
                         </div>
+
+                        {selectedProfile.passwordHash && (
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                              Contraseña actual
+                            </label>
+                            <div className="relative">
+                              <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                              <input
+                                type={showProfileCurrentPassword ? 'text' : 'password'}
+                                value={profileCurrentPassword}
+                                onChange={(e) => setProfileCurrentPassword(e.target.value)}
+                                placeholder="Tu contraseña actual..."
+                                autoFocus
+                                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowProfileCurrentPassword(!showProfileCurrentPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                              >
+                                {showProfileCurrentPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                              </button>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="space-y-1.5">
                           <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -433,7 +493,7 @@ export const LoginPage: React.FC = () => {
                               value={profileNewPassword}
                               onChange={(e) => setProfileNewPassword(e.target.value)}
                               placeholder="Mínimo 4 caracteres..."
-                              autoFocus
+                              autoFocus={!selectedProfile.passwordHash}
                               className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                             />
                             <button
@@ -448,7 +508,7 @@ export const LoginPage: React.FC = () => {
 
                         <div className="space-y-1.5">
                           <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            Confirmar contraseña
+                            Confirmar nueva contraseña
                           </label>
                           <div className="relative">
                             <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -456,7 +516,7 @@ export const LoginPage: React.FC = () => {
                               type={showProfileNewPassword ? 'text' : 'password'}
                               value={profileConfirmPassword}
                               onChange={(e) => setProfileConfirmPassword(e.target.value)}
-                              placeholder="Repite la contraseña..."
+                              placeholder="Repite la nueva contraseña..."
                               className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                             />
                           </div>
@@ -468,6 +528,9 @@ export const LoginPage: React.FC = () => {
                               type="button"
                               onClick={() => {
                                 setIsSettingPassword(false)
+                                setProfileCurrentPassword('')
+                                setProfileNewPassword('')
+                                setProfileConfirmPassword('')
                                 setError(null)
                               }}
                               className="w-1/3 py-2.5 rounded-xl border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] text-xs font-semibold transition-colors"
@@ -480,7 +543,7 @@ export const LoginPage: React.FC = () => {
                             className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                           >
                             <CheckCircle2 size={15} />
-                            <span>Guardar Contraseña y Acceder</span>
+                            <span>{selectedProfile.passwordHash ? 'Actualizar Contraseña y Acceder' : 'Guardar Contraseña y Acceder'}</span>
                           </button>
                         </div>
                       </form>
@@ -548,7 +611,7 @@ export const LoginPage: React.FC = () => {
                             className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
                           >
                             <Key size={12} />
-                            <span>Cambiar o restablecer contraseña</span>
+                            <span>Modificar contraseña</span>
                           </button>
                         </div>
                       </form>
