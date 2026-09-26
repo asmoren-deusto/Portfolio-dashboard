@@ -148,6 +148,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     const target = state.users.find((u) => u.id === userId) || INITIAL_USER_PROFILES.find((u) => u.id === userId)
     if (!target) return false
 
+    // Allow Demo user to enter directly without password
+    if (target.isDemo || target.id === 'demo') {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('portfolio_active_user_id', target.id)
+      }
+      set({
+        currentUser: target,
+        useMock: true,
+      })
+      return true
+    }
+
     // Require and verify cryptographic salted password
     if (target.passwordHash && target.passwordSalt) {
       if (!password) return false

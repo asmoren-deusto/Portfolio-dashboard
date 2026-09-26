@@ -236,7 +236,7 @@ export const LoginPage: React.FC = () => {
 
   const handleFillDemoCreds = () => {
     setEmail('demo@portfoliopro.app')
-    setPassword('demo1234')
+    setPassword('')
     setError(null)
   }
 
@@ -376,13 +376,20 @@ export const LoginPage: React.FC = () => {
                               </div>
                             </div>
 
-                            {/* Right side unlock button: icon strictly on the left of text */}
+                            {/* Right side action button */}
                             <div className="flex items-center gap-2 shrink-0 pl-2">
-                              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-white/[0.08] border border-slate-200/90 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all text-xs font-semibold shadow-xs">
-                                <Lock size={13} className="shrink-0" />
-                                <span>Desbloquear</span>
-                                <ArrowRight size={13} className="shrink-0 opacity-70 group-hover:translate-x-0.5 transition-transform" />
-                              </div>
+                              {isDemo ? (
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-100/90 dark:bg-blue-500/20 border border-blue-200/90 dark:border-blue-500/30 text-blue-700 dark:text-blue-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all text-xs font-semibold shadow-xs">
+                                  <span>Acceso Libre</span>
+                                  <ArrowRight size={13} className="shrink-0 opacity-80 group-hover:translate-x-0.5 transition-transform" />
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-white/[0.08] border border-slate-200/90 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all text-xs font-semibold shadow-xs">
+                                  <Lock size={13} className="shrink-0" />
+                                  <span>Desbloquear</span>
+                                  <ArrowRight size={13} className="shrink-0 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+                                </div>
+                              )}
                             </div>
                           </div>
                         )

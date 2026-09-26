@@ -487,8 +487,6 @@ const DEMO_USER: UserProfile = {
   isDemo: true,
   color: 'bg-blue-600 text-white',
   bgGradient: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
-  passwordSalt: '7f3a8b1c4d9e0f21',
-  passwordHash: 'd85e322dea74de622c3d8b8da84da8d5dd7c4b39a19f11fd019dd1ecb32598be',
   summary: MOCK_SUMMARY,
   positions: MOCK_POSITIONS,
   analytics: MOCK_ANALYTICS,
