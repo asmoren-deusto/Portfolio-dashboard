@@ -5,9 +5,9 @@ from datetime import datetime
 import logging
 
 from app.database import get_db
-from app.models import Asset, Transaction
-from app.schemas import PortfolioSummary, PositionOut, PerformancePoint
-from app.services.price_service import get_current_price, get_price_history
+from app.models import Asset, Transaction, PriceCache
+from app.schemas import PortfolioSummary, PositionOut, PerformancePoint, UpdatePriceRequest
+from app.services.price_service import get_current_price, get_price_with_date, get_price_history, _price_cache
 from app.services.finance_engine import (
     calculate_positions,
     calculate_portfolio_value_series,
@@ -70,7 +70,7 @@ async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(ge
     for isin, pos in active_positions.items():
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
-        price = await get_current_price(isin, ticker)
+        price = await get_current_price(isin, ticker, db=db)
         effective_price = price if (price and price > 0) else pos["avg_cost"]
         total_value += pos["shares"] * effective_price
         total_invested += pos["invested_amount"]
@@ -90,7 +90,7 @@ async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(ge
 
 @router.get("/positions", response_model=list[PositionOut])
 async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
-    """Return all current positions with live prices."""
+    """Return all current positions with live prices and valuation dates."""
     transactions = _get_all_transactions(db, user_id)
     if not transactions:
         return []
@@ -108,7 +108,7 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
         asset_type = asset.asset_type if asset else "fund"
         currency = asset.currency if asset else "EUR"
 
-        price = await get_current_price(isin, ticker)
+        price, price_date = await get_price_with_date(isin, ticker, db=db)
         effective_price = price if (price and price > 0) else pos["avg_cost"]
         current_value = pos["shares"] * effective_price
         total_value += current_value
@@ -129,6 +129,7 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
             "unrealized_pnl": round(pnl, 2),
             "unrealized_pnl_pct": round(pnl_pct, 2),
             "last_updated": datetime.now().isoformat(),
+            "price_date": price_date,
         })
 
     # Add weight
@@ -140,6 +141,21 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
         result.append(PositionOut(**p))
 
     return sorted(result, key=lambda x: x.current_value or 0, reverse=True)
+
+
+@router.post("/update-price")
+async def update_price(req: UpdatePriceRequest, db: Session = Depends(get_db)):
+    """Update or override a fund NAV manually with an exact date."""
+    target_date = req.date or datetime.now().strftime("%Y-%m-%d")
+    existing = db.query(PriceCache).filter(PriceCache.isin == req.isin, PriceCache.date == target_date).first()
+    if existing:
+        existing.price = req.price
+    else:
+        db.add(PriceCache(isin=req.isin, date=target_date, price=req.price, currency="EUR"))
+    db.commit()
+
+    _price_cache[req.isin] = {"price": req.price, "date": target_date, "ts": datetime.now()}
+    return {"ok": True, "isin": req.isin, "price": req.price, "date": target_date}
 
 
 @router.get("/performance", response_model=list[PerformancePoint])

@@ -48,6 +48,12 @@ class ImportTextRequest(BaseModel):
     user_id: Optional[str] = "asier"
 
 
+class UpdatePriceRequest(BaseModel):
+    isin: str
+    price: float
+    date: Optional[str] = None
+
+
 class TransactionOut(TransactionBase):
     id: int
 
@@ -70,6 +76,7 @@ class PositionOut(BaseModel):
     unrealized_pnl_pct: Optional[float]
     weight: Optional[float] = None   # % of total portfolio
     last_updated: Optional[str] = None
+    price_date: Optional[str] = None
 
 
 

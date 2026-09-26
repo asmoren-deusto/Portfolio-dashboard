@@ -9,7 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Simple in-memory cache: {isin: {"price": float, "ts": datetime}}
+# Simple in-memory cache: {isin: {"price": float, "date": Optional[str], "ts": datetime}}
 _price_cache: dict = {}
 CACHE_TTL_MINUTES = 15
 
@@ -21,62 +21,118 @@ def _is_cache_valid(isin: str) -> bool:
     return age.total_seconds() < CACHE_TTL_MINUTES * 60
 
 
-async def get_current_price(isin: str, ticker: str | None = None) -> Optional[float]:
-    """Get current price for an asset. Uses ticker for Yahoo Finance, falls back to Quefondos & Morningstar."""
+async def get_price_with_date(
+    isin: str,
+    ticker: str | None = None,
+    db = None,
+) -> tuple[Optional[float], Optional[str]]:
+    """
+    Get current NAV and date for an asset.
+    Order of precedence:
+      0. In-memory cache (if valid)
+      1. DB PriceCache (manual overrides / verified MyInvestor entries)
+      2. Quefondos (Spanish/European fund liquidation value with date)
+      3. Yahoo Finance (fast closing prices with date)
+      4. Morningstar (fallback)
+    """
+    # 1. DB PriceCache check first (manual overrides / verified entries take precedence)
+    if db is not None:
+        try:
+            from app.models import PriceCache
+            entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+            if entry and entry.price > 0:
+                _price_cache[isin] = {"price": entry.price, "date": entry.date, "ts": datetime.now()}
+                return entry.price, entry.date
+        except Exception as e:
+            logger.warning(f"Error querying PriceCache for {isin}: {e}")
+
     if _is_cache_valid(isin):
-        return _price_cache[isin]["price"]
+        return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
     price = None
+    price_date = None
 
-    # 1. Try Quefondos by ISIN first (exact Spanish/European fund NAV matching MyInvestor)
-    price = await _fetch_quefondos_price(isin)
+    # 2. Try Quefondos by ISIN (reliable for European/Spanish funds)
+    price, price_date = await _fetch_quefondos_price(isin)
 
-    # 2. Fallback: Yahoo Finance if ticker provided
+    # 3. Fallback: Yahoo Finance if ticker provided or no Quefondos price
     if price is None and ticker:
-        price = await _fetch_yahoo_price(ticker)
+        price, price_date = await _fetch_yahoo_price(ticker)
 
-    # 3. Fallback: Morningstar by ISIN
+    # 4. Fallback: Morningstar by ISIN
     if price is None:
         price = await _fetch_morningstar_price(isin)
+        if price:
+            price_date = datetime.now().strftime("%Y-%m-%d")
 
     if price is not None:
-        _price_cache[isin] = {"price": price, "ts": datetime.now()}
+        _price_cache[isin] = {"price": price, "date": price_date, "ts": datetime.now()}
 
+    return price, price_date
+
+
+async def get_current_price(isin: str, ticker: str | None = None, db = None) -> Optional[float]:
+    """Get current price for an asset (float only)."""
+    price, _ = await get_price_with_date(isin, ticker, db=db)
     return price
 
 
-async def _fetch_yahoo_price(ticker: str) -> Optional[float]:
-    """Fetch latest price from Yahoo Finance."""
+async def _fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]]:
+    """Fetch latest price and date from Yahoo Finance."""
     try:
         t = yf.Ticker(ticker)
+        hist = t.history(period="5d")
+        if len(hist) > 0:
+            last_price = float(hist["Close"].iloc[-1])
+            last_date = str(hist.index[-1].date())
+            return last_price, last_date
         info = t.fast_info
         price = getattr(info, "last_price", None) or getattr(info, "regular_market_price", None)
         if price:
-            return float(price)
+            return float(price), datetime.now().strftime("%Y-%m-%d")
     except Exception as e:
         logger.warning(f"Yahoo Finance error for {ticker}: {e}")
-    return None
+    return None, None
 
 
-async def _fetch_quefondos_price(isin: str) -> Optional[float]:
-    """Fetch NAV from Quefondos public fund page."""
+async def _fetch_quefondos_price(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """Fetch NAV and date from Quefondos public fund page."""
     try:
         url = f"https://www.quefondos.com/es/fondos/ficha/index.html?isin={isin}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         async with httpx.AsyncClient(timeout=8) as client:
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
-                m = re.search(r"Valor liquidativo.*?([\d\.]+,\d+)\s*EUR", resp.text, re.DOTALL | re.IGNORECASE)
-                if m:
-                    val_str = m.group(1).replace(".", "").replace(",", ".")
-                    return float(val_str)
-                m2 = re.search(r"<span>([\d\.]+,\d+)\s*EUR</span>", resp.text, re.IGNORECASE)
-                if m2:
-                    val_str = m2.group(1).replace(".", "").replace(",", ".")
-                    return float(val_str)
+                price = None
+                date_str = None
+
+                m_date = re.search(r"Valor liquidativo.*?(\d{2}/\d{2}/\d{4}).*?([\d\.]+,\d+)\s*EUR", resp.text, re.DOTALL | re.IGNORECASE)
+                if m_date:
+                    date_str = m_date.group(1)
+                    price = float(m_date.group(2).replace(".", "").replace(",", "."))
+                else:
+                    m = re.search(r"Valor liquidativo.*?([\d\.]+,\d+)\s*EUR", resp.text, re.DOTALL | re.IGNORECASE)
+                    if m:
+                        price = float(m.group(1).replace(".", "").replace(",", "."))
+                    else:
+                        m2 = re.search(r"<span>([\d\.]+,\d+)\s*EUR</span>", resp.text, re.IGNORECASE)
+                        if m2:
+                            price = float(m2.group(1).replace(".", "").replace(",", "."))
+
+                    dates = re.findall(r"\b(\d{2}/\d{2}/\d{4})\b", resp.text)
+                    if dates:
+                        date_str = dates[0]
+
+                if price is not None:
+                    # Convert dd/mm/yyyy to yyyy-mm-dd if needed
+                    if date_str and "/" in date_str:
+                        parts = date_str.split("/")
+                        if len(parts) == 3:
+                            date_str = f"{parts[2]}-{parts[1]}-{parts[0]}"
+                    return price, date_str
     except Exception as e:
         logger.warning(f"Quefondos error for {isin}: {e}")
-    return None
+    return None, None
 
 
 async def _fetch_morningstar_price(isin: str) -> Optional[float]:
