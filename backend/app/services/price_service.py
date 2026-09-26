@@ -1,4 +1,5 @@
 """Price service — fetches NAV/prices from Yahoo Finance and Morningstar."""
+import re
 import httpx
 import yfinance as yf
 import pandas as pd
@@ -21,7 +22,7 @@ def _is_cache_valid(isin: str) -> bool:
 
 
 async def get_current_price(isin: str, ticker: str | None = None) -> Optional[float]:
-    """Get current price for an asset. Uses ticker for Yahoo Finance, falls back to Morningstar."""
+    """Get current price for an asset. Uses ticker for Yahoo Finance, falls back to Quefondos & Morningstar."""
     if _is_cache_valid(isin):
         return _price_cache[isin]["price"]
 
@@ -31,7 +32,11 @@ async def get_current_price(isin: str, ticker: str | None = None) -> Optional[fl
     if ticker:
         price = await _fetch_yahoo_price(ticker)
 
-    # 2. Fallback: Morningstar by ISIN
+    # 2. Fallback: Quefondos by ISIN (highly reliable for European/Spanish funds)
+    if price is None:
+        price = await _fetch_quefondos_price(isin)
+
+    # 3. Fallback: Morningstar by ISIN
     if price is None:
         price = await _fetch_morningstar_price(isin)
 
@@ -51,6 +56,23 @@ async def _fetch_yahoo_price(ticker: str) -> Optional[float]:
             return float(price)
     except Exception as e:
         logger.warning(f"Yahoo Finance error for {ticker}: {e}")
+    return None
+
+
+async def _fetch_quefondos_price(isin: str) -> Optional[float]:
+    """Fetch NAV from Quefondos public fund page."""
+    try:
+        url = f"https://www.quefondos.com/es/fondos/ficha/index.html?isin={isin}"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        async with httpx.AsyncClient(timeout=8) as client:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 200:
+                m = re.search(r"Valor liquidativo.*?>([\d,]+)\s*EUR", resp.text)
+                if m:
+                    val_str = m.group(1).replace(",", ".")
+                    return float(val_str)
+    except Exception as e:
+        logger.warning(f"Quefondos error for {isin}: {e}")
     return None
 
 

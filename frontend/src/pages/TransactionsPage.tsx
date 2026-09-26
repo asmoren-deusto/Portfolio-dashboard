@@ -5,25 +5,26 @@ import {
   Upload,
   Plus,
   Search,
-  Filter,
-  ArrowUpDown,
-  Download,
-  Calendar,
+  Layers,
   DollarSign,
   TrendingUp,
   TrendingDown,
-  Layers,
-  Sparkles,
   X,
   CheckCircle2,
   FileSpreadsheet,
   AlertCircle,
+  FileText,
+  Trash2,
+  Loader2,
+  Sparkles,
 } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Header } from '@/components/layout/Header'
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { fmt } from '@/lib/utils'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
+import { useAppStore } from '@/store/appStore'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import type { Transaction } from '@/lib/mockData'
 
@@ -45,27 +46,21 @@ const TYPE_TABS: { id: TxType; label: string }[] = [
 ]
 
 export function TransactionsPage() {
-  const { data: initialTransactions = [] } = useTransactions()
+  const queryClient = useQueryClient()
+  const { currentUser } = useAppStore()
+  const userId = currentUser?.id || 'asier'
+
+  const { data: transactions = [] } = useTransactions()
   const { data: positions = [] } = usePositions()
 
-  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [activeType, setActiveType] = useState<TxType>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
-  const [notification, setNotification] = useState<string | null>(null)
+  const [notification, setNotification] = useState<{ text: string; error?: boolean } | null>(null)
+  const [isDeleting, setIsDeleting] = useState<string | number | null>(null)
 
-  const fileRef = useRef<HTMLInputElement>(null)
-
-  // Sync initial transactions
-  useEffect(() => {
-    if (initialTransactions.length > 0 && transactions.length === 0) {
-      setTransactions(initialTransactions)
-    }
-  }, [initialTransactions])
-
-  // Map ISIN to position info for logos and names
   const positionMap = useMemo(() => {
     const map = new Map<string, Position>()
     positions.forEach((p) => {
@@ -104,26 +99,58 @@ export function TransactionsPage() {
     })
   }, [transactions, activeType, searchQuery, positionMap])
 
-  const notify = (msg: string) => {
-    setNotification(msg)
-    setTimeout(() => setNotification(null), 3500)
+  const notify = (text: string, error = false) => {
+    setNotification({ text, error })
+    setTimeout(() => setNotification(null), 4000)
   }
 
-  // Handle adding new operation
-  const handleAddTransaction = (newTx: Transaction) => {
-    setTransactions((prev) => [newTx, ...prev])
-    setShowAddModal(false)
-    notify('¡Operación registrada con éxito en la cartera!')
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['transactions'] })
+    queryClient.invalidateQueries({ queryKey: ['positions'] })
+    queryClient.invalidateQueries({ queryKey: ['summary'] })
+    queryClient.invalidateQueries({ queryKey: ['performance'] })
+    queryClient.invalidateQueries({ queryKey: ['analytics'] })
   }
 
-  // Simulate CSV import
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setTimeout(() => {
-      notify(`Archivo ${file.name} procesado correctamente. Datos sincronizados.`)
-      setShowImportModal(false)
-    }, 600)
+  // Handle manual addition
+  const handleAddTransaction = async (newTx: any) => {
+    try {
+      const res = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newTx, user_id: userId }),
+      })
+      if (res.ok) {
+        notify('¡Operación registrada con éxito en la cartera!')
+        setShowAddModal(false)
+        invalidateAll()
+      } else {
+        const err = await res.json().catch(() => null)
+        notify(err?.detail || 'Error al guardar la operación.', true)
+      }
+    } catch {
+      notify('Error de red al guardar la operación.', true)
+    }
+  }
+
+  // Handle deletion
+  const handleDelete = async (e: React.MouseEvent, txId: string | number) => {
+    e.stopPropagation()
+    if (!window.confirm('¿Deseas eliminar esta transacción de tu cartera?')) return
+    setIsDeleting(txId)
+    try {
+      const res = await fetch(`/api/transactions/${txId}`, { method: 'DELETE' })
+      if (res.ok) {
+        notify('Operación eliminada.')
+        invalidateAll()
+      } else {
+        notify('Error al eliminar la operación.', true)
+      }
+    } catch {
+      notify('Error de conexión al eliminar la operación.', true)
+    } finally {
+      setIsDeleting(null)
+    }
   }
 
   return (
@@ -135,10 +162,18 @@ export function TransactionsPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-5 right-5 z-[99999] flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-emerald-950/90 border border-emerald-500/40 text-emerald-200 text-xs font-medium shadow-2xl backdrop-blur-md"
+            className={`fixed top-5 right-5 z-[99999] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md text-xs font-medium border ${
+              notification.error
+                ? 'bg-rose-950/90 border-rose-500/40 text-rose-200'
+                : 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200'
+            }`}
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{notification}</span>
+            {notification.error ? (
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            )}
+            <span>{notification.text}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -146,7 +181,7 @@ export function TransactionsPage() {
       {/* Unified Header */}
       <Header
         title="Registro de Operaciones"
-        subtitle="Historial de compras periódicas (DCA), ventas, dividendos e importación de extractos."
+        subtitle="Historial de compras periódicas (DCA), reembolsos, traspasos e importación de extractos."
         badge="Histórico Completo"
         badgeColor="amber"
       >
@@ -156,7 +191,7 @@ export function TransactionsPage() {
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200/90 dark:bg-[#111625]/90 dark:hover:bg-[#151c2e] dark:text-slate-300 dark:hover:text-white dark:border-white/[0.08] dark:hover:border-white/20 text-xs font-semibold transition-all shadow-sm active:scale-95"
           >
             <Upload className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
-            <span>Importar CSV</span>
+            <span>Importar Extracto</span>
           </button>
           <button
             onClick={() => setShowAddModal(true)}
@@ -290,12 +325,15 @@ export function TransactionsPage() {
                 <th className="px-5 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                   Entidad / Broker
                 </th>
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 w-12">
+                  
+                </th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-20 text-center text-slate-500">
+                  <td colSpan={8} className="py-20 text-center text-slate-500">
                     <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No hay operaciones con este criterio</p>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Prueba a seleccionar otra pestaña o limpiar la búsqueda.</p>
                   </td>
@@ -311,7 +349,7 @@ export function TransactionsPage() {
                       key={t.id}
                       initial={{ opacity: 0, y: 3 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.02 }}
+                      transition={{ delay: Math.min(i * 0.015, 0.3) }}
                       onClick={() => {
                         if (assetInfo) setSelectedPosition(assetInfo)
                       }}
@@ -373,6 +411,22 @@ export function TransactionsPage() {
                           {t.broker}
                         </span>
                       </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-3.5 text-center">
+                        <button
+                          onClick={(e) => handleDelete(e, t.id)}
+                          disabled={isDeleting === t.id}
+                          title="Eliminar operación"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        >
+                          {isDeleting === t.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </td>
                     </motion.tr>
                   )
                 })
@@ -391,12 +445,17 @@ export function TransactionsPage() {
         />
       )}
 
-      {/* Import CSV Modal */}
+      {/* Import Extracto Modal */}
       {showImportModal && (
-        <ImportCsvModal
-          fileRef={fileRef}
+        <ImportExtractoModal
+          userId={userId}
           onClose={() => setShowImportModal(false)}
-          onUpload={handleFileUpload}
+          onSuccess={(msg) => {
+            notify(msg)
+            setShowImportModal(false)
+            invalidateAll()
+          }}
+          onError={(msg) => notify(msg, true)}
         />
       )}
 
@@ -419,7 +478,7 @@ function AddTransactionModal({
 }: {
   positions: any[]
   onClose: () => void
-  onAdd: (tx: Transaction) => void
+  onAdd: (tx: any) => void
 }) {
   const [type, setType] = useState<'buy' | 'sell' | 'dividend' | 'transfer'>('buy')
   const [isin, setIsin] = useState(positions[0]?.isin || '')
@@ -448,10 +507,9 @@ function AddTransactionModal({
     e.preventDefault()
     if (!isin) return
 
-    const newTx: Transaction = {
-      id: `tx-custom-${Date.now()}`,
+    const newTx = {
       isin,
-      name: selectedPos?.name || isin,
+      asset_name: selectedPos?.name || isin,
       type,
       date,
       shares: parseFloat(shares) || 0,
@@ -466,7 +524,6 @@ function AddTransactionModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -475,7 +532,6 @@ function AddTransactionModal({
         className="fixed inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
       />
 
-      {/* Modal Dialog */}
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -540,7 +596,7 @@ function AddTransactionModal({
               onChange={(e) => {
                 setIsin(e.target.value)
                 const found = positions.find((p) => p.isin === e.target.value)
-                if (found) setPrice(String(found.current_price))
+                if (found && found.current_price) setPrice(String(found.current_price))
               }}
               className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
             >
@@ -643,20 +699,27 @@ function AddTransactionModal({
 }
 
 // ----------------------------------------------------
-// Import CSV Modal (Portal)
+// Import Extracto Modal with Dual Tabs (File & Text)
 // ----------------------------------------------------
-function ImportCsvModal({
-  fileRef,
+function ImportExtractoModal({
+  userId,
   onClose,
-  onUpload,
+  onSuccess,
+  onError,
 }: {
-  fileRef: React.RefObject<HTMLInputElement | null>
+  userId: string
   onClose: () => void
-  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onSuccess: (msg: string) => void
+  onError: (msg: string) => void
 }) {
+  const [tab, setTab] = useState<'text' | 'file'>('text')
+  const [pastedText, setPastedText] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape' && !isProcessing) onClose()
     }
     const orig = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -665,29 +728,83 @@ function ImportCsvModal({
       document.body.style.overflow = orig
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [onClose])
+  }, [onClose, isProcessing])
+
+  // Handle Text Submission
+  const handleTextSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!pastedText.trim()) {
+      onError('Por favor, pega el texto de las operaciones antes de importar.')
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      const res = await fetch('/api/transactions/import-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: pastedText, user_id: userId }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        onSuccess(data.message || `${data.imported} operaciones importadas con éxito.`)
+      } else {
+        onError(data.detail || 'Error al procesar el texto.')
+      }
+    } catch {
+      onError('Error de red al importar el texto.')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Handle File Upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsProcessing(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch(`/api/transactions/import-csv?user_id=${userId}`, {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+      if (res.ok) {
+        onSuccess(data.message || `Archivo ${file.name} procesado correctamente.`)
+      } else {
+        onError(data.detail || 'Error al procesar el archivo CSV/Excel.')
+      }
+    } catch {
+      onError('Error de conexión al subir el archivo.')
+    } finally {
+      setIsProcessing(false)
+      if (e.target) e.target.value = ''
+    }
+  }
 
   if (typeof document === 'undefined') return null
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={() => !isProcessing && onClose()}
         className="fixed inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
       />
 
-      {/* Modal Dialog */}
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}
-        className="relative z-10 w-full max-w-lg my-auto rounded-3xl bg-white dark:bg-[#0f1424] border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
+        className="relative z-10 w-full max-w-xl my-auto rounded-3xl bg-white dark:bg-[#0f1424] border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/[0.08]">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
@@ -695,56 +812,154 @@ function ImportCsvModal({
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">Importar Extracto de Broker</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Sincroniza tus operaciones automáticamente</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Sincroniza tus operaciones de MyInvestor, Degiro o Trade Republic
+              </p>
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => !isProcessing && onClose()}
+            disabled={isProcessing}
             className="p-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="mt-5 space-y-4 text-xs">
-          <div
-            onClick={() => fileRef.current?.click()}
-            className="border-2 border-dashed border-slate-200 dark:border-white/15 hover:border-blue-500/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-white/[0.01] hover:bg-blue-500/[0.02]"
+        {/* Tab Selection */}
+        <div className="flex items-center gap-2 mt-4 p-1 rounded-2xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.06]">
+          <button
+            type="button"
+            onClick={() => setTab('text')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+              tab === 'text'
+                ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
           >
-            <Upload className="w-8 h-8 text-blue-500 dark:text-blue-400 mb-2 animate-bounce" />
-            <p className="font-semibold text-slate-900 dark:text-white text-sm">Arrastra tu archivo CSV aquí o haz clic para subir</p>
-            <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Formatos soportados: CSV, XLSX o TXT de MyInvestor / Degiro</p>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".csv,.xlsx,.txt"
-              className="hidden"
-              onChange={onUpload}
-            />
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] space-y-2">
-            <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold">
-              <AlertCircle className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-              <span>Plantillas compatibles:</span>
-            </div>
-            <ul className="text-slate-700 dark:text-slate-300 space-y-1 list-disc list-inside text-xs">
-              <li>Extracto MyInvestor (Movimientos de fondos y cuentas)</li>
-              <li>Historial de Transacciones Degiro (CSV estándar)</li>
-              <li>Trade Republic (Extracto de cuenta en CSV)</li>
-              <li>Formato estándar: Fecha, ISIN, Tipo, Títulos, Precio, Importe</li>
-            </ul>
-          </div>
-
-          <div className="pt-2 flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:text-slate-300 font-medium transition-colors"
-            >
-              Cerrar
-            </button>
-          </div>
+            <FileText className="w-3.5 h-3.5" />
+            <span>Pegar Texto Web (Recomendado)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('file')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+              tab === 'file'
+                ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span>Subir Archivo (CSV / Excel)</span>
+          </button>
         </div>
+
+        {/* Tab 1: Paste Web Text */}
+        {tab === 'text' && (
+          <form onSubmit={handleTextSubmit} className="mt-4 space-y-3.5 text-xs">
+            <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-800 dark:text-blue-300">
+              <div className="flex items-start gap-2">
+                <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-blue-500 dark:text-blue-400" />
+                <div>
+                  <p className="font-semibold text-xs">Detecta compras, ventas y traspasos automáticamente:</p>
+                  <p className="text-[11px] opacity-90 mt-0.5">
+                    Entra en MyInvestor Web &gt; Inversión &gt; Órdenes de Fondos, selecciona con el ratón el listado y pégalo aquí. Reconoce estados ('Finalizada'), importes y participaciones.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1 uppercase tracking-wider text-[11px]">
+                Texto copiado de MyInvestor:
+              </label>
+              <textarea
+                rows={9}
+                value={pastedText}
+                onChange={(e) => setPastedText(e.target.value)}
+                placeholder="Ejemplo:&#10;10/07/2026&#10;Suscripción por Traspaso Interno&#10;116,72 €&#10;Azvalor Internacional FI&#10;Finalizada&#10;0,345743 participaciones..."
+                className="w-full p-3 font-mono text-xs rounded-2xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500/50 resize-none shadow-inner"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                {pastedText.length > 0 ? `${pastedText.length} caracteres listos` : 'Sin contenido'}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isProcessing}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:text-slate-300 font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isProcessing || !pastedText.trim()}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isProcessing ? 'Procesando...' : 'Importar Operaciones'}</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
+
+        {/* Tab 2: File Upload (CSV/Excel) */}
+        {tab === 'file' && (
+          <div className="mt-4 space-y-4 text-xs">
+            <div
+              onClick={() => !isProcessing && fileInputRef.current?.click()}
+              className="border-2 border-dashed border-slate-200 dark:border-white/15 hover:border-blue-500/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-white/[0.01] hover:bg-blue-500/[0.02]"
+            >
+              {isProcessing ? (
+                <Loader2 className="w-8 h-8 text-blue-500 dark:text-blue-400 mb-2 animate-spin" />
+              ) : (
+                <Upload className="w-8 h-8 text-blue-500 dark:text-blue-400 mb-2 animate-bounce" />
+              )}
+              <p className="font-semibold text-slate-900 dark:text-white text-sm">
+                {isProcessing ? 'Analizando y extrayendo archivo...' : 'Arrastra tu archivo CSV o haz clic para subir'}
+              </p>
+              <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">
+                Formatos soportados: CSV, XLSX, XLS o TXT de MyInvestor / Degiro
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.xlsx,.xls,.txt,.tsv"
+                className="hidden"
+                disabled={isProcessing}
+                onChange={handleFileUpload}
+              />
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] space-y-1.5">
+              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold">
+                <AlertCircle className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                <span>Formatos compatibles:</span>
+              </div>
+              <ul className="text-slate-700 dark:text-slate-300 space-y-1 list-disc list-inside text-xs">
+                <li>Extracto MyInvestor (CSV / Excel con Fecha, ISIN, Importe, Participaciones)</li>
+                <li>Historial de Transacciones Degiro (CSV estándar)</li>
+                <li>Trade Republic (Extracto de cuenta en CSV)</li>
+              </ul>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isProcessing}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:text-slate-300 font-medium transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
     </div>,
     document.body

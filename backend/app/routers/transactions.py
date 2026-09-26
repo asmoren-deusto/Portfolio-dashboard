@@ -1,12 +1,13 @@
-"""Transactions router — CRUD + CSV/Excel import."""
+"""Transactions router — CRUD + CSV/Excel import + Text paste import."""
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 import logging
 
 from app.database import get_db
 from app.models import Asset, Transaction
-from app.schemas import TransactionCreate, TransactionOut
+from app.schemas import TransactionCreate, TransactionOut, ImportTextRequest
 from app.services.csv_importer import parse_myinvestor_csv
+from app.services.parse_web_orders import parse_web_text, KNOWN_NAMES
 
 router = APIRouter(prefix="/api/transactions", tags=["transactions"])
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ def create_transaction(tx: TransactionCreate, db: Session = Depends(get_db)):
     db_tx = Transaction(**data)
     db.add(db_tx)
 
-    # Auto-create asset entry if missing or update default name
+    # Auto-create asset entry if missing
     existing = db.query(Asset).filter(Asset.isin == tx.isin).first()
     if not existing:
         db.add(Asset(isin=tx.isin, name=asset_name, asset_type="fund"))
@@ -114,5 +115,78 @@ async def import_csv(file: UploadFile = File(...), user_id: str = "asier", db: S
         "imported": imported,
         "skipped": skipped,
         "total": len(transactions),
+        "message": f"Se han importado correctamente {imported} operaciones ({skipped} duplicadas omitidas).",
+    }
+
+
+@router.post("/import-text")
+def import_text(req: ImportTextRequest, db: Session = Depends(get_db)):
+    """
+    Import transactions directly from text copied from MyInvestor website.
+    Distinguishes Suscripción (buy) vs Reembolso (sell) and maps ISINs.
+    """
+    ops = parse_web_text(req.text)
+    if not ops:
+        raise HTTPException(
+            status_code=422,
+            detail="No se detectaron operaciones en el texto proporcionado. Asegúrate de copiar el listado de movimientos de MyInvestor.",
+        )
+
+    user_id = req.user_id or "asier"
+    finalized = [op for op in ops if op["status"] == "finalizada" and op["type"] in ["buy", "sell"] and op["isin"]]
+
+    imported = 0
+    skipped = 0
+    seen_assets = {a.isin for a in db.query(Asset).all()}
+
+    for op in finalized:
+        isin = op["isin"]
+        amount = op["amount"]
+        shares = op["shares"]
+        date = op["date"]
+        op_type = op["type"]
+        price = round(amount / shares, 4) if shares > 0 else 0.0
+
+        existing = db.query(Transaction).filter(
+            Transaction.user_id == user_id,
+            Transaction.isin == isin,
+            Transaction.date == date,
+            Transaction.amount == amount,
+            Transaction.type == op_type,
+        ).first()
+
+        if existing:
+            skipped += 1
+            continue
+
+        db.add(Transaction(
+            user_id=user_id,
+            isin=isin,
+            type=op_type,
+            shares=shares,
+            price=price,
+            amount=amount,
+            fees=0.0,
+            date=date,
+            broker="myinvestor",
+            notes=op["raw_type"],
+        ))
+
+        name = KNOWN_NAMES.get(isin, op["fund_name"])
+        if isin not in seen_assets:
+            db.add(Asset(isin=isin, name=name, asset_type="fund"))
+            seen_assets.add(isin)
+        else:
+            asset = db.query(Asset).filter(Asset.isin == isin).first()
+            if asset and name and (asset.name.startswith("Asset ") or asset.name.startswith("Fund ") or asset.name.startswith("Fondo ")):
+                asset.name = name
+
+        imported += 1
+
+    db.commit()
+    return {
+        "imported": imported,
+        "skipped": skipped,
+        "total": len(finalized),
         "message": f"Se han importado correctamente {imported} operaciones ({skipped} duplicadas omitidas).",
     }

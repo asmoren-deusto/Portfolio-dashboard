@@ -62,10 +62,12 @@ async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(ge
         )
 
     positions = calculate_positions(transactions)
+    # Active positions with positive shares
+    active_positions = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
     total_value = 0.0
     total_invested = 0.0
 
-    for isin, pos in positions.items():
+    for isin, pos in active_positions.items():
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         price = await get_current_price(isin, ticker)
@@ -81,7 +83,7 @@ async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(ge
         total_invested=round(total_invested, 2),
         total_pnl=round(total_pnl, 2),
         total_pnl_pct=round(total_pnl_pct, 2),
-        num_positions=len(positions),
+        num_positions=len(active_positions),
         last_updated=datetime.now().isoformat(),
     )
 
@@ -94,11 +96,12 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
         return []
 
     positions = calculate_positions(transactions)
+    active_positions = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
     result = []
     total_value = 0.0
 
     position_data = []
-    for isin, pos in positions.items():
+    for isin, pos in active_positions.items():
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         name = asset.name if asset else isin
@@ -106,9 +109,12 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
         currency = asset.currency if asset else "EUR"
 
         price = await get_current_price(isin, ticker)
-        display_price = price if (price and price > 0) else pos["avg_cost"]
-        current_value = pos["shares"] * display_price
+        effective_price = price if (price and price > 0) else pos["avg_cost"]
+        current_value = pos["shares"] * effective_price
         total_value += current_value
+
+        pnl = current_value - pos["invested_amount"]
+        pnl_pct = (pnl / pos["invested_amount"] * 100) if pos["invested_amount"] > 0 else 0.0
 
         position_data.append({
             "isin": isin,
@@ -117,22 +123,20 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
             "currency": currency,
             "shares": round(pos["shares"], 6),
             "avg_cost": round(pos["avg_cost"], 4),
-            "current_price": round(display_price, 4),
+            "current_price": round(effective_price, 4),
             "current_value": round(current_value, 2),
             "invested_amount": round(pos["invested_amount"], 2),
-            "unrealized_pnl": round(current_value - pos["invested_amount"], 2),
-            "unrealized_pnl_pct": round(
-                (current_value - pos["invested_amount"]) / pos["invested_amount"] * 100, 2
-            ) if pos["invested_amount"] > 0 else 0.0,
+            "unrealized_pnl": round(pnl, 2),
+            "unrealized_pnl_pct": round(pnl_pct, 2),
             "last_updated": datetime.now().isoformat(),
         })
 
     # Add weight
     for p in position_data:
-        if p["current_value"] and total_value > 0:
+        if total_value > 0:
             p["weight"] = round(p["current_value"] / total_value * 100, 2)
         else:
-            p["weight"] = None
+            p["weight"] = 0.0
         result.append(PositionOut(**p))
 
     return sorted(result, key=lambda x: x.current_value or 0, reverse=True)

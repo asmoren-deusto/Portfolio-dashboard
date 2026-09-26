@@ -43,6 +43,11 @@ class TransactionCreate(TransactionBase):
     asset_name: Optional[str] = None
 
 
+class ImportTextRequest(BaseModel):
+    text: str
+    user_id: Optional[str] = "asier"
+
+
 class TransactionOut(TransactionBase):
     id: int
 
