@@ -31,6 +31,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     _migrate_schema()
     _seed_default_users()
+    _seed_asier_data()
 
 
 def _migrate_schema():
@@ -82,3 +83,46 @@ def _seed_default_users():
         db.rollback()
     finally:
         db.close()
+
+
+def _seed_asier_data():
+    """Ensure real portfolio assets, prices, and transactions exist on fresh deployment."""
+    try:
+        from app.models import Asset, Transaction, PriceCache
+        from app.seed_data import ASSETS, PRICES, TRANSACTIONS
+
+        db = SessionLocal()
+        try:
+            # 1. Seed assets
+            seen_assets = {a.isin for a in db.query(Asset).all()}
+            for a_data in ASSETS:
+                if a_data["isin"] not in seen_assets:
+                    db.add(Asset(**a_data))
+                    seen_assets.add(a_data["isin"])
+                else:
+                    existing = db.query(Asset).filter(Asset.isin == a_data["isin"]).first()
+                    if existing and a_data.get("ticker") and not existing.ticker:
+                        existing.ticker = a_data["ticker"]
+
+            # 2. Seed prices
+            for p_data in PRICES:
+                exists = db.query(PriceCache).filter(
+                    PriceCache.isin == p_data["isin"],
+                    PriceCache.date == p_data["date"],
+                ).first()
+                if not exists:
+                    db.add(PriceCache(**p_data))
+
+            # 3. Seed transactions if user 'asier' has none
+            asier_tx_count = db.query(Transaction).filter(Transaction.user_id == "asier").count()
+            if asier_tx_count == 0:
+                for t_data in TRANSACTIONS:
+                    db.add(Transaction(**t_data))
+
+            db.commit()
+        except Exception:
+            db.rollback()
+        finally:
+            db.close()
+    except ImportError:
+        pass

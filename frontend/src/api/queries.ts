@@ -29,91 +29,85 @@ async function get<T>(path: string): Promise<T> {
 
 // ── Summary ────────────────────────────────────────────────────────────────────
 export function usePortfolioSummary() {
-  const { useMock, period, currentUser } = useAppStore()
+  const { period, currentUser } = useAppStore()
   const userId = currentUser?.id || 'asier'
-  const userSummary = currentUser?.summary ?? MOCK_SUMMARY
+  const isDemo = currentUser?.isDemo ?? false
 
   return useQuery<PortfolioSummary>({
-    queryKey: ['summary', currentUser?.id, period],
+    queryKey: ['summary', userId, period],
     queryFn: () =>
-      useMock || currentUser?.isDemo
-        ? Promise.resolve(userSummary)
-        : get<PortfolioSummary>(`/portfolio/summary?user_id=${userId}`).catch(() => userSummary),
-    initialData: userSummary,
+      isDemo
+        ? Promise.resolve(currentUser?.summary ?? MOCK_SUMMARY)
+        : get<PortfolioSummary>(`/portfolio/summary?user_id=${userId}`),
     placeholderData: (previousData) => previousData,
-    staleTime: 1000 * 60 * 5,
-    refetchInterval: 1000 * 60 * 15,
+    staleTime: 1000 * 60 * 2,
+    refetchInterval: 1000 * 60 * 5,
   })
 }
 
 // ── Positions ─────────────────────────────────────────────────────────────────
 export function usePositions() {
-  const { useMock, currentUser } = useAppStore()
+  const { currentUser } = useAppStore()
   const userId = currentUser?.id || 'asier'
-  const userPositions = currentUser?.positions ?? MOCK_POSITIONS
+  const isDemo = currentUser?.isDemo ?? false
 
   return useQuery<Position[]>({
-    queryKey: ['positions', currentUser?.id],
+    queryKey: ['positions', userId],
     queryFn: () =>
-      useMock || currentUser?.isDemo
-        ? Promise.resolve(userPositions)
-        : get<Position[]>(`/portfolio/positions?user_id=${userId}`).catch(() => userPositions),
-    initialData: userPositions,
+      isDemo
+        ? Promise.resolve(currentUser?.positions ?? MOCK_POSITIONS)
+        : get<Position[]>(`/portfolio/positions?user_id=${userId}`),
     placeholderData: (previousData) => previousData,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
   })
 }
 
 // ── Performance ────────────────────────────────────────────────────────────────
 export function usePerformance() {
-  const { useMock, period, currentUser } = useAppStore()
+  const { period, currentUser } = useAppStore()
   const userId = currentUser?.id || 'asier'
-  const userPerf = currentUser?.performance ?? MOCK_PERFORMANCE
-  const userPoints = userPerf[period] ?? userPerf['1y'] ?? []
+  const isDemo = currentUser?.isDemo ?? false
 
   return useQuery<PricePoint[]>({
-    queryKey: ['performance', currentUser?.id, period],
+    queryKey: ['performance', userId, period],
     queryFn: (): Promise<PricePoint[]> =>
-      useMock || currentUser?.isDemo
-        ? Promise.resolve(userPoints)
-        : get<PricePoint[]>(`/portfolio/performance?period=${period}&user_id=${userId}`).catch(() => userPoints),
-    initialData: userPoints,
+      isDemo
+        ? Promise.resolve(currentUser?.performance?.[period] ?? MOCK_PERFORMANCE[period] ?? [])
+        : get<PricePoint[]>(`/portfolio/performance?period=${period}&user_id=${userId}`).catch(() => []),
     placeholderData: (previousData) => previousData,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
   })
 }
 
 // ── Analytics ──────────────────────────────────────────────────────────────────
 export function useAnalytics() {
-  const { useMock, period, currentUser } = useAppStore()
+  const { period, currentUser } = useAppStore()
   const userId = currentUser?.id || 'asier'
-  const userAnalytics = currentUser?.analytics ?? MOCK_ANALYTICS
+  const isDemo = currentUser?.isDemo ?? false
 
   return useQuery<Analytics>({
-    queryKey: ['analytics', currentUser?.id, period],
+    queryKey: ['analytics', userId, period],
     queryFn: () =>
-      useMock || currentUser?.isDemo
-        ? Promise.resolve(userAnalytics)
-        : get<Analytics>(`/portfolio/analytics?period=${period}&user_id=${userId}`).catch(() => userAnalytics),
-    initialData: userAnalytics,
+      isDemo
+        ? Promise.resolve(currentUser?.analytics ?? MOCK_ANALYTICS)
+        : get<Analytics>(`/portfolio/analytics?period=${period}&user_id=${userId}`).catch(() => currentUser?.analytics ?? MOCK_ANALYTICS),
     placeholderData: (previousData) => previousData,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
   })
 }
 
 // ── Transactions ───────────────────────────────────────────────────────────────
 export function useTransactions() {
-  const { useMock, currentUser } = useAppStore()
+  const { currentUser } = useAppStore()
   const userId = currentUser?.id || 'asier'
-  const userTx = currentUser?.transactions ?? MOCK_TRANSACTIONS
+  const isDemo = currentUser?.isDemo ?? false
 
   return useQuery<Transaction[]>({
-    queryKey: ['transactions', currentUser?.id],
+    queryKey: ['transactions', userId],
     queryFn: () =>
-      useMock || currentUser?.isDemo
-        ? Promise.resolve(userTx)
-        : get<Transaction[]>(`/transactions?user_id=${userId}`).catch(() => userTx),
-    initialData: userTx,
+      isDemo
+        ? Promise.resolve(currentUser?.transactions ?? MOCK_TRANSACTIONS)
+        : get<Transaction[]>(`/transactions?user_id=${userId}`),
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60,
   })

@@ -113,21 +113,21 @@ function getStoredUsers(): UserProfile[] {
   return list.filter((u) => u.id !== 'laura')
 }
 
-// Load active user session (returns null if no session is cached)
+// Load active user session (defaults to Asier Moreno if no session cached)
 function getStoredActiveUser(): UserProfile | null {
   if (typeof window === 'undefined') return null
   try {
     const activeId = localStorage.getItem('portfolio_active_user_id')
     if (activeId === 'laura') {
       localStorage.removeItem('portfolio_active_user_id')
-      return null
-    }
-    if (activeId) {
+    } else if (activeId) {
       const allUsers = getStoredUsers()
       const found = allUsers.find((u) => u.id === activeId)
       if (found) return found
     }
-    return null
+    const allUsers = getStoredUsers()
+    const asier = allUsers.find((u) => u.id === 'asier')
+    return asier || allUsers[0] || null
   } catch {
     return null
   }
@@ -155,7 +155,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setMobileSidebarOpen: (mobileSidebarOpen) => set({ mobileSidebarOpen }),
   toggleMobileSidebar: () => set((s) => ({ mobileSidebarOpen: !s.mobileSidebarOpen })),
 
-  useMock: initialUser?.isDemo ?? true,
+  useMock: initialUser?.isDemo ?? false,
   setUseMock: (useMock) => set({ useMock }),
 
   // Auth State
