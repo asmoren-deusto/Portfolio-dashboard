@@ -1,6 +1,23 @@
-"""SQLAlchemy ORM models."""
-from sqlalchemy import Column, String, Float, Integer, Text, DateTime, func
+from sqlalchemy import Column, String, Float, Integer, Text, DateTime, Boolean, func
 from app.database import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String(50), primary_key=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(150), unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=True)
+    password_salt = Column(String(64), nullable=True)
+    strategy = Column(String(100), default="Cartera Indexada Global")
+    initial_balance = Column(Float, default=50000.0)
+    broker = Column(String(50), default="MyInvestor")
+    avatar = Column(String(10), default="AM")
+    badge = Column(String(50), default="Cuenta Principal")
+    bg_gradient = Column(String(150), default="linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)")
+    is_demo = Column(Boolean, default=False)
+    created_at = Column(DateTime, server_default=func.now())
 
 
 class Asset(Base):

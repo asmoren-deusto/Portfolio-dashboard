@@ -30,12 +30,13 @@ interface AppState {
   // User & Authentication
   currentUser: UserProfile | null
   users: UserProfile[]
-  login: (userId: string, password?: string) => boolean
+  fetchUsersFromBackend: () => Promise<void>
+  login: (userId: string, password?: string) => Promise<boolean> | boolean
   logout: () => void
-  switchUser: (userId: string, password?: string) => boolean
-  createUser: (name: string, email: string, strategy: string, initialBalance?: number, password?: string) => UserProfile
-  setUserPassword: (userId: string, newPassword: string) => boolean
-  changePassword: (userId: string, oldPassword: string, newPassword: string) => { success: boolean; error?: string }
+  switchUser: (userId: string, password?: string) => Promise<boolean> | boolean
+  createUser: (name: string, email: string, strategy: string, initialBalance?: number, password?: string) => Promise<UserProfile | null> | UserProfile
+  setUserPassword: (userId: string, newPassword: string) => Promise<boolean> | boolean
+  changePassword: (userId: string, oldPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }> | { success: boolean; error?: string }
 }
 
 function applyTheme(theme: Theme) {
@@ -161,25 +162,135 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUser: initialUser,
   users: getStoredUsers(),
 
-  login: (userId: string, password?: string) => {
+  fetchUsersFromBackend: async () => {
+    try {
+      const res = await fetch('/api/auth/users')
+      if (res.ok) {
+        const backendUsers: Array<{
+          id: string
+          name: string
+          email: string
+          strategy: string
+          initial_balance: number
+          broker: string
+          avatar: string
+          badge: string
+          bg_gradient: string
+          is_demo: boolean
+          has_password: boolean
+        }> = await res.json()
+
+        const state = get()
+        const merged = state.users.map((existing) => {
+          const match = backendUsers.find((bu) => bu.id === existing.id)
+          if (match) {
+            return {
+              ...existing,
+              name: match.name,
+              email: match.email,
+              strategy: match.strategy,
+              badge: match.badge,
+              broker: match.broker,
+              avatar: match.avatar,
+              bgGradient: match.bg_gradient,
+              isDemo: match.is_demo,
+              passwordHash: match.has_password ? (existing.passwordHash || 'server-hash') : undefined,
+              passwordSalt: match.has_password ? (existing.passwordSalt || 'server-salt') : undefined,
+            }
+          }
+          return existing
+        })
+
+        backendUsers.forEach((bu) => {
+          if (!merged.some((u) => u.id === bu.id) && bu.id !== 'laura') {
+            const base = getUserProfileById(bu.id)
+            merged.push({
+              ...base,
+              id: bu.id,
+              name: bu.name,
+              email: bu.email,
+              avatar: bu.avatar,
+              role: 'Inversor Registrado',
+              strategy: bu.strategy,
+              badge: bu.badge,
+              broker: bu.broker,
+              isDemo: bu.is_demo,
+              color: 'bg-emerald-600 text-white',
+              bgGradient: bu.bg_gradient,
+              passwordHash: bu.has_password ? 'server-hash' : undefined,
+            })
+          }
+        })
+
+        let updatedCurrentUser = state.currentUser
+        if (updatedCurrentUser) {
+          const match = merged.find((u) => u.id === updatedCurrentUser?.id)
+          if (match) updatedCurrentUser = match
+        }
+
+        set({ users: merged, currentUser: updatedCurrentUser })
+      }
+    } catch {
+      // offline / backend not ready
+    }
+  },
+
+  login: async (userId: string, password?: string) => {
+    // Demo user bypasses password
+    if (userId === 'demo') {
+      const state = get()
+      const target = state.users.find((u) => u.id === 'demo') || INITIAL_USER_PROFILES.find((u) => u.id === 'demo')
+      if (target) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('portfolio_active_user_id', 'demo')
+        }
+        set({
+          currentUser: target,
+          useMock: true,
+        })
+        return true
+      }
+    }
+
+    // Attempt backend authentication
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, password }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success && data.user) {
+          if (data.token && typeof window !== 'undefined') {
+            localStorage.setItem('portfolio_auth_token', data.token)
+            localStorage.setItem('portfolio_active_user_id', data.user.id)
+          }
+          const state = get()
+          const target = state.users.find((u) => u.id === data.user.id) || getUserProfileById(data.user.id)
+          const updatedUser: UserProfile = {
+            ...target,
+            passwordHash: data.user.has_password ? (target.passwordHash || 'server-hash') : undefined,
+          }
+          set({
+            currentUser: updatedUser,
+            useMock: updatedUser.isDemo,
+          })
+          return true
+        } else if (data.error) {
+          return false
+        }
+      }
+    } catch {
+      // Backend offline fallback
+    }
+
+    // Fallback client-side verification
     const state = get()
     const target = state.users.find((u) => u.id === userId) || INITIAL_USER_PROFILES.find((u) => u.id === userId)
     if (!target) return false
 
-    // Allow Demo user to enter directly without password
-    if (target.isDemo || target.id === 'demo') {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('portfolio_active_user_id', target.id)
-      }
-      set({
-        currentUser: target,
-        useMock: true,
-      })
-      return true
-    }
-
-    // Require and verify cryptographic salted password
-    if (target.passwordHash && target.passwordSalt) {
+    if (target.passwordHash && target.passwordSalt && target.passwordHash !== 'server-hash') {
       if (!password) return false
       const isValid = verifyPassword(password, target.passwordHash, target.passwordSalt)
       if (!isValid) return false
@@ -199,6 +310,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   logout: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('portfolio_active_user_id')
+      localStorage.removeItem('portfolio_auth_token')
     }
     set({
       currentUser: null,
@@ -367,12 +479,38 @@ export const useAppStore = create<AppState>((set, get) => ({
     return newUser
   },
 
-  changePassword: (userId: string, oldPassword: string, newPassword: string) => {
+  changePassword: async (userId: string, oldPassword: string, newPassword: string) => {
+    // 1. Attempt backend update
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          current_password: oldPassword,
+          new_password: newPassword,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (!data.success) {
+          return { success: false, error: data.error || 'La contraseña actual no es correcta.' }
+        }
+        if (data.token && typeof window !== 'undefined') {
+          localStorage.setItem('portfolio_auth_token', data.token)
+        }
+        get().fetchUsersFromBackend()
+      }
+    } catch {
+      // offline fallback
+    }
+
+    // 2. Client-side fallback
     const state = get()
     const target = state.users.find((u) => u.id === userId)
     if (!target) return { success: false, error: 'Usuario no encontrado.' }
 
-    if (target.passwordHash && target.passwordSalt) {
+    if (target.passwordHash && target.passwordSalt && target.passwordHash !== 'server-hash') {
       if (!verifyPassword(oldPassword, target.passwordHash, target.passwordSalt)) {
         return { success: false, error: 'La contraseña actual no es correcta.' }
       }
@@ -404,7 +542,29 @@ export const useAppStore = create<AppState>((set, get) => ({
     return { success: true }
   },
 
-  setUserPassword: (userId: string, newPassword: string) => {
+  setUserPassword: async (userId: string, newPassword: string) => {
+    // 1. Attempt backend set-password
+    try {
+      const res = await fetch('/api/auth/set-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, new_password: newPassword }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          if (data.token && typeof window !== 'undefined') {
+            localStorage.setItem('portfolio_auth_token', data.token)
+            localStorage.setItem('portfolio_active_user_id', userId)
+          }
+          get().fetchUsersFromBackend()
+        }
+      }
+    } catch {
+      // offline fallback
+    }
+
+    // 2. Client-side fallback
     const { hash, salt } = hashPassword(newPassword)
     const state = get()
     const target = state.users.find((u) => u.id === userId)
@@ -438,3 +598,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     return true
   },
 }))
+
+if (typeof window !== 'undefined') {
+  useAppStore.getState().fetchUsersFromBackend()
+}

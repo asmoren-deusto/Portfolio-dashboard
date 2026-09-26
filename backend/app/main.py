@@ -7,7 +7,7 @@ import os
 import logging
 
 from app.database import init_db
-from app.routers import portfolio, transactions, assets, market
+from app.routers import portfolio, transactions, assets, market, auth
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,6 +28,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(portfolio.router)
 app.include_router(transactions.router)
 app.include_router(assets.router)

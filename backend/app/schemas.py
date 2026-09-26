@@ -84,3 +84,54 @@ class PerformancePoint(BaseModel):
 class PricePoint(BaseModel):
     date: str
     price: float
+
+
+# ── User & Auth schemas ────────────────────────────────────────────────────────
+class UserOut(BaseModel):
+    id: str
+    name: str
+    email: str
+    strategy: str
+    initial_balance: float
+    broker: str
+    avatar: str
+    badge: str
+    bg_gradient: str
+    is_demo: bool
+    has_password: bool
+
+    class Config:
+        from_attributes = True
+
+
+class LoginRequest(BaseModel):
+    user_id: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+
+
+class LoginResponse(BaseModel):
+    success: bool
+    user: Optional[UserOut] = None
+    token: Optional[str] = None
+    error: Optional[str] = None
+
+
+class SetPasswordRequest(BaseModel):
+    user_id: str
+    new_password: str
+
+
+class ChangePasswordRequest(BaseModel):
+    user_id: str
+    current_password: str
+    new_password: str
+
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+    strategy: str = "Cartera Indexada Global"
+    initial_balance: float = 50000.0
+    password: Optional[str] = None
+

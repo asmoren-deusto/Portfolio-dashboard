@@ -23,7 +23,12 @@ import { fmt } from '@/lib/utils'
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { users, login, createUser, setUserPassword, changePassword, currentUser } = useAppStore()
+  const { users, login, createUser, setUserPassword, changePassword, currentUser, fetchUsersFromBackend } = useAppStore()
+
+  // Fetch updated user list & password presence from backend
+  useEffect(() => {
+    fetchUsersFromBackend()
+  }, [fetchUsersFromBackend])
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
@@ -114,7 +119,7 @@ export const LoginPage: React.FC = () => {
   }
 
   // Handle password unlock for existing password
-  const handleUnlockProfile = (e: React.FormEvent) => {
+  const handleUnlockProfile = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
@@ -125,7 +130,7 @@ export const LoginPage: React.FC = () => {
       return
     }
 
-    const success = login(selectedProfile.id, profilePassword)
+    const success = await login(selectedProfile.id, profilePassword)
     if (success) {
       navigate('/')
     } else {
@@ -134,7 +139,7 @@ export const LoginPage: React.FC = () => {
   }
 
   // Handle setting a custom password for a profile (e.g. Asier Moreno)
-  const handleSaveProfilePassword = (e: React.FormEvent) => {
+  const handleSaveProfilePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
@@ -157,7 +162,7 @@ export const LoginPage: React.FC = () => {
         return
       }
 
-      const res = changePassword(selectedProfile.id, profileCurrentPassword, profileNewPassword)
+      const res = await changePassword(selectedProfile.id, profileCurrentPassword, profileNewPassword)
       if (!res.success) {
         setError(res.error || 'La contraseña actual no es correcta.')
         return
@@ -178,7 +183,7 @@ export const LoginPage: React.FC = () => {
       return
     }
 
-    const ok = setUserPassword(selectedProfile.id, profileNewPassword)
+    const ok = await setUserPassword(selectedProfile.id, profileNewPassword)
     if (ok) {
       navigate('/')
     } else {
@@ -187,17 +192,12 @@ export const LoginPage: React.FC = () => {
   }
 
   // Handle direct form login (email + password)
-  const handleFormLogin = (e: React.FormEvent) => {
+  const handleFormLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
     if (!email.trim()) {
       setError('Por favor introduce tu correo electrónico.')
-      return
-    }
-
-    if (!password) {
-      setError('Por favor introduce tu contraseña.')
       return
     }
 
@@ -210,7 +210,12 @@ export const LoginPage: React.FC = () => {
       return
     }
 
-    const success = login(found.id, password)
+    if (!found.isDemo && found.id !== 'demo' && !password) {
+      setError('Por favor introduce tu contraseña.')
+      return
+    }
+
+    const success = await login(found.id, password)
     if (success) {
       navigate('/')
     } else {
