@@ -184,13 +184,16 @@ export function TransactionsPage() {
         setShowImportModal(false)
         notify(data.message || `Archivo ${file.name} importado correctamente.`)
         return
+      } else {
+        const err = await res.json().catch(() => ({}))
+        notify(err.detail || 'Error al procesar el archivo. Revisa el formato.')
+        return
       }
-    } catch {}
-
-    setTimeout(() => {
-      notify(`Archivo ${file.name} procesado. Datos sincronizados.`)
-      setShowImportModal(false)
-    }, 600)
+    } catch {
+      notify('Error de conexión al subir el archivo.')
+    } finally {
+      if (e.target) e.target.value = ''
+    }
   }
 
   // Handle delete operation

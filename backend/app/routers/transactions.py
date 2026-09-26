@@ -57,14 +57,21 @@ async def import_csv(file: UploadFile = File(...), user_id: str = "asier", db: S
     Import transactions from a MyInvestor CSV export.
     Auto-detects column names and Spanish number formatting.
     """
-    if not file.filename.lower().endswith((".csv", ".txt")):
-        raise HTTPException(status_code=400, detail="Only CSV files are supported")
+    allowed_exts = (".csv", ".txt", ".xlsx", ".xls", ".tsv")
+    if not any(file.filename.lower().endswith(ext) for ext in allowed_exts):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Formato no admitido ('{file.filename}'). Formatos válidos: CSV, Excel (.xlsx, .xls), TXT.",
+        )
 
     content = await file.read()
-    transactions = parse_myinvestor_csv(content)
+    transactions = parse_myinvestor_csv(content, filename=file.filename)
 
     if not transactions:
-        raise HTTPException(status_code=422, detail="No valid transactions found in CSV")
+        raise HTTPException(
+            status_code=422,
+            detail="No se encontraron operaciones válidas en el archivo. Asegúrate de que el archivo contiene las columnas de Fecha, ISIN, Títulos o Importe.",
+        )
 
     imported = 0
     skipped = 0
