@@ -27,6 +27,20 @@ async function get<T>(path: string): Promise<T> {
   return res.json()
 }
 
+export async function refreshPortfolioPrices(userId = 'asier') {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  const res = await fetch(`${API}/portfolio/refresh-prices?user_id=${userId}`, {
+    method: 'POST',
+    headers,
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 // ── Summary ────────────────────────────────────────────────────────────────────
 export function usePortfolioSummary() {
   const { period, currentUser } = useAppStore()

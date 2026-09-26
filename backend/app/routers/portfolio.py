@@ -94,8 +94,11 @@ async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(ge
 
 
 @router.get("/positions", response_model=list[PositionOut])
-async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
+async def get_positions(user_id: str = "asier", refresh: bool = False, db: Session = Depends(get_db)):
     """Return all current positions with live prices and valuation dates."""
+    if refresh:
+        _price_cache.clear()
+
     transactions = _get_all_transactions(db, user_id)
     if not transactions:
         return []
@@ -113,7 +116,7 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
         asset_type = asset.asset_type if asset else "fund"
         currency = asset.currency if asset else "EUR"
 
-        price, price_date = await get_price_with_date(isin, ticker, db=db)
+        price, price_date = await get_price_with_date(isin, ticker, db=db, force=refresh)
         effective_price = price if (price and price > 0) else pos["avg_cost"]
         current_value = pos["shares"] * effective_price
         total_value += current_value
@@ -146,6 +149,37 @@ async def get_positions(user_id: str = "asier", db: Session = Depends(get_db)):
         result.append(PositionOut(**p))
 
     return sorted(result, key=lambda x: x.current_value or 0, reverse=True)
+
+
+@router.post("/refresh-prices")
+async def refresh_portfolio_prices(user_id: str = "asier", db: Session = Depends(get_db)):
+    """
+    Force re-scraping of all active positions from official gestora websites,
+    Financial Times tearsheets, and Quefondos. Clears in-memory price cache.
+    """
+    _price_cache.clear()
+    transactions = _get_all_transactions(db, user_id)
+    positions = calculate_positions(transactions)
+    active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
+
+    results = {}
+    for isin, pos in active.items():
+        asset = _get_asset(db, isin)
+        ticker = asset.ticker if asset else None
+        price, price_date = await get_price_with_date(isin, ticker, db=db, force=True)
+        results[isin] = {
+            "name": asset.name if asset else isin,
+            "price": price,
+            "price_date": price_date,
+        }
+
+    logger.info(f"Refreshed prices for {len(results)} assets: {results}")
+    return {
+        "status": "ok",
+        "updated_at": datetime.now().isoformat(),
+        "count": len(results),
+        "results": results,
+    }
 
 
 @router.post("/update-price")

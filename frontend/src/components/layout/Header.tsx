@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
+import { refreshPortfolioPrices } from '@/api/queries'
 
 const PERIODS = [
   { label: '1M', value: '1mo' },
@@ -36,12 +37,27 @@ export function Header({
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [spinning, setSpinning] = useState(false)
+  const [refreshSuccess, setRefreshSuccess] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const handleRefresh = async () => {
+    if (spinning) return
     setSpinning(true)
-    await queryClient.invalidateQueries()
-    setTimeout(() => setSpinning(false), 800)
+    setRefreshSuccess(false)
+    try {
+      const userId = currentUser?.id || 'asier'
+      if (!currentUser?.isDemo) {
+        await refreshPortfolioPrices(userId)
+      }
+      await queryClient.invalidateQueries()
+      setRefreshSuccess(true)
+      setTimeout(() => setRefreshSuccess(false), 3000)
+    } catch (err) {
+      console.warn('Error fetching live NAVs:', err)
+      await queryClient.invalidateQueries()
+    } finally {
+      setSpinning(false)
+    }
   }
 
   const badgeColorStyles = {
@@ -263,12 +279,25 @@ export function Header({
         {/* Refresh button */}
         <button
           onClick={handleRefresh}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-sm text-xs font-semibold transition-all active:scale-95 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20"
+          disabled={spinning}
+          className={cn(
+            'flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-sm text-xs font-semibold transition-all active:scale-95 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
+            spinning && 'opacity-80 cursor-wait bg-blue-50/50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-300 dark:border-blue-800/30',
+            refreshSuccess && 'border-emerald-300 text-emerald-600 bg-emerald-50/40 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-950/20'
+          )}
+          title="Buscar y actualizar los NAVs oficiales en tiempo real desde las gestoras"
         >
-          <motion.div animate={{ rotate: spinning ? 360 : 0 }} transition={{ duration: 0.6 }}>
-            <RefreshCw className={cn('w-3.5 h-3.5', spinning && 'text-blue-500')} />
-          </motion.div>
-          <span>Actualizar</span>
+          {refreshSuccess ? (
+            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          ) : (
+            <motion.div
+              animate={{ rotate: spinning ? 360 : 0 }}
+              transition={{ duration: 0.8, repeat: spinning ? Infinity : 0, ease: 'linear' }}
+            >
+              <RefreshCw className={cn('w-3.5 h-3.5', spinning ? 'text-blue-500' : 'text-slate-500 dark:text-slate-400')} />
+            </motion.div>
+          )}
+          <span>{spinning ? 'Buscando NAVs...' : refreshSuccess ? 'Actualizado' : 'Actualizar'}</span>
         </button>
       </div>
     </div>
