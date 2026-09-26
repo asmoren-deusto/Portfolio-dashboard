@@ -169,16 +169,16 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
     CLOSED: 'Mercado Cerrado',
   }
   const colors: Record<string, string> = {
-    PRE: 'bg-amber-50 text-amber-700 border-amber-300/70 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20',
-    POST: 'bg-purple-50 text-purple-700 border-purple-300/70 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20',
-    POSTPOST: 'bg-purple-50 text-purple-700 border-purple-300/70 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20',
-    CLOSED: 'bg-slate-100 text-slate-500 border-slate-300/70 dark:bg-slate-700/30 dark:text-slate-400 dark:border-slate-600/30',
+    PRE: 'bg-amber-100/95 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30',
+    POST: 'bg-purple-100/95 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
+    POSTPOST: 'bg-purple-100/95 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
+    CLOSED: 'bg-slate-200/95 text-slate-700 border-slate-300 dark:bg-slate-800/95 dark:text-slate-300 dark:border-slate-600',
   }
   const cls = colors[effectiveState] || colors.CLOSED
   return (
     <span
       title={tooltips[effectiveState] || effectiveState}
-      className={`inline-flex items-center ml-1 text-[7.5px] font-bold uppercase tracking-tight px-1 py-px rounded border leading-none align-middle ${cls}`}
+      className={`absolute -top-1.5 -right-1 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1.5px] rounded-full border shadow-2xs leading-none backdrop-blur-xs select-none ${cls}`}
     >
       {labels[effectiveState] || effectiveState}
     </span>
@@ -271,7 +271,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           </div>
 
           {/* Marquee Ticker Track (Rotates slowly, pauses on hover) */}
-          <div className="relative flex-1 overflow-hidden ml-2.5 group">
+          <div className="relative flex-1 overflow-hidden ml-2.5 py-1 group">
             {/* Subtle fade edges for smooth transition */}
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#111625]/90 to-transparent z-10" />
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#111625]/90 to-transparent z-10" />
@@ -293,8 +293,13 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     tabIndex={0}
                     key={`${idx.name}-${index}`}
                     onClick={() => handleCardClick(idx)}
-                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-blue-500/40 cursor-pointer active:scale-[0.98]"
+                    className="relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-blue-500/40 cursor-pointer active:scale-[0.98]"
                   >
+                    {/* Floating Overlaid State Badge (Upper-right corner) */}
+                    {state !== 'REGULAR' && (
+                      <MarketStateBadge state={state} name={idx.name} />
+                    )}
+
                     <CompanyLogo
                       ticker={idx.ticker || idx.name}
                       name={idx.name}
@@ -306,9 +311,6 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     <div className="flex flex-col justify-center min-w-0">
                       <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap leading-none">
                         {idx.name}
-                        {state !== 'REGULAR' && (
-                          <MarketStateBadge state={state} name={idx.name} />
-                        )}
                       </span>
                       <span className="text-[11.5px] font-bold text-slate-900 tracking-tight dark:text-white mt-[3px] tabular-nums leading-none whitespace-nowrap">
                         {idx.price != null ? fmtPrice(idx.price) : '—'}
