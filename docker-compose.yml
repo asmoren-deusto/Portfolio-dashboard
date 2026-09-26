@@ -1,5 +1,6 @@
 services:
   portfolio-dashboard:
+    image: portfolio-dashboard:latest
     build:
       context: .
       dockerfile: Dockerfile
