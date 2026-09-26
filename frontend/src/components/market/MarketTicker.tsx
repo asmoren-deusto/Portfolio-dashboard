@@ -8,15 +8,22 @@ interface MarketTickerProps {
   onSelectStock?: (stock: MarketStock) => void
 }
 
+function formatTickerName(name: string): string {
+  if (name === 'MSCI Emergentes' || name === 'Emegentes') return 'Emergentes'
+  if (name === 'Euro Stoxx 50') return 'Euro 50'
+  if (name === 'Petróleo Brent' || name.startsWith('Petróleo')) return 'Petróleo'
+  return name
+}
+
 function getAssetDomain(name: string, ticker: string): string {
   if (name.includes('S&P') || ticker === '^GSPC') return 'spglobal.com'
   if (name.includes('NASDAQ') || ticker === '^IXIC') return 'nasdaq.com'
-  if (name.includes('MSCI') || ticker === 'URTH' || ticker === 'EEM') return 'msci.com'
+  if (name.includes('MSCI') || name.includes('Emergentes') || ticker === 'URTH' || ticker === 'EEM') return 'msci.com'
   if (name.includes('IBEX') || ticker === '^IBEX') return 'bolsasymercados.es'
-  if (name.includes('Stoxx') || ticker === '^STOXX50E') return 'stoxx.com'
+  if (name === 'Euro 50' || name.includes('Stoxx') || ticker === '^STOXX50E') return 'stoxx.com'
   if (name.includes('Nikkei') || ticker === '^N225') return 'nikkei.com'
   if (name.includes('Oro') || ticker === 'GC=F') return 'gold.org'
-  if (name.includes('Brent') || ticker === 'BZ=F') return 'theice.com'
+  if (name.includes('Brent') || name.includes('Petróleo') || ticker === 'BZ=F') return 'theice.com'
   if (name.includes('BTC') || ticker.includes('BTC')) return 'bitcoin.org'
   if (name.includes('EUR/USD') || ticker === 'EURUSD=X') return 'ecb.europa.eu'
   if (name.includes('EUR/JPY') || ticker === 'EURJPY=X') return 'boj.or.jp'
@@ -31,7 +38,7 @@ function getAssetLogo(name: string, ticker: string): string | undefined {
   // Commodities: classic gold bars & clean petroleum
   if (name.includes('Oro') || ticker === 'GC=F')
     return 'https://img.icons8.com/color/48/gold-bars.png'
-  if (name.includes('Brent') || ticker === 'BZ=F')
+  if (name.includes('Brent') || name.includes('Petróleo') || ticker === 'BZ=F')
     return 'https://img.icons8.com/color/48/oil-industry.png'
 
   // US Indices:
@@ -42,16 +49,16 @@ function getAssetLogo(name: string, ticker: string): string | undefined {
   if (name.includes('S&P') || ticker === '^GSPC')
     return 'https://logo.clearbit.com/spglobal.com'
 
-  // Global / MSCI World: World / UN international emblem
-  if (name.includes('MSCI') || ticker === 'URTH' || ticker === 'EEM')
+  // Global / MSCI World & Emergentes: World / UN international emblem
+  if (name.includes('MSCI') || name.includes('Emergentes') || ticker === 'URTH' || ticker === 'EEM')
     return 'https://flagcdn.com/w80/un.png'
 
   // European Indices:
   // IBEX 35: Flag of Spain 🇪🇸 (crisp high-res, matching forex currency style)
   if (name.includes('IBEX') || ticker === '^IBEX')
     return 'https://flagcdn.com/w80/es.png'
-  // Euro Stoxx 50: Flag of the European Union 🇪🇺
-  if (name.includes('Stoxx') || ticker === '^STOXX50E')
+  // Euro 50 / Euro Stoxx 50: Flag of the European Union 🇪🇺
+  if (name === 'Euro 50' || name.includes('Stoxx') || ticker === '^STOXX50E')
     return 'https://flagcdn.com/w80/eu.png'
 
   // Asian Indices:
@@ -69,15 +76,19 @@ function getAssetLogo(name: string, ticker: string): string | undefined {
 }
 
 function normalizeStock(idx: any): MarketStock {
+  const cleanName = formatTickerName(idx.name)
   const sectorMap: Record<string, string> = {
     'S&P 500': 'Índice Bursátil USA',
     'NASDAQ': 'Índice Tecnológico',
     'MSCI World': 'Índice Global Desarrollado',
+    'Emergentes': 'Índice Mercados Emergentes',
     'MSCI Emergentes': 'Índice Mercados Emergentes',
     'IBEX 35': 'Índice Bursátil España',
+    'Euro 50': 'Índice Bursátil Europeo',
     'Euro Stoxx 50': 'Índice Bursátil Europeo',
     'Nikkei 225': 'Índice Bursátil Japón',
     'Oro': 'Materia Prima (Metales)',
+    'Petróleo': 'Materia Prima (Energía)',
     'Petróleo Brent': 'Materia Prima (Energía)',
     'BTC/EUR': 'Criptoactivo',
     'EUR/USD': 'Mercado de Divisas (Forex)',
@@ -93,15 +104,15 @@ function normalizeStock(idx: any): MarketStock {
       : 0
   const chg = typeof idx.change === 'number' ? idx.change : price - prevClose
 
-  const domain = idx.domain || getAssetDomain(idx.name, idx.ticker || '')
-  const logo = idx.logo_url || getAssetLogo(idx.name, idx.ticker || '') || ''
+  const domain = idx.domain || getAssetDomain(cleanName, idx.ticker || '')
+  const logo = idx.logo_url || getAssetLogo(cleanName, idx.ticker || '') || ''
 
   return {
-    name: idx.name,
+    name: cleanName,
     ticker: idx.ticker,
     domain: domain,
-    sector: idx.sector || sectorMap[idx.name] || 'Índice de Mercado',
-    index: idx.index || [idx.name],
+    sector: idx.sector || sectorMap[cleanName] || sectorMap[idx.name] || 'Índice de Mercado',
+    index: idx.index || [cleanName],
     price: price,
     regular_price: idx.regular_price ?? null,
     pre_market_price: idx.pre_market_price ?? null,
@@ -115,7 +126,7 @@ function normalizeStock(idx: any): MarketStock {
     day_high: typeof idx.day_high === 'number' ? idx.day_high : price > 0 ? price * 1.008 : 0,
     day_low: typeof idx.day_low === 'number' ? idx.day_low : price > 0 ? price * 0.992 : 0,
     volume: typeof idx.volume === 'number' ? idx.volume : 2400000000,
-    currency: idx.currency || (['^IBEX', '^GDAXI', '^STOXX50E', 'BTC-EUR'].includes(idx.ticker) || idx.name === 'BTC/EUR' || idx.name.includes('Euro Stoxx') || idx.name === 'IBEX 35' ? 'EUR' : ['^N225', 'EURJPY=X'].includes(idx.ticker) || idx.name.includes('JPY') || idx.name.includes('Nikkei') ? 'JPY' : 'USD'),
+    currency: idx.currency || (['^IBEX', '^GDAXI', '^STOXX50E', 'BTC-EUR'].includes(idx.ticker) || idx.name === 'BTC/EUR' || cleanName === 'Euro 50' || idx.name.includes('Euro Stoxx') || idx.name === 'IBEX 35' ? 'EUR' : ['^N225', 'EURJPY=X'].includes(idx.ticker) || idx.name.includes('JPY') || idx.name.includes('Nikkei') ? 'JPY' : 'USD'),
     market_cap: idx.market_cap || null,
     logo_url: idx.logo_url || '',
     last_updated: idx.last_updated || null,
@@ -168,18 +179,22 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
     { name: 'S&P 500', ticker: '^GSPC', price: 7722.62, change_pct: 0.24, market_state: 'PRE' },
     { name: 'NASDAQ', ticker: '^IXIC', price: 27049.82, change_pct: 0.41, market_state: 'PRE' },
     { name: 'MSCI World', ticker: 'URTH', price: 208.39, change_pct: 0.15, market_state: 'REGULAR' },
-    { name: 'MSCI Emergentes', ticker: 'EEM', price: 67.79, change_pct: 0.80, market_state: 'REGULAR' },
+    { name: 'Emergentes', ticker: 'EEM', price: 67.79, change_pct: 0.80, market_state: 'REGULAR' },
     { name: 'IBEX 35', ticker: '^IBEX', price: 19750.20, change_pct: 0.90, market_state: 'REGULAR' },
-    { name: 'Euro Stoxx 50', ticker: '^STOXX50E', price: 6308.78, change_pct: 0.55, market_state: 'REGULAR' },
+    { name: 'Euro 50', ticker: '^STOXX50E', price: 6308.78, change_pct: 0.55, market_state: 'REGULAR' },
     { name: 'Nikkei 225', ticker: '^N225', price: 66364.20, change_pct: 0.77, market_state: 'CLOSED' },
     { name: 'Oro', ticker: 'GC=F', price: 4331.20, change_pct: 0.77, market_state: 'REGULAR' },
-    { name: 'Petróleo Brent', ticker: 'BZ=F', price: 98.43, change_pct: -1.79, market_state: 'REGULAR' },
+    { name: 'Petróleo', ticker: 'BZ=F', price: 98.43, change_pct: -1.79, market_state: 'REGULAR' },
     { name: 'BTC/EUR', ticker: 'BTC-EUR', price: 74066.85, change_pct: -0.16, market_state: 'REGULAR' },
     { name: 'EUR/USD', ticker: 'EURUSD=X', price: 1.1406, change_pct: 0.23, market_state: 'REGULAR' },
     { name: 'EUR/JPY', ticker: 'EURJPY=X', price: 179.05, change_pct: -0.87, market_state: 'REGULAR' },
   ]
 
-  const rawIndices = data?.indices && data.indices.length > 0 ? data.indices : defaultIndices
+  const rawList = data?.indices && data.indices.length > 0 ? data.indices : defaultIndices
+  const rawIndices = rawList.map((idx: any) => ({
+    ...idx,
+    name: formatTickerName(idx.name),
+  }))
 
   // Status determined by active US and European equity session
   const sp500 = rawIndices.find((i: any) => i.name === 'S&P 500' || i.ticker === '^GSPC')
