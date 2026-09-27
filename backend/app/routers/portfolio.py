@@ -216,14 +216,19 @@ async def get_performance(period: str = "1y", user_id: str = "asier", broker: st
 
     positions = calculate_positions(transactions)
 
-    # Fetch price history for all assets
+    # Fetch price history for all assets, ensuring latest date uses current price
     price_history = {}
     for isin in positions:
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         history = await get_price_history(isin, ticker, period)
+        curr_p = await get_current_price(isin, ticker, db=db)
         if history:
+            if curr_p and curr_p > 0:
+                history[-1]["price"] = round(curr_p, 4)
             price_history[isin] = history
+        elif curr_p and curr_p > 0:
+            price_history[isin] = [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
     value_series = calculate_portfolio_value_series(transactions, price_history)
     return [PerformancePoint(**v) for v in value_series]
@@ -242,8 +247,13 @@ async def get_analytics(period: str = "1y", user_id: str = "asier", broker: str 
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         history = await get_price_history(isin, ticker, period)
+        curr_p = await get_current_price(isin, ticker, db=db)
         if history:
+            if curr_p and curr_p > 0:
+                history[-1]["price"] = round(curr_p, 4)
             price_history[isin] = history
+        elif curr_p and curr_p > 0:
+            price_history[isin] = [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
     value_series = calculate_portfolio_value_series(transactions, price_history)
     nav_series = calculate_portfolio_nav_series(transactions, price_history)

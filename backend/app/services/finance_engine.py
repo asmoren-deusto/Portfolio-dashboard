@@ -112,21 +112,15 @@ def calculate_portfolio_value_series(
         cash_in_transit = max(0.0, traspaso_sells - traspaso_buys)
         total += cash_in_transit
 
-        # Cumulative net external capital contributed (Dinero aportado durante el tiempo)
-        net_invested = 0.0
-        for tx in active_tx:
-            is_traspaso = "traspaso" in (tx.get("notes") or "").lower()
-            if not is_traspaso:
-                if tx["type"] == "buy":
-                    net_invested += tx["amount"]
-                elif tx["type"] == "sell":
-                    net_invested -= tx["amount"]
+        # Cumulative invested capital active in the portfolio on date d
+        # (Matches exact cost basis of held positions + pending cash in transit from traspasos)
+        invested_on_date = sum(pos["invested_amount"] for pos in positions.values() if pos["shares"] > 0.0001) + cash_in_transit
 
         if total > 0:
             portfolio_values.append({
                 "date": d_str,
                 "value": round(total, 2),
-                "invested": round(net_invested, 2),
+                "invested": round(invested_on_date, 2),
             })
 
     return portfolio_values

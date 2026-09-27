@@ -286,16 +286,22 @@ async def get_price_history(
 
 
 def _generate_demo_history(current_price: float, period: str) -> list[dict]:
-    """Generate plausible history when real data unavailable (for demo/dev)."""
+    """Generate plausible history when real data unavailable, ending exactly at current_price."""
     import random
     days = {"1d": 1, "5d": 5, "1mo": 30, "3mo": 90, "6mo": 180, "1y": 365, "2y": 730, "5y": 1825}
     n_days = days.get(period, 365)
     end = datetime.now()
-    prices = []
-    price = current_price * 0.85  # start 15% below current
+    raw_points = []
+    val = 1.0
     for i in range(n_days):
         d = end - timedelta(days=n_days - i)
         if d.weekday() < 5:  # weekdays only
-            price *= (1 + random.gauss(0.0002, 0.008))
-            prices.append({"date": str(d.date()), "price": round(price, 4)})
-    return prices
+            val *= (1 + random.gauss(0.0003, 0.007))
+            raw_points.append((str(d.date()), val))
+
+    if not raw_points:
+        return [{"date": str(datetime.now().date()), "price": round(current_price, 4)}]
+
+    final_val = raw_points[-1][1]
+    scale = current_price / final_val if final_val > 0 else 1.0
+    return [{"date": d_str, "price": round(v * scale, 4)} for d_str, v in raw_points]
