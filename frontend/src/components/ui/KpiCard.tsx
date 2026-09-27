@@ -12,6 +12,7 @@ interface KpiCardProps {
   delay?: number
   className?: string
   icon?: React.ReactNode
+  loading?: boolean
 }
 
 export function KpiCard({
@@ -23,6 +24,7 @@ export function KpiCard({
   hero,
   className,
   icon,
+  loading = false,
 }: KpiCardProps) {
   const changeClass =
     changePositive === undefined
@@ -42,8 +44,12 @@ export function KpiCard({
         className
       )}
     >
-      {/* Top subtle light reflection line */}
-      <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-white/15" />
+      {/* Top subtle light reflection line or active loading shimmer */}
+      {loading ? (
+        <div className="pointer-events-none absolute -top-px left-0 right-0 h-[2.5px] bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+      ) : (
+        <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-white/15" />
+      )}
 
       {/* Hero ambient glow */}
       {hero && (
@@ -52,9 +58,17 @@ export function KpiCard({
 
       {/* Label and Icon Header */}
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate pr-2">
-          {label}
-        </p>
+        <div className="flex items-center gap-1.5 min-w-0 pr-2">
+          <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
+            {label}
+          </p>
+          {loading && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+              <span className="hidden sm:inline">Actualizando</span>
+            </span>
+          )}
+        </div>
         {icon && (
           <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100 border border-slate-200/90 text-slate-700 group-hover:text-blue-600 group-hover:bg-blue-50 group-hover:border-blue-200 transition-all dark:bg-white/[0.04] dark:border-white/[0.06] dark:text-slate-300 dark:group-hover:text-blue-400 dark:group-hover:bg-blue-500/10 dark:group-hover:border-blue-500/20">
             {icon}
@@ -64,7 +78,7 @@ export function KpiCard({
 
       {hero ? (
         /* Hero Mode: Value, Badge and Subtitle arranged horizontally */
-        <div className="flex items-baseline justify-between gap-3 min-w-0">
+        <div className={cn("flex items-baseline justify-between gap-3 min-w-0 transition-opacity duration-300", loading ? "opacity-65" : "opacity-100")}>
           <div className="flex items-baseline gap-2.5 sm:gap-3 flex-wrap min-w-0">
             <div className="text-2xl sm:text-[26px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
               {value}
@@ -97,7 +111,7 @@ export function KpiCard({
         </div>
       ) : (
         /* Regular KPI Card: Value and Subtitle placed side-by-side to minimize height */
-        <div className="flex items-baseline gap-2 min-w-0">
+        <div className={cn("flex items-baseline gap-2 min-w-0 transition-opacity duration-300", loading ? "opacity-65" : "opacity-100")}>
           <div className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
             {value}
           </div>

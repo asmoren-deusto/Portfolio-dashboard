@@ -60,12 +60,16 @@ export function OverviewPage() {
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
 
-  const { data: summary } = usePortfolioSummary()
-  const { data: positions = [] } = usePositions()
-  const { data: performance = [] } = usePerformance()
-  const { data: analytics } = useAnalytics()
+  const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
+  const { data: positions = [], isFetching: positionsFetching } = usePositions()
+  const { data: performance = [], isFetching: perfFetching } = usePerformance()
+  const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: transactions = [] } = useTransactions()
   const { data: marketData } = useMarketQuotes('Todos')
+
+  const isGlobalUpdating = summaryFetching || positionsFetching
+  const isPeriodUpdating = perfFetching || analyticsFetching
+  const isAnyUpdating = isGlobalUpdating || isPeriodUpdating
 
   // Real portfolio summary directly from backend or calculated from active positions if loading
   const displaySummary = React.useMemo(() => {
@@ -158,9 +162,15 @@ export function OverviewPage() {
       {/* 1. Métricas Globales (Totales Cartera) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between px-0.5">
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <Wallet size={13.5} className="text-blue-500" />
             <span>Métricas Globales y del Periodo Seleccionado ({periodLabel})</span>
+            {isAnyUpdating && (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-semibold lowercase tracking-normal">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping" />
+                actualizando...
+              </span>
+            )}
           </div>
           <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
             {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
@@ -181,6 +191,7 @@ export function OverviewPage() {
             delay={0}
             className="lg:col-span-2"
             icon={<Wallet size={16} className="text-blue-400" />}
+            loading={isGlobalUpdating}
           />
           <KpiCard
             label="Rendimiento Anualizado"
@@ -196,6 +207,7 @@ export function OverviewPage() {
             changePositive={true}
             delay={0.05}
             icon={<TrendingUp size={16} className="text-emerald-400" />}
+            loading={isGlobalUpdating || isPeriodUpdating}
           />
           <KpiCard
             label="Plusvalía Acumulada"
@@ -205,23 +217,36 @@ export function OverviewPage() {
             changePositive={pnlPositive}
             delay={0.1}
             icon={<ArrowUpRight size={16} className="text-cyan-400" />}
+            loading={isGlobalUpdating}
           />
           <div
             className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:shadow-md dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16]"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
-            <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent dark:via-white/15" />
+            {isGlobalUpdating ? (
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-[2.5px] bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+            ) : (
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent dark:via-white/15" />
+            )}
             <div className="flex items-center justify-between mb-1">
-              <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate pr-1">
-                Total Invertido
-              </p>
+              <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
+                  Total Invertido
+                </p>
+                {isGlobalUpdating && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+                    <span className="hidden sm:inline">Actualizando</span>
+                  </span>
+                )}
+              </div>
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
                 <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
                 DCA 416,66 €/m
               </span>
             </div>
 
-            <div className="flex items-baseline justify-between gap-2 min-w-0">
+            <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isGlobalUpdating ? "opacity-65" : "opacity-100")}>
               <div className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
                 {fmt.currency(displaySummary?.total_invested)}
               </div>
@@ -250,6 +275,7 @@ export function OverviewPage() {
             changePositive={(perfStats?.diffPct ?? 0) >= 0}
             delay={0.1}
             icon={<TrendingUp size={15} className="text-emerald-400" />}
+            loading={isPeriodUpdating}
           />
           <KpiCard
             label="Rentabilidad Activos (TWR)"
@@ -264,6 +290,7 @@ export function OverviewPage() {
             changePositive={(analytics?.twr ?? 0) >= 0}
             delay={0.12}
             icon={<Activity size={15} className="text-cyan-400" />}
+            loading={isPeriodUpdating}
           />
           <KpiCard
             label={`Volatilidad (${periodLabel})`}
@@ -277,6 +304,7 @@ export function OverviewPage() {
             sub={`fluctuación en ${periodLabel}`}
             delay={0.14}
             icon={<ShieldCheck size={15} className="text-violet-400" />}
+            loading={isPeriodUpdating}
           />
           <KpiCard
             label={`Máxima Caída (${periodLabel})`}
@@ -291,6 +319,7 @@ export function OverviewPage() {
             changePositive={false}
             delay={0.16}
             icon={<TrendingDown size={15} className="text-rose-400" />}
+            loading={isPeriodUpdating}
           />
         </div>
       </div>

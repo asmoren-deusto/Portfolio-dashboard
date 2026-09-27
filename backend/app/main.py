@@ -31,7 +31,8 @@ app.add_middleware(
 @app.middleware("http")
 async def add_no_cache_headers(request, call_next):
     response = await call_next(request)
-    if request.url.path.startswith("/api"):
+    path = request.url.path
+    if path.startswith("/api") or path == "/" or path.endswith(".html") or "." not in path.split("/")[-1]:
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
@@ -95,6 +96,10 @@ async def serve_spa(full_path: str):
     # SPA fallback: return index.html so React Router handles the route (/market, /positions, etc.)
     index_path = os.path.join(STATIC_DIR, "index.html")
     if os.path.isfile(index_path):
-        return FileResponse(index_path)
+        resp = FileResponse(index_path)
+        resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
 
     return {"detail": "Frontend build not found. Please build the frontend."}
