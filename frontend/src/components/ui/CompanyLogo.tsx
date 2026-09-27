@@ -1,31 +1,12 @@
 import React, { useState } from 'react'
 
 interface CompanyLogoProps {
-  ticker?: string
-  isin?: string
+  ticker: string
   name: string
   logoUrl?: string | null
   domain?: string | null
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   className?: string
-}
-
-const ISIN_DOMAINS: Record<string, string> = {
-  'IE00BYX5NX33': 'fidelity.com',
-  'IE00BYX5NH74': 'fidelity.com',
-  'LU0261952682': 'fidelity.com',
-  'IE00BYX5M476': 'fidelity.com',
-  'LU1598719752': 'cobasam.com',
-  'ES0112611001': 'azvalor.com',
-  'LU0302296495': 'dnb.no',
-  'IE000QAZP7L2': 'ishares.com',
-  'IE000ZYRH0Q7': 'ishares.com',
-  '0192#0011': 'indexacapital.com',
-  '0201G': 'kutxabank.es',
-  'LU0996182563': 'amundi.es',
-  'LU2145461757': 'robeco.com',
-  'IE00BM95B621': 'polarcapital.co.uk',
-  'LU1623762843': 'carmignac.es',
 }
 
 // Generate consistent, sophisticated gradient based on ticker letters
@@ -49,7 +30,6 @@ function getAvatarGradient(str: string): string {
 
 export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   ticker,
-  isin,
   name,
   logoUrl,
   domain,
@@ -80,25 +60,19 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   }[size]
 
   let targetDomain = domain
-  if (!targetDomain && isin && ISIN_DOMAINS[isin]) {
-    targetDomain = ISIN_DOMAINS[isin]
-  }
   if (!targetDomain) {
     const nl = (name || '').toLowerCase()
     if (nl.includes('indexa')) targetDomain = 'indexacapital.com'
-    else if (nl.includes('cobas')) targetDomain = 'cobasam.com'
+    else if (nl.includes('cobas')) targetDomain = 'cobasfondos.com'
     else if (nl.includes('azvalor')) targetDomain = 'azvalor.com'
-    else if (nl.includes('fidelity')) targetDomain = 'fidelity.com'
-    else if (nl.includes('ishares') || nl.includes('blackrock')) targetDomain = 'ishares.com'
-    else if (nl.includes('vanguard')) targetDomain = 'vanguard.com'
+    else if (nl.includes('fidelity')) targetDomain = 'fidelity.es'
+    else if (nl.includes('ishares')) targetDomain = 'ishares.com'
     else if (nl.includes('robeco')) targetDomain = 'robeco.com'
     else if (nl.includes('polar')) targetDomain = 'polarcapital.co.uk'
     else if (nl.includes('dnb')) targetDomain = 'dnb.no'
     else if (nl.includes('amundi')) targetDomain = 'amundi.es'
     else if (nl.includes('carmignac')) targetDomain = 'carmignac.es'
     else if (nl.includes('kutxabank') || nl.includes('baskepensiones')) targetDomain = 'kutxabank.es'
-    else if (nl.includes('bbva')) targetDomain = 'bbva.es'
-    else if (nl.includes('myinvestor')) targetDomain = 'myinvestor.es'
   }
   const cleanDomain = targetDomain?.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
 
@@ -119,8 +93,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   }
 
   const currentSrc = getSource(attempt)
-  const fallbackStr = ticker || isin || name
-  const initials = fallbackStr.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || name.slice(0, 2).toUpperCase()
+  const initials = ticker.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || name.slice(0, 2).toUpperCase()
 
   const handleError = () => {
     if (attempt < 2 && cleanDomain) {
@@ -136,8 +109,8 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   if (attempt >= 3 || !currentSrc) {
     return (
       <div
-        className={`${sizeClasses} ${roundedClass} bg-gradient-to-br ${getAvatarGradient(fallbackStr)} flex items-center justify-center font-bold tracking-tight text-white shadow-md ring-1 ring-white/15 shrink-0 ${className}`}
-        title={`${name} (${fallbackStr})`}
+        className={`${sizeClasses} ${roundedClass} bg-gradient-to-br ${getAvatarGradient(ticker)} flex items-center justify-center font-bold tracking-tight text-white shadow-md ring-1 ring-white/15 shrink-0 ${className}`}
+        title={`${name} (${ticker})`}
       >
         {initials}
       </div>

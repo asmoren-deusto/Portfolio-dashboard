@@ -1,7 +1,7 @@
 """Portfolio router — summary, positions, performance."""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 from app.database import get_db
@@ -188,6 +188,7 @@ async def refresh_portfolio_prices(user_id: str = "asier", db: Session = Depends
     Financial Times tearsheets, and Quefondos. Clears in-memory price cache.
     """
     _price_cache.clear()
+    _perf_cache.clear()
     transactions = _get_all_transactions(db, user_id)
     positions = calculate_positions(transactions)
     active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
@@ -224,7 +225,11 @@ async def update_price(req: UpdatePriceRequest, db: Session = Depends(get_db)):
     db.commit()
 
     _price_cache[req.isin] = {"price": req.price, "date": target_date, "ts": datetime.now()}
+    _perf_cache.clear()
     return {"ok": True, "isin": req.isin, "price": req.price, "date": target_date}
+
+
+_perf_cache: dict[str, tuple[datetime, list[dict]]] = {}
 
 
 @router.get("/performance", response_model=list[PerformancePoint])
@@ -232,10 +237,24 @@ async def get_performance(
     period: str = "1y",
     user_id: str = "asier",
     broker: str | None = None,
-    start_date: str | None = "2025-11-01",
+    start_date: str | None = None,
     db: Session = Depends(get_db),
 ):
     """Return portfolio value time series."""
+    effective_start = start_date or "2025-11-01"
+    if period == "1mo":
+        effective_start = max(effective_start, (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d"))
+    elif period == "3mo":
+        effective_start = max(effective_start, (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d"))
+    elif period == "6mo":
+        effective_start = max(effective_start, (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d"))
+
+    cache_key = f"{user_id}:{broker}:{period}:{effective_start}"
+    if cache_key in _perf_cache:
+        ts, cached = _perf_cache[cache_key]
+        if (datetime.now() - ts).total_seconds() < 600:
+            return [PerformancePoint(**v) for v in cached]
+
     transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
         return []
@@ -257,7 +276,8 @@ async def get_performance(
         elif curr_p and curr_p > 0:
             price_history[isin] = [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
-    value_series = calculate_portfolio_value_series(transactions, price_history, start_date=start_date)
+    value_series = calculate_portfolio_value_series(transactions, price_history, start_date=effective_start)
+    _perf_cache[cache_key] = (datetime.now(), value_series)
     return [PerformancePoint(**v) for v in value_series]
 
 

@@ -254,6 +254,9 @@ async def _fetch_morningstar_price(isin: str) -> Optional[float]:
     return None
 
 
+_history_cache: dict[tuple[str, str], tuple[datetime, list[dict]]] = {}
+
+
 async def get_price_history(
     isin: str,
     ticker: str | None = None,
@@ -263,16 +266,24 @@ async def get_price_history(
     Get historical prices for charting.
     Returns list of {"date": "YYYY-MM-DD", "price": float}
     """
-    # Try Yahoo Finance first (best historical data for ETFs/stocks)
-    if ticker:
+    cache_key = (isin, period)
+    if cache_key in _history_cache:
+        cached_ts, cached_data = _history_cache[cache_key]
+        if (datetime.now() - cached_ts).total_seconds() < 1800:
+            return cached_data
+
+    # Try Yahoo Finance first (best historical data for ETFs/stocks, skip Morningstar codes)
+    if ticker and not ticker.startswith("0P"):
         try:
             t = yf.Ticker(ticker)
             hist = t.history(period=period)
             if not hist.empty:
-                return [
+                res = [
                     {"date": str(idx.date()), "price": round(float(row["Close"]), 4)}
                     for idx, row in hist.iterrows()
                 ]
+                _history_cache[cache_key] = (datetime.now(), res)
+                return res
         except Exception as e:
             logger.warning(f"Yahoo history error for {ticker}: {e}")
 
@@ -284,7 +295,9 @@ async def get_price_history(
         try:
             cached_rows = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.asc()).all()
             if len(cached_rows) > 1:
-                return [{"date": row.date, "price": round(row.price, 4)} for row in cached_rows]
+                res = [{"date": row.date, "price": round(row.price, 4)} for row in cached_rows]
+                _history_cache[cache_key] = (datetime.now(), res)
+                return res
         finally:
             db.close()
     except Exception as e:

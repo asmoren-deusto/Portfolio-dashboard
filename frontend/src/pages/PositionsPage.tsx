@@ -363,7 +363,6 @@ export function PositionsPage() {
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-3">
                             <CompanyLogo
-                              isin={p.isin}
                               ticker={p.ticker || p.isin.slice(0, 4)}
                               name={p.name}
                               domain={p.domain}
@@ -490,7 +489,6 @@ export function PositionsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <CompanyLogo
-                        isin={p.isin}
                         ticker={p.ticker || p.isin.slice(0, 4)}
                         name={p.name}
                         domain={p.domain}

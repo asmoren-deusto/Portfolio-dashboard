@@ -28,7 +28,7 @@ import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { fmt, cn } from '@/lib/utils'
+import { fmt } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
 
 import {
@@ -41,29 +41,6 @@ import {
   type MarketStock,
   type Position,
 } from '@/api/queries'
-
-function getBrokerBadge(broker?: string | null) {
-  const b = (broker || '').toLowerCase()
-  if (b === 'bbva') {
-    return (
-      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-blue-100/90 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 shrink-0">
-        BBVA
-      </span>
-    )
-  }
-  if (b === 'indexa') {
-    return (
-      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-indigo-100/90 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 shrink-0">
-        Indexa
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
-      MyInvestor
-    </span>
-  )
-}
 
 type AllocMode = 'asset' | 'type'
 
@@ -358,16 +335,14 @@ export function OverviewPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
-                  <th className="py-2 px-2.5">Activo / Fondo</th>
-                  <th className="py-2 px-2 text-center">Banco</th>
-                  <th className="py-2 px-2">Tipo</th>
-                  <th className="py-2 px-2 text-right">NAV</th>
-                  <th className="py-2 px-2 text-right">Rend. Día</th>
-                  <th className="py-2 px-2 text-right">Valor Actual</th>
-                  <th className="py-2 px-2 text-right">Ganancia (P&L)</th>
-                  <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
+                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  <th className="py-2 pl-3.5 pr-1 text-center w-7 text-slate-400">#</th>
+                  <th className="py-2 px-3">Activo / Fondo</th>
+                  <th className="py-2 px-2.5">Tipo</th>
+                  <th className="py-2 px-2.5 text-right">Valor Actual</th>
+                  <th className="py-2 px-2.5 text-right">Fecha Act.</th>
+                  <th className="py-2 px-2.5 text-right">Ganancia (P&L)</th>
+                  <th className="py-2 pr-3.5 pl-2 text-right">Peso</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
@@ -380,96 +355,64 @@ export function OverviewPage() {
                     onClick={() => setSelectedPosition(p)}
                     className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
                   >
-                    <td className="py-2.5 pl-3 pr-1 text-center">
+                    <td className="py-2.5 pl-3.5 pr-1 text-center">
                       <span className="font-mono font-bold text-xs text-slate-400 dark:text-slate-500">
                         {i + 1}
                       </span>
                     </td>
-                    <td className="py-2.5 px-2.5">
-                      <div className="flex items-center gap-2">
+                    <td className="py-2.5 px-3">
+                      <div className="flex items-center gap-2.5">
                         <CompanyLogo
-                          isin={p.isin}
                           ticker={p.ticker || p.isin.slice(0, 4)}
                           name={p.name}
                           domain={p.domain}
                           size="sm"
                         />
                         <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[13px]">
+                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[120px] sm:max-w-[140px] 2xl:max-w-[190px] text-[13.5px]">
                             {p.name}
                           </div>
-                          <div className="font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                          <div className="font-mono text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">
                             {p.isin}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-2.5 px-2 text-center">
-                      {getBrokerBadge(p.broker)}
-                    </td>
-                    <td className="py-2.5 px-2">
+                    <td className="py-2.5 px-2.5">
                       <AssetBadge type={p.asset_type} />
                     </td>
-                    <td className="py-2.5 px-2 text-right">
-                      <div className="font-mono font-bold text-slate-900 dark:text-white text-[12.5px] leading-tight">
-                        {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
-                      </div>
-                      <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
-                        {(() => {
-                          const raw = p.price_date || p.last_updated
-                          if (!raw) return '—'
-                          try {
-                            const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                            return format(parseISO(dateOnly), 'dd/MM/yyyy')
-                          } catch {
-                            return raw
-                          }
-                        })()}
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-2 text-right">
-                      {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-0.5 font-mono text-[11px] font-bold',
-                            p.daily_change_pct > 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : p.daily_change_pct < 0
-                              ? 'text-rose-600 dark:text-rose-400'
-                              : 'text-slate-500 dark:text-slate-400'
-                          )}
-                        >
-                          {p.daily_change_pct > 0 ? (
-                            <TrendingUp className="w-3 h-3 stroke-[2.5]" />
-                          ) : p.daily_change_pct < 0 ? (
-                            <TrendingDown className="w-3 h-3 stroke-[2.5]" />
-                          ) : null}
-                          <span>{fmt.pct(p.daily_change_pct)}</span>
-                        </span>
-                      ) : (
-                        <span className="font-mono text-xs text-slate-400">—</span>
-                      )}
-                    </td>
-                    <td className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[13px]">
+                    <td className="py-2.5 px-2.5 text-right font-mono font-bold text-slate-900 dark:text-white text-[13.5px]">
                       {fmt.currency(p.current_value)}
                     </td>
-                    <td className="py-2.5 px-2 text-right">
+                    <td className="py-2.5 px-2.5 text-right font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                      {(() => {
+                        const raw = p.price_date || p.last_updated
+                        if (!raw) return '—'
+                        try {
+                          const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                          return format(parseISO(dateOnly), 'dd/MM/yyyy')
+                        } catch {
+                          return raw
+                        }
+                      })()}
+                    </td>
+                    <td className="py-2.5 px-2.5 text-right">
                       <div className="flex flex-col items-end">
                         <PnlBadge value={p.unrealized_pnl} />
-                        <span className="text-[10.5px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                        <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
                           {fmt.pct(p.unrealized_pnl_pct)}
                         </span>
                       </div>
                     </td>
-                    <td className="py-2.5 pr-3 pl-1.5 text-right">
+                    <td className="py-2.5 pr-3.5 pl-2 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <div className="h-1.5 w-8 sm:w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
+                        <div className="h-1.5 w-10 sm:w-12 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
                           <div
                             className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm shadow-blue-500/30"
                             style={{ width: `${Math.min(p.weight, 100)}%` }}
                           />
                         </div>
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 w-8 text-right text-[11px]">
+                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 w-9 text-right text-xs">
                           {p.weight.toFixed(1)}%
                         </span>
                       </div>
@@ -484,16 +427,14 @@ export function OverviewPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
-                  <th className="py-2 px-2.5">Activo / Fondo</th>
-                  <th className="py-2 px-2 text-center">Banco</th>
-                  <th className="py-2 px-2">Tipo</th>
-                  <th className="py-2 px-2 text-right">NAV</th>
-                  <th className="py-2 px-2 text-right">Rend. Día</th>
-                  <th className="py-2 px-2 text-right">Valor Actual</th>
-                  <th className="py-2 px-2 text-right">Ganancia (P&L)</th>
-                  <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
+                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  <th className="py-2 pl-3.5 pr-1 text-center w-7 text-slate-400">#</th>
+                  <th className="py-2 px-3">Activo / Fondo</th>
+                  <th className="py-2 px-2.5">Tipo</th>
+                  <th className="py-2 px-2.5 text-right">Valor Actual</th>
+                  <th className="py-2 px-2.5 text-right">Fecha Act.</th>
+                  <th className="py-2 px-2.5 text-right">Ganancia (P&L)</th>
+                  <th className="py-2 pr-3.5 pl-2 text-right">Peso</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
@@ -506,96 +447,64 @@ export function OverviewPage() {
                     onClick={() => setSelectedPosition(p)}
                     className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
                   >
-                    <td className="py-2.5 pl-3 pr-1 text-center">
+                    <td className="py-2.5 pl-3.5 pr-1 text-center">
                       <span className="font-mono font-bold text-xs text-slate-400 dark:text-slate-500">
                         {i + 6}
                       </span>
                     </td>
-                    <td className="py-2.5 px-2.5">
-                      <div className="flex items-center gap-2">
+                    <td className="py-2.5 px-3">
+                      <div className="flex items-center gap-2.5">
                         <CompanyLogo
-                          isin={p.isin}
                           ticker={p.ticker || p.isin.slice(0, 4)}
                           name={p.name}
                           domain={p.domain}
                           size="sm"
                         />
                         <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[13px]">
+                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[120px] sm:max-w-[140px] 2xl:max-w-[190px] text-[13.5px]">
                             {p.name}
                           </div>
-                          <div className="font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                          <div className="font-mono text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">
                             {p.isin}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-2.5 px-2 text-center">
-                      {getBrokerBadge(p.broker)}
-                    </td>
-                    <td className="py-2.5 px-2">
+                    <td className="py-2.5 px-2.5">
                       <AssetBadge type={p.asset_type} />
                     </td>
-                    <td className="py-2.5 px-2 text-right">
-                      <div className="font-mono font-bold text-slate-900 dark:text-white text-[12.5px] leading-tight">
-                        {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
-                      </div>
-                      <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
-                        {(() => {
-                          const raw = p.price_date || p.last_updated
-                          if (!raw) return '—'
-                          try {
-                            const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                            return format(parseISO(dateOnly), 'dd/MM/yyyy')
-                          } catch {
-                            return raw
-                          }
-                        })()}
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-2 text-right">
-                      {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-0.5 font-mono text-[11px] font-bold',
-                            p.daily_change_pct > 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : p.daily_change_pct < 0
-                              ? 'text-rose-600 dark:text-rose-400'
-                              : 'text-slate-500 dark:text-slate-400'
-                          )}
-                        >
-                          {p.daily_change_pct > 0 ? (
-                            <TrendingUp className="w-3 h-3 stroke-[2.5]" />
-                          ) : p.daily_change_pct < 0 ? (
-                            <TrendingDown className="w-3 h-3 stroke-[2.5]" />
-                          ) : null}
-                          <span>{fmt.pct(p.daily_change_pct)}</span>
-                        </span>
-                      ) : (
-                        <span className="font-mono text-xs text-slate-400">—</span>
-                      )}
-                    </td>
-                    <td className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[13px]">
+                    <td className="py-2.5 px-2.5 text-right font-mono font-bold text-slate-900 dark:text-white text-[13.5px]">
                       {fmt.currency(p.current_value)}
                     </td>
-                    <td className="py-2.5 px-2 text-right">
+                    <td className="py-2.5 px-2.5 text-right font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                      {(() => {
+                        const raw = p.price_date || p.last_updated
+                        if (!raw) return '—'
+                        try {
+                          const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                          return format(parseISO(dateOnly), 'dd/MM/yyyy')
+                        } catch {
+                          return raw
+                        }
+                      })()}
+                    </td>
+                    <td className="py-2.5 px-2.5 text-right">
                       <div className="flex flex-col items-end">
                         <PnlBadge value={p.unrealized_pnl} />
-                        <span className="text-[10.5px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                        <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
                           {fmt.pct(p.unrealized_pnl_pct)}
                         </span>
                       </div>
                     </td>
-                    <td className="py-2.5 pr-3 pl-1.5 text-right">
+                    <td className="py-2.5 pr-3.5 pl-2 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <div className="h-1.5 w-8 sm:w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
+                        <div className="h-1.5 w-10 sm:w-12 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
                           <div
                             className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm shadow-blue-500/30"
                             style={{ width: `${Math.min(p.weight, 100)}%` }}
                           />
                         </div>
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 w-8 text-right text-[11px]">
+                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 w-9 text-right text-xs">
                           {p.weight.toFixed(1)}%
                         </span>
                       </div>
