@@ -21,12 +21,12 @@ import { AllocationChart } from '@/components/charts/AllocationChart'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { fmt } from '@/lib/utils'
+import { fmt, cn } from '@/lib/utils'
 import { useAnalytics, usePositions } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
 export function AnalyticsPage() {
-  const { data: analytics } = useAnalytics()
+  const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: positions = [] } = usePositions()
   const [allocMode, setAllocMode] = useState<'asset' | 'type'>('type')
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
@@ -53,6 +53,7 @@ export function AnalyticsPage() {
           changePositive={(analytics?.twr ?? 0) >= 0}
           delay={0}
           icon={<TrendingUp size={16} className="text-emerald-400" />}
+          loading={analyticsFetching}
         />
         <KpiCard
           label="CAGR Anualizado"
@@ -61,6 +62,7 @@ export function AnalyticsPage() {
           changePositive={(analytics?.cagr ?? 0) >= 0}
           delay={0.04}
           icon={<BarChart3 size={16} className="text-blue-400" />}
+          loading={analyticsFetching}
         />
         <KpiCard
           label="Volatilidad Anual"
@@ -68,6 +70,7 @@ export function AnalyticsPage() {
           sub="Desviación típica (σ)"
           delay={0.08}
           icon={<Activity size={16} className="text-amber-400" />}
+          loading={analyticsFetching}
         />
         <KpiCard
           label="Sharpe Ratio"
@@ -76,6 +79,7 @@ export function AnalyticsPage() {
           changePositive={isSharpeGood}
           delay={0.12}
           icon={<ShieldCheck size={16} className="text-indigo-400" />}
+          loading={analyticsFetching}
         />
         <KpiCard
           label="Max Drawdown"
@@ -84,16 +88,23 @@ export function AnalyticsPage() {
           changePositive={false}
           delay={0.16}
           icon={<TrendingDown size={16} className="text-rose-400" />}
+          loading={analyticsFetching}
         />
       </div>
 
       {/* Benchmark Comparison Card */}
-      <Card delay={0.18}>
+      <Card delay={0.18} loading={analyticsFetching}>
         <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/[0.05]">
           <div>
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-blue-500 dark:text-blue-400" />
               <h2 className="text-base font-semibold text-slate-900 dark:text-white">Comparativa de Rentabilidad vs Benchmarks</h2>
+              {analyticsFetching && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+                  <span className="hidden sm:inline">Actualizando</span>
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
               Rendimiento acumulado de tu cartera frente a los principales índices globales y tipo libre de riesgo.
@@ -104,7 +115,7 @@ export function AnalyticsPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5">
+        <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 p-5 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
           <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
             <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Tu Cartera</span>
             <span className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">
@@ -136,15 +147,21 @@ export function AnalyticsPage() {
       {/* Returns Chart + Allocation Chart Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Returns bar chart */}
-        <Card className="lg:col-span-3 flex flex-col justify-between" delay={0.22}>
+        <Card className="lg:col-span-3 flex flex-col justify-between" delay={0.22} loading={analyticsFetching}>
           <CardHeader>
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
               <CardTitle>Rentabilidad por Periodo</CardTitle>
+              {analyticsFetching && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+                  <span className="hidden sm:inline">Actualizando</span>
+                </span>
+              )}
             </div>
             <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Retorno temporal continuo</span>
           </CardHeader>
-          <div className="px-5 pb-5">
+          <div className={cn("px-5 pb-5 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
             {analytics ? (
               <ReturnsChart analytics={analytics} />
             ) : (
@@ -194,15 +211,21 @@ export function AnalyticsPage() {
       </div>
 
       {/* Risk Metrics Detail */}
-      <Card delay={0.3}>
+      <Card delay={0.3} loading={analyticsFetching}>
         <CardHeader>
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
             <CardTitle>Diagnóstico de Riesgo y Resiliencia</CardTitle>
+            {analyticsFetching && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+                <span className="hidden sm:inline">Actualizando</span>
+              </span>
+            )}
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400">Evaluación estadística del portfolio</span>
         </CardHeader>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:divide-x divide-y md:divide-y-0 divide-slate-100 dark:divide-white/[0.05] border-t border-slate-100 dark:border-white/[0.05]">
+        <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-0 md:divide-x divide-y md:divide-y-0 divide-slate-100 dark:divide-white/[0.05] border-t border-slate-100 dark:border-white/[0.05] transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
           {[
             {
               label: 'Volatilidad Anualizada',

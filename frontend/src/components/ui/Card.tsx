@@ -6,9 +6,10 @@ interface CardProps {
   className?: string
   glass?: boolean
   delay?: number
+  loading?: boolean
 }
 
-export function Card({ children, className, glass = true }: CardProps) {
+export function Card({ children, className, glass = true, loading = false }: CardProps) {
   return (
     <div
       className={cn(
@@ -19,8 +20,12 @@ export function Card({ children, className, glass = true }: CardProps) {
         className
       )}
     >
-      {/* Subtle shine line at top */}
-      <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-white/10" />
+      {/* Subtle shine line at top or active loading shimmer */}
+      {loading ? (
+        <div className="pointer-events-none absolute -top-px left-0 right-0 h-[2.5px] bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+      ) : (
+        <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-white/10" />
+      )}
       {children}
     </div>
   )

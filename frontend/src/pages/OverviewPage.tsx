@@ -165,7 +165,7 @@ export function OverviewPage() {
             <Wallet size={13.5} className="text-blue-500" />
             <span>Métricas Globales y del Periodo Seleccionado ({periodLabel})</span>
           </div>
-          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+          <span className={cn("text-[11px] font-mono text-slate-500 dark:text-slate-400 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
             {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
           </span>
         </div>
@@ -320,14 +320,22 @@ export function OverviewPage() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
         {/* Performance Evolution Chart */}
-        <Card className="lg:col-span-2" delay={0.2}>
+        <Card className="lg:col-span-2" delay={0.2} loading={isPeriodUpdating}>
           <CardHeader>
             <div className="flex items-center gap-2.5">
               <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 <BarChart3 className="w-4 h-4" />
               </div>
-              <div>
-                <CardTitle>Evolución Patrimonial</CardTitle>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <CardTitle>Evolución Patrimonial</CardTitle>
+                  {isPeriodUpdating && (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+                      <span className="hidden sm:inline">Actualizando</span>
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
                   Trayectoria histórica del valor liquidativo acumulado
                 </p>
@@ -336,7 +344,12 @@ export function OverviewPage() {
 
             {/* Performance Period Stats Pill */}
             {perfStats && (
-              <div className="hidden sm:flex items-center gap-3 text-xs font-mono bg-slate-100 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06]">
+              <div
+                className={cn(
+                  'hidden sm:flex items-center gap-3 text-xs font-mono bg-slate-100 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] transition-opacity duration-300',
+                  isPeriodUpdating ? 'opacity-65' : 'opacity-100'
+                )}
+              >
                 <span className="text-slate-600 dark:text-slate-400 font-medium">
                   Rango:{' '}
                   <span className="text-slate-900 dark:text-slate-100 font-bold">
@@ -355,7 +368,7 @@ export function OverviewPage() {
             )}
           </CardHeader>
 
-          <div className="px-5 pb-3.5 pt-1.5">
+          <div className={cn("px-5 pb-3.5 pt-1.5 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
             {performance.length > 0 ? (
               <PerformanceChart data={performance} height={280} />
             ) : (
