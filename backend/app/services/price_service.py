@@ -38,23 +38,26 @@ async def get_price_with_date(
       6. Database PriceCache fallback (cached historical NAV)
       7. Morningstar public search
     """
-    if not force and _is_cache_valid(isin):
-        return _price_cache[isin]["price"], _price_cache[isin].get("date")
-
     price = None
     price_date = None
-
-    # For non-standard ISINs (e.g. EPSV registration numbers like 0192#0011, 0201G), look up DB directly
     is_standard_isin = len(isin) == 12 and isin.isalnum()
-    if not is_standard_isin and db is not None:
-        try:
-            from app.models import PriceCache
-            entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
-            if entry and entry.price > 0:
-                _price_cache[isin] = {"price": entry.price, "date": entry.date, "ts": datetime.now()}
-                return entry.price, entry.date
-        except Exception as e:
-            logger.warning(f"Error querying PriceCache for non-standard ISIN {isin}: {e}")
+
+    if not force:
+        if _is_cache_valid(isin):
+            return _price_cache[isin]["price"], _price_cache[isin].get("date")
+        if db is not None:
+            try:
+                from app.models import PriceCache
+                entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+                if entry and entry.price > 0:
+                    _price_cache[isin] = {"price": entry.price, "date": entry.date, "ts": datetime.now()}
+                    return entry.price, entry.date
+            except Exception as e:
+                logger.warning(f"Error querying PriceCache for {isin}: {e}")
+
+    # For non-standard ISINs (e.g. EPSV 0201G, 0192#0011), do not attempt external scrapers
+    if not is_standard_isin:
+        return None, None
 
     # 1. Try Direct Official Gestora (Azvalor website)
     if isin.startswith("ES011261"):
