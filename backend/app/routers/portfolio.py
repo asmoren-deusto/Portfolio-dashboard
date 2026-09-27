@@ -218,7 +218,8 @@ async def get_performance(period: str = "1y", user_id: str = "asier", broker: st
 
     # Fetch price history for all assets, ensuring latest date uses current price
     price_history = {}
-    for isin in positions:
+    all_isins = set(t["isin"] for t in transactions)
+    for isin in all_isins:
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         history = await get_price_history(isin, ticker, period)
@@ -243,7 +244,8 @@ async def get_analytics(period: str = "1y", user_id: str = "asier", broker: str 
 
     positions = calculate_positions(transactions)
     price_history = {}
-    for isin in positions:
+    all_isins = set(t["isin"] for t in transactions)
+    for isin in all_isins:
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         history = await get_price_history(isin, ticker, period)

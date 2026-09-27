@@ -6,66 +6,119 @@ ASSETS = json.loads(r'''[
     "name": "Azvalor Internacional FI",
     "ticker": "0P00016YQ5.F",
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
   },
   {
     "isin": "LU0261952682",
     "name": "Fidelity Euro 50 Index Fund A-ACC-EUR",
     "ticker": "0P00006DA4.F",
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
   },
   {
     "isin": "IE000ZYRH0Q7",
     "name": "iShares Developed World Index (IE) S Acc EUR",
     "ticker": null,
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
   },
   {
     "isin": "IE000QAZP7L2",
     "name": "iShares Emerging Markets Index (IE) S Acc EUR",
     "ticker": "0P0001XF3Z.F",
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
   },
   {
     "isin": "LU2145461757",
     "name": "Robeco Capital Growth - Robeco Smart Energy D EUR",
     "ticker": null,
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
   },
   {
     "isin": "IE00BM95B621",
     "name": "Polar Capital Global Technology Fund R Acc",
     "ticker": null,
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
   },
   {
     "isin": "IE00BYX5NH74",
     "name": "Fidelity MSCI Japan Index Fund",
     "ticker": "FEPB.MU",
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
   },
   {
     "isin": "LU0302296495",
     "name": "DNB Fund - Technology",
     "ticker": "CFPM.F",
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
   },
   {
     "isin": "LU1623762843",
     "name": "Carmignac Portfolio Credit A EUR Acc",
     "ticker": null,
     "asset_type": "fund",
-    "currency": "EUR"
+    "currency": "EUR",
+    "category": null,
+    "ter": null
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "name": "Fidelity MSCI World Index Fund EUR P Acc",
+    "ticker": "0P000184UV.F",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "category": null,
+    "ter": null
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "name": "Fidelity MSCI Emerging Markets Index Fund EUR P Acc",
+    "ticker": "0P000184UW.F",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "category": null,
+    "ter": null
+  },
+  {
+    "isin": "LU1598719752",
+    "name": "Cobas Lux SICAV - Cobas International Fund P EUR Acc",
+    "ticker": "0P0001AZ4C",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "category": "Renta Variable Global",
+    "ter": 1.85
+  },
+  {
+    "isin": "LU0996182563",
+    "name": "Amundi Index Solutions - Amundi Index MSCI World AE-C",
+    "ticker": "0P0000XW13.F",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "category": "Renta Variable Global",
+    "ter": 0.3
   }
-]
-''')
+]''')
 
 PRICES = json.loads(r'''[
   {
@@ -77,13 +130,13 @@ PRICES = json.loads(r'''[
   {
     "isin": "ES0112611001",
     "date": "2026-09-24",
-    "price": 351.640134,
+    "price": 351.64,
     "currency": "EUR"
   },
   {
     "isin": "IE000QAZP7L2",
     "date": "2026-09-24",
-    "price": 14.358999,
+    "price": 14.36,
     "currency": "EUR"
   },
   {
@@ -97,11 +150,100 @@ PRICES = json.loads(r'''[
     "date": "2026-09-25",
     "price": 29.25,
     "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-09-24",
+    "price": 29.1,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0302296495",
+    "date": "2026-09-23",
+    "price": 2030.9108,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-09-25",
+    "price": 14.75,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0302296495",
+    "date": "2026-09-24",
+    "price": 2023.18,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-09-25",
+    "price": 14.42,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-09-25",
+    "price": 9.21,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1598719752",
+    "date": "2026-09-24",
+    "price": 175.79,
+    "currency": null
   }
-]
-''')
+]''')
 
 TRANSACTIONS = json.loads(r'''[
+  {
+    "user_id": "asier",
+    "isin": "LU0996182563",
+    "type": "buy",
+    "shares": 0.876395,
+    "price": 342.3112,
+    "amount": 300.0,
+    "fees": 0.0,
+    "date": "2025-08-28",
+    "broker": "bbva",
+    "notes": "Aportación inicial (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0996182563",
+    "type": "buy",
+    "shares": 28.573998,
+    "price": 339.4694,
+    "amount": 9700.0,
+    "fees": 0.0,
+    "date": "2025-09-02",
+    "broker": "bbva",
+    "notes": "Aportación (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0996182563",
+    "type": "buy",
+    "shares": 29.546095,
+    "price": 338.4542,
+    "amount": 10000.0,
+    "fees": 0.0,
+    "date": "2025-09-04",
+    "broker": "bbva",
+    "notes": "Aportación (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0996182563",
+    "type": "buy",
+    "shares": 6.285367,
+    "price": 318.1994,
+    "amount": 2000.0,
+    "fees": 0.0,
+    "date": "2025-09-23",
+    "broker": "bbva",
+    "notes": "Aportación (compra cuenta corriente)"
+  },
   {
     "user_id": "asier",
     "isin": "IE000ZYRH0Q7",
@@ -112,7 +254,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-10-29",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -124,7 +266,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-10-29",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -172,7 +314,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-06",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -184,7 +326,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-06",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -220,7 +362,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-11",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -244,7 +386,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-14",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -256,7 +398,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-14",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -268,7 +410,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-18",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -316,7 +458,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-21",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -328,7 +470,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-22",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -352,7 +494,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-24",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -364,7 +506,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-24",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -376,7 +518,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-25",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -388,7 +530,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-25",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -424,7 +566,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-27",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -436,7 +578,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-11-27",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -448,7 +590,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-12-16",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -460,7 +602,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-12-18",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -472,7 +614,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-12-18",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -484,7 +626,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-12-18",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -496,7 +638,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-12-18",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -508,7 +650,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-12-23",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -520,7 +662,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-12-30",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -532,7 +674,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-07",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -568,7 +710,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-09",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -580,7 +722,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-12",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -592,7 +734,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-12",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -604,7 +746,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-13",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -640,7 +782,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-15",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -652,7 +794,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-27",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -688,7 +830,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-29",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -700,7 +842,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-01-29",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -712,7 +854,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-02-02",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -760,7 +902,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-02-16",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -772,7 +914,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-02-16",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -784,7 +926,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-02-16",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -796,7 +938,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-03-02",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -808,7 +950,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-04-20",
     "broker": "myinvestor",
-    "notes": "Reembolso Fondos de Inversi\u00f3n"
+    "notes": "Reembolso Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -820,7 +962,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-04-23",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -832,7 +974,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-04-23",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -844,7 +986,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-04-23",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -856,7 +998,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-04-23",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -868,7 +1010,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-04-23",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -880,7 +1022,31 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-04-23",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0996182563",
+    "type": "sell",
+    "shares": 15.648356,
+    "price": 386.9135,
+    "amount": 5273.5,
+    "fees": 0.0,
+    "date": "2026-05-08",
+    "broker": "bbva",
+    "notes": "Traspaso fondo en contra (a Cobas Lux)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU1598719752",
+    "type": "buy",
+    "shares": 34.5975,
+    "price": 152.4243,
+    "amount": 5273.5,
+    "fees": 0.0,
+    "date": "2026-05-08",
+    "broker": "bbva",
+    "notes": "Traspaso fondos a favor (desde Amundi, coste fiscal originario 5.273,50 € de valor 6.054,56 €)"
   },
   {
     "user_id": "asier",
@@ -904,7 +1070,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-05-18",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -916,7 +1082,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-05-18",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -928,7 +1094,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-05-19",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -964,7 +1130,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-05-26",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -976,7 +1142,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-05-27",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -1000,7 +1166,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-05-29",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -1012,7 +1178,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-06-01",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n Fondos de Inversi\u00f3n"
+    "notes": "Suscripción Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -1024,7 +1190,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-06-08",
     "broker": "myinvestor",
-    "notes": "Reembolso Fondos de Inversi\u00f3n"
+    "notes": "Reembolso Fondos de Inversión"
   },
   {
     "user_id": "asier",
@@ -1040,6 +1206,30 @@ TRANSACTIONS = json.loads(r'''[
   },
   {
     "user_id": "asier",
+    "isin": "IE00BYX5NX33",
+    "type": "buy",
+    "shares": 0.7326,
+    "price": 13.65,
+    "amount": 10.0,
+    "fees": 0.0,
+    "date": "2026-06-08",
+    "broker": "bbva",
+    "notes": "Aportación (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5M476",
+    "type": "buy",
+    "shares": 1.098,
+    "price": 9.1165,
+    "amount": 10.01,
+    "fees": 0.0,
+    "date": "2026-06-08",
+    "broker": "bbva",
+    "notes": "Aportación (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
     "isin": "IE000ZYRH0Q7",
     "type": "buy",
     "shares": 245.4,
@@ -1048,7 +1238,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-06-10",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -1076,6 +1266,42 @@ TRANSACTIONS = json.loads(r'''[
   },
   {
     "user_id": "asier",
+    "isin": "LU0996182563",
+    "type": "sell",
+    "shares": 33.506306,
+    "price": 386.9135,
+    "amount": 11291.64,
+    "fees": 0.0,
+    "date": "2026-06-15",
+    "broker": "bbva",
+    "notes": "Traspaso fondo en contra (a Fidelity World)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5NX33",
+    "type": "buy",
+    "shares": 946.279,
+    "price": 11.9327,
+    "amount": 11291.64,
+    "fees": 0.0,
+    "date": "2026-06-15",
+    "broker": "bbva",
+    "notes": "Traspaso fondos a favor (desde Amundi, coste fiscal originario 11.291,64 € de valor 12.964,03 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5NX33",
+    "type": "buy",
+    "shares": 144.16,
+    "price": 13.7,
+    "amount": 1975.0,
+    "fees": 0.0,
+    "date": "2026-06-16",
+    "broker": "bbva",
+    "notes": "Aportación (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
     "isin": "IE000ZYRH0Q7",
     "type": "buy",
     "shares": 189.6,
@@ -1084,7 +1310,31 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-06-17",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0996182563",
+    "type": "sell",
+    "shares": 16.127193,
+    "price": 386.9135,
+    "amount": 5434.86,
+    "fees": 0.0,
+    "date": "2026-06-17",
+    "broker": "bbva",
+    "notes": "Traspaso fondo en contra (a Fidelity Emerging)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5M476",
+    "type": "buy",
+    "shares": 680.586,
+    "price": 7.9856,
+    "amount": 5434.86,
+    "fees": 0.0,
+    "date": "2026-06-17",
+    "broker": "bbva",
+    "notes": "Traspaso fondos a favor (desde Amundi, coste fiscal originario 5.434,86 € de valor 6.239,82 €)"
   },
   {
     "user_id": "asier",
@@ -1096,7 +1346,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-06-18",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -1120,7 +1370,31 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-06-30",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU1598719752",
+    "type": "sell",
+    "shares": 34.5975,
+    "price": 152.4243,
+    "amount": 5273.5,
+    "fees": 0.0,
+    "date": "2026-07-03",
+    "broker": "bbva",
+    "notes": "Traspaso fondo en contra (a Fidelity World)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5NX33",
+    "type": "buy",
+    "shares": 433.75,
+    "price": 12.1579,
+    "amount": 5273.5,
+    "fees": 0.0,
+    "date": "2026-07-09",
+    "broker": "bbva",
+    "notes": "Traspaso fondos a favor (desde Cobas Lux, coste fiscal originario 5.273,50 € de valor 6.050,82 €)"
   },
   {
     "user_id": "asier",
@@ -1132,7 +1406,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2026-07-10",
     "broker": "myinvestor",
-    "notes": "Suscripci\u00f3n por Traspaso Interno"
+    "notes": "Suscripción por Traspaso Interno"
   },
   {
     "user_id": "asier",
@@ -1145,5 +1419,41 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-07-10",
     "broker": "myinvestor",
     "notes": "Reembolso por Traspaso Interno"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5NX33",
+    "type": "buy",
+    "shares": 289.3404,
+    "price": 13.824,
+    "amount": 4000.0,
+    "fees": 0.0,
+    "date": "2026-07-30",
+    "broker": "bbva",
+    "notes": "Aportación (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5NX33",
+    "type": "sell",
+    "shares": 425.253,
+    "price": 12.429,
+    "amount": 5285.47,
+    "fees": 0.0,
+    "date": "2026-09-17",
+    "broker": "bbva",
+    "notes": "Traspaso fondo en contra (a Cobas Lux)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU1598719752",
+    "type": "buy",
+    "shares": 34.2638,
+    "price": 154.258,
+    "amount": 5285.63,
+    "fees": 0.0,
+    "date": "2026-09-24",
+    "broker": "bbva",
+    "notes": "Traspaso fondos a favor (desde Fidelity World, coste fiscal originario 5.285,63 € de valor 6.042,08 €)"
   }
 ]''')
