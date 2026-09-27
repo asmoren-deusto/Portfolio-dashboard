@@ -118,6 +118,21 @@ def _seed_asier_data():
             if asier_tx_count == 0:
                 for t_data in TRANSACTIONS:
                     db.add(Transaction(**t_data))
+            else:
+                # Ensure TR_TRANSFER transactions exist if missing on existing DB volume
+                tr_count = db.query(Transaction).filter(
+                    Transaction.user_id == "asier",
+                    Transaction.isin == "TR_TRANSFER"
+                ).count()
+                if tr_count == 0:
+                    for t_data in TRANSACTIONS:
+                        if t_data.get("isin") == "TR_TRANSFER":
+                            db.add(Transaction(**t_data))
+                    db.query(Transaction).filter(
+                        Transaction.user_id == "asier",
+                        Transaction.isin == "IE000ZYRH0Q7",
+                        Transaction.date == "2025-10-29"
+                    ).update({"notes": "Traspaso de Entrada desde Trade Republic"})
 
             db.commit()
         except Exception:

@@ -135,10 +135,37 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Renta Variable Mixta (EPSV)",
     "ter": 1.20
+  },
+  {
+    "isin": "TR_TRANSFER",
+    "name": "Cartera Trade Republic",
+    "ticker": null,
+    "asset_type": "stock",
+    "currency": "EUR",
+    "category": null,
+    "ter": 0.0
   }
 ]''')
 
 PRICES = json.loads(r'''[
+  {
+    "isin": "TR_TRANSFER",
+    "date": "2025-08-01",
+    "price": 1.0,
+    "currency": "EUR"
+  },
+  {
+    "isin": "TR_TRANSFER",
+    "date": "2025-10-29",
+    "price": 1.0,
+    "currency": "EUR"
+  },
+  {
+    "isin": "TR_TRANSFER",
+    "date": "2026-09-25",
+    "price": 1.0,
+    "currency": "EUR"
+  },
   {
     "isin": "ES0112611001",
     "date": "2026-09-23",
@@ -1026,6 +1053,18 @@ TRANSACTIONS = json.loads(r'''[
   },
   {
     "user_id": "asier",
+    "isin": "TR_TRANSFER",
+    "type": "buy",
+    "shares": 20000.0,
+    "price": 1.0,
+    "amount": 20000.0,
+    "fees": 0.0,
+    "date": "2025-08-01",
+    "broker": "trade_republic",
+    "notes": "Saldo consolidado Trade Republic"
+  },
+  {
+    "user_id": "asier",
     "isin": "0201G",
     "type": "buy",
     "shares": 20.0,
@@ -1118,7 +1157,7 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-10-29",
     "broker": "myinvestor",
-    "notes": "Suscripción Fondos de Inversión"
+    "notes": "Traspaso de Entrada desde Trade Republic"
   },
   {
     "user_id": "asier",
@@ -1130,7 +1169,19 @@ TRANSACTIONS = json.loads(r'''[
     "fees": 0.0,
     "date": "2025-10-29",
     "broker": "myinvestor",
-    "notes": "Suscripción Fondos de Inversión"
+    "notes": "Traspaso de Entrada desde Trade Republic"
+  },
+  {
+    "user_id": "asier",
+    "isin": "TR_TRANSFER",
+    "type": "sell",
+    "shares": 20000.0,
+    "price": 1.0,
+    "amount": 20000.0,
+    "fees": 0.0,
+    "date": "2025-10-29",
+    "broker": "trade_republic",
+    "notes": "Traspaso de Salida a MyInvestor"
   },
   {
     "user_id": "asier",
