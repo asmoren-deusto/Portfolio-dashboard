@@ -69,7 +69,6 @@ export function OverviewPage() {
 
   const isGlobalUpdating = summaryFetching || positionsFetching
   const isPeriodUpdating = perfFetching || analyticsFetching
-  const isAnyUpdating = isGlobalUpdating || isPeriodUpdating
 
   // Real portfolio summary directly from backend or calculated from active positions if loading
   const displaySummary = React.useMemo(() => {
@@ -162,15 +161,9 @@ export function OverviewPage() {
       {/* 1. Métricas Globales (Totales Cartera) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between px-0.5">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <Wallet size={13.5} className="text-blue-500" />
             <span>Métricas Globales y del Periodo Seleccionado ({periodLabel})</span>
-            {isAnyUpdating && (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-semibold lowercase tracking-normal">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping" />
-                actualizando...
-              </span>
-            )}
           </div>
           <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
             {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
