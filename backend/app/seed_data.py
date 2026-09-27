@@ -8,7 +8,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 1.85
   },
   {
     "isin": "LU0261952682",
@@ -17,7 +17,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 0.30
   },
   {
     "isin": "IE000ZYRH0Q7",
@@ -26,7 +26,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 0.12
   },
   {
     "isin": "IE000QAZP7L2",
@@ -35,7 +35,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 0.20
   },
   {
     "isin": "LU2145461757",
@@ -44,7 +44,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 1.50
   },
   {
     "isin": "IE00BM95B621",
@@ -53,7 +53,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 1.65
   },
   {
     "isin": "IE00BYX5NH74",
@@ -62,7 +62,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 0.15
   },
   {
     "isin": "LU0302296495",
@@ -71,7 +71,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 1.50
   },
   {
     "isin": "LU1623762843",
@@ -80,7 +80,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 1.15
   },
   {
     "isin": "IE00BYX5NX33",
@@ -89,7 +89,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 0.12
   },
   {
     "isin": "IE00BYX5M476",
@@ -98,7 +98,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": null
+    "ter": 0.20
   },
   {
     "isin": "LU1598719752",
@@ -106,7 +106,7 @@ ASSETS = json.loads(r'''[
     "ticker": "0P0001AZ4C",
     "asset_type": "fund",
     "currency": "EUR",
-    "category": "Renta Variable Global",
+    "category": null,
     "ter": 1.85
   },
   {
@@ -115,8 +115,8 @@ ASSETS = json.loads(r'''[
     "ticker": "0P0000XW13.F",
     "asset_type": "fund",
     "currency": "EUR",
-    "category": "Renta Variable Global",
-    "ter": 0.3
+    "category": null,
+    "ter": 0.30
   },
   {
     "isin": "0192#0011",
@@ -124,7 +124,7 @@ ASSETS = json.loads(r'''[
     "ticker": null,
     "asset_type": "epsv",
     "currency": "EUR",
-    "category": "Renta Variable Global (EPSV)",
+    "category": null,
     "ter": 0.52
   },
   {
@@ -134,7 +134,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "epsv",
     "currency": "EUR",
     "category": "Renta Variable Mixta (EPSV)",
-    "ter": 1.2
+    "ter": 1.20
   }
 ]''')
 

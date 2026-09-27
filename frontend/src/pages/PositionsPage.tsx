@@ -55,11 +55,17 @@ export function PositionsPage() {
     const gainers = positions.filter((p) => p.unrealized_pnl >= 0).length
     const losers = positions.filter((p) => p.unrealized_pnl < 0).length
 
-    // Weighted average TER
-    const weightedTer = positions.reduce((sum, p) => {
-      const ter = (p as any).ter ?? 0.15
-      return sum + ter * (p.weight / 100)
+    // Weighted average TER calculated rigorously across positions with official TER
+    let validWeightSum = 0
+    const weightedTerSum = positions.reduce((sum, p) => {
+      const ter = (p as any).ter
+      if (ter !== null && ter !== undefined && typeof ter === 'number' && ter > 0) {
+        validWeightSum += p.weight
+        return sum + ter * (p.weight / 100)
+      }
+      return sum
     }, 0)
+    const weightedTer = validWeightSum > 0 ? (weightedTerSum / (validWeightSum / 100)) : null
 
     return { totalValue, totalInvested, totalPnl, totalPnlPct, gainers, losers, weightedTer }
   }, [positions])
@@ -196,7 +202,7 @@ export function PositionsPage() {
               <Percent className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1">
-              {stats.weightedTer.toFixed(2)}%
+              {stats.weightedTer !== null ? `${stats.weightedTer.toFixed(2)}%` : '—'}
             </div>
             <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
               Ponderado por volumen de cartera

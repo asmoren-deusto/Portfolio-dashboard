@@ -313,18 +313,13 @@ export function OverviewPage() {
             loading={isPeriodUpdating}
           />
           <KpiCard
-            label="Rentabilidad Activos (TWR)"
-            value={
-              analytics?.twr !== undefined
-                ? fmt.pct(analytics.twr)
-                : displaySummary
-                ? fmt.pct(displaySummary.total_pnl_pct)
-                : '—'
-            }
-            sub="time-weighted return puro"
-            changePositive={(analytics?.twr ?? 0) >= 0}
+            label={`Aportaciones (${periodLabel})`}
+            value={perfStats ? fmt.currency(perfStats.periodInflow) : '—'}
+            change={perfStats && perfStats.periodInflow !== 0 ? 'DCA / Compras' : undefined}
+            sub={`capital neto ingresado en ${periodLabel}`}
+            changePositive={true}
             delay={0.12}
-            icon={<Activity size={15} className="text-cyan-400" />}
+            icon={<Wallet size={15} className="text-indigo-400" />}
             loading={isPeriodUpdating}
           />
           <KpiCard

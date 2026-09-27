@@ -110,16 +110,17 @@ export function AnalyticsPage() {
               Rendimiento acumulado de tu cartera frente a los principales índices globales y tipo libre de riesgo.
             </p>
           </div>
-          <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 self-start md:self-auto">
-            Alfa estimada: +3.2%
-          </span>
         </div>
 
         <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 p-5 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
           <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
-            <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Tu Cartera</span>
+            <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Tu Cartera (TIR)</span>
             <span className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">
-              {analytics ? fmt.pct(analytics.twr) : '+21.4%'}
+              {analytics?.annualized_return !== undefined
+                ? fmt.pct(analytics.annualized_return)
+                : analytics?.net_profit_pct !== undefined
+                ? fmt.pct(analytics.net_profit_pct)
+                : '—'}
             </span>
             <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Gestión activa + DCA</span>
           </div>
@@ -229,24 +230,24 @@ export function AnalyticsPage() {
           {[
             {
               label: 'Volatilidad Anualizada',
-              value: analytics ? fmt.pct(analytics.volatility, false) : '12.4%',
+              value: analytics && analytics.volatility !== undefined ? fmt.pct(analytics.volatility, false) : '—',
               desc: 'Desviación estándar anualizada de retornos. Un valor inferior al 15% indica una cartera equilibrada y defensiva.',
               color: 'text-amber-500 dark:text-amber-400',
-              tag: 'Moderada',
+              tag: analytics && analytics.volatility !== undefined && analytics.volatility < 15 ? 'Baja / Moderada' : 'Moderada',
             },
             {
               label: 'Máximo Drawdown Histórico',
-              value: analytics ? fmt.pct(analytics.max_drawdown) : '-8.7%',
+              value: analytics && analytics.max_drawdown !== undefined ? fmt.pct(analytics.max_drawdown) : '—',
               desc: 'Mayor caída pico a valle registrada. Mide la resistencia patrimonial durante correcciones severas de mercado.',
               color: 'text-rose-500 dark:text-rose-400',
               tag: 'Bajo impacto',
             },
             {
               label: 'Ratio de Sharpe',
-              value: analytics ? fmt.ratio(analytics.sharpe_ratio) : '1.38',
+              value: analytics && analytics.sharpe_ratio !== undefined ? fmt.ratio(analytics.sharpe_ratio) : '—',
               desc: 'Rendimiento extra obtenido por unidad de riesgo asumido vs tasa libre de riesgo. > 1.0 se considera óptimo.',
               color: isSharpeGood ? 'text-emerald-500 dark:text-emerald-400' : 'text-amber-500 dark:text-amber-400',
-              tag: 'Excelente',
+              tag: isSharpeGood ? 'Excelente' : 'Aceptable',
             },
           ].map((m, i) => (
             <motion.div

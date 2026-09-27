@@ -284,63 +284,63 @@ async def get_price_history(
         if (datetime.now() - ts).total_seconds() < 1800:
             return cached_data
 
-    # Try Yahoo Finance first (best historical data for ETFs/stocks)
-    # Skip Morningstar codes (0P...) which are not valid Yahoo Finance tickers
-    if ticker and not ticker.startswith("0P"):
+    # 1. Try Yahoo Finance (works for stocks, ETFs and European funds)
+    if ticker:
         try:
             yf_period = "max" if period == "all" else period
             t = yf.Ticker(ticker)
             hist = t.history(period=yf_period)
-            if not hist.empty:
+            if not hist.empty and len(hist) > 1:
                 res = [
                     {"date": str(idx.date()), "price": round(float(row["Close"]), 4)}
                     for idx, row in hist.iterrows()
+                    if float(row["Close"]) > 0
                 ]
-                _history_cache[cache_key] = (datetime.now(), res)
-                return res
+                if res:
+                    _history_cache[cache_key] = (datetime.now(), res)
+                    return res
         except Exception as e:
-            logger.warning(f"Yahoo history error for {ticker}: {e}")
+            logger.debug(f"Yahoo history error for {ticker}: {e}")
 
-    # Check PriceCache in DB for stored historical NAVs (e.g. for EPSVs and custom funds)
+    # 2. Check PriceCache & Transactions in DB for authentic historical records
     try:
         from app.database import SessionLocal
-        from app.models import PriceCache
+        from app.models import PriceCache, Transaction
         db = SessionLocal()
         try:
+            points_dict = {}
+            # Real execution prices from transactions
+            txs = db.query(Transaction).filter(Transaction.isin == isin).order_by(Transaction.date.asc()).all()
+            for tx in txs:
+                p = tx.price or (tx.amount / tx.shares if tx.shares > 0 else 0)
+                if p > 0:
+                    d_str = str(tx.date)[:10]
+                    points_dict[d_str] = round(float(p), 4)
+
+            # Real historical NAVs stored in PriceCache
             cached_rows = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.asc()).all()
-            if len(cached_rows) > 1:
-                return [{"date": row.date, "price": round(row.price, 4)} for row in cached_rows]
+            for row in cached_rows:
+                if row.price and row.price > 0:
+                    points_dict[row.date] = round(float(row.price), 4)
+
+            # Latest live price
+            current, current_date = await get_price_with_date(isin, ticker, db=db)
+            if current and current > 0:
+                t_date = current_date or datetime.now().strftime("%Y-%m-%d")
+                points_dict[t_date] = round(float(current), 4)
+
+            if points_dict:
+                sorted_pts = [{"date": d, "price": p} for d, p in sorted(points_dict.items())]
+                _history_cache[cache_key] = (datetime.now(), sorted_pts)
+                return sorted_pts
         finally:
             db.close()
     except Exception as e:
-        logger.warning(f"Error querying historical PriceCache for {isin}: {e}")
+        logger.warning(f"Error querying historical records for {isin}: {e}")
 
-    # Fallback: generate synthetic history from current price (for funds without ticker)
-    # In a real scenario, you'd use Morningstar historical NAV endpoint
+    # Fallback to single latest known price without synthetic random generation
     current = await get_current_price(isin, ticker)
-    if current:
-        return _generate_demo_history(current, period)
+    if current and current > 0:
+        return [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(float(current), 4)}]
 
     return []
-
-
-def _generate_demo_history(current_price: float, period: str) -> list[dict]:
-    """Generate plausible history when real data unavailable, ending exactly at current_price."""
-    import random
-    days = {"1d": 1, "5d": 5, "1mo": 30, "3mo": 90, "6mo": 180, "1y": 365, "2y": 730, "5y": 1825}
-    n_days = days.get(period, 365)
-    end = datetime.now()
-    raw_points = []
-    val = 1.0
-    for i in range(n_days):
-        d = end - timedelta(days=n_days - i)
-        if d.weekday() < 5:  # weekdays only
-            val *= (1 + random.gauss(0.0003, 0.007))
-            raw_points.append((str(d.date()), val))
-
-    if not raw_points:
-        return [{"date": str(datetime.now().date()), "price": round(current_price, 4)}]
-
-    final_val = raw_points[-1][1]
-    scale = current_price / final_val if final_val > 0 else 1.0
-    return [{"date": d_str, "price": round(v * scale, 4)} for d_str, v in raw_points]

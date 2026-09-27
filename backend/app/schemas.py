@@ -82,6 +82,7 @@ class PositionOut(BaseModel):
     daily_change_pct: Optional[float] = None
     ticker: Optional[str] = None
     domain: Optional[str] = None
+    ter: Optional[float] = None
 
 
 

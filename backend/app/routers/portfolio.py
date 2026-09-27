@@ -167,6 +167,7 @@ async def get_positions(user_id: str = "asier", broker: str | None = None, refre
             "daily_change": daily_change,
             "daily_change_pct": daily_change_pct,
             "broker": pos_broker,
+            "ter": getattr(asset, "ter", None) if asset else None,
             "last_updated": price_date or datetime.now().strftime("%Y-%m-%d"),
             "price_date": price_date or datetime.now().strftime("%Y-%m-%d"),
         })
@@ -323,10 +324,6 @@ async def get_analytics(period: str = "1y", user_id: str = "asier", broker: str 
     vol = calculate_volatility(nav_series)
     max_dd = calculate_max_drawdown(nav_series)
     twr = calculate_twr(nav_series, transactions)
-
-    # If unit NAV series has historical distortions, fall back cleanly
-    if (twr is None or twr < 0) and net_profit > 0:
-        twr = net_profit_pct
 
     # Realistic Sharpe ratio based on annualized return vs 2.5% risk free
     sharpe = None
