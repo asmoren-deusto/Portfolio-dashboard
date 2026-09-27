@@ -160,13 +160,12 @@ export function OverviewPage() {
         <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <Wallet size={13.5} className="text-blue-500" />
-            <span>Métricas Globales (Totales Cartera)</span>
+            <span>Métricas Globales y del Periodo Seleccionado ({periodLabel})</span>
           </div>
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-            Histórico acumulado
+          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
           </span>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5">
           <KpiCard
             hero
@@ -236,16 +235,6 @@ export function OverviewPage() {
 
       {/* 2. Métricas del Periodo Seleccionado */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between px-0.5">
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            <Calendar size={13.5} />
-            <span>Métricas del Periodo Seleccionado ({periodLabel})</span>
-          </div>
-          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-            {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
-          </span>
-        </div>
-
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
           <KpiCard
             label={`Rentabilidad (${periodLabel})`}
