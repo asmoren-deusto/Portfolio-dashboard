@@ -69,6 +69,7 @@ export function OverviewPage() {
 
   const isGlobalUpdating = summaryFetching || positionsFetching
   const isPeriodUpdating = perfFetching || analyticsFetching
+  const isAnyUpdating = isGlobalUpdating || isPeriodUpdating
 
   // Real portfolio summary directly from backend or calculated from active positions if loading
   const displaySummary = React.useMemo(() => {
@@ -95,10 +96,35 @@ export function OverviewPage() {
   // Quick stats on performance period directly from real performance series
   const perfStats = React.useMemo(() => {
     if (!performance || performance.length === 0) return null
-    const first = performance[0].value
-    const last = performance[performance.length - 1].value
-    const diff = last - first
-    const diffPct = first > 0 ? (diff / first) * 100 : 0
+    const firstPoint = performance[0]
+    const lastPoint = performance[performance.length - 1]
+
+    const first = firstPoint.value
+    const last = lastPoint.value
+    const firstInvested = firstPoint.invested ?? first
+    const lastInvested = lastPoint.invested ?? last
+
+    // Ganancia/Pérdida neta real de mercado generada durante este periodo (exclusiva de rentabilidad)
+    const startPnl = first - firstInvested
+    const endPnl = last - lastInvested
+    const periodProfit = Math.round((endPnl - startPnl) * 100) / 100
+
+    // Aportaciones netas de capital ingresadas en este periodo
+    const periodInflow = Math.round((lastInvested - firstInvested) * 100) / 100
+
+    // Crecimiento patrimonial bruto (saldo final - saldo inicial)
+    const grossGrowth = Math.round((last - first) * 100) / 100
+
+    // Rentabilidad porcentual real ponderada (Dietz Modificado)
+    let realReturnPct = 0
+    if (firstInvested <= 0.01) {
+      realReturnPct = lastInvested > 0 ? (endPnl / lastInvested) * 100 : 0
+    } else {
+      const capitalBase = first + Math.max(0, periodInflow) * 0.5
+      realReturnPct = capitalBase > 0 ? (periodProfit / capitalBase) * 100 : 0
+    }
+    realReturnPct = Math.round(realReturnPct * 100) / 100
+
     let max = -Infinity
     let min = Infinity
     let peak = -Infinity
@@ -131,8 +157,10 @@ export function OverviewPage() {
     return {
       first,
       last,
-      diff,
-      diffPct,
+      grossGrowth,
+      periodProfit,
+      periodInflow,
+      realReturnPct,
       max,
       min,
       maxDrawdown: Number(maxDrawdown.toFixed(2)),
@@ -161,11 +189,17 @@ export function OverviewPage() {
       {/* 1. Métricas Globales (Totales Cartera) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between px-0.5">
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <Wallet size={13.5} className="text-blue-500" />
             <span>Métricas Globales y del Periodo Seleccionado ({periodLabel})</span>
+            {isAnyUpdating && (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-semibold lowercase tracking-normal">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping" />
+                actualizando...
+              </span>
+            )}
           </div>
-          <span className={cn("text-[11px] font-mono text-slate-500 dark:text-slate-400 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
+          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
             {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
           </span>
         </div>
@@ -258,14 +292,22 @@ export function OverviewPage() {
             label={`Rentabilidad (${periodLabel})`}
             value={
               perfStats
-                ? fmt.pct(perfStats.diffPct)
+                ? fmt.pct(perfStats.realReturnPct)
                 : analytics?.return_ytd !== undefined
                 ? fmt.pct(analytics.return_ytd)
                 : '—'
             }
-            change={perfStats ? `${perfStats.diff >= 0 ? '+' : ''}${fmt.currency(perfStats.diff)}` : undefined}
-            sub={`variación en ${periodLabel}`}
-            changePositive={(perfStats?.diffPct ?? 0) >= 0}
+            change={
+              perfStats
+                ? `${perfStats.periodProfit >= 0 ? '+' : ''}${fmt.currency(perfStats.periodProfit)}`
+                : undefined
+            }
+            sub={
+              perfStats && perfStats.periodInflow !== 0
+                ? `aportado: ${perfStats.periodInflow >= 0 ? '+' : ''}${fmt.currency(perfStats.periodInflow)}`
+                : `ganancia neta en ${periodLabel}`
+            }
+            changePositive={(perfStats?.periodProfit ?? 0) >= 0}
             delay={0.1}
             icon={<TrendingUp size={15} className="text-emerald-400" />}
             loading={isPeriodUpdating}
@@ -358,11 +400,12 @@ export function OverviewPage() {
                 </span>
                 <span
                   className={`font-bold ${
-                    perfStats.diff >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                    perfStats.periodProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                   }`}
+                  title={`Ganancia neta: ${fmt.currency(perfStats.periodProfit)} | Aportaciones: ${fmt.currency(perfStats.periodInflow)}`}
                 >
-                  {perfStats.diff >= 0 ? '+' : ''}
-                  {fmt.pct(perfStats.diffPct)}
+                  {perfStats.periodProfit >= 0 ? '+' : ''}
+                  {fmt.currency(perfStats.periodProfit)} ({fmt.pct(perfStats.realReturnPct)})
                 </span>
               </div>
             )}
