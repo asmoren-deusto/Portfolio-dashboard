@@ -22,7 +22,7 @@ import { KpiCard } from '@/components/ui/KpiCard'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PerformanceChart } from '@/components/charts/PerformanceChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
-import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
+import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
@@ -41,29 +41,6 @@ import {
   type MarketStock,
   type Position,
 } from '@/api/queries'
-
-function getBrokerBadge(broker?: string | null) {
-  const b = (broker || '').toLowerCase()
-  if (b === 'bbva') {
-    return (
-      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-blue-100/90 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 shrink-0">
-        BBVA
-      </span>
-    )
-  }
-  if (b === 'indexa') {
-    return (
-      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-indigo-100/90 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 shrink-0">
-        Indexa
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
-      MyInvestor
-    </span>
-  )
-}
 
 type AllocMode = 'asset' | 'type'
 
@@ -432,7 +409,7 @@ export function OverviewPage() {
                       </div>
                     </td>
                     <td className="py-2.5 px-2 text-center">
-                      {getBrokerBadge(p.broker)}
+                      <BrokerBadge broker={p.broker} />
                     </td>
                     <td className="py-2.5 px-2">
                       <AssetBadge type={p.asset_type} />
@@ -558,7 +535,7 @@ export function OverviewPage() {
                       </div>
                     </td>
                     <td className="py-2.5 px-2 text-center">
-                      {getBrokerBadge(p.broker)}
+                      <BrokerBadge broker={p.broker} />
                     </td>
                     <td className="py-2.5 px-2">
                       <AssetBadge type={p.asset_type} />

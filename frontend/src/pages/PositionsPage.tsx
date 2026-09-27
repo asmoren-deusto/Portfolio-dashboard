@@ -17,7 +17,7 @@ import {
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
-import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
+import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { fmt, cn } from '@/lib/utils'
 import { usePositions } from '@/api/queries'
@@ -381,18 +381,7 @@ export function PositionsPage() {
                                     <span className="text-blue-600 dark:text-blue-400 font-semibold">{p.ticker}</span>
                                   </>
                                 )}
-                                <span
-                                  className={cn(
-                                    'ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase',
-                                    p.broker === 'bbva'
-                                      ? 'bg-blue-100/90 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60'
-                                      : p.broker === 'indexa'
-                                      ? 'bg-indigo-100/90 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60'
-                                      : 'bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
-                                  )}
-                                >
-                                  {p.broker === 'bbva' ? 'BBVA' : p.broker === 'indexa' ? 'Indexa Capital' : 'MyInvestor'}
-                                </span>
+                                <BrokerBadge broker={p.broker} className="ml-1" />
                                 {p.asset_type === 'epsv' && (
                                   <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
                                     DCA 416,66 €/mes (día 7)
@@ -502,18 +491,7 @@ export function PositionsPage() {
                         </h3>
                         <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
                           <span>{p.isin}</span>
-                          <span
-                            className={cn(
-                              'px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase shrink-0',
-                              p.broker === 'bbva'
-                                ? 'bg-blue-100/90 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60'
-                                : p.broker === 'indexa'
-                                ? 'bg-indigo-100/90 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60'
-                                : 'bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
-                            )}
-                          >
-                            {p.broker === 'bbva' ? 'BBVA' : p.broker === 'indexa' ? 'Indexa Capital' : 'MyInvestor'}
-                          </span>
+                          <BrokerBadge broker={p.broker} className="shrink-0" />
                           {p.asset_type === 'epsv' && (
                             <span className="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shrink-0">
                               DCA 416,66 € (día 7)
