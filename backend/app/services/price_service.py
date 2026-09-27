@@ -1,5 +1,6 @@
-"""Price service — fetches NAV/prices from Yahoo Finance and Morningstar."""
+"""Price service — fetches NAV/prices from Yahoo Finance, FT, Azvalor, Indexa Capital and Morningstar."""
 import re
+import csv
 import httpx
 import yfinance as yf
 import pandas as pd
@@ -31,12 +32,13 @@ async def get_price_with_date(
     Get current NAV and date for an asset dynamically.
     Order of precedence:
       1. In-memory cache (if valid within 15 min TTL and not forced)
-      2. Direct Official Gestora Website (e.g. Azvalor official website for ES011261...)
-      3. Financial Times Markets (official European institutional fund tearsheet feed)
-      4. Live fetch from Quefondos (Spanish distributor fund page)
-      5. Live fetch from Yahoo Finance (using ticker)
-      6. Database PriceCache fallback (cached historical NAV)
-      7. Morningstar public search
+      2. Indexa Capital official website (for EPSV 0192#0011 / 0192...)
+      3. Direct Official Gestora Website (e.g. Azvalor official website for ES011261...)
+      4. Financial Times Markets (official European institutional fund tearsheet feed)
+      5. Live fetch from Quefondos (Spanish distributor fund page)
+      6. Live fetch from Yahoo Finance (using ticker)
+      7. Database PriceCache fallback (cached historical NAV)
+      8. Morningstar public search
     """
     if not force and _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
@@ -44,9 +46,13 @@ async def get_price_with_date(
     price = None
     price_date = None
 
-    # For non-standard ISINs (e.g. EPSV registration numbers like 0192#0011, 0201G), look up DB directly
+    # Check if this is an Indexa EPSV (e.g. 0192#0011)
+    if isin.startswith("0192") or isin == "0192#0011":
+        price, price_date = await _fetch_indexa_epsv_official(isin, db=db)
+
+    # For other non-standard ISINs (e.g. Kutxabank 0201G), look up DB PriceCache
     is_standard_isin = len(isin) == 12 and isin.isalnum()
-    if not is_standard_isin and db is not None:
+    if price is None and not is_standard_isin and db is not None:
         try:
             from app.models import PriceCache
             entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
@@ -57,7 +63,7 @@ async def get_price_with_date(
             logger.warning(f"Error querying PriceCache for non-standard ISIN {isin}: {e}")
 
     # 1. Try Direct Official Gestora (Azvalor website)
-    if isin.startswith("ES011261"):
+    if price is None and isin.startswith("ES011261"):
         price, price_date = await _fetch_azvalor_official(isin)
 
     # 2. Try Financial Times Markets (official European fund data provider)
@@ -114,6 +120,135 @@ async def get_current_price(isin: str, ticker: str | None = None, db = None, for
     """Get current price for an asset (float only)."""
     price, _ = await get_price_with_date(isin, ticker, db=db, force=force)
     return price
+
+
+async def _fetch_indexa_epsv_official(isin: str, db=None) -> tuple[Optional[float], Optional[str]]:
+    """
+    Fetch official NAV and date directly from Indexa Capital website:
+    https://indexacapital.com/es/esp/stats/download?stat=epsv
+
+    Indexa provides daily official indexes for EPSV portfolios (1 to 10).
+    For 'Indexa Más Rentabilidad Acciones EPSV' (ISIN 0192#0011 / 01920011),
+    it tracks 100% Cartera 10 (Acciones). With inception index 100.00 = 10.00 EUR NAV,
+    NAV = Cartera 10 index / 10.0.
+    """
+    try:
+        url = "https://indexacapital.com/es/esp/stats/download?stat=epsv"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code != 200:
+                logger.warning(f"Indexa EPSV request returned status {resp.status_code}")
+                return None, None
+
+            text = resp.text.lstrip('\ufeff')
+            lines = text.splitlines()
+            reader = csv.reader(lines, delimiter=';')
+            header = next(reader, None)
+
+            # Determine column index: Cartera 10 for Acciones, Cartera 1 for Bonos
+            col_idx = 10
+            if header:
+                for idx, h in enumerate(header):
+                    if "10" in h:
+                        col_idx = idx
+                        break
+
+            rows = list(reader)
+            for r in reversed(rows):
+                if r and len(r) > col_idx and r[0].strip() and r[col_idx].strip():
+                    date_str = r[0].strip()
+                    val_str = r[col_idx].strip().replace(',', '.')
+                    try:
+                        raw_val = float(val_str)
+                        if raw_val > 0:
+                            nav = round(raw_val / 10.0, 4)
+                            # Persist recent history to DB PriceCache if db available
+                            if db is not None:
+                                try:
+                                    from app.models import PriceCache
+                                    for sub_r in rows[-30:]:
+                                        if sub_r and len(sub_r) > col_idx and sub_r[0].strip() and sub_r[col_idx].strip():
+                                            s_dt = sub_r[0].strip()
+                                            s_val = float(sub_r[col_idx].strip().replace(',', '.')) / 10.0
+                                            existing = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == s_dt).first()
+                                            if not existing:
+                                                db.add(PriceCache(isin=isin, date=s_dt, price=round(s_val, 4), currency="EUR", source="live_indexa"))
+                                    db.commit()
+                                except Exception as e:
+                                    logger.warning(f"Error persisting Indexa recent points to PriceCache: {e}")
+                            return nav, date_str
+                    except ValueError:
+                        continue
+    except Exception as e:
+        logger.warning(f"Error fetching official EPSV price from Indexa Capital: {e}")
+    return None, None
+
+
+async def _fetch_indexa_epsv_history(isin: str, period: str = "1y", db=None) -> list[dict]:
+    """
+    Fetch historical NAVs directly from Indexa Capital official EPSV dataset.
+    """
+    try:
+        url = "https://indexacapital.com/es/esp/stats/download?stat=epsv"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code != 200:
+                return []
+
+            text = resp.text.lstrip('\ufeff')
+            lines = text.splitlines()
+            reader = csv.reader(lines, delimiter=';')
+            header = next(reader, None)
+
+            col_idx = 10
+            if header:
+                for idx, h in enumerate(header):
+                    if "10" in h:
+                        col_idx = idx
+                        break
+
+            cutoff_date = None
+            now = datetime.now()
+            if period in ["1m", "1mo"]:
+                cutoff_date = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+            elif period in ["3m", "3mo"]:
+                cutoff_date = (now - timedelta(days=90)).strftime("%Y-%m-%d")
+            elif period in ["6m", "6mo"]:
+                cutoff_date = (now - timedelta(days=180)).strftime("%Y-%m-%d")
+            elif period in ["1y", "12mo"]:
+                cutoff_date = (now - timedelta(days=365)).strftime("%Y-%m-%d")
+            elif period in ["2y"]:
+                cutoff_date = (now - timedelta(days=730)).strftime("%Y-%m-%d")
+            elif period in ["3y"]:
+                cutoff_date = (now - timedelta(days=365*3)).strftime("%Y-%m-%d")
+            elif period in ["5y"]:
+                cutoff_date = (now - timedelta(days=365*5)).strftime("%Y-%m-%d")
+            elif period == "ytd":
+                cutoff_date = f"{now.year}-01-01"
+
+            history = []
+            for r in reader:
+                if r and len(r) > col_idx and r[0].strip() and r[col_idx].strip():
+                    d_str = r[0].strip()
+                    if cutoff_date and d_str < cutoff_date:
+                        continue
+                    val_str = r[col_idx].strip().replace(',', '.')
+                    try:
+                        raw_val = float(val_str)
+                        if raw_val > 0:
+                            history.append({"date": d_str, "price": round(raw_val / 10.0, 4)})
+                    except ValueError:
+                        continue
+            return history
+    except Exception as e:
+        logger.warning(f"Error fetching Indexa EPSV history: {e}")
+        return []
 
 
 async def _fetch_azvalor_official(isin: str) -> tuple[Optional[float], Optional[str]]:
@@ -283,6 +418,13 @@ async def get_price_history(
         ts, cached_data = _history_cache[cache_key]
         if (datetime.now() - ts).total_seconds() < 1800:
             return cached_data
+
+    # 0. If it's an Indexa EPSV, fetch official daily history directly from Indexa Capital
+    if isin.startswith("0192") or isin == "0192#0011":
+        indexa_hist = await _fetch_indexa_epsv_history(isin, period=period)
+        if indexa_hist:
+            _history_cache[cache_key] = (datetime.now(), indexa_hist)
+            return indexa_hist
 
     # 1. Try Yahoo Finance (works for stocks, ETFs and European funds)
     if ticker:
