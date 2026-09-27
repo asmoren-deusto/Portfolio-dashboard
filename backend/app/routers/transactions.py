@@ -14,9 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=list[TransactionOut])
-def get_transactions(user_id: str = "asier", db: Session = Depends(get_db)):
+def get_transactions(user_id: str = "asier", broker: str | None = None, db: Session = Depends(get_db)):
     """List all transactions ordered by date desc."""
-    return db.query(Transaction).filter(Transaction.user_id == user_id).order_by(Transaction.date.desc()).all()
+    query = db.query(Transaction).filter(Transaction.user_id == user_id)
+    if broker and broker.lower() not in ["all", "todos"]:
+        query = query.filter(Transaction.broker == broker.lower())
+    return query.order_by(Transaction.date.desc()).all()
 
 
 @router.post("", response_model=TransactionOut)

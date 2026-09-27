@@ -14,6 +14,8 @@ interface AppState {
   // Period & Theme
   period: Period
   setPeriod: (p: Period) => void
+  selectedBroker: 'all' | 'myinvestor' | 'bbva'
+  setSelectedBroker: (b: 'all' | 'myinvestor' | 'bbva') => void
   theme: Theme
   setTheme: (t: Theme) => void
   toggleTheme: () => void
@@ -139,6 +141,8 @@ const initialUser = getStoredActiveUser()
 export const useAppStore = create<AppState>((set, get) => ({
   period: '1y',
   setPeriod: (period) => set({ period }),
+  selectedBroker: 'all',
+  setSelectedBroker: (selectedBroker) => set({ selectedBroker }),
   theme: savedTheme,
   setTheme: (theme) => {
     applyTheme(theme)

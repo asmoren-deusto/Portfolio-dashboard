@@ -75,6 +75,7 @@ class PositionOut(BaseModel):
     unrealized_pnl: Optional[float]
     unrealized_pnl_pct: Optional[float]
     weight: Optional[float] = None   # % of total portfolio
+    broker: Optional[str] = "myinvestor"
     last_updated: Optional[str] = None
     price_date: Optional[str] = None
 

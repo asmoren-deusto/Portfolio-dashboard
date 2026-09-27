@@ -24,15 +24,20 @@ router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 logger = logging.getLogger(__name__)
 
 
-def _get_all_transactions(db: Session, user_id: str = "asier") -> list[dict]:
+def _get_all_transactions(db: Session, user_id: str = "asier", broker: str | None = None) -> list[dict]:
     query = db.query(Transaction)
-    rows = []
     if user_id:
-        rows = query.filter(Transaction.user_id == user_id).order_by(Transaction.date).all()
+        query = query.filter(Transaction.user_id == user_id)
+    if broker and broker.lower() not in ["all", "todos"]:
+        query = query.filter(Transaction.broker == broker.lower())
+    rows = query.order_by(Transaction.date).all()
     if not rows and user_id != "demo":
-        rows = query.filter(Transaction.user_id == "asier").order_by(Transaction.date).all()
-    if not rows:
+        query = db.query(Transaction).filter(Transaction.user_id == "asier")
+        if broker and broker.lower() not in ["all", "todos"]:
+            query = query.filter(Transaction.broker == broker.lower())
         rows = query.order_by(Transaction.date).all()
+    if not rows and not broker:
+        rows = db.query(Transaction).order_by(Transaction.date).all()
     return [
         {
             "id": t.id,
@@ -42,7 +47,7 @@ def _get_all_transactions(db: Session, user_id: str = "asier") -> list[dict]:
             "price": t.price,
             "amount": t.amount,
             "date": t.date,
-            "broker": t.broker,
+            "broker": t.broker or "myinvestor",
             "notes": t.notes,
         }
         for t in rows
@@ -54,9 +59,9 @@ def _get_asset(db: Session, isin: str) -> Asset | None:
 
 
 @router.get("/summary", response_model=PortfolioSummary)
-async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(get_db)):
+async def get_portfolio_summary(user_id: str = "asier", broker: str | None = None, db: Session = Depends(get_db)):
     """Return overall portfolio KPIs."""
-    transactions = _get_all_transactions(db, user_id)
+    transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
         return PortfolioSummary(
             total_value=0,
@@ -68,7 +73,6 @@ async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(ge
         )
 
     positions = calculate_positions(transactions)
-    # Active positions with positive shares
     active_positions = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
     total_value = 0.0
     total_invested = 0.0
@@ -95,12 +99,12 @@ async def get_portfolio_summary(user_id: str = "asier", db: Session = Depends(ge
 
 
 @router.get("/positions", response_model=list[PositionOut])
-async def get_positions(user_id: str = "asier", refresh: bool = False, db: Session = Depends(get_db)):
-    """Return all current positions with live prices and valuation dates."""
+async def get_positions(user_id: str = "asier", broker: str | None = None, refresh: bool = False, db: Session = Depends(get_db)):
+    """Return all current positions with live prices, valuation dates, and broker tags."""
     if refresh:
         _price_cache.clear()
 
-    transactions = _get_all_transactions(db, user_id)
+    transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
         return []
 
@@ -116,6 +120,10 @@ async def get_positions(user_id: str = "asier", refresh: bool = False, db: Sessi
         name = asset.name if asset else isin
         asset_type = asset.asset_type if asset else "fund"
         currency = asset.currency if asset else "EUR"
+
+        # Find broker for this position
+        pos_txs = [t for t in transactions if t["isin"] == isin]
+        pos_broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
 
         price, price_date = await get_price_with_date(isin, ticker, db=db, force=refresh)
         effective_price = price if (price and price > 0) else pos["avg_cost"]
@@ -137,6 +145,7 @@ async def get_positions(user_id: str = "asier", refresh: bool = False, db: Sessi
             "invested_amount": round(pos["invested_amount"], 2),
             "unrealized_pnl": round(pnl, 2),
             "unrealized_pnl_pct": round(pnl_pct, 2),
+            "broker": pos_broker,
             "last_updated": price_date or datetime.now().strftime("%Y-%m-%d"),
             "price_date": price_date or datetime.now().strftime("%Y-%m-%d"),
         })
@@ -199,9 +208,9 @@ async def update_price(req: UpdatePriceRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/performance", response_model=list[PerformancePoint])
-async def get_performance(period: str = "1y", user_id: str = "asier", db: Session = Depends(get_db)):
+async def get_performance(period: str = "1y", user_id: str = "asier", broker: str | None = None, db: Session = Depends(get_db)):
     """Return portfolio value time series."""
-    transactions = _get_all_transactions(db, user_id)
+    transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
         return []
 
@@ -221,9 +230,9 @@ async def get_performance(period: str = "1y", user_id: str = "asier", db: Sessio
 
 
 @router.get("/analytics")
-async def get_analytics(period: str = "1y", user_id: str = "asier", db: Session = Depends(get_db)):
+async def get_analytics(period: str = "1y", user_id: str = "asier", broker: str | None = None, db: Session = Depends(get_db)):
     """Return all computed risk/return metrics."""
-    transactions = _get_all_transactions(db, user_id)
+    transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
         return {}
 

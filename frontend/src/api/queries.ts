@@ -38,15 +38,16 @@ export async function refreshPortfolioPrices(userId = 'asier') {
 
 // ── Summary ────────────────────────────────────────────────────────────────────
 export function usePortfolioSummary() {
-  const { useMock, period, currentUser } = useAppStore()
+  const { useMock, period, selectedBroker, currentUser } = useAppStore()
   const userSummary = currentUser?.summary ?? MOCK_SUMMARY
+  const brokerQuery = selectedBroker !== 'all' ? `?broker=${selectedBroker}` : ''
 
   return useQuery<PortfolioSummary>({
-    queryKey: ['summary', currentUser?.id, period],
+    queryKey: ['summary', currentUser?.id, period, selectedBroker],
     queryFn: () =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userSummary)
-        : get<PortfolioSummary>('/portfolio/summary').catch(() => userSummary),
+        : get<PortfolioSummary>(`/portfolio/summary${brokerQuery}`).catch(() => userSummary),
     initialData: userSummary,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
@@ -56,15 +57,16 @@ export function usePortfolioSummary() {
 
 // ── Positions ─────────────────────────────────────────────────────────────────
 export function usePositions() {
-  const { useMock, currentUser } = useAppStore()
+  const { useMock, selectedBroker, currentUser } = useAppStore()
   const userPositions = currentUser?.positions ?? MOCK_POSITIONS
+  const brokerQuery = selectedBroker !== 'all' ? `?broker=${selectedBroker}` : ''
 
   return useQuery<Position[]>({
-    queryKey: ['positions', currentUser?.id],
+    queryKey: ['positions', currentUser?.id, selectedBroker],
     queryFn: () =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userPositions)
-        : get<Position[]>('/portfolio/positions').catch(() => userPositions),
+        : get<Position[]>(`/portfolio/positions${brokerQuery}`).catch(() => userPositions),
     initialData: userPositions,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
@@ -73,16 +75,17 @@ export function usePositions() {
 
 // ── Performance ────────────────────────────────────────────────────────────────
 export function usePerformance() {
-  const { useMock, period, currentUser } = useAppStore()
+  const { useMock, period, selectedBroker, currentUser } = useAppStore()
   const userPerf = currentUser?.performance ?? MOCK_PERFORMANCE
   const userPoints = userPerf[period] ?? userPerf['1y'] ?? []
+  const brokerQuery = selectedBroker !== 'all' ? `&broker=${selectedBroker}` : ''
 
   return useQuery<PricePoint[]>({
-    queryKey: ['performance', currentUser?.id, period],
+    queryKey: ['performance', currentUser?.id, period, selectedBroker],
     queryFn: (): Promise<PricePoint[]> =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userPoints)
-        : get<PricePoint[]>(`/portfolio/performance?period=${period}`).catch(() => userPoints),
+        : get<PricePoint[]>(`/portfolio/performance?period=${period}${brokerQuery}`).catch(() => userPoints),
     initialData: userPoints,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
@@ -91,15 +94,16 @@ export function usePerformance() {
 
 // ── Analytics ──────────────────────────────────────────────────────────────────
 export function useAnalytics() {
-  const { useMock, period, currentUser } = useAppStore()
+  const { useMock, period, selectedBroker, currentUser } = useAppStore()
   const userAnalytics = currentUser?.analytics ?? MOCK_ANALYTICS
+  const brokerQuery = selectedBroker !== 'all' ? `&broker=${selectedBroker}` : ''
 
   return useQuery<Analytics>({
-    queryKey: ['analytics', currentUser?.id, period],
+    queryKey: ['analytics', currentUser?.id, period, selectedBroker],
     queryFn: () =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userAnalytics)
-        : get<Analytics>(`/portfolio/analytics?period=${period}`).catch(() => userAnalytics),
+        : get<Analytics>(`/portfolio/analytics?period=${period}${brokerQuery}`).catch(() => userAnalytics),
     initialData: userAnalytics,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
@@ -108,15 +112,16 @@ export function useAnalytics() {
 
 // ── Transactions ───────────────────────────────────────────────────────────────
 export function useTransactions() {
-  const { useMock, currentUser } = useAppStore()
+  const { useMock, selectedBroker, currentUser } = useAppStore()
   const userTx = currentUser?.transactions ?? MOCK_TRANSACTIONS
+  const brokerQuery = selectedBroker !== 'all' ? `?broker=${selectedBroker}` : ''
 
   return useQuery<Transaction[]>({
-    queryKey: ['transactions', currentUser?.id],
+    queryKey: ['transactions', currentUser?.id, selectedBroker],
     queryFn: () =>
       useMock || currentUser?.isDemo
         ? Promise.resolve(userTx)
-        : get<Transaction[]>('/transactions').catch(() => userTx),
+        : get<Transaction[]>(`/transactions${brokerQuery}`).catch(() => userTx),
     initialData: userTx,
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60,

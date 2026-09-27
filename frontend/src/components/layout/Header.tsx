@@ -16,12 +16,19 @@ const PERIODS = [
   { label: 'Max', value: '5y' },
 ] as const
 
+const BROKERS = [
+  { label: 'Consolidado', value: 'all' },
+  { label: 'MyInvestor', value: 'myinvestor' },
+  { label: 'BBVA', value: 'bbva' },
+] as const
+
 interface HeaderProps {
   title: string
   subtitle?: string
   badge?: string
   badgeColor?: 'blue' | 'emerald' | 'amber' | 'violet'
   showPeriodSelector?: boolean
+  showBrokerSelector?: boolean
   children?: React.ReactNode
 }
 
@@ -31,9 +38,10 @@ export function Header({
   badge,
   badgeColor = 'blue',
   showPeriodSelector = false,
+  showBrokerSelector = true,
   children,
 }: HeaderProps) {
-  const { period, setPeriod, useMock, theme, toggleTheme, currentUser, users, login, logout } = useAppStore()
+  const { period, setPeriod, selectedBroker, setSelectedBroker, useMock, theme, toggleTheme, currentUser, users, login, logout } = useAppStore()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [spinning, setSpinning] = useState(false)
@@ -105,6 +113,40 @@ export function Header({
       {/* Right side controls */}
       <div className="flex items-center gap-3 flex-wrap">
         {children}
+
+        {/* Broker / Entity Selector Pill */}
+        {showBrokerSelector && (
+          <div className="flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-sm dark:border-white/[0.08] dark:bg-[#111625]/90">
+            {BROKERS.map((b) => (
+              <button
+                key={b.value}
+                onClick={() => setSelectedBroker(b.value)}
+                className={cn(
+                  'relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors duration-150',
+                  selectedBroker === b.value
+                    ? 'text-white'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                )}
+              >
+                {selectedBroker === b.value && (
+                  <motion.div
+                    layoutId="headerBrokerPill"
+                    className={cn(
+                      'absolute inset-0 rounded-lg shadow-sm',
+                      b.value === 'bbva'
+                        ? 'bg-blue-600 shadow-blue-600/30'
+                        : b.value === 'myinvestor'
+                        ? 'bg-emerald-600 shadow-emerald-600/30'
+                        : 'bg-slate-800 dark:bg-slate-700 shadow-slate-800/30'
+                    )}
+                    transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                  />
+                )}
+                <span className="relative z-10">{b.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Period selector if requested */}
         {showPeriodSelector && (
