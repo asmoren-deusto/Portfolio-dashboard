@@ -19,7 +19,7 @@ import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { fmt } from '@/lib/utils'
+import { fmt, cn } from '@/lib/utils'
 import { usePositions } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
@@ -379,6 +379,16 @@ export function PositionsPage() {
                                     <span className="text-blue-600 dark:text-blue-400 font-semibold">{p.ticker}</span>
                                   </>
                                 )}
+                                <span
+                                  className={cn(
+                                    'ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase',
+                                    p.broker === 'bbva'
+                                      ? 'bg-blue-100/90 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60'
+                                      : 'bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
+                                  )}
+                                >
+                                  {p.broker === 'bbva' ? 'BBVA' : 'MyInvestor'}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -480,9 +490,19 @@ export function PositionsPage() {
                         <h3 className="font-semibold text-sm text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-300 transition-colors truncate">
                           {p.name}
                         </h3>
-                        <p className="font-mono text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
-                          {p.isin}
-                        </p>
+                        <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
+                          <span>{p.isin}</span>
+                          <span
+                            className={cn(
+                              'px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase shrink-0',
+                              p.broker === 'bbva'
+                                ? 'bg-blue-100/90 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60'
+                                : 'bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
+                            )}
+                          >
+                            {p.broker === 'bbva' ? 'BBVA' : 'MyInvestor'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <AssetBadge type={p.asset_type} />

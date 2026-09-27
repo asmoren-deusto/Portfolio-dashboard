@@ -25,6 +25,7 @@ async def get_price_with_date(
     isin: str,
     ticker: str | None = None,
     db = None,
+    force: bool = False,
 ) -> tuple[Optional[float], Optional[str]]:
     """
     Get current NAV and date for an asset dynamically.
@@ -37,7 +38,7 @@ async def get_price_with_date(
       6. Database PriceCache fallback (cached historical NAV)
       7. Morningstar public search
     """
-    if _is_cache_valid(isin):
+    if not force and _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
     price = None
@@ -97,9 +98,9 @@ async def get_price_with_date(
 
 
 
-async def get_current_price(isin: str, ticker: str | None = None, db = None) -> Optional[float]:
+async def get_current_price(isin: str, ticker: str | None = None, db = None, force: bool = False) -> Optional[float]:
     """Get current price for an asset (float only)."""
-    price, _ = await get_price_with_date(isin, ticker, db=db)
+    price, _ = await get_price_with_date(isin, ticker, db=db, force=force)
     return price
 
 

@@ -18,6 +18,7 @@ export interface Position {
   weight: number
   last_updated?: string | null
   price_date?: string | null
+  broker?: string | null
 }
 
 export interface PortfolioSummary {
