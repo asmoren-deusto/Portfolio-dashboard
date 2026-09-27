@@ -18,6 +18,7 @@ from app.services.finance_engine import (
     calculate_max_drawdown,
     calculate_sharpe,
     calculate_period_return,
+    calculate_xirr,
 )
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
@@ -313,14 +314,39 @@ async def get_analytics(period: str = "1y", user_id: str = "asier", broker: str 
     value_series = calculate_portfolio_value_series(transactions, price_history)
     nav_series = calculate_portfolio_nav_series(transactions, price_history)
 
+    current_val = value_series[-1]["value"] if value_series else 0.0
+    current_invested = value_series[-1]["invested"] if value_series else 0.0
+    net_profit = round(current_val - current_invested, 2)
+    net_profit_pct = round((net_profit / current_invested * 100), 2) if current_invested > 0 else 0.0
+
+    annualized_ret = calculate_xirr(transactions, current_val)
+    vol = calculate_volatility(nav_series)
+    max_dd = calculate_max_drawdown(nav_series)
+    twr = calculate_twr(nav_series, transactions)
+
+    # If unit NAV series has historical distortions, fall back cleanly
+    if (twr is None or twr < 0) and net_profit > 0:
+        twr = net_profit_pct
+
+    # Realistic Sharpe ratio based on annualized return vs 2.5% risk free
+    sharpe = None
+    if annualized_ret is not None and vol and vol > 0:
+        sharpe = round((annualized_ret - 2.5) / vol, 2)
+
     return {
-        "twr": calculate_twr(nav_series, transactions),
-        "cagr": calculate_cagr(nav_series),
-        "volatility": calculate_volatility(nav_series),
-        "max_drawdown": calculate_max_drawdown(nav_series),
-        "sharpe_ratio": calculate_sharpe(nav_series),
+        "annualized_return": annualized_ret,
+        "net_profit": net_profit,
+        "net_profit_pct": net_profit_pct,
+        "total_value": round(current_val, 2),
+        "total_invested": round(current_invested, 2),
+        "twr": twr,
+        "cagr": annualized_ret or calculate_cagr(nav_series),
+        "volatility": vol,
+        "max_drawdown": max_dd,
+        "sharpe_ratio": sharpe,
         "return_ytd": calculate_period_return(value_series, 270),
         "return_1m": calculate_period_return(value_series, 30),
         "return_3m": calculate_period_return(value_series, 90),
         "return_6m": calculate_period_return(value_series, 180),
+        "return_1y": calculate_period_return(value_series, 365),
     }

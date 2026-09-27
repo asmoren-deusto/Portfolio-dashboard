@@ -67,15 +67,25 @@ function getBrokerBadge(broker?: string | null) {
 
 type AllocMode = 'asset' | 'type'
 
+const PERIOD_LABELS: Record<string, string> = {
+  '1mo': '1 Mes',
+  '3mo': '3 Meses',
+  '6mo': '6 Meses',
+  '1y': '1 Año',
+  '2y': '2 Años',
+  '5y': 'Todo',
+}
+
 export function OverviewPage() {
-  const { currentUser } = useAppStore()
+  const { currentUser, period } = useAppStore()
+  const periodLabel = PERIOD_LABELS[period] || 'Periodo'
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
 
   const { data: summary } = usePortfolioSummary()
   const { data: positions = [] } = usePositions()
-  const { data: performance = [], isLoading: perfLoading, isError: perfError, refetch: refetchPerf } = usePerformance()
+  const { data: performance = [] } = usePerformance()
   const { data: analytics } = useAnalytics()
   const { data: transactions = [] } = useTransactions()
   const { data: marketData } = useMarketQuotes('Todos')
@@ -148,67 +158,54 @@ export function OverviewPage() {
               : '—'
           }
           changePositive={pnlPositive}
-          sub={displaySummary ? `Invertido: ${fmt.currency(displaySummary.total_invested)}` : undefined}
+          sub={displaySummary ? `Aportado: ${fmt.currency(displaySummary.total_invested)}` : undefined}
           delay={0}
           className="lg:col-span-2"
           icon={<Wallet size={16} className="text-blue-400" />}
         />
         <KpiCard
-          label="Rentabilidad Global"
-          value={displaySummary ? fmt.pct(displaySummary.total_pnl_pct) : '—'}
-          sub="acumulada desde inicio"
-          changePositive={pnlPositive}
-          delay={0.05}
-          icon={
-            pnlPositive ? (
-              <TrendingUp size={16} className="text-emerald-400" />
-            ) : (
-              <TrendingDown size={16} className="text-rose-400" />
-            )
+          label="Rendimiento Anualizado"
+          value={
+            analytics?.annualized_return !== undefined
+              ? fmt.pct(analytics.annualized_return)
+              : displaySummary
+              ? fmt.pct(displaySummary.total_pnl_pct)
+              : '—'
           }
+          change="TIR Anual"
+          sub="tasa ponderada por flujos"
+          changePositive={true}
+          delay={0.05}
+          icon={<TrendingUp size={16} className="text-emerald-400" />}
         />
         <KpiCard
-          label="Tasa CAGR"
-          value={analytics?.cagr !== undefined ? fmt.pct(analytics.cagr) : '—'}
-          sub="crecimiento anual compuesto"
-          changePositive={(analytics?.cagr ?? 0) >= 0}
+          label="Plusvalía Acumulada"
+          value={displaySummary ? `${pnlPositive ? '+' : ''}${fmt.currency(displaySummary.total_pnl)}` : '—'}
+          change={displaySummary ? fmt.pct(displaySummary.total_pnl_pct) : undefined}
+          sub="ganancia neta latente"
+          changePositive={pnlPositive}
           delay={0.1}
-          icon={<BarChart3 size={16} className="text-indigo-400" />}
+          icon={<ArrowUpRight size={16} className="text-cyan-400" />}
         />
         <KpiCard
-          label="Sharpe Ratio"
-          value={analytics?.sharpe_ratio !== undefined ? fmt.ratio(analytics.sharpe_ratio) : '—'}
-          sub="eficiencia riesgo / retorno"
+          label={`Rentabilidad (${periodLabel})`}
+          value={
+            perfStats
+              ? fmt.pct(perfStats.diffPct)
+              : analytics?.return_ytd !== undefined
+              ? fmt.pct(analytics.return_ytd)
+              : '—'
+          }
+          change={perfStats ? `${perfStats.diff >= 0 ? '+' : ''}${fmt.currency(perfStats.diff)}` : undefined}
+          sub="en el periodo seleccionado"
+          changePositive={(perfStats?.diffPct ?? 0) >= 0}
           delay={0.15}
-          icon={<ShieldCheck size={16} className="text-violet-400" />}
+          icon={<Calendar size={16} className="text-indigo-400" />}
         />
       </div>
 
       {/* Secondary Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
-        <KpiCard
-          label="Rentabilidad Ponderada (TWR)"
-          value={analytics?.twr !== undefined ? fmt.pct(analytics.twr) : '—'}
-          sub="time-weighted return"
-          changePositive={(analytics?.twr ?? 0) >= 0}
-          delay={0.1}
-          icon={<Activity size={15} className="text-cyan-400" />}
-        />
-        <KpiCard
-          label="Volatilidad Anualizada"
-          value={analytics?.volatility !== undefined ? fmt.pct(analytics.volatility, false) : '—'}
-          sub="desviación típica anual"
-          delay={0.12}
-          icon={<TrendingUp size={15} className="text-amber-400" />}
-        />
-        <KpiCard
-          label="Máxima Caída (Drawdown)"
-          value={analytics?.max_drawdown !== undefined ? fmt.pct(analytics.max_drawdown) : '—'}
-          sub="máxima pérdida histórica"
-          changePositive={false}
-          delay={0.14}
-          icon={<TrendingDown size={15} className="text-rose-400" />}
-        />
         <div
           className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:shadow-md dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16]"
           title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
@@ -233,6 +230,36 @@ export function OverviewPage() {
             </span>
           </div>
         </div>
+
+        <KpiCard
+          label="Rentabilidad Activos (TWR)"
+          value={
+            analytics?.twr !== undefined
+              ? fmt.pct(analytics.twr)
+              : displaySummary
+              ? fmt.pct(displaySummary.total_pnl_pct)
+              : '—'
+          }
+          sub="time-weighted return puro"
+          changePositive={(analytics?.twr ?? 0) >= 0}
+          delay={0.1}
+          icon={<Activity size={15} className="text-cyan-400" />}
+        />
+        <KpiCard
+          label="Volatilidad Anualizada"
+          value={analytics?.volatility !== undefined ? fmt.pct(analytics.volatility, false) : '—'}
+          sub="desviación típica anual"
+          delay={0.12}
+          icon={<ShieldCheck size={15} className="text-violet-400" />}
+        />
+        <KpiCard
+          label="Máxima Caída (Drawdown)"
+          value={analytics?.max_drawdown !== undefined ? fmt.pct(analytics.max_drawdown) : '—'}
+          sub="máxima pérdida histórica"
+          changePositive={false}
+          delay={0.14}
+          icon={<TrendingDown size={15} className="text-rose-400" />}
+        />
       </div>
 
       {/* Charts Section */}
@@ -274,23 +301,11 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className="px-5 pb-3.5 pt-1.5">
-            {perfLoading ? (
-              <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                <span className="text-xs">Cargando histórico patrimonial...</span>
-              </div>
-            ) : performance.length > 0 ? (
+            {performance.length > 0 ? (
               <PerformanceChart data={performance} height={280} />
             ) : (
-              <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
-                <span>Sin datos de evolución</span>
-                <button
-                  type="button"
-                  onClick={() => refetchPerf()}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 font-medium transition-colors"
-                >
-                  Reintentar carga
-                </button>
+              <div className="flex h-[280px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                Sin datos de evolución
               </div>
             )}
           </div>

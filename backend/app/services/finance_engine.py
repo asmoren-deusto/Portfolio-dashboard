@@ -308,3 +308,84 @@ def calculate_period_return(value_series: list[dict], days: int) -> Optional[flo
         logger.warning(f"Period return error: {e}")
         return None
 
+
+def calculate_xirr(
+    transactions: list[dict],
+    current_value: float,
+    as_of_date: Optional[str] = None,
+) -> Optional[float]:
+    """
+    Calculate Money-Weighted Return / Internal Rate of Return (TIR / XIRR)
+    from external cash flows (buys as negative flows, sells as positive flows,
+    excluding internal fund transfers 'traspasos'), with current portfolio value
+    as the final terminal positive inflow.
+    """
+    if not transactions or current_value <= 0:
+        return None
+
+    flows: list[tuple[str, float]] = []
+    for tx in transactions:
+        notes = (tx.get("notes") or "").lower()
+        if "traspaso" in notes:
+            continue
+        amt = float(tx.get("amount") or 0.0)
+        if amt <= 0:
+            continue
+        tx_type = tx.get("type")
+        d_str = str(tx.get("date") or "")[:10]
+        if not d_str:
+            continue
+        if tx_type == "buy":
+            flows.append((d_str, -amt))
+        elif tx_type == "sell":
+            flows.append((d_str, amt))
+
+    if not flows:
+        return None
+
+    flows.sort(key=lambda x: x[0])
+    terminal_date = as_of_date or datetime.now().strftime("%Y-%m-%d")
+    flows.append((terminal_date, float(current_value)))
+
+    d0 = datetime.fromisoformat(flows[0][0])
+
+    def npv(rate: float) -> float:
+        total = 0.0
+        for d_str, cf in flows:
+            dt = (datetime.fromisoformat(d_str) - d0).days / 365.25
+            try:
+                denom = (1.0 + rate) ** dt
+                if denom == 0:
+                    return float("inf")
+                total += cf / denom
+            except (OverflowError, ZeroDivisionError):
+                return float("inf")
+        return total
+
+    # Search for root using bisection method
+    low, high = -0.99, 10.0
+    val_low = npv(low)
+    val_high = npv(high)
+
+    if val_low * val_high > 0:
+        low, high = -0.5, 2.0
+        val_low = npv(low)
+        val_high = npv(high)
+        if val_low * val_high > 0:
+            return None
+
+    for _ in range(150):
+        mid = (low + high) / 2.0
+        val_mid = npv(mid)
+        if abs(val_mid) < 1e-4:
+            return round(mid * 100.0, 2)
+        if val_low * val_mid < 0:
+            high = mid
+            val_high = val_mid
+        else:
+            low = mid
+            val_low = val_mid
+
+    return round(((low + high) / 2.0) * 100.0, 2)
+
+

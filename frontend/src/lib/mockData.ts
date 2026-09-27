@@ -35,6 +35,11 @@ export interface PortfolioSummary {
 export interface Analytics {
   twr: number
   cagr: number
+  annualized_return?: number
+  net_profit?: number
+  net_profit_pct?: number
+  total_value?: number
+  total_invested?: number
   volatility: number
   max_drawdown: number
   sharpe_ratio: number
@@ -42,6 +47,7 @@ export interface Analytics {
   return_1m: number
   return_3m: number
   return_6m: number
+  return_1y?: number
 }
 
 export interface Transaction {
