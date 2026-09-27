@@ -1,5 +1,6 @@
 services:
   portfolio-dashboard:
+    image: ghcr.io/asmoren-deusto/portfolio-dashboard:latest
     build:
       context: .
       dockerfile: Dockerfile
