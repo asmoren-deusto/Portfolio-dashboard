@@ -132,10 +132,28 @@ async def get_positions(user_id: str = "asier", broker: str | None = None, refre
 
         pnl = current_value - pos["invested_amount"]
         pnl_pct = (pnl / pos["invested_amount"] * 100) if pos["invested_amount"] > 0 else 0.0
+        # Calculate daily return from price history
+        cached_prices = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(2).all()
+        daily_change = None
+        daily_change_pct = None
+        if len(cached_prices) >= 2 and cached_prices[1].price and cached_prices[1].price > 0:
+            p_last = effective_price
+            p_prev = cached_prices[1].price
+            daily_change = round(p_last - p_prev, 4)
+            daily_change_pct = round((p_last - p_prev) / p_prev * 100, 2)
+        else:
+            h = await get_price_history(isin, ticker, "1m")
+            if h and len(h) >= 2 and h[-2].get("price", 0) > 0:
+                p_last = effective_price
+                p_prev = h[-2]["price"]
+                daily_change = round(p_last - p_prev, 4)
+                daily_change_pct = round((p_last - p_prev) / p_prev * 100, 2)
 
         position_data.append({
             "isin": isin,
             "name": name,
+            "ticker": ticker,
+            "domain": getattr(asset, "domain", None) if asset else None,
             "asset_type": asset_type,
             "currency": currency,
             "shares": round(pos["shares"], 6),
@@ -145,6 +163,8 @@ async def get_positions(user_id: str = "asier", broker: str | None = None, refre
             "invested_amount": round(pos["invested_amount"], 2),
             "unrealized_pnl": round(pnl, 2),
             "unrealized_pnl_pct": round(pnl_pct, 2),
+            "daily_change": daily_change,
+            "daily_change_pct": daily_change_pct,
             "broker": pos_broker,
             "last_updated": price_date or datetime.now().strftime("%Y-%m-%d"),
             "price_date": price_date or datetime.now().strftime("%Y-%m-%d"),

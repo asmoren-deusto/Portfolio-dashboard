@@ -19,6 +19,8 @@ export interface Position {
   last_updated?: string | null
   price_date?: string | null
   broker?: string | null
+  daily_change?: number | null
+  daily_change_pct?: number | null
 }
 
 export interface PortfolioSummary {
