@@ -67,7 +67,7 @@ function getStoredUsers(): UserProfile[] {
     const raw = localStorage.getItem('portfolio_custom_users')
     if (raw) {
       const custom: UserProfile[] = JSON.parse(raw)
-      list = [...INITIAL_USER_PROFILES, ...custom.filter((u) => u.id !== 'laura')]
+      list = [...INITIAL_USER_PROFILES, ...custom.filter((u) => u.id !== 'laura' && u.id !== 'asier' && u.id !== 'demo')]
     }
   } catch {
     // fallback

@@ -30,7 +30,7 @@ async def get_price_with_date(
     """
     Get current NAV and date for an asset dynamically.
     Order of precedence:
-      1. In-memory cache (if valid within 15 min TTL)
+      1. In-memory cache (if valid within 15 min TTL and not forced)
       2. Direct Official Gestora Website (e.g. Azvalor official website for ES011261...)
       3. Financial Times Markets (official European institutional fund tearsheet feed)
       4. Live fetch from Quefondos (Spanish distributor fund page)
