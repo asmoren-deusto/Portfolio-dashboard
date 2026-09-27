@@ -127,31 +127,40 @@ export function OverviewPage() {
 
     let max = -Infinity
     let min = Infinity
-    let peak = -Infinity
+    let marketIndex = 100.0
+    let peakIndex = 100.0
     let maxDrawdown = 0
+    const dailyRets: number[] = []
 
-    performance.forEach((p) => {
+    for (let i = 0; i < performance.length; i++) {
+      const p = performance[i]
       if (p.value > max) max = p.value
       if (p.value < min) min = p.value
-      if (p.value > peak) peak = p.value
-      const dd = peak > 0 ? ((p.value - peak) / peak) * 100 : 0
-      if (dd < maxDrawdown) maxDrawdown = dd
-    })
 
-    let periodVolatility: number | null = null
-    if (performance.length > 5) {
-      const dailyRets: number[] = []
-      for (let i = 1; i < performance.length; i++) {
+      if (i > 0) {
         const prev = performance[i - 1].value
+        const prevInvested = performance[i - 1].invested ?? prev
+        const curInvested = p.invested ?? p.value
+        const netInflow = curInvested - prevInvested
+
         if (prev > 0) {
-          dailyRets.push((performance[i].value - prev) / prev)
+          // Market return of the day excluding net cash inflows
+          const dayReturn = (p.value - netInflow - prev) / prev
+          dailyRets.push(dayReturn)
+
+          marketIndex = marketIndex * (1.0 + dayReturn)
+          if (marketIndex > peakIndex) peakIndex = marketIndex
+          const dd = peakIndex > 0 ? ((marketIndex - peakIndex) / peakIndex) * 100 : 0
+          if (dd < maxDrawdown) maxDrawdown = dd
         }
       }
-      if (dailyRets.length > 2) {
-        const mean = dailyRets.reduce((a, b) => a + b, 0) / dailyRets.length
-        const variance = dailyRets.reduce((acc, r) => acc + Math.pow(r - mean, 2), 0) / (dailyRets.length - 1)
-        periodVolatility = Math.sqrt(variance) * Math.sqrt(252) * 100
-      }
+    }
+
+    let periodVolatility: number | null = null
+    if (dailyRets.length > 2) {
+      const mean = dailyRets.reduce((a, b) => a + b, 0) / dailyRets.length
+      const variance = dailyRets.reduce((acc, r) => acc + Math.pow(r - mean, 2), 0) / (dailyRets.length - 1)
+      periodVolatility = Math.sqrt(variance) * Math.sqrt(252) * 100
     }
 
     return {
@@ -302,11 +311,7 @@ export function OverviewPage() {
                 ? `${perfStats.periodProfit >= 0 ? '+' : ''}${fmt.currency(perfStats.periodProfit)}`
                 : undefined
             }
-            sub={
-              perfStats && perfStats.periodInflow !== 0
-                ? `aportado: ${perfStats.periodInflow >= 0 ? '+' : ''}${fmt.currency(perfStats.periodInflow)}`
-                : `ganancia neta en ${periodLabel}`
-            }
+            sub={`ganancia neta de mercado en ${periodLabel}`}
             changePositive={(perfStats?.periodProfit ?? 0) >= 0}
             delay={0.1}
             icon={<TrendingUp size={15} className="text-emerald-400" />}
@@ -325,13 +330,13 @@ export function OverviewPage() {
           <KpiCard
             label={`Volatilidad (${periodLabel})`}
             value={
-              perfStats?.periodVolatility !== null && perfStats?.periodVolatility !== undefined
-                ? fmt.pct(perfStats.periodVolatility, false)
-                : analytics?.volatility !== undefined
+              analytics?.volatility !== undefined && (periodLabel === '1 Año' || periodLabel === 'Todo')
                 ? fmt.pct(analytics.volatility, false)
+                : perfStats?.periodVolatility !== null && perfStats?.periodVolatility !== undefined
+                ? fmt.pct(perfStats.periodVolatility, false)
                 : '—'
             }
-            sub={`fluctuación en ${periodLabel}`}
+            sub="fluctuación anualizada de mercado"
             delay={0.14}
             icon={<ShieldCheck size={15} className="text-violet-400" />}
             loading={isPeriodUpdating}
@@ -339,10 +344,10 @@ export function OverviewPage() {
           <KpiCard
             label={`Máxima Caída (${periodLabel})`}
             value={
-              perfStats?.maxDrawdown !== undefined
-                ? fmt.pct(perfStats.maxDrawdown)
-                : analytics?.max_drawdown !== undefined
+              analytics?.max_drawdown !== undefined && (periodLabel === '1 Año' || periodLabel === 'Todo')
                 ? fmt.pct(analytics.max_drawdown)
+                : perfStats?.maxDrawdown !== undefined
+                ? fmt.pct(perfStats.maxDrawdown)
                 : '—'
             }
             sub={`peor caída en ${periodLabel}`}
