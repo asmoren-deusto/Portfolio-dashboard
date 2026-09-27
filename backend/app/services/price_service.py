@@ -288,9 +288,11 @@ async def get_price_history(
     # Skip Morningstar codes (0P...) which are not valid Yahoo Finance tickers
     if ticker and not ticker.startswith("0P"):
         try:
-            yf_period = "max" if period == "all" else period
+            yf_period = "5y" if period in ("all", "max") else period
             t = yf.Ticker(ticker)
             hist = t.history(period=yf_period)
+            if hist.empty and period in ("all", "max"):
+                hist = t.history(period="2y")
             if not hist.empty:
                 res = [
                     {"date": str(idx.date()), "price": round(float(row["Close"]), 4)}

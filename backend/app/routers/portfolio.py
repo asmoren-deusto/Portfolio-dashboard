@@ -240,14 +240,21 @@ async def get_performance(
     start_date: str | None = None,
     db: Session = Depends(get_db),
 ):
-    """Return portfolio value time series."""
-    effective_start = start_date or "2025-11-01"
-    if period == "1mo":
-        effective_start = max(effective_start, (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d"))
-    elif period == "3mo":
-        effective_start = max(effective_start, (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d"))
-    elif period == "6mo":
-        effective_start = max(effective_start, (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d"))
+    effective_start = start_date
+    if not effective_start and period != "all":
+        now = datetime.now()
+        if period == "1mo":
+            effective_start = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+        elif period == "3mo":
+            effective_start = (now - timedelta(days=90)).strftime("%Y-%m-%d")
+        elif period == "6mo":
+            effective_start = (now - timedelta(days=180)).strftime("%Y-%m-%d")
+        elif period == "1y":
+            effective_start = (now - timedelta(days=365)).strftime("%Y-%m-%d")
+        elif period == "2y":
+            effective_start = (now - timedelta(days=730)).strftime("%Y-%m-%d")
+        elif period == "5y":
+            effective_start = (now - timedelta(days=1825)).strftime("%Y-%m-%d")
 
     cache_key = f"{user_id}:{broker}:{period}:{effective_start}"
     if cache_key in _perf_cache:
