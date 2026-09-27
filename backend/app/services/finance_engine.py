@@ -49,7 +49,6 @@ def calculate_portfolio_value_series(
     transactions: list[dict],
     price_history: dict[str, list[dict]],
     start_date: str | None = None,
-    **kwargs,
 ) -> list[dict]:
     """
     Reconstruct portfolio value over time.
