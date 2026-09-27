@@ -44,16 +44,28 @@ async def get_price_with_date(
     price = None
     price_date = None
 
+    # For non-standard ISINs (e.g. EPSV registration numbers like 0192#0011, 0201G), look up DB directly
+    is_standard_isin = len(isin) == 12 and isin.isalnum()
+    if not is_standard_isin and db is not None:
+        try:
+            from app.models import PriceCache
+            entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+            if entry and entry.price > 0:
+                _price_cache[isin] = {"price": entry.price, "date": entry.date, "ts": datetime.now()}
+                return entry.price, entry.date
+        except Exception as e:
+            logger.warning(f"Error querying PriceCache for non-standard ISIN {isin}: {e}")
+
     # 1. Try Direct Official Gestora (Azvalor website)
     if isin.startswith("ES011261"):
         price, price_date = await _fetch_azvalor_official(isin)
 
     # 2. Try Financial Times Markets (official European fund data provider)
-    if price is None:
+    if price is None and is_standard_isin:
         price, price_date = await _fetch_ft_official(isin)
 
     # 3. Try Quefondos by ISIN
-    if price is None:
+    if price is None and is_standard_isin:
         price, price_date = await _fetch_quefondos_price(isin)
 
     # 4. Try Yahoo Finance if ticker provided or previous scrapers failed
@@ -254,7 +266,7 @@ async def _fetch_morningstar_price(isin: str) -> Optional[float]:
     return None
 
 
-_history_cache: dict[tuple[str, str], tuple[datetime, list[dict]]] = {}
+_history_cache: dict[str, tuple[datetime, list[dict]]] = {}
 
 
 async def get_price_history(
@@ -266,17 +278,19 @@ async def get_price_history(
     Get historical prices for charting.
     Returns list of {"date": "YYYY-MM-DD", "price": float}
     """
-    cache_key = (isin, period)
+    cache_key = f"{isin}:{ticker}:{period}"
     if cache_key in _history_cache:
-        cached_ts, cached_data = _history_cache[cache_key]
-        if (datetime.now() - cached_ts).total_seconds() < 1800:
+        ts, cached_data = _history_cache[cache_key]
+        if (datetime.now() - ts).total_seconds() < 1800:
             return cached_data
 
-    # Try Yahoo Finance first (best historical data for ETFs/stocks, skip Morningstar codes)
+    # Try Yahoo Finance first (best historical data for ETFs/stocks)
+    # Skip Morningstar codes (0P...) which are not valid Yahoo Finance tickers
     if ticker and not ticker.startswith("0P"):
         try:
+            yf_period = "max" if period == "all" else period
             t = yf.Ticker(ticker)
-            hist = t.history(period=period)
+            hist = t.history(period=yf_period)
             if not hist.empty:
                 res = [
                     {"date": str(idx.date()), "price": round(float(row["Close"]), 4)}
@@ -295,9 +309,7 @@ async def get_price_history(
         try:
             cached_rows = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.asc()).all()
             if len(cached_rows) > 1:
-                res = [{"date": row.date, "price": round(row.price, 4)} for row in cached_rows]
-                _history_cache[cache_key] = (datetime.now(), res)
-                return res
+                return [{"date": row.date, "price": round(row.price, 4)} for row in cached_rows]
         finally:
             db.close()
     except Exception as e:

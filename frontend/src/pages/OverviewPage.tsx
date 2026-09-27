@@ -52,7 +52,7 @@ export function OverviewPage() {
 
   const { data: summary } = usePortfolioSummary()
   const { data: positions = [] } = usePositions()
-  const { data: performance = [] } = usePerformance()
+  const { data: performance = [], isLoading: perfLoading, isError: perfError, refetch: refetchPerf } = usePerformance()
   const { data: analytics } = useAnalytics()
   const { data: transactions = [] } = useTransactions()
   const { data: marketData } = useMarketQuotes('Todos')
@@ -251,11 +251,23 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className="px-5 pb-3.5 pt-1.5">
-            {performance.length > 0 ? (
+            {perfLoading ? (
+              <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                <span className="text-xs">Cargando histórico patrimonial...</span>
+              </div>
+            ) : performance.length > 0 ? (
               <PerformanceChart data={performance} height={280} />
             ) : (
-              <div className="flex h-[280px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                Sin datos de evolución
+              <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
+                <span>Sin datos de evolución</span>
+                <button
+                  type="button"
+                  onClick={() => refetchPerf()}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 font-medium transition-colors"
+                >
+                  Reintentar carga
+                </button>
               </div>
             )}
           </div>
