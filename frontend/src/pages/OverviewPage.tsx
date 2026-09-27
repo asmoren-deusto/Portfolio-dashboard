@@ -186,32 +186,29 @@ export function OverviewPage() {
           delay={0.14}
           icon={<TrendingDown size={15} className="text-rose-400" />}
         />
-        <KpiCard
-          label="Total Invertido"
-          value={fmt.currency(displaySummary?.total_invested)}
-          sub={`${displaySummary?.num_positions ?? positions.length} posiciones activas`}
-          delay={0.16}
-          icon={<Layers size={15} className="text-slate-300" />}
-        />
-      </div>
+        <div
+          className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:shadow-md dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16]"
+          title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
+        >
+          <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent dark:via-white/15" />
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate pr-1">
+              Total Invertido
+            </p>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              DCA 416,66 €/m
+            </span>
+          </div>
 
-      {/* Active DCA Strategy Banner */}
-      <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-transparent border border-indigo-500/20 text-xs font-medium">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse shrink-0" />
-          <span className="text-slate-900 dark:text-slate-200 font-semibold">
-            Aportación Periódica Programada (DCA):
-          </span>
-          <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
-            416,66 € / mes (día 7 de cada mes)
-          </span>
-          <span className="text-slate-500 dark:text-slate-400">
-            • Indexa EPSV Más Rentabilidad Acciones
-          </span>
-        </div>
-        <div className="hidden md:flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
-          <span>Próxima aportación:</span>
-          <span className="font-mono font-bold text-slate-800 dark:text-slate-200">07/10/2026</span>
+          <div className="flex items-baseline justify-between gap-2 min-w-0">
+            <div className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
+              {fmt.currency(displaySummary?.total_invested)}
+            </div>
+            <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
+              Indexa día 7 • {displaySummary?.num_positions ?? positions.length} pos.
+            </span>
+          </div>
         </div>
       </div>
 

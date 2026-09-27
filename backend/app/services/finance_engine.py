@@ -48,12 +48,14 @@ def calculate_positions(transactions: list[dict]) -> dict[str, dict]:
 def calculate_portfolio_value_series(
     transactions: list[dict],
     price_history: dict[str, list[dict]],
+    start_date: str | None = "2025-11-01",
 ) -> list[dict]:
     """
     Reconstruct portfolio value over time.
     transactions: list of all transactions
     price_history: {isin: [{"date": str, "price": float}]}
-    Returns: [{"date": str, "value": float}]
+    start_date: optional cutoff date (defaults to 2025-11-01 for clean history)
+    Returns: [{"date": str, "value": float, "invested": float}]
     """
     if not transactions:
         return []
@@ -77,7 +79,12 @@ def calculate_portfolio_value_series(
     first_tx_date = pd.to_datetime(tx_sorted[0]["date"])
     all_dates.add(first_tx_date)
 
-    date_range = pd.date_range(min(all_dates), max(all_dates), freq="B")  # business days
+    start_dt = pd.to_datetime(start_date) if start_date else min(all_dates)
+    end_dt = max(all_dates)
+    if start_dt > end_dt:
+        start_dt = min(all_dates)
+
+    date_range = pd.date_range(start_dt, end_dt, freq="B")  # business days
 
     # For each date, calculate portfolio value
     portfolio_values = []
@@ -112,21 +119,14 @@ def calculate_portfolio_value_series(
         cash_in_transit = max(0.0, traspaso_sells - traspaso_buys)
         total += cash_in_transit
 
-        # Cumulative net external capital contributed (Dinero aportado durante el tiempo)
-        net_invested = 0.0
-        for tx in active_tx:
-            is_traspaso = "traspaso" in (tx.get("notes") or "").lower()
-            if not is_traspaso:
-                if tx["type"] == "buy":
-                    net_invested += tx["amount"]
-                elif tx["type"] == "sell":
-                    net_invested -= tx["amount"]
+        # Exact active invested capital: matches summary.total_invested 100%
+        invested_on_date = sum(pos["invested_amount"] for pos in positions.values() if pos["shares"] > 0.0001) + cash_in_transit
 
         if total > 0:
             portfolio_values.append({
                 "date": d_str,
                 "value": round(total, 2),
-                "invested": round(net_invested, 2),
+                "invested": round(invested_on_date, 2),
             })
 
     return portfolio_values

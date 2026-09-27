@@ -208,7 +208,13 @@ async def update_price(req: UpdatePriceRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/performance", response_model=list[PerformancePoint])
-async def get_performance(period: str = "1y", user_id: str = "asier", broker: str | None = None, db: Session = Depends(get_db)):
+async def get_performance(
+    period: str = "1y",
+    user_id: str = "asier",
+    broker: str | None = None,
+    start_date: str | None = "2025-11-01",
+    db: Session = Depends(get_db),
+):
     """Return portfolio value time series."""
     transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
@@ -231,7 +237,7 @@ async def get_performance(period: str = "1y", user_id: str = "asier", broker: st
         elif curr_p and curr_p > 0:
             price_history[isin] = [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
-    value_series = calculate_portfolio_value_series(transactions, price_history)
+    value_series = calculate_portfolio_value_series(transactions, price_history, start_date=start_date)
     return [PerformancePoint(**v) for v in value_series]
 
 
