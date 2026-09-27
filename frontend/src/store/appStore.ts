@@ -14,8 +14,8 @@ interface AppState {
   // Period & Theme
   period: Period
   setPeriod: (p: Period) => void
-  selectedBroker: 'all' | 'myinvestor' | 'bbva'
-  setSelectedBroker: (b: 'all' | 'myinvestor' | 'bbva') => void
+  selectedBroker: 'all' | 'myinvestor' | 'bbva' | 'indexa'
+  setSelectedBroker: (b: 'all' | 'myinvestor' | 'bbva' | 'indexa') => void
   theme: Theme
   setTheme: (t: Theme) => void
   toggleTheme: () => void

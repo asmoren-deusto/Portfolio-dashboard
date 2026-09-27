@@ -276,6 +276,20 @@ async def get_price_history(
         except Exception as e:
             logger.warning(f"Yahoo history error for {ticker}: {e}")
 
+    # Check PriceCache in DB for stored historical NAVs (e.g. for EPSVs and custom funds)
+    try:
+        from app.database import SessionLocal
+        from app.models import PriceCache
+        db = SessionLocal()
+        try:
+            cached_rows = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.asc()).all()
+            if len(cached_rows) > 1:
+                return [{"date": row.date, "price": round(row.price, 4)} for row in cached_rows]
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"Error querying historical PriceCache for {isin}: {e}")
+
     # Fallback: generate synthetic history from current price (for funds without ticker)
     # In a real scenario, you'd use Morningstar historical NAV endpoint
     current = await get_current_price(isin, ticker)

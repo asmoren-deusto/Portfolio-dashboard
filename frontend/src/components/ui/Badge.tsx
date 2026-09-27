@@ -2,6 +2,7 @@ import { cn, ASSET_TYPE_LABELS } from '@/lib/utils'
 
 const configs: Record<string, { label: string; bg: string; text: string; border: string }> = {
   fund:   { label: 'Fondo',   bg: 'bg-blue-500/10 dark:bg-blue-500/15',   text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-500/20' },
+  epsv:   { label: 'EPSV',    bg: 'bg-indigo-500/10 dark:bg-indigo-500/15', text: 'text-indigo-700 dark:text-indigo-300', border: 'border-indigo-500/20' },
   etf:    { label: 'ETF',     bg: 'bg-amber-500/10 dark:bg-amber-500/15', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-500/20' },
   stock:  { label: 'Acción',  bg: 'bg-emerald-500/10 dark:bg-emerald-500/15', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-500/20' },
   bond:   { label: 'Bono',    bg: 'bg-purple-500/10 dark:bg-purple-500/15', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-500/20' },

@@ -23,13 +23,14 @@ import { fmt, cn } from '@/lib/utils'
 import { usePositions } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
-type AssetFilter = 'all' | 'fund' | 'etf' | 'stock'
+type AssetFilter = 'all' | 'fund' | 'epsv' | 'etf' | 'stock'
 type SortField = 'current_value' | 'unrealized_pnl_pct' | 'unrealized_pnl' | 'name' | 'weight'
 type SortDir = 1 | -1
 
 const FILTER_TABS: { id: AssetFilter; label: string }[] = [
   { id: 'all', label: 'Todos los Activos' },
   { id: 'fund', label: 'Fondos Indexados' },
+  { id: 'epsv', label: 'Planes EPSV' },
   { id: 'etf', label: 'ETFs' },
   { id: 'stock', label: 'Acciones' },
 ]
@@ -384,11 +385,18 @@ export function PositionsPage() {
                                     'ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase',
                                     p.broker === 'bbva'
                                       ? 'bg-blue-100/90 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60'
+                                      : p.broker === 'indexa'
+                                      ? 'bg-indigo-100/90 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60'
                                       : 'bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
                                   )}
                                 >
-                                  {p.broker === 'bbva' ? 'BBVA' : 'MyInvestor'}
+                                  {p.broker === 'bbva' ? 'BBVA' : p.broker === 'indexa' ? 'Indexa Capital' : 'MyInvestor'}
                                 </span>
+                                {p.asset_type === 'epsv' && (
+                                  <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
+                                    DCA 416,66 €/mes (día 7)
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -497,11 +505,18 @@ export function PositionsPage() {
                               'px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase shrink-0',
                               p.broker === 'bbva'
                                 ? 'bg-blue-100/90 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60'
+                                : p.broker === 'indexa'
+                                ? 'bg-indigo-100/90 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60'
                                 : 'bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
                             )}
                           >
-                            {p.broker === 'bbva' ? 'BBVA' : 'MyInvestor'}
+                            {p.broker === 'bbva' ? 'BBVA' : p.broker === 'indexa' ? 'Indexa Capital' : 'MyInvestor'}
                           </span>
+                          {p.asset_type === 'epsv' && (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shrink-0">
+                              DCA 416,66 € (día 7)
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>

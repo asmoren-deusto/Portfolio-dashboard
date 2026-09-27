@@ -21,6 +21,7 @@ export const PALETTE = [
 
 export const ASSET_TYPE_LABELS: Record<string, string> = {
   fund: 'Fondo de Inversión',
+  epsv: 'Plan de Previsión (EPSV)',
   etf: 'ETF',
   stock: 'Acción',
   bond: 'Bono / Renta Fija',

@@ -22,7 +22,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
-import { fmt } from '@/lib/utils'
+import { fmt, cn } from '@/lib/utils'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { useAppStore } from '@/store/appStore'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
@@ -407,8 +407,15 @@ export function TransactionsPage() {
 
                       {/* Broker */}
                       <td className="px-5 py-3.5 text-center">
-                        <span className="inline-block px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.06] text-xs font-medium text-slate-700 dark:text-slate-300 capitalize">
-                          {t.broker}
+                        <span className={cn(
+                          "inline-block px-2.5 py-0.5 rounded-lg text-xs font-semibold uppercase tracking-wider border",
+                          t.broker === 'bbva'
+                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/60'
+                            : t.broker === 'indexa'
+                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/60'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/60'
+                        )}>
+                          {t.broker === 'bbva' ? 'BBVA' : t.broker === 'indexa' ? 'Indexa Capital' : 'MyInvestor'}
                         </span>
                       </td>
 

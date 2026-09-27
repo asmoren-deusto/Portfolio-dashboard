@@ -20,6 +20,7 @@ const BROKERS = [
   { label: 'Consolidado', value: 'all' },
   { label: 'MyInvestor', value: 'myinvestor' },
   { label: 'BBVA', value: 'bbva' },
+  { label: 'Indexa (EPSV)', value: 'indexa' },
 ] as const
 
 interface HeaderProps {

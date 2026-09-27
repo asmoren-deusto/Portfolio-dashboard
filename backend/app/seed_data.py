@@ -117,6 +117,24 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Renta Variable Global",
     "ter": 0.3
+  },
+  {
+    "isin": "0192#0011",
+    "name": "Indexa EPSV Más Rentabilidad Acciones",
+    "ticker": null,
+    "asset_type": "epsv",
+    "currency": "EUR",
+    "category": "Renta Variable Global (EPSV)",
+    "ter": 0.52
+  },
+  {
+    "isin": "0201G",
+    "name": "Kutxabank Baskepensiones EPSV",
+    "ticker": null,
+    "asset_type": "epsv",
+    "currency": "EUR",
+    "category": "Renta Variable Mixta (EPSV)",
+    "ter": 1.2
   }
 ]''')
 
@@ -192,10 +210,802 @@ PRICES = json.loads(r'''[
     "date": "2026-09-24",
     "price": 175.79,
     "currency": null
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-25",
+    "price": 23.576068,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-24",
+    "price": 23.580837,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-23",
+    "price": 23.692619,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-22",
+    "price": 23.633129,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-21",
+    "price": 23.362666,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-20",
+    "price": 23.456122,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-19",
+    "price": 23.456122,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-18",
+    "price": 23.456122,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-17",
+    "price": 23.123892,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-16",
+    "price": 23.136482,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-15",
+    "price": 23.233525,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-14",
+    "price": 23.306249,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-13",
+    "price": 23.106705,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-12",
+    "price": 23.106705,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-11",
+    "price": 23.106705,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-10",
+    "price": 23.241818,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-09",
+    "price": 23.456745,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-08",
+    "price": 23.546892,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-07",
+    "price": 23.518815,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-06",
+    "price": 23.53456,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-05",
+    "price": 23.53456,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-04",
+    "price": 23.53456,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-03",
+    "price": 23.360542,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-02",
+    "price": 23.321594,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-01",
+    "price": 23.444313,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-31",
+    "price": 23.468231,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-30",
+    "price": 23.477611,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-29",
+    "price": 23.477611,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-28",
+    "price": 23.477611,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-27",
+    "price": 23.384103,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-26",
+    "price": 23.386426,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-25",
+    "price": 23.274784,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-24",
+    "price": 23.300846,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-23",
+    "price": 23.204167,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-22",
+    "price": 23.204167,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-21",
+    "price": 23.204167,
+    "currency": "EUR"
   }
 ]''')
 
 TRANSACTIONS = json.loads(r'''[
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.0,
+    "price": 10.0,
+    "amount": 30.0,
+    "fees": 0.0,
+    "date": "2021-10-28",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (1)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.0,
+    "price": 10.0,
+    "amount": 30.0,
+    "fees": 0.0,
+    "date": "2021-12-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (2)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.0,
+    "price": 10.0,
+    "amount": 30.0,
+    "fees": 0.0,
+    "date": "2022-01-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (3)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-02-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (4)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-03-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (5)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-04-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (6)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-05-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (7)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-06-06",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (8)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-07-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (9)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-08-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (10)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-09-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (11)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-10-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (12)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-11-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (13)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2022-12-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (14)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.195,
+    "price": 10.0,
+    "amount": 31.95,
+    "fees": 0.0,
+    "date": "2023-01-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (15)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-02-06",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (16)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-03-06",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (17)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-04-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (18)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-05-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (19)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-06-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (20)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-07-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (21)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-08-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (22)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-09-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (23)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-10-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (24)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-11-06",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (25)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.377,
+    "price": 10.0,
+    "amount": 33.77,
+    "fees": 0.0,
+    "date": "2023-12-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (26)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 111.9,
+    "price": 10.0,
+    "amount": 1119.0,
+    "fees": 0.0,
+    "date": "2023-12-30",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (27)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 16.666,
+    "price": 10.0,
+    "amount": 166.66,
+    "fees": 0.0,
+    "date": "2024-01-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (28)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 3.333,
+    "price": 10.0,
+    "amount": 33.33,
+    "fees": 0.0,
+    "date": "2024-01-29",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (29)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-02-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (30)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-03-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (31)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-04-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (32)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-05-06",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (33)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-06-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (34)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-07-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (35)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-08-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (36)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-09-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (37)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-10-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (38)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-11-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (39)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2024-12-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (40)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-01-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (41)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-02-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (42)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-03-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (43)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-04-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (44)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-05-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (45)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-06-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (46)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-07-07",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (47)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-08-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (48)"
+  },
   {
     "user_id": "asier",
     "isin": "LU0996182563",
@@ -234,6 +1044,18 @@ TRANSACTIONS = json.loads(r'''[
   },
   {
     "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-09-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (49)"
+  },
+  {
+    "user_id": "asier",
     "isin": "LU0996182563",
     "type": "buy",
     "shares": 6.285367,
@@ -243,6 +1065,18 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2025-09-23",
     "broker": "bbva",
     "notes": "Aportación (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-10-06",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (50)"
   },
   {
     "user_id": "asier",
@@ -291,6 +1125,18 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2025-11-03",
     "broker": "myinvestor",
     "notes": "Reembolso por Traspaso Interno"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-11-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (51)"
   },
   {
     "user_id": "asier",
@@ -582,6 +1428,18 @@ TRANSACTIONS = json.loads(r'''[
   },
   {
     "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2025-12-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (52)"
+  },
+  {
+    "user_id": "asier",
     "isin": "LU1623762843",
     "type": "buy",
     "shares": 1.906,
@@ -663,6 +1521,18 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2025-12-30",
     "broker": "myinvestor",
     "notes": "Suscripción Fondos de Inversión"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2026-01-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (53)"
   },
   {
     "user_id": "asier",
@@ -858,6 +1728,18 @@ TRANSACTIONS = json.loads(r'''[
   },
   {
     "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2026-02-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (54)"
+  },
+  {
+    "user_id": "asier",
     "isin": "IE000QAZP7L2",
     "type": "sell",
     "shares": 9.82,
@@ -942,6 +1824,30 @@ TRANSACTIONS = json.loads(r'''[
   },
   {
     "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2026-03-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (55)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2026-04-06",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (56)"
+  },
+  {
+    "user_id": "asier",
     "isin": "LU1623762843",
     "type": "sell",
     "shares": 37.742,
@@ -1023,6 +1929,18 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-04-23",
     "broker": "myinvestor",
     "notes": "Suscripción Fondos de Inversión"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2026-05-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (57)"
   },
   {
     "user_id": "asier",
@@ -1179,6 +2097,18 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-06-01",
     "broker": "myinvestor",
     "notes": "Suscripción Fondos de Inversión"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2026-06-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (58)"
   },
   {
     "user_id": "asier",
@@ -1386,6 +2316,18 @@ TRANSACTIONS = json.loads(r'''[
   },
   {
     "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2026-07-06",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (59)"
+  },
+  {
+    "user_id": "asier",
     "isin": "IE00BYX5NX33",
     "type": "buy",
     "shares": 433.75,
@@ -1431,6 +2373,54 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-07-30",
     "broker": "bbva",
     "notes": "Aportación (compra cuenta corriente)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "buy",
+    "shares": 20.0,
+    "price": 10.0,
+    "amount": 200.0,
+    "fees": 0.0,
+    "date": "2026-08-05",
+    "broker": "indexa",
+    "notes": "Aportación mensual Kutxabank Baskepensiones (60)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0201G",
+    "type": "sell",
+    "shares": 836.386,
+    "price": 10.0,
+    "amount": 8363.86,
+    "fees": 0.0,
+    "date": "2026-08-17",
+    "broker": "indexa",
+    "notes": "Traspaso fondo en contra (a Indexa EPSV, valor salida 10.390,13 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0192#0011",
+    "type": "buy",
+    "shares": 447.77,
+    "price": 18.6789,
+    "amount": 8363.86,
+    "fees": 0.0,
+    "date": "2026-08-20",
+    "broker": "indexa",
+    "notes": "Traspaso fondos a favor (desde Kutxabank EPSV, coste fiscal originario 8.363,86 € de valor 10.390,13 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0192#0011",
+    "type": "buy",
+    "shares": 17.690575,
+    "price": 23.5526,
+    "amount": 416.66,
+    "fees": 0.0,
+    "date": "2026-09-07",
+    "broker": "indexa",
+    "notes": "Aportación periódica mensual DCA (416,66 € cada día 7)"
   },
   {
     "user_id": "asier",

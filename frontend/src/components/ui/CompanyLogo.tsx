@@ -59,7 +59,22 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
     xl: 'p-2.5',
   }[size]
 
-  const cleanDomain = domain?.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
+  let targetDomain = domain
+  if (!targetDomain) {
+    const nl = (name || '').toLowerCase()
+    if (nl.includes('indexa')) targetDomain = 'indexacapital.com'
+    else if (nl.includes('cobas')) targetDomain = 'cobasfondos.com'
+    else if (nl.includes('azvalor')) targetDomain = 'azvalor.com'
+    else if (nl.includes('fidelity')) targetDomain = 'fidelity.es'
+    else if (nl.includes('ishares')) targetDomain = 'ishares.com'
+    else if (nl.includes('robeco')) targetDomain = 'robeco.com'
+    else if (nl.includes('polar')) targetDomain = 'polarcapital.co.uk'
+    else if (nl.includes('dnb')) targetDomain = 'dnb.no'
+    else if (nl.includes('amundi')) targetDomain = 'amundi.es'
+    else if (nl.includes('carmignac')) targetDomain = 'carmignac.es'
+    else if (nl.includes('kutxabank') || nl.includes('baskepensiones')) targetDomain = 'kutxabank.es'
+  }
+  const cleanDomain = targetDomain?.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
 
   const getSource = (step: number) => {
     if (!cleanDomain && !logoUrl) return null

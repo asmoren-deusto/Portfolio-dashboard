@@ -195,6 +195,26 @@ export function OverviewPage() {
         />
       </div>
 
+      {/* Active DCA Strategy Banner */}
+      <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-transparent border border-indigo-500/20 text-xs font-medium">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse shrink-0" />
+          <span className="text-slate-900 dark:text-slate-200 font-semibold">
+            Aportación Periódica Programada (DCA):
+          </span>
+          <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+            416,66 € / mes (día 7 de cada mes)
+          </span>
+          <span className="text-slate-500 dark:text-slate-400">
+            • Indexa EPSV Más Rentabilidad Acciones
+          </span>
+        </div>
+        <div className="hidden md:flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+          <span>Próxima aportación:</span>
+          <span className="font-mono font-bold text-slate-800 dark:text-slate-200">07/10/2026</span>
+        </div>
+      </div>
+
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
         {/* Performance Evolution Chart */}
