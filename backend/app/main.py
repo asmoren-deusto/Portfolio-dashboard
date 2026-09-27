@@ -51,16 +51,21 @@ async def startup():
     logger.info("Initializing database...")
     init_db()
     logger.info("Database ready.")
-    try:
-        from app.database import SessionLocal
-        from app.routers.portfolio import get_performance
-        db = SessionLocal()
-        for p in ["1y", "all"]:
-            await get_performance(period=p, user_id="asier", broker=None, db=db)
-        db.close()
-        logger.info("Performance cache pre-warmed successfully.")
-    except Exception as e:
-        logger.warning(f"Error pre-warming performance cache: {e}")
+    async def _warm_cache():
+        try:
+            import asyncio
+            from app.database import SessionLocal
+            from app.routers.portfolio import get_performance
+            db = SessionLocal()
+            for p in ["1y", "all"]:
+                await get_performance(period=p, user_id="asier", broker=None, db=db)
+            db.close()
+            logger.info("Performance cache pre-warmed successfully.")
+        except Exception as e:
+            logger.warning(f"Error pre-warming performance cache: {e}")
+
+    import asyncio
+    asyncio.create_task(_warm_cache())
 
 
 @app.get("/api/health")
