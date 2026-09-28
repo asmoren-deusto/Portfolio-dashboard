@@ -208,7 +208,7 @@ export function OverviewPage() {
               </span>
             )}
           </div>
-          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+          <span data-private className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
             {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
           </span>
         </div>
@@ -276,17 +276,17 @@ export function OverviewPage() {
                   </span>
                 )}
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
+              <span data-private className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
                 <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
                 DCA 416,66 €/m
               </span>
             </div>
 
             <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isGlobalUpdating ? "opacity-65" : "opacity-100")}>
-              <div className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
+              <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
                 {fmt.currency(displaySummary?.total_invested)}
               </div>
-              <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
+              <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
                 Indexa día 7 • {displaySummary?.num_positions ?? positions.length} pos.
               </span>
             </div>
@@ -386,7 +386,7 @@ export function OverviewPage() {
 
             {/* Performance Period Stats Pill */}
             {perfStats && (
-              <div
+              <div data-private
                 className={cn(
                   'hidden sm:flex items-center gap-3 text-xs font-mono bg-slate-100 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] transition-opacity duration-300',
                   isPeriodUpdating ? 'opacity-65' : 'opacity-100'
@@ -485,7 +485,7 @@ export function OverviewPage() {
             to="/positions"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20"
           >
-            <span>Ver todas ({positions.length})</span>
+            <span>Ver todas (<span data-private>{positions.length}</span>)</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </CardHeader>
@@ -588,10 +588,10 @@ export function OverviewPage() {
                         <span className="font-mono text-xs text-slate-400">—</span>
                       )}
                     </td>
-                    <td className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[13px]">
+                    <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[13px]">
                       {fmt.currency(p.current_value)}
                     </td>
-                    <td className="py-2.5 px-2 text-right">
+                    <td data-private className="py-2.5 px-2 text-right">
                       <div className="flex flex-col items-end">
                         <PnlBadge value={p.unrealized_pnl} />
                         <span className="text-[10.5px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
@@ -599,7 +599,7 @@ export function OverviewPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="py-2.5 pr-3 pl-1.5 text-right">
+                    <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <div className="h-1.5 w-8 sm:w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
                           <div
@@ -714,10 +714,10 @@ export function OverviewPage() {
                         <span className="font-mono text-xs text-slate-400">—</span>
                       )}
                     </td>
-                    <td className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[13px]">
+                    <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[13px]">
                       {fmt.currency(p.current_value)}
                     </td>
-                    <td className="py-2.5 px-2 text-right">
+                    <td data-private className="py-2.5 px-2 text-right">
                       <div className="flex flex-col items-end">
                         <PnlBadge value={p.unrealized_pnl} />
                         <span className="text-[10.5px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
@@ -725,7 +725,7 @@ export function OverviewPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="py-2.5 pr-3 pl-1.5 text-right">
+                    <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <div className="h-1.5 w-8 sm:w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
                           <div
@@ -782,7 +782,7 @@ export function OverviewPage() {
             </Link>
           </CardHeader>
 
-          <div className="p-4 pt-2.5 space-y-2">
+          <div data-private className="p-4 pt-2.5 space-y-2">
             {transactions.slice(0, 8).map((t) => {
               const isBuy = t.type === 'buy'
               const isDiv = t.type === 'dividend'

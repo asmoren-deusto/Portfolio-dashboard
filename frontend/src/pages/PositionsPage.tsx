@@ -134,7 +134,7 @@ export function PositionsPage() {
 
       {/* Summary KPI Highlights */}
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Valor Total */}
           <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#111625]/85 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20">
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
@@ -389,7 +389,7 @@ export function PositionsPage() {
                                 )}
                                 <BrokerBadge broker={p.broker} className="ml-1" />
                                 {p.asset_type === 'epsv' && (
-                                  <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
+                                  <span data-private className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
                                     DCA 416,66 €/mes (día 7)
                                   </span>
                                 )}
@@ -404,12 +404,12 @@ export function PositionsPage() {
                         </td>
 
                         {/* Participaciones */}
-                        <td className="px-4 py-3.5 text-right tabular-nums font-mono text-slate-800 dark:text-slate-200 font-medium">
+                        <td data-private className="px-4 py-3.5 text-right tabular-nums font-mono text-slate-800 dark:text-slate-200 font-medium">
                           {fmt.num(p.shares)}
                         </td>
 
                         {/* Coste medio */}
-                        <td className="px-4 py-3.5 text-right tabular-nums font-mono text-slate-700 dark:text-slate-300 font-medium">
+                        <td data-private className="px-4 py-3.5 text-right tabular-nums font-mono text-slate-700 dark:text-slate-300 font-medium">
                           {fmt.currency(p.avg_cost)}
                         </td>
 
@@ -425,27 +425,27 @@ export function PositionsPage() {
                         </td>
 
                         {/* Valor Actual */}
-                        <td className="px-4 py-3.5 text-right tabular-nums font-mono font-bold text-slate-900 dark:text-white">
+                        <td data-private className="px-4 py-3.5 text-right tabular-nums font-mono font-bold text-slate-900 dark:text-white">
                           {fmt.currency(p.current_value)}
                         </td>
 
                         {/* Invertido */}
-                        <td className="px-4 py-3.5 text-right tabular-nums font-mono text-slate-700 dark:text-slate-300 font-medium">
+                        <td data-private className="px-4 py-3.5 text-right tabular-nums font-mono text-slate-700 dark:text-slate-300 font-medium">
                           {fmt.currency(p.invested_amount)}
                         </td>
 
                         {/* P&L € */}
-                        <td className="px-4 py-3.5 text-right font-mono">
+                        <td data-private className="px-4 py-3.5 text-right font-mono">
                           <PnlBadge value={p.unrealized_pnl} />
                         </td>
 
                         {/* P&L % */}
-                        <td className="px-4 py-3.5 text-right font-mono">
+                        <td data-private className="px-4 py-3.5 text-right font-mono">
                           <PnlBadge value={p.unrealized_pnl_pct} suffix="%" />
                         </td>
 
                         {/* Peso % */}
-                        <td className="px-4 py-3.5 text-right">
+                        <td data-private className="px-4 py-3.5 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <div className="h-2 w-14 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
                               <div
@@ -468,7 +468,7 @@ export function PositionsPage() {
         </Card>
       ) : (
         /* Grid Mode */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div data-private className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence>
             {filteredPositions.map((p, i) => (
               <motion.div

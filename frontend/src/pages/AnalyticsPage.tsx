@@ -113,7 +113,7 @@ export function AnalyticsPage() {
         </div>
 
         <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 p-5 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
-          <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
+          <div data-private className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
             <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Tu Cartera (TIR)</span>
             <span className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">
               {analytics?.annualized_return !== undefined
@@ -162,7 +162,7 @@ export function AnalyticsPage() {
             </div>
             <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Retorno temporal continuo</span>
           </CardHeader>
-          <div className={cn("px-5 pb-5 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
+          <div data-private className={cn("px-5 pb-5 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
             {analytics ? (
               <ReturnsChart analytics={analytics} />
             ) : (
@@ -199,7 +199,7 @@ export function AnalyticsPage() {
               </button>
             </div>
           </CardHeader>
-          <div className="px-5 pb-5">
+          <div data-private className="px-5 pb-5">
             {positions.length > 0 ? (
               <AllocationChart positions={positions} mode={allocMode} />
             ) : (
@@ -226,7 +226,7 @@ export function AnalyticsPage() {
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400">Evaluación estadística del portfolio</span>
         </CardHeader>
-        <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-0 md:divide-x divide-y md:divide-y-0 divide-slate-100 dark:divide-white/[0.05] border-t border-slate-100 dark:border-white/[0.05] transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
+        <div data-private className={cn("grid grid-cols-1 md:grid-cols-3 gap-0 md:divide-x divide-y md:divide-y-0 divide-slate-100 dark:divide-white/[0.05] border-t border-slate-100 dark:border-white/[0.05] transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
           {[
             {
               label: 'Volatilidad Anualizada',
@@ -311,7 +311,7 @@ export function AnalyticsPage() {
                 .slice()
                 .sort((a, b) => b.unrealized_pnl_pct - a.unrealized_pnl_pct)
                 .map((p, i) => (
-                  <motion.tr
+                  <motion.tr data-private
                     key={p.isin}
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}

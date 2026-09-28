@@ -19,6 +19,8 @@ interface AppState {
   theme: Theme
   setTheme: (t: Theme) => void
   toggleTheme: () => void
+  privacyMode: boolean
+  togglePrivacyMode: () => void
 
   // Mobile sidebar
   mobileSidebarOpen: boolean
@@ -153,6 +155,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       const nextTheme: Theme = state.theme === 'dark' ? 'light' : 'dark'
       applyTheme(nextTheme)
       return { theme: nextTheme }
+    })
+  },
+  privacyMode: typeof window !== 'undefined' && localStorage.getItem('portfolio_privacy_mode') === 'true',
+  togglePrivacyMode: () => {
+    set((state) => {
+      const privacyMode = !state.privacyMode
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('portfolio_privacy_mode', String(privacyMode))
+      }
+      return { privacyMode }
     })
   },
 

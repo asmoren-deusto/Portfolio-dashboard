@@ -65,12 +65,15 @@ export function Sidebar({}: SidebarProps) {
       >
         {/* Logo & Mobile Close Button */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.06] px-4 py-3.5">
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-1 min-w-0 items-center gap-2.5">
             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
               <TrendingUp size={18} strokeWidth={2.5} />
             </div>
             <span className="font-bold text-[17px] tracking-tight text-slate-950 dark:text-white">
               Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
+            </span>
+            <span className="ml-auto shrink-0 rounded-md border border-slate-200/80 px-1.5 py-0.5 font-mono text-[9px] font-medium text-slate-500 dark:border-white/[0.08] dark:text-slate-400">
+              v2.5
             </span>
           </div>
 

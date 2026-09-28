@@ -246,20 +246,22 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             decimals = 2 if abs(v) >= 1 else 6
             return round(v, decimals)
 
+        price_precision = 4 if ticker == "EURUSD=X" else None
+
         return {
             "ticker":              ticker,
-            "price":               _r(display_price),
-            "regular_price":       _r(regular_price),
-            "pre_market_price":    _r(pre_price),
-            "post_market_price":   _r(post_price),
+            "price":               _r(display_price, price_precision),
+            "regular_price":       _r(regular_price, price_precision),
+            "pre_market_price":    _r(pre_price, price_precision),
+            "post_market_price":   _r(post_price, price_precision),
             "pre_market_change_pct":  pre_chg_pct,
             "post_market_change_pct": post_chg_pct,
             "market_state":        market_state,
-            "prev_close":          _r(prev_close),
+            "prev_close":          _r(prev_close, price_precision),
             "change":              round(chg, 4),
             "change_pct":          chg_pct,
-            "day_high":            _r(day_high),
-            "day_low":             _r(day_low),
+            "day_high":            _r(day_high, price_precision),
+            "day_low":             _r(day_low, price_precision),
             "volume":              int(volume) if volume else None,
             "market_cap":          market_cap,
             "currency":            currency or "USD",

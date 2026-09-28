@@ -127,7 +127,6 @@ export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) 
         crosshairMarkerBackgroundColor: '#3b82f6',
         crosshairMarkerBorderColor: '#fff',
         crosshairMarkerBorderWidth: 2,
-        title: 'Valor Cartera',
       })
 
       // 2. Secondary Line Series: Net Invested Capital (Dinero Aportado)
@@ -141,7 +140,6 @@ export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) 
         crosshairMarkerBackgroundColor: '#a855f7',
         crosshairMarkerBorderColor: '#fff',
         crosshairMarkerBorderWidth: 1.5,
-        title: 'Dinero Aportado',
       })
 
       chartRef.current = chart
@@ -226,7 +224,7 @@ export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) 
   }, [data])
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div data-private className="w-full flex flex-col gap-2">
       {/* Interactive Legend & Metric Strip */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs px-1">
         {/* Series indicators */}

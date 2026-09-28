@@ -204,7 +204,7 @@ export function TransactionsPage() {
       </Header>
 
       {/* Summary KPI Highlights */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#111625]/85 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Total Operaciones</span>
@@ -330,7 +330,7 @@ export function TransactionsPage() {
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody data-private>
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-20 text-center text-slate-500">

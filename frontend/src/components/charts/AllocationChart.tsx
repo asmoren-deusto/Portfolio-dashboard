@@ -109,10 +109,10 @@ export function AllocationChart({ positions, mode = 'asset' }: AllocationChartPr
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate w-full">
                 {hoveredItem.name}
               </span>
-              <span className="text-lg font-bold text-slate-950 dark:text-white tabular-nums tracking-tight">
+              <span data-private className="text-lg font-bold text-slate-950 dark:text-white tabular-nums tracking-tight">
                 {fmt.currency(hoveredItem.value)}
               </span>
-              <span className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
+              <span data-private className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
                 {(hoveredItem.pct ?? 0).toFixed(1)}%
               </span>
             </>
@@ -121,10 +121,10 @@ export function AllocationChart({ positions, mode = 'asset' }: AllocationChartPr
               <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
                 Total
               </span>
-              <span className="text-xl font-bold text-slate-950 dark:text-slate-100 tabular-nums tracking-tight">
+              <span data-private className="text-xl font-bold text-slate-950 dark:text-slate-100 tabular-nums tracking-tight">
                 {fmt.currency(total)}
               </span>
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+              <span data-private className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                 {data.length} {mode === 'asset' ? 'posiciones' : 'tipos'}
               </span>
             </>

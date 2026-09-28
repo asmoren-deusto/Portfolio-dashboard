@@ -234,12 +234,12 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5">
                     Valoración en Cartera
                   </span>
-                  <div className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-slate-950 dark:text-white">
+                  <div data-private className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-slate-950 dark:text-white">
                     {fmt.currency(position.current_value)}
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 font-medium">
                     Inversión neta:{' '}
-                    <span className="text-slate-800 dark:text-slate-200 font-bold">
+                    <span data-private className="text-slate-800 dark:text-slate-200 font-bold">
                       {fmt.currency(position.invested_amount)}
                     </span>
                   </div>
@@ -255,7 +255,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 font-medium">
                     Coste medio:{' '}
-                    <span className="text-slate-800 dark:text-slate-200 font-bold">
+                    <span data-private className="text-slate-800 dark:text-slate-200 font-bold">
                       {fmt.currency(position.avg_cost)}
                     </span>
                   </div>
@@ -275,7 +275,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                     ) : (
                       <TrendingDown className="w-4 h-4 stroke-[2.5]" />
                     )}
-                    <span>
+                    <span data-private>
                       {fmt.pct(position.unrealized_pnl_pct)} ({fmt.currency(position.unrealized_pnl)})
                     </span>
                   </div>
@@ -381,7 +381,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-semibold truncate">
                   Participaciones
                 </span>
-                <span className="text-xs sm:text-sm font-bold font-mono text-slate-950 dark:text-white mt-0.5 block truncate">
+                <span data-private className="text-xs sm:text-sm font-bold font-mono text-slate-950 dark:text-white mt-0.5 block truncate">
                   {fmt.num(position.shares)}
                 </span>
               </div>
@@ -390,7 +390,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-semibold truncate">
                   Coste Medio
                 </span>
-                <span className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-slate-200 mt-0.5 block truncate">
+                <span data-private className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-slate-200 mt-0.5 block truncate">
                   {fmt.currency(position.avg_cost)}
                 </span>
               </div>
@@ -414,7 +414,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-semibold truncate">
                   Peso en Cartera
                 </span>
-                <span className="text-xs sm:text-sm font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5 block truncate">
+                <span data-private className="text-xs sm:text-sm font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5 block truncate">
                   {position.weight.toFixed(1)}%
                 </span>
               </div>

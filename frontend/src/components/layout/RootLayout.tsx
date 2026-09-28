@@ -8,7 +8,7 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 
 export function RootLayout() {
   const location = useLocation()
-  const { theme, toggleMobileSidebar, currentUser } = useAppStore()
+  const { theme, privacyMode, toggleMobileSidebar, currentUser } = useAppStore()
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -26,7 +26,7 @@ export function RootLayout() {
   }
 
   return (
-    <div className="relative flex min-h-screen bg-[#f8fafc] text-slate-800 dark:bg-[#090d16] dark:text-slate-100 overflow-x-hidden selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-blue-500/30 dark:selection:text-blue-200 transition-colors duration-200">
+    <div className={`relative flex min-h-screen bg-[#f8fafc] text-slate-800 dark:bg-[#090d16] dark:text-slate-100 overflow-x-hidden selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-blue-500/30 dark:selection:text-blue-200 transition-colors duration-200${privacyMode ? ' privacy-mode' : ''}`}>
       {/* Ambient background glows */}
       <div className="pointer-events-none fixed top-0 left-1/3 w-[800px] h-[350px] bg-blue-500/[0.04] blur-[140px] rounded-full -z-10 dark:bg-blue-600/[0.04]" />
       <div className="pointer-events-none fixed top-1/4 right-10 w-[500px] h-[300px] bg-violet-500/[0.03] blur-[120px] rounded-full -z-10 dark:bg-violet-600/[0.03]" />
@@ -54,7 +54,7 @@ export function RootLayout() {
             </div>
           </div>
           <span className="text-xs font-mono font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/[0.04] px-2 py-0.5 rounded-full border border-slate-200/80 dark:border-white/[0.06]">
-            v2.4
+            v2.5
           </span>
         </header>
 

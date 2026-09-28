@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RefreshCw, Sun, Moon, User, ChevronDown, Check, LogOut, ShieldCheck } from 'lucide-react'
+import { RefreshCw, Sun, Moon, Eye, EyeOff, User, ChevronDown, Check, LogOut, ShieldCheck } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
@@ -42,7 +42,7 @@ export function Header({
   showBrokerSelector = true,
   children,
 }: HeaderProps) {
-  const { period, setPeriod, selectedBroker, setSelectedBroker, useMock, theme, toggleTheme, currentUser, users, login, logout } = useAppStore()
+  const { period, setPeriod, selectedBroker, setSelectedBroker, useMock, theme, toggleTheme, privacyMode, togglePrivacyMode, currentUser, users, login, logout } = useAppStore()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [spinning, setSpinning] = useState(false)
@@ -305,6 +305,22 @@ export function Header({
             )}
           </div>
         )}
+
+        {/* Privacy Mode Toggle */}
+        <button
+          onClick={togglePrivacyMode}
+          aria-label={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
+          aria-pressed={privacyMode}
+          className={cn(
+            'flex items-center justify-center w-9 h-9 rounded-xl border shadow-sm transition-all active:scale-95',
+            privacyMode
+              ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300'
+              : 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-300'
+          )}
+          title={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
+        >
+          {privacyMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
 
         {/* Quick Theme Toggle Button in Header */}
         <button

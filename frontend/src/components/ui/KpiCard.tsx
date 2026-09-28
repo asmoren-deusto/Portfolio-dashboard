@@ -80,12 +80,12 @@ export function KpiCard({
         /* Hero Mode: Value, Badge and Subtitle arranged horizontally */
         <div className={cn("flex items-baseline justify-between gap-3 min-w-0 transition-opacity duration-300", loading ? "opacity-65" : "opacity-100")}>
           <div className="flex items-baseline gap-2.5 sm:gap-3 flex-wrap min-w-0">
-            <div className="text-2xl sm:text-[26px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
+            <div data-private className="text-2xl sm:text-[26px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
               {value}
             </div>
 
             {change && (
-              <span
+              <span data-private
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 font-mono text-xs sm:text-[13px] font-bold border shadow-xs transition-all shrink-0',
                   changeClass
@@ -104,7 +104,7 @@ export function KpiCard({
           </div>
 
           {sub && (
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium font-mono shrink-0">
+            <span data-private className="text-xs text-slate-500 dark:text-slate-400 font-medium font-mono shrink-0">
               {sub}
             </span>
           )}
@@ -112,12 +112,12 @@ export function KpiCard({
       ) : (
         /* Regular KPI Card: Value and Subtitle placed side-by-side to minimize height */
         <div className={cn("flex items-baseline gap-2 min-w-0 transition-opacity duration-300", loading ? "opacity-65" : "opacity-100")}>
-          <div className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
+          <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
             {value}
           </div>
 
           {change && (
-            <span
+            <span data-private
               className={cn(
                 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold border shrink-0',
                 changeClass
@@ -135,7 +135,7 @@ export function KpiCard({
           )}
 
           {sub && (
-            <span
+            <span data-private
               className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate flex-1 min-w-0"
               title={sub}
             >

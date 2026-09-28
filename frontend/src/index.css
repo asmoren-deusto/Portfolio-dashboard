@@ -106,6 +106,12 @@
   .glow-green { box-shadow: 0 0 30px rgba(16, 185, 129, 0.08); }
 }
 
+.privacy-mode [data-private] {
+  filter: blur(7px);
+  user-select: none;
+  transition: filter 160ms ease;
+}
+
 @keyframes tickerMarquee {
   0% {
     transform: translateX(0);

@@ -133,7 +133,10 @@ function normalizeStock(idx: any): MarketStock {
   }
 }
 
-function fmtPrice(price: number): string {
+function fmtPrice(price: number, ticker?: string): string {
+  if (ticker === 'EURUSD=X') {
+    return price.toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+  }
   return price >= 1000
     ? price.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
     : price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 4 })
@@ -208,6 +211,10 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   const rawIndices = rawList.map((idx: any) => ({
     ...idx,
     name: formatTickerName(idx.name),
+    market_state:
+      idx.market_state === 'PRE' && idx.pre_market_price == null
+        ? 'CLOSED'
+        : idx.market_state,
   }))
 
   // Status determined by active US and European equity session
@@ -225,6 +232,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
 
   const mainStatusLabel =
     usState === 'REGULAR' ? 'En Vivo' :
+    usState === 'CLOSED' ? 'Cerrado' :
     (usState === 'POST' || usState === 'POSTPOST') ? 'Post-mercado' :
     (usState === 'PRE' && utcHour >= 10 && utcHour < 15.5) ? 'Pre-mercado' :
     (usState === 'PRE' && (utcHour >= 22 || utcHour < 2)) ? 'Post-mercado' :
@@ -313,7 +321,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                         {idx.name}
                       </span>
                       <span className="text-[11.5px] font-bold text-slate-900 tracking-tight dark:text-white mt-[3px] tabular-nums leading-none whitespace-nowrap">
-                        {idx.price != null ? fmtPrice(idx.price) : '—'}
+                        {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
                       </span>
                     </div>
 
