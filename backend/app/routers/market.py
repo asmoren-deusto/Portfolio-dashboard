@@ -142,6 +142,107 @@ def _now_iso() -> str:
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
+def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
+    """Fallback quote fetch through Yahoo's chart endpoint when yfinance is rate-limited."""
+    import httpx
+    from urllib.parse import quote
+
+    try:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(ticker, safe='')}"
+        response = httpx.get(
+            url,
+            params={"range": "1d", "interval": "1m", "includePrePost": "true"},
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=12,
+        )
+        response.raise_for_status()
+        chart = response.json().get("chart", {})
+        result = (chart.get("result") or [None])[0]
+        if not result:
+            return None
+
+        meta = result.get("meta", {})
+        quote_data = (result.get("indicators", {}).get("quote") or [{}])[0]
+        timestamps = result.get("timestamp") or []
+        closes = quote_data.get("close") or []
+        valid_prices = [
+            (timestamp, price)
+            for timestamp, price in zip(timestamps, closes)
+            if price is not None
+        ]
+        last_price = valid_prices[-1][1] if valid_prices else None
+        regular_price = meta.get("regularMarketPrice") or last_price
+        if regular_price is None:
+            return None
+
+        market_state = meta.get("marketState")
+        if not market_state:
+            now = time.time()
+            periods = meta.get("currentTradingPeriod", {})
+            market_state = "CLOSED"
+            for period_name, state in (("pre", "PRE"), ("regular", "REGULAR"), ("post", "POST")):
+                period = periods.get(period_name, {})
+                start = period.get("start")
+                end = period.get("end")
+                if start is not None and end is not None and start <= now < end:
+                    market_state = state
+                    break
+
+        previous_close = meta.get("previousClose") or meta.get("chartPreviousClose")
+        pre_price = meta.get("preMarketPrice")
+        post_price = meta.get("postMarketPrice")
+        display_price = (
+            pre_price if market_state == "PRE" and pre_price is not None
+            else post_price if market_state in ("POST", "POSTPOST") and post_price is not None
+            else regular_price
+        )
+
+        if market_state == "PRE" and pre_price is not None:
+            reference = regular_price
+        elif market_state in ("POST", "POSTPOST") and post_price is not None:
+            reference = regular_price
+        else:
+            reference = previous_close or regular_price
+
+        change = display_price - reference if reference else 0.0
+        change_pct = change / reference * 100 if reference else 0.0
+
+        def latest_value(key: str):
+            values = quote_data.get(key) or []
+            return next((value for value in reversed(values) if value is not None), None)
+
+        price_precision = 4 if ticker == "EURUSD=X" else None
+
+        def rounded(value):
+            if value is None:
+                return None
+            decimals = price_precision if price_precision is not None else (2 if abs(value) >= 1 else 6)
+            return round(value, decimals)
+
+        return {
+            "ticker": ticker,
+            "price": rounded(display_price),
+            "regular_price": rounded(regular_price),
+            "pre_market_price": rounded(pre_price),
+            "post_market_price": rounded(post_price),
+            "pre_market_change_pct": round((pre_price - regular_price) / regular_price * 100, 2) if pre_price is not None and regular_price else None,
+            "post_market_change_pct": round((post_price - regular_price) / regular_price * 100, 2) if post_price is not None and regular_price else None,
+            "market_state": market_state,
+            "prev_close": rounded(previous_close),
+            "change": round(change, 4),
+            "change_pct": round(change_pct, 2),
+            "day_high": rounded(max((value for value in quote_data.get("high", []) if value is not None), default=meta.get("regularMarketDayHigh"))),
+            "day_low": rounded(min((value for value in quote_data.get("low", []) if value is not None), default=meta.get("regularMarketDayLow"))),
+            "volume": int(latest_value("volume") or meta.get("regularMarketVolume") or 0) or None,
+            "market_cap": meta.get("marketCap"),
+            "currency": meta.get("currency", "USD"),
+            "last_updated": _now_iso(),
+        }
+    except Exception as e:
+        logger.debug(f"Yahoo chart fallback failed for {ticker}: {e}")
+        return None
+
+
 def _fetch_ticker_extended(ticker: str) -> dict:
     """Fetch a single ticker with pre/post market and market state via yfinance."""
     import yfinance as yf
@@ -219,6 +320,9 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             display_price = regular_price
 
         if display_price is None:
+            fallback = _fetch_yahoo_chart_quote(ticker)
+            if fallback:
+                return fallback
             return {"ticker": ticker, "error": "no_price"}
 
         # ── Change calculation ──────────────────────────────────────────────────
@@ -269,6 +373,9 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         }
     except Exception as e:
         logger.debug(f"Error fetching {ticker}: {e}")
+        fallback = _fetch_yahoo_chart_quote(ticker)
+        if fallback:
+            return fallback
         return {"ticker": ticker, "error": str(e)}
 
 

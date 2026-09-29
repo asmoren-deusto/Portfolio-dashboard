@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { ArrowLeftRight, BarChart3, Bitcoin, Coins, Droplets, Globe, Landmark, TrendingUp } from 'lucide-react'
 
 interface CompanyLogoProps {
   ticker?: string
@@ -26,6 +27,33 @@ const ISIN_DOMAINS: Record<string, string> = {
   'LU2145461757': 'robeco.com',
   'IE00BM95B621': 'polarcapital.co.uk',
   'LU1623762843': 'carmignac.es',
+}
+
+function getMarketIcon(ticker?: string): React.ReactNode {
+  switch (ticker) {
+    case '^GSPC':
+      return <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+    case '^IXIC':
+      return <BarChart3 className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+    case 'URTH':
+    case 'EEM':
+      return <Globe className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+    case '^IBEX':
+    case '^STOXX50E':
+    case '^N225':
+      return <Landmark className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+    case 'GC=F':
+      return <Coins className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+    case 'BZ=F':
+      return <Droplets className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+    case 'BTC-EUR':
+      return <Bitcoin className="w-5 h-5 text-orange-500" />
+    case 'EURUSD=X':
+    case 'EURJPY=X':
+      return <ArrowLeftRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+    default:
+      return null
+  }
 }
 
 // Generate consistent, sophisticated gradient based on ticker letters
@@ -132,6 +160,18 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   }
 
   const roundedClass = size === 'xs' ? 'rounded-lg' : 'rounded-xl'
+  const marketIcon = getMarketIcon(ticker)
+
+  if (marketIcon) {
+    return (
+      <div
+        className={`${sizeClasses} ${roundedClass} bg-slate-100 border border-slate-200/90 flex items-center justify-center shrink-0 dark:bg-slate-800/90 dark:border-white/10 ${className}`}
+        title={`${name} (${ticker})`}
+      >
+        {marketIcon}
+      </div>
+    )
+  }
 
   if (attempt >= 3 || !currentSrc) {
     return (

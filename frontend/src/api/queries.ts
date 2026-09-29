@@ -174,11 +174,12 @@ export interface MarketStock {
 
 export type MarketIndex = MarketStock
 
-export function useMarketQuotes(index?: string) {
+export function useMarketQuotes(index?: string, enabled = true) {
   const queryParam = index && index !== 'Todos' ? `?index=${encodeURIComponent(index)}` : ''
   return useQuery({
     queryKey: ['market-quotes', index],
     queryFn: () => get<{ stocks: MarketStock[]; count: number; cached: boolean; cache_timestamp: string }>(`/market/quotes${queryParam}`),
+    enabled,
     staleTime: 1000 * 55,        // 55 s — just under cache TTL
     refetchInterval: 1000 * 60,  // poll every 60 s
   })

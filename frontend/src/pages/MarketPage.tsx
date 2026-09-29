@@ -16,7 +16,7 @@ import {
   Columns2,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useMarketQuotes, type MarketStock } from '@/api/queries'
+import { useMarketIndices, useMarketQuotes, type MarketStock } from '@/api/queries'
 import { Header } from '@/components/layout/Header'
 import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
@@ -27,6 +27,7 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { fmt } from '@/lib/utils'
 
 const INDEX_TABS = [
+  { id: 'TICKER', label: 'Ticker superior' },
   { id: 'Todos', label: 'Todos los Mercados' },
   { id: 'SP500', label: 'S&P 500' },
   { id: 'NASDAQ100', label: 'NASDAQ 100' },
@@ -38,7 +39,7 @@ type SortOption = 'market_cap_desc' | 'change_pct_desc' | 'change_pct_asc' | 'vo
 type ViewMode = 'split' | 'heatmap' | 'grid' | 'table'
 
 export const MarketPage: React.FC = () => {
-  const [selectedIndex, setSelectedIndex] = useState<string>('Todos')
+  const [selectedIndex, setSelectedIndex] = useState<string>('TICKER')
   const [selectedSector, setSelectedSector] = useState<string>('Todos')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortBy, setSortBy] = useState<SortOption>('market_cap_desc')
@@ -48,15 +49,6 @@ export const MarketPage: React.FC = () => {
   // Height synchronization between Heatmap and Stock List in split view
   const heatmapContainerRef = useRef<HTMLDivElement>(null)
   const [heatmapHeight, setHeatmapHeight] = useState<number>(760)
-  const [isXl, setIsXl] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth >= 1280 : true)
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsXl(window.innerWidth >= 1280)
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
   useEffect(() => {
     if (viewMode !== 'split') return
@@ -80,7 +72,25 @@ export const MarketPage: React.FC = () => {
     return () => ro.disconnect()
   }, [viewMode])
 
-  const { data, isLoading, isFetching, refetch } = useMarketQuotes(selectedIndex)
+  const { data: quoteData, isLoading: quotesLoading, isFetching: quotesFetching } = useMarketQuotes(
+    selectedIndex,
+    selectedIndex !== 'TICKER'
+  )
+  const { data: tickerData, isLoading: tickerLoading, isFetching: tickerFetching } = useMarketIndices()
+  const isTickerUniverse = selectedIndex === 'TICKER'
+  const tickerStocks = useMemo(() => (tickerData?.indices ?? []).map((stock) => ({
+    ...stock,
+    sector: stock.sector.startsWith('Índice')
+      ? 'Índices'
+      : stock.sector.startsWith('Materia Prima')
+      ? 'Materias primas'
+      : stock.sector,
+  })), [tickerData?.indices])
+  const data = isTickerUniverse
+    ? { stocks: tickerStocks }
+    : quoteData
+  const isLoading = isTickerUniverse ? tickerLoading : quotesLoading
+  const isFetching = isTickerUniverse ? tickerFetching : quotesFetching
 
   // Extract unique sectors
   const sectors = useMemo(() => {
@@ -268,7 +278,10 @@ export const MarketPage: React.FC = () => {
             return (
               <button
                 key={tab.id}
-                onClick={() => setSelectedIndex(tab.id)}
+                onClick={() => {
+                  setSelectedIndex(tab.id)
+                  setSelectedSector('Todos')
+                }}
                 className={`relative px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors z-10 ${
                   active ? 'text-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.03]'
                 }`}
@@ -439,8 +452,8 @@ export const MarketPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
           {/* Left Column: Interactive Stock List — Explicit Height Synchronized with Heatmap */}
           <div
-            style={{ height: isXl && heatmapHeight ? `${heatmapHeight}px` : '760px' }}
-            className="xl:col-span-5 rounded-2xl bg-white/95 dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col"
+            style={{ height: `${heatmapHeight}px` }}
+            className="xl:col-span-7 rounded-2xl bg-white/95 dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col"
           >
             <div className="px-4 py-3 border-b border-slate-200/80 dark:border-white/[0.06] flex items-center justify-between bg-slate-50/70 dark:bg-white/[0.02] shrink-0">
               <div className="flex items-center gap-2">
@@ -594,7 +607,7 @@ export const MarketPage: React.FC = () => {
           </div>
 
           {/* Right Column: Heatmap */}
-          <div ref={heatmapContainerRef} className="xl:col-span-7 w-full min-w-0">
+          <div ref={heatmapContainerRef} className="xl:col-span-5 w-full min-w-0">
             <MarketHeatmap
               stocks={filteredStocks}
               onSelectStock={(stock) => setSelectedStock(stock)}
