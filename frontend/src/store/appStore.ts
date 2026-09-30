@@ -127,12 +127,12 @@ function getStoredActiveUser(): UserProfile | null {
       return null
     }
     const allUsers = getStoredUsers()
-    if (activeId) {
+    const hasAuthToken = Boolean(localStorage.getItem('portfolio_auth_token'))
+    if (activeId && (hasAuthToken || activeId === 'demo')) {
       const found = allUsers.find((u) => u.id === activeId)
       if (found) return found
     }
-    const asier = allUsers.find((u) => u.id === 'asier')
-    return asier || allUsers[0] || null
+    return null
   } catch {
     return null
   }

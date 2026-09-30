@@ -20,6 +20,7 @@ from app.services.finance_engine import (
     calculate_period_return,
     calculate_xirr,
 )
+from app.routers.auth import get_current_user_id
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 logger = logging.getLogger(__name__)
@@ -32,13 +33,6 @@ def _get_all_transactions(db: Session, user_id: str = "asier", broker: str | Non
     if broker and broker.lower() not in ["all", "todos"]:
         query = query.filter(Transaction.broker == broker.lower())
     rows = query.order_by(Transaction.date).all()
-    if not rows and user_id != "demo":
-        query = db.query(Transaction).filter(Transaction.user_id == "asier")
-        if broker and broker.lower() not in ["all", "todos"]:
-            query = query.filter(Transaction.broker == broker.lower())
-        rows = query.order_by(Transaction.date).all()
-    if not rows and not broker:
-        rows = db.query(Transaction).order_by(Transaction.date).all()
     return [
         {
             "id": t.id,
@@ -60,7 +54,7 @@ def _get_asset(db: Session, isin: str) -> Asset | None:
 
 
 @router.get("/summary", response_model=PortfolioSummary)
-async def get_portfolio_summary(user_id: str = "asier", broker: str | None = None, db: Session = Depends(get_db)):
+async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), broker: str | None = None, db: Session = Depends(get_db)):
     """Return overall portfolio KPIs."""
     transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
@@ -100,7 +94,7 @@ async def get_portfolio_summary(user_id: str = "asier", broker: str | None = Non
 
 
 @router.get("/positions", response_model=list[PositionOut])
-async def get_positions(user_id: str = "asier", broker: str | None = None, refresh: bool = False, db: Session = Depends(get_db)):
+async def get_positions(user_id: str = Depends(get_current_user_id), broker: str | None = None, refresh: bool = False, db: Session = Depends(get_db)):
     """Return all current positions with live prices, valuation dates, and broker tags."""
     if refresh:
         _price_cache.clear()
@@ -184,7 +178,7 @@ async def get_positions(user_id: str = "asier", broker: str | None = None, refre
 
 
 @router.post("/refresh-prices")
-async def refresh_portfolio_prices(user_id: str = "asier", db: Session = Depends(get_db)):
+async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Force re-scraping of all active positions from official gestora websites,
     Financial Times tearsheets, and Quefondos. Clears in-memory price cache.
@@ -216,7 +210,7 @@ async def refresh_portfolio_prices(user_id: str = "asier", db: Session = Depends
 
 
 @router.post("/update-price")
-async def update_price(req: UpdatePriceRequest, db: Session = Depends(get_db)):
+async def update_price(req: UpdatePriceRequest, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """Update or override a fund NAV manually with an exact date."""
     target_date = req.date or datetime.now().strftime("%Y-%m-%d")
     existing = db.query(PriceCache).filter(PriceCache.isin == req.isin, PriceCache.date == target_date).first()
@@ -237,7 +231,7 @@ _perf_cache: dict[str, tuple[datetime, list[dict]]] = {}
 @router.get("/performance", response_model=list[PerformancePoint])
 async def get_performance(
     period: str = "1y",
-    user_id: str = "asier",
+    user_id: str = Depends(get_current_user_id),
     broker: str | None = None,
     start_date: str | None = None,
     db: Session = Depends(get_db),
@@ -291,7 +285,7 @@ async def get_performance(
 
 
 @router.get("/analytics")
-async def get_analytics(period: str = "1y", user_id: str = "asier", broker: str | None = None, db: Session = Depends(get_db)):
+async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_user_id), broker: str | None = None, db: Session = Depends(get_db)):
     """Return all computed risk/return metrics."""
     transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:

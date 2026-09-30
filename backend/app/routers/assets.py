@@ -6,17 +6,18 @@ from app.database import get_db
 from app.models import Asset
 from app.schemas import AssetCreate, AssetOut, PricePoint
 from app.services.price_service import get_current_price, get_price_history
+from app.routers.auth import get_current_user_id
 
 router = APIRouter(prefix="/api/assets", tags=["assets"])
 
 
 @router.get("", response_model=list[AssetOut])
-def list_assets(db: Session = Depends(get_db)):
+def list_assets(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     return db.query(Asset).all()
 
 
 @router.post("", response_model=AssetOut)
-def create_asset(asset: AssetCreate, db: Session = Depends(get_db)):
+def create_asset(asset: AssetCreate, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     existing = db.query(Asset).filter(Asset.isin == asset.isin).first()
     if existing:
         raise HTTPException(status_code=409, detail="Asset already exists")
@@ -28,7 +29,7 @@ def create_asset(asset: AssetCreate, db: Session = Depends(get_db)):
 
 
 @router.put("/{isin}", response_model=AssetOut)
-def update_asset(isin: str, asset: AssetCreate, db: Session = Depends(get_db)):
+def update_asset(isin: str, asset: AssetCreate, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     db_asset = db.query(Asset).filter(Asset.isin == isin).first()
     if not db_asset:
         raise HTTPException(status_code=404, detail="Asset not found")
@@ -40,7 +41,7 @@ def update_asset(isin: str, asset: AssetCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{isin}/price")
-async def get_price(isin: str, db: Session = Depends(get_db)):
+async def get_price(isin: str, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     asset = db.query(Asset).filter(Asset.isin == isin).first()
     ticker = asset.ticker if asset else None
     price = await get_current_price(isin, ticker)
@@ -48,7 +49,7 @@ async def get_price(isin: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{isin}/history", response_model=list[PricePoint])
-async def get_history(isin: str, period: str = "1y", db: Session = Depends(get_db)):
+async def get_history(isin: str, period: str = "1y", user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     asset = db.query(Asset).filter(Asset.isin == isin).first()
     ticker = asset.ticker if asset else None
     history = await get_price_history(isin, ticker, period)

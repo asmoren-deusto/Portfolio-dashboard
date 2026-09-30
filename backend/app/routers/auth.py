@@ -24,6 +24,17 @@ from app.services.auth_service import (
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
+def get_current_user_id(authorization: Optional[str] = Header(None)) -> str:
+    """Return the authenticated user id or reject the request."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="No autorizado")
+
+    user_id = verify_access_token(authorization.split(" ", 1)[1])
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Token inválido o expirado")
+    return user_id
+
+
 def _to_user_out(user: User) -> UserOut:
     return UserOut(
         id=user.id,
@@ -66,10 +77,9 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         token = create_access_token(user.id)
         return LoginResponse(success=True, user=_to_user_out(user), token=token)
 
-    # If user has not set a password yet, allow login
+    # Passwords are required for every non-demo account.
     if not user.password_hash or not user.password_salt:
-        token = create_access_token(user.id)
-        return LoginResponse(success=True, user=_to_user_out(user), token=token)
+        return LoginResponse(success=False, error="Este usuario no tiene contraseña configurada. Contacta con el administrador.")
 
     # User has a password: verify it
     if not req.password:
@@ -83,9 +93,12 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/set-password", response_model=LoginResponse)
-def set_password(req: SetPasswordRequest, db: Session = Depends(get_db)):
+def set_password(req: SetPasswordRequest, current_user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """Set an initial password for a user that does not have one yet."""
-    user = db.query(User).filter(User.id == req.user_id).first()
+    if current_user_id != req.user_id:
+        raise HTTPException(status_code=403, detail="No puedes modificar otro usuario")
+
+    user = db.query(User).filter(User.id == current_user_id).first()
     if not user:
         return LoginResponse(success=False, error="Usuario no encontrado.")
 
@@ -109,9 +122,12 @@ def set_password(req: SetPasswordRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/change-password", response_model=LoginResponse)
-def change_password(req: ChangePasswordRequest, db: Session = Depends(get_db)):
+def change_password(req: ChangePasswordRequest, current_user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """Change an existing password verifying the current password."""
-    user = db.query(User).filter(User.id == req.user_id).first()
+    if current_user_id != req.user_id:
+        raise HTTPException(status_code=403, detail="No puedes modificar otro usuario")
+
+    user = db.query(User).filter(User.id == current_user_id).first()
     if not user:
         return LoginResponse(success=False, error="Usuario no encontrado.")
 
