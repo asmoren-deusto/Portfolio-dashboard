@@ -11,7 +11,7 @@ const configs: Record<string, { label: string; bg: string; text: string; border:
 
 const brokerConfigs: Record<string, { label: string; bg: string; text: string; border: string }> = {
   myinvestor: {
-    label: 'MyInvestor',
+    label: 'Myinves',
     bg: 'bg-teal-500/10 dark:bg-teal-500/15',
     text: 'text-teal-700 dark:text-teal-300',
     border: 'border-teal-500/20',

@@ -19,6 +19,7 @@ import type { MarketStock } from '@/api/queries'
 interface StockTableRowProps {
   stock: MarketStock
   onClick?: () => void
+  rank?: number
 }
 
 function getSectorIcon(sector: string) {
@@ -44,7 +45,7 @@ function getSectorIcon(sector: string) {
   }
 }
 
-export const StockTableRow: React.FC<StockTableRowProps> = ({ stock, onClick }) => {
+export const StockTableRow: React.FC<StockTableRowProps> = ({ stock, onClick, rank }) => {
   const isPos = (stock.change_pct ?? 0) >= 0
   const cur = stock.currency ?? 'USD'
   const price = stock.price ?? 0
@@ -62,6 +63,11 @@ export const StockTableRow: React.FC<StockTableRowProps> = ({ stock, onClick }) 
       className="group border-b border-slate-100 dark:border-white/[0.04] hover:bg-slate-50/80 dark:hover:bg-white/[0.035] transition-colors cursor-pointer"
     >
       {/* Company */}
+      <td className="py-3.5 pl-4 pr-1 text-center w-8">
+        <span className="font-mono font-bold text-xs text-slate-400 dark:text-slate-500">
+          {rank}
+        </span>
+      </td>
       <td className="py-3.5 px-4">
         <div className="flex items-center gap-3">
           <CompanyLogo

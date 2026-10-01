@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { format, parseISO } from 'date-fns'
 import {
@@ -24,6 +24,7 @@ import { PerformanceChart } from '@/components/charts/PerformanceChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
+import { MiniDonut } from '@/components/ui/MiniDonut'
 import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
@@ -44,6 +45,14 @@ import {
 
 type AllocMode = 'asset' | 'type'
 
+const BROKER_ORDER = ['myinvestor', 'indexa', 'bbva', 'kutxabank', 'traderepublic', 'scalable']
+
+function brokerRank(broker?: string | null): number {
+  const key = (broker || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const idx = BROKER_ORDER.indexOf(key)
+  return idx === -1 ? BROKER_ORDER.length : idx
+}
+
 const PERIOD_LABELS: Record<string, string> = {
   '1mo': '1 Mes',
   '3mo': '3 Meses',
@@ -62,6 +71,15 @@ export function OverviewPage() {
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
+  const sortedPositions = useMemo(
+    () =>
+      [...positions].sort((a, b) => {
+        const brokerCompare = brokerRank(a.broker) - brokerRank(b.broker)
+        if (brokerCompare !== 0) return brokerCompare
+        return (b.current_value ?? 0) - (a.current_value ?? 0)
+      }),
+    [positions]
+  )
   const { data: performance = [], isFetching: perfFetching } = usePerformance()
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: transactions = [] } = useTransactions()
@@ -187,8 +205,6 @@ export function OverviewPage() {
             ? `${currentUser.strategy} • ${currentUser.broker}`
             : 'Resumen ejecutivo del patrimonio, evolución de rentabilidad y asignación global.'
         }
-        badge={currentUser ? `Cartera ${currentUser.name.split(' ')[0]}` : 'Cartera MyInvestor'}
-        badgeColor={currentUser?.isDemo ? 'blue' : 'emerald'}
         showPeriodSelector
       />
 
@@ -200,7 +216,7 @@ export function OverviewPage() {
         <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <Wallet size={13.5} className="text-blue-500" />
-            <span>Métricas Globales y del Periodo Seleccionado ({periodLabel})</span>
+            <span>Métricas Globales y del Periodo ({periodLabel})</span>
             {isAnyUpdating && (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-semibold lowercase tracking-normal">
                 <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping" />
@@ -500,7 +516,6 @@ export function OverviewPage() {
                   <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                   <th className="py-2 px-2.5">Activo / Fondo</th>
                   <th className="py-2 px-2 text-center">Banco</th>
-                  <th className="py-2 px-2">Tipo</th>
                   <th className="py-2 px-2 text-right">NAV</th>
                   <th className="py-2 px-2 text-right">Rend. Día</th>
                   <th className="py-2 px-2 text-right">Valor Actual</th>
@@ -509,7 +524,7 @@ export function OverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
-                {positions.slice(0, 5).map((p, i) => (
+                {sortedPositions.slice(0, 5).map((p, i) => (
                   <motion.tr
                     key={p.isin}
                     initial={{ opacity: 0, y: 4 }}
@@ -519,7 +534,7 @@ export function OverviewPage() {
                     className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
                   >
                     <td className="py-2.5 pl-3 pr-1 text-center">
-                      <span className="font-mono font-bold text-xs text-slate-400 dark:text-slate-500">
+                      <span className="font-mono font-bold text-[13px] text-slate-400 dark:text-slate-500">
                         {i + 1}
                       </span>
                     </td>
@@ -533,11 +548,12 @@ export function OverviewPage() {
                           size="sm"
                         />
                         <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[13px]">
+                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
                             {p.name}
                           </div>
-                          <div className="font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                            {p.isin}
+                          <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-500 dark:text-slate-400">
+                            <span>{p.isin}</span>
+                            <AssetBadge type={p.asset_type} />
                           </div>
                         </div>
                       </div>
@@ -545,14 +561,11 @@ export function OverviewPage() {
                     <td className="py-2.5 px-2 text-center">
                       <BrokerBadge broker={p.broker} />
                     </td>
-                    <td className="py-2.5 px-2">
-                      <AssetBadge type={p.asset_type} />
-                    </td>
                     <td className="py-2.5 px-2 text-right">
-                      <div className="font-mono font-bold text-slate-900 dark:text-white text-[12.5px] leading-tight">
+                      <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
                         {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                       </div>
-                      <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                      <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
                         {(() => {
                           const raw = p.price_date || p.last_updated
                           if (!raw) return '—'
@@ -569,7 +582,7 @@ export function OverviewPage() {
                       {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
                         <span
                           className={cn(
-                            'inline-flex items-center gap-0.5 font-mono text-[11px] font-bold',
+                            'inline-flex items-center gap-0.5 font-mono text-[12px] font-bold',
                             p.daily_change_pct > 0
                               ? 'text-emerald-600 dark:text-emerald-400'
                               : p.daily_change_pct < 0
@@ -588,26 +601,21 @@ export function OverviewPage() {
                         <span className="font-mono text-xs text-slate-400">—</span>
                       )}
                     </td>
-                    <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[13px]">
+                    <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
                       {fmt.currency(p.current_value)}
                     </td>
                     <td data-private className="py-2.5 px-2 text-right">
                       <div className="flex flex-col items-end">
                         <PnlBadge value={p.unrealized_pnl} />
-                        <span className="text-[10.5px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                        <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
                           {fmt.pct(p.unrealized_pnl_pct)}
                         </span>
                       </div>
                     </td>
                     <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <div className="h-1.5 w-8 sm:w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm shadow-blue-500/30"
-                            style={{ width: `${Math.min(p.weight, 100)}%` }}
-                          />
-                        </div>
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 w-8 text-right text-[11px]">
+                        <MiniDonut value={p.weight} size={22} strokeWidth={3} />
+                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-right text-[12px]">
                           {p.weight.toFixed(1)}%
                         </span>
                       </div>
@@ -626,7 +634,6 @@ export function OverviewPage() {
                   <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                   <th className="py-2 px-2.5">Activo / Fondo</th>
                   <th className="py-2 px-2 text-center">Banco</th>
-                  <th className="py-2 px-2">Tipo</th>
                   <th className="py-2 px-2 text-right">NAV</th>
                   <th className="py-2 px-2 text-right">Rend. Día</th>
                   <th className="py-2 px-2 text-right">Valor Actual</th>
@@ -635,7 +642,7 @@ export function OverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
-                {positions.slice(5, 10).map((p, i) => (
+                {sortedPositions.slice(5, 10).map((p, i) => (
                   <motion.tr
                     key={p.isin}
                     initial={{ opacity: 0, y: 4 }}
@@ -645,7 +652,7 @@ export function OverviewPage() {
                     className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
                   >
                     <td className="py-2.5 pl-3 pr-1 text-center">
-                      <span className="font-mono font-bold text-xs text-slate-400 dark:text-slate-500">
+                      <span className="font-mono font-bold text-[13px] text-slate-400 dark:text-slate-500">
                         {i + 6}
                       </span>
                     </td>
@@ -659,11 +666,12 @@ export function OverviewPage() {
                           size="sm"
                         />
                         <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[13px]">
+                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
                             {p.name}
                           </div>
-                          <div className="font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                            {p.isin}
+                          <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-500 dark:text-slate-400">
+                            <span>{p.isin}</span>
+                            <AssetBadge type={p.asset_type} />
                           </div>
                         </div>
                       </div>
@@ -671,14 +679,11 @@ export function OverviewPage() {
                     <td className="py-2.5 px-2 text-center">
                       <BrokerBadge broker={p.broker} />
                     </td>
-                    <td className="py-2.5 px-2">
-                      <AssetBadge type={p.asset_type} />
-                    </td>
                     <td className="py-2.5 px-2 text-right">
-                      <div className="font-mono font-bold text-slate-900 dark:text-white text-[12.5px] leading-tight">
+                      <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
                         {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                       </div>
-                      <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                      <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
                         {(() => {
                           const raw = p.price_date || p.last_updated
                           if (!raw) return '—'
@@ -695,7 +700,7 @@ export function OverviewPage() {
                       {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
                         <span
                           className={cn(
-                            'inline-flex items-center gap-0.5 font-mono text-[11px] font-bold',
+                            'inline-flex items-center gap-0.5 font-mono text-[12px] font-bold',
                             p.daily_change_pct > 0
                               ? 'text-emerald-600 dark:text-emerald-400'
                               : p.daily_change_pct < 0
@@ -714,26 +719,21 @@ export function OverviewPage() {
                         <span className="font-mono text-xs text-slate-400">—</span>
                       )}
                     </td>
-                    <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[13px]">
+                    <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
                       {fmt.currency(p.current_value)}
                     </td>
                     <td data-private className="py-2.5 px-2 text-right">
                       <div className="flex flex-col items-end">
                         <PnlBadge value={p.unrealized_pnl} />
-                        <span className="text-[10.5px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                        <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
                           {fmt.pct(p.unrealized_pnl_pct)}
                         </span>
                       </div>
                     </td>
                     <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <div className="h-1.5 w-8 sm:w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm shadow-blue-500/30"
-                            style={{ width: `${Math.min(p.weight, 100)}%` }}
-                          />
-                        </div>
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 w-8 text-right text-[11px]">
+                        <MiniDonut value={p.weight} size={22} strokeWidth={3} />
+                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-right text-[12px]">
                           {p.weight.toFixed(1)}%
                         </span>
                       </div>

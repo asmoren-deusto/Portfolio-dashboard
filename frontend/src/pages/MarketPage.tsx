@@ -180,8 +180,6 @@ export const MarketPage: React.FC = () => {
       <Header
         title="Mercado Global"
         subtitle="Cotizaciones en directo de megacaps, índices globales y valores del S&P 500 e IBEX 35."
-        badge="Tiempo Real"
-        badgeColor="blue"
       />
 
       {/* Real-time Ticker Bar */}
@@ -472,23 +470,29 @@ export const MarketPage: React.FC = () => {
             <div className="flex-1 min-h-0 overflow-y-auto">
               <table className="w-full table-fixed text-left">
                 <colgroup>
-                  <col className="w-[42%]" />
-                  <col className="w-[18%]" />
-                  <col className="w-[14%]" />
-                  <col className="hidden lg:table-column w-[14%]" />
-                  <col className="hidden xl:table-column w-[12%]" />
+                  <col className="w-[4%]" />
+                  <col className="w-[30%]" />
+                  <col className="w-[13%]" />
+                  <col className="w-[11%]" />
+                  <col className="hidden lg:table-column w-[10%]" />
+                  <col className="hidden lg:table-column w-[13%]" />
+                  <col className="hidden xl:table-column w-[11%]" />
+                  <col className="hidden xl:table-column w-[8%]" />
                 </colgroup>
                 <thead className="sticky top-0 z-10 bg-slate-50/95 dark:bg-[#111625]/95 backdrop-blur-sm border-b border-slate-200/80 dark:border-white/[0.06]">
                   <tr>
+                    <th className="px-3 py-1.5 text-center text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">#</th>
                     <th className="px-3 py-1.5 text-left text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Empresa</th>
                     <th className="px-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Precio</th>
                     <th className="px-2 pr-3 lg:pr-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Var. %</th>
+                    <th className="hidden lg:table-cell px-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Cierre Ant.</th>
                     <th className="hidden lg:table-cell px-2 pr-3 xl:pr-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Vol / Cap</th>
                     <th className="hidden xl:table-cell px-2 pr-3 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Rango día</th>
+                    <th className="hidden xl:table-cell px-2 pr-3 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Índices</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/80 dark:divide-white/[0.03]">
-                  {filteredStocks.map((stock) => {
+                  {filteredStocks.map((stock, i) => {
                     const isPositive = (stock.change_pct ?? 0) >= 0
                     const isSelected = selectedStock?.ticker === stock.ticker
                     const rangePct =
@@ -506,6 +510,13 @@ export const MarketPage: React.FC = () => {
                             : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.03]'
                         }`}
                       >
+                        {/* # */}
+                        <td className="px-3 py-2.5 text-center">
+                          <span className="font-mono font-bold text-xs text-slate-400 dark:text-slate-500">
+                            {i + 1}
+                          </span>
+                        </td>
+
                         {/* Empresa */}
                         <td className="px-3 py-2.5">
                           <div className="flex items-center gap-2.5 min-w-0">
@@ -518,15 +529,15 @@ export const MarketPage: React.FC = () => {
                             />
                             <div className="min-w-0 overflow-hidden">
                               <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-sm text-slate-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors whitespace-nowrap">
-                                  {stock.ticker}
+                                <span className="font-bold text-sm text-slate-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                  {stock.name}
                                 </span>
                                 <span className="hidden sm:inline text-[10.5px] font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/[0.05] px-1 py-px rounded truncate max-w-[60px]">
                                   {stock.sector}
                                 </span>
                               </div>
                               <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
-                                {stock.name}
+                                {stock.ticker}
                               </p>
                             </div>
                           </div>
@@ -558,6 +569,13 @@ export const MarketPage: React.FC = () => {
                             {stock.change_pct != null
                               ? `${isPositive ? '+' : ''}${stock.change_pct.toFixed(2)}%`
                               : '—'}
+                          </span>
+                        </td>
+
+                        {/* Cierre Ant. */}
+                        <td className="hidden lg:table-cell px-2 py-2.5 text-right">
+                          <span className="text-[11px] font-mono font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                            {fmt.price(stock.prev_close, stock.currency)}
                           </span>
                         </td>
 
@@ -597,6 +615,20 @@ export const MarketPage: React.FC = () => {
                           ) : (
                             <span className="text-[10px] text-slate-400 dark:text-slate-600">—</span>
                           )}
+                        </td>
+
+                        {/* Índices */}
+                        <td className="hidden xl:table-cell px-2 pr-3 py-2.5 text-right">
+                          <div className="flex items-center justify-end gap-1 flex-wrap">
+                            {stock.index.slice(0, 2).map((idx) => (
+                              <span
+                                key={idx}
+                                className="text-[9.5px] font-semibold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 whitespace-nowrap"
+                              >
+                                {idx}
+                              </span>
+                            ))}
+                          </div>
                         </td>
                       </tr>
                     )
@@ -661,6 +693,7 @@ export const MarketPage: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-200/80 dark:border-white/[0.06] bg-slate-50/75 dark:bg-white/[0.01] text-xs font-semibold tracking-wider uppercase text-slate-700 dark:text-slate-400">
+                <th className="py-3.5 pl-4 pr-1 text-center w-8">#</th>
                 <th className="py-3.5 px-4">Empresa / Ticker</th>
                 <th className="py-3.5 px-4 text-right">Precio Actual</th>
                 <th className="py-3.5 px-4 text-right">Variación Hoy</th>
@@ -671,10 +704,11 @@ export const MarketPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredStocks.map((stock) => (
+              {filteredStocks.map((stock, i) => (
                 <StockTableRow
                   key={stock.ticker}
                   stock={stock}
+                  rank={i + 1}
                   onClick={() => setSelectedStock(stock)}
                 />
               ))}

@@ -20,7 +20,7 @@ const BROKERS = [
   { label: 'Consolidado', value: 'all' },
   { label: 'MyInvestor', value: 'myinvestor' },
   { label: 'BBVA', value: 'bbva' },
-  { label: 'Indexa (EPSV)', value: 'indexa' },
+  { label: 'Indexa', value: 'indexa' },
 ] as const
 
 interface HeaderProps {
@@ -151,28 +151,19 @@ export function Header({
 
         {/* Period selector if requested */}
         {showPeriodSelector && (
-          <div className="flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-sm dark:border-white/[0.08] dark:bg-[#111625]/90">
-            {PERIODS.map((p) => (
-              <button
-                key={p.value}
-                onClick={() => setPeriod(p.value)}
-                className={cn(
-                  'relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors duration-150',
-                  period === p.value
-                    ? 'text-white'
-                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                )}
-              >
-                {period === p.value && (
-                  <motion.div
-                    layoutId="headerPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
-                    transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
-                  />
-                )}
-                <span className="relative z-10">{p.label}</span>
-              </button>
-            ))}
+          <div className="relative">
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value as typeof period)}
+              className="appearance-none pl-3 pr-7 py-2 rounded-xl border border-slate-200/90 bg-white shadow-sm text-xs font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/[0.08] dark:bg-[#111625]/90 dark:text-slate-300"
+            >
+              {PERIODS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
           </div>
         )}
 
@@ -340,7 +331,7 @@ export function Header({
           onClick={handleRefresh}
           disabled={spinning}
           className={cn(
-            'flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-sm text-xs font-semibold transition-all active:scale-95 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
+            'flex items-center justify-center w-9 h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-sm transition-all active:scale-95 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
             spinning && 'opacity-80 cursor-wait bg-blue-50/50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-300 dark:border-blue-800/30',
             refreshSuccess && 'border-emerald-300 text-emerald-600 bg-emerald-50/40 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-950/20'
           )}
@@ -356,7 +347,6 @@ export function Header({
               <RefreshCw className={cn('w-3.5 h-3.5', spinning ? 'text-blue-500' : 'text-slate-500 dark:text-slate-400')} />
             </motion.div>
           )}
-          <span>{spinning ? 'Buscando NAVs...' : refreshSuccess ? 'Actualizado' : 'Actualizar'}</span>
         </button>
       </div>
     </div>

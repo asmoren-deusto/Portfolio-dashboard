@@ -182,8 +182,6 @@ export function TransactionsPage() {
       <Header
         title="Registro de Operaciones"
         subtitle="Historial de compras periódicas (DCA), reembolsos, traspasos e importación de extractos."
-        badge="Histórico Completo"
-        badgeColor="amber"
       >
         <div className="flex items-center gap-2.5">
           <button

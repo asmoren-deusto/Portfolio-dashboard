@@ -124,7 +124,7 @@
 .animate-ticker-marquee {
   display: flex;
   width: max-content;
-  animation: tickerMarquee 115s linear infinite;
+  animation: tickerMarquee 45s linear infinite;
   will-change: transform;
 }
 

@@ -39,8 +39,6 @@ export function AnalyticsPage() {
       <Header
         title="Analítica y Riesgo"
         subtitle="Métricas cuantitativas avanzadas, rentabilidad ponderada en el tiempo (TWR) y perfil de volatilidad."
-        badge="Métricas Cuantitativas"
-        badgeColor="violet"
         showPeriodSelector
       />
 

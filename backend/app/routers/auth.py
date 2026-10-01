@@ -1,5 +1,5 @@
 """Authentication router: user management, password verification, and session tokens."""
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import time
@@ -93,12 +93,14 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/set-password", response_model=LoginResponse)
-def set_password(req: SetPasswordRequest, current_user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+def set_password(
+    req: SetPasswordRequest,
+    request: Request,
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
     """Set an initial password for a user that does not have one yet."""
-    if current_user_id != req.user_id:
-        raise HTTPException(status_code=403, detail="No puedes modificar otro usuario")
-
-    user = db.query(User).filter(User.id == current_user_id).first()
+    user = db.query(User).filter(User.id == req.user_id).first()
     if not user:
         return LoginResponse(success=False, error="Usuario no encontrado.")
 
@@ -106,7 +108,14 @@ def set_password(req: SetPasswordRequest, current_user_id: str = Depends(get_cur
         return LoginResponse(success=False, error="El usuario demo no puede tener contraseña.")
 
     if user.password_hash and user.password_salt:
+        current_user_id = get_current_user_id(authorization)
+        if current_user_id != user.id:
+            raise HTTPException(status_code=403, detail="No puedes modificar otro usuario")
         return LoginResponse(success=False, error="El perfil ya tiene una contraseña configurada. Usa cambiar contraseña.")
+
+    client_host = request.client.host if request.client else ""
+    if client_host not in {"127.0.0.1", "::1", "localhost"}:
+        raise HTTPException(status_code=403, detail="La configuración inicial solo está permitida desde el equipo local")
 
     if not req.new_password or len(req.new_password) < 4:
         return LoginResponse(success=False, error="La contraseña debe tener al menos 4 caracteres.")

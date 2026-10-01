@@ -273,9 +273,6 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
                 Mapa de Calor del Mercado
               </h2>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-                Heatmap S&P 500 / Global
-              </span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
               Tamaño por capitalización bursátil • Color por rentabilidad diaria
@@ -284,13 +281,13 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
         </div>
 
         {/* Controls: Sector Filter, Height Toggle, Legend & Fullscreen */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {/* Sector Selector */}
           <div className="relative">
             <select
               value={activeSector}
               onChange={(e) => setSector(e.target.value)}
-              className="appearance-none pl-3 pr-7 py-1.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.08] text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500/50 cursor-pointer"
+              className="appearance-none max-w-[120px] sm:max-w-none pl-2.5 pr-6 py-1.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.08] text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500/50 cursor-pointer truncate"
             >
               {sectors.map((sec) => (
                 <option key={sec} value={sec}>
@@ -298,11 +295,11 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
                 </option>
               ))}
             </select>
-            <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
+            <Filter className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
           </div>
 
           {/* Color Scale Legend */}
-          <div className="hidden lg:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06] text-xs font-mono font-medium">
+          <div className="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06] text-xs font-mono font-medium">
             <span className="text-rose-600 dark:text-rose-400 font-bold">-3%</span>
             <div className="flex items-center h-2 w-24 rounded-full overflow-hidden mx-1">
               <div className="flex-1 h-full bg-[#dc2626]" />
@@ -322,7 +319,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               onClick={() =>
                 setHeightMode((prev) => (prev === 'expanded' ? 'standard' : 'expanded'))
               }
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all shrink-0 ${
                 heightMode === 'expanded'
                   ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-600/20 dark:text-blue-300 dark:border-blue-500/40'
                   : 'bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 dark:bg-[#141928] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08]'
@@ -336,12 +333,12 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               {heightMode === 'expanded' ? (
                 <>
                   <ChevronsUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  <span>Ajustar</span>
+                  <span className="hidden lg:inline">Ajustar</span>
                 </>
               ) : (
                 <>
                   <ChevronsDown className="w-3.5 h-3.5" />
-                  <span>Ampliar abajo</span>
+                  <span className="hidden lg:inline">Ampliar</span>
                 </>
               )}
             </button>
@@ -350,19 +347,20 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           {/* Fullscreen Button */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/90 dark:bg-[#141928] dark:hover:bg-[#1a2136] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08] transition-colors"
+            className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/90 dark:bg-[#141928] dark:hover:bg-[#1a2136] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08] transition-colors shrink-0"
             title={isFullscreen ? 'Salir de pantalla completa (Esc)' : 'Pantalla completa'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
 
-          {/* Ver mercado completo Link button */}
+          {/* Ver mercado Link button */}
           {showViewAllLink && !isFullscreen && (
             <Link
               to="/market"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20"
+              className="inline-flex items-center gap-1.5 p-1.5 lg:px-3 lg:py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 shrink-0"
+              title="Ver mercado"
             >
-              <span>Ver mercado completo</span>
+              <span className="hidden lg:inline">Ver mercado</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           )}
@@ -399,8 +397,8 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
                 className="px-2.5 flex items-center justify-between bg-slate-200/90 dark:bg-[#161c2d] border-b border-slate-300/90 dark:border-black/80 text-xs font-bold text-slate-900 dark:text-slate-300 tracking-wide uppercase select-none"
               >
                 <span className="truncate">{sectorNode.sector}</span>
-                {width > 120 && (
-                  <span className="text-xs font-mono text-slate-700 dark:text-slate-400 font-medium">
+                {width > 140 && (
+                  <span className="text-xs font-mono text-slate-700 dark:text-slate-400 font-medium shrink-0 ml-1">
                     {formatMarketCap(sectorNode.totalValue)}
                   </span>
                 )}

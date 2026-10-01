@@ -128,8 +128,6 @@ export function PositionsPage() {
       <Header
         title="Posiciones de Cartera"
         subtitle="Seguimiento detallado de activos con rentabilidad latente, peso relativo y desglose por coste."
-        badge="MyInvestor + Global"
-        badgeColor="emerald"
       />
 
       {/* Summary KPI Highlights */}
