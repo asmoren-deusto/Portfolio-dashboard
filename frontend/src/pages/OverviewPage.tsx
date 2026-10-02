@@ -14,8 +14,6 @@ import {
   ArrowRight,
   Calendar,
   Sparkles,
-  Eye,
-  EyeOff,
   Euro,
   Percent,
   Target,
@@ -79,7 +77,6 @@ export function OverviewPage() {
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
-  const [showLegend, setShowLegend] = useState(false)
   const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
   const [perfChartMode, setPerfChartMode] = useState<'currency' | 'percent'>('currency')
   const [perfShowInvested, setPerfShowInvested] = useState(true)
@@ -902,58 +899,30 @@ export function OverviewPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              {/* Toggle Mode */}
-              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
-                {(['asset', 'type'] as AllocMode[]).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setAllocMode(m)}
-                    className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${
-                      allocMode === m
-                        ? 'text-white'
-                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    {allocMode === m && (
-                      <motion.div
-                        layoutId="overviewAllocPill"
-                        className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
-                        transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
-                      />
-                    )}
-                    <span className="relative z-10 text-[11px]">
-                      {m === 'asset' ? 'Activo' : 'Tipo'}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Toggle Legend Button matching EXACT style of selector */}
-              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+            {/* Toggle Mode */}
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+              {(['asset', 'type'] as AllocMode[]).map((m) => (
                 <button
-                  type="button"
-                  onClick={() => setShowLegend((v) => !v)}
-                  title={showLegend ? 'Ocultar leyenda' : 'Mostrar leyenda'}
-                  aria-label={showLegend ? 'Ocultar leyenda' : 'Mostrar leyenda'}
-                  className={`relative rounded-lg h-[24px] w-[24px] flex items-center justify-center transition-colors ${
-                    showLegend
+                  key={m}
+                  onClick={() => setAllocMode(m)}
+                  className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${
+                    allocMode === m
                       ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
-                  {showLegend && (
+                  {allocMode === m && (
                     <motion.div
-                      layoutId="overviewLegendPill"
+                      layoutId="overviewAllocPill"
                       className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
-                  <span className="relative z-10 flex items-center justify-center">
-                    {showLegend ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  <span className="relative z-10 text-[11px]">
+                    {m === 'asset' ? 'Activo' : 'Tipo'}
                   </span>
                 </button>
-              </div>
+              ))}
             </div>
           </CardHeader>
 
@@ -963,7 +932,7 @@ export function OverviewPage() {
                 <AllocationChart
                   positions={positions}
                   mode={allocMode}
-                  showLegend={showLegend}
+                  showLegend={false}
                   hoveredIsin={hoveredIsin}
                   onHoverIsin={setHoveredIsin}
                   height={260}
