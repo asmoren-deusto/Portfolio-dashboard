@@ -16,6 +16,7 @@ interface MonthlyReturnsHeatmapProps {
   data?: PricePoint[]
   className?: string
   compact?: boolean
+  tableMaxHeight?: string
 }
 
 interface MonthData {
@@ -40,7 +41,7 @@ const FULL_MONTH_NAMES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ]
 
-export function MonthlyReturnsHeatmap({ data: propData, className, compact = false }: MonthlyReturnsHeatmapProps) {
+export function MonthlyReturnsHeatmap({ data: propData, className, compact = false, tableMaxHeight }: MonthlyReturnsHeatmapProps) {
   // If data is not provided, fetch 5y performance to cover all years
   const { data: fetchedData = [] } = usePerformance()
   const rawData = propData || fetchedData
@@ -277,9 +278,15 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
       )}
 
       {/* Heatmap Grid */}
-      <div className="overflow-x-auto pb-1">
+      <div
+        className={cn(
+          "overflow-x-auto pb-1",
+          tableMaxHeight && "overflow-y-auto"
+        )}
+        style={tableMaxHeight ? { maxHeight: tableMaxHeight } : undefined}
+      >
         <table className="w-full text-center border-collapse min-w-[620px]">
-          <thead>
+          <thead className={tableMaxHeight ? "sticky top-0 bg-white/95 dark:bg-[#111625]/95 backdrop-blur-xs z-10" : ""}>
             <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               <th className="py-2 px-2.5 text-left font-bold text-slate-800 dark:text-slate-200 w-16">
                 Año

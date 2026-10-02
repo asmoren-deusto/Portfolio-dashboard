@@ -568,7 +568,7 @@ export function OverviewPage() {
       {/* Charts Section: 60% / 20% / 20% */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* 1. Performance Evolution (60% on desktop: lg:col-span-3, md:col-span-2) */}
-        <Card className="lg:col-span-3 md:col-span-2" delay={0.2} loading={isPeriodUpdating}>
+        <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between" delay={0.2} loading={isPeriodUpdating}>
           <CardHeader>
             <div className="flex items-center gap-2.5">
               <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -678,28 +678,30 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className={cn("px-5 pb-3.5 pt-1.5 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
+          <div className={cn("px-5 pb-3.5 pt-1.5 flex-1 flex flex-col justify-between h-[368px] min-h-[368px] max-h-[368px] transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
             {chartView === 'evolution' ? (
               performance.length > 0 ? (
-                <PerformanceChart
-                  data={performance}
-                  height={260}
-                  chartMode={perfChartMode}
-                  showInvested={perfShowInvested}
-                  showMilestones={perfShowMilestones}
-                />
+                <div className="flex-1 flex flex-col justify-between">
+                  <PerformanceChart
+                    data={performance}
+                    height={262}
+                    chartMode={perfChartMode}
+                    showInvested={perfShowInvested}
+                    showMilestones={perfShowMilestones}
+                  />
+                </div>
               ) : (
-                <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                   Sin datos de evolución
                 </div>
               )
             ) : (
-              <div className="py-1 flex flex-col justify-between gap-3">
-                <MonthlyReturnsHeatmap data={performance} />
+              <div className="py-0.5 flex-1 flex flex-col justify-between min-h-0">
+                <MonthlyReturnsHeatmap data={performance} tableMaxHeight="220px" />
 
                 {/* Milestone Boxes at the bottom to match PerformanceChart layout */}
                 {perfMetrics && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1.5 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                     {/* Max Peak */}
                     <div
                       className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
