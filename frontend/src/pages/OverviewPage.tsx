@@ -336,9 +336,9 @@ export function OverviewPage() {
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
             {isGlobalUpdating ? (
-              <div className="pointer-events-none absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
             ) : (
-              <div className="pointer-events-none absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/25 to-transparent dark:via-white/10" />
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/15" />
             )}
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5 min-w-0 pr-1">
