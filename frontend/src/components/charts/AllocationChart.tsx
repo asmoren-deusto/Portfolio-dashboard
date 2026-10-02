@@ -5,7 +5,7 @@ import type { Position } from '@/lib/mockData'
 
 interface AllocationChartProps {
   positions: Position[]
-  mode?: 'asset' | 'type'
+  mode?: 'asset' | 'type' | 'broker'
   showLegend?: boolean
   hoveredIsin?: string | null
   onHoverIsin?: (isin: string | null) => void
@@ -70,6 +70,20 @@ export function AllocationChart({
         pct: totalGroup > 0 ? (v / totalGroup) * 100 : 0,
       }
     })
+  } else if (mode === 'broker') {
+    const groups: Record<string, number> = {}
+    positions.forEach((p) => {
+      const broker = p.broker || 'Otros'
+      groups[broker] = (groups[broker] ?? 0) + (p.current_value ?? 0)
+    })
+    const totalGroup = Object.values(groups).reduce((s, v) => s + v, 0)
+    data = Object.entries(groups).map(([k, v]) => ({
+      key: k,
+      name: k,
+      fullName: k,
+      value: v,
+      pct: totalGroup > 0 ? (v / totalGroup) * 100 : 0,
+    }))
   } else {
     data = positions.map((p) => ({
       isin: p.isin,

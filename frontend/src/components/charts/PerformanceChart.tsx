@@ -549,68 +549,90 @@ export function PerformanceChart({
       {/* 2. Canvas Container */}
       <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden" />
 
-      {/* 3. Useful Milestones Strip (Single-line compact badges without bulky titles) */}
+      {/* 3. Useful Milestones Strip (Larger, higher contrast, and with label on 4th box) */}
       {metrics && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1 border-t border-slate-100 dark:border-white/[0.04] text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
           {/* Max Peak */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
             title={`Máximo del periodo (ATH): ${fmt.currency(metrics.maxPoint.value)} el ${formatDateSpanish(metrics.maxPoint.date)}`}
           >
-            <TrendingUp size={13} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Máx:</span>
-            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 text-[11px] truncate">
-              {fmt.currency(metrics.maxPoint.value)}
-            </span>
+            <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+              <TrendingUp size={14} />
+            </div>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Máx:</span>
+              <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                {fmt.currency(metrics.maxPoint.value)}
+              </span>
+            </div>
           </div>
 
           {/* Period Low */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
             title={`Mínimo del periodo: ${fmt.currency(metrics.minPoint.value)} el ${formatDateSpanish(metrics.minPoint.date)}`}
           >
-            <TrendingDown size={13} className="text-rose-600 dark:text-rose-400 shrink-0" />
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Mín:</span>
-            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 text-[11px] truncate">
-              {fmt.currency(metrics.minPoint.value)}
-            </span>
+            <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
+              <TrendingDown size={14} />
+            </div>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Mín:</span>
+              <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                {fmt.currency(metrics.minPoint.value)}
+              </span>
+            </div>
           </div>
 
           {/* Current Drawdown */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
             title={metrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${metrics.drawdownPct.toFixed(2)}%`}
           >
-            <Flame size={13} className={metrics.drawdownPct >= -0.05 ? 'text-emerald-500 shrink-0' : 'text-amber-500 shrink-0'} />
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Pico:</span>
-            <span
-              className={cn(
-                'font-mono font-bold text-[11px] truncate',
-                metrics.drawdownPct >= -0.05
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-amber-600 dark:text-amber-400'
-              )}
-            >
-              {metrics.drawdownPct >= -0.05 ? 'En Máximos (ATH)' : `${metrics.drawdownPct.toFixed(2)}%`}
-            </span>
+            <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+              <Flame size={14} />
+            </div>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Pico:</span>
+              <span
+                className={cn(
+                  'font-mono font-extrabold text-xs truncate',
+                  metrics.drawdownPct >= -0.05
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-amber-600 dark:text-amber-400'
+                )}
+              >
+                {metrics.drawdownPct >= -0.05 ? 'En Máximos (ATH)' : `${metrics.drawdownPct.toFixed(2)}%`}
+              </span>
+            </div>
           </div>
 
           {/* Net Return */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
             title={`Ganancia neta del periodo: ${fmt.currency(metrics.periodProfit)} (${fmt.pct(metrics.periodReturnPct)})`}
           >
-            <ArrowUpRight size={13} className={metrics.periodProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400 shrink-0' : 'text-rose-600 dark:text-rose-400 shrink-0'} />
-            <span
-              className={cn(
-                'font-mono font-bold text-[11px] truncate',
-                metrics.periodProfit >= 0
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-rose-600 dark:text-rose-400'
-              )}
-            >
-              {metrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(metrics.periodProfit)} ({fmt.pct(metrics.periodReturnPct)})
-            </span>
+            <div className={cn(
+              "p-1 rounded-lg shrink-0",
+              metrics.periodProfit >= 0
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+            )}>
+              <ArrowUpRight size={14} />
+            </div>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Neto:</span>
+              <span
+                className={cn(
+                  'font-mono font-extrabold text-xs truncate',
+                  metrics.periodProfit >= 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400'
+                )}
+              >
+                {metrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(metrics.periodProfit)} ({fmt.pct(metrics.periodReturnPct)})
+              </span>
+            </div>
           </div>
         </div>
       )}
