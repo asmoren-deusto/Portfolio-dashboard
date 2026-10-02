@@ -10,6 +10,9 @@ import {
   Moon,
   X,
   LogOut,
+  PanelLeftClose,
+  Pin,
+  PinOff,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -27,7 +30,17 @@ const NAV = [
 interface SidebarProps {}
 
 export function Sidebar({}: SidebarProps) {
-  const { theme, setTheme, mobileSidebarOpen, setMobileSidebarOpen, currentUser, logout } = useAppStore()
+  const {
+    theme,
+    setTheme,
+    mobileSidebarOpen,
+    setMobileSidebarOpen,
+    sidebarCollapsed,
+    setSidebarCollapsed,
+    toggleSidebarCollapsed,
+    currentUser,
+    logout,
+  } = useAppStore()
   const { data: indicesData, dataUpdatedAt } = useMarketIndices()
 
   // Live timestamp: prefer server's cache_timestamp, fall back to React Query's dataUpdatedAt
@@ -44,7 +57,7 @@ export function Sidebar({}: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Drawer Backdrop (on mobile or when sidebar is collapsed on desktop) */}
       <AnimatePresence>
         {mobileSidebarOpen && (
           <motion.div
@@ -52,38 +65,48 @@ export function Sidebar({}: SidebarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setMobileSidebarOpen(false)}
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs md:hidden cursor-pointer"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs cursor-pointer"
           />
         )}
       </AnimatePresence>
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.06] dark:bg-[#0f1420] transition-transform duration-300 ease-in-out shadow-lg md:shadow-none',
-          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.06] dark:bg-[#0f1420] transition-transform duration-300 ease-in-out shadow-lg',
+          sidebarCollapsed
+            ? mobileSidebarOpen
+              ? 'translate-x-0'
+              : '-translate-x-full'
+            : mobileSidebarOpen
+            ? 'translate-x-0'
+            : '-translate-x-full md:translate-x-0 md:shadow-none'
         )}
       >
-        {/* Logo & Mobile Close Button */}
+        {/* Logo & Close / Collapse Button (v2.5 removed to eliminate collision with X and redundancy) */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.06] px-4 py-3.5">
           <div className="flex flex-1 min-w-0 items-center gap-2.5">
             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
               <TrendingUp size={18} strokeWidth={2.5} />
             </div>
-            <span className="font-bold text-[17px] tracking-tight text-slate-950 dark:text-white">
+            <span className="font-bold text-[17px] tracking-tight text-slate-950 dark:text-white truncate">
               Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
-            </span>
-            <span className="ml-auto shrink-0 rounded-md border border-slate-200/80 px-1.5 py-0.5 font-mono text-[9px] font-medium text-slate-500 dark:border-white/[0.08] dark:text-slate-400">
-              v2.5
             </span>
           </div>
 
-          {/* Close button on mobile */}
+          {/* Close or Collapse button */}
           <button
-            onClick={() => setMobileSidebarOpen(false)}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] md:hidden transition-colors"
-            aria-label="Cerrar menú lateral"
+            onClick={() => {
+              if (sidebarCollapsed || mobileSidebarOpen) {
+                setMobileSidebarOpen(false)
+              } else {
+                setSidebarCollapsed(true)
+              }
+            }}
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] transition-colors"
+            title={sidebarCollapsed || mobileSidebarOpen ? "Cerrar menú lateral" : "Ocultar panel lateral"}
+            aria-label="Cerrar o colapsar menú lateral"
           >
-            <X size={18} />
+            {sidebarCollapsed || mobileSidebarOpen ? <X size={18} /> : <PanelLeftClose size={18} />}
           </button>
         </div>
 
@@ -200,6 +223,28 @@ export function Sidebar({}: SidebarProps) {
               )}
               <Moon className={cn('w-3.5 h-3.5 relative z-10', theme === 'dark' ? 'text-blue-300' : '')} />
               <span className="relative z-10">Oscuro</span>
+            </button>
+          </div>
+
+          {/* Desktop Pin/Unpin Toggle */}
+          <div className="hidden md:block pt-0.5">
+            <button
+              onClick={() => {
+                toggleSidebarCollapsed()
+                if (sidebarCollapsed) {
+                  setMobileSidebarOpen(false)
+                }
+              }}
+              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-white/[0.05] transition-colors border border-slate-200/80 dark:border-white/[0.06]"
+              title={sidebarCollapsed ? "Fijar panel en la pantalla" : "Ocultar panel lateral como en móvil"}
+            >
+              <span className="flex items-center gap-1.5 font-semibold text-[11.5px]">
+                {sidebarCollapsed ? <Pin size={13} className="text-blue-500" /> : <PinOff size={13} />}
+                <span>{sidebarCollapsed ? 'Fijar panel lateral' : 'Ocultar panel lateral'}</span>
+              </span>
+              <span className="font-mono text-[9.5px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-white/[0.06]">
+                {sidebarCollapsed ? 'Oculto' : 'Fijado'}
+              </span>
             </button>
           </div>
 

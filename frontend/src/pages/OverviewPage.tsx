@@ -264,9 +264,9 @@ export function OverviewPage() {
             <Wallet size={13.5} className="text-blue-500" />
             <span>Métricas Globales y del Periodo ({periodLabel})</span>
             {isAnyUpdating && (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-semibold lowercase tracking-normal">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping" />
-                actualizando...
+              <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
               </span>
             )}
           </div>
@@ -336,9 +336,9 @@ export function OverviewPage() {
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
             {isGlobalUpdating ? (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-[2.5px] bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+              <div className="pointer-events-none absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
             ) : (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/15" />
+              <div className="pointer-events-none absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/25 to-transparent dark:via-white/10" />
             )}
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5 min-w-0 pr-1">
@@ -346,9 +346,9 @@ export function OverviewPage() {
                   Total Invertido
                 </p>
                 {isGlobalUpdating && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
-                    <span className="hidden sm:inline">Actualizando</span>
+                  <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                   </span>
                 )}
               </div>
@@ -456,9 +456,9 @@ export function OverviewPage() {
                 <div className="flex items-center gap-2">
                   <CardTitle>Evolución Patrimonial</CardTitle>
                   {isPeriodUpdating && (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
-                      <span className="hidden sm:inline">Actualizando</span>
+                    <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                     </span>
                   )}
                 </div>

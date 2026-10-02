@@ -22,10 +22,13 @@ interface AppState {
   privacyMode: boolean
   togglePrivacyMode: () => void
 
-  // Mobile sidebar
+  // Mobile and Collapsible Sidebar
   mobileSidebarOpen: boolean
   setMobileSidebarOpen: (open: boolean) => void
   toggleMobileSidebar: () => void
+  sidebarCollapsed: boolean
+  setSidebarCollapsed: (v: boolean) => void
+  toggleSidebarCollapsed: () => void
 
   // Mock toggle
   useMock: boolean
@@ -171,6 +174,23 @@ export const useAppStore = create<AppState>((set, get) => ({
   mobileSidebarOpen: false,
   setMobileSidebarOpen: (mobileSidebarOpen) => set({ mobileSidebarOpen }),
   toggleMobileSidebar: () => set((s) => ({ mobileSidebarOpen: !s.mobileSidebarOpen })),
+
+  sidebarCollapsed: typeof window !== 'undefined' ? localStorage.getItem('sidebar_collapsed') === 'true' : false,
+  setSidebarCollapsed: (sidebarCollapsed) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebar_collapsed', String(sidebarCollapsed))
+    }
+    set({ sidebarCollapsed })
+  },
+  toggleSidebarCollapsed: () => {
+    set((state) => {
+      const next = !state.sidebarCollapsed
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebar_collapsed', String(next))
+      }
+      return { sidebarCollapsed: next }
+    })
+  },
 
   useMock: initialUser?.isDemo ?? false,
   setUseMock: (useMock) => set({ useMock }),

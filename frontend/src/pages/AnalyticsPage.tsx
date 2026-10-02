@@ -100,9 +100,9 @@ export function AnalyticsPage() {
               <Award className="w-4 h-4 text-blue-500 dark:text-blue-400" />
               <h2 className="text-base font-semibold text-slate-900 dark:text-white">Comparativa de Rentabilidad vs Benchmarks</h2>
               {analyticsFetching && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
-                  <span className="hidden sm:inline">Actualizando</span>
+                <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                 </span>
               )}
             </div>
@@ -154,9 +154,9 @@ export function AnalyticsPage() {
               <BarChart3 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
               <CardTitle>Rentabilidad por Periodo</CardTitle>
               {analyticsFetching && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
-                  <span className="hidden sm:inline">Actualizando</span>
+                <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                 </span>
               )}
             </div>
@@ -218,9 +218,9 @@ export function AnalyticsPage() {
             <Calendar className="w-4 h-4 text-blue-500 dark:text-blue-400" />
             <CardTitle>Matriz de Rendimientos Mensuales</CardTitle>
             {analyticsFetching && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
-                <span className="hidden sm:inline">Actualizando</span>
+              <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
               </span>
             )}
           </div>
@@ -240,9 +240,9 @@ export function AnalyticsPage() {
             <ShieldCheck className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
             <CardTitle>Diagnóstico de Riesgo y Resiliencia</CardTitle>
             {analyticsFetching && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
-                <span className="hidden sm:inline">Actualizando</span>
+              <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
               </span>
             )}
           </div>
