@@ -29,7 +29,7 @@ import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { fmt, cn } from '@/lib/utils'
+import { fmt, cn, PALETTE } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
 
 import {
@@ -68,9 +68,18 @@ export function OverviewPage() {
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
+  const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
+
+  const assetColorMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    positions.forEach((p, idx) => {
+      map[p.isin] = PALETTE[idx % PALETTE.length]
+    })
+    return map
+  }, [positions])
   const sortedPositions = useMemo(
     () =>
       [...positions].sort((a, b) => {
@@ -475,11 +484,18 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-5 pb-3.5 pt-1.5 flex flex-col justify-center">
+          <div className="px-5 pb-3.5 pt-1.5 flex flex-col justify-center flex-1">
             {positions.length > 0 ? (
-              <AllocationChart positions={positions} mode={allocMode} />
+              <AllocationChart
+                positions={positions}
+                mode={allocMode}
+                showLegend={false}
+                hoveredIsin={hoveredIsin}
+                onHoverIsin={setHoveredIsin}
+                height={290}
+              />
             ) : (
-              <div className="flex h-[220px] items-center justify-center text-slate-500 text-sm">
+              <div className="flex h-[280px] items-center justify-center text-slate-500 text-sm">
                 Sin posiciones registradas
               </div>
             )}
@@ -524,104 +540,135 @@ export function OverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
-                {sortedPositions.slice(0, 5).map((p, i) => (
-                  <motion.tr
-                    key={p.isin}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + i * 0.03 }}
-                    onClick={() => setSelectedPosition(p)}
-                    className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
-                  >
-                    <td className="py-2.5 pl-3 pr-1 text-center">
-                      <span className="font-mono font-bold text-[13px] text-slate-400 dark:text-slate-500">
-                        {i + 1}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-2.5">
-                      <div className="flex items-center gap-2">
-                        <CompanyLogo
-                          isin={p.isin}
-                          ticker={p.ticker || p.isin.slice(0, 4)}
-                          name={p.name}
-                          domain={p.domain}
-                          size="sm"
-                        />
-                        <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
-                            {p.name}
-                          </div>
-                          <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-500 dark:text-slate-400">
-                            <span>{p.isin}</span>
-                            <AssetBadge type={p.asset_type} />
+                {sortedPositions.slice(0, 5).map((p, i) => {
+                  const isRowHovered = hoveredIsin === p.isin
+                  const assetColor = assetColorMap[p.isin]
+
+                  return (
+                    <motion.tr
+                      key={p.isin}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + i * 0.03 }}
+                      onClick={() => setSelectedPosition(p)}
+                      onMouseEnter={() => setHoveredIsin(p.isin)}
+                      onMouseLeave={() => setHoveredIsin(null)}
+                      className={cn(
+                        'transition-all duration-150 group cursor-pointer',
+                        isRowHovered
+                          ? 'bg-blue-50/90 dark:bg-blue-950/40 ring-1 ring-inset ring-blue-500/30'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
+                      )}
+                    >
+                      <td className="py-2.5 pl-3 pr-1 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <div
+                            className="w-1.5 h-1.5 rounded-full shrink-0 transition-transform duration-150"
+                            style={{
+                              backgroundColor: assetColor || '#3b82f6',
+                              transform: isRowHovered ? 'scale(1.5)' : 'scale(1)',
+                            }}
+                          />
+                          <span
+                            className={cn(
+                              'font-mono font-bold text-[13px] transition-colors',
+                              isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
+                            )}
+                          >
+                            {i + 1}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-2.5">
+                        <div className="flex items-center gap-2">
+                          <CompanyLogo
+                            isin={p.isin}
+                            ticker={p.ticker || p.isin.slice(0, 4)}
+                            name={p.name}
+                            domain={p.domain}
+                            size="sm"
+                          />
+                          <div className="min-w-0">
+                            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
+                              {p.name}
+                            </div>
+                            <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-500 dark:text-slate-400">
+                              <span>{p.isin}</span>
+                              <AssetBadge type={p.asset_type} />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-2 text-center">
-                      <BrokerBadge broker={p.broker} />
-                    </td>
-                    <td className="py-2.5 px-2 text-right">
-                      <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
-                        {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
-                      </div>
-                      <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
-                        {(() => {
-                          const raw = p.price_date || p.last_updated
-                          if (!raw) return '—'
-                          try {
-                            const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                            return format(parseISO(dateOnly), 'dd/MM/yyyy')
-                          } catch {
-                            return raw
-                          }
-                        })()}
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-2 text-right">
-                      {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-0.5 font-mono text-[12px] font-bold',
-                            p.daily_change_pct > 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : p.daily_change_pct < 0
-                              ? 'text-rose-600 dark:text-rose-400'
-                              : 'text-slate-500 dark:text-slate-400'
-                          )}
-                        >
-                          {p.daily_change_pct > 0 ? (
-                            <TrendingUp className="w-3 h-3 stroke-[2.5]" />
-                          ) : p.daily_change_pct < 0 ? (
-                            <TrendingDown className="w-3 h-3 stroke-[2.5]" />
-                          ) : null}
-                          <span>{fmt.pct(p.daily_change_pct)}</span>
-                        </span>
-                      ) : (
-                        <span className="font-mono text-xs text-slate-400">—</span>
-                      )}
-                    </td>
-                    <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
-                      {fmt.currency(p.current_value)}
-                    </td>
-                    <td data-private className="py-2.5 px-2 text-right">
-                      <div className="flex flex-col items-end">
-                        <PnlBadge value={p.unrealized_pnl} />
-                        <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
-                          {fmt.pct(p.unrealized_pnl_pct)}
-                        </span>
-                      </div>
-                    </td>
-                    <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <MiniDonut value={p.weight} size={22} strokeWidth={3} />
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-right text-[12px]">
-                          {p.weight.toFixed(1)}%
-                        </span>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
+                      </td>
+                      <td className="py-2.5 px-2 text-center">
+                        <BrokerBadge broker={p.broker} />
+                      </td>
+                      <td className="py-2.5 px-2 text-right">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
+                          {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
+                        </div>
+                        <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                          {(() => {
+                            const raw = p.price_date || p.last_updated
+                            if (!raw) return '—'
+                            try {
+                              const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                              return format(parseISO(dateOnly), 'dd/MM/yyyy')
+                            } catch {
+                              return raw
+                            }
+                          })()}
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-2 text-right">
+                        {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-0.5 font-mono text-[12px] font-bold',
+                              p.daily_change_pct > 0
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : p.daily_change_pct < 0
+                                ? 'text-rose-600 dark:text-rose-400'
+                                : 'text-slate-500 dark:text-slate-400'
+                            )}
+                          >
+                            {p.daily_change_pct > 0 ? (
+                              <TrendingUp className="w-3 h-3 stroke-[2.5]" />
+                            ) : p.daily_change_pct < 0 ? (
+                              <TrendingDown className="w-3 h-3 stroke-[2.5]" />
+                            ) : null}
+                            <span>{fmt.pct(p.daily_change_pct)}</span>
+                          </span>
+                        ) : (
+                          <span className="font-mono text-xs text-slate-400">—</span>
+                        )}
+                      </td>
+                      <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
+                        {fmt.currency(p.current_value)}
+                      </td>
+                      <td data-private className="py-2.5 px-2 text-right">
+                        <div className="flex flex-col items-end">
+                          <PnlBadge value={p.unrealized_pnl} />
+                          <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                            {fmt.pct(p.unrealized_pnl_pct)}
+                          </span>
+                        </div>
+                      </td>
+                      <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
+                          <span
+                            className={cn(
+                              'font-mono font-bold text-right text-[12px] transition-colors',
+                              isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'
+                            )}
+                          >
+                            {p.weight.toFixed(1)}%
+                          </span>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -642,104 +689,135 @@ export function OverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
-                {sortedPositions.slice(5, 10).map((p, i) => (
-                  <motion.tr
-                    key={p.isin}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 + i * 0.03 }}
-                    onClick={() => setSelectedPosition(p)}
-                    className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
-                  >
-                    <td className="py-2.5 pl-3 pr-1 text-center">
-                      <span className="font-mono font-bold text-[13px] text-slate-400 dark:text-slate-500">
-                        {i + 6}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-2.5">
-                      <div className="flex items-center gap-2">
-                        <CompanyLogo
-                          isin={p.isin}
-                          ticker={p.ticker || p.isin.slice(0, 4)}
-                          name={p.name}
-                          domain={p.domain}
-                          size="sm"
-                        />
-                        <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
-                            {p.name}
-                          </div>
-                          <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-500 dark:text-slate-400">
-                            <span>{p.isin}</span>
-                            <AssetBadge type={p.asset_type} />
+                {sortedPositions.slice(5, 10).map((p, i) => {
+                  const isRowHovered = hoveredIsin === p.isin
+                  const assetColor = assetColorMap[p.isin]
+
+                  return (
+                    <motion.tr
+                      key={p.isin}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 + i * 0.03 }}
+                      onClick={() => setSelectedPosition(p)}
+                      onMouseEnter={() => setHoveredIsin(p.isin)}
+                      onMouseLeave={() => setHoveredIsin(null)}
+                      className={cn(
+                        'transition-all duration-150 group cursor-pointer',
+                        isRowHovered
+                          ? 'bg-blue-50/90 dark:bg-blue-950/40 ring-1 ring-inset ring-blue-500/30'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
+                      )}
+                    >
+                      <td className="py-2.5 pl-3 pr-1 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <div
+                            className="w-1.5 h-1.5 rounded-full shrink-0 transition-transform duration-150"
+                            style={{
+                              backgroundColor: assetColor || '#3b82f6',
+                              transform: isRowHovered ? 'scale(1.5)' : 'scale(1)',
+                            }}
+                          />
+                          <span
+                            className={cn(
+                              'font-mono font-bold text-[13px] transition-colors',
+                              isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
+                            )}
+                          >
+                            {i + 6}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-2.5">
+                        <div className="flex items-center gap-2">
+                          <CompanyLogo
+                            isin={p.isin}
+                            ticker={p.ticker || p.isin.slice(0, 4)}
+                            name={p.name}
+                            domain={p.domain}
+                            size="sm"
+                          />
+                          <div className="min-w-0">
+                            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
+                              {p.name}
+                            </div>
+                            <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-500 dark:text-slate-400">
+                              <span>{p.isin}</span>
+                              <AssetBadge type={p.asset_type} />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-2 text-center">
-                      <BrokerBadge broker={p.broker} />
-                    </td>
-                    <td className="py-2.5 px-2 text-right">
-                      <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
-                        {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
-                      </div>
-                      <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
-                        {(() => {
-                          const raw = p.price_date || p.last_updated
-                          if (!raw) return '—'
-                          try {
-                            const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                            return format(parseISO(dateOnly), 'dd/MM/yyyy')
-                          } catch {
-                            return raw
-                          }
-                        })()}
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-2 text-right">
-                      {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-0.5 font-mono text-[12px] font-bold',
-                            p.daily_change_pct > 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : p.daily_change_pct < 0
-                              ? 'text-rose-600 dark:text-rose-400'
-                              : 'text-slate-500 dark:text-slate-400'
-                          )}
-                        >
-                          {p.daily_change_pct > 0 ? (
-                            <TrendingUp className="w-3 h-3 stroke-[2.5]" />
-                          ) : p.daily_change_pct < 0 ? (
-                            <TrendingDown className="w-3 h-3 stroke-[2.5]" />
-                          ) : null}
-                          <span>{fmt.pct(p.daily_change_pct)}</span>
-                        </span>
-                      ) : (
-                        <span className="font-mono text-xs text-slate-400">—</span>
-                      )}
-                    </td>
-                    <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
-                      {fmt.currency(p.current_value)}
-                    </td>
-                    <td data-private className="py-2.5 px-2 text-right">
-                      <div className="flex flex-col items-end">
-                        <PnlBadge value={p.unrealized_pnl} />
-                        <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
-                          {fmt.pct(p.unrealized_pnl_pct)}
-                        </span>
-                      </div>
-                    </td>
-                    <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <MiniDonut value={p.weight} size={22} strokeWidth={3} />
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-right text-[12px]">
-                          {p.weight.toFixed(1)}%
-                        </span>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
+                      </td>
+                      <td className="py-2.5 px-2 text-center">
+                        <BrokerBadge broker={p.broker} />
+                      </td>
+                      <td className="py-2.5 px-2 text-right">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
+                          {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
+                        </div>
+                        <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                          {(() => {
+                            const raw = p.price_date || p.last_updated
+                            if (!raw) return '—'
+                            try {
+                              const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                              return format(parseISO(dateOnly), 'dd/MM/yyyy')
+                            } catch {
+                              return raw
+                            }
+                          })()}
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-2 text-right">
+                        {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-0.5 font-mono text-[12px] font-bold',
+                              p.daily_change_pct > 0
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : p.daily_change_pct < 0
+                                ? 'text-rose-600 dark:text-rose-400'
+                                : 'text-slate-500 dark:text-slate-400'
+                            )}
+                          >
+                            {p.daily_change_pct > 0 ? (
+                              <TrendingUp className="w-3 h-3 stroke-[2.5]" />
+                            ) : p.daily_change_pct < 0 ? (
+                              <TrendingDown className="w-3 h-3 stroke-[2.5]" />
+                            ) : null}
+                            <span>{fmt.pct(p.daily_change_pct)}</span>
+                          </span>
+                        ) : (
+                          <span className="font-mono text-xs text-slate-400">—</span>
+                        )}
+                      </td>
+                      <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
+                        {fmt.currency(p.current_value)}
+                      </td>
+                      <td data-private className="py-2.5 px-2 text-right">
+                        <div className="flex flex-col items-end">
+                          <PnlBadge value={p.unrealized_pnl} />
+                          <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                            {fmt.pct(p.unrealized_pnl_pct)}
+                          </span>
+                        </div>
+                      </td>
+                      <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
+                          <span
+                            className={cn(
+                              'font-mono font-bold text-right text-[12px] transition-colors',
+                              isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'
+                            )}
+                          >
+                            {p.weight.toFixed(1)}%
+                          </span>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

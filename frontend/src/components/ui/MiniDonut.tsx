@@ -5,9 +5,10 @@ interface MiniDonutProps {
   size?: number
   strokeWidth?: number
   className?: string
+  color?: string
 }
 
-export function MiniDonut({ value, size = 24, strokeWidth = 3.5, className }: MiniDonutProps) {
+export function MiniDonut({ value, size = 24, strokeWidth = 3.5, className, color }: MiniDonutProps) {
   const clamped = Math.max(0, Math.min(100, value || 0))
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
@@ -33,7 +34,8 @@ export function MiniDonut({ value, size = 24, strokeWidth = 3.5, className }: Mi
         strokeDashoffset={offset}
         strokeLinecap="round"
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        className="stroke-blue-500 dark:stroke-blue-400 transition-all duration-500"
+        stroke={color || undefined}
+        className={color ? 'transition-all duration-500' : 'stroke-blue-500 dark:stroke-blue-400 transition-all duration-500'}
       />
     </svg>
   )
