@@ -71,7 +71,7 @@ export function OverviewPage() {
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
-  const [showLegend, setShowLegend] = useState(true)
+  const [showLegend, setShowLegend] = useState(false)
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
@@ -451,7 +451,7 @@ export function OverviewPage() {
         </Card>
 
         {/* Asset Allocation Breakdown */}
-        <Card className="lg:col-span-1" delay={0.25}>
+        <Card className="lg:col-span-1 flex flex-col" delay={0.25}>
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20">
@@ -487,25 +487,35 @@ export function OverviewPage() {
                 ))}
               </div>
 
-              {/* Toggle Legend Button */}
-              <button
-                type="button"
-                onClick={() => setShowLegend((v) => !v)}
-                title={showLegend ? 'Ocultar leyenda' : 'Mostrar leyenda'}
-                aria-label={showLegend ? 'Ocultar leyenda' : 'Mostrar leyenda'}
-                className={cn(
-                  'p-1.5 rounded-xl border transition-all flex items-center justify-center',
-                  showLegend
-                    ? 'border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                    : 'border-slate-200/60 dark:border-white/[0.05] bg-transparent text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                )}
-              >
-                {showLegend ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-              </button>
+              {/* Toggle Legend Button matching EXACT style of selector */}
+              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setShowLegend((v) => !v)}
+                  title={showLegend ? 'Ocultar leyenda' : 'Mostrar leyenda'}
+                  aria-label={showLegend ? 'Ocultar leyenda' : 'Mostrar leyenda'}
+                  className={`relative rounded-lg h-[26px] w-[26px] sm:h-7 sm:w-7 flex items-center justify-center transition-colors ${
+                    showLegend
+                      ? 'text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {showLegend && (
+                    <motion.div
+                      layoutId="overviewLegendPill"
+                      className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center justify-center">
+                    {showLegend ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </span>
+                </button>
+              </div>
             </div>
           </CardHeader>
 
-          <div className="px-5 pb-3.5 pt-1.5 flex flex-col justify-center">
+          <div className="px-5 pb-3.5 pt-1.5 flex flex-col justify-center flex-1">
             {positions.length > 0 ? (
               <AllocationChart
                 positions={positions}
@@ -515,7 +525,7 @@ export function OverviewPage() {
                 onHoverIsin={setHoveredIsin}
               />
             ) : (
-              <div className="flex h-[220px] items-center justify-center text-slate-500 text-sm">
+              <div className="flex h-[280px] items-center justify-center text-slate-500 text-sm">
                 Sin posiciones registradas
               </div>
             )}

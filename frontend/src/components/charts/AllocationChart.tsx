@@ -22,15 +22,23 @@ const TYPE_LABELS: Record<string, string> = {
 export function AllocationChart({
   positions,
   mode = 'asset',
-  showLegend = true,
+  showLegend = false,
   hoveredIsin = null,
   onHoverIsin,
 }: AllocationChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
+  const chartHeight = showLegend ? 235 : 285
+  const innerRadius = showLegend ? 72 : 86
+  const outerRadius = showLegend ? 104 : 122
+  const centerMaxW = showLegend ? 'max-w-[126px]' : 'max-w-[140px]'
+
   if (!positions || positions.length === 0) {
     return (
-      <div className="flex h-[245px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+      <div
+        style={{ height: chartHeight }}
+        className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm"
+      >
         Sin datos de asignación
       </div>
     )
@@ -75,7 +83,10 @@ export function AllocationChart({
   const total = data.reduce((s, d) => s + (d.value ?? 0), 0)
   if (total <= 0) {
     return (
-      <div className="flex h-[245px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+      <div
+        style={{ height: chartHeight }}
+        className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm"
+      >
         Sin datos de asignación
       </div>
     )
@@ -97,17 +108,20 @@ export function AllocationChart({
   const hoveredItem = activeIndex !== null && data[activeIndex] ? data[activeIndex] : null
 
   return (
-    <div className="flex flex-col gap-3 min-w-0">
+    <div className="flex flex-col gap-3 min-w-0 w-full">
       {/* Donut Chart Container */}
-      <div className="relative flex items-center justify-center w-full min-h-[245px]">
-        <ResponsiveContainer width="100%" height={245}>
+      <div
+        style={{ height: chartHeight }}
+        className="relative flex items-center justify-center w-full min-w-0"
+      >
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={74}
-              outerRadius={106}
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
               paddingAngle={2.5}
               dataKey="value"
               strokeWidth={0}
@@ -143,32 +157,34 @@ export function AllocationChart({
         </ResponsiveContainer>
 
         {/* Center label */}
-        <div className="pointer-events-none absolute flex flex-col items-center justify-center text-center px-4 max-w-[134px]">
-          {hoveredItem ? (
-            <>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate w-full">
-                {hoveredItem.name}
-              </span>
-              <span data-private className="text-lg font-bold text-slate-950 dark:text-white tabular-nums tracking-tight">
-                {fmt.currency(hoveredItem.value)}
-              </span>
-              <span data-private className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
-                {(hoveredItem.pct ?? 0).toFixed(1)}%
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
-                Total
-              </span>
-              <span data-private className="text-xl font-bold text-slate-950 dark:text-slate-100 tabular-nums tracking-tight">
-                {fmt.currency(total)}
-              </span>
-              <span data-private className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                {data.length} {mode === 'asset' ? 'posiciones' : 'tipos'}
-              </span>
-            </>
-          )}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-3 z-10">
+          <div className={`${centerMaxW} flex flex-col items-center justify-center`}>
+            {hoveredItem ? (
+              <>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate w-full">
+                  {hoveredItem.name}
+                </span>
+                <span data-private className="text-xl font-bold text-slate-950 dark:text-white tabular-nums tracking-tight my-0.5">
+                  {fmt.currency(hoveredItem.value)}
+                </span>
+                <span data-private className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
+                  {(hoveredItem.pct ?? 0).toFixed(1)}%
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
+                  Total
+                </span>
+                <span data-private className="text-2xl font-bold text-slate-950 dark:text-slate-100 tabular-nums tracking-tight my-0.5">
+                  {fmt.currency(total)}
+                </span>
+                <span data-private className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                  {data.length} {mode === 'asset' ? 'posiciones' : 'tipos'}
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
