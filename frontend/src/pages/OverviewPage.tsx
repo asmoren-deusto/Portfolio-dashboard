@@ -14,6 +14,8 @@ import {
   ArrowRight,
   Calendar,
   Sparkles,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -69,6 +71,7 @@ export function OverviewPage() {
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
+  const [showLegend, setShowLegend] = useState(true)
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
@@ -457,30 +460,48 @@ export function OverviewPage() {
               <CardTitle>Distribución</CardTitle>
             </div>
 
-            {/* Toggle Mode */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
-              {(['asset', 'type'] as AllocMode[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setAllocMode(m)}
-                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-                    allocMode === m
-                      ? 'text-white'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
-                >
-                  {allocMode === m && (
-                    <motion.div
-                      layoutId="overviewAllocPill"
-                      className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
-                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
-                    />
-                  )}
-                  <span className="relative z-10">
-                    {m === 'asset' ? 'Activo' : 'Tipo'}
-                  </span>
-                </button>
-              ))}
+            <div className="flex items-center gap-1.5">
+              {/* Toggle Mode */}
+              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+                {(['asset', 'type'] as AllocMode[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setAllocMode(m)}
+                    className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                      allocMode === m
+                        ? 'text-white'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    {allocMode === m && (
+                      <motion.div
+                        layoutId="overviewAllocPill"
+                        className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
+                        transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                      />
+                    )}
+                    <span className="relative z-10">
+                      {m === 'asset' ? 'Activo' : 'Tipo'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Toggle Legend Button */}
+              <button
+                type="button"
+                onClick={() => setShowLegend((v) => !v)}
+                title={showLegend ? 'Ocultar leyenda' : 'Mostrar leyenda'}
+                aria-label={showLegend ? 'Ocultar leyenda' : 'Mostrar leyenda'}
+                className={cn(
+                  'p-1.5 rounded-xl border transition-all flex items-center justify-center',
+                  showLegend
+                    ? 'border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    : 'border-slate-200/60 dark:border-white/[0.05] bg-transparent text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                )}
+              >
+                {showLegend ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              </button>
             </div>
           </CardHeader>
 
@@ -489,6 +510,7 @@ export function OverviewPage() {
               <AllocationChart
                 positions={positions}
                 mode={allocMode}
+                showLegend={showLegend}
                 hoveredIsin={hoveredIsin}
                 onHoverIsin={setHoveredIsin}
               />

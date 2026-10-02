@@ -6,6 +6,7 @@ import type { Position } from '@/lib/mockData'
 interface AllocationChartProps {
   positions: Position[]
   mode?: 'asset' | 'type'
+  showLegend?: boolean
   hoveredIsin?: string | null
   onHoverIsin?: (isin: string | null) => void
 }
@@ -21,6 +22,7 @@ const TYPE_LABELS: Record<string, string> = {
 export function AllocationChart({
   positions,
   mode = 'asset',
+  showLegend = true,
   hoveredIsin = null,
   onHoverIsin,
 }: AllocationChartProps) {
@@ -171,59 +173,61 @@ export function AllocationChart({
       </div>
 
       {/* Legend in 2 columns */}
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 px-0.5 pt-0.5">
-        {data.map((d, i) => {
-          const isHovered = activeIndex === i
-          const isOtherHovered = activeIndex !== null && !isHovered
+      {showLegend && (
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 px-0.5 pt-0.5">
+          {data.map((d, i) => {
+            const isHovered = activeIndex === i
+            const isOtherHovered = activeIndex !== null && !isHovered
 
-          return (
-            <div
-              key={d.name + i}
-              onMouseEnter={() => {
-                setHoveredIndex(i)
-                if (onHoverIsin && d.isin) onHoverIsin(d.isin)
-              }}
-              onMouseLeave={() => {
-                setHoveredIndex(null)
-                if (onHoverIsin) onHoverIsin(null)
-              }}
-              style={{ opacity: isOtherHovered ? 0.45 : 1, transition: 'opacity 0.15s ease' }}
-              className={`flex items-center gap-1.5 py-1 px-1.5 rounded-lg transition-colors cursor-pointer ${
-                isHovered
-                  ? 'bg-slate-100/90 dark:bg-white/10 ring-1 ring-slate-200/90 dark:ring-white/10'
-                  : 'hover:bg-slate-50 dark:hover:bg-white/[0.04]'
-              }`}
-            >
+            return (
               <div
-                className="h-2 w-2 flex-shrink-0 rounded-full transition-transform"
-                style={{
-                  background: PALETTE[i % PALETTE.length],
-                  transform: isHovered ? 'scale(1.25)' : 'scale(1)',
+                key={d.name + i}
+                onMouseEnter={() => {
+                  setHoveredIndex(i)
+                  if (onHoverIsin && d.isin) onHoverIsin(d.isin)
                 }}
-              />
-              <span
-                title={d.fullName || d.name}
-                className={`flex-1 truncate text-xs transition-colors ${
+                onMouseLeave={() => {
+                  setHoveredIndex(null)
+                  if (onHoverIsin) onHoverIsin(null)
+                }}
+                style={{ opacity: isOtherHovered ? 0.45 : 1, transition: 'opacity 0.15s ease' }}
+                className={`flex items-center gap-1.5 py-1 px-1.5 rounded-lg transition-colors cursor-pointer ${
                   isHovered
-                    ? 'font-bold text-slate-900 dark:text-white'
-                    : 'font-medium text-slate-700 dark:text-slate-300'
+                    ? 'bg-slate-100/90 dark:bg-white/10 ring-1 ring-slate-200/90 dark:ring-white/10'
+                    : 'hover:bg-slate-50 dark:hover:bg-white/[0.04]'
                 }`}
               >
-                {d.name}
-              </span>
-              <span
-                className={`tabular-nums font-mono text-xs shrink-0 transition-colors ${
-                  isHovered
-                    ? 'font-bold text-blue-600 dark:text-blue-400'
-                    : 'font-semibold text-slate-800 dark:text-slate-200'
-                }`}
-              >
-                {(d.pct ?? 0).toFixed(1)}%
-              </span>
-            </div>
-          )
-        })}
-      </div>
+                <div
+                  className="h-2 w-2 flex-shrink-0 rounded-full transition-transform"
+                  style={{
+                    background: PALETTE[i % PALETTE.length],
+                    transform: isHovered ? 'scale(1.25)' : 'scale(1)',
+                  }}
+                />
+                <span
+                  title={d.fullName || d.name}
+                  className={`flex-1 truncate text-xs transition-colors ${
+                    isHovered
+                      ? 'font-bold text-slate-900 dark:text-white'
+                      : 'font-medium text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  {d.name}
+                </span>
+                <span
+                  className={`tabular-nums font-mono text-xs shrink-0 transition-colors ${
+                    isHovered
+                      ? 'font-bold text-blue-600 dark:text-blue-400'
+                      : 'font-semibold text-slate-800 dark:text-slate-200'
+                  }`}
+                >
+                  {(d.pct ?? 0).toFixed(1)}%
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
