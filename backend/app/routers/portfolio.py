@@ -324,6 +324,9 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     if annualized_ret is not None and vol and vol > 0:
         sharpe = round((annualized_ret - 2.5) / vol, 2)
 
+    series_for_returns = nav_series if nav_series and len(nav_series) >= 2 else value_series
+    days_ytd = max(1, (datetime.now() - datetime(datetime.now().year, 1, 1)).days)
+
     return {
         "annualized_return": annualized_ret,
         "net_profit": net_profit,
@@ -335,9 +338,9 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         "volatility": vol,
         "max_drawdown": max_dd,
         "sharpe_ratio": sharpe,
-        "return_ytd": calculate_period_return(value_series, 270),
-        "return_1m": calculate_period_return(value_series, 30),
-        "return_3m": calculate_period_return(value_series, 90),
-        "return_6m": calculate_period_return(value_series, 180),
-        "return_1y": calculate_period_return(value_series, 365),
+        "return_ytd": calculate_period_return(series_for_returns, days_ytd),
+        "return_1m": calculate_period_return(series_for_returns, 30),
+        "return_3m": calculate_period_return(series_for_returns, 90),
+        "return_6m": calculate_period_return(series_for_returns, 180),
+        "return_1y": calculate_period_return(series_for_returns, 365),
     }

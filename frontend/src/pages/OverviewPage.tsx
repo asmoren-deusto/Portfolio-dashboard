@@ -24,6 +24,7 @@ import { KpiCard } from '@/components/ui/KpiCard'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PerformanceChart } from '@/components/charts/PerformanceChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
+import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { MiniDonut } from '@/components/ui/MiniDonut'
@@ -72,6 +73,7 @@ export function OverviewPage() {
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
   const [showLegend, setShowLegend] = useState(false)
+  const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
@@ -207,6 +209,38 @@ export function OverviewPage() {
     }
   }, [performance])
 
+  const volVal =
+    analytics?.volatility !== undefined && (periodLabel === '1 Año' || periodLabel === 'Todo')
+      ? analytics.volatility
+      : perfStats?.periodVolatility !== null && perfStats?.periodVolatility !== undefined
+      ? perfStats.periodVolatility
+      : null
+
+  const volTag =
+    volVal !== null
+      ? volVal < 14
+        ? 'Baja / Defensiva'
+        : volVal < 22
+        ? 'Moderada'
+        : 'Elevada'
+      : undefined
+
+  const ddVal =
+    analytics?.max_drawdown !== undefined && (periodLabel === '1 Año' || periodLabel === 'Todo')
+      ? analytics.max_drawdown
+      : perfStats?.maxDrawdown !== undefined
+      ? perfStats.maxDrawdown
+      : null
+
+  const ddTag =
+    ddVal !== null
+      ? ddVal > -8
+        ? 'Bajo impacto'
+        : ddVal > -16
+        ? 'Controlada'
+        : 'Severa'
+      : undefined
+
   return (
     <div className="flex flex-col gap-4 pb-8">
       {/* Unified High-End Header */}
@@ -252,9 +286,13 @@ export function OverviewPage() {
             }
             changePositive={pnlPositive}
             sub={displaySummary ? `Aportado: ${fmt.currency(displaySummary.total_invested)}` : undefined}
+            tag={displaySummary ? `${displaySummary.num_positions ?? positions.length} pos.` : undefined}
+            tagColor="blue"
+            borderAccent="blue"
             delay={0}
             className="lg:col-span-2"
-            icon={<Wallet size={16} className="text-blue-400" />}
+            icon={<Wallet size={16} className="text-blue-500 dark:text-blue-400" />}
+            iconBg="bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400"
             loading={isGlobalUpdating}
           />
           <KpiCard
@@ -266,31 +304,41 @@ export function OverviewPage() {
                 ? fmt.pct(displaySummary.total_pnl_pct)
                 : '—'
             }
+            valueColor="text-emerald-600 dark:text-emerald-400"
+            tag="TIR Anual"
+            tagColor="emerald"
+            borderAccent="emerald"
             change="TIR Anual"
             sub="tasa ponderada por flujos desde inicio"
             changePositive={true}
             delay={0.05}
-            icon={<TrendingUp size={16} className="text-emerald-400" />}
+            icon={<TrendingUp size={16} className="text-emerald-500 dark:text-emerald-400" />}
+            iconBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400"
             loading={isGlobalUpdating || isPeriodUpdating}
           />
           <KpiCard
             label="Plusvalía Acumulada"
             value={displaySummary ? `${pnlPositive ? '+' : ''}${fmt.currency(displaySummary.total_pnl)}` : '—'}
+            valueColor={pnlPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
             change={displaySummary ? fmt.pct(displaySummary.total_pnl_pct) : undefined}
+            tag={pnlPositive ? "+ Ganancia" : "- Pérdida"}
+            tagColor={pnlPositive ? "emerald" : "rose"}
+            borderAccent={pnlPositive ? "emerald" : "rose"}
             sub="ganancia neta total latente"
             changePositive={pnlPositive}
             delay={0.1}
-            icon={<ArrowUpRight size={16} className="text-cyan-400" />}
+            icon={<ArrowUpRight size={16} className={pnlPositive ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
+            iconBg={pnlPositive ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
             loading={isGlobalUpdating}
           />
           <div
-            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:shadow-md dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16]"
+            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:shadow-md dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16] hover:border-indigo-500/40 dark:hover:border-indigo-500/40"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
             {isGlobalUpdating ? (
               <div className="pointer-events-none absolute -top-px left-0 right-0 h-[2.5px] bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
             ) : (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent dark:via-white/15" />
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/15" />
             )}
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5 min-w-0 pr-1">
@@ -334,54 +382,62 @@ export function OverviewPage() {
                 ? fmt.pct(analytics.return_ytd)
                 : '—'
             }
+            valueColor={(perfStats?.periodProfit ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
             change={
               perfStats
                 ? `${perfStats.periodProfit >= 0 ? '+' : ''}${fmt.currency(perfStats.periodProfit)}`
                 : undefined
             }
+            tag={(perfStats?.realReturnPct ?? 0) >= 0 ? "Rentabilidad" : "Pérdida"}
+            tagColor={(perfStats?.realReturnPct ?? 0) >= 0 ? "emerald" : "rose"}
+            borderAccent={(perfStats?.realReturnPct ?? 0) >= 0 ? "emerald" : "rose"}
             sub={`ganancia neta de mercado en ${periodLabel}`}
             changePositive={(perfStats?.periodProfit ?? 0) >= 0}
             delay={0.1}
-            icon={<TrendingUp size={15} className="text-emerald-400" />}
+            icon={<TrendingUp size={15} className={(perfStats?.realReturnPct ?? 0) >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
+            iconBg={(perfStats?.realReturnPct ?? 0) >= 0 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
             loading={isPeriodUpdating}
           />
           <KpiCard
             label={`Aportaciones (${periodLabel})`}
             value={perfStats ? fmt.currency(perfStats.periodInflow) : '—'}
+            valueColor="text-blue-600 dark:text-blue-400"
             change={perfStats && perfStats.periodInflow !== 0 ? 'DCA / Compras' : undefined}
+            tag={perfStats && perfStats.periodInflow > 0 ? "Inversión neta" : "Sin compras"}
+            tagColor="blue"
+            borderAccent="blue"
             sub={`capital neto ingresado en ${periodLabel}`}
             changePositive={true}
             delay={0.12}
-            icon={<Wallet size={15} className="text-indigo-400" />}
+            icon={<Wallet size={15} className="text-blue-500 dark:text-blue-400" />}
+            iconBg="bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400"
             loading={isPeriodUpdating}
           />
           <KpiCard
             label={`Volatilidad (${periodLabel})`}
-            value={
-              analytics?.volatility !== undefined && (periodLabel === '1 Año' || periodLabel === 'Todo')
-                ? fmt.pct(analytics.volatility, false)
-                : perfStats?.periodVolatility !== null && perfStats?.periodVolatility !== undefined
-                ? fmt.pct(perfStats.periodVolatility, false)
-                : '—'
-            }
-            sub="fluctuación anualizada de mercado"
+            value={volVal !== null ? fmt.pct(volVal, false) : '—'}
+            valueColor="text-amber-500 dark:text-amber-400"
+            tag={volTag}
+            tagColor="amber"
+            borderAccent="amber"
+            sub="fluctuación anualizada de mercado (σ)"
             delay={0.14}
-            icon={<ShieldCheck size={15} className="text-violet-400" />}
+            icon={<Activity size={15} className="text-amber-500 dark:text-amber-400" />}
+            iconBg="bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400"
             loading={isPeriodUpdating}
           />
           <KpiCard
             label={`Máxima Caída (${periodLabel})`}
-            value={
-              analytics?.max_drawdown !== undefined && (periodLabel === '1 Año' || periodLabel === 'Todo')
-                ? fmt.pct(analytics.max_drawdown)
-                : perfStats?.maxDrawdown !== undefined
-                ? fmt.pct(perfStats.maxDrawdown)
-                : '—'
-            }
+            value={ddVal !== null ? fmt.pct(ddVal) : '—'}
+            valueColor="text-rose-500 dark:text-rose-400"
+            tag={ddTag}
+            tagColor="rose"
+            borderAccent="rose"
             sub={`peor caída en ${periodLabel}`}
             changePositive={false}
             delay={0.16}
-            icon={<TrendingDown size={15} className="text-rose-400" />}
+            icon={<TrendingDown size={15} className="text-rose-500 dark:text-rose-400" />}
+            iconBg="bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"
             loading={isPeriodUpdating}
           />
         </div>
@@ -412,39 +468,70 @@ export function OverviewPage() {
               </div>
             </div>
 
-            {/* Performance Period Stats Pill */}
-            {perfStats && (
-              <div data-private
-                className={cn(
-                  'hidden sm:flex items-center gap-3 text-xs font-mono bg-slate-100 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] transition-opacity duration-300',
-                  isPeriodUpdating ? 'opacity-65' : 'opacity-100'
-                )}
-              >
-                <span className="text-slate-600 dark:text-slate-400 font-medium">
-                  Rango:{' '}
-                  <span className="text-slate-900 dark:text-slate-100 font-bold">
-                    {fmt.currency(perfStats.min)} - {fmt.currency(perfStats.max)}
-                  </span>
-                </span>
-                <span
-                  className={`font-bold ${
-                    perfStats.periodProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+            <div className="flex items-center gap-2">
+              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+                <button
+                  onClick={() => setChartView('evolution')}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    chartView === 'evolution'
+                      ? 'bg-blue-600 text-white shadow'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
-                  title={`Ganancia neta: ${fmt.currency(perfStats.periodProfit)} | Aportaciones: ${fmt.currency(perfStats.periodInflow)}`}
                 >
-                  {perfStats.periodProfit >= 0 ? '+' : ''}
-                  {fmt.currency(perfStats.periodProfit)} ({fmt.pct(perfStats.realReturnPct)})
-                </span>
+                  Curva
+                </button>
+                <button
+                  onClick={() => setChartView('heatmap')}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    chartView === 'heatmap'
+                      ? 'bg-blue-600 text-white shadow'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                >
+                  Matriz Mensual
+                </button>
               </div>
-            )}
+
+              {/* Performance Period Stats Pill */}
+              {perfStats && chartView === 'evolution' && (
+                <div data-private
+                  className={cn(
+                    'hidden xl:flex items-center gap-3 text-xs font-mono bg-slate-100 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] transition-opacity duration-300',
+                    isPeriodUpdating ? 'opacity-65' : 'opacity-100'
+                  )}
+                >
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">
+                    Rango:{' '}
+                    <span className="text-slate-900 dark:text-slate-100 font-bold">
+                      {fmt.currency(perfStats.min)} - {fmt.currency(perfStats.max)}
+                    </span>
+                  </span>
+                  <span
+                    className={`font-bold ${
+                      perfStats.periodProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                    }`}
+                    title={`Ganancia neta: ${fmt.currency(perfStats.periodProfit)} | Aportaciones: ${fmt.currency(perfStats.periodInflow)}`}
+                  >
+                    {perfStats.periodProfit >= 0 ? '+' : ''}
+                    {fmt.currency(perfStats.periodProfit)} ({fmt.pct(perfStats.realReturnPct)})
+                  </span>
+                </div>
+              )}
+            </div>
           </CardHeader>
 
           <div className={cn("px-5 pb-3.5 pt-1.5 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
-            {performance.length > 0 ? (
-              <PerformanceChart data={performance} height={280} />
+            {chartView === 'evolution' ? (
+              performance.length > 0 ? (
+                <PerformanceChart data={performance} height={280} />
+              ) : (
+                <div className="flex h-[280px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  Sin datos de evolución
+                </div>
+              )
             ) : (
-              <div className="flex h-[280px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                Sin datos de evolución
+              <div className="py-2">
+                <MonthlyReturnsHeatmap data={performance} />
               </div>
             )}
           </div>

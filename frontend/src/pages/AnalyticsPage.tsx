@@ -12,12 +12,14 @@ import {
   Info,
   Scale,
   Award,
+  Calendar,
 } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { ReturnsChart } from '@/components/charts/ReturnsChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
+import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
@@ -208,6 +210,28 @@ export function AnalyticsPage() {
           </div>
         </Card>
       </div>
+
+      {/* Matriz de Rendimientos Mensuales */}
+      <Card delay={0.28} loading={analyticsFetching}>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+            <CardTitle>Matriz de Rendimientos Mensuales</CardTitle>
+            {analyticsFetching && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 shrink-0 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+                <span className="hidden sm:inline">Actualizando</span>
+              </span>
+            )}
+          </div>
+          <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+            Rendimiento neto ponderado en el tiempo mes a mes y acumulación anual
+          </span>
+        </CardHeader>
+        <div data-private className="p-5">
+          <MonthlyReturnsHeatmap />
+        </div>
+      </Card>
 
       {/* Risk Metrics Detail */}
       <Card delay={0.3} loading={analyticsFetching}>

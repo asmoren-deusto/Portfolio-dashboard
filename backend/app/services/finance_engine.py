@@ -293,8 +293,8 @@ def calculate_sharpe(nav_series: list[dict], risk_free_rate: float = 2.5) -> Opt
 
 
 def calculate_period_return(value_series: list[dict], days: int) -> Optional[float]:
-    """Return for last N days."""
-    if len(value_series) < 2:
+    """Return for last N days (using nav if available for true TWR, otherwise value)."""
+    if not value_series or len(value_series) < 2:
         return None
     try:
         cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
@@ -302,7 +302,8 @@ def calculate_period_return(value_series: list[dict], days: int) -> Optional[flo
         filtered = [v for v in value_series if v["date"] >= cutoff_str]
         if len(filtered) < 2:
             return None
-        ret = (filtered[-1]["value"] / filtered[0]["value"] - 1) * 100
+        key = "nav" if "nav" in filtered[0] else "value"
+        ret = (filtered[-1][key] / filtered[0][key] - 1) * 100
         return round(float(ret), 2)
     except Exception as e:
         logger.warning(f"Period return error: {e}")

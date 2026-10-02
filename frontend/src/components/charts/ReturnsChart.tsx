@@ -1,6 +1,6 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ReferenceLine, ResponsiveContainer, Cell,
+  ReferenceLine, ResponsiveContainer, Cell, LabelList
 } from 'recharts'
 import type { Analytics } from '@/lib/mockData'
 
@@ -12,10 +12,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length || payload[0]?.value == null) return null
   const v: number = payload[0].value
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#1a2035] px-3 py-2 text-xs shadow-xl">
-      <p className="font-semibold text-slate-800 dark:text-slate-200">{label}</p>
-      <p className={v >= 0 ? 'text-emerald-500 dark:text-emerald-400 font-mono font-medium' : 'text-rose-500 dark:text-rose-400 font-mono font-medium'}>
-        {v >= 0 ? '+' : ''}{v.toFixed(2)}%
+    <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#1a2035]/95 backdrop-blur-md px-3.5 py-2.5 text-xs shadow-xl">
+      <p className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5">{label}</p>
+      <div className="flex items-center gap-1.5 font-mono">
+        <span className="text-slate-500 dark:text-slate-400">Rendimiento:</span>
+        <span className={v >= 0 ? 'text-emerald-500 dark:text-emerald-400 font-bold' : 'text-rose-500 dark:text-rose-400 font-bold'}>
+          {v >= 0 ? '+' : ''}{v.toFixed(2)}%
+        </span>
+      </div>
+      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+        TWR ponderado en el tiempo (aislado de depósitos)
       </p>
     </div>
   )
@@ -24,7 +30,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export function ReturnsChart({ analytics }: ReturnsChartProps) {
   if (!analytics) {
     return (
-      <div className="flex h-[220px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+      <div className="flex h-[240px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
         Sin datos de rentabilidad
       </div>
     )
@@ -34,19 +40,30 @@ export function ReturnsChart({ analytics }: ReturnsChartProps) {
     { name: '1 Mes',   value: analytics.return_1m ?? 0 },
     { name: '3 Meses', value: analytics.return_3m ?? 0 },
     { name: '6 Meses', value: analytics.return_6m ?? 0 },
-    { name: '1 Año',   value: analytics.return_ytd ?? 0 },
+    { name: 'Año Actual (YTD)', value: analytics.return_ytd ?? 0 },
+    { name: '1 Año',   value: analytics.return_1y ?? analytics.return_ytd ?? 0 },
   ]
 
   return (
-    <div className="w-full min-h-[220px]">
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
-          <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.03)" />
+    <div className="w-full min-h-[240px]">
+      <ResponsiveContainer width="100%" height={240}>
+        <BarChart data={data} margin={{ top: 16, right: 12, left: -10, bottom: 0 }}>
+          <defs>
+            <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#059669" stopOpacity={0.65} />
+            </linearGradient>
+            <linearGradient id="barRed" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#e11d48" stopOpacity={0.65} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
           <XAxis
             dataKey="name"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#64748b', fontSize: 11 }}
+            tick={{ fill: '#64748b', fontSize: 11, fontWeight: 500 }}
           />
           <YAxis
             axisLine={false}
@@ -54,13 +71,19 @@ export function ReturnsChart({ analytics }: ReturnsChartProps) {
             tick={{ fill: '#64748b', fontSize: 11 }}
             tickFormatter={v => `${v}%`}
           />
-          <ReferenceLine y={0} stroke="rgba(255,255,255,0.08)" />
+          <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-          <Bar dataKey="value" radius={[5, 5, 0, 0]} maxBarSize={48}>
+          <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={44}>
+            <LabelList
+              dataKey="value"
+              position="top"
+              formatter={(val: any) => `${Number(val) >= 0 ? '+' : ''}${Number(val).toFixed(1)}%`}
+              style={{ fill: '#94a3b8', fontSize: '10.5px', fontFamily: 'monospace', fontWeight: 600 }}
+            />
             {data.map((d, i) => (
               <Cell
                 key={i}
-                fill={d.value >= 0 ? 'rgba(16,185,129,0.75)' : 'rgba(244,63,94,0.75)'}
+                fill={d.value >= 0 ? 'url(#barGreen)' : 'url(#barRed)'}
               />
             ))}
           </Bar>
