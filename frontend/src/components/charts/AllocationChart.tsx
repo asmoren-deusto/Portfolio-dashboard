@@ -30,11 +30,12 @@ export function AllocationChart({
 }: AllocationChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
-  const chartHeight = height ?? (showLegend ? 235 : 285)
+  const chartHeight = height ?? (showLegend ? 235 : 295)
   const isCompact = chartHeight <= 265
-  const innerRadius = showLegend ? 68 : (isCompact ? 76 : 86)
-  const outerRadius = showLegend ? 98 : (isCompact ? 108 : 122)
-  const centerMaxW = showLegend ? 'max-w-[120px]' : (isCompact ? 'max-w-[126px]' : 'max-w-[140px]')
+  const isLarge = chartHeight >= 295
+  const innerRadius = showLegend ? 68 : (isLarge ? 90 : (isCompact ? 76 : 86))
+  const outerRadius = showLegend ? 98 : (isLarge ? 128 : (isCompact ? 108 : 122))
+  const centerMaxW = showLegend ? 'max-w-[120px]' : (isLarge ? 'max-w-[148px]' : (isCompact ? 'max-w-[126px]' : 'max-w-[140px]'))
 
   if (!positions || positions.length === 0) {
     return (

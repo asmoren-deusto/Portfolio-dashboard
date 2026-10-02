@@ -739,10 +739,10 @@ export function OverviewPage() {
                   showLegend={showLegend}
                   hoveredIsin={hoveredIsin}
                   onHoverIsin={setHoveredIsin}
-                  height={260}
+                  height={305}
                 />
               ) : (
-                <div className="flex h-[260px] items-center justify-center text-slate-500 text-sm">
+                <div className="flex h-[305px] items-center justify-center text-slate-500 text-sm">
                   Sin posiciones registradas
                 </div>
               )}
@@ -839,17 +839,17 @@ export function OverviewPage() {
             <div className="flex flex-col justify-center flex-1">
               {secondaryChartMode === 'returns' ? (
                 analytics ? (
-                  <ReturnsChart analytics={analytics} compact height={260} />
+                  <ReturnsChart analytics={analytics} compact height={305} />
                 ) : (
-                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  <div className="flex h-[305px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                     Sin datos de rendimiento
                   </div>
                 )
               ) : (
                 positions.length > 0 ? (
-                  <AllocationChart positions={positions} mode="broker" showLegend={false} height={260} />
+                  <AllocationChart positions={positions} mode="broker" showLegend={false} height={305} />
                 ) : (
-                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  <div className="flex h-[305px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                     Sin datos de entidades
                   </div>
                 )
