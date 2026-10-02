@@ -484,18 +484,16 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-5 pb-3.5 pt-1.5 flex flex-col justify-center flex-1">
+          <div className="px-5 pb-3.5 pt-1.5 flex flex-col justify-center">
             {positions.length > 0 ? (
               <AllocationChart
                 positions={positions}
                 mode={allocMode}
-                showLegend={false}
                 hoveredIsin={hoveredIsin}
                 onHoverIsin={setHoveredIsin}
-                height={290}
               />
             ) : (
-              <div className="flex h-[280px] items-center justify-center text-slate-500 text-sm">
+              <div className="flex h-[220px] items-center justify-center text-slate-500 text-sm">
                 Sin posiciones registradas
               </div>
             )}
@@ -554,29 +552,21 @@ export function OverviewPage() {
                       onMouseEnter={() => setHoveredIsin(p.isin)}
                       onMouseLeave={() => setHoveredIsin(null)}
                       className={cn(
-                        'transition-all duration-150 group cursor-pointer',
+                        'transition-colors group cursor-pointer',
                         isRowHovered
-                          ? 'bg-blue-50/90 dark:bg-blue-950/40 ring-1 ring-inset ring-blue-500/30'
+                          ? 'bg-blue-50/70 dark:bg-blue-950/30'
                           : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
                       )}
                     >
                       <td className="py-2.5 pl-3 pr-1 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
+                        <div className="flex items-center justify-center">
                           <div
-                            className="w-1.5 h-1.5 rounded-full shrink-0 transition-transform duration-150"
+                            className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
                             style={{
                               backgroundColor: assetColor || '#3b82f6',
-                              transform: isRowHovered ? 'scale(1.5)' : 'scale(1)',
+                              transform: isRowHovered ? 'scale(1.4)' : 'scale(1)',
                             }}
                           />
-                          <span
-                            className={cn(
-                              'font-mono font-bold text-[13px] transition-colors',
-                              isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
-                            )}
-                          >
-                            {i + 1}
-                          </span>
                         </div>
                       </td>
                       <td className="py-2.5 px-2.5">
@@ -703,29 +693,21 @@ export function OverviewPage() {
                       onMouseEnter={() => setHoveredIsin(p.isin)}
                       onMouseLeave={() => setHoveredIsin(null)}
                       className={cn(
-                        'transition-all duration-150 group cursor-pointer',
+                        'transition-colors group cursor-pointer',
                         isRowHovered
-                          ? 'bg-blue-50/90 dark:bg-blue-950/40 ring-1 ring-inset ring-blue-500/30'
+                          ? 'bg-blue-50/70 dark:bg-blue-950/30'
                           : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
                       )}
                     >
                       <td className="py-2.5 pl-3 pr-1 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
+                        <div className="flex items-center justify-center">
                           <div
-                            className="w-1.5 h-1.5 rounded-full shrink-0 transition-transform duration-150"
+                            className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
                             style={{
                               backgroundColor: assetColor || '#3b82f6',
-                              transform: isRowHovered ? 'scale(1.5)' : 'scale(1)',
+                              transform: isRowHovered ? 'scale(1.4)' : 'scale(1)',
                             }}
                           />
-                          <span
-                            className={cn(
-                              'font-mono font-bold text-[13px] transition-colors',
-                              isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
-                            )}
-                          >
-                            {i + 6}
-                          </span>
                         </div>
                       </td>
                       <td className="py-2.5 px-2.5">
