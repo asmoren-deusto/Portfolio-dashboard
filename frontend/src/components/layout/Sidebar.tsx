@@ -12,7 +12,6 @@ import {
   LogOut,
   PanelLeftClose,
   Pin,
-  PinOff,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -93,21 +92,36 @@ export function Sidebar({}: SidebarProps) {
             </span>
           </div>
 
-          {/* Close or Collapse button */}
-          <button
-            onClick={() => {
-              if (sidebarCollapsed || mobileSidebarOpen) {
-                setMobileSidebarOpen(false)
-              } else {
-                setSidebarCollapsed(true)
-              }
-            }}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] transition-colors"
-            title={sidebarCollapsed || mobileSidebarOpen ? "Cerrar menú lateral" : "Ocultar panel lateral"}
-            aria-label="Cerrar o colapsar menú lateral"
-          >
-            {sidebarCollapsed || mobileSidebarOpen ? <X size={18} /> : <PanelLeftClose size={18} />}
-          </button>
+          {/* Action buttons (Pin on desktop drawer / Collapse / Close) */}
+          <div className="flex items-center gap-1 shrink-0">
+            {sidebarCollapsed && (
+              <button
+                onClick={() => {
+                  setSidebarCollapsed(false)
+                  setMobileSidebarOpen(false)
+                }}
+                className="hidden md:flex p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-500/10 transition-colors"
+                title="Fijar panel lateral"
+                aria-label="Fijar panel lateral"
+              >
+                <Pin size={16} />
+              </button>
+            )}
+            <button
+              onClick={() => {
+                if (sidebarCollapsed || mobileSidebarOpen) {
+                  setMobileSidebarOpen(false)
+                } else {
+                  setSidebarCollapsed(true)
+                }
+              }}
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] transition-colors"
+              title={sidebarCollapsed || mobileSidebarOpen ? "Cerrar menú lateral" : "Ocultar panel lateral"}
+              aria-label="Cerrar o colapsar menú lateral"
+            >
+              {sidebarCollapsed || mobileSidebarOpen ? <X size={18} /> : <PanelLeftClose size={18} />}
+            </button>
+          </div>
         </div>
 
         {/* Nav Items */}
@@ -226,36 +240,16 @@ export function Sidebar({}: SidebarProps) {
             </button>
           </div>
 
-          {/* Desktop Pin/Unpin Toggle */}
-          <div className="hidden md:block pt-0.5">
-            <button
-              onClick={() => {
-                toggleSidebarCollapsed()
-                if (sidebarCollapsed) {
-                  setMobileSidebarOpen(false)
-                }
-              }}
-              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-white/[0.05] transition-colors border border-slate-200/80 dark:border-white/[0.06]"
-              title={sidebarCollapsed ? "Fijar panel en la pantalla" : "Ocultar panel lateral como en móvil"}
-            >
-              <span className="flex items-center gap-1.5 font-semibold text-[11.5px]">
-                {sidebarCollapsed ? <Pin size={13} className="text-blue-500" /> : <PinOff size={13} />}
-                <span>{sidebarCollapsed ? 'Fijar panel lateral' : 'Ocultar panel lateral'}</span>
-              </span>
-              <span className="font-mono text-[9.5px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-white/[0.06]">
-                {sidebarCollapsed ? 'Oculto' : 'Fijado'}
-              </span>
-            </button>
-          </div>
-
-          {/* Sync Status */}
-          <p className="flex items-center justify-between text-xs font-mono text-slate-700 dark:text-slate-400 px-1 font-medium">
-            <span className="flex items-center gap-1">
-              <RefreshCw size={12} className="text-slate-600 dark:text-slate-400" />
-              <span>Sincronizado</span>
+          {/* Sync Status & Discreet App Version */}
+          <div className="flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400 px-1 pt-0.5">
+            <span className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+              <RefreshCw size={11} className="text-slate-400 dark:text-slate-500" />
+              <span>{syncTime ?? 'En vivo'}</span>
             </span>
-            <span>{syncTime ?? 'En vivo'}</span>
-          </p>
+            <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500/80 tracking-wider">
+              v2.5
+            </span>
+          </div>
         </div>
       </aside>
     </>
