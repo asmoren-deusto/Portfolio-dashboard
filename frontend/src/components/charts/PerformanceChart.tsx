@@ -15,23 +15,20 @@ import { fmt, cn } from '@/lib/utils'
 import {
   TrendingUp,
   TrendingDown,
-  Maximize2,
   Calendar,
-  Layers,
-  Percent,
-  Euro,
   ArrowUpRight,
-  ArrowDownRight,
-  Target,
   Flame,
 } from 'lucide-react'
+
+export type ChartMode = 'currency' | 'percent'
 
 interface PerformanceChartProps {
   data: PricePoint[]
   height?: number
+  chartMode?: ChartMode
+  showInvested?: boolean
+  showMilestones?: boolean
 }
-
-type ChartMode = 'currency' | 'percent'
 
 function formatDateSpanish(dateStr: string): string {
   try {
@@ -101,7 +98,13 @@ function sanitizePercentPoints(points: PricePoint[]): { time: any; value: number
   return unique
 }
 
-export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) {
+export function PerformanceChart({
+  data,
+  height = 260,
+  chartMode = 'currency',
+  showInvested = true,
+  showMilestones = true,
+}: PerformanceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const areaSeriesRef = useRef<any>(null)
@@ -112,10 +115,6 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
   const theme = useAppStore(s => s.theme)
   const isDark = theme === 'dark'
 
-  // Interactive controls state
-  const [chartMode, setChartMode] = useState<ChartMode>('currency')
-  const [showInvested, setShowInvested] = useState<boolean>(true)
-  const [showMilestones, setShowMilestones] = useState<boolean>(true)
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
   const dataRef = useRef<PricePoint[]>(data)
@@ -224,7 +223,7 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
         },
         rightPriceScale: {
           borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-          scaleMargins: { top: 0.14, bottom: 0.08 },
+          scaleMargins: { top: 0.12, bottom: 0.08 },
         },
         timeScale: {
           borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
@@ -278,7 +277,7 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
       investedSeriesRef.current = investedSeries
       markersRef.current = markersPlugin
 
-      // Initial data population
+      // Initial data population & automatic fit
       const valPoints = sanitizeValuePoints(dataRef.current)
       if (valPoints.length) {
         areaSeries.setData(valPoints)
@@ -289,6 +288,7 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
         investedSeries.setData(invPoints)
       }
 
+      // Auto-fit immediately on mount
       if (valPoints.length) {
         chart.timeScale().fitContent()
       }
@@ -321,6 +321,7 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
       try {
         const w = Math.max(10, entries[0].contentRect.width)
         chartRef.current.applyOptions({ width: w })
+        chartRef.current.timeScale().fitContent()
       } catch {}
     })
 
@@ -344,7 +345,7 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
     }
   }, [height, isDark])
 
-  // Update Series Data, Mode, Colors and Markers
+  // Update Series Data, Mode, Colors, Markers, and Auto-fit automatically
   useEffect(() => {
     if (!areaSeriesRef.current || !chartRef.current || !data) return
 
@@ -474,108 +475,26 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
         }
       }
 
+      // Automatically auto-fit the view to the full period data width without needing a button
       chart.timeScale().fitContent()
     } catch (err) {
       console.warn('Failed to update performance chart:', err)
     }
   }, [data, chartMode, showInvested, showMilestones, metrics, isDark])
 
-  const handleFitContent = () => {
-    if (chartRef.current) {
-      chartRef.current.timeScale().fitContent()
-    }
-  }
-
   return (
-    <div data-private className="w-full flex flex-col gap-2.5">
-      {/* 1. Header Toolbar: Mode Selector, Series Toggles & Zoom Button */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-white/[0.04] pb-2">
-        {/* Left: Mode Switcher (€ vs %) */}
-        <div className="flex items-center gap-1.5">
-          <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#0c101c] p-0.5">
-            <button
-              onClick={() => setChartMode('currency')}
-              className={cn(
-                'flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md transition-all',
-                chartMode === 'currency'
-                  ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-              )}
-              title="Ver evolución en Euros (€)"
-            >
-              <Euro size={12} />
-              <span>Valor (€)</span>
-            </button>
-            <button
-              onClick={() => setChartMode('percent')}
-              className={cn(
-                'flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md transition-all',
-                chartMode === 'percent'
-                  ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-              )}
-              title="Ver rentabilidad acumulada en porcentaje (%)"
-            >
-              <Percent size={12} />
-              <span>Retorno (%)</span>
-            </button>
-          </div>
-
-          {/* Invested Capital Toggle (only in € mode) */}
-          {chartMode === 'currency' && (
-            <button
-              onClick={() => setShowInvested(v => !v)}
-              className={cn(
-                'flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-all',
-                showInvested
-                  ? 'bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 font-semibold'
-                  : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
-              )}
-              title="Mostrar u ocultar la línea de aportaciones netas acumuladas"
-            >
-              <span className={cn('w-2.5 h-0.5 border-t-2 border-dashed', showInvested ? 'border-purple-600 dark:border-purple-400' : 'border-slate-400')} />
-              <span>Aportado</span>
-            </button>
-          )}
-
-          {/* High / Low Milestones Toggle */}
-          <button
-            onClick={() => setShowMilestones(v => !v)}
-            className={cn(
-              'hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-all',
-              showMilestones
-                ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold'
-                : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
-            )}
-            title="Mostrar u ocultar los picos máximos y mínimos"
-          >
-            <Target size={12} className={showMilestones ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} />
-            <span>Picos Máx/Mín</span>
-          </button>
-        </div>
-
-        {/* Right: Reset Zoom */}
-        <button
-          onClick={handleFitContent}
-          className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/[0.04] transition-colors"
-          title="Reajustar el gráfico para ver todo el rango"
-        >
-          <Maximize2 size={12} />
-          <span>Ajustar</span>
-        </button>
-      </div>
-
-      {/* 2. Dynamic HUD: Interactive Inspection & Live Metric Card */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 rounded-xl bg-slate-50/90 dark:bg-[#0c101c]/80 border border-slate-200/80 dark:border-white/[0.06]">
+    <div data-private className="w-full flex flex-col gap-2">
+      {/* 1. Dynamic HUD: Interactive Inspection & Live Metric Strip (Compact) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50/90 dark:bg-[#0c101c]/80 border border-slate-200/80 dark:border-white/[0.06]">
         {/* Left: Value, Return & Gain at current cursor or last point */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-medium">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium">
           {/* Main Portfolio Value / Return */}
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
             <span className="text-slate-500 dark:text-slate-400">
               {chartMode === 'currency' ? 'Patrimonio:' : 'Rentabilidad:'}
             </span>
-            <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">
+            <span className="font-mono font-bold text-slate-900 dark:text-white">
               {chartMode === 'currency'
                 ? fmt.currency(activePoint?.value)
                 : `${activePercentReturn >= 0 ? '+' : ''}${activePercentReturn.toFixed(2)}%`}
@@ -599,7 +518,7 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
               <span className="text-slate-500 dark:text-slate-400">Beneficio:</span>
               <span
                 className={cn(
-                  'font-mono font-bold px-1.5 py-0.5 rounded text-[11.5px]',
+                  'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
                   activePnl.diff >= 0
                     ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
                     : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
@@ -613,13 +532,13 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
 
         {/* Right: Date inspection pill */}
         {activePoint?.date && (
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-white/[0.04] px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-            <Calendar size={12} className={hoveredPoint ? 'text-blue-500' : 'text-slate-400'} />
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-white/[0.04] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.06]">
+            <Calendar size={11} className={hoveredPoint ? 'text-blue-500' : 'text-slate-400'} />
             <span className="font-semibold text-slate-800 dark:text-slate-200">
               {formatDateSpanish(activePoint.date)}
             </span>
             {hoveredPoint && (
-              <span className="text-[9.5px] uppercase font-bold text-blue-600 dark:text-blue-400 ml-0.5">
+              <span className="text-[9px] uppercase font-bold text-blue-600 dark:text-blue-400 ml-0.5">
                 (Inspección)
               </span>
             )}
@@ -627,84 +546,71 @@ export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) 
         )}
       </div>
 
-      {/* 3. Canvas Container */}
+      {/* 2. Canvas Container */}
       <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden" />
 
-      {/* 4. Useful Milestones Strip (ATH, Low, Drawdown) */}
+      {/* 3. Useful Milestones Strip (Single-line compact badges without bulky titles) */}
       {metrics && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.04] text-xs">
-          {/* ATH Peak */}
-          <div className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50/70 dark:bg-white/[0.02]">
-            <div className="p-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-              <TrendingUp size={13} />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
-                Máximo Periodo
-              </span>
-              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block truncate text-[11px]">
-                {fmt.currency(metrics.maxPoint.value)}
-              </span>
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1 border-t border-slate-100 dark:border-white/[0.04] text-xs">
+          {/* Max Peak */}
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]"
+            title={`Máximo del periodo (ATH): ${fmt.currency(metrics.maxPoint.value)} el ${formatDateSpanish(metrics.maxPoint.date)}`}
+          >
+            <TrendingUp size={13} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Máx:</span>
+            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 text-[11px] truncate">
+              {fmt.currency(metrics.maxPoint.value)}
+            </span>
           </div>
 
           {/* Period Low */}
-          <div className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50/70 dark:bg-white/[0.02]">
-            <div className="p-1 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
-              <TrendingDown size={13} />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
-                Mínimo Periodo
-              </span>
-              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block truncate text-[11px]">
-                {fmt.currency(metrics.minPoint.value)}
-              </span>
-            </div>
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]"
+            title={`Mínimo del periodo: ${fmt.currency(metrics.minPoint.value)} el ${formatDateSpanish(metrics.minPoint.date)}`}
+          >
+            <TrendingDown size={13} className="text-rose-600 dark:text-rose-400 shrink-0" />
+            <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Mín:</span>
+            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 text-[11px] truncate">
+              {fmt.currency(metrics.minPoint.value)}
+            </span>
           </div>
 
           {/* Current Drawdown */}
-          <div className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50/70 dark:bg-white/[0.02]">
-            <div className="p-1 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-              <Flame size={13} />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
-                Distancia a Pico
-              </span>
-              <span
-                className={cn(
-                  'font-mono font-bold block truncate text-[11px]',
-                  metrics.drawdownPct >= -0.05
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-amber-600 dark:text-amber-400'
-                )}
-              >
-                {metrics.drawdownPct >= -0.05 ? 'En Máximos (ATH)' : `${metrics.drawdownPct.toFixed(2)}%`}
-              </span>
-            </div>
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]"
+            title={metrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${metrics.drawdownPct.toFixed(2)}%`}
+          >
+            <Flame size={13} className={metrics.drawdownPct >= -0.05 ? 'text-emerald-500 shrink-0' : 'text-amber-500 shrink-0'} />
+            <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Pico:</span>
+            <span
+              className={cn(
+                'font-mono font-bold text-[11px] truncate',
+                metrics.drawdownPct >= -0.05
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-amber-600 dark:text-amber-400'
+              )}
+            >
+              {metrics.drawdownPct >= -0.05 ? 'En Máximos (ATH)' : `${metrics.drawdownPct.toFixed(2)}%`}
+            </span>
           </div>
 
           {/* Net Return */}
-          <div className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50/70 dark:bg-white/[0.02]">
-            <div className="p-1 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
-              <ArrowUpRight size={13} />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
-                Ganancia Neta
-              </span>
-              <span
-                className={cn(
-                  'font-mono font-bold block truncate text-[11px]',
-                  metrics.periodProfit >= 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-rose-600 dark:text-rose-400'
-                )}
-              >
-                {metrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(metrics.periodProfit)} ({fmt.pct(metrics.periodReturnPct)})
-              </span>
-            </div>
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]"
+            title={`Ganancia neta del periodo: ${fmt.currency(metrics.periodProfit)} (${fmt.pct(metrics.periodReturnPct)})`}
+          >
+            <ArrowUpRight size={13} className={metrics.periodProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400 shrink-0' : 'text-rose-600 dark:text-rose-400 shrink-0'} />
+            <span
+              className={cn(
+                'font-mono font-bold text-[11px] truncate',
+                metrics.periodProfit >= 0
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-rose-600 dark:text-rose-400'
+              )}
+            >
+              {metrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(metrics.periodProfit)} ({fmt.pct(metrics.periodReturnPct)})
+            </span>
           </div>
         </div>
       )}

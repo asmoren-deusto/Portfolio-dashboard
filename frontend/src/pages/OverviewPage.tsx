@@ -16,6 +16,9 @@ import {
   Sparkles,
   Eye,
   EyeOff,
+  Euro,
+  Percent,
+  Target,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -74,6 +77,9 @@ export function OverviewPage() {
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
   const [showLegend, setShowLegend] = useState(false)
   const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
+  const [perfChartMode, setPerfChartMode] = useState<'currency' | 'percent'>('currency')
+  const [perfShowInvested, setPerfShowInvested] = useState(true)
+  const [perfShowMilestones, setPerfShowMilestones] = useState(true)
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
@@ -492,29 +498,66 @@ export function OverviewPage() {
                 </button>
               </div>
 
-              {/* Performance Period Stats Pill */}
-              {perfStats && chartView === 'evolution' && (
-                <div data-private
-                  className={cn(
-                    'hidden xl:flex items-center gap-3 text-xs font-mono bg-slate-100 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] transition-opacity duration-300',
-                    isPeriodUpdating ? 'opacity-65' : 'opacity-100'
+              {/* Evolution Chart Controls in CardHeader */}
+              {chartView === 'evolution' && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {/* Mode Selector (€ vs %) */}
+                  <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+                    <button
+                      onClick={() => setPerfChartMode('currency')}
+                      className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold transition-colors ${
+                        perfChartMode === 'currency'
+                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs font-bold'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      }`}
+                      title="Ver evolución en Euros (€)"
+                    >
+                      <Euro size={11} />
+                      <span>€</span>
+                    </button>
+                    <button
+                      onClick={() => setPerfChartMode('percent')}
+                      className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold transition-colors ${
+                        perfChartMode === 'percent'
+                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs font-bold'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      }`}
+                      title="Ver rentabilidad acumulada en porcentaje (%)"
+                    >
+                      <Percent size={11} />
+                      <span>%</span>
+                    </button>
+                  </div>
+
+                  {/* Toggle Invested Capital (only in € mode) */}
+                  {perfChartMode === 'currency' && (
+                    <button
+                      onClick={() => setPerfShowInvested(v => !v)}
+                      className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${
+                        perfShowInvested
+                          ? 'bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 font-semibold'
+                          : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+                      }`}
+                      title="Mostrar u ocultar aportaciones"
+                    >
+                      <span className={`w-2.5 h-0.5 border-t-2 border-dashed ${perfShowInvested ? 'border-purple-600 dark:border-purple-400' : 'border-slate-400'}`} />
+                      <span className="hidden sm:inline">Aportado</span>
+                    </button>
                   )}
-                >
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">
-                    Rango:{' '}
-                    <span className="text-slate-900 dark:text-slate-100 font-bold">
-                      {fmt.currency(perfStats.min)} - {fmt.currency(perfStats.max)}
-                    </span>
-                  </span>
-                  <span
-                    className={`font-bold ${
-                      perfStats.periodProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+
+                  {/* Toggle Milestones */}
+                  <button
+                    onClick={() => setPerfShowMilestones(v => !v)}
+                    className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${
+                      perfShowMilestones
+                        ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold'
+                        : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
                     }`}
-                    title={`Ganancia neta: ${fmt.currency(perfStats.periodProfit)} | Aportaciones: ${fmt.currency(perfStats.periodInflow)}`}
+                    title="Mostrar u ocultar picos máximos y mínimos"
                   >
-                    {perfStats.periodProfit >= 0 ? '+' : ''}
-                    {fmt.currency(perfStats.periodProfit)} ({fmt.pct(perfStats.realReturnPct)})
-                  </span>
+                    <Target size={11} className={perfShowMilestones ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} />
+                    <span className="hidden sm:inline">Picos</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -523,9 +566,15 @@ export function OverviewPage() {
           <div className={cn("px-5 pb-3.5 pt-1.5 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
             {chartView === 'evolution' ? (
               performance.length > 0 ? (
-                <PerformanceChart data={performance} height={280} />
+                <PerformanceChart
+                  data={performance}
+                  height={260}
+                  chartMode={perfChartMode}
+                  showInvested={perfShowInvested}
+                  showMilestones={perfShowMilestones}
+                />
               ) : (
-                <div className="flex h-[280px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                   Sin datos de evolución
                 </div>
               )
