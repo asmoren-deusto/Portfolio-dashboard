@@ -215,21 +215,218 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
-      {/* Heatmap Grid */}
+    <div className={cn("space-y-3.5", className)}>
+      {/* 4 Interactive Metric Highlights (Hover-integrated) */}
+      {stats && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {/* Card 1 */}
+          <div
+            className="p-3 rounded-2xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150 flex items-center justify-between"
+            title={
+              hoveredCell
+                ? (hoveredCell.type === 'month'
+                    ? `Periodo: ${FULL_MONTH_NAMES[hoveredCell.month! - 1]} ${hoveredCell.year}`
+                    : `Ejercicio anual ${hoveredCell.year}`)
+                : `Tasa de acierto: ${stats.positiveMonths} de ${stats.totalMonths} meses en verde (${stats.winRate}%)`
+            }
+          >
+            <div className="min-w-0 pr-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block truncate">
+                {hoveredCell ? (hoveredCell.type === 'month' ? 'Mes Inspeccionado' : 'Año') : 'Tasa de Acierto'}
+              </span>
+              <span className={cn(
+                "text-lg sm:text-xl font-bold font-mono tracking-tight mt-0.5 block truncate",
+                hoveredCell ? "text-slate-950 dark:text-white" : "text-emerald-600 dark:text-emerald-400"
+              )}>
+                {hoveredCell
+                  ? (hoveredCell.type === 'month'
+                      ? `${MONTH_NAMES[hoveredCell.month! - 1]} ${hoveredCell.year}`
+                      : `${hoveredCell.year} Total`)
+                  : `${stats.winRate}%`}
+              </span>
+              <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium truncate block">
+                {hoveredCell
+                  ? (hoveredCell.type === 'month' ? `${FULL_MONTH_NAMES[hoveredCell.month! - 1]}` : 'ejercicio completo')
+                  : `${stats.positiveMonths} de ${stats.totalMonths} meses en verde`}
+              </span>
+            </div>
+            <div className={cn(
+              "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border",
+              hoveredCell
+                ? "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
+                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+            )}>
+              {hoveredCell ? <Calendar size={16} /> : <CheckCircle2 size={16} />}
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div
+            className="p-3 rounded-2xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150 flex items-center justify-between"
+            title={
+              hoveredCell
+                ? `Rentabilidad neta registrada: ${hoveredCell.returnPct >= 0 ? '+' : ''}${hoveredCell.returnPct.toFixed(2)}%`
+                : `Mejor mes histórico: ${stats.bestMonth ? `${stats.bestMonth.label} (+${stats.bestMonth.val.toFixed(2)}%)` : '—'}`
+            }
+          >
+            <div className="min-w-0 pr-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block truncate">
+                {hoveredCell ? 'Retorno Neto' : 'Mejor Mes'}
+              </span>
+              <span className={cn(
+                "text-lg sm:text-xl font-bold font-mono tracking-tight mt-0.5 block truncate",
+                hoveredCell
+                  ? (hoveredCell.returnPct >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")
+                  : "text-emerald-600 dark:text-emerald-400"
+              )}>
+                {hoveredCell
+                  ? `${hoveredCell.returnPct >= 0 ? '+' : ''}${hoveredCell.returnPct.toFixed(2)}%`
+                  : stats.bestMonth
+                  ? `+${stats.bestMonth.val.toFixed(2)}%`
+                  : '—'}
+              </span>
+              <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium truncate block">
+                {hoveredCell
+                  ? (hoveredCell.returnPct >= 0 ? 'mes con beneficio (+)' : 'mes con pérdida (-)')
+                  : (stats.bestMonth ? stats.bestMonth.label : '—')}
+              </span>
+            </div>
+            <div className={cn(
+              "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border",
+              hoveredCell
+                ? (hoveredCell.returnPct >= 0
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                    : "bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400")
+                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+            )}>
+              {hoveredCell
+                ? (hoveredCell.returnPct >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />)
+                : <Flame size={16} />}
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div
+            className="p-3 rounded-2xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150 flex items-center justify-between"
+            title={
+              hoveredCell
+                ? (hoveredCell.type === 'month'
+                    ? `Sesiones de mercado computadas en ${MONTH_NAMES[hoveredCell.month! - 1]} ${hoveredCell.year}`
+                    : `Meses con retorno positivo en ${hoveredCell.year}`)
+                : `Peor mes histórico: ${stats.worstMonth ? `${stats.worstMonth.label} (${stats.worstMonth.val.toFixed(2)}%)` : '—'}`
+            }
+          >
+            <div className="min-w-0 pr-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block truncate">
+                {hoveredCell ? (hoveredCell.type === 'month' ? 'Sesiones' : 'Meses en Verde') : 'Peor Mes'}
+              </span>
+              <span className={cn(
+                "text-lg sm:text-xl font-bold font-mono tracking-tight mt-0.5 block truncate",
+                hoveredCell ? "text-slate-950 dark:text-white" : "text-rose-600 dark:text-rose-400"
+              )}>
+                {hoveredCell
+                  ? (hoveredCell.type === 'month'
+                      ? `${hoveredCell.daysCount ?? 21} sesiones`
+                      : `${hoveredCell.positiveMonths} de ${hoveredCell.totalMonths}`)
+                  : stats.worstMonth
+                  ? `${stats.worstMonth.val.toFixed(2)}%`
+                  : '—'}
+              </span>
+              <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium truncate block">
+                {hoveredCell
+                  ? (hoveredCell.type === 'month' ? 'días cotizados en mes' : 'tasa anual en positivo')
+                  : (stats.worstMonth ? stats.worstMonth.label : '—')}
+              </span>
+            </div>
+            <div className={cn(
+              "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border",
+              hoveredCell
+                ? (hoveredCell.type === 'month'
+                    ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+                    : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400")
+                : "bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400"
+            )}>
+              {hoveredCell
+                ? (hoveredCell.type === 'month' ? <Activity size={16} /> : <CheckCircle2 size={16} />)
+                : <TrendingDown size={16} />}
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          {(() => {
+            const diff = hoveredCell ? hoveredCell.returnPct - stats.avgMonthly : 0
+            const isDiffPos = diff >= 0
+            return (
+              <div
+                className="p-3 rounded-2xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150 flex items-center justify-between"
+                title={
+                  hoveredCell
+                    ? (hoveredCell.type === 'month'
+                        ? `Diferencia frente a la media mensual histórica (${stats.avgMonthly >= 0 ? '+' : ''}${stats.avgMonthly.toFixed(2)}%)`
+                        : `Mes con mayor rentabilidad de ${hoveredCell.year}`)
+                    : `Rentabilidad mensual media histórica`
+                }
+              >
+                <div className="min-w-0 pr-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block truncate">
+                    {hoveredCell ? (hoveredCell.type === 'month' ? 'vs Media' : 'Mejor del Año') : 'Media Mensual'}
+                  </span>
+                  <span className={cn(
+                    "text-lg sm:text-xl font-bold font-mono tracking-tight mt-0.5 block truncate",
+                    hoveredCell
+                      ? (hoveredCell.type === 'month'
+                          ? (isDiffPos ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")
+                          : "text-slate-950 dark:text-white")
+                      : (stats.avgMonthly >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")
+                  )}>
+                    {hoveredCell
+                      ? (hoveredCell.type === 'month'
+                          ? `${isDiffPos ? '+' : ''}${diff.toFixed(2)}%`
+                          : hoveredCell.bestMonth)
+                      : `${stats.avgMonthly >= 0 ? '+' : ''}${stats.avgMonthly.toFixed(2)}%`}
+                  </span>
+                  <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium truncate block">
+                    {hoveredCell
+                      ? (hoveredCell.type === 'month'
+                          ? `media histórica: ${stats.avgMonthly >= 0 ? '+' : ''}${stats.avgMonthly.toFixed(2)}%`
+                          : 'pico del ejercicio')
+                      : 'rentabilidad promedio / mes'}
+                  </span>
+                </div>
+                <div className={cn(
+                  "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border",
+                  hoveredCell
+                    ? (hoveredCell.type === 'month'
+                        ? (isDiffPos ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400")
+                        : "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400")
+                    : "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
+                )}>
+                  {hoveredCell
+                    ? (hoveredCell.type === 'month'
+                        ? <ArrowUpRight size={16} className={isDiffPos ? "text-emerald-500" : "text-rose-500 rotate-90"} />
+                        : <Flame size={16} />)
+                    : <TrendingUp size={16} />}
+                </div>
+              </div>
+            )
+          })()}
+        </div>
+      )}
+
+      {/* Heatmap Grid with taller, comfortable cells */}
       <div className="overflow-x-auto pb-1">
         <table className="w-full text-center border-collapse min-w-[620px]">
           <thead>
             <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <th className="py-2 px-2.5 text-left font-bold text-slate-800 dark:text-slate-200 w-16">
+              <th className="py-2.5 px-2.5 text-left font-bold text-slate-800 dark:text-slate-200 w-16">
                 Año
               </th>
               {MONTH_NAMES.map((m) => (
-                <th key={m} className="py-2 px-1 text-center font-semibold">
+                <th key={m} className="py-2.5 px-1 text-center font-semibold text-[11px]">
                   {m}
                 </th>
               ))}
-              <th className="py-2 px-2.5 text-right font-bold text-slate-800 dark:text-slate-200 w-24">
+              <th className="py-2.5 px-2.5 text-right font-bold text-slate-800 dark:text-slate-200 w-24">
                 Total Año
               </th>
             </tr>
@@ -247,7 +444,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
 
               return (
                 <tr key={row.year} className="group hover:bg-slate-50/50 dark:hover:bg-white/[0.015] transition-colors">
-                  <td className="py-2 px-2.5 text-left font-mono font-bold text-xs text-slate-900 dark:text-slate-100">
+                  <td className="py-2.5 px-2.5 text-left font-mono font-bold text-xs text-slate-900 dark:text-slate-100">
                     {row.year}
                   </td>
                   {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => {
@@ -259,7 +456,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
                       hoveredCell.month === m
 
                     return (
-                      <td key={m} className="p-1">
+                      <td key={m} className="p-1 sm:p-1.5">
                         <div
                           onMouseEnter={() => {
                             if (val !== undefined) {
@@ -274,7 +471,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
                           }}
                           onMouseLeave={() => setHoveredCell(null)}
                           className={cn(
-                            "relative h-8 sm:h-9 rounded-lg flex items-center justify-center font-mono text-[11px] transition-all cursor-pointer select-none",
+                            "relative h-10 sm:h-11 md:h-12 rounded-xl flex items-center justify-center font-mono text-xs sm:text-[12.5px] font-bold transition-all cursor-pointer select-none",
                             getCellClasses(val),
                             val !== undefined && "hover:ring-2 hover:ring-blue-500/80 hover:z-10 hover:scale-105",
                             isCellHovered && "ring-2 ring-blue-500 shadow-md scale-105 z-10"
@@ -292,7 +489,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
                       </td>
                     )
                   })}
-                  <td className="py-2 px-2.5 text-right">
+                  <td className="py-2.5 px-2.5 text-right">
                     <span
                       onMouseEnter={() => {
                         setHoveredCell({
@@ -306,7 +503,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
                       }}
                       onMouseLeave={() => setHoveredCell(null)}
                       className={cn(
-                        "inline-flex items-center justify-end px-2.5 py-1 rounded-lg font-mono text-xs font-bold border transition-all cursor-pointer",
+                        "inline-flex items-center justify-end px-3 py-2 rounded-xl font-mono text-xs sm:text-[12.5px] font-bold border transition-all cursor-pointer",
                         row.annualReturnPct >= 0
                           ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
                           : "bg-rose-500/10 border-rose-500/25 text-rose-700 dark:text-rose-400 hover:bg-rose-500/20",
@@ -322,181 +519,6 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
           </tbody>
         </table>
       </div>
-
-      {/* 4 Bottom Informative Boxes with Live Hover Integration */}
-      {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs">
-          {/* Box 1 */}
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150"
-            title={
-              hoveredCell
-                ? (hoveredCell.type === 'month'
-                    ? `Periodo: ${FULL_MONTH_NAMES[hoveredCell.month! - 1]} ${hoveredCell.year}`
-                    : `Ejercicio anual ${hoveredCell.year}`)
-                : `Tasa de acierto: ${stats.positiveMonths} de ${stats.totalMonths} meses en verde (${stats.winRate}%)`
-            }
-          >
-            <div className={cn(
-              "p-1 rounded-lg shrink-0",
-              hoveredCell ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-            )}>
-              {hoveredCell ? <Calendar size={14} /> : <CheckCircle2 size={14} />}
-            </div>
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
-                {hoveredCell ? (hoveredCell.type === 'month' ? 'Mes:' : 'Año:') : 'Acierto:'}
-              </span>
-              <span className={cn(
-                "font-mono font-extrabold text-xs truncate",
-                hoveredCell ? "text-slate-950 dark:text-white" : "text-emerald-600 dark:text-emerald-400"
-              )}>
-                {hoveredCell
-                  ? (hoveredCell.type === 'month'
-                      ? `${MONTH_NAMES[hoveredCell.month! - 1]} ${hoveredCell.year}`
-                      : `${hoveredCell.year} Total`)
-                  : `${stats.winRate}% (${stats.positiveMonths}/${stats.totalMonths} m.)`}
-              </span>
-            </div>
-          </div>
-
-          {/* Box 2 */}
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150"
-            title={
-              hoveredCell
-                ? `Rentabilidad neta registrada: ${hoveredCell.returnPct >= 0 ? '+' : ''}${hoveredCell.returnPct.toFixed(2)}%`
-                : `Mejor mes histórico: ${stats.bestMonth ? `${stats.bestMonth.label} (+${stats.bestMonth.val.toFixed(2)}%)` : '—'}`
-            }
-          >
-            <div className={cn(
-              "p-1 rounded-lg shrink-0",
-              hoveredCell
-                ? (hoveredCell.returnPct >= 0
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400")
-                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-            )}>
-              {hoveredCell
-                ? (hoveredCell.returnPct >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />)
-                : <Flame size={14} />}
-            </div>
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
-                {hoveredCell ? 'Retorno:' : 'Mejor:'}
-              </span>
-              <span className={cn(
-                "font-mono font-extrabold text-xs truncate",
-                hoveredCell
-                  ? (hoveredCell.returnPct >= 0
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-rose-600 dark:text-rose-400")
-                  : "text-emerald-600 dark:text-emerald-400"
-              )}>
-                {hoveredCell
-                  ? `${hoveredCell.returnPct >= 0 ? '+' : ''}${hoveredCell.returnPct.toFixed(2)}%`
-                  : stats.bestMonth
-                  ? `+${stats.bestMonth.val.toFixed(2)}% (${stats.bestMonth.label})`
-                  : '—'}
-              </span>
-            </div>
-          </div>
-
-          {/* Box 3 */}
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150"
-            title={
-              hoveredCell
-                ? (hoveredCell.type === 'month'
-                    ? `Sesiones de mercado computadas en ${MONTH_NAMES[hoveredCell.month! - 1]} ${hoveredCell.year}`
-                    : `Meses con retorno positivo en ${hoveredCell.year}`)
-                : `Peor mes histórico: ${stats.worstMonth ? `${stats.worstMonth.label} (${stats.worstMonth.val.toFixed(2)}%)` : '—'}`
-            }
-          >
-            <div className={cn(
-              "p-1 rounded-lg shrink-0",
-              hoveredCell
-                ? (hoveredCell.type === 'month' ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400")
-                : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-            )}>
-              {hoveredCell
-                ? (hoveredCell.type === 'month' ? <Activity size={14} /> : <CheckCircle2 size={14} />)
-                : <TrendingDown size={14} />}
-            </div>
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
-                {hoveredCell ? (hoveredCell.type === 'month' ? 'Días:' : 'En verde:') : 'Peor:'}
-              </span>
-              <span className={cn(
-                "font-mono font-extrabold text-xs truncate",
-                hoveredCell
-                  ? "text-slate-950 dark:text-white"
-                  : "text-rose-600 dark:text-rose-400"
-              )}>
-                {hoveredCell
-                  ? (hoveredCell.type === 'month'
-                      ? `${hoveredCell.daysCount ?? 21} sesiones`
-                      : `${hoveredCell.positiveMonths} de ${hoveredCell.totalMonths} m.`)
-                  : stats.worstMonth
-                  ? `${stats.worstMonth.val.toFixed(2)}% (${stats.worstMonth.label})`
-                  : '—'}
-              </span>
-            </div>
-          </div>
-
-          {/* Box 4 */}
-          {(() => {
-            const diff = hoveredCell ? hoveredCell.returnPct - stats.avgMonthly : 0
-            const isDiffPos = diff >= 0
-            return (
-              <div
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150"
-                title={
-                  hoveredCell
-                    ? (hoveredCell.type === 'month'
-                        ? `Diferencia frente a la media mensual histórica (${stats.avgMonthly >= 0 ? '+' : ''}${stats.avgMonthly.toFixed(2)}%)`
-                        : `Mes con mayor rentabilidad de ${hoveredCell.year}`)
-                    : `Rentabilidad mensual media histórica`
-                }
-              >
-                <div className={cn(
-                  "p-1 rounded-lg shrink-0",
-                  hoveredCell
-                    ? (hoveredCell.type === 'month'
-                        ? (isDiffPos ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/10 text-rose-600 dark:text-rose-400")
-                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400")
-                    : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                )}>
-                  {hoveredCell
-                    ? (hoveredCell.type === 'month'
-                        ? <ArrowUpRight size={14} className={isDiffPos ? "text-emerald-500" : "text-rose-500 rotate-90"} />
-                        : <Flame size={14} />)
-                    : <TrendingUp size={14} />}
-                </div>
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
-                    {hoveredCell ? (hoveredCell.type === 'month' ? 'vs Media:' : 'Pico:') : 'Media:'}
-                  </span>
-                  <span className={cn(
-                    "font-mono font-extrabold text-xs truncate",
-                    hoveredCell
-                      ? (hoveredCell.type === 'month'
-                          ? (isDiffPos ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")
-                          : "text-slate-950 dark:text-white")
-                      : (stats.avgMonthly >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")
-                  )}>
-                    {hoveredCell
-                      ? (hoveredCell.type === 'month'
-                          ? `${isDiffPos ? '+' : ''}${diff.toFixed(2)}%`
-                          : hoveredCell.bestMonth)
-                      : `${stats.avgMonthly >= 0 ? '+' : ''}${stats.avgMonthly.toFixed(2)}% / mes`}
-                  </span>
-                </div>
-              </div>
-            )
-          })()}
-        </div>
-      )}
     </div>
   )
 }
