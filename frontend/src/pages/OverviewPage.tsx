@@ -694,10 +694,12 @@ export function OverviewPage() {
                 </div>
               )
             ) : (
-              <div className="py-1 space-y-2.5">
-                {/* Milestone Boxes a modo de subtitulo */}
+              <div className="py-1 flex flex-col justify-between gap-3">
+                <MonthlyReturnsHeatmap data={performance} />
+
+                {/* Milestone Boxes at the bottom to match PerformanceChart layout */}
                 {perfMetrics && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pb-2.5 border-b border-slate-100 dark:border-white/[0.06] text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs">
                     {/* Max Peak */}
                     <div
                       className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
@@ -782,8 +784,6 @@ export function OverviewPage() {
                     </div>
                   </div>
                 )}
-
-                <MonthlyReturnsHeatmap data={performance} />
               </div>
             )}
           </div>
