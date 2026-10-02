@@ -28,6 +28,7 @@ interface PerformanceChartProps {
   chartMode?: ChartMode
   showInvested?: boolean
   showMilestones?: boolean
+  showFooterStrip?: boolean
 }
 
 function formatDateSpanish(dateStr: string): string {
@@ -104,6 +105,7 @@ export function PerformanceChart({
   chartMode = 'currency',
   showInvested = true,
   showMilestones = true,
+  showFooterStrip = true,
 }: PerformanceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
@@ -550,7 +552,7 @@ export function PerformanceChart({
       <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden" />
 
       {/* 3. Useful Milestones Strip (Larger, higher contrast, and with label on 4th box) */}
-      {metrics && (
+      {metrics && showFooterStrip && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
           {/* Max Peak */}
           <div

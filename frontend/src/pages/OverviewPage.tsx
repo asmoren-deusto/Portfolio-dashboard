@@ -569,9 +569,9 @@ export function OverviewPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* 1. Performance Evolution (60% on desktop: lg:col-span-3, md:col-span-2) */}
         <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between" delay={0.2} loading={isPeriodUpdating}>
-          <CardHeader>
+          <CardHeader className="h-[58px] min-h-[58px] py-2">
             <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
                 <BarChart3 className="w-4 h-4" />
               </div>
               <div className="min-w-0">
@@ -584,7 +584,7 @@ export function OverviewPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
                   Trayectoria histórica del valor liquidativo acumulado
                 </p>
               </div>
@@ -678,114 +678,115 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className={cn("px-5 pb-3.5 pt-1.5 flex-1 flex flex-col justify-between h-[368px] min-h-[368px] max-h-[368px] transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
-            {chartView === 'evolution' ? (
-              performance.length > 0 ? (
-                <div className="flex-1 flex flex-col justify-between">
+          <div className={cn("px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
+            <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
+              {chartView === 'evolution' ? (
+                performance.length > 0 ? (
                   <PerformanceChart
                     data={performance}
-                    height={262}
+                    height={260}
                     chartMode={perfChartMode}
                     showInvested={perfShowInvested}
                     showMilestones={perfShowMilestones}
+                    showFooterStrip={false}
                   />
-                </div>
-              ) : (
-                <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                  Sin datos de evolución
-                </div>
-              )
-            ) : (
-              <div className="py-0.5 flex-1 flex flex-col justify-between min-h-0">
-                <MonthlyReturnsHeatmap data={performance} tableMaxHeight="220px" />
-
-                {/* Milestone Boxes at the bottom to match PerformanceChart layout */}
-                {perfMetrics && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1.5 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
-                    {/* Max Peak */}
-                    <div
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-                      title={`Máximo del periodo (ATH): ${fmt.currency(perfMetrics.maxPoint.value)}`}
-                    >
-                      <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                        <TrendingUp size={14} />
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Máx:</span>
-                        <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
-                          {fmt.currency(perfMetrics.maxPoint.value)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Period Low */}
-                    <div
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-                      title={`Mínimo del periodo: ${fmt.currency(perfMetrics.minPoint.value)}`}
-                    >
-                      <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
-                        <TrendingDown size={14} />
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Mín:</span>
-                        <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
-                          {fmt.currency(perfMetrics.minPoint.value)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Current Drawdown */}
-                    <div
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-                      title={perfMetrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${perfMetrics.drawdownPct.toFixed(2)}%`}
-                    >
-                      <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-                        <Flame size={14} />
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Pico:</span>
-                        <span
-                          className={cn(
-                            'font-mono font-extrabold text-xs truncate',
-                            perfMetrics.drawdownPct >= -0.05
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-amber-600 dark:text-amber-400'
-                          )}
-                        >
-                          {perfMetrics.drawdownPct >= -0.05 ? 'En Máximos (ATH)' : `${perfMetrics.drawdownPct.toFixed(2)}%`}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Net Return */}
-                    <div
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-                      title={`Ganancia neta del periodo: ${fmt.currency(perfMetrics.periodProfit)} (${fmt.pct(perfMetrics.periodReturnPct)})`}
-                    >
-                      <div className={cn(
-                        "p-1 rounded-lg shrink-0",
-                        perfMetrics.periodProfit >= 0
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                      )}>
-                        <ArrowUpRight size={14} />
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Neto:</span>
-                        <span
-                          className={cn(
-                            'font-mono font-extrabold text-xs truncate',
-                            perfMetrics.periodProfit >= 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-rose-600 dark:text-rose-400'
-                          )}
-                        >
-                          {perfMetrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(perfMetrics.periodProfit)} ({fmt.pct(perfMetrics.periodReturnPct)})
-                        </span>
-                      </div>
-                    </div>
+                ) : (
+                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                    Sin datos de evolución
                   </div>
-                )}
+                )
+              ) : (
+                <div className="py-0.5 flex-1 flex flex-col justify-between min-h-0 overflow-hidden">
+                  <MonthlyReturnsHeatmap data={performance} tableMaxHeight="200px" />
+                </div>
+              )}
+            </div>
+
+            {/* Shared Milestone Strip for BOTH Curva and Matriz Mensual at the EXACT same footer */}
+            {perfMetrics && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+                {/* Max Peak */}
+                <div
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  title={`Máximo del periodo (ATH): ${fmt.currency(perfMetrics.maxPoint.value)}`}
+                >
+                  <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <TrendingUp size={14} />
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Máx:</span>
+                    <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                      {fmt.currency(perfMetrics.maxPoint.value)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Period Low */}
+                <div
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  title={`Mínimo del periodo: ${fmt.currency(perfMetrics.minPoint.value)}`}
+                >
+                  <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
+                    <TrendingDown size={14} />
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Mín:</span>
+                    <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                      {fmt.currency(perfMetrics.minPoint.value)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Current Drawdown */}
+                <div
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  title={perfMetrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${perfMetrics.drawdownPct.toFixed(2)}%`}
+                >
+                  <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                    <Flame size={14} />
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Pico:</span>
+                    <span
+                      className={cn(
+                        'font-mono font-extrabold text-xs truncate',
+                        perfMetrics.drawdownPct >= -0.05
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-amber-600 dark:text-amber-400'
+                      )}
+                    >
+                      {perfMetrics.drawdownPct >= -0.05 ? 'En Máximos (ATH)' : `${perfMetrics.drawdownPct.toFixed(2)}%`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Net Return */}
+                <div
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  title={`Ganancia neta del periodo: ${fmt.currency(perfMetrics.periodProfit)} (${fmt.pct(perfMetrics.periodReturnPct)})`}
+                >
+                  <div className={cn(
+                    "p-1 rounded-lg shrink-0",
+                    perfMetrics.periodProfit >= 0
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                  )}>
+                    <ArrowUpRight size={14} />
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Neto:</span>
+                    <span
+                      className={cn(
+                        'font-mono font-extrabold text-xs truncate',
+                        perfMetrics.periodProfit >= 0
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                      )}
+                    >
+                      {perfMetrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(perfMetrics.periodProfit)} ({fmt.pct(perfMetrics.periodReturnPct)})
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -793,12 +794,17 @@ export function OverviewPage() {
 
         {/* 2. Asset Allocation Breakdown (20% on desktop: lg:col-span-1, md:col-span-1) */}
         <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.23}>
-          <CardHeader>
+          <CardHeader className="h-[58px] min-h-[58px] py-2">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20">
+              <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20 shrink-0">
                 <PieChart className="w-4 h-4" />
               </div>
-              <CardTitle className="text-sm">Distribución</CardTitle>
+              <div className="min-w-0">
+                <CardTitle className="text-sm">Distribución</CardTitle>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
+                  Desglose de cartera
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -856,8 +862,8 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-3 pb-3.5 pt-1.5 flex flex-col justify-between flex-1">
-            <div className="flex flex-col justify-center flex-1">
+          <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
+            <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {positions.length > 0 ? (
                 <AllocationChart
                   positions={positions}
@@ -865,10 +871,10 @@ export function OverviewPage() {
                   showLegend={showLegend}
                   hoveredIsin={hoveredIsin}
                   onHoverIsin={setHoveredIsin}
-                  height={305}
+                  height={260}
                 />
               ) : (
-                <div className="flex h-[305px] items-center justify-center text-slate-500 text-sm">
+                <div className="flex h-full items-center justify-center text-slate-500 text-sm">
                   Sin posiciones registradas
                 </div>
               )}
@@ -876,10 +882,10 @@ export function OverviewPage() {
 
             {/* Useful Stats Strip (Matching Card 1) */}
             {allocStats && (
-              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={allocStats.box1Title}
                 >
                   <div className="p-1 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
@@ -895,7 +901,7 @@ export function OverviewPage() {
 
                 {/* Box 2 */}
                 <div
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={allocStats.box2Title}
                 >
                   <div className="p-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
@@ -915,12 +921,17 @@ export function OverviewPage() {
 
         {/* 3. Performance by Period / Broker Distribution (20% on desktop: lg:col-span-1, md:col-span-1) */}
         <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.26} loading={analyticsFetching}>
-          <CardHeader>
+          <CardHeader className="h-[58px] min-h-[58px] py-2">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
+              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                 <BarChart3 className="w-4 h-4" />
               </div>
-              <CardTitle className="text-sm">Rendimiento</CardTitle>
+              <div className="min-w-0">
+                <CardTitle className="text-sm">Rendimiento</CardTitle>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
+                  Retorno y asignación
+                </p>
+              </div>
             </div>
 
             <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
@@ -961,21 +972,21 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-3 pb-3.5 pt-1.5 flex flex-col justify-between flex-1">
-            <div className="flex flex-col justify-center flex-1">
+          <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
+            <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {secondaryChartMode === 'returns' ? (
                 analytics ? (
-                  <ReturnsChart analytics={analytics} compact height={305} />
+                  <ReturnsChart analytics={analytics} compact height={260} />
                 ) : (
-                  <div className="flex h-[305px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                     Sin datos de rendimiento
                   </div>
                 )
               ) : (
                 positions.length > 0 ? (
-                  <AllocationChart positions={positions} mode="broker" showLegend={false} height={305} />
+                  <AllocationChart positions={positions} mode="broker" showLegend={false} height={260} />
                 ) : (
-                  <div className="flex h-[305px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                     Sin datos de entidades
                   </div>
                 )
@@ -984,10 +995,10 @@ export function OverviewPage() {
 
             {/* Useful Stats Strip (Matching Card 1) */}
             {secondaryStats && (
-              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={secondaryStats.box1Title}
                 >
                   <div
@@ -1023,7 +1034,7 @@ export function OverviewPage() {
 
                 {/* Box 2 */}
                 <div
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={secondaryStats.box2Title}
                 >
                   <div
