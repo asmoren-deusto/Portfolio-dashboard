@@ -1,8 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import {
   TrendingUp,
   TrendingDown,
-  Calendar,
   CheckCircle2,
   Award,
   Flame,
@@ -45,11 +44,6 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
   // If data is not provided, fetch 5y performance to cover all years
   const { data: fetchedData = [] } = usePerformance()
   const rawData = propData || fetchedData
-  const [hoveredCell, setHoveredCell] = useState<{
-    year: number
-    month: number
-    val: number
-  } | null>(null)
 
   const { rows, stats } = useMemo(() => {
     if (!rawData || rawData.length < 2) {
@@ -309,17 +303,14 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => {
                   const mData = row.months[m]
                   const val = mData?.returnPct
-                  const isHovered = hoveredCell?.year === row.year && hoveredCell?.month === m
 
                   return (
                     <td key={m} className="p-1">
                       <div
-                        onMouseEnter={() => val !== undefined && setHoveredCell({ year: row.year, month: m, val })}
-                        onMouseLeave={() => setHoveredCell(null)}
                         className={cn(
                           "relative h-8 sm:h-9 rounded-lg flex items-center justify-center font-mono text-[11px] transition-all cursor-default select-none",
                           getCellClasses(val),
-                          isHovered && "ring-2 ring-blue-500/60 z-10 scale-105"
+                          val !== undefined && "hover:ring-2 hover:ring-blue-500/60 hover:z-10 hover:scale-105"
                         )}
                         title={val !== undefined ? `${FULL_MONTH_NAMES[m - 1]} ${row.year}: ${val >= 0 ? '+' : ''}${val.toFixed(2)}%` : undefined}
                       >
@@ -351,31 +342,6 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
           </tbody>
         </table>
       </div>
-
-      {/* Floating Insight / Tooltip Indicator */}
-      {hoveredCell && (
-        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] text-xs animate-fadeIn">
-          <div className="flex items-center gap-2">
-            <Calendar size={14} className="text-blue-500" />
-            <span className="font-semibold text-slate-800 dark:text-slate-200">
-              {FULL_MONTH_NAMES[hoveredCell.month - 1]} {hoveredCell.year}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-500 dark:text-slate-400">Rentabilidad neta de mercado:</span>
-            <span
-              className={cn(
-                "font-mono font-bold px-2 py-0.5 rounded",
-                hoveredCell.val >= 0
-                  ? "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10"
-                  : "text-rose-700 dark:text-rose-400 bg-rose-500/10"
-              )}
-            >
-              {hoveredCell.val >= 0 ? '+' : ''}{hoveredCell.val.toFixed(2)}%
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
