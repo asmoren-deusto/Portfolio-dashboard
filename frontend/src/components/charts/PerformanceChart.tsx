@@ -1,12 +1,47 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import { createChart, AreaSeries, LineSeries, LineStyle, type IChartApi, ColorType } from 'lightweight-charts'
+import {
+  createChart,
+  AreaSeries,
+  LineSeries,
+  LineStyle,
+  type IChartApi,
+  type IPriceLine,
+  ColorType,
+  createSeriesMarkers,
+} from 'lightweight-charts'
 import type { PricePoint } from '@/lib/mockData'
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
+import {
+  TrendingUp,
+  TrendingDown,
+  Maximize2,
+  Calendar,
+  Layers,
+  Percent,
+  Euro,
+  ArrowUpRight,
+  ArrowDownRight,
+  Target,
+  Flame,
+} from 'lucide-react'
 
 interface PerformanceChartProps {
   data: PricePoint[]
   height?: number
+}
+
+type ChartMode = 'currency' | 'percent'
+
+function formatDateSpanish(dateStr: string): string {
+  try {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    if (!year || !month || !day) return dateStr
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+    return `${day} ${months[month - 1]} ${year}`
+  } catch {
+    return dateStr
+  }
 }
 
 function sanitizeValuePoints(points: PricePoint[]): { time: any; value: number }[] {
@@ -43,37 +78,120 @@ function sanitizeInvestedPoints(points: PricePoint[]): { time: any; value: numbe
   return unique
 }
 
-export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) {
+function sanitizePercentPoints(points: PricePoint[]): { time: any; value: number }[] {
+  if (!points || !points.length) return []
+  const valid = points
+    .filter(p => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
+    .sort((a, b) => a.date.localeCompare(b.date))
+
+  if (!valid.length) return []
+  const base = valid[0]
+  const unique: { time: any; value: number }[] = []
+  const seen = new Set<string>()
+
+  for (const p of valid) {
+    if (!seen.has(p.date)) {
+      seen.add(p.date)
+      const periodInflow = (p.invested ?? 0) - (base.invested ?? 0)
+      const profit = (p.value - base.value) - periodInflow
+      const pct = base.value > 0 ? (profit / base.value) * 100 : 0
+      unique.push({ time: p.date as any, value: Number(pct.toFixed(2)) })
+    }
+  }
+  return unique
+}
+
+export function PerformanceChart({ data, height = 300 }: PerformanceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
-  const areaSeriesRef = useRef<ReturnType<IChartApi['addSeries']> | null>(null)
-  const investedSeriesRef = useRef<ReturnType<IChartApi['addSeries']> | null>(null)
-  const dataRef = useRef<PricePoint[]>(data)
-  const theme = useAppStore(s => s.theme)
+  const areaSeriesRef = useRef<any>(null)
+  const investedSeriesRef = useRef<any>(null)
+  const markersRef = useRef<any>(null)
+  const zeroPriceLineRef = useRef<IPriceLine | null>(null)
 
+  const theme = useAppStore(s => s.theme)
+  const isDark = theme === 'dark'
+
+  // Interactive controls state
+  const [chartMode, setChartMode] = useState<ChartMode>('currency')
+  const [showInvested, setShowInvested] = useState<boolean>(true)
+  const [showMilestones, setShowMilestones] = useState<boolean>(true)
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
+  const dataRef = useRef<PricePoint[]>(data)
   dataRef.current = data
 
-  const latestPoint = useMemo(() => {
-    if (!data || !data.length) return null
-    return data[data.length - 1]
+  // Metrics computation for milestones & quick stats
+  const metrics = useMemo(() => {
+    if (!data || data.length === 0) return null
+
+    const valid = data
+      .filter(p => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    if (valid.length === 0) return null
+
+    const first = valid[0]
+    const last = valid[valid.length - 1]
+
+    let maxPoint = valid[0]
+    let minPoint = valid[0]
+
+    for (const p of valid) {
+      if (p.value > maxPoint.value) maxPoint = p
+      if (p.value < minPoint.value) minPoint = p
+    }
+
+    const currentVal = last.value
+    const maxVal = maxPoint.value
+    const drawdownPct = maxVal > 0 ? ((currentVal - maxVal) / maxVal) * 100 : 0
+
+    const periodInflow = (last.invested ?? 0) - (first.invested ?? 0)
+    const periodProfit = (last.value - first.value) - periodInflow
+    const periodReturnPct = first.value > 0 ? (periodProfit / first.value) * 100 : 0
+
+    return {
+      first,
+      last,
+      maxPoint,
+      minPoint,
+      drawdownPct,
+      periodProfit,
+      periodReturnPct,
+      periodInflow,
+    }
   }, [data])
 
-  const activePoint = hoveredPoint || latestPoint
+  const activePoint = hoveredPoint || (metrics ? metrics.last : null)
 
-  const pnl = useMemo(() => {
-    if (!activePoint || activePoint.invested === undefined) return null
-    const diff = activePoint.value - activePoint.invested
-    const pct = activePoint.invested > 0 ? (diff / activePoint.invested) * 100 : 0
-    return { diff, pct }
-  }, [activePoint])
+  const activePnl = useMemo(() => {
+    if (!activePoint) return null
+    if (activePoint.invested !== undefined && activePoint.invested > 0) {
+      const diff = activePoint.value - activePoint.invested
+      const pct = (diff / activePoint.invested) * 100
+      return { diff, pct }
+    }
+    if (metrics && metrics.first) {
+      const diff = activePoint.value - metrics.first.value
+      const pct = metrics.first.value > 0 ? (diff / metrics.first.value) * 100 : 0
+      return { diff, pct }
+    }
+    return null
+  }, [activePoint, metrics])
 
+  // Active percent return from period start if in percent mode
+  const activePercentReturn = useMemo(() => {
+    if (!activePoint || !metrics || !metrics.first) return 0
+    const periodInflow = (activePoint.invested ?? 0) - (metrics.first.invested ?? 0)
+    const profit = (activePoint.value - metrics.first.value) - periodInflow
+    return metrics.first.value > 0 ? (profit / metrics.first.value) * 100 : 0
+  }, [activePoint, metrics])
+
+  // Initialize and maintain chart instance
   useEffect(() => {
     if (!containerRef.current) return
 
     let disposed = false
-    const isDark = theme === 'dark'
     const containerWidth = Math.max(10, containerRef.current.clientWidth || 300)
 
     let chart: IChartApi | null = null
@@ -84,7 +202,7 @@ export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) 
         layout: {
           background: { type: ColorType.Solid, color: 'transparent' },
           textColor: isDark ? '#94a3b8' : '#64748b',
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'Inter, system-ui, sans-serif',
           fontSize: 11,
         },
         grid: {
@@ -93,18 +211,20 @@ export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) 
         },
         crosshair: {
           vertLine: {
-            color: 'rgba(79,142,247,0.4)',
-            labelBackgroundColor: '#4f8ef7',
+            color: isDark ? 'rgba(96,165,250,0.45)' : 'rgba(37,99,235,0.35)',
+            labelBackgroundColor: '#2563eb',
             width: 1,
+            style: LineStyle.Dotted,
           },
           horzLine: {
-            color: 'rgba(79,142,247,0.4)',
-            labelBackgroundColor: '#4f8ef7',
+            color: isDark ? 'rgba(96,165,250,0.45)' : 'rgba(37,99,235,0.35)',
+            labelBackgroundColor: '#2563eb',
+            style: LineStyle.Dotted,
           },
         },
         rightPriceScale: {
           borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-          scaleMargins: { top: 0.12, bottom: 0.1 },
+          scaleMargins: { top: 0.14, bottom: 0.08 },
         },
         timeScale: {
           borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
@@ -115,37 +235,50 @@ export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) 
         handleScale: true,
       })
 
-      // 1. Primary Area Series: Portfolio Total Value
+      // Primary Area Series (Portfolio Value or %)
       const areaSeries = chart.addSeries(AreaSeries, {
-        lineColor: '#3b82f6',
-        topColor: 'rgba(59, 130, 246, 0.28)',
-        bottomColor: 'rgba(59, 130, 246, 0.01)',
+        lineColor: '#2563eb',
+        topColor: isDark ? 'rgba(37, 99, 235, 0.32)' : 'rgba(37, 99, 235, 0.22)',
+        bottomColor: 'rgba(37, 99, 235, 0.01)',
         lineWidth: 2,
         priceLineVisible: false,
         lastValueVisible: true,
         crosshairMarkerRadius: 5,
-        crosshairMarkerBackgroundColor: '#3b82f6',
-        crosshairMarkerBorderColor: '#fff',
+        crosshairMarkerBackgroundColor: '#2563eb',
+        crosshairMarkerBorderColor: '#ffffff',
         crosshairMarkerBorderWidth: 2,
+        priceFormat: {
+          type: 'custom',
+          formatter: (p: number) => fmt.currency(p),
+        },
       })
 
-      // 2. Secondary Line Series: Net Invested Capital (Dinero Aportado)
+      // Secondary Line Series (Net Invested Capital)
       const investedSeries = chart.addSeries(LineSeries, {
-        color: isDark ? '#c084fc' : '#9333ea', // Violet
+        color: isDark ? '#c084fc' : '#9333ea',
         lineWidth: 2,
         lineStyle: LineStyle.Dashed,
         priceLineVisible: false,
         lastValueVisible: true,
         crosshairMarkerRadius: 4,
-        crosshairMarkerBackgroundColor: '#a855f7',
-        crosshairMarkerBorderColor: '#fff',
+        crosshairMarkerBackgroundColor: isDark ? '#c084fc' : '#9333ea',
+        crosshairMarkerBorderColor: '#ffffff',
         crosshairMarkerBorderWidth: 1.5,
+        priceFormat: {
+          type: 'custom',
+          formatter: (p: number) => fmt.currency(p),
+        },
       })
+
+      // Markers handle
+      const markersPlugin = createSeriesMarkers(areaSeries, [])
 
       chartRef.current = chart
       areaSeriesRef.current = areaSeries
       investedSeriesRef.current = investedSeries
+      markersRef.current = markersPlugin
 
+      // Initial data population
       const valPoints = sanitizeValuePoints(dataRef.current)
       if (valPoints.length) {
         areaSeries.setData(valPoints)
@@ -160,13 +293,18 @@ export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) 
         chart.timeScale().fitContent()
       }
 
-      // Crosshair inspection tracking
+      // Crosshair inspection listener
       chart.subscribeCrosshairMove(param => {
         if (!param || !param.time || !dataRef.current) {
           setHoveredPoint(null)
           return
         }
-        const timeStr = typeof param.time === 'string' ? param.time : (param.time as any).year ? `${(param.time as any).year}-${String((param.time as any).month).padStart(2, '0')}-${String((param.time as any).day).padStart(2, '0')}` : String(param.time)
+        const timeStr = typeof param.time === 'string'
+          ? param.time
+          : (param.time as any).year
+          ? `${(param.time as any).year}-${String((param.time as any).month).padStart(2, '0')}-${String((param.time as any).day).padStart(2, '0')}`
+          : String(param.time)
+
         const match = dataRef.current.find(p => p.date === timeStr)
         if (match) {
           setHoveredPoint(match)
@@ -201,75 +339,375 @@ export function PerformanceChart({ data, height = 280 }: PerformanceChartProps) 
       chartRef.current = null
       areaSeriesRef.current = null
       investedSeriesRef.current = null
+      markersRef.current = null
+      zeroPriceLineRef.current = null
     }
-  }, [height, theme])
+  }, [height, isDark])
 
+  // Update Series Data, Mode, Colors and Markers
   useEffect(() => {
     if (!areaSeriesRef.current || !chartRef.current || !data) return
+
     try {
-      const valPoints = sanitizeValuePoints(data)
-      areaSeriesRef.current.setData(valPoints)
+      const area = areaSeriesRef.current
+      const inv = investedSeriesRef.current
+      const chart = chartRef.current
 
-      if (investedSeriesRef.current) {
-        const invPoints = sanitizeInvestedPoints(data)
-        investedSeriesRef.current.setData(invPoints)
+      if (chartMode === 'currency') {
+        const valPoints = sanitizeValuePoints(data)
+        area.setData(valPoints)
+        area.applyOptions({
+          lineColor: '#2563eb',
+          topColor: isDark ? 'rgba(37, 99, 235, 0.32)' : 'rgba(37, 99, 235, 0.22)',
+          bottomColor: 'rgba(37, 99, 235, 0.01)',
+          crosshairMarkerBackgroundColor: '#2563eb',
+          priceFormat: {
+            type: 'custom',
+            formatter: (p: number) => fmt.currency(p),
+          },
+        })
+
+        // Clean up zero line if was in percent mode
+        if (zeroPriceLineRef.current) {
+          try {
+            area.removePriceLine(zeroPriceLineRef.current)
+          } catch {}
+          zeroPriceLineRef.current = null
+        }
+
+        // Invested line series
+        if (inv) {
+          inv.applyOptions({ visible: showInvested })
+          if (showInvested) {
+            const invPoints = sanitizeInvestedPoints(data)
+            inv.setData(invPoints)
+          }
+        }
+
+        // High / Low markers
+        if (markersRef.current && metrics) {
+          if (showMilestones && metrics.maxPoint && metrics.minPoint && metrics.maxPoint.date !== metrics.minPoint.date) {
+            markersRef.current.setMarkers([
+              {
+                time: metrics.maxPoint.date,
+                position: 'aboveBar',
+                color: '#10b981',
+                shape: 'arrowDown',
+                text: `Pico: ${fmt.currency(metrics.maxPoint.value)}`,
+              },
+              {
+                time: metrics.minPoint.date,
+                position: 'belowBar',
+                color: '#f43f5e',
+                shape: 'arrowUp',
+                text: `Mín: ${fmt.currency(metrics.minPoint.value)}`,
+              },
+            ])
+          } else {
+            markersRef.current.setMarkers([])
+          }
+        }
+      } else {
+        // Percent mode
+        const pctPoints = sanitizePercentPoints(data)
+        area.setData(pctPoints)
+
+        const isPositive = (metrics?.periodReturnPct ?? 0) >= 0
+        const mainColor = isPositive ? '#10b981' : '#f43f5e'
+        const topGrad = isPositive
+          ? (isDark ? 'rgba(16, 185, 129, 0.30)' : 'rgba(16, 185, 129, 0.22)')
+          : (isDark ? 'rgba(244, 63, 94, 0.30)' : 'rgba(244, 63, 94, 0.22)')
+
+        area.applyOptions({
+          lineColor: mainColor,
+          topColor: topGrad,
+          bottomColor: isPositive ? 'rgba(16, 185, 129, 0.01)' : 'rgba(244, 63, 94, 0.01)',
+          crosshairMarkerBackgroundColor: mainColor,
+          priceFormat: {
+            type: 'custom',
+            formatter: (p: number) => `${p >= 0 ? '+' : ''}${p.toFixed(2)}%`,
+          },
+        })
+
+        // In percent mode, invested line is hidden as reference is 0%
+        if (inv) {
+          inv.applyOptions({ visible: false })
+        }
+
+        // Add 0% baseline price line
+        if (!zeroPriceLineRef.current) {
+          zeroPriceLineRef.current = area.createPriceLine({
+            price: 0,
+            color: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.25)',
+            lineWidth: 1,
+            lineStyle: LineStyle.Dotted,
+            axisLabelVisible: true,
+            title: 'Base (0.0%)',
+          })
+        }
+
+        // Markers for % mode
+        if (markersRef.current && metrics) {
+          if (showMilestones && metrics.maxPoint && metrics.minPoint && metrics.maxPoint.date !== metrics.minPoint.date) {
+            const maxPct = sanitizePercentPoints([metrics.first, metrics.maxPoint])[1]?.value ?? 0
+            const minPct = sanitizePercentPoints([metrics.first, metrics.minPoint])[1]?.value ?? 0
+
+            markersRef.current.setMarkers([
+              {
+                time: metrics.maxPoint.date,
+                position: 'aboveBar',
+                color: '#10b981',
+                shape: 'arrowDown',
+                text: `Pico: +${maxPct.toFixed(1)}%`,
+              },
+              {
+                time: metrics.minPoint.date,
+                position: 'belowBar',
+                color: '#f43f5e',
+                shape: 'arrowUp',
+                text: `Mín: ${minPct.toFixed(1)}%`,
+              },
+            ])
+          } else {
+            markersRef.current.setMarkers([])
+          }
+        }
       }
 
-      if (valPoints.length) {
-        chartRef.current.timeScale().fitContent()
-      }
+      chart.timeScale().fitContent()
     } catch (err) {
-      console.warn('Failed to update performance chart data:', err)
+      console.warn('Failed to update performance chart:', err)
     }
-  }, [data])
+  }, [data, chartMode, showInvested, showMilestones, metrics, isDark])
+
+  const handleFitContent = () => {
+    if (chartRef.current) {
+      chartRef.current.timeScale().fitContent()
+    }
+  }
 
   return (
-    <div data-private className="w-full flex flex-col gap-2">
-      {/* Interactive Legend & Metric Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs px-1">
-        {/* Series indicators */}
-        <div className="flex items-center gap-4 flex-wrap">
-          {/* Valor Cartera */}
-          <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
-            <span className="w-3 h-1.5 rounded-sm bg-blue-500 shadow-sm" />
-            <span className="text-slate-500 dark:text-slate-400">Valor Cartera:</span>
-            <span className="font-bold font-mono text-slate-900 dark:text-white">
-              {fmt.currency(activePoint?.value)}
+    <div data-private className="w-full flex flex-col gap-2.5">
+      {/* 1. Header Toolbar: Mode Selector, Series Toggles & Zoom Button */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-white/[0.04] pb-2">
+        {/* Left: Mode Switcher (€ vs %) */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#0c101c] p-0.5">
+            <button
+              onClick={() => setChartMode('currency')}
+              className={cn(
+                'flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md transition-all',
+                chartMode === 'currency'
+                  ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              )}
+              title="Ver evolución en Euros (€)"
+            >
+              <Euro size={12} />
+              <span>Valor (€)</span>
+            </button>
+            <button
+              onClick={() => setChartMode('percent')}
+              className={cn(
+                'flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md transition-all',
+                chartMode === 'percent'
+                  ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              )}
+              title="Ver rentabilidad acumulada en porcentaje (%)"
+            >
+              <Percent size={12} />
+              <span>Retorno (%)</span>
+            </button>
+          </div>
+
+          {/* Invested Capital Toggle (only in € mode) */}
+          {chartMode === 'currency' && (
+            <button
+              onClick={() => setShowInvested(v => !v)}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-all',
+                showInvested
+                  ? 'bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 font-semibold'
+                  : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+              )}
+              title="Mostrar u ocultar la línea de aportaciones netas acumuladas"
+            >
+              <span className={cn('w-2.5 h-0.5 border-t-2 border-dashed', showInvested ? 'border-purple-600 dark:border-purple-400' : 'border-slate-400')} />
+              <span>Aportado</span>
+            </button>
+          )}
+
+          {/* High / Low Milestones Toggle */}
+          <button
+            onClick={() => setShowMilestones(v => !v)}
+            className={cn(
+              'hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-all',
+              showMilestones
+                ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold'
+                : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+            )}
+            title="Mostrar u ocultar los picos máximos y mínimos"
+          >
+            <Target size={12} className={showMilestones ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} />
+            <span>Picos Máx/Mín</span>
+          </button>
+        </div>
+
+        {/* Right: Reset Zoom */}
+        <button
+          onClick={handleFitContent}
+          className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/[0.04] transition-colors"
+          title="Reajustar el gráfico para ver todo el rango"
+        >
+          <Maximize2 size={12} />
+          <span>Ajustar</span>
+        </button>
+      </div>
+
+      {/* 2. Dynamic HUD: Interactive Inspection & Live Metric Card */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 rounded-xl bg-slate-50/90 dark:bg-[#0c101c]/80 border border-slate-200/80 dark:border-white/[0.06]">
+        {/* Left: Value, Return & Gain at current cursor or last point */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-medium">
+          {/* Main Portfolio Value / Return */}
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
+            <span className="text-slate-500 dark:text-slate-400">
+              {chartMode === 'currency' ? 'Patrimonio:' : 'Rentabilidad:'}
+            </span>
+            <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">
+              {chartMode === 'currency'
+                ? fmt.currency(activePoint?.value)
+                : `${activePercentReturn >= 0 ? '+' : ''}${activePercentReturn.toFixed(2)}%`}
             </span>
           </div>
 
-          {/* Dinero Aportado */}
-          {activePoint?.invested !== undefined && (
-            <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
-              <span className="w-3 h-0.5 border-t-2 border-dashed border-purple-500" />
-              <span className="text-slate-500 dark:text-slate-400">Dinero Aportado:</span>
-              <span className="font-bold font-mono text-slate-900 dark:text-white">
-                {fmt.currency(activePoint?.invested)}
+          {/* Invested Capital */}
+          {activePoint?.invested !== undefined && chartMode === 'currency' && (
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-0.5 border-t-2 border-dashed border-purple-500" />
+              <span className="text-slate-500 dark:text-slate-400">Aportado:</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                {fmt.currency(activePoint.invested)}
               </span>
             </div>
           )}
 
-          {/* Plusvalía Neta */}
-          {pnl && (
-            <div className="hidden sm:flex items-center gap-1.5 font-medium">
-              <span className="text-slate-500 dark:text-slate-400">Ganancia:</span>
-              <span className={cn('font-bold font-mono', pnl.diff >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-                {pnl.diff >= 0 ? '+' : ''}{fmt.currency(pnl.diff)} ({fmt.pct(pnl.pct)})
+          {/* Net Profit (Plusvalía) */}
+          {activePnl && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500 dark:text-slate-400">Beneficio:</span>
+              <span
+                className={cn(
+                  'font-mono font-bold px-1.5 py-0.5 rounded text-[11.5px]',
+                  activePnl.diff >= 0
+                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                    : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                )}
+              >
+                {activePnl.diff >= 0 ? '+' : ''}{fmt.currency(activePnl.diff)} ({fmt.pct(activePnl.pct)})
               </span>
             </div>
           )}
         </div>
 
-        {/* Date tracker */}
+        {/* Right: Date inspection pill */}
         {activePoint?.date && (
-          <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.04] px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-white/[0.06]">
-            {hoveredPoint ? `Inspeccionando: ${activePoint.date}` : `Último dato: ${activePoint.date}`}
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-white/[0.04] px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+            <Calendar size={12} className={hoveredPoint ? 'text-blue-500' : 'text-slate-400'} />
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              {formatDateSpanish(activePoint.date)}
+            </span>
+            {hoveredPoint && (
+              <span className="text-[9.5px] uppercase font-bold text-blue-600 dark:text-blue-400 ml-0.5">
+                (Inspección)
+              </span>
+            )}
           </div>
         )}
       </div>
 
-      {/* Chart Canvas */}
-      <div ref={containerRef} style={{ height }} className="w-full relative" />
+      {/* 3. Canvas Container */}
+      <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden" />
+
+      {/* 4. Useful Milestones Strip (ATH, Low, Drawdown) */}
+      {metrics && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.04] text-xs">
+          {/* ATH Peak */}
+          <div className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50/70 dark:bg-white/[0.02]">
+            <div className="p-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+              <TrendingUp size={13} />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                Máximo Periodo
+              </span>
+              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block truncate text-[11px]">
+                {fmt.currency(metrics.maxPoint.value)}
+              </span>
+            </div>
+          </div>
+
+          {/* Period Low */}
+          <div className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50/70 dark:bg-white/[0.02]">
+            <div className="p-1 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
+              <TrendingDown size={13} />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                Mínimo Periodo
+              </span>
+              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block truncate text-[11px]">
+                {fmt.currency(metrics.minPoint.value)}
+              </span>
+            </div>
+          </div>
+
+          {/* Current Drawdown */}
+          <div className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50/70 dark:bg-white/[0.02]">
+            <div className="p-1 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+              <Flame size={13} />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                Distancia a Pico
+              </span>
+              <span
+                className={cn(
+                  'font-mono font-bold block truncate text-[11px]',
+                  metrics.drawdownPct >= -0.05
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-amber-600 dark:text-amber-400'
+                )}
+              >
+                {metrics.drawdownPct >= -0.05 ? 'En Máximos (ATH)' : `${metrics.drawdownPct.toFixed(2)}%`}
+              </span>
+            </div>
+          </div>
+
+          {/* Net Return */}
+          <div className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50/70 dark:bg-white/[0.02]">
+            <div className="p-1 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
+              <ArrowUpRight size={13} />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                Ganancia Neta
+              </span>
+              <span
+                className={cn(
+                  'font-mono font-bold block truncate text-[11px]',
+                  metrics.periodProfit >= 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400'
+                )}
+              >
+                {metrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(metrics.periodProfit)} ({fmt.pct(metrics.periodReturnPct)})
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
