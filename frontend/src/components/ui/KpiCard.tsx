@@ -18,6 +18,7 @@ interface KpiCardProps {
   valueColor?: string
   iconBg?: string
   borderAccent?: 'emerald' | 'amber' | 'rose' | 'blue' | 'indigo'
+  extra?: React.ReactNode
 }
 
 const TAG_STYLES = {
@@ -60,6 +61,7 @@ export function KpiCard({
   valueColor,
   iconBg,
   borderAccent,
+  extra,
 }: KpiCardProps) {
   const changeClass =
     changePositive === undefined
@@ -166,6 +168,8 @@ export function KpiCard({
                 <span>{change}</span>
               </span>
             )}
+
+            {extra}
           </div>
 
           {sub && (

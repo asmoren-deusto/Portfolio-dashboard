@@ -338,6 +338,8 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         "volatility": vol,
         "max_drawdown": max_dd,
         "sharpe_ratio": sharpe,
+        "return_1d": calculate_period_return(series_for_returns, 1),
+        "return_1w": calculate_period_return(series_for_returns, 7),
         "return_ytd": calculate_period_return(series_for_returns, days_ytd),
         "return_1m": calculate_period_return(series_for_returns, 30),
         "return_3m": calculate_period_return(series_for_returns, 90),

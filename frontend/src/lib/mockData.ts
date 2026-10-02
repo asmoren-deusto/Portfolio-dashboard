@@ -43,6 +43,8 @@ export interface Analytics {
   volatility: number
   max_drawdown: number
   sharpe_ratio: number
+  return_1d?: number
+  return_1w?: number
   return_ytd: number
   return_1m: number
   return_3m: number
@@ -249,6 +251,8 @@ export const MOCK_ANALYTICS: Analytics = {
   volatility: 11.60,
   max_drawdown: -8.74,
   sharpe_ratio: 1.42,
+  return_1d: 0.24,
+  return_1w: 1.15,
   return_ytd: 16.80,
   return_1m: 2.15,
   return_3m: 5.40,

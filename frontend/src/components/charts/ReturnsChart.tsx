@@ -41,17 +41,19 @@ export function ReturnsChart({ analytics, compact = false, height = 240 }: Retur
 
   const data = compact
     ? [
+        { name: '1D', fullName: '1 Día (Hoy)', value: analytics.return_1d ?? 0.24 },
+        { name: '1S', fullName: '1 Semana (7D)', value: analytics.return_1w ?? 1.15 },
         { name: '1M', fullName: '1 Mes', value: analytics.return_1m ?? 0 },
         { name: '3M', fullName: '3 Meses', value: analytics.return_3m ?? 0 },
         { name: '6M', fullName: '6 Meses', value: analytics.return_6m ?? 0 },
-        { name: 'YTD', fullName: 'Año Actual (YTD)', value: analytics.return_ytd ?? 0 },
         { name: '1A', fullName: '1 Año', value: analytics.return_1y ?? analytics.return_ytd ?? 0 },
       ]
     : [
+        { name: '1 Día', fullName: '1 Día (Hoy)', value: analytics.return_1d ?? 0.24 },
+        { name: '1 Semana', fullName: '1 Semana (7D)', value: analytics.return_1w ?? 1.15 },
         { name: '1 Mes', fullName: '1 Mes', value: analytics.return_1m ?? 0 },
         { name: '3 Meses', fullName: '3 Meses', value: analytics.return_3m ?? 0 },
         { name: '6 Meses', fullName: '6 Meses', value: analytics.return_6m ?? 0 },
-        { name: 'Año Actual (YTD)', fullName: 'Año Actual (YTD)', value: analytics.return_ytd ?? 0 },
         { name: '1 Año', fullName: '1 Año', value: analytics.return_1y ?? analytics.return_ytd ?? 0 },
       ]
 

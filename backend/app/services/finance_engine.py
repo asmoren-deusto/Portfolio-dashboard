@@ -297,14 +297,21 @@ def calculate_period_return(value_series: list[dict], days: int) -> Optional[flo
     if not value_series or len(value_series) < 2:
         return None
     try:
+        key = "nav" if "nav" in value_series[-1] else "value"
+        if days <= 1:
+            prev = value_series[-2][key]
+            curr = value_series[-1][key]
+            return round(float((curr / prev - 1) * 100), 2) if prev > 0 else 0.0
+
         cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
         cutoff_str = str(cutoff.date())
         filtered = [v for v in value_series if v["date"] >= cutoff_str]
         if len(filtered) < 2:
-            return None
-        key = "nav" if "nav" in filtered[0] else "value"
-        ret = (filtered[-1][key] / filtered[0][key] - 1) * 100
-        return round(float(ret), 2)
+            filtered = value_series[-min(len(value_series), max(2, days + 1)):]
+        if len(filtered) >= 2 and filtered[0][key] > 0:
+            ret = (filtered[-1][key] / filtered[0][key] - 1) * 100
+            return round(float(ret), 2)
+        return None
     except Exception as e:
         logger.warning(f"Period return error: {e}")
         return None
