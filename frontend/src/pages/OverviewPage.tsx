@@ -458,12 +458,6 @@ export function OverviewPage() {
             hero
             label="Valor Total de la Cartera"
             value={fmt.currency(displaySummary?.total_value)}
-            change={
-              displaySummary && displaySummary.total_invested > 0
-                ? `${(displaySummary.total_pnl ?? 0) >= 0 ? '+' : ''}${fmt.currency(displaySummary.total_pnl)} (${fmt.pct(displaySummary.total_pnl_pct)})`
-                : '—'
-            }
-            changePositive={pnlPositive}
             extra={
               shortTermMetrics && (
                 <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
