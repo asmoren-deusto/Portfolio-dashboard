@@ -19,6 +19,7 @@ import {
   Euro,
   Percent,
   Target,
+  Building2,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -102,6 +103,7 @@ export function OverviewPage() {
       }),
     [positions]
   )
+
   const { data: performance = [], isFetching: perfFetching } = usePerformance()
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: transactions = [] } = useTransactions()
@@ -248,6 +250,82 @@ export function OverviewPage() {
         ? 'Controlada'
         : 'Severa'
       : undefined
+
+  const allocStats = useMemo(() => {
+    if (!positions || positions.length === 0) return null
+    const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
+    if (totalVal <= 0) return null
+
+    if (allocMode === 'asset') {
+      const sorted = [...positions].sort((a, b) => (b.current_value || 0) - (a.current_value || 0))
+      const top1 = sorted[0]
+      const top1Pct = top1 ? ((top1.current_value || 0) / totalVal) * 100 : 0
+      const top3Sum = sorted.slice(0, 3).reduce((acc, p) => acc + (p.current_value || 0), 0)
+      const top3Pct = (top3Sum / totalVal) * 100
+      return {
+        box1Label: 'Top 1:',
+        box1Val: `${top1Pct.toFixed(1)}%`,
+        box1Title: `Mayor activo: ${top1?.name || top1?.ticker || '—'} (${top1Pct.toFixed(1)}%)`,
+        box2Label: 'Top 3:',
+        box2Val: `${top3Pct.toFixed(1)}%`,
+        box2Title: `Concentración 3 mayores activos: ${top3Pct.toFixed(1)}%`,
+      }
+    } else {
+      const byType: Record<string, number> = {}
+      for (const p of positions) {
+        const t = p.asset_type || 'Otros'
+        byType[t] = (byType[t] || 0) + (p.current_value || 0)
+      }
+      const sorted = Object.entries(byType).sort((a, b) => b[1] - a[1])
+      const topType = sorted[0]
+      const topPct = topType ? (topType[1] / totalVal) * 100 : 0
+      return {
+        box1Label: 'Líder:',
+        box1Val: `${topPct.toFixed(1)}%`,
+        box1Title: `Categoría principal: ${topType?.[0] || '—'} (${topPct.toFixed(1)}%)`,
+        box2Label: 'Clases:',
+        box2Val: `${sorted.length}`,
+        box2Title: `${sorted.length} clases de activos distintas`,
+      }
+    }
+  }, [positions, allocMode])
+
+  const secondaryStats = useMemo(() => {
+    if (secondaryChartMode === 'returns') {
+      const twr = analytics?.twr !== undefined ? analytics.twr : analytics?.return_ytd
+      const ytd = analytics?.return_ytd
+      return {
+        box1Label: 'TWR:',
+        box1Val: twr !== undefined ? fmt.pct(twr) : '—',
+        box1Title: 'Rentabilidad ponderada en el tiempo (TWR)',
+        box1Positive: (twr ?? 0) >= 0,
+        box2Label: 'YTD:',
+        box2Val: ytd !== undefined ? fmt.pct(ytd) : '—',
+        box2Title: 'Rentabilidad acumulada en el año en curso (YTD)',
+        box2Positive: (ytd ?? 0) >= 0,
+      }
+    } else {
+      const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
+      const byBroker: Record<string, number> = {}
+      for (const p of positions) {
+        const b = p.broker || 'Otros'
+        byBroker[b] = (byBroker[b] || 0) + (p.current_value || 0)
+      }
+      const sorted = Object.entries(byBroker).sort((a, b) => b[1] - a[1])
+      const top = sorted[0]
+      const topPct = totalVal > 0 && top ? (top[1] / totalVal) * 100 : 0
+      return {
+        box1Label: 'Líder:',
+        box1Val: `${topPct.toFixed(1)}%`,
+        box1Title: `Entidad principal: ${top?.[0] || '—'} (${topPct.toFixed(1)}%)`,
+        box1Positive: true,
+        box2Label: 'Bancos:',
+        box2Val: `${sorted.length}`,
+        box2Title: `${sorted.length} entidades financieras / brokers`,
+        box2Positive: true,
+      }
+    }
+  }, [secondaryChartMode, analytics, positions])
 
   return (
     <div className="flex flex-col gap-4 pb-8">
@@ -484,27 +562,25 @@ export function OverviewPage() {
                   <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
                     <button
                       onClick={() => setPerfChartMode('currency')}
-                      className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold transition-colors ${
+                      className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
                         perfChartMode === 'currency'
-                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs font-bold'
+                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                       }`}
                       title="Ver evolución en Euros (€)"
                     >
-                      <Euro size={11} />
-                      <span>€</span>
+                      €
                     </button>
                     <button
                       onClick={() => setPerfChartMode('percent')}
-                      className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold transition-colors ${
+                      className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
                         perfChartMode === 'percent'
-                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs font-bold'
+                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                       }`}
                       title="Ver rentabilidad acumulada en porcentaje (%)"
                     >
-                      <Percent size={11} />
-                      <span>%</span>
+                      %
                     </button>
                   </div>
 
@@ -654,18 +730,58 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-3 pb-3 pt-1.5 flex flex-col justify-center flex-1">
-            {positions.length > 0 ? (
-              <AllocationChart
-                positions={positions}
-                mode={allocMode}
-                showLegend={showLegend}
-                hoveredIsin={hoveredIsin}
-                onHoverIsin={setHoveredIsin}
-              />
-            ) : (
-              <div className="flex h-[260px] items-center justify-center text-slate-500 text-sm">
-                Sin posiciones registradas
+          <div className="px-3 pb-3.5 pt-1.5 flex flex-col justify-between flex-1">
+            <div className="flex flex-col justify-center flex-1">
+              {positions.length > 0 ? (
+                <AllocationChart
+                  positions={positions}
+                  mode={allocMode}
+                  showLegend={showLegend}
+                  hoveredIsin={hoveredIsin}
+                  onHoverIsin={setHoveredIsin}
+                  height={260}
+                />
+              ) : (
+                <div className="flex h-[260px] items-center justify-center text-slate-500 text-sm">
+                  Sin posiciones registradas
+                </div>
+              )}
+            </div>
+
+            {/* Useful Stats Strip (Matching Card 1) */}
+            {allocStats && (
+              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
+                {/* Box 1 */}
+                <div
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  title={allocStats.box1Title}
+                >
+                  <div className="p-1 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
+                    <PieChart size={14} />
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">{allocStats.box1Label}</span>
+                    <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                      {allocStats.box1Val}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Box 2 */}
+                <div
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  title={allocStats.box2Title}
+                >
+                  <div className="p-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                    <Layers size={14} />
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">{allocStats.box2Label}</span>
+                    <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                      {allocStats.box2Val}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -719,23 +835,100 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-3 pb-3 pt-1.5 flex flex-col justify-center flex-1">
-            {secondaryChartMode === 'returns' ? (
-              analytics ? (
-                <ReturnsChart analytics={analytics} compact height={260} />
+          <div className="px-3 pb-3.5 pt-1.5 flex flex-col justify-between flex-1">
+            <div className="flex flex-col justify-center flex-1">
+              {secondaryChartMode === 'returns' ? (
+                analytics ? (
+                  <ReturnsChart analytics={analytics} compact height={260} />
+                ) : (
+                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                    Sin datos de rendimiento
+                  </div>
+                )
               ) : (
-                <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                  Sin datos de rendimiento
+                positions.length > 0 ? (
+                  <AllocationChart positions={positions} mode="broker" showLegend={false} height={260} />
+                ) : (
+                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                    Sin datos de entidades
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* Useful Stats Strip (Matching Card 1) */}
+            {secondaryStats && (
+              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
+                {/* Box 1 */}
+                <div
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  title={secondaryStats.box1Title}
+                >
+                  <div
+                    className={cn(
+                      'p-1 rounded-lg shrink-0',
+                      secondaryChartMode === 'returns'
+                        ? secondaryStats.box1Positive
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                        : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                    )}
+                  >
+                    {secondaryChartMode === 'returns' ? <TrendingUp size={14} /> : <Building2 size={14} />}
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
+                      {secondaryStats.box1Label}
+                    </span>
+                    <span
+                      className={cn(
+                        'font-mono font-extrabold text-xs truncate',
+                        secondaryChartMode === 'returns'
+                          ? secondaryStats.box1Positive
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                          : 'text-slate-950 dark:text-white'
+                      )}
+                    >
+                      {secondaryStats.box1Val}
+                    </span>
+                  </div>
                 </div>
-              )
-            ) : (
-              positions.length > 0 ? (
-                <AllocationChart positions={positions} mode="broker" showLegend={false} />
-              ) : (
-                <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                  Sin datos de entidades
+
+                {/* Box 2 */}
+                <div
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  title={secondaryStats.box2Title}
+                >
+                  <div
+                    className={cn(
+                      'p-1 rounded-lg shrink-0',
+                      secondaryChartMode === 'returns'
+                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                        : 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                    )}
+                  >
+                    {secondaryChartMode === 'returns' ? <Calendar size={14} /> : <Layers size={14} />}
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
+                      {secondaryStats.box2Label}
+                    </span>
+                    <span
+                      className={cn(
+                        'font-mono font-extrabold text-xs truncate',
+                        secondaryChartMode === 'returns'
+                          ? secondaryStats.box2Positive
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                          : 'text-slate-950 dark:text-white'
+                      )}
+                    >
+                      {secondaryStats.box2Val}
+                    </span>
+                  </div>
                 </div>
-              )
+              </div>
             )}
           </div>
         </Card>

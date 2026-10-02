@@ -9,6 +9,7 @@ interface AllocationChartProps {
   showLegend?: boolean
   hoveredIsin?: string | null
   onHoverIsin?: (isin: string | null) => void
+  height?: number
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -25,13 +26,15 @@ export function AllocationChart({
   showLegend = false,
   hoveredIsin = null,
   onHoverIsin,
+  height,
 }: AllocationChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
-  const chartHeight = showLegend ? 235 : 285
-  const innerRadius = showLegend ? 72 : 86
-  const outerRadius = showLegend ? 104 : 122
-  const centerMaxW = showLegend ? 'max-w-[126px]' : 'max-w-[140px]'
+  const chartHeight = height ?? (showLegend ? 235 : 285)
+  const isCompact = chartHeight <= 265
+  const innerRadius = showLegend ? 68 : (isCompact ? 76 : 86)
+  const outerRadius = showLegend ? 98 : (isCompact ? 108 : 122)
+  const centerMaxW = showLegend ? 'max-w-[120px]' : (isCompact ? 'max-w-[126px]' : 'max-w-[140px]')
 
   if (!positions || positions.length === 0) {
     return (
