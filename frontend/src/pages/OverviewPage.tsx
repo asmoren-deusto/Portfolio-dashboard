@@ -1159,11 +1159,11 @@ export function OverviewPage() {
                 <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                   <th className="py-2 px-2.5">Activo / Fondo</th>
-                  <th className="py-2 px-2 text-center">Banco</th>
                   <th className="py-2 px-2 text-right">NAV</th>
                   <th className="py-2 px-2 text-right">Rend. Día</th>
                   <th className="py-2 px-2 text-right">Valor Actual</th>
                   <th className="py-2 px-2 text-right">Ganancia (P&L)</th>
+                  <th className="py-2 px-2 text-center">Banco</th>
                   <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
                 </tr>
               </thead>
@@ -1219,14 +1219,11 @@ export function OverviewPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="py-2.5 px-2 text-center">
-                        <BrokerBadge broker={p.broker} />
-                      </td>
                       <td data-private className="py-2.5 px-2 text-right">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[12px] sm:text-[13px] leading-tight whitespace-nowrap">
                           {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                         </div>
-                        <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                        <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
                           {(() => {
                             const raw = p.price_date || p.last_updated
                             if (!raw) return '—'
@@ -1273,6 +1270,9 @@ export function OverviewPage() {
                           </span>
                         </div>
                       </td>
+                      <td className="py-2.5 px-2 text-center">
+                        <BrokerBadge broker={p.broker} />
+                      </td>
                       <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
@@ -1296,15 +1296,15 @@ export function OverviewPage() {
           {/* Column 2: Next 5 Positions */}
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead>
+              <thead className="hidden xl:table-header-group">
                 <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                   <th className="py-2 px-2.5">Activo / Fondo</th>
-                  <th className="py-2 px-2 text-center">Banco</th>
                   <th className="py-2 px-2 text-right">NAV</th>
                   <th className="py-2 px-2 text-right">Rend. Día</th>
                   <th className="py-2 px-2 text-right">Valor Actual</th>
                   <th className="py-2 px-2 text-right">Ganancia (P&L)</th>
+                  <th className="py-2 px-2 text-center">Banco</th>
                   <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
                 </tr>
               </thead>
@@ -1360,14 +1360,11 @@ export function OverviewPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="py-2.5 px-2 text-center">
-                        <BrokerBadge broker={p.broker} />
-                      </td>
                       <td data-private className="py-2.5 px-2 text-right">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[12px] sm:text-[13px] leading-tight whitespace-nowrap">
                           {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                         </div>
-                        <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                        <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
                           {(() => {
                             const raw = p.price_date || p.last_updated
                             if (!raw) return '—'
@@ -1413,6 +1410,9 @@ export function OverviewPage() {
                             {fmt.pct(p.unrealized_pnl_pct)}
                           </span>
                         </div>
+                      </td>
+                      <td className="py-2.5 px-2 text-center">
+                        <BrokerBadge broker={p.broker} />
                       </td>
                       <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
