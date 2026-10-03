@@ -193,50 +193,57 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   const [internalSelectedStock, setInternalSelectedStock] = useState<MarketStock | null>(null)
 
   const defaultIndices = [
-    { name: 'S&P 500', ticker: '^GSPC', price: 7722.62, change_pct: 0.24, market_state: 'PRE' },
-    { name: 'NASDAQ', ticker: '^IXIC', price: 27049.82, change_pct: 0.41, market_state: 'PRE' },
-    { name: 'MSCI World', ticker: 'URTH', price: 208.39, change_pct: 0.15, market_state: 'REGULAR' },
-    { name: 'Emergentes', ticker: 'EEM', price: 67.79, change_pct: 0.80, market_state: 'REGULAR' },
-    { name: 'IBEX 35', ticker: '^IBEX', price: 19750.20, change_pct: 0.90, market_state: 'REGULAR' },
-    { name: 'Euro 50', ticker: '^STOXX50E', price: 6308.78, change_pct: 0.55, market_state: 'REGULAR' },
+    { name: 'S&P 500', ticker: '^GSPC', price: 7722.62, change_pct: 0.24, market_state: 'CLOSED' },
+    { name: 'NASDAQ', ticker: '^IXIC', price: 27049.82, change_pct: 0.41, market_state: 'CLOSED' },
+    { name: 'MSCI World', ticker: 'URTH', price: 208.39, change_pct: 0.15, market_state: 'CLOSED' },
+    { name: 'Emergentes', ticker: 'EEM', price: 67.79, change_pct: 0.80, market_state: 'CLOSED' },
+    { name: 'IBEX 35', ticker: '^IBEX', price: 19750.20, change_pct: 0.90, market_state: 'CLOSED' },
+    { name: 'Euro 50', ticker: '^STOXX50E', price: 6308.78, change_pct: 0.55, market_state: 'CLOSED' },
     { name: 'Nikkei 225', ticker: '^N225', price: 66364.20, change_pct: 0.77, market_state: 'CLOSED' },
-    { name: 'Oro', ticker: 'GC=F', price: 4331.20, change_pct: 0.77, market_state: 'REGULAR' },
-    { name: 'Petróleo', ticker: 'BZ=F', price: 98.43, change_pct: -1.79, market_state: 'REGULAR' },
+    { name: 'Oro', ticker: 'GC=F', price: 4331.20, change_pct: 0.77, market_state: 'CLOSED' },
+    { name: 'Petróleo', ticker: 'BZ=F', price: 98.43, change_pct: -1.79, market_state: 'CLOSED' },
     { name: 'BTC/EUR', ticker: 'BTC-EUR', price: 74066.85, change_pct: -0.16, market_state: 'REGULAR' },
-    { name: 'EUR/USD', ticker: 'EURUSD=X', price: 1.1406, change_pct: 0.23, market_state: 'REGULAR' },
-    { name: 'EUR/JPY', ticker: 'EURJPY=X', price: 179.05, change_pct: -0.87, market_state: 'REGULAR' },
+    { name: 'EUR/USD', ticker: 'EURUSD=X', price: 1.1406, change_pct: 0.23, market_state: 'CLOSED' },
+    { name: 'EUR/JPY', ticker: 'EURJPY=X', price: 179.05, change_pct: -0.87, market_state: 'CLOSED' },
   ]
 
+  // Market hours in UTC:
+  // Saturday all day = CLOSED
+  // Sunday before 22:00 UTC (18:00 ET when Globex futures open) = CLOSED
+  // Friday night after 21:00 UTC (post-market close) = CLOSED
+  const nowUTC = new Date()
+  const utcDay = nowUTC.getUTCDay() // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  const utcHour = nowUTC.getUTCHours() + nowUTC.getUTCMinutes() / 60
+  const isWeekend = utcDay === 6 || (utcDay === 0 && utcHour < 22) || (utcDay === 5 && utcHour >= 21)
+
   const rawList = data?.indices && data.indices.length > 0 ? data.indices : defaultIndices
-  const rawIndices = rawList.map((idx: any) => ({
-    ...idx,
-    name: formatTickerName(idx.name),
-    market_state:
-      idx.market_state === 'PRE' && idx.pre_market_price == null
-        ? 'CLOSED'
-        : idx.market_state,
-  }))
+  const rawIndices = rawList.map((idx: any) => {
+    const isCrypto = idx.ticker?.includes('BTC') || idx.name?.includes('BTC')
+    let state = idx.market_state
+    if (isWeekend && !isCrypto) {
+      state = 'CLOSED'
+    } else if (state === 'PRE' && idx.pre_market_price == null) {
+      state = 'CLOSED'
+    }
+    return {
+      ...idx,
+      name: formatTickerName(idx.name),
+      market_state: state,
+    }
+  })
 
   // Status determined by active US and European equity session
   const sp500 = rawIndices.find((i: any) => i.name === 'S&P 500' || i.ticker === '^GSPC')
-  const usState = sp500?.market_state || 'REGULAR'
-  const isUsPre = usState === 'PRE'
-  const isUsPost = usState === 'POST' || usState === 'POSTPOST'
-
-  // Status label: US market is 9:30-16:00 ET = 15:30-22:00 UTC
-  // Pre-market: 04:00-09:30 ET = 10:00-15:30 UTC
-  // Post-market: 16:00-20:00 ET = 22:00-02:00 UTC (next day)
-  // Overnight (02:00-04:00 UTC) = truly closed, yfinance returns PRE erroneously
-  const nowUTC = new Date()
-  const utcHour = nowUTC.getUTCHours() + nowUTC.getUTCMinutes() / 60
+  const usState = isWeekend ? 'CLOSED' : (sp500?.market_state || 'REGULAR')
 
   const mainStatusLabel =
+    isWeekend ? 'Cerrado' :
     usState === 'REGULAR' ? 'En Vivo' :
     usState === 'CLOSED' ? 'Cerrado' :
     (usState === 'POST' || usState === 'POSTPOST') ? 'Post-mercado' :
     (usState === 'PRE' && utcHour >= 10 && utcHour < 15.5) ? 'Pre-mercado' :
     (usState === 'PRE' && (utcHour >= 22 || utcHour < 2)) ? 'Post-mercado' :
-    'En Vivo'
+    'Cerrado'
 
   // Last updated = from cache_timestamp if available, else most recent per-ticker timestamp
   const lastUpdated: string | null = data?.cache_timestamp ??
@@ -255,16 +262,24 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
     }
   }
 
+  const isMarketClosed = mainStatusLabel === 'Cerrado'
+
   return (
     <>
       <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300 backdrop-blur-md px-3.5 py-1.5 dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14] transition-colors duration-200">
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
           <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/90 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#111625]/90">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute -inset-0.5 rounded-full bg-emerald-500 opacity-70" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
-            </span>
+            {isMarketClosed ? (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="inline-flex rounded-full h-2 w-2 bg-slate-400 dark:bg-slate-500" />
+              </span>
+            ) : (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute -inset-0.5 rounded-full bg-emerald-500 opacity-70" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+              </span>
+            )}
             <div className="flex flex-col leading-none">
               <span className="text-[11px] font-semibold tracking-wider text-slate-800 dark:text-slate-100 uppercase">
                 {mainStatusLabel}

@@ -275,6 +275,12 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             if inf_reg:
                 regular_price = inf_reg
 
+            # Detect weekend closure (Saturday, Sunday before 22:00 UTC, Friday after 21:00 UTC)
+            now_utc = datetime.now(timezone.utc)
+            is_weekend = now_utc.weekday() == 5 or (now_utc.weekday() == 6 and now_utc.hour < 22) or (now_utc.weekday() == 4 and now_utc.hour >= 21)
+            if is_weekend and "BTC" not in ticker:
+                market_state = "CLOSED"
+
             if not regular_price:
                 regular_price = getattr(fi, "last_price", None)
             if not prev_close:
@@ -497,8 +503,14 @@ async def get_indices():
     for name, ticker in INDEX_TICKERS.items():
         q = dict(quotes.get(ticker, {}))
 
-        # Check if cash index needs futures proxy for pre-market or post-market
-        if ticker in INDEX_PROXY_MAP:
+        # Check weekend: Saturday or Sunday (before futures open at 22:00 UTC) or Friday after 21:00 UTC
+        now_utc = datetime.now(timezone.utc)
+        is_weekend = now_utc.weekday() == 5 or (now_utc.weekday() == 6 and now_utc.hour < 22) or (now_utc.weekday() == 4 and now_utc.hour >= 21)
+
+        if is_weekend and ticker != "BTC-EUR":
+            q["market_state"] = "CLOSED"
+        elif ticker in INDEX_PROXY_MAP:
+            # Check if cash index needs futures proxy for pre-market or post-market
             proxy_sym = INDEX_PROXY_MAP[ticker]
             proxy_q = quotes.get(proxy_sym, {})
             proxy_p = proxy_q.get("price") or proxy_q.get("regular_price")
@@ -508,8 +520,8 @@ async def get_indices():
                 proxy_pct = round((proxy_p - proxy_prev) / proxy_prev * 100, 2)
                 base_p = q.get("regular_price") or q.get("price") or q.get("prev_close")
 
-                # If market is PRE or not in regular session with no direct pre_market_price
-                if q.get("market_state") == "PRE" or (q.get("market_state") != "REGULAR" and not q.get("pre_market_price")):
+                # If market is PRE
+                if q.get("market_state") == "PRE":
                     if base_p:
                         implied_pre = round(base_p * (1 + proxy_pct / 100), 2)
                         q["pre_market_price"] = implied_pre
