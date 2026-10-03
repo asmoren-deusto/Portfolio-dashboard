@@ -449,7 +449,7 @@ export function OverviewPage() {
               </span>
             )}
           </div>
-          <span data-private className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+          <span data-private className="hidden sm:inline text-[11px] font-mono text-slate-500 dark:text-slate-400">
             {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
           </span>
         </div>
