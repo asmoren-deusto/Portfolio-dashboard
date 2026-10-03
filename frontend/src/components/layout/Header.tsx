@@ -90,7 +90,7 @@ export function Header({
 
         {/* Broker / Entity Selector Pill */}
         {showBrokerSelector && (
-          <div className="w-full md:w-auto flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-sm dark:border-white/[0.08] dark:bg-[#111625]/90">
+          <div className="w-full md:w-auto flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-none dark:border-white/[0.08] dark:bg-[#111625]/90">
             {BROKERS.map((b) => (
               <button
                 key={b.value}
@@ -106,12 +106,12 @@ export function Header({
                   <motion.div
                     layoutId="headerBrokerPill"
                     className={cn(
-                      'absolute inset-0 rounded-lg shadow-sm',
+                      'absolute inset-0 rounded-lg',
                       b.value === 'bbva'
-                        ? 'bg-blue-600 shadow-blue-600/30'
+                        ? 'bg-blue-600'
                         : b.value === 'myinvestor'
-                        ? 'bg-emerald-600 shadow-emerald-600/30'
-                        : 'bg-slate-800 dark:bg-slate-700 shadow-slate-800/30'
+                        ? 'bg-emerald-600'
+                        : 'bg-slate-800 dark:bg-slate-700'
                     )}
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
@@ -128,7 +128,7 @@ export function Header({
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value as typeof period)}
-              className="appearance-none pl-3 pr-7 py-2 rounded-xl border border-slate-200/90 bg-white shadow-sm text-xs font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/[0.08] dark:bg-[#111625]/90 dark:text-slate-300"
+              className="appearance-none pl-3 pr-7 py-2 rounded-xl border border-slate-200/90 bg-white shadow-none text-xs font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/[0.08] dark:bg-[#111625]/90 dark:text-slate-300"
             >
               {PERIODS.map((p) => (
                 <option key={p.value} value={p.value}>

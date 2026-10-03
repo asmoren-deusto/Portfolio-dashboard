@@ -67,7 +67,7 @@ export function HeaderActions({
             value={period}
             onChange={(e) => setPeriod(e.target.value as typeof period)}
             className={cn(
-              "appearance-none rounded-xl border border-slate-200/90 bg-white shadow-sm font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200",
+              "appearance-none rounded-xl border border-slate-200/90 bg-white shadow-none font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200",
               compact ? "pl-2 pr-5 py-1 text-xs rounded-lg h-8 leading-none" : "pl-3 pr-7 py-2 text-xs"
             )}
           >
@@ -87,7 +87,7 @@ export function HeaderActions({
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
             className={cn(
-              "flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-sm text-xs font-semibold transition-all dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:border-white/10 dark:text-slate-200 active:scale-95",
+              "flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none text-xs font-semibold transition-all dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:border-white/10 dark:text-slate-200 active:scale-95",
               compact ? "p-1 sm:pl-2 sm:pr-2.5 sm:py-1.5" : "pl-2 pr-2.5 py-1.5"
             )}
             title="Perfil activo y cambio de usuario"
@@ -220,7 +220,7 @@ export function HeaderActions({
         aria-label={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
         aria-pressed={privacyMode}
         className={cn(
-          'flex items-center justify-center border shadow-sm transition-all active:scale-95',
+          'flex items-center justify-center border transition-all active:scale-95',
           btnSize,
           privacyMode
             ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300'
@@ -235,7 +235,7 @@ export function HeaderActions({
       <button
         onClick={toggleTheme}
         className={cn(
-          'flex items-center justify-center border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 shadow-sm transition-all active:scale-95 dark:border-white/10 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-300',
+          'flex items-center justify-center border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 transition-all active:scale-95 dark:border-white/10 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-300',
           btnSize
         )}
         title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
@@ -252,7 +252,7 @@ export function HeaderActions({
         onClick={handleRefresh}
         disabled={spinning}
         className={cn(
-          'flex items-center justify-center border border-slate-200/90 shadow-sm transition-all active:scale-95 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
+          'flex items-center justify-center border border-slate-200/90 transition-all active:scale-95 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
           btnSize,
           'bg-white hover:bg-slate-50 text-slate-700',
           spinning && 'opacity-80 cursor-wait bg-blue-50/50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-300 dark:border-blue-800/30',

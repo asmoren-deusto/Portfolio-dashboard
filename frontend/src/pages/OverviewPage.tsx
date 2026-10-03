@@ -685,7 +685,7 @@ export function OverviewPage() {
                       onClick={() => setPerfChartMode('currency')}
                       className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
                         perfChartMode === 'currency'
-                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs'
+                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                       }`}
                       title="Ver evolución en Euros (€)"
@@ -696,7 +696,7 @@ export function OverviewPage() {
                       onClick={() => setPerfChartMode('percent')}
                       className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
                         perfChartMode === 'percent'
-                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs'
+                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                       }`}
                       title="Ver rentabilidad acumulada en porcentaje (%)"
@@ -743,7 +743,7 @@ export function OverviewPage() {
                   onClick={() => setChartView('evolution')}
                   className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                     chartView === 'evolution'
-                      ? 'bg-blue-600 text-white shadow'
+                      ? 'bg-blue-600 text-white'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
@@ -753,7 +753,7 @@ export function OverviewPage() {
                   onClick={() => setChartView('heatmap')}
                   className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                     chartView === 'heatmap'
-                      ? 'bg-blue-600 text-white shadow'
+                      ? 'bg-blue-600 text-white'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
@@ -909,7 +909,7 @@ export function OverviewPage() {
                   {allocMode === m && (
                     <motion.div
                       layoutId="overviewAllocPill"
-                      className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
+                      className="absolute inset-0 rounded-lg bg-blue-600"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
@@ -1005,7 +1005,7 @@ export function OverviewPage() {
                 {secondaryChartMode === 'returns' && (
                   <motion.div
                     layoutId="secondaryChartPill"
-                    className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
+                    className="absolute inset-0 rounded-lg bg-blue-600"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}
@@ -1022,7 +1022,7 @@ export function OverviewPage() {
                 {secondaryChartMode === 'broker' && (
                   <motion.div
                     layoutId="secondaryChartPill"
-                    className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm shadow-blue-600/30"
+                    className="absolute inset-0 rounded-lg bg-blue-600"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}

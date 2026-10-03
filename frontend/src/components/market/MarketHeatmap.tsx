@@ -256,7 +256,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
 
   return (
     <div
-      className={`flex flex-col rounded-2xl bg-white/95 dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl transition-all ${
+      className={`flex flex-col rounded-2xl bg-white/95 dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-none dark:shadow-2xl transition-all ${
         isFullscreen
           ? 'fixed inset-0 z-[99999] rounded-none p-5 sm:p-6 bg-slate-100 dark:bg-[#0a0d18] overflow-hidden'
           : 'relative p-4 md:p-5'
