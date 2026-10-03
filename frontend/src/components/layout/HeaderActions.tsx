@@ -7,13 +7,29 @@ import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { refreshPortfolioPrices } from '@/api/queries'
 
+const PERIODS = [
+  { label: '1M', value: '1mo' },
+  { label: '3M', value: '3mo' },
+  { label: '6M', value: '6mo' },
+  { label: '1A', value: '1y' },
+  { label: '2A', value: '2y' },
+  { label: 'Max', value: '5y' },
+] as const
+
 interface HeaderActionsProps {
   className?: string
   compact?: boolean
+  showPeriod?: boolean
+  hideUser?: boolean
 }
 
-export function HeaderActions({ className, compact = false }: HeaderActionsProps) {
-  const { theme, toggleTheme, privacyMode, togglePrivacyMode, currentUser, users, login, logout } = useAppStore()
+export function HeaderActions({
+  className,
+  compact = false,
+  showPeriod = false,
+  hideUser = false,
+}: HeaderActionsProps) {
+  const { theme, toggleTheme, privacyMode, togglePrivacyMode, currentUser, users, login, logout, period, setPeriod } = useAppStore()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [spinning, setSpinning] = useState(false)
@@ -44,8 +60,29 @@ export function HeaderActions({ className, compact = false }: HeaderActionsProps
 
   return (
     <div className={cn('flex items-center gap-1 sm:gap-2', className)}>
+      {/* Period selector if enabled */}
+      {showPeriod && (
+        <div className="relative shrink-0">
+          <select
+            value={period}
+            onChange={(e) => setPeriod(e.target.value as typeof period)}
+            className={cn(
+              "appearance-none rounded-xl border border-slate-200/90 bg-white shadow-sm font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200",
+              compact ? "pl-2 pr-5 py-1 text-xs rounded-lg h-8 leading-none" : "pl-3 pr-7 py-2 text-xs"
+            )}
+          >
+            {PERIODS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className={cn("absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none", compact ? "right-1.5 w-3 h-3" : "right-2.5 w-3 h-3")} />
+        </div>
+      )}
+
       {/* User Account / Profile Dropdown Menu */}
-      {currentUser && (
+      {!hideUser && currentUser && (
         <div className="relative">
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}

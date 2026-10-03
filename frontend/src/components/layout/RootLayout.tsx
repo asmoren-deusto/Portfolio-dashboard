@@ -68,9 +68,9 @@ export function RootLayout() {
             </button>
           </div>
 
-          {/* User controls on Mobile in top sticky header */}
+          {/* Controls on Mobile in top sticky header */}
           <div className="flex md:hidden items-center">
-            <HeaderActions compact />
+            <HeaderActions compact showPeriod hideUser />
           </div>
         </header>
 

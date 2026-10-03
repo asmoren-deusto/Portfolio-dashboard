@@ -20,6 +20,7 @@ interface KpiCardProps {
   borderAccent?: 'emerald' | 'amber' | 'rose' | 'blue' | 'indigo'
   extra?: React.ReactNode
   hideTagOnMobile?: boolean
+  hideChangeOnMobile?: boolean
 }
 
 const TAG_STYLES = {
@@ -64,6 +65,7 @@ export function KpiCard({
   borderAccent,
   extra,
   hideTagOnMobile = false,
+  hideChangeOnMobile = false,
 }: KpiCardProps) {
   const changeClass =
     changePositive === undefined
@@ -158,7 +160,8 @@ export function KpiCard({
             {change && (
               <span data-private
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 font-mono text-xs sm:text-[13px] font-bold border shadow-xs transition-all shrink-0',
+                  'items-center gap-1.5 rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 font-mono text-xs sm:text-[13px] font-bold border shadow-xs transition-all shrink-0',
+                  hideChangeOnMobile ? 'hidden sm:inline-flex' : 'inline-flex',
                   changeClass
                 )}
               >
@@ -198,7 +201,8 @@ export function KpiCard({
           {change && (
             <span data-private
               className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold border shrink-0',
+                'items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold border shrink-0',
+                hideChangeOnMobile ? 'hidden sm:inline-flex' : 'inline-flex',
                 changeClass
               )}
             >

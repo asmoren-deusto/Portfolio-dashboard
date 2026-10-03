@@ -85,18 +85,18 @@ export function Header({
       </div>
 
       {/* Right side controls */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="w-full md:w-auto flex items-center gap-3 flex-wrap">
         {children}
 
         {/* Broker / Entity Selector Pill */}
         {showBrokerSelector && (
-          <div className="flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-sm dark:border-white/[0.08] dark:bg-[#111625]/90">
+          <div className="w-full md:w-auto flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-sm dark:border-white/[0.08] dark:bg-[#111625]/90">
             {BROKERS.map((b) => (
               <button
                 key={b.value}
                 onClick={() => setSelectedBroker(b.value)}
                 className={cn(
-                  'relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors duration-150',
+                  'relative flex-1 md:flex-initial text-center rounded-lg px-2 sm:px-2.5 py-1.5 md:py-1 text-xs font-semibold transition-colors duration-150',
                   selectedBroker === b.value
                     ? 'text-white'
                     : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -122,9 +122,9 @@ export function Header({
           </div>
         )}
 
-        {/* Period selector if requested */}
+        {/* Period selector if requested (desktop only; on mobile it is in the sticky top navbar) */}
         {showPeriodSelector && (
-          <div className="relative">
+          <div className="hidden md:block relative">
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value as typeof period)}
