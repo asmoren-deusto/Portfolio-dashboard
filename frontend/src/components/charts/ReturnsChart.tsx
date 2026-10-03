@@ -58,7 +58,7 @@ export function ReturnsChart({ analytics, compact = false, height = 240 }: Retur
       ]
 
   return (
-    <div style={{ height }} className="w-full">
+    <div data-private style={{ height }} className="w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}

@@ -203,7 +203,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
   }
 
   return (
-    <div className={cn("space-y-3.5", className)}>
+    <div data-private className={cn("space-y-3.5", className)}>
       {/* Institutional Metric Highlights */}
       {stats && !compact && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">

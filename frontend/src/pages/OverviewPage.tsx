@@ -463,7 +463,7 @@ export function OverviewPage() {
                 <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
                   <span
                     data-private
-                    title={`Rendimiento Hoy (1D): ${shortTermMetrics.dayAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.dayAmount)} (${shortTermMetrics.dayPct >= 0 ? '+' : ''}${fmt.pct(shortTermMetrics.dayPct)})`}
+                    title={`Rendimiento Hoy (1D): ${shortTermMetrics.dayAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.dayAmount)} (${fmt.pct(shortTermMetrics.dayPct)})`}
                     className={cn(
                       'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-help',
                       shortTermMetrics.dayPct >= 0
@@ -473,12 +473,12 @@ export function OverviewPage() {
                   >
                     <Zap className="w-3 h-3 stroke-[2.5]" />
                     <span>Hoy:</span>
-                    <span className="font-bold">{shortTermMetrics.dayPct >= 0 ? '+' : ''}{fmt.pct(shortTermMetrics.dayPct)}</span>
+                    <span className="font-bold">{fmt.pct(shortTermMetrics.dayPct)}</span>
                   </span>
 
                   <span
                     data-private
-                    title={`Rendimiento 7 Días: ${shortTermMetrics.weekAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.weekAmount)} (${shortTermMetrics.weekPct >= 0 ? '+' : ''}${fmt.pct(shortTermMetrics.weekPct)})`}
+                    title={`Rendimiento 7 Días: ${shortTermMetrics.weekAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.weekAmount)} (${fmt.pct(shortTermMetrics.weekPct)})`}
                     className={cn(
                       'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-help',
                       shortTermMetrics.weekPct >= 0
@@ -488,7 +488,7 @@ export function OverviewPage() {
                   >
                     <Calendar className="w-3 h-3 stroke-[2.5]" />
                     <span>7D:</span>
-                    <span className="font-bold">{shortTermMetrics.weekPct >= 0 ? '+' : ''}{fmt.pct(shortTermMetrics.weekPct)}</span>
+                    <span className="font-bold">{fmt.pct(shortTermMetrics.weekPct)}</span>
                   </span>
                 </div>
               )
@@ -516,9 +516,7 @@ export function OverviewPage() {
             tag="TIR Anual"
             tagColor="emerald"
             borderAccent="emerald"
-            change="TIR Anual"
             sub="tasa ponderada por flujos desde inicio"
-            changePositive={true}
             delay={0.05}
             icon={<TrendingUp size={16} className="text-emerald-500 dark:text-emerald-400" />}
             iconBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400"
@@ -528,12 +526,10 @@ export function OverviewPage() {
             label="Plusvalía Acumulada"
             value={displaySummary ? `${pnlPositive ? '+' : ''}${fmt.currency(displaySummary.total_pnl)}` : '—'}
             valueColor={pnlPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
-            change={displaySummary ? fmt.pct(displaySummary.total_pnl_pct) : undefined}
             tag={pnlPositive ? "+ Ganancia" : "- Pérdida"}
             tagColor={pnlPositive ? "emerald" : "rose"}
             borderAccent={pnlPositive ? "emerald" : "rose"}
             sub="ganancia neta total latente"
-            changePositive={pnlPositive}
             delay={0.1}
             icon={<ArrowUpRight size={16} className={pnlPositive ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
             iconBg={pnlPositive ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
@@ -610,12 +606,10 @@ export function OverviewPage() {
             label={`Aportaciones (${periodLabel})`}
             value={perfStats ? fmt.currency(perfStats.periodInflow) : '—'}
             valueColor="text-blue-600 dark:text-blue-400"
-            change={perfStats && perfStats.periodInflow !== 0 ? 'DCA / Compras' : undefined}
             tag={perfStats && perfStats.periodInflow > 0 ? "Inversión neta" : "Sin compras"}
             tagColor="blue"
             borderAccent="blue"
             sub={`capital neto ingresado en ${periodLabel}`}
-            changePositive={true}
             delay={0.12}
             icon={<Wallet size={15} className="text-blue-500 dark:text-blue-400" />}
             iconBg="bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400"
@@ -801,7 +795,7 @@ export function OverviewPage() {
                   </div>
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Máx:</span>
-                    <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
                       {fmt.currency(perfMetrics.maxPoint.value)}
                     </span>
                   </div>
@@ -817,7 +811,7 @@ export function OverviewPage() {
                   </div>
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Mín:</span>
-                    <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
                       {fmt.currency(perfMetrics.minPoint.value)}
                     </span>
                   </div>
@@ -834,6 +828,7 @@ export function OverviewPage() {
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Pico:</span>
                     <span
+                      data-private
                       className={cn(
                         'font-mono font-extrabold text-xs truncate',
                         perfMetrics.drawdownPct >= -0.05
@@ -862,6 +857,7 @@ export function OverviewPage() {
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Neto:</span>
                     <span
+                      data-private
                       className={cn(
                         'font-mono font-extrabold text-xs truncate',
                         perfMetrics.periodProfit >= 0
@@ -951,7 +947,7 @@ export function OverviewPage() {
                   </div>
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">{allocStats.box1Label}</span>
-                    <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
                       {allocStats.box1Val}
                     </span>
                   </div>
@@ -967,7 +963,7 @@ export function OverviewPage() {
                   </div>
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">{allocStats.box2Label}</span>
-                    <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
                       {allocStats.box2Val}
                     </span>
                   </div>
@@ -1031,7 +1027,7 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
-            <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
+            <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {secondaryChartMode === 'returns' ? (
                 analytics ? (
                   <ReturnsChart analytics={analytics} compact height={260} />
@@ -1076,6 +1072,7 @@ export function OverviewPage() {
                       {secondaryStats.box1Label}
                     </span>
                     <span
+                      data-private
                       className={cn(
                         'font-mono font-extrabold text-xs truncate',
                         secondaryChartMode === 'returns'
@@ -1110,6 +1107,7 @@ export function OverviewPage() {
                       {secondaryStats.box2Label}
                     </span>
                     <span
+                      data-private
                       className={cn(
                         'font-mono font-extrabold text-xs truncate',
                         secondaryChartMode === 'returns'
@@ -1220,7 +1218,7 @@ export function OverviewPage() {
                       <td className="py-2.5 px-2 text-center">
                         <BrokerBadge broker={p.broker} />
                       </td>
-                      <td className="py-2.5 px-2 text-right">
+                      <td data-private className="py-2.5 px-2 text-right">
                         <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
                           {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                         </div>
@@ -1237,7 +1235,7 @@ export function OverviewPage() {
                           })()}
                         </div>
                       </td>
-                      <td className="py-2.5 px-2 text-right">
+                      <td data-private className="py-2.5 px-2 text-right">
                         {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
                           <span
                             className={cn(
@@ -1361,7 +1359,7 @@ export function OverviewPage() {
                       <td className="py-2.5 px-2 text-center">
                         <BrokerBadge broker={p.broker} />
                       </td>
-                      <td className="py-2.5 px-2 text-right">
+                      <td data-private className="py-2.5 px-2 text-right">
                         <div className="font-mono font-bold text-slate-900 dark:text-white text-[13.5px] leading-tight">
                           {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                         </div>
@@ -1378,7 +1376,7 @@ export function OverviewPage() {
                           })()}
                         </div>
                       </td>
-                      <td className="py-2.5 px-2 text-right">
+                      <td data-private className="py-2.5 px-2 text-right">
                         {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
                           <span
                             className={cn(

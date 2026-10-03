@@ -100,7 +100,7 @@ export function PnlBadge({ value, suffix = '', className }: PnlBadgeProps) {
   if (value == null) return <span className="text-slate-500">—</span>
   const pos = value >= 0
   return (
-    <span className={cn(
+    <span data-private className={cn(
       'font-semibold text-xs tabular-nums',
       pos ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400',
       className

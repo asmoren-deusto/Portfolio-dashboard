@@ -115,6 +115,7 @@ export function KpiCard({
         <div className="flex items-center gap-1.5 shrink-0">
           {tag && (
             <span
+              data-private={/\d/.test(tag) ? true : undefined}
               className={cn(
                 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors',
                 TAG_STYLES[tagColor]
