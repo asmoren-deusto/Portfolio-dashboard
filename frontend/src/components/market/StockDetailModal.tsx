@@ -186,11 +186,36 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({ stock, onClo
             <div className="rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] p-4 mb-3.5">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white tabular-nums">
-                    {fmt.price(stock.price, cur)}
+                  <div className="flex items-center gap-2">
+                    <div className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white tabular-nums">
+                      {fmt.price(stock.price, cur)}
+                    </div>
+                    {stock.market_state === 'PRE' && (
+                      <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
+                        Pre-mercado
+                      </span>
+                    )}
+                    {(stock.market_state === 'POST' || stock.market_state === 'POSTPOST') && (
+                      <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30">
+                        Post-mercado
+                      </span>
+                    )}
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium tabular-nums">
-                    Cierre anterior: <span className="text-slate-800 dark:text-slate-200 font-semibold">{fmt.price(stock.prev_close, cur)}</span>
+                  <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium tabular-nums flex-wrap">
+                    <span>
+                      Cierre anterior:{' '}
+                      <span className="text-slate-800 dark:text-slate-200 font-semibold">
+                        {fmt.price(stock.prev_close, cur)}
+                      </span>
+                    </span>
+                    {(stock.market_state === 'PRE' || stock.market_state === 'POST' || stock.market_state === 'POSTPOST') && stock.regular_price != null && (
+                      <span>
+                        Cierre regular:{' '}
+                        <span className="text-slate-800 dark:text-slate-200 font-semibold">
+                          {fmt.price(stock.regular_price, cur)}
+                        </span>
+                      </span>
+                    )}
                   </div>
                 </div>
 

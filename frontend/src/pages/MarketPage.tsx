@@ -536,9 +536,21 @@ export const MarketPage: React.FC = () => {
                                   {stock.sector}
                                 </span>
                               </div>
-                              <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
-                                {stock.ticker}
-                              </p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate leading-tight">
+                                  {stock.ticker}
+                                </p>
+                                {stock.market_state === 'PRE' && (
+                                  <span className="inline-flex items-center text-[8px] font-bold uppercase tracking-tight px-1 py-0.5 rounded-full border leading-none bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
+                                    Pre
+                                  </span>
+                                )}
+                                {(stock.market_state === 'POST' || stock.market_state === 'POSTPOST') && (
+                                  <span className="inline-flex items-center text-[8px] font-bold uppercase tracking-tight px-1 py-0.5 rounded-full border leading-none bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30">
+                                    Post
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </td>

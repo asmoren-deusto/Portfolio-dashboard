@@ -239,10 +239,8 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   const mainStatusLabel =
     isWeekend ? 'Cerrado' :
     usState === 'REGULAR' ? 'En Vivo' :
-    usState === 'CLOSED' ? 'Cerrado' :
+    usState === 'PRE' ? 'Pre-mercado' :
     (usState === 'POST' || usState === 'POSTPOST') ? 'Post-mercado' :
-    (usState === 'PRE' && utcHour >= 10 && utcHour < 15.5) ? 'Pre-mercado' :
-    (usState === 'PRE' && (utcHour >= 22 || utcHour < 2)) ? 'Post-mercado' :
     'Cerrado'
 
   // Last updated = from cache_timestamp if available, else most recent per-ticker timestamp
@@ -270,9 +268,19 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
           <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/90 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#111625]/90">
-            {isMarketClosed ? (
+            {mainStatusLabel === 'Cerrado' ? (
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="inline-flex rounded-full h-2 w-2 bg-slate-400 dark:bg-slate-500" />
+              </span>
+            ) : mainStatusLabel === 'Pre-mercado' ? (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute -inset-0.5 rounded-full bg-amber-500 opacity-70" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+              </span>
+            ) : mainStatusLabel === 'Post-mercado' ? (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute -inset-0.5 rounded-full bg-purple-500 opacity-70" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
               </span>
             ) : (
               <span className="relative flex h-2 w-2 shrink-0">

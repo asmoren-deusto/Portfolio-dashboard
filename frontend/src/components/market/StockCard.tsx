@@ -87,6 +87,16 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
                 <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/[0.06] px-1.5 py-0.5 rounded tracking-wide">
                   {stock.ticker}
                 </span>
+                {stock.market_state === 'PRE' && (
+                  <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
+                    Pre
+                  </span>
+                )}
+                {(stock.market_state === 'POST' || stock.market_state === 'POSTPOST') && (
+                  <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30">
+                    Post
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
                   {getSectorIcon(stock.sector)}
                   <span>{stock.sector}</span>

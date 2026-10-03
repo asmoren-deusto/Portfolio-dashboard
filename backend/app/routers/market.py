@@ -139,7 +139,68 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+from zoneinfo import ZoneInfo
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+def get_market_session_for_ticker(ticker: str, dt_utc: datetime | None = None) -> str:
+    """
+    Returns the exact active trading session state for a given asset:
+    - Crypto ('BTC-EUR', 'BTC'): always 'REGULAR' (24/7).
+    - European stocks & indices ('.MC', '.PA', '.DE', '.AS', '^IBEX', '^STOXX50E'): 'REGULAR' (09:00-17:30 CET) or 'CLOSED'.
+    - Asian stocks & indices ('^N225', '.T'): 'REGULAR' (09:00-15:30 JST) or 'CLOSED'.
+    - US stocks, indices, and commodities:
+      - 'CLOSED': weekends (Friday 20:00 ET to Sunday 18:00 ET), overnight (20:00-04:00 ET).
+      - 'PRE': pre-market (04:00-09:30 ET weekdays, Sunday after 18:00 ET for futures proxies).
+      - 'REGULAR': regular trading session (09:30-16:00 ET weekdays).
+      - 'POST': after-hours session (16:00-20:00 ET weekdays).
+    """
+    if "BTC" in ticker:
+        return "REGULAR"
+
+    if dt_utc is None:
+        dt_utc = datetime.now(timezone.utc)
+
+    # European assets
+    if any(ticker.endswith(s) for s in (".MC", ".PA", ".DE", ".AS")) or ticker in ("^IBEX", "^STOXX50E", "^GDAXI"):
+        dt_eu = dt_utc.astimezone(ZoneInfo("Europe/Madrid"))
+        if dt_eu.weekday() >= 5:
+            return "CLOSED"
+        mins = dt_eu.hour * 60 + dt_eu.minute
+        if 9 * 60 <= mins < 17 * 60 + 30:
+            return "REGULAR"
+        return "CLOSED"
+
+    # Asian assets
+    if ticker in ("^N225",) or ticker.endswith(".T"):
+        dt_tokyo = dt_utc.astimezone(ZoneInfo("Asia/Tokyo"))
+        if dt_tokyo.weekday() >= 5:
+            return "CLOSED"
+        mins = dt_tokyo.hour * 60 + dt_tokyo.minute
+        if 9 * 60 <= mins < 15 * 60 + 30:
+            return "REGULAR"
+        return "CLOSED"
+
+    # US assets (default)
+    dt_ny = dt_utc.astimezone(ZoneInfo("America/New_York"))
+    weekday = dt_ny.weekday()  # 0=Mon..4=Fri, 5=Sat, 6=Sun
+    if weekday == 5:
+        return "CLOSED"
+    if weekday == 6:
+        # Sunday Globex futures open at 18:00 ET
+        if dt_ny.hour >= 18 and (ticker in INDEX_PROXY_MAP or ticker.endswith("=F")):
+            return "PRE"
+        return "CLOSED"
+
+    mins = dt_ny.hour * 60 + dt_ny.minute
+    if 4 * 60 <= mins < 9 * 60 + 30:
+        return "PRE"
+    elif 9 * 60 + 30 <= mins < 16 * 60:
+        return "REGULAR"
+    elif 16 * 60 <= mins < 20 * 60:
+        return "POST"
+    else:
+        return "CLOSED"
 
 
 def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
@@ -175,22 +236,13 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
         if regular_price is None:
             return None
 
-        market_state = meta.get("marketState")
-        if not market_state:
-            now = time.time()
-            periods = meta.get("currentTradingPeriod", {})
-            market_state = "CLOSED"
-            for period_name, state in (("pre", "PRE"), ("regular", "REGULAR"), ("post", "POST")):
-                period = periods.get(period_name, {})
-                start = period.get("start")
-                end = period.get("end")
-                if start is not None and end is not None and start <= now < end:
-                    market_state = state
-                    break
+        market_state = get_market_session_for_ticker(ticker)
 
         previous_close = meta.get("previousClose") or meta.get("chartPreviousClose")
-        pre_price = meta.get("preMarketPrice")
-        post_price = meta.get("postMarketPrice")
+        raw_pre = meta.get("preMarketPrice")
+        raw_post = meta.get("postMarketPrice")
+        pre_price = raw_pre if market_state == "PRE" else None
+        post_price = raw_post if market_state in ("POST", "POSTPOST") else None
         display_price = (
             pre_price if market_state == "PRE" and pre_price is not None
             else post_price if market_state in ("POST", "POSTPOST") and post_price is not None
@@ -261,12 +313,11 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         # Extended hours prices from .info (slower but richer)
         pre_price  = None
         post_price = None
-        market_state = "REGULAR"
+        market_state = get_market_session_for_ticker(ticker)
         try:
             info = t.info
             pre_price    = info.get("preMarketPrice")
             post_price   = info.get("postMarketPrice")
-            market_state = info.get("marketState", "REGULAR")
             # Official previous close and price from quote
             inf_prev = info.get("regularMarketPreviousClose") or info.get("previousClose")
             if inf_prev:
@@ -274,12 +325,6 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             inf_reg = info.get("regularMarketPrice") or info.get("currentPrice")
             if inf_reg:
                 regular_price = inf_reg
-
-            # Detect weekend closure (Saturday, Sunday before 22:00 UTC, Friday after 21:00 UTC)
-            now_utc = datetime.now(timezone.utc)
-            is_weekend = now_utc.weekday() == 5 or (now_utc.weekday() == 6 and now_utc.hour < 22) or (now_utc.weekday() == 4 and now_utc.hour >= 21)
-            if is_weekend and "BTC" not in ticker:
-                market_state = "CLOSED"
 
             if not regular_price:
                 regular_price = getattr(fi, "last_price", None)
@@ -317,12 +362,20 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         if post_price and regular_price and regular_price > 0 and post_chg_pct is None:
             post_chg_pct = round((post_price - regular_price) / regular_price * 100, 2)
 
-        # Choose the most current price based on market state
-        if market_state == "PRE" and pre_price:
-            display_price = pre_price
-        elif market_state in ("POST", "POSTPOST") and post_price:
-            display_price = post_price
+        # Choose the most current price based on the active physical market state
+        if market_state == "PRE":
+            post_price = None
+            post_chg_pct = None
+            display_price = pre_price if pre_price is not None else regular_price
+        elif market_state in ("POST", "POSTPOST"):
+            pre_price = None
+            pre_chg_pct = None
+            display_price = post_price if post_price is not None else regular_price
         else:
+            pre_price = None
+            post_price = None
+            pre_chg_pct = None
+            post_chg_pct = None
             display_price = regular_price
 
         if display_price is None:
@@ -503,13 +556,27 @@ async def get_indices():
     for name, ticker in INDEX_TICKERS.items():
         q = dict(quotes.get(ticker, {}))
 
-        # Check weekend: Saturday or Sunday (before futures open at 22:00 UTC) or Friday after 21:00 UTC
-        now_utc = datetime.now(timezone.utc)
-        is_weekend = now_utc.weekday() == 5 or (now_utc.weekday() == 6 and now_utc.hour < 22) or (now_utc.weekday() == 4 and now_utc.hour >= 21)
+        idx_state = get_market_session_for_ticker(ticker)
+        q["market_state"] = idx_state
 
-        if is_weekend and ticker != "BTC-EUR":
-            q["market_state"] = "CLOSED"
-        elif ticker in INDEX_PROXY_MAP:
+        if idx_state == "CLOSED":
+            q["pre_market_price"] = None
+            q["post_market_price"] = None
+            q["pre_market_change_pct"] = None
+            q["post_market_change_pct"] = None
+            base_p = q.get("regular_price") or q.get("price") or q.get("prev_close")
+            prev_p = q.get("prev_close")
+            if base_p:
+                q["price"] = base_p
+                if prev_p and prev_p > 0:
+                    q["change"] = round(base_p - prev_p, 4)
+                    q["change_pct"] = round((base_p - prev_p) / prev_p * 100, 2)
+        elif idx_state == "REGULAR":
+            q["pre_market_price"] = None
+            q["post_market_price"] = None
+            q["pre_market_change_pct"] = None
+            q["post_market_change_pct"] = None
+        elif ticker in INDEX_PROXY_MAP and idx_state in ("PRE", "POST"):
             # Check if cash index needs futures proxy for pre-market or post-market
             proxy_sym = INDEX_PROXY_MAP[ticker]
             proxy_q = quotes.get(proxy_sym, {})
@@ -520,24 +587,22 @@ async def get_indices():
                 proxy_pct = round((proxy_p - proxy_prev) / proxy_prev * 100, 2)
                 base_p = q.get("regular_price") or q.get("price") or q.get("prev_close")
 
-                # If market is PRE
-                if q.get("market_state") == "PRE":
-                    if base_p:
-                        implied_pre = round(base_p * (1 + proxy_pct / 100), 2)
-                        q["pre_market_price"] = implied_pre
+                if base_p:
+                    implied_ext = round(base_p * (1 + proxy_pct / 100), 2)
+                    implied_change = round(implied_ext - base_p, 2)
+                    if idx_state == "PRE":
+                        q["pre_market_price"] = implied_ext
                         q["pre_market_change_pct"] = proxy_pct
-                        q["price"] = implied_pre
-                        q["change"] = round(implied_pre - base_p, 2)
-                        q["change_pct"] = proxy_pct
-                        q["market_state"] = "PRE"
-                elif q.get("market_state") in ("POST", "POSTPOST") and not q.get("post_market_price"):
-                    if base_p:
-                        implied_post = round(base_p * (1 + proxy_pct / 100), 2)
-                        q["post_market_price"] = implied_post
+                        q["post_market_price"] = None
+                        q["post_market_change_pct"] = None
+                    else:
+                        q["post_market_price"] = implied_ext
                         q["post_market_change_pct"] = proxy_pct
-                        q["price"] = implied_post
-                        q["change"] = round(implied_post - base_p, 2)
-                        q["change_pct"] = proxy_pct
+                        q["pre_market_price"] = None
+                        q["pre_market_change_pct"] = None
+                    q["price"] = implied_ext
+                    q["change"] = implied_change
+                    q["change_pct"] = proxy_pct
 
         cur = "EUR" if ticker in ("^IBEX", "^GDAXI", "^STOXX50E", "BTC-EUR") else "JPY" if ticker in ("^N225", "EURJPY=X") else "USD"
         result.append({
