@@ -90,7 +90,7 @@ export function Header({
 
         {/* Broker / Entity Selector Pill */}
         {showBrokerSelector && (
-          <div className="w-full md:w-auto flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-none md:shadow-sm dark:border-white/[0.08] dark:bg-[#111625]/90">
+          <div className="w-full md:w-auto flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-sm dark:border-white/[0.08] dark:bg-[#111625]/90">
             {BROKERS.map((b) => (
               <button
                 key={b.value}

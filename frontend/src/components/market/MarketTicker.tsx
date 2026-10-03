@@ -257,7 +257,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 backdrop-blur-md px-3.5 py-1.5 dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14] transition-colors duration-200">
+      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300 backdrop-blur-md px-3.5 py-1.5 dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14] transition-colors duration-200">
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
           <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/90 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#111625]/90">

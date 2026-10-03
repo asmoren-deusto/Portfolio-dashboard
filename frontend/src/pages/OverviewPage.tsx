@@ -536,7 +536,7 @@ export function OverviewPage() {
             loading={isGlobalUpdating}
           />
           <div
-            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:shadow-md dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16] hover:border-indigo-500/40 dark:hover:border-indigo-500/40"
+            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300 dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16] hover:border-indigo-500/40 dark:hover:border-indigo-500/40"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
             {isGlobalUpdating ? (

@@ -14,7 +14,7 @@ export function Card({ children, className, glass = true, loading = false }: Car
     <div
       className={cn(
         'relative rounded-2xl overflow-hidden transition-all duration-200',
-        'bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300',
+        'bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300',
         'dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14]',
         glass && 'backdrop-blur-md',
         className

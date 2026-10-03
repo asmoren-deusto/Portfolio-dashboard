@@ -78,11 +78,11 @@ export function KpiCard({
     <div
       className={cn(
         'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5',
-        'bg-white/95 border border-slate-200/90 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:shadow-md',
+        'bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300',
         'dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16] dark:hover:shadow-xl',
         borderAccent && ACCENT_BORDERS[borderAccent],
         hero &&
-          'bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/50 border-blue-200 shadow-blue-500/5 dark:bg-gradient-to-br dark:from-[#111625]/95 dark:via-[#161d36]/90 dark:to-[#12182b]/95 dark:border-blue-500/30 dark:shadow-blue-500/10 dark:shadow-2xl',
+          'bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/50 border-blue-200 shadow-none dark:bg-gradient-to-br dark:from-[#111625]/95 dark:via-[#161d36]/90 dark:to-[#12182b]/95 dark:border-blue-500/30 dark:shadow-blue-500/10 dark:shadow-2xl',
         className
       )}
     >
