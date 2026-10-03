@@ -4,7 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg-app: #f4f6fa;
+  --bg-app: #f1f5f9;
   --bg-sidebar: #ffffff;
   --border-sidebar: #cbd5e1;
   --bg-card: rgba(255, 255, 255, 0.97);
