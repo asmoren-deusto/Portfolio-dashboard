@@ -111,6 +111,8 @@ export function Header({
                         ? 'bg-blue-600'
                         : b.value === 'myinvestor'
                         ? 'bg-emerald-600'
+                        : b.value === 'indexa'
+                        ? 'bg-orange-600 dark:bg-orange-500'
                         : 'bg-slate-800 dark:bg-slate-700'
                     )}
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
