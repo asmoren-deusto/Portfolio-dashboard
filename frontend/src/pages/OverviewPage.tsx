@@ -654,31 +654,59 @@ export function OverviewPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* 1. Performance Evolution (60% on desktop: lg:col-span-3, md:col-span-2) */}
         <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between" delay={0.2} loading={isPeriodUpdating}>
-          <CardHeader className="h-[58px] min-h-[58px] py-2">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
-                <BarChart3 className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <CardTitle>Evolución Patrimonial</CardTitle>
-                  {isPeriodUpdating && (
-                    <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                    </span>
-                  )}
+          <CardHeader className="h-auto sm:h-[58px] sm:min-h-[58px] py-2.5 sm:py-2 px-3.5 sm:px-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-2">
+            {/* Top row on mobile / Left + Right on desktop */}
+            <div className="flex items-center justify-between gap-2 w-full sm:w-auto">
+              {/* Title & Icon */}
+              <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+                  <BarChart3 className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
-                  Trayectoria histórica del valor liquidativo acumulado
-                </p>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-sm sm:text-[15px] truncate">Evolución Patrimonial</CardTitle>
+                    {isPeriodUpdating && (
+                      <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                      </span>
+                    )}
+                  </div>
+                  <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
+                    Trayectoria histórica del valor liquidativo acumulado
+                  </p>
+                </div>
+              </div>
+
+              {/* Curva / Matriz toggle on Mobile */}
+              <div className="flex sm:hidden rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5 shrink-0">
+                <button
+                  onClick={() => setChartView('evolution')}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    chartView === 'evolution'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                >
+                  Curva
+                </button>
+                <button
+                  onClick={() => setChartView('heatmap')}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    chartView === 'heatmap'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                >
+                  Matriz
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 ml-auto">
-              {/* Evolution Chart Controls in CardHeader */}
+            {/* Desktop Controls (hidden on mobile) */}
+            <div className="hidden sm:flex items-center gap-2 ml-auto">
               {chartView === 'evolution' && (
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center gap-1.5">
                   {/* Mode Selector (€ vs %) */}
                   <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
                     <button
@@ -717,7 +745,7 @@ export function OverviewPage() {
                       title="Mostrar u ocultar aportaciones"
                     >
                       <span className={`w-2.5 h-0.5 border-t-2 border-dashed ${perfShowInvested ? 'border-purple-600 dark:border-purple-400' : 'border-slate-400'}`} />
-                      <span className="hidden sm:inline">Aportado</span>
+                      <span>Aportado</span>
                     </button>
                   )}
 
@@ -732,12 +760,12 @@ export function OverviewPage() {
                     title="Mostrar u ocultar picos máximos y mínimos"
                   >
                     <Target size={11} className={perfShowMilestones ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} />
-                    <span className="hidden sm:inline">Picos</span>
+                    <span>Picos</span>
                   </button>
                 </div>
               )}
 
-              {/* Curva / Matriz Mensual ALWAYS on the far right */}
+              {/* Curva / Matriz Mensual on Desktop */}
               <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5 shrink-0">
                 <button
                   onClick={() => setChartView('evolution')}
@@ -761,6 +789,64 @@ export function OverviewPage() {
                 </button>
               </div>
             </div>
+
+            {/* Mobile Secondary Toolbar (Row 2, only in Evolution mode) */}
+            {chartView === 'evolution' && (
+              <div className="flex sm:hidden items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.04] w-full">
+                {/* Mode Selector (€ vs %) */}
+                <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+                  <button
+                    onClick={() => setPerfChartMode('currency')}
+                    className={`min-w-[28px] px-2.5 py-1 text-xs font-bold rounded-md transition-colors text-center ${
+                      perfChartMode === 'currency'
+                        ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    €
+                  </button>
+                  <button
+                    onClick={() => setPerfChartMode('percent')}
+                    className={`min-w-[28px] px-2.5 py-1 text-xs font-bold rounded-md transition-colors text-center ${
+                      perfChartMode === 'percent'
+                        ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    %
+                  </button>
+                </div>
+
+                {/* Toggles: Aportado & Picos with clear labels */}
+                <div className="flex items-center gap-1.5">
+                  {perfChartMode === 'currency' && (
+                    <button
+                      onClick={() => setPerfShowInvested(v => !v)}
+                      className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg border transition-all ${
+                        perfShowInvested
+                          ? 'bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 font-semibold'
+                          : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+                      }`}
+                    >
+                      <span className={`w-2.5 h-0.5 border-t-2 border-dashed ${perfShowInvested ? 'border-purple-600 dark:border-purple-400' : 'border-slate-400'}`} />
+                      <span>Aportado</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => setPerfShowMilestones(v => !v)}
+                    className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg border transition-all ${
+                      perfShowMilestones
+                        ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold'
+                        : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    <Target size={11} className={perfShowMilestones ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} />
+                    <span>Picos</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </CardHeader>
 
           <div className={cn("px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
@@ -841,7 +927,14 @@ export function OverviewPage() {
                           : 'text-amber-600 dark:text-amber-400'
                       )}
                     >
-                      {perfMetrics.drawdownPct >= -0.05 ? 'En Máximos (ATH)' : `${perfMetrics.drawdownPct.toFixed(2)}%`}
+                      {perfMetrics.drawdownPct >= -0.05 ? (
+                        <>
+                          <span className="sm:hidden">Máximos</span>
+                          <span className="hidden sm:inline">En Máximos (ATH)</span>
+                        </>
+                      ) : (
+                        `${perfMetrics.drawdownPct.toFixed(2)}%`
+                      )}
                     </span>
                   </div>
                 </div>
@@ -870,7 +963,8 @@ export function OverviewPage() {
                           : 'text-rose-600 dark:text-rose-400'
                       )}
                     >
-                      {perfMetrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(perfMetrics.periodProfit)} ({fmt.pct(perfMetrics.periodReturnPct)})
+                      {perfMetrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(perfMetrics.periodProfit)}
+                      <span className="hidden sm:inline"> ({fmt.pct(perfMetrics.periodReturnPct)})</span>
                     </span>
                   </div>
                 </div>
@@ -881,7 +975,7 @@ export function OverviewPage() {
 
         {/* 2. Asset Allocation Breakdown (20% on desktop: lg:col-span-1, md:col-span-1) */}
         <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.23}>
-          <CardHeader className="h-[58px] min-h-[58px] py-2">
+          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20 shrink-0">
                 <PieChart className="w-4 h-4" />
@@ -980,7 +1074,7 @@ export function OverviewPage() {
 
         {/* 3. Performance by Period / Broker Distribution (20% on desktop: lg:col-span-1, md:col-span-1) */}
         <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.26} loading={analyticsFetching}>
-          <CardHeader className="h-[58px] min-h-[58px] py-2">
+          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                 <BarChart3 className="w-4 h-4" />

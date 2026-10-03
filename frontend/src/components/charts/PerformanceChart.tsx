@@ -487,9 +487,9 @@ export function PerformanceChart({
   return (
     <div data-private className="w-full flex flex-col gap-2">
       {/* 1. Dynamic HUD: Interactive Inspection & Live Metric Strip (Compact) */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50/90 dark:bg-[#0c101c]/80 border border-slate-200/80 dark:border-white/[0.06]">
-        {/* Left: Value, Return & Gain at current cursor or last point */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50/90 dark:bg-[#0c101c]/80 border border-slate-200/80 dark:border-white/[0.06]">
+        {/* Left / Top on mobile: Main metrics */}
+        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-x-3.5 sm:gap-x-4 gap-y-1 text-xs font-medium">
           {/* Main Portfolio Value / Return */}
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
@@ -513,7 +513,10 @@ export function PerformanceChart({
               </span>
             </div>
           )}
+        </div>
 
+        {/* Right / Bottom on mobile: Beneficio + Date pill */}
+        <div className="flex items-center justify-between sm:justify-end gap-2 text-xs font-medium pt-1 sm:pt-0 border-t border-slate-200/60 dark:border-white/[0.04] sm:border-0">
           {/* Net Profit (Plusvalía) */}
           {activePnl && (
             <div className="flex items-center gap-1.5">
@@ -530,22 +533,22 @@ export function PerformanceChart({
               </span>
             </div>
           )}
-        </div>
 
-        {/* Right: Date inspection pill */}
-        {activePoint?.date && (
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-white/[0.04] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.06]">
-            <Calendar size={11} className={hoveredPoint ? 'text-blue-500' : 'text-slate-400'} />
-            <span className="font-semibold text-slate-800 dark:text-slate-200">
-              {formatDateSpanish(activePoint.date)}
-            </span>
-            {hoveredPoint && (
-              <span className="text-[9px] uppercase font-bold text-blue-600 dark:text-blue-400 ml-0.5">
-                (Inspección)
+          {/* Date inspection pill */}
+          {activePoint?.date && (
+            <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-white/[0.04] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.06] shrink-0">
+              <Calendar size={11} className={hoveredPoint ? 'text-blue-500' : 'text-slate-400'} />
+              <span className="font-semibold text-slate-800 dark:text-slate-200">
+                {formatDateSpanish(activePoint.date)}
               </span>
-            )}
-          </div>
-        )}
+              {hoveredPoint && (
+                <span className="text-[9px] uppercase font-bold text-blue-600 dark:text-blue-400 ml-0.5">
+                  (Inspección)
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 2. Canvas Container */}
