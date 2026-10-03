@@ -19,6 +19,7 @@ interface KpiCardProps {
   iconBg?: string
   borderAccent?: 'emerald' | 'amber' | 'rose' | 'blue' | 'indigo'
   extra?: React.ReactNode
+  hideTagOnMobile?: boolean
 }
 
 const TAG_STYLES = {
@@ -62,6 +63,7 @@ export function KpiCard({
   iconBg,
   borderAccent,
   extra,
+  hideTagOnMobile = false,
 }: KpiCardProps) {
   const changeClass =
     changePositive === undefined
@@ -117,7 +119,8 @@ export function KpiCard({
             <span
               data-private={/\d/.test(tag) ? true : undefined}
               className={cn(
-                'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors',
+                'items-center px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors',
+                hideTagOnMobile ? 'hidden sm:inline-flex' : 'inline-flex',
                 TAG_STYLES[tagColor]
               )}
             >

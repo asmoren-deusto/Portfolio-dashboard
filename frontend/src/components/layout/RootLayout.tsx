@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/appStore'
 import { useEffect } from 'react'
 import { Menu, TrendingUp, PanelLeftOpen } from 'lucide-react'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
+import { HeaderActions } from '@/components/layout/HeaderActions'
 
 export function RootLayout() {
   const location = useLocation()
@@ -65,6 +66,11 @@ export function RootLayout() {
               <PanelLeftOpen size={14} />
               <span>Fijar panel</span>
             </button>
+          </div>
+
+          {/* User controls on Mobile in top sticky header */}
+          <div className="flex md:hidden items-center">
+            <HeaderActions compact />
           </div>
         </header>
 

@@ -578,6 +578,7 @@ export function OverviewPage() {
       <div className="space-y-1.5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
           <KpiCard
+            hideTagOnMobile
             label={`Rentabilidad (${periodLabel})`}
             value={
               perfStats
@@ -603,6 +604,7 @@ export function OverviewPage() {
             loading={isPeriodUpdating}
           />
           <KpiCard
+            hideTagOnMobile
             label={`Aportaciones (${periodLabel})`}
             value={perfStats ? fmt.currency(perfStats.periodInflow) : '—'}
             valueColor="text-blue-600 dark:text-blue-400"
@@ -616,6 +618,7 @@ export function OverviewPage() {
             loading={isPeriodUpdating}
           />
           <KpiCard
+            hideTagOnMobile
             label={`Volatilidad (${periodLabel})`}
             value={volVal !== null ? fmt.pct(volVal, false) : '—'}
             valueColor="text-amber-500 dark:text-amber-400"
@@ -629,6 +632,7 @@ export function OverviewPage() {
             loading={isPeriodUpdating}
           />
           <KpiCard
+            hideTagOnMobile
             label={`Máxima Caída (${periodLabel})`}
             value={ddVal !== null ? fmt.pct(ddVal) : '—'}
             valueColor="text-rose-500 dark:text-rose-400"
