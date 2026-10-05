@@ -414,7 +414,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-semibold truncate">
                   Peso en Cartera
                 </span>
-                <span data-private className="text-xs sm:text-sm font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5 block truncate">
+                <span className="text-xs sm:text-sm font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5 block truncate">
                   {position.weight.toFixed(1)}%
                 </span>
               </div>

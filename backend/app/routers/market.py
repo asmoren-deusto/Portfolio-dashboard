@@ -120,8 +120,9 @@ INDEX_TICKERS = {
 
 # Proxy futures for indices that don't publish extended-hours quotes directly on cash index
 INDEX_PROXY_MAP = {
-    "^GSPC": "ES=F",  # S&P 500 E-mini futures
-    "^IXIC": "NQ=F",  # Nasdaq 100 E-mini futures
+    "^GSPC": "ES=F",   # S&P 500 E-mini futures (CME Globex)
+    "^IXIC": "NQ=F",   # Nasdaq 100 E-mini futures (CME Globex)
+    "^N225": "NIY=F",  # Nikkei 225 Yen Futures (CME Globex)
 }
 
 # In-memory cache (shorter TTL for real-time feel)
@@ -147,57 +148,113 @@ def get_market_session_for_ticker(ticker: str, dt_utc: datetime | None = None) -
     """
     Returns the exact active trading session state for a given asset:
     - Crypto ('BTC-EUR', 'BTC'): always 'REGULAR' (24/7).
+    - Forex ('=X'): 'REGULAR' (24/5 from Sunday 21:00 UTC to Friday 22:00 UTC), 'CLOSED' on weekends.
+    - Commodity futures ('GC=F', 'BZ=F', etc.): 'REGULAR' when continuous trading is active
+      (Sun 18:00 ET to Fri 17:00 ET, excluding daily 17:00-18:00 ET halt), else 'CLOSED'.
     - European stocks & indices ('.MC', '.PA', '.DE', '.AS', '^IBEX', '^STOXX50E'): 'REGULAR' (09:00-17:30 CET) or 'CLOSED'.
-    - Asian stocks & indices ('^N225', '.T'): 'REGULAR' (09:00-15:30 JST) or 'CLOSED'.
-    - US stocks, indices, and commodities:
-      - 'CLOSED': weekends (Friday 20:00 ET to Sunday 18:00 ET), overnight (20:00-04:00 ET).
-      - 'PRE': pre-market (04:00-09:30 ET weekdays, Sunday after 18:00 ET for futures proxies).
-      - 'REGULAR': regular trading session (09:30-16:00 ET weekdays).
-      - 'POST': after-hours session (16:00-20:00 ET weekdays).
+    - Asian stocks & indices ('^N225', '.T'): 'REGULAR' during Tokyo hours (09:00-15:30 JST).
+      Outside Tokyo hours, if CME Nikkei futures are trading, returns 'FUTURES'.
+    - US cash indices with futures proxy ('^GSPC', '^IXIC'):
+      - 'REGULAR': 09:30-16:00 ET weekdays.
+      - 'POST': 16:00-20:00 ET weekdays (after-hours).
+      - 'PRE': 04:00-09:30 ET weekdays (official US pre-market).
+      - 'FUTURES': overnight CME Globex trading (20:00-04:00 ET weekdays, Sunday 18:00-24:00 ET).
+      - 'CLOSED': weekends (Friday 17:00 ET to Sunday 18:00 ET) and daily halt (17:00-18:00 ET).
+    - US index futures ('ES=F', 'NQ=F', 'NIY=F'): 'REGULAR' whenever Globex is trading, else 'CLOSED'.
+    - US stocks & ETFs (AAPL, MSFT, URTH, EEM):
+      - 'REGULAR': 09:30-16:00 ET weekdays.
+      - 'PRE': 04:00-09:30 ET weekdays.
+      - 'POST': 16:00-20:00 ET weekdays.
+      - 'CLOSED': weekends & overnight.
     """
-    if "BTC" in ticker:
+    if "BTC" in ticker or ticker.endswith("-USD") or ticker.endswith("-EUR"):
         return "REGULAR"
 
     if dt_utc is None:
         dt_utc = datetime.now(timezone.utc)
 
-    # European assets
+    # Forex pairs (24/5 from Sunday 21:00 UTC to Friday 22:00 UTC)
+    if ticker.endswith("=X"):
+        weekday = dt_utc.weekday()
+        if weekday == 5:  # Saturday
+            return "CLOSED"
+        if weekday == 6 and dt_utc.hour < 21:  # Sunday before 21:00 UTC
+            return "CLOSED"
+        if weekday == 4 and dt_utc.hour >= 22:  # Friday after 22:00 UTC
+            return "CLOSED"
+        return "REGULAR"
+
+    dt_ny = dt_utc.astimezone(ZoneInfo("America/New_York"))
+    weekday_ny = dt_ny.weekday()  # 0=Mon..4=Fri, 5=Sat, 6=Sun
+    mins_ny = dt_ny.hour * 60 + dt_ny.minute
+
+    # Direct index futures (ES=F, NQ=F, NIY=F)
+    if ticker in ("ES=F", "NQ=F", "NIY=F", "YM=F", "RTY=F"):
+        if weekday_ny == 5 or (weekday_ny == 6 and dt_ny.hour < 18) or (weekday_ny == 4 and mins_ny >= 17 * 60):
+            return "CLOSED"
+        if 0 <= weekday_ny <= 3 and 17 * 60 <= mins_ny < 18 * 60:
+            return "CLOSED"
+        return "REGULAR"
+
+    # Commodity futures (GC=F, BZ=F, CL=F, etc.)
+    if ticker.endswith("=F"):
+        if weekday_ny == 5 or (weekday_ny == 6 and dt_ny.hour < 18) or (weekday_ny == 4 and mins_ny >= 17 * 60):
+            return "CLOSED"
+        if 0 <= weekday_ny <= 3 and 17 * 60 <= mins_ny < 18 * 60:
+            return "CLOSED"
+        return "REGULAR"
+
+    # European assets (Stocks & Indices)
     if any(ticker.endswith(s) for s in (".MC", ".PA", ".DE", ".AS")) or ticker in ("^IBEX", "^STOXX50E", "^GDAXI"):
         dt_eu = dt_utc.astimezone(ZoneInfo("Europe/Madrid"))
         if dt_eu.weekday() >= 5:
             return "CLOSED"
-        mins = dt_eu.hour * 60 + dt_eu.minute
-        if 9 * 60 <= mins < 17 * 60 + 30:
+        mins_eu = dt_eu.hour * 60 + dt_eu.minute
+        if 9 * 60 <= mins_eu < 17 * 60 + 30:
             return "REGULAR"
         return "CLOSED"
 
     # Asian assets
     if ticker in ("^N225",) or ticker.endswith(".T"):
         dt_tokyo = dt_utc.astimezone(ZoneInfo("Asia/Tokyo"))
-        if dt_tokyo.weekday() >= 5:
-            return "CLOSED"
-        mins = dt_tokyo.hour * 60 + dt_tokyo.minute
-        if 9 * 60 <= mins < 15 * 60 + 30:
+        weekday_tokyo = dt_tokyo.weekday()
+        mins_tokyo = dt_tokyo.hour * 60 + dt_tokyo.minute
+        if weekday_tokyo < 5 and 9 * 60 <= mins_tokyo < 15 * 60 + 30:
             return "REGULAR"
+        # If outside Tokyo cash hours, check if proxy future is trading on Globex
+        if ticker in INDEX_PROXY_MAP:
+            if weekday_ny == 5 or (weekday_ny == 6 and dt_ny.hour < 18) or (weekday_ny == 4 and mins_ny >= 17 * 60):
+                return "CLOSED"
+            if 0 <= weekday_ny <= 3 and 17 * 60 <= mins_ny < 18 * 60:
+                return "CLOSED"
+            return "FUTURES"
         return "CLOSED"
 
-    # US assets (default)
-    dt_ny = dt_utc.astimezone(ZoneInfo("America/New_York"))
-    weekday = dt_ny.weekday()  # 0=Mon..4=Fri, 5=Sat, 6=Sun
-    if weekday == 5:
-        return "CLOSED"
-    if weekday == 6:
-        # Sunday Globex futures open at 18:00 ET
-        if dt_ny.hour >= 18 and (ticker in INDEX_PROXY_MAP or ticker.endswith("=F")):
+    # Cash Indices with futures proxies (^GSPC, ^IXIC)
+    if ticker in INDEX_PROXY_MAP:
+        if weekday_ny == 5 or (weekday_ny == 4 and mins_ny >= 17 * 60):
+            return "CLOSED"
+        if weekday_ny == 6:
+            return "FUTURES" if dt_ny.hour >= 18 else "CLOSED"
+
+        if 9 * 60 + 30 <= mins_ny < 16 * 60:
+            return "REGULAR"
+        elif 4 * 60 <= mins_ny < 9 * 60 + 30:
             return "PRE"
+        elif 16 * 60 <= mins_ny < 20 * 60:
+            return "POST"
+        else:
+            return "FUTURES"
+
+    # US stocks and ETFs (default)
+    if weekday_ny >= 5:
         return "CLOSED"
 
-    mins = dt_ny.hour * 60 + dt_ny.minute
-    if 4 * 60 <= mins < 9 * 60 + 30:
-        return "PRE"
-    elif 9 * 60 + 30 <= mins < 16 * 60:
+    if 9 * 60 + 30 <= mins_ny < 16 * 60:
         return "REGULAR"
-    elif 16 * 60 <= mins < 20 * 60:
+    elif 4 * 60 <= mins_ny < 9 * 60 + 30:
+        return "PRE"
+    elif 16 * 60 <= mins_ny < 20 * 60:
         return "POST"
     else:
         return "CLOSED"
@@ -559,25 +616,21 @@ async def get_indices():
         idx_state = get_market_session_for_ticker(ticker)
         q["market_state"] = idx_state
 
-        if idx_state == "CLOSED":
+        if idx_state == "REGULAR":
             q["pre_market_price"] = None
             q["post_market_price"] = None
             q["pre_market_change_pct"] = None
             q["post_market_change_pct"] = None
-            base_p = q.get("regular_price") or q.get("price") or q.get("prev_close")
+            base_p = q.get("regular_price") or q.get("price")
             prev_p = q.get("prev_close")
             if base_p:
                 q["price"] = base_p
                 if prev_p and prev_p > 0:
                     q["change"] = round(base_p - prev_p, 4)
                     q["change_pct"] = round((base_p - prev_p) / prev_p * 100, 2)
-        elif idx_state == "REGULAR":
-            q["pre_market_price"] = None
-            q["post_market_price"] = None
-            q["pre_market_change_pct"] = None
-            q["post_market_change_pct"] = None
-        elif ticker in INDEX_PROXY_MAP and idx_state in ("PRE", "POST"):
-            # Check if cash index needs futures proxy for pre-market or post-market
+
+        elif ticker in INDEX_PROXY_MAP and idx_state in ("PRE", "POST", "FUTURES"):
+            # Cash index projected via active futures proxy (ES=F, NQ=F, NIY=F)
             proxy_sym = INDEX_PROXY_MAP[ticker]
             proxy_q = quotes.get(proxy_sym, {})
             proxy_p = proxy_q.get("price") or proxy_q.get("regular_price")
@@ -595,14 +648,49 @@ async def get_indices():
                         q["pre_market_change_pct"] = proxy_pct
                         q["post_market_price"] = None
                         q["post_market_change_pct"] = None
-                    else:
+                    elif idx_state in ("POST", "POSTPOST"):
                         q["post_market_price"] = implied_ext
                         q["post_market_change_pct"] = proxy_pct
                         q["pre_market_price"] = None
                         q["pre_market_change_pct"] = None
+                    else:  # FUTURES (overnight Globex session)
+                        q["pre_market_price"] = implied_ext
+                        q["pre_market_change_pct"] = proxy_pct
+                        q["post_market_price"] = None
+                        q["post_market_change_pct"] = None
+
                     q["price"] = implied_ext
                     q["change"] = implied_change
                     q["change_pct"] = proxy_pct
+                    q["regular_price"] = base_p
+
+        elif idx_state in ("PRE", "POST"):
+            # Asset with direct pre/post data (e.g. ETFs like URTH, EEM)
+            if idx_state == "PRE" and q.get("pre_market_price") is not None:
+                q["price"] = q["pre_market_price"]
+                if q.get("pre_market_change_pct") is not None:
+                    q["change_pct"] = q["pre_market_change_pct"]
+            elif idx_state in ("POST", "POSTPOST") and q.get("post_market_price") is not None:
+                q["price"] = q["post_market_price"]
+                if q.get("post_market_change_pct") is not None:
+                    q["change_pct"] = q["post_market_change_pct"]
+            else:
+                base_p = q.get("regular_price") or q.get("price") or q.get("prev_close")
+                if base_p:
+                    q["price"] = base_p
+
+        elif idx_state == "CLOSED":
+            q["pre_market_price"] = None
+            q["post_market_price"] = None
+            q["pre_market_change_pct"] = None
+            q["post_market_change_pct"] = None
+            base_p = q.get("regular_price") or q.get("price") or q.get("prev_close")
+            prev_p = q.get("prev_close")
+            if base_p:
+                q["price"] = base_p
+                if prev_p and prev_p > 0:
+                    q["change"] = round(base_p - prev_p, 4)
+                    q["change_pct"] = round((base_p - prev_p) / prev_p * 100, 2)
 
         cur = "EUR" if ticker in ("^IBEX", "^GDAXI", "^STOXX50E", "BTC-EUR") else "JPY" if ticker in ("^N225", "EURJPY=X") else "USD"
         result.append({
@@ -743,6 +831,75 @@ async def get_market_history(ticker: str, period: str = "1mo"):
 
     data = await asyncio.to_thread(_fetch_history_sync, ticker, period)
     _history_cache[cache_key] = {"data": data, "ts": now}
+    return data
+
+
+# Fixed whitelist: public index data only, no user-supplied tickers.
+BENCHMARK_TICKERS = {
+    "sp500": "^GSPC",
+    "msci_world": "URTH",
+    "nasdaq100": "QQQ",
+    "eurostoxx50": "^STOXX50E",
+    "nikkei225": "^N225",
+}
+BENCHMARK_PERIODS = {"1mo", "3mo", "6mo", "1y", "2y", "5y"}
+BENCHMARK_CACHE_TTL = 1800
+_benchmark_cache: dict = {}
+
+
+def _fetch_benchmarks_sync(period: str) -> dict:
+    import yfinance as yf
+    from app.routers.portfolio import _get_ecb_deposit_rate
+
+    closes: dict[str, dict[str, float]] = {}
+    for key, ticker in BENCHMARK_TICKERS.items():
+        hist = yf.Ticker(ticker).history(period=period, interval="1d")
+        closes[key] = {
+            str(idx.date()): float(row["Close"])
+            for idx, row in hist.iterrows()
+            if row["Close"] == row["Close"] and row["Close"] > 0
+        }
+
+    dates = sorted({d for series in closes.values() for d in series})
+    if not dates:
+        return {"period": period, "points": []}
+
+    last: dict[str, float] = {}
+    base: dict[str, float] = {}
+    bce_factor = 1.0
+    prev_date = None
+    points = []
+    for d in dates:
+        point: dict = {"date": d}
+        for key, series in closes.items():
+            if d in series:
+                last[key] = series[d]
+                base.setdefault(key, series[d])
+            point[key] = round((last[key] / base[key] - 1.0) * 100.0, 2) if key in last else 0.0
+
+        if prev_date is not None:
+            days = (datetime.strptime(d, "%Y-%m-%d") - datetime.strptime(prev_date, "%Y-%m-%d")).days
+            if days > 0:
+                bce_factor *= (1.0 + _get_ecb_deposit_rate(d) / 100.0) ** (days / 365.25)
+        prev_date = d
+        point["bce_rate"] = round((bce_factor - 1.0) * 100.0, 2)
+        points.append(point)
+
+    return {"period": period, "points": points}
+
+
+@router.get("/benchmarks")
+async def get_benchmarks(period: str = "1y"):
+    """Public index performance (% since start of period) for S&P 500, MSCI World, NASDAQ 100, Euro Stoxx 50, Nikkei 225 and the ECB deposit rate."""
+    if period not in BENCHMARK_PERIODS:
+        period = "1y"
+    cached = _benchmark_cache.get(period)
+    if cached and time.time() - cached["ts"] < BENCHMARK_CACHE_TTL:
+        return cached["data"]
+
+    data = await asyncio.to_thread(_fetch_benchmarks_sync, period)
+    if data["points"]:
+        _benchmark_cache[period] = {"data": data, "ts": time.time()}
     return data
 
 

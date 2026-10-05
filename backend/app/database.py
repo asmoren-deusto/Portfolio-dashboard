@@ -42,6 +42,14 @@ def _migrate_schema():
                 conn.exec_driver_sql("ALTER TABLE transactions ADD COLUMN user_id VARCHAR(50) DEFAULT 'asier'")
         except Exception:
             pass
+        try:
+            conn.exec_driver_sql(
+                "UPDATE users SET broker = 'Kutxabank / Scalable / Trade Republic' "
+                "WHERE id = 'demo' AND broker IN ('MyInvestor / Indexa', 'Indexa / BBVA / Trade Republic')"
+            )
+            conn.commit()
+        except Exception:
+            pass
 
 
 def _seed_default_users():
@@ -57,7 +65,7 @@ def _seed_default_users():
                 password_salt=None,
                 strategy="Cartera Indexada Moderada",
                 initial_balance=50000.0,
-                broker="MyInvestor / Indexa",
+                broker="Kutxabank / Scalable / Trade Republic",
                 avatar="DM",
                 badge="Modo Demo",
                 bg_gradient="linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",

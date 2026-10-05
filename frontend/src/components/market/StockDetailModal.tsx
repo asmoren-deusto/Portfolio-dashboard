@@ -200,6 +200,11 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({ stock, onClo
                         Post-mercado
                       </span>
                     )}
+                    {(stock.market_state === 'FUTURES' || stock.market_state === 'OVERNIGHT') && (
+                      <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
+                        FUT
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium tabular-nums flex-wrap">
                     <span>
@@ -208,7 +213,7 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({ stock, onClo
                         {fmt.price(stock.prev_close, cur)}
                       </span>
                     </span>
-                    {(stock.market_state === 'PRE' || stock.market_state === 'POST' || stock.market_state === 'POSTPOST') && stock.regular_price != null && (
+                    {(stock.market_state === 'PRE' || stock.market_state === 'POST' || stock.market_state === 'POSTPOST' || stock.market_state === 'FUTURES') && stock.regular_price != null && (
                       <span>
                         Cierre regular:{' '}
                         <span className="text-slate-800 dark:text-slate-200 font-semibold">

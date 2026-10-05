@@ -101,6 +101,7 @@ export const MOCK_POSITIONS: Position[] = [
     unrealized_pnl: 9839.53,
     unrealized_pnl_pct: 28.25,
     weight: 34.77,
+    broker: 'kutxabank',
     last_updated: '2026-09-24T18:30:00Z',
   },
   {
@@ -121,6 +122,7 @@ export const MOCK_POSITIONS: Position[] = [
     unrealized_pnl: 6948.46,
     unrealized_pnl_pct: 27.12,
     weight: 25.35,
+    broker: 'scalable',
     last_updated: '2026-09-24T18:30:00Z',
   },
   {
@@ -141,6 +143,7 @@ export const MOCK_POSITIONS: Position[] = [
     unrealized_pnl: 4270.50,
     unrealized_pnl_pct: 28.63,
     weight: 14.94,
+    broker: 'scalable',
     last_updated: '2026-09-25T15:30:00Z',
   },
   {
@@ -161,6 +164,7 @@ export const MOCK_POSITIONS: Position[] = [
     unrealized_pnl: 1537.95,
     unrealized_pnl_pct: 15.56,
     weight: 8.89,
+    broker: 'kutxabank',
     last_updated: '2026-09-24T18:30:00Z',
   },
   {
@@ -181,6 +185,7 @@ export const MOCK_POSITIONS: Position[] = [
     unrealized_pnl: 2110.50,
     unrealized_pnl_pct: 35.85,
     weight: 6.23,
+    broker: 'traderepublic',
     last_updated: '2026-09-25T16:00:00Z',
   },
   {
@@ -201,6 +206,7 @@ export const MOCK_POSITIONS: Position[] = [
     unrealized_pnl: 1381.50,
     unrealized_pnl_pct: 27.09,
     weight: 5.05,
+    broker: 'traderepublic',
     last_updated: '2026-09-25T16:00:00Z',
   },
   {
@@ -221,13 +227,14 @@ export const MOCK_POSITIONS: Position[] = [
     unrealized_pnl: 1317.00,
     unrealized_pnl_pct: 55.92,
     weight: 2.86,
+    broker: 'traderepublic',
     last_updated: '2026-09-25T16:00:00Z',
   },
   {
     isin: 'ES0113900J37',
     name: 'Cuenta Liquidez Remunerada',
     ticker: 'CASH',
-    domain: 'myinvestor.es',
+    domain: 'kutxabank.es',
     category: 'Monetario / Liquidez EUR',
     ter: 0.0,
     geo: 'Zona Euro',
@@ -241,6 +248,7 @@ export const MOCK_POSITIONS: Position[] = [
     unrealized_pnl: 0.0,
     unrealized_pnl_pct: 0.0,
     weight: 1.91,
+    broker: 'kutxabank',
     last_updated: '2026-09-25T12:00:00Z',
   },
 ]
@@ -398,7 +406,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     amount: 1083.22,
     fees: 0,
     date: '2026-09-05',
-    broker: 'MyInvestor',
+    broker: 'kutxabank',
     notes: 'Aportación periódica mensual DCA',
   },
   {
@@ -411,7 +419,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     amount: 899.64,
     fees: 0,
     date: '2026-09-05',
-    broker: 'MyInvestor',
+    broker: 'scalable',
     notes: 'Aportación periódica mensual DCA',
   },
   {
@@ -424,7 +432,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     amount: 1185.00,
     fees: 2.5,
     date: '2026-08-20',
-    broker: 'Trade Republic',
+    broker: 'traderepublic',
     notes: 'Compra táctica',
   },
   {
@@ -437,7 +445,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     amount: 8.75,
     fees: 0,
     date: '2026-08-15',
-    broker: 'Trade Republic',
+    broker: 'traderepublic',
     notes: 'Cobro dividendo trimestral',
   },
   {
@@ -450,7 +458,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     amount: 1428.00,
     fees: 1.0,
     date: '2026-08-01',
-    broker: 'Scalable Capital',
+    broker: 'scalable',
     notes: 'Ahorro programado ETF',
   },
   {
@@ -463,7 +471,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     amount: 482.30,
     fees: 0,
     date: '2026-07-05',
-    broker: 'MyInvestor',
+    broker: 'kutxabank',
     notes: 'Rebalanceo cartera indexada',
   },
 ]
@@ -502,7 +510,7 @@ const DEMO_USER: UserProfile = {
   role: 'Inversor Boglehead Global',
   strategy: 'Boglehead Indexado + Tech Core',
   badge: 'Demo (Mock)',
-  broker: 'MyInvestor / Scalable',
+  broker: 'Kutxabank / Scalable / Trade Republic',
   isDemo: true,
   color: 'bg-blue-600 text-white',
   bgGradient: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',

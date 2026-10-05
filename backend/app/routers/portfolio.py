@@ -284,6 +284,260 @@ async def get_performance(
     return [PerformancePoint(**v) for v in value_series]
 
 
+_bench_cache: dict[str, tuple[datetime, dict]] = {}
+
+
+def _get_ecb_deposit_rate(date_str: str) -> float:
+    """Returns official annualized ECB deposit facility rate (%) for a given YYYY-MM-DD date."""
+    if date_str < "2022-07-27":
+        return 0.00  # Floored at 0.0%
+    elif date_str < "2022-09-14":
+        return 0.00
+    elif date_str < "2022-11-02":
+        return 0.75
+    elif date_str < "2022-12-21":
+        return 1.50
+    elif date_str < "2023-02-08":
+        return 2.00
+    elif date_str < "2023-03-22":
+        return 2.50
+    elif date_str < "2023-05-10":
+        return 3.00
+    elif date_str < "2023-06-21":
+        return 3.25
+    elif date_str < "2023-08-02":
+        return 3.50
+    elif date_str < "2023-09-20":
+        return 3.75
+    elif date_str < "2024-06-12":
+        return 4.00
+    elif date_str < "2024-09-18":
+        return 3.75
+    elif date_str < "2024-10-23":
+        return 3.50
+    elif date_str < "2024-12-18":
+        return 3.25
+    else:
+        return 3.00
+
+
+@router.get("/benchmark-comparison")
+async def get_benchmark_comparison(
+    period: str = "1y",
+    user_id: str = Depends(get_current_user_id),
+    broker: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """
+    Returns time-weighted portfolio returns alongside S&P 500 and MSCI World,
+    neutralizing the impact of cash inflows and outflows.
+    """
+    cache_key = f"{user_id}:{broker}:{period}"
+    if cache_key in _bench_cache:
+        ts, cached = _bench_cache[cache_key]
+        if (datetime.now() - ts).total_seconds() < 600:
+            return cached
+
+    transactions = _get_all_transactions(db, user_id, broker=broker)
+    if not transactions:
+        return {"period": period, "points": [], "summary": None}
+
+    now = datetime.now()
+    effective_start = None
+    if period in ("1m", "1mo"):
+        effective_start = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+    elif period in ("3m", "3mo"):
+        effective_start = (now - timedelta(days=90)).strftime("%Y-%m-%d")
+    elif period in ("6m", "6mo"):
+        effective_start = (now - timedelta(days=180)).strftime("%Y-%m-%d")
+    elif period == "ytd":
+        effective_start = f"{now.year}-01-01"
+    elif period == "1y":
+        effective_start = (now - timedelta(days=365)).strftime("%Y-%m-%d")
+    elif period == "2y":
+        effective_start = (now - timedelta(days=730)).strftime("%Y-%m-%d")
+    elif period == "5y":
+        effective_start = (now - timedelta(days=1825)).strftime("%Y-%m-%d")
+
+    price_history = {}
+    all_isins = set(t["isin"] for t in transactions)
+    for isin in all_isins:
+        asset = _get_asset(db, isin)
+        ticker = asset.ticker if asset else None
+        history = await get_price_history(isin, ticker, period)
+        curr_p = await get_current_price(isin, ticker, db=db)
+        if history:
+            if curr_p and curr_p > 0:
+                history[-1]["price"] = round(curr_p, 4)
+            price_history[isin] = history
+        elif curr_p and curr_p > 0:
+            price_history[isin] = [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
+
+    # 1. Compute true unitized Time-Weighted Return (TWR) using True NAV Engine
+    val_series = calculate_portfolio_value_series(transactions, price_history, start_date=effective_start)
+    val_map = {p["date"]: p for p in val_series}
+
+    nav_series = calculate_portfolio_nav_series(transactions, price_history)
+    if effective_start:
+        nav_points = [p for p in nav_series if p["date"] >= effective_start and p["date"] in val_map]
+    else:
+        nav_points = [p for p in nav_series if p["date"] in val_map]
+
+    if not nav_points:
+        return {"period": period, "points": [], "summary": None}
+
+    base_nav = nav_points[0]["nav"]
+    twr_points = []
+    for pt in nav_points:
+        d = pt["date"]
+        v_info = val_map.get(d, {"value": 0.0, "invested": 0.0})
+        twr_val = round((pt["nav"] / base_nav - 1.0) * 100.0, 2)
+        twr_points.append({
+            "date": d,
+            "value": v_info["value"],
+            "invested": v_info["invested"],
+            "twr": twr_val,
+        })
+
+    # 2. Fetch S&P 500, MSCI World, NASDAQ 100 and Euro Stoxx 50 historical prices
+    sp_hist = await get_price_history("^GSPC", "^GSPC", period)
+    msci_hist = await get_price_history("URTH", "URTH", period)
+    nasdaq_hist = await get_price_history("QQQ", "QQQ", period)
+    stoxx_hist = await get_price_history("^STOXX50E", "^STOXX50E", period)
+    nikkei_hist = await get_price_history("^N225", "^N225", period)
+
+    sp_dict = {p["date"]: p["price"] for p in sp_hist if p.get("price")}
+    msci_dict = {p["date"]: p["price"] for p in msci_hist if p.get("price")}
+    nasdaq_dict = {p["date"]: p["price"] for p in nasdaq_hist if p.get("price")}
+    stoxx_dict = {p["date"]: p["price"] for p in stoxx_hist if p.get("price")}
+    nikkei_dict = {p["date"]: p["price"] for p in nikkei_hist if p.get("price")}
+
+    sp_dates = sorted(sp_dict.keys())
+    msci_dates = sorted(msci_dict.keys())
+    nasdaq_dates = sorted(nasdaq_dict.keys())
+    stoxx_dates = sorted(stoxx_dict.keys())
+    nikkei_dates = sorted(nikkei_dict.keys())
+
+    def _find_price(target_date: str, price_map: dict[str, float], all_dates: list[str]) -> float | None:
+        if target_date in price_map:
+            return price_map[target_date]
+        prev_dates = [d for d in all_dates if d <= target_date]
+        if prev_dates:
+            return price_map[prev_dates[-1]]
+        return None
+
+    start_date = twr_points[0]["date"]
+    sp_base = _find_price(start_date, sp_dict, sp_dates) or (sp_dict[sp_dates[0]] if sp_dates else None)
+    msci_base = _find_price(start_date, msci_dict, msci_dates) or (msci_dict[msci_dates[0]] if msci_dates else None)
+    nasdaq_base = _find_price(start_date, nasdaq_dict, nasdaq_dates) or (nasdaq_dict[nasdaq_dates[0]] if nasdaq_dates else None)
+    stoxx_base = _find_price(start_date, stoxx_dict, stoxx_dates) or (stoxx_dict[stoxx_dates[0]] if stoxx_dates else None)
+    nikkei_base = _find_price(start_date, nikkei_dict, nikkei_dates) or (nikkei_dict[nikkei_dates[0]] if nikkei_dates else None)
+
+    aligned_points = []
+    last_sp_ret = 0.0
+    last_msci_ret = 0.0
+    last_nasdaq_ret = 0.0
+    last_stoxx_ret = 0.0
+    last_nikkei_ret = 0.0
+    bce_cum_factor = 1.0
+    prev_d = None
+
+    for pt in twr_points:
+        d = pt["date"]
+
+        # 1. ECB risk-free rate compounding
+        if prev_d is not None:
+            try:
+                days_delta = (datetime.strptime(d, "%Y-%m-%d") - datetime.strptime(prev_d, "%Y-%m-%d")).days
+                if days_delta > 0:
+                    annual_rate = _get_ecb_deposit_rate(d) / 100.0
+                    bce_cum_factor *= ((1.0 + annual_rate) ** (days_delta / 365.25))
+            except Exception:
+                pass
+        prev_d = d
+        bce_ret = round((bce_cum_factor - 1.0) * 100.0, 2)
+
+        # 2. S&P 500
+        sp_p = _find_price(d, sp_dict, sp_dates)
+        if sp_p and sp_base and sp_base > 0:
+            sp_ret = round((sp_p / sp_base - 1.0) * 100.0, 2)
+            last_sp_ret = sp_ret
+        else:
+            sp_ret = last_sp_ret
+
+        # 3. MSCI World
+        msci_p = _find_price(d, msci_dict, msci_dates)
+        if msci_p and msci_base and msci_base > 0:
+            msci_ret = round((msci_p / msci_base - 1.0) * 100.0, 2)
+            last_msci_ret = msci_ret
+        else:
+            msci_ret = last_msci_ret
+
+        # 4. NASDAQ 100
+        nasdaq_p = _find_price(d, nasdaq_dict, nasdaq_dates)
+        if nasdaq_p and nasdaq_base and nasdaq_base > 0:
+            nasdaq_ret = round((nasdaq_p / nasdaq_base - 1.0) * 100.0, 2)
+            last_nasdaq_ret = nasdaq_ret
+        else:
+            nasdaq_ret = last_nasdaq_ret
+
+        # 5. Euro Stoxx 50
+        stoxx_p = _find_price(d, stoxx_dict, stoxx_dates)
+        if stoxx_p and stoxx_base and stoxx_base > 0:
+            stoxx_ret = round((stoxx_p / stoxx_base - 1.0) * 100.0, 2)
+            last_stoxx_ret = stoxx_ret
+        else:
+            stoxx_ret = last_stoxx_ret
+
+        # 6. Nikkei 225
+        nikkei_p = _find_price(d, nikkei_dict, nikkei_dates)
+        if nikkei_p and nikkei_base and nikkei_base > 0:
+            nikkei_ret = round((nikkei_p / nikkei_base - 1.0) * 100.0, 2)
+            last_nikkei_ret = nikkei_ret
+        else:
+            nikkei_ret = last_nikkei_ret
+
+        aligned_points.append({
+            "date": d,
+            "value": pt["value"],
+            "invested": pt["invested"],
+            "portfolio_twr": pt["twr"],
+            "sp500": sp_ret,
+            "msci_world": msci_ret,
+            "bce_rate": bce_ret,
+            "nasdaq100": nasdaq_ret,
+            "eurostoxx50": stoxx_ret,
+            "nikkei225": nikkei_ret,
+        })
+
+    final_twr = aligned_points[-1]["portfolio_twr"] if aligned_points else 0.0
+    final_sp = aligned_points[-1]["sp500"] if aligned_points else 0.0
+    final_msci = aligned_points[-1]["msci_world"] if aligned_points else 0.0
+    final_bce = aligned_points[-1]["bce_rate"] if aligned_points else 0.0
+    final_nasdaq = aligned_points[-1]["nasdaq100"] if aligned_points else 0.0
+    final_stoxx = aligned_points[-1]["eurostoxx50"] if aligned_points else 0.0
+    final_nikkei = aligned_points[-1]["nikkei225"] if aligned_points else 0.0
+
+    result = {
+        "period": period,
+        "points": aligned_points,
+        "summary": {
+            "portfolio_twr": final_twr,
+            "sp500": final_sp,
+            "msci_world": final_msci,
+            "bce_rate": final_bce,
+            "nasdaq100": final_nasdaq,
+            "eurostoxx50": final_stoxx,
+            "nikkei225": final_nikkei,
+            "alpha_sp500": round(final_twr - final_sp, 2),
+            "alpha_msci": round(final_twr - final_msci, 2),
+            "alpha_bce": round(final_twr - final_bce, 2),
+        }
+    }
+    _bench_cache[cache_key] = (datetime.now(), result)
+    return result
+
+
 @router.get("/analytics")
 async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_user_id), broker: str | None = None, db: Session = Depends(get_db)):
     """Return all computed risk/return metrics."""

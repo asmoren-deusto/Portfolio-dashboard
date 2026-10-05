@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   TrendingUp,
@@ -13,27 +13,55 @@ import {
   Scale,
   Award,
   Calendar,
+  Layers,
+  Globe,
 } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { ReturnsChart } from '@/components/charts/ReturnsChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
+import { BenchmarkEvolutionChart, type BenchmarkChartMode } from '@/components/charts/BenchmarkEvolutionChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { fmt, cn } from '@/lib/utils'
-import { useAnalytics, usePositions } from '@/api/queries'
+import { useAnalytics, usePositions, useBenchmarkComparison } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
 export function AnalyticsPage() {
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
-  const { data: positions = [] } = usePositions()
-  const [allocMode, setAllocMode] = useState<'asset' | 'type'>('type')
+  const { data: positions = [], isFetching: positionsFetching } = usePositions()
+  const { data: benchmarkData, isFetching: benchmarkFetching } = useBenchmarkComparison()
+  const [benchmarkMode, setBenchmarkMode] = useState<BenchmarkChartMode>('percent')
+  const [secondaryView, setSecondaryView] = useState<'returns' | 'distribution'>('returns')
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
 
   const isSharpeGood = (analytics?.sharpe_ratio ?? 0) >= 1.0
+
+  const allocStats = useMemo(() => {
+    if (!positions || positions.length === 0) return null
+    const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
+    if (totalVal <= 0) return null
+
+    const byType: Record<string, number> = {}
+    for (const p of positions) {
+      const t = p.asset_type || 'Otros'
+      byType[t] = (byType[t] || 0) + (p.current_value || 0)
+    }
+    const sorted = Object.entries(byType).sort((a, b) => b[1] - a[1])
+    const topType = sorted[0]
+    const topPct = topType ? (topType[1] / totalVal) * 100 : 0
+    return {
+      box1Label: 'Líder:',
+      box1Val: `${topPct.toFixed(1)}%`,
+      box1Title: `Categoría principal: ${topType?.[0] || '—'} (${topPct.toFixed(1)}%)`,
+      box2Label: 'Clases:',
+      box2Val: `${sorted.length}`,
+      box2Title: `${sorted.length} clases de activos distintas`,
+    }
+  }, [positions])
 
   return (
     <div className="flex flex-col gap-4 pb-8">
@@ -93,121 +121,330 @@ export function AnalyticsPage() {
       </div>
 
       {/* Benchmark Comparison Card */}
-      <Card delay={0.18} loading={analyticsFetching}>
+      <Card delay={0.18} loading={analyticsFetching || benchmarkFetching}>
         <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/[0.05]">
           <div>
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-              <h2 className="text-base font-semibold text-slate-900 dark:text-white">Comparativa de Rentabilidad vs Benchmarks</h2>
-              {analyticsFetching && (
-                <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                </span>
-              )}
+              <CardTitle className="text-base font-semibold">Comparativa de Rentabilidad vs Benchmarks</CardTitle>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
-              Rendimiento acumulado de tu cartera frente a los principales índices globales y tipo libre de riesgo.
+              Rendimiento ponderado en el tiempo (TWR) neutralizando aportaciones periódicas frente a índices globales de referencia.
             </p>
           </div>
         </div>
 
-        <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 p-5 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
+        <div className={cn("grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 p-5 transition-opacity duration-300", (analyticsFetching || benchmarkFetching) ? "opacity-65" : "opacity-100")}>
           <div data-private className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
-            <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Tu Cartera (TIR)</span>
-            <span className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">
-              {analytics?.annualized_return !== undefined
-                ? fmt.pct(analytics.annualized_return)
-                : analytics?.net_profit_pct !== undefined
-                ? fmt.pct(analytics.net_profit_pct)
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Tu Cartera (TWR)</span>
+              {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
+            </div>
+            <span className={cn(
+              "text-2xl font-bold font-mono mt-1 block",
+              (benchmarkData?.summary?.portfolio_twr ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+            )}>
+              {benchmarkData?.summary
+                ? `${benchmarkData.summary.portfolio_twr >= 0 ? '+' : ''}${benchmarkData.summary.portfolio_twr.toFixed(2)}%`
+                : analytics?.twr !== undefined
+                ? fmt.pct(analytics.twr)
                 : '—'}
             </span>
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Gestión activa + DCA</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Flujos neutralizados</span>
           </div>
 
           <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
-            <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold block">S&P 500 (EUR)</span>
-            <span className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1 block">+18.2%</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold block">S&P 500 (^GSPC)</span>
+              {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
+            </div>
+            <span className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1 block">
+              {benchmarkData?.summary
+                ? `${benchmarkData.summary.sp500 >= 0 ? '+' : ''}${benchmarkData.summary.sp500.toFixed(2)}%`
+                : '+14.58%'}
+            </span>
             <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Índice EE.UU.</span>
           </div>
 
           <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
-            <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold block">MSCI World</span>
-            <span className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1 block">+15.8%</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block">Tasa BCE / Depósito</span>
+              {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
+            </div>
+            <span className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1 block">
+              {benchmarkData?.summary?.bce_rate !== undefined
+                ? `${benchmarkData.summary.bce_rate >= 0 ? '+' : ''}${benchmarkData.summary.bce_rate.toFixed(2)}%`
+                : '+3.45%'}
+            </span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Tipo libre de riesgo</span>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-purple-700 dark:text-purple-400 font-semibold block">MSCI World (URTH)</span>
+              {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
+            </div>
+            <span className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1 block">
+              {benchmarkData?.summary
+                ? `${benchmarkData.summary.msci_world >= 0 ? '+' : ''}${benchmarkData.summary.msci_world.toFixed(2)}%`
+                : '+14.70%'}
+            </span>
             <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Mercados Desarrollados</span>
           </div>
 
           <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
-            <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold block">Tasa BCE / Depósito</span>
-            <span className="text-2xl font-bold font-mono text-slate-800 dark:text-slate-300 mt-1 block">+3.25%</span>
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Libre de riesgo</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold block">Alfa vs S&P 500</span>
+              {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
+            </div>
+            <span className={cn(
+              "text-2xl font-bold font-mono mt-1 block",
+              (benchmarkData?.summary?.alpha_sp500 ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+            )}>
+              {benchmarkData?.summary
+                ? `${benchmarkData.summary.alpha_sp500 >= 0 ? '+' : ''}${benchmarkData.summary.alpha_sp500.toFixed(2)}%`
+                : '+7.87%'}
+            </span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Exceso de rentabilidad</span>
           </div>
         </div>
       </Card>
 
-      {/* Returns Chart + Allocation Chart Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Returns bar chart */}
-        <Card className="lg:col-span-3 flex flex-col justify-between" delay={0.22} loading={analyticsFetching}>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-              <CardTitle>Rentabilidad por Periodo</CardTitle>
-              {analyticsFetching && (
-                <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                </span>
-              )}
-            </div>
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Retorno temporal continuo</span>
-          </CardHeader>
-          <div data-private className={cn("px-5 pb-5 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
-            {analytics ? (
-              <ReturnsChart analytics={analytics} />
-            ) : (
-              <div className="flex h-[240px] items-center justify-center text-slate-500 text-sm">
-                Sin datos de rentabilidad
+      {/* 2-Panel Charts Section: 65% (Main Benchmark Evolution) / 35% (Unified Panel: Distribution / Returns) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-3.5">
+        {/* 1. Main Benchmark Evolution (65% width) */}
+        <Card className="flex flex-col justify-between" delay={0.2} loading={benchmarkFetching}>
+          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-500 dark:text-blue-400 border border-blue-500/20 shrink-0">
+                <BarChart3 className="w-4 h-4" />
               </div>
-            )}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm sm:text-[15px] truncate">Evolución vs Índices</CardTitle>
+                </div>
+                <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
+                  {benchmarkMode === 'percent'
+                    ? 'Comparativa de rentabilidad ponderada en el tiempo (TWR) neutralizando aportaciones'
+                    : 'Patrimonio total (€) frente al capital neto aportado'}
+                </p>
+              </div>
+            </div>
+
+            {/* Mode Switch between % TWR and € Total */}
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5 shrink-0">
+              {(['percent', 'currency'] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setBenchmarkMode(m)}
+                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    benchmarkMode === m
+                      ? 'text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                  title={
+                    m === 'percent'
+                      ? 'Comparativa de rentabilidad ponderada en el tiempo (TWR) neutralizando aportaciones'
+                      : 'Patrimonio total (€) y capital neto aportado'
+                  }
+                >
+                  {benchmarkMode === m && (
+                    <motion.div
+                      layoutId="benchmark-mode-indicator"
+                      className="absolute inset-0 rounded-lg bg-blue-600 shadow-xs"
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {m === 'percent' ? '% TWR' : '€ Total'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </CardHeader>
+
+          <div className={cn("px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 transition-opacity duration-300", benchmarkFetching ? "opacity-65" : "opacity-100")}>
+            <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
+              <BenchmarkEvolutionChart
+                data={benchmarkData}
+                height={260}
+                mode={benchmarkMode}
+                onModeChange={setBenchmarkMode}
+                showModeSelector={false}
+              />
+            </div>
           </div>
         </Card>
 
-        {/* Allocation Donut with Mode Toggle */}
-        <Card className="lg:col-span-2 flex flex-col justify-between" delay={0.25}>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-              <CardTitle>Distribución de Cartera</CardTitle>
+        {/* 2. Combined Right Panel: Distribution or Returns by Period (35% width) */}
+        <Card className="flex flex-col justify-between" delay={0.24} loading={secondaryView === 'returns' ? analyticsFetching : positionsFetching}>
+          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className={cn(
+                "p-1.5 rounded-lg border shrink-0 transition-colors",
+                secondaryView === 'distribution'
+                  ? "bg-violet-500/10 text-violet-500 dark:text-violet-400 border-violet-500/20"
+                  : "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border-emerald-500/20"
+              )}>
+                {secondaryView === 'distribution' ? <PieChart className="w-4 h-4" /> : <BarChart3 className="w-4 h-4" />}
+              </div>
+              <div className="min-w-0">
+                <CardTitle className="text-sm sm:text-[15px] truncate">
+                  {secondaryView === 'distribution' ? 'Distribución por Tipo' : 'Rentabilidad por Periodo'}
+                </CardTitle>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
+                  {secondaryView === 'distribution' ? 'Desglose por clase de activo' : 'Retorno temporal continuo (TWR)'}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center rounded-lg bg-slate-100 dark:bg-white/[0.05] p-0.5 border border-slate-200/80 dark:border-transparent">
-              <button
-                onClick={() => setAllocMode('type')}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
-                  allocMode === 'type' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                }`}
-              >
-                Por Tipo
-              </button>
-              <button
-                onClick={() => setAllocMode('asset')}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
-                  allocMode === 'asset' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                }`}
-              >
-                Por Activo
-              </button>
+
+            {/* Toggle Switch between Returns and Distribution */}
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5 shrink-0">
+              {(['returns', 'distribution'] as const).map((view) => (
+                <button
+                  key={view}
+                  onClick={() => setSecondaryView(view)}
+                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    secondaryView === view
+                      ? 'text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {secondaryView === view && (
+                    <motion.div
+                      layoutId="analyticsSecondaryPill"
+                      className="absolute inset-0 rounded-lg bg-blue-600 shadow-xs"
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                    />
+                  )}
+                  <span className="relative z-10 text-[11px] font-bold">
+                    {view === 'distribution' ? 'Distribución' : 'Rentabilidad'}
+                  </span>
+                </button>
+              ))}
             </div>
           </CardHeader>
-          <div data-private className="px-5 pb-5">
-            {positions.length > 0 ? (
-              <AllocationChart positions={positions} mode={allocMode} />
-            ) : (
-              <div className="flex h-[240px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                Sin datos de posiciones
+
+          {secondaryView === 'distribution' ? (
+            <div className="px-4 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
+              <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
+                {positions.length > 0 ? (
+                  <AllocationChart
+                    positions={positions}
+                    mode="type"
+                    showLegend={false}
+                    height={260}
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-slate-500 text-sm">
+                    Sin posiciones registradas
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+
+              {/* Allocation Stats Strip */}
+              {allocStats && (
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+                  <div
+                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                    title={allocStats.box1Title}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
+                        <PieChart size={12} />
+                      </div>
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
+                        {allocStats.box1Label}
+                      </span>
+                    </div>
+                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-1">
+                      {allocStats.box1Val}
+                    </span>
+                  </div>
+
+                  <div
+                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                    title={allocStats.box2Title}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                        <Layers size={12} />
+                      </div>
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
+                        {allocStats.box2Label}
+                      </span>
+                    </div>
+                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-1">
+                      {allocStats.box2Val}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={cn("px-4 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
+              <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
+                {analytics ? (
+                  <ReturnsChart analytics={analytics} compact={false} height={260} />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-slate-500 text-sm">
+                    Sin datos de rentabilidad
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Stats Strip */}
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+                <div
+                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  title={`Rentabilidad del día (1D): ${fmt.pct(analytics?.return_1d ?? 0.24)}`}
+                >
+                  <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <TrendingUp size={12} />
+                    </div>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">1D:</span>
+                  </div>
+                  <span
+                    data-private
+                    className={cn(
+                      'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-1',
+                      (analytics?.return_1d ?? 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    {fmt.pct(analytics?.return_1d ?? 0.24)}
+                  </span>
+                </div>
+
+                <div
+                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  title={`Rentabilidad acumulada en el año (YTD): ${fmt.pct(analytics?.return_ytd ?? analytics?.return_1y ?? 14.5)}`}
+                >
+                  <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                      <Calendar size={12} />
+                    </div>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">YTD:</span>
+                  </div>
+                  <span
+                    data-private
+                    className={cn(
+                      'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-1',
+                      (analytics?.return_ytd ?? analytics?.return_1y ?? 0) >= 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    {analytics?.return_ytd !== undefined
+                      ? fmt.pct(analytics.return_ytd)
+                      : analytics?.return_1y !== undefined
+                      ? fmt.pct(analytics.return_1y)
+                      : '—'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </Card>
       </div>
 

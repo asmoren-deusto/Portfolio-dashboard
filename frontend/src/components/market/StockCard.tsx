@@ -97,6 +97,11 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
                     Post
                   </span>
                 )}
+                {(stock.market_state === 'FUTURES' || stock.market_state === 'OVERNIGHT') && (
+                  <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
+                    FUT
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
                   {getSectorIcon(stock.sector)}
                   <span>{stock.sector}</span>
@@ -129,17 +134,23 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
             <div className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white tabular-nums group-hover:scale-[1.02] transition-transform origin-left">
               {fmt.price(stock.price, cur)}
             </div>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
               <div className="text-xs text-slate-700 dark:text-slate-300 font-medium tabular-nums">
-                Cierre ant: <span className="text-slate-900 dark:text-slate-200 font-semibold">{fmt.price(stock.prev_close, cur)}</span>
+                {stock.market_state && stock.market_state !== 'REGULAR' && stock.market_state !== 'CLOSED' && stock.regular_price != null ? (
+                  <span>Cierre reg: <span className="text-slate-900 dark:text-slate-200 font-semibold">{fmt.price(stock.regular_price, cur)}</span></span>
+                ) : (
+                  <span>Cierre ant: <span className="text-slate-900 dark:text-slate-200 font-semibold">{fmt.price(stock.prev_close, cur)}</span></span>
+                )}
               </div>
-              {stock.market_state && stock.market_state !== 'REGULAR' && (
+              {stock.market_state && stock.market_state !== 'REGULAR' && stock.market_state !== 'CLOSED' && (
                 <span className={`text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border ${
                   stock.market_state === 'PRE'
                     ? 'bg-amber-50 text-amber-700 border-amber-300/70 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20'
-                    : 'bg-purple-50 text-purple-700 border-purple-300/70 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20'
+                    : (stock.market_state === 'POST' || stock.market_state === 'POSTPOST')
+                    ? 'bg-purple-50 text-purple-700 border-purple-300/70 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20'
+                    : 'bg-sky-50 text-sky-700 border-sky-200/70 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20'
                 }`}>
-                  {stock.market_state === 'PRE' ? 'Pre-mercado' : 'Post-mercado'}
+                  {stock.market_state === 'PRE' ? 'Pre-mercado' : (stock.market_state === 'POST' || stock.market_state === 'POSTPOST') ? 'Post-mercado' : 'FUT'}
                 </span>
               )}
             </div>

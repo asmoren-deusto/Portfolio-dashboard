@@ -19,7 +19,14 @@ const BROKERS = [
   { label: 'MyInvestor', value: 'myinvestor' },
   { label: 'BBVA', value: 'bbva' },
   { label: 'Indexa', value: 'indexa' },
-] as const
+]
+
+const DEMO_BROKERS = [
+  { label: 'Consolidado', value: 'all' },
+  { label: 'Kutxabank', value: 'kutxabank' },
+  { label: 'Scalable', value: 'scalable' },
+  { label: 'Trade Rep.', value: 'traderepublic' },
+]
 
 interface HeaderProps {
   title: string
@@ -41,6 +48,12 @@ export function Header({
   children,
 }: HeaderProps) {
   const { period, setPeriod, selectedBroker, setSelectedBroker, useMock } = useAppStore()
+  const brokers = useMock ? DEMO_BROKERS : BROKERS
+
+  // Reset the filter when it doesn't exist for the active profile (e.g. after switching user)
+  React.useEffect(() => {
+    if (!brokers.some((b) => b.value === selectedBroker)) setSelectedBroker('all')
+  }, [brokers, selectedBroker, setSelectedBroker])
 
   const badgeColorStyles = {
     blue: 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 dark:shadow-blue-500/10',
@@ -91,7 +104,7 @@ export function Header({
         {/* Broker / Entity Selector Pill */}
         {showBrokerSelector && (
           <div className="w-full md:w-auto flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-none dark:border-white/[0.08] dark:bg-[#111625]/90">
-            {BROKERS.map((b) => (
+            {brokers.map((b) => (
               <button
                 key={b.value}
                 onClick={() => setSelectedBroker(b.value)}
@@ -113,6 +126,12 @@ export function Header({
                         ? 'bg-emerald-600'
                         : b.value === 'indexa'
                         ? 'bg-orange-600 dark:bg-orange-500'
+                        : b.value === 'kutxabank'
+                        ? 'bg-rose-600'
+                        : b.value === 'scalable'
+                        ? 'bg-cyan-600'
+                        : b.value === 'traderepublic'
+                        ? 'bg-slate-700 dark:bg-slate-600'
                         : 'bg-slate-800 dark:bg-slate-700'
                     )}
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}

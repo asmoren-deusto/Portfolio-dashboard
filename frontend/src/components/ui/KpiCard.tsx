@@ -1,6 +1,7 @@
 import React from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LoadingDot } from '@/components/ui/LoadingDot'
 
 interface KpiCardProps {
   label: string
@@ -109,12 +110,7 @@ export function KpiCard({
           <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
             {label}
           </p>
-          {loading && (
-            <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-            </span>
-          )}
+          {loading && <LoadingDot />}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {tag && (

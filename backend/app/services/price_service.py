@@ -22,6 +22,18 @@ def _is_cache_valid(isin: str) -> bool:
     return age.total_seconds() < CACHE_TTL_MINUTES * 60
 
 
+KNOWN_TICKERS: dict[str, str] = {
+    "IE00BYX5NX33": "0P0001CLDK.F",  # Fidelity MSCI World Index Fund EUR P Acc
+    "LU1598719752": "0P0001A94B.F",  # Cobas Lux SICAV - Cobas International Fund P EUR Acc
+    "LU0996182563": "0P00012PP6.F",  # Amundi Index MSCI World AE-C
+    "IE00BYX5M476": "0P0001CJGK.F",  # Fidelity MSCI Emerging Markets Index Fund EUR P Acc
+    "IE000ZYRH0Q7": "0P0001XF40.F",  # iShares Developed World Index (IE) S Acc EUR
+    "IE00BM95B621": "0P0001LT4H.F",  # Polar Capital Global Technology Fund R Acc
+    "LU1623762843": "0P0001FE3K.F",  # Carmignac Portfolio Credit A EUR Acc
+    "LU2145461757": "0P0001XYYU.F",  # Robeco Capital Growth - Robeco Smart Energy D EUR
+}
+
+
 async def get_price_with_date(
     isin: str,
     ticker: str | None = None,
@@ -40,6 +52,7 @@ async def get_price_with_date(
       7. Database PriceCache fallback (cached historical NAV)
       8. Morningstar public search
     """
+    ticker = KNOWN_TICKERS.get(isin) or ticker
     if not force and _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
@@ -413,6 +426,7 @@ async def get_price_history(
     Get historical prices for charting.
     Returns list of {"date": "YYYY-MM-DD", "price": float}
     """
+    ticker = KNOWN_TICKERS.get(isin) or ticker
     cache_key = f"{isin}:{ticker}:{period}"
     if cache_key in _history_cache:
         ts, cached_data = _history_cache[cache_key]
@@ -451,9 +465,12 @@ async def get_price_history(
         db = SessionLocal()
         try:
             points_dict = {}
-            # Real execution prices from transactions
+            # Real execution prices from transactions (excluding traspasos which carry historical fiscal base costs)
             txs = db.query(Transaction).filter(Transaction.isin == isin).order_by(Transaction.date.asc()).all()
             for tx in txs:
+                is_traspaso = "traspaso" in (tx.notes or "").lower() or "coste fiscal" in (tx.notes or "").lower()
+                if is_traspaso:
+                    continue
                 p = tx.price or (tx.amount / tx.shares if tx.shares > 0 else 0)
                 if p > 0:
                     d_str = str(tx.date)[:10]

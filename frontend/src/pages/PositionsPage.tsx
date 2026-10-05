@@ -443,7 +443,7 @@ export function PositionsPage() {
                         </td>
 
                         {/* Peso % */}
-                        <td data-private className="px-4 py-3.5 text-right">
+                        <td className="px-4 py-3.5 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <div className="h-2 w-14 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.08]">
                               <div
@@ -466,7 +466,7 @@ export function PositionsPage() {
         </Card>
       ) : (
         /* Grid Mode */
-        <div data-private className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence>
             {filteredPositions.map((p, i) => (
               <motion.div
@@ -497,7 +497,7 @@ export function PositionsPage() {
                           <span>{p.isin}</span>
                           <BrokerBadge broker={p.broker} className="shrink-0" />
                           {p.asset_type === 'epsv' && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shrink-0">
+                            <span data-private className="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shrink-0">
                               DCA 416,66 € (día 7)
                             </span>
                           )}
@@ -511,13 +511,14 @@ export function PositionsPage() {
                   <div className="mt-5 flex items-baseline justify-between">
                     <div>
                       <div className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Valoración</div>
-                      <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">
+                      <div data-private className="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">
                         {fmt.currency(p.current_value)}
                       </div>
                     </div>
                     <div className="text-right">
                       <PnlBadge value={p.unrealized_pnl_pct} suffix="%" />
                       <div
+                        data-private
                         className={`text-xs font-mono font-bold mt-0.5 ${
                           p.unrealized_pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                         }`}
@@ -532,7 +533,7 @@ export function PositionsPage() {
                   <div className="mt-4 grid grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/90 dark:bg-white/[0.02] dark:border-white/[0.04] text-xs font-mono">
                     <div>
                       <span className="text-slate-600 dark:text-slate-400 font-medium block">Títulos:</span>
-                      <span className="text-slate-900 dark:text-slate-200 font-bold">{fmt.num(p.shares)}</span>
+                      <span data-private className="text-slate-900 dark:text-slate-200 font-bold">{fmt.num(p.shares)}</span>
                     </div>
                     <div>
                       <span className="text-slate-600 dark:text-slate-400 font-medium block">Precio NAV:</span>
@@ -546,11 +547,11 @@ export function PositionsPage() {
                     </div>
                     <div>
                       <span className="text-slate-600 dark:text-slate-400 font-medium block">Coste Medio:</span>
-                      <span className="text-slate-900 dark:text-slate-200 font-bold">{fmt.currency(p.avg_cost)}</span>
+                      <span data-private className="text-slate-900 dark:text-slate-200 font-bold">{fmt.currency(p.avg_cost)}</span>
                     </div>
                     <div>
                       <span className="text-slate-600 dark:text-slate-400 font-medium block">Invertido:</span>
-                      <span className="text-slate-900 dark:text-slate-200 font-bold">{fmt.currency(p.invested_amount)}</span>
+                      <span data-private className="text-slate-900 dark:text-slate-200 font-bold">{fmt.currency(p.invested_amount)}</span>
                     </div>
                   </div>
                 </div>

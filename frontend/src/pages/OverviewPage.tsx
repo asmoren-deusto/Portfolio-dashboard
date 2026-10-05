@@ -427,7 +427,7 @@ export function OverviewPage() {
         title="Visión General"
         subtitle={
           currentUser
-            ? `${currentUser.strategy} • ${currentUser.broker}`
+            ? currentUser.strategy
             : 'Resumen ejecutivo del patrimonio, evolución de rentabilidad y asignación global.'
         }
         showPeriodSelector
@@ -558,7 +558,7 @@ export function OverviewPage() {
               </div>
               <span data-private className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
                 <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                DCA 416,66 €/m
+                {currentUser?.isDemo ? 'DCA 1.200 €/m' : 'DCA 416,66 €/m'}
               </span>
             </div>
 
@@ -567,7 +567,7 @@ export function OverviewPage() {
                 {fmt.currency(displaySummary?.total_invested)}
               </div>
               <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-                Indexa día 7 • {displaySummary?.num_positions ?? positions.length} pos.
+                {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos.
               </span>
             </div>
           </div>
@@ -949,37 +949,41 @@ export function OverviewPage() {
 
             {/* Useful Stats Strip (Matching Card 1) */}
             {allocStats && (
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+              <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={allocStats.box1Title}
                 >
-                  <div className="p-1 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
-                    <PieChart size={14} />
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">{allocStats.box1Label}</span>
-                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
-                      {allocStats.box1Val}
+                  <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
+                      <PieChart size={12} />
+                    </div>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
+                      {allocStats.box1Label}
                     </span>
                   </div>
+                  <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5">
+                    {allocStats.box1Val}
+                  </span>
                 </div>
 
                 {/* Box 2 */}
                 <div
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={allocStats.box2Title}
                 >
-                  <div className="p-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-                    <Layers size={14} />
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">{allocStats.box2Label}</span>
-                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
-                      {allocStats.box2Val}
+                  <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                      <Layers size={12} />
+                    </div>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
+                      {allocStats.box2Label}
                     </span>
                   </div>
+                  <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5">
+                    {allocStats.box2Val}
+                  </span>
                 </div>
               </div>
             )}
@@ -1062,77 +1066,77 @@ export function OverviewPage() {
 
             {/* Useful Stats Strip (Matching Card 1) */}
             {secondaryStats && (
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+              <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={secondaryStats.box1Title}
                 >
-                  <div
-                    className={cn(
-                      'p-1 rounded-lg shrink-0',
-                      secondaryChartMode === 'returns'
-                        ? secondaryStats.box1Positive
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                        : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
-                    )}
-                  >
-                    {secondaryChartMode === 'returns' ? <Zap size={14} /> : <Building2 size={14} />}
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
-                      {secondaryStats.box1Label}
-                    </span>
-                    <span
-                      data-private
+                  <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                    <div
                       className={cn(
-                        'font-mono font-extrabold text-xs truncate',
+                        'w-5 h-5 rounded-md flex items-center justify-center shrink-0',
                         secondaryChartMode === 'returns'
                           ? secondaryStats.box1Positive
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-rose-600 dark:text-rose-400'
-                          : 'text-slate-950 dark:text-white'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                          : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
                       )}
                     >
-                      {secondaryStats.box1Val}
+                      {secondaryChartMode === 'returns' ? <Zap size={12} /> : <Building2 size={12} />}
+                    </div>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
+                      {secondaryStats.box1Label}
                     </span>
                   </div>
+                  <span
+                    data-private
+                    className={cn(
+                      'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
+                      secondaryChartMode === 'returns'
+                        ? secondaryStats.box1Positive
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                        : 'text-slate-950 dark:text-white'
+                    )}
+                  >
+                    {secondaryStats.box1Val}
+                  </span>
                 </div>
 
                 {/* Box 2 */}
                 <div
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={secondaryStats.box2Title}
                 >
-                  <div
-                    className={cn(
-                      'p-1 rounded-lg shrink-0',
-                      secondaryChartMode === 'returns'
-                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                        : 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
-                    )}
-                  >
-                    {secondaryChartMode === 'returns' ? <Calendar size={14} /> : <Layers size={14} />}
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
-                      {secondaryStats.box2Label}
-                    </span>
-                    <span
-                      data-private
+                  <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                    <div
                       className={cn(
-                        'font-mono font-extrabold text-xs truncate',
+                        'w-5 h-5 rounded-md flex items-center justify-center shrink-0',
                         secondaryChartMode === 'returns'
-                          ? secondaryStats.box2Positive
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-rose-600 dark:text-rose-400'
-                          : 'text-slate-950 dark:text-white'
+                          ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                          : 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
                       )}
                     >
-                      {secondaryStats.box2Val}
+                      {secondaryChartMode === 'returns' ? <Calendar size={12} /> : <Layers size={12} />}
+                    </div>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
+                      {secondaryStats.box2Label}
                     </span>
                   </div>
+                  <span
+                    data-private
+                    className={cn(
+                      'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
+                      secondaryChartMode === 'returns'
+                        ? secondaryStats.box2Positive
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                        : 'text-slate-950 dark:text-white'
+                    )}
+                  >
+                    {secondaryStats.box2Val}
+                  </span>
                 </div>
               </div>
             )}
@@ -1154,7 +1158,7 @@ export function OverviewPage() {
             to="/positions"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20"
           >
-            <span>Ver todas (<span data-private>{positions.length}</span>)</span>
+            <span>Ver todas ({positions.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </CardHeader>
@@ -1228,7 +1232,7 @@ export function OverviewPage() {
                           </div>
                         </div>
                       </td>
-                      <td data-private className="py-2.5 px-2 text-right">
+                      <td className="py-2.5 px-2 text-right">
                         <div className="font-mono font-bold text-slate-900 dark:text-white text-[12px] sm:text-[13px] leading-tight whitespace-nowrap">
                           {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                         </div>
@@ -1245,7 +1249,7 @@ export function OverviewPage() {
                           })()}
                         </div>
                       </td>
-                      <td data-private className="py-2.5 px-2 text-right">
+                      <td className="py-2.5 px-2 text-right">
                         {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
                           <span
                             className={cn(
@@ -1282,7 +1286,7 @@ export function OverviewPage() {
                       <td className="py-2.5 px-2 text-center">
                         <BrokerBadge broker={p.broker} />
                       </td>
-                      <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
+                      <td className="py-2.5 pr-3 pl-1.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
                           <span
@@ -1369,7 +1373,7 @@ export function OverviewPage() {
                           </div>
                         </div>
                       </td>
-                      <td data-private className="py-2.5 px-2 text-right">
+                      <td className="py-2.5 px-2 text-right">
                         <div className="font-mono font-bold text-slate-900 dark:text-white text-[12px] sm:text-[13px] leading-tight whitespace-nowrap">
                           {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                         </div>
@@ -1386,7 +1390,7 @@ export function OverviewPage() {
                           })()}
                         </div>
                       </td>
-                      <td data-private className="py-2.5 px-2 text-right">
+                      <td className="py-2.5 px-2 text-right">
                         {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
                           <span
                             className={cn(
@@ -1423,7 +1427,7 @@ export function OverviewPage() {
                       <td className="py-2.5 px-2 text-center">
                         <BrokerBadge broker={p.broker} />
                       </td>
-                      <td data-private className="py-2.5 pr-3 pl-1.5 text-right">
+                      <td className="py-2.5 pr-3 pl-1.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
                           <span

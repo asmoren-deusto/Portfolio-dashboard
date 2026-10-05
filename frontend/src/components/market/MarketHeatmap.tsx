@@ -32,11 +32,15 @@ interface MarketHeatmapProps {
   selectedSector?: string
   onSectorChange?: (sector: string) => void
   showViewAllLink?: boolean
+  isIndices?: boolean
 }
 
 const HEADER_HEIGHT = 24
 
-function getHeatmapColor(changePct: number | null | undefined): {
+function getHeatmapColor(
+  changePct: number | null | undefined,
+  isIndices: boolean = false
+): {
   bg: string
   hoverBg: string
   text: string
@@ -51,8 +55,14 @@ function getHeatmapColor(changePct: number | null | undefined): {
     }
   }
 
+  // Indices have lower daily volatility, so we scale the thresholds to +/-1% instead of +/-3%
+  const t3 = isIndices ? 1.0 : 3.0
+  const t2 = isIndices ? 0.65 : 2.0
+  const t1 = isIndices ? 0.35 : 1.0
+  const t0 = isIndices ? 0.08 : 0.2
+
   // Positive gains (green scale)
-  if (changePct >= 3.0) {
+  if (changePct >= t3) {
     return {
       bg: '#047857',
       hoverBg: '#059669',
@@ -60,7 +70,7 @@ function getHeatmapColor(changePct: number | null | undefined): {
       border: '#10b981',
     }
   }
-  if (changePct >= 2.0) {
+  if (changePct >= t2) {
     return {
       bg: '#059669',
       hoverBg: '#10b981',
@@ -68,7 +78,7 @@ function getHeatmapColor(changePct: number | null | undefined): {
       border: '#34d399',
     }
   }
-  if (changePct >= 1.0) {
+  if (changePct >= t1) {
     return {
       bg: '#0f766e',
       hoverBg: '#14b8a6',
@@ -76,7 +86,7 @@ function getHeatmapColor(changePct: number | null | undefined): {
       border: '#2dd4bf',
     }
   }
-  if (changePct >= 0.2) {
+  if (changePct >= t0) {
     return {
       bg: '#064e3b',
       hoverBg: '#065f46',
@@ -86,7 +96,7 @@ function getHeatmapColor(changePct: number | null | undefined): {
   }
 
   // Neutral (close to 0%)
-  if (changePct > -0.2) {
+  if (changePct > -t0) {
     return {
       bg: '#27272a',
       hoverBg: '#3f3f46',
@@ -96,7 +106,7 @@ function getHeatmapColor(changePct: number | null | undefined): {
   }
 
   // Negative drops (red scale)
-  if (changePct > -1.0) {
+  if (changePct > -t1) {
     return {
       bg: '#7f1d1d',
       hoverBg: '#991b1b',
@@ -104,7 +114,7 @@ function getHeatmapColor(changePct: number | null | undefined): {
       border: '#b91c1c',
     }
   }
-  if (changePct > -2.0) {
+  if (changePct > -t2) {
     return {
       bg: '#991b1b',
       hoverBg: '#b91c1c',
@@ -112,7 +122,7 @@ function getHeatmapColor(changePct: number | null | undefined): {
       border: '#dc2626',
     }
   }
-  if (changePct > -3.0) {
+  if (changePct > -t3) {
     return {
       bg: '#b91c1c',
       hoverBg: '#dc2626',
@@ -140,12 +150,84 @@ function formatMarketCap(cap: number | null | undefined): string {
   return `${(cap / 1_000_000).toFixed(0)} M$`
 }
 
+const INDEX_DESCRIPTIVE_NAMES: Record<string, string> = {
+  '^IXIC': 'NASDAQ',
+  'IXIC': 'NASDAQ',
+  'IXIQ': 'NASDAQ',
+  '^NDX': 'NASDAQ 100',
+  'NDX': 'NASDAQ 100',
+  'NQ=F': 'NASDAQ Fut.',
+  '^GSPC': 'S&P 500',
+  'GSPC': 'S&P 500',
+  'ES=F': 'S&P 500 Fut.',
+  'URTH': 'MSCI World',
+  'EEM': 'Emergentes',
+  '^IBEX': 'IBEX 35',
+  'IBEX': 'IBEX 35',
+  'IBEX35': 'IBEX 35',
+  '^STOXX50E': 'Euro 50',
+  'STOXX50E': 'Euro 50',
+  '^SX5E': 'Euro 50',
+  '^GDAXI': 'DAX 40',
+  'GDAXI': 'DAX 40',
+  'DAX': 'DAX 40',
+  '^N225': 'Nikkei 225',
+  'N225': 'Nikkei 225',
+  'NIY=F': 'Nikkei Fut.',
+  '^DJI': 'Dow Jones',
+  'DJI': 'Dow Jones',
+  'YM=F': 'Dow Fut.',
+  '^RUT': 'Russell 2000',
+  'RTY=F': 'Russell Fut.',
+  'GC=F': 'Oro',
+  'BZ=F': 'Petróleo',
+  'CL=F': 'Crudo WTI',
+  'SI=F': 'Plata',
+  '^VIX': 'VIX',
+  'VIX': 'VIX',
+  'BTC-EUR': 'BTC/EUR',
+  'BTC-USD': 'BTC/USD',
+  'EURUSD=X': 'EUR/USD',
+  'EURJPY=X': 'EUR/JPY',
+  'GBPUSD=X': 'GBP/USD',
+  'USDJPY=X': 'USD/JPY',
+  'SPY': 'S&P 500',
+  'QQQ': 'NASDAQ 100',
+  'DIA': 'Dow Jones',
+  'IWM': 'Russell 2000',
+}
+
+function cleanIndexName(name: string): string {
+  if (!name) return ''
+  if (name === 'Euro Stoxx 50') return 'Euro 50'
+  if (name === 'MSCI Emergentes') return 'Emergentes'
+  if (name.startsWith('Petróleo') || name === 'Petróleo Brent') return 'Petróleo'
+  if (name === 'NASDAQ Composite') return 'NASDAQ'
+  if (name === 'S&P 500 Index') return 'S&P 500'
+  if (name === 'Nikkei 225 Stock Average') return 'Nikkei 225'
+  return name
+}
+
+function getHeatmapDisplayName(stock: MarketStock, isIndex: boolean): string {
+  if (INDEX_DESCRIPTIVE_NAMES[stock.ticker]) {
+    return INDEX_DESCRIPTIVE_NAMES[stock.ticker]
+  }
+  if (isIndex && stock.name) {
+    return cleanIndexName(stock.name)
+  }
+  if (isIndex && stock.ticker.startsWith('^')) {
+    return stock.ticker.slice(1)
+  }
+  return stock.ticker.replace('.MC', '').replace('.DE', '').replace('.AS', '').replace('.PA', '')
+}
+
 export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
   stocks,
   onSelectStock,
   selectedSector: propSector,
   onSectorChange,
   showViewAllLink = false,
+  isIndices: propIsIndices,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 680 })
@@ -219,6 +301,22 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
     if (activeSector === 'Todos') return stocks
     return stocks.filter((s) => s.sector === activeSector)
   }, [stocks, activeSector])
+
+  // Determine if this heatmap represents market indices
+  const isIndicesMode = useMemo(() => {
+    if (propIsIndices !== undefined) return propIsIndices
+    if (activeSector === 'Índices' || activeSector === 'Índice') return true
+    if (!eligibleStocks || eligibleStocks.length === 0) return false
+
+    const indexCount = eligibleStocks.filter((s) => {
+      const isIndexSector = s.sector === 'Índices' || s.sector?.startsWith('Índice')
+      const isIndexTicker = s.ticker.startsWith('^') || ['URTH', 'SPY', 'QQQ', 'DIA', 'IWM', 'EWG', 'EWU'].includes(s.ticker)
+      const hasIndexTag = Array.isArray(s.index) && s.index.some((idx) => idx.toLowerCase().includes('índice') || idx.toLowerCase().includes('indice'))
+      return isIndexSector || isIndexTicker || hasIndexTag
+    }).length
+
+    return indexCount >= eligibleStocks.length * 0.4
+  }, [propIsIndices, activeSector, eligibleStocks])
 
   // Layout treemap with exact bounds
   const sectorNodes = useMemo<HierarchicalSectorNode<MarketStock>[]>(() => {
@@ -299,8 +397,13 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           </div>
 
           {/* Color Scale Legend */}
-          <div className="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06] text-xs font-mono font-medium">
-            <span className="text-rose-600 dark:text-rose-400 font-bold">-3%</span>
+          <div
+            className="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06] text-xs font-mono font-medium"
+            title={isIndicesMode ? 'Escala de rendimiento para índices: -1% a +1%' : 'Escala de rendimiento para acciones: -3% a +3%'}
+          >
+            <span className="text-rose-600 dark:text-rose-400 font-bold">
+              {isIndicesMode ? '-1%' : '-3%'}
+            </span>
             <div className="flex items-center h-2 w-24 rounded-full overflow-hidden mx-1">
               <div className="flex-1 h-full bg-[#dc2626]" />
               <div className="flex-1 h-full bg-[#b91c1c]" />
@@ -310,7 +413,9 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               <div className="flex-1 h-full bg-[#059669]" />
               <div className="flex-1 h-full bg-[#047857]" />
             </div>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">+3%</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+              {isIndicesMode ? '+1%' : '+3%'}
+            </span>
           </div>
 
           {/* Height Adjuster Button (Toggle between Standard and Expanded) */}
@@ -416,7 +521,18 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
 
                   if (w <= 2 || h <= 2) return null
 
-                  const colors = getHeatmapColor(stock.change_pct)
+                  const isIndexStock =
+                    isIndicesMode ||
+                    stock.sector === 'Índices' ||
+                    stock.sector?.toLowerCase().includes('índice') ||
+                    stock.sector?.toLowerCase().includes('indice') ||
+                    stock.ticker.startsWith('^') ||
+                    stock.ticker.endsWith('=F') ||
+                    stock.ticker.endsWith('=X') ||
+                    INDEX_DESCRIPTIVE_NAMES[stock.ticker] !== undefined
+
+                  const displayName = getHeatmapDisplayName(stock, isIndexStock)
+                  const colors = getHeatmapColor(stock.change_pct, isIndicesMode)
                   const isLarge = w > 75 && h > 55
                   const isMedium = w > 45 && h > 35
                   const changeFormatted =
@@ -440,17 +556,26 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
                       }}
                       className="group border border-black/70 hover:brightness-125 transition-all cursor-pointer overflow-hidden p-1 flex flex-col items-center justify-center text-center shadow-inner"
                     >
-                      {/* Ticker */}
+                      {/* Ticker / Descriptive Name */}
                       <span
-                        className={`font-black tracking-tight text-white leading-none ${
+                        className={`font-black tracking-tight text-white leading-none truncate max-w-[96%] px-0.5 ${
                           isLarge
-                            ? 'text-base lg:text-lg'
+                            ? displayName.length > 9
+                              ? 'text-xs sm:text-sm font-black'
+                              : displayName.length > 6
+                              ? 'text-sm sm:text-base font-black'
+                              : 'text-base lg:text-lg font-black'
                             : isMedium
-                            ? 'text-xs font-bold'
-                            : 'text-xs font-bold'
+                            ? displayName.length > 8
+                              ? 'text-[10px] font-bold'
+                              : 'text-xs font-bold'
+                            : displayName.length > 6
+                            ? 'text-[9px] font-bold'
+                            : 'text-[10px] font-bold'
                         }`}
+                        title={stock.name || displayName}
                       >
-                        {stock.ticker.replace('.MC', '').replace('.DE', '').replace('.AS', '').replace('.PA', '')}
+                        {displayName}
                       </span>
 
                       {/* Return % */}
@@ -463,10 +588,14 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
                         </span>
                       )}
 
-                      {/* Small company name or market cap if large */}
+                      {/* Small company name or market cap / price if large */}
                       {isLarge && w > 110 && h > 80 && (
-                        <span className="text-xs text-white/90 font-medium truncate max-w-[90%] mt-1">
-                          {formatMarketCap(stock.market_cap)}
+                        <span className="text-xs text-white/90 font-mono font-medium truncate max-w-[90%] mt-1">
+                          {isIndexStock
+                            ? stock.price != null
+                              ? fmt.price(stock.price, stock.currency || (stock.ticker.includes('EUR') || stock.ticker === '^IBEX' ? 'EUR' : 'USD'))
+                              : stock.ticker
+                            : formatMarketCap(stock.market_cap)}
                         </span>
                       )}
                     </div>
@@ -497,10 +626,25 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                  {hoveredStock.stock.name}
+                  {hoveredStock.stock.name || getHeatmapDisplayName(hoveredStock.stock, true)}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs font-mono text-slate-700 dark:text-slate-400">
                   <span>{hoveredStock.stock.ticker}</span>
+                  {hoveredStock.stock.market_state === 'PRE' && (
+                    <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
+                      Pre
+                    </span>
+                  )}
+                  {(hoveredStock.stock.market_state === 'POST' || hoveredStock.stock.market_state === 'POSTPOST') && (
+                    <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30">
+                      Post
+                    </span>
+                  )}
+                  {(hoveredStock.stock.market_state === 'FUTURES' || hoveredStock.stock.market_state === 'OVERNIGHT') && (
+                    <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
+                      FUT
+                    </span>
+                  )}
                   <span>•</span>
                   <span className="text-blue-600 dark:text-blue-400 font-semibold">{hoveredStock.stock.sector}</span>
                 </div>

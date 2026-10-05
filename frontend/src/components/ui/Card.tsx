@@ -1,5 +1,14 @@
-import React from 'react'
+import React, { createContext, useContext } from 'react'
 import { cn } from '@/lib/utils'
+import { LoadingDot } from '@/components/ui/LoadingDot'
+
+export { LoadingDot }
+
+interface CardContextValue {
+  loading?: boolean
+}
+
+export const CardContext = createContext<CardContextValue>({ loading: false })
 
 interface CardProps {
   children: React.ReactNode
@@ -11,23 +20,25 @@ interface CardProps {
 
 export function Card({ children, className, glass = true, loading = false }: CardProps) {
   return (
-    <div
-      className={cn(
-        'relative rounded-2xl overflow-hidden transition-all duration-200',
-        'bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300',
-        'dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14]',
-        glass && 'backdrop-blur-md',
-        className
-      )}
-    >
-      {/* Subtle shine line at top or active loading shimmer */}
-      {loading ? (
-        <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-      ) : (
-        <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-white/10" />
-      )}
-      {children}
-    </div>
+    <CardContext.Provider value={{ loading }}>
+      <div
+        className={cn(
+          'relative rounded-2xl overflow-hidden transition-all duration-200',
+          'bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300',
+          'dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14]',
+          glass && 'backdrop-blur-md',
+          className
+        )}
+      >
+        {/* Subtle shine line at top or active loading shimmer */}
+        {loading ? (
+          <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+        ) : (
+          <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-white/10" />
+        )}
+        {children}
+      </div>
+    </CardContext.Provider>
   )
 }
 
@@ -39,10 +50,22 @@ export function CardHeader({ children, className }: { children: React.ReactNode;
   )
 }
 
-export function CardTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+export function CardTitle({
+  children,
+  className,
+  loading,
+}: {
+  children: React.ReactNode
+  className?: string
+  loading?: boolean
+}) {
+  const ctx = useContext(CardContext)
+  const isUpdating = loading !== undefined ? loading : ctx.loading
+
   return (
     <h2 className={cn('text-[15px] font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2', className)}>
-      {children}
+      <span>{children}</span>
+      {isUpdating && <LoadingDot />}
     </h2>
   )
 }

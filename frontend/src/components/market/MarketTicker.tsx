@@ -152,7 +152,6 @@ function fmtUpdated(iso: string | null): string {
 function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   if (state === 'REGULAR') return null
   const isForeign =
-    name?.includes('Nikkei') ||
     name?.includes('IBEX') ||
     name?.includes('Stoxx') ||
     name === 'Euro 50' ||
@@ -163,18 +162,24 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
     PRE: 'Pre',
     POST: 'Post',
     POSTPOST: 'Post',
+    FUTURES: 'FUT',
+    OVERNIGHT: 'FUT',
     CLOSED: 'Closed',
   }
   const tooltips: Record<string, string> = {
     PRE: 'Pre-mercado',
     POST: 'Post-mercado',
     POSTPOST: 'Post-mercado',
+    FUTURES: 'Mercado de Futuros en Tiempo Real',
+    OVERNIGHT: 'Mercado de Futuros (Overnight)',
     CLOSED: 'Mercado Cerrado',
   }
   const colors: Record<string, string> = {
     PRE: 'bg-amber-100/95 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30',
     POST: 'bg-purple-100/95 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
     POSTPOST: 'bg-purple-100/95 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
+    FUTURES: 'bg-sky-50/90 text-sky-700 border-sky-200/90 dark:bg-sky-500/10 dark:text-sky-300/90 dark:border-sky-500/20',
+    OVERNIGHT: 'bg-sky-50/90 text-sky-700 border-sky-200/90 dark:bg-sky-500/10 dark:text-sky-300/90 dark:border-sky-500/20',
     CLOSED: 'bg-slate-200/95 text-slate-700 border-slate-300 dark:bg-slate-800/95 dark:text-slate-300 dark:border-slate-600',
   }
   const cls = colors[effectiveState] || colors.CLOSED
@@ -222,7 +227,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
     let state = idx.market_state
     if (isWeekend && !isCrypto) {
       state = 'CLOSED'
-    } else if (state === 'PRE' && idx.pre_market_price == null) {
+    } else if (state === 'PRE' && idx.pre_market_price == null && idx.price == null) {
       state = 'CLOSED'
     }
     return {
@@ -241,6 +246,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
     usState === 'REGULAR' ? 'En Vivo' :
     usState === 'PRE' ? 'Pre-mercado' :
     (usState === 'POST' || usState === 'POSTPOST') ? 'Post-mercado' :
+    (usState === 'FUTURES' || usState === 'OVERNIGHT') ? 'FUT' :
     'Cerrado'
 
   // Last updated = from cache_timestamp if available, else most recent per-ticker timestamp
@@ -281,6 +287,11 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute -inset-0.5 rounded-full bg-purple-500 opacity-70" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
+              </span>
+            ) : mainStatusLabel === 'FUT' ? (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute -inset-0.5 rounded-full bg-sky-400 opacity-50" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
               </span>
             ) : (
               <span className="relative flex h-2 w-2 shrink-0">

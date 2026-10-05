@@ -24,6 +24,7 @@ import { StockCard } from '@/components/market/StockCard'
 import { StockTableRow } from '@/components/market/StockTableRow'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
+import { LoadingDot } from '@/components/ui/LoadingDot'
 import { fmt } from '@/lib/utils'
 
 const INDEX_TABS = [
@@ -35,14 +36,48 @@ const INDEX_TABS = [
   { id: 'DAX', label: 'DAX 40' },
 ]
 
-type SortOption = 'market_cap_desc' | 'change_pct_desc' | 'change_pct_asc' | 'volume_desc' | 'price_desc'
+export const TICKER_ORDER = [
+  '^GSPC',      // S&P 500
+  '^IXIC',      // NASDAQ
+  'URTH',       // MSCI World
+  'EEM',        // Emergentes
+  '^IBEX',      // IBEX 35
+  '^STOXX50E',  // Euro 50
+  '^N225',      // Nikkei 225
+  'GC=F',       // Oro
+  'BZ=F',       // Petróleo
+  'BTC-EUR',    // BTC/EUR
+  'EURUSD=X',   // EUR/USD
+  'EURJPY=X',   // EUR/JPY
+]
+
+function getTickerOrder(stock: { ticker: string; name?: string }): number {
+  const idx = TICKER_ORDER.indexOf(stock.ticker)
+  if (idx !== -1) return idx
+  const name = stock.name || ''
+  if (stock.ticker === '^GSPC' || name.includes('S&P')) return 0
+  if (stock.ticker === '^IXIC' || name.includes('NASDAQ')) return 1
+  if (stock.ticker === 'URTH' || name.includes('MSCI World')) return 2
+  if (stock.ticker === 'EEM' || name.includes('Emergentes')) return 3
+  if (stock.ticker === '^IBEX' || name.includes('IBEX')) return 4
+  if (stock.ticker === '^STOXX50E' || name.includes('Euro 50') || name.includes('Stoxx')) return 5
+  if (stock.ticker === '^N225' || name.includes('Nikkei')) return 6
+  if (stock.ticker === 'GC=F' || name.includes('Oro')) return 7
+  if (stock.ticker === 'BZ=F' || name.includes('Petróleo') || name.includes('Brent')) return 8
+  if (stock.ticker === 'BTC-EUR' || stock.ticker?.includes('BTC') || name.includes('BTC')) return 9
+  if (stock.ticker === 'EURUSD=X' || name.includes('EUR/USD')) return 10
+  if (stock.ticker === 'EURJPY=X' || name.includes('EUR/JPY')) return 11
+  return 999
+}
+
+type SortOption = 'ticker' | 'market_cap_desc' | 'change_pct_desc' | 'change_pct_asc' | 'volume_desc' | 'price_desc'
 type ViewMode = 'split' | 'heatmap' | 'grid' | 'table'
 
 export const MarketPage: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState<string>('TICKER')
   const [selectedSector, setSelectedSector] = useState<string>('Todos')
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [sortBy, setSortBy] = useState<SortOption>('market_cap_desc')
+  const [sortBy, setSortBy] = useState<SortOption>('ticker')
   const [viewMode, setViewMode] = useState<ViewMode>('split')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
 
@@ -78,14 +113,27 @@ export const MarketPage: React.FC = () => {
   )
   const { data: tickerData, isLoading: tickerLoading, isFetching: tickerFetching } = useMarketIndices()
   const isTickerUniverse = selectedIndex === 'TICKER'
-  const tickerStocks = useMemo(() => (tickerData?.indices ?? []).map((stock) => ({
-    ...stock,
-    sector: stock.sector.startsWith('Índice')
-      ? 'Índices'
-      : stock.sector.startsWith('Materia Prima')
-      ? 'Materias primas'
-      : stock.sector,
-  })), [tickerData?.indices])
+  const tickerStocks = useMemo(() => (tickerData?.indices ?? []).map((stock) => {
+    const rawName = stock.name || ''
+    const cleanName =
+      rawName === 'MSCI Emergentes' || rawName === 'Emegentes'
+        ? 'Emergentes'
+        : rawName === 'Euro Stoxx 50'
+        ? 'Euro 50'
+        : rawName === 'Petróleo Brent' || rawName.startsWith('Petróleo')
+        ? 'Petróleo'
+        : rawName
+
+    return {
+      ...stock,
+      name: cleanName,
+      sector: stock.sector?.startsWith('Índice')
+        ? 'Índices'
+        : stock.sector?.startsWith('Materia Prima')
+        ? 'Materias primas'
+        : stock.sector || 'Índices',
+    }
+  }), [tickerData?.indices])
   const data = isTickerUniverse
     ? { stocks: tickerStocks }
     : quoteData
@@ -123,6 +171,11 @@ export const MarketPage: React.FC = () => {
       })
       .sort((a, b) => {
         switch (sortBy) {
+          case 'ticker':
+            if (isTickerUniverse) {
+              return getTickerOrder(a) - getTickerOrder(b)
+            }
+            return (b.market_cap ?? 0) - (a.market_cap ?? 0)
           case 'market_cap_desc':
             return (b.market_cap ?? 0) - (a.market_cap ?? 0)
           case 'change_pct_desc':
@@ -137,7 +190,7 @@ export const MarketPage: React.FC = () => {
             return 0
         }
       })
-  }, [data?.stocks, selectedSector, searchQuery, sortBy])
+  }, [data?.stocks, selectedSector, searchQuery, sortBy, isTickerUniverse])
 
   // Quick stats
   const stats = useMemo<{
@@ -190,8 +243,14 @@ export const MarketPage: React.FC = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Total Companies */}
           <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#111625]/80 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20">
+            {isFetching && (
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+            )}
             <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <span>Total Seguimiento</span>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span>Total Seguimiento</span>
+                {isFetching && <LoadingDot />}
+              </div>
               <Layers className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
@@ -209,8 +268,14 @@ export const MarketPage: React.FC = () => {
               onClick={() => setSelectedStock(bestStock)}
               className="relative overflow-hidden p-4 rounded-2xl bg-white/95 hover:bg-slate-50/80 dark:bg-[#111625]/80 dark:hover:bg-[#151c2e] border border-emerald-500/25 hover:border-emerald-500/40 backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-emerald-500/5 cursor-pointer transition-all group"
             >
+              {isFetching && (
+                <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+              )}
               <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                <span>Mayor Ganancia Hoy</span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span>Mayor Ganancia Hoy</span>
+                  {isFetching && <LoadingDot />}
+                </div>
                 <Flame className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
               </div>
               <div className="flex items-baseline justify-between mt-1">
@@ -233,8 +298,14 @@ export const MarketPage: React.FC = () => {
               onClick={() => setSelectedStock(worstStock)}
               className="relative overflow-hidden p-4 rounded-2xl bg-white/95 hover:bg-slate-50/80 dark:bg-[#111625]/80 dark:hover:bg-[#151c2e] border border-rose-500/25 hover:border-rose-500/40 backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-rose-500/5 cursor-pointer transition-all group"
             >
+              {isFetching && (
+                <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+              )}
               <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                <span>Mayor Caída Hoy</span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span>Mayor Caída Hoy</span>
+                  {isFetching && <LoadingDot />}
+                </div>
                 <TrendingDown className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
               </div>
               <div className="flex items-baseline justify-between mt-1">
@@ -253,8 +324,14 @@ export const MarketPage: React.FC = () => {
 
           {/* Combined Capitalization */}
           <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#111625]/80 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20">
+            {isFetching && (
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+            )}
             <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <span>Cap. Agregada</span>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span>Cap. Agregada</span>
+                {isFetching && <LoadingDot />}
+              </div>
               <Sparkles className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
@@ -279,6 +356,11 @@ export const MarketPage: React.FC = () => {
                 onClick={() => {
                   setSelectedIndex(tab.id)
                   setSelectedSector('Todos')
+                  if (tab.id === 'TICKER') {
+                    setSortBy('ticker')
+                  } else if (sortBy === 'ticker') {
+                    setSortBy('market_cap_desc')
+                  }
                 }}
                 className={`relative px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors z-10 ${
                   active ? 'text-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.03]'
@@ -342,6 +424,11 @@ export const MarketPage: React.FC = () => {
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
                 className="appearance-none pl-8 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/15 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer transition-colors"
               >
+                {isTickerUniverse && (
+                  <option value="ticker" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
+                    Orden del Ticker (S&P 500 primero)
+                  </option>
+                )}
                 <option value="market_cap_desc" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
                   Más Capitalización ↓
                 </option>
@@ -451,8 +538,11 @@ export const MarketPage: React.FC = () => {
           {/* Left Column: Interactive Stock List — Explicit Height Synchronized with Heatmap */}
           <div
             style={{ height: `${heatmapHeight}px` }}
-            className="xl:col-span-7 rounded-2xl bg-white/95 dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col"
+            className="xl:col-span-7 rounded-2xl bg-white/95 dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col relative"
           >
+            {isFetching && (
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
+            )}
             <div className="px-4 py-3 border-b border-slate-200/80 dark:border-white/[0.06] flex items-center justify-between bg-slate-50/70 dark:bg-white/[0.02] shrink-0">
               <div className="flex items-center gap-2">
                 <div className="p-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -461,6 +551,7 @@ export const MarketPage: React.FC = () => {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
                   Listado de Cotizadas
                 </h3>
+                {isFetching && <LoadingDot />}
               </div>
               <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.05] px-2 py-0.5 rounded-full border border-slate-200/60 dark:border-white/[0.06]">
                 {filteredStocks.length} valores
@@ -471,13 +562,12 @@ export const MarketPage: React.FC = () => {
               <table className="w-full table-fixed text-left">
                 <colgroup>
                   <col className="w-[4%]" />
-                  <col className="w-[30%]" />
-                  <col className="w-[13%]" />
+                  <col className="w-[35%]" />
+                  <col className="w-[14%]" />
                   <col className="w-[11%]" />
-                  <col className="hidden lg:table-column w-[10%]" />
+                  <col className="hidden lg:table-column w-[11%]" />
                   <col className="hidden lg:table-column w-[13%]" />
-                  <col className="hidden xl:table-column w-[11%]" />
-                  <col className="hidden xl:table-column w-[8%]" />
+                  <col className="hidden xl:table-column w-[12%]" />
                 </colgroup>
                 <thead className="sticky top-0 z-10 bg-slate-50/95 dark:bg-[#111625]/95 backdrop-blur-sm border-b border-slate-200/80 dark:border-white/[0.06]">
                   <tr>
@@ -485,10 +575,9 @@ export const MarketPage: React.FC = () => {
                     <th className="px-3 py-1.5 text-left text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Empresa</th>
                     <th className="px-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Precio</th>
                     <th className="px-2 pr-3 lg:pr-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Var. %</th>
-                    <th className="hidden lg:table-cell px-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Cierre Ant.</th>
+                    <th className="hidden lg:table-cell px-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Cierre</th>
                     <th className="hidden lg:table-cell px-2 pr-3 xl:pr-2 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Vol / Cap</th>
                     <th className="hidden xl:table-cell px-2 pr-3 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Rango día</th>
-                    <th className="hidden xl:table-cell px-2 pr-3 py-1.5 text-right text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Índices</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/80 dark:divide-white/[0.03]">
@@ -537,17 +626,22 @@ export const MarketPage: React.FC = () => {
                                 </span>
                               </div>
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate leading-tight">
+                                <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate leading-tight font-mono font-medium">
                                   {stock.ticker}
                                 </p>
                                 {stock.market_state === 'PRE' && (
-                                  <span className="inline-flex items-center text-[8px] font-bold uppercase tracking-tight px-1 py-0.5 rounded-full border leading-none bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
+                                  <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
                                     Pre
                                   </span>
                                 )}
                                 {(stock.market_state === 'POST' || stock.market_state === 'POSTPOST') && (
-                                  <span className="inline-flex items-center text-[8px] font-bold uppercase tracking-tight px-1 py-0.5 rounded-full border leading-none bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30">
+                                  <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30">
                                     Post
+                                  </span>
+                                )}
+                                {(stock.market_state === 'FUTURES' || stock.market_state === 'OVERNIGHT') && (
+                                  <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
+                                    FUT
                                   </span>
                                 )}
                               </div>
@@ -584,10 +678,12 @@ export const MarketPage: React.FC = () => {
                           </span>
                         </td>
 
-                        {/* Cierre Ant. */}
+                        {/* Cierre */}
                         <td className="hidden lg:table-cell px-2 py-2.5 text-right">
                           <span className="text-[11px] font-mono font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                            {fmt.price(stock.prev_close, stock.currency)}
+                            {stock.market_state && stock.market_state !== 'REGULAR' && stock.market_state !== 'CLOSED' && stock.regular_price != null
+                              ? fmt.price(stock.regular_price, stock.currency)
+                              : fmt.price(stock.prev_close, stock.currency)}
                           </span>
                         </td>
 
@@ -628,20 +724,6 @@ export const MarketPage: React.FC = () => {
                             <span className="text-[10px] text-slate-400 dark:text-slate-600">—</span>
                           )}
                         </td>
-
-                        {/* Índices */}
-                        <td className="hidden xl:table-cell px-2 pr-3 py-2.5 text-right">
-                          <div className="flex items-center justify-end gap-1 flex-wrap">
-                            {stock.index.slice(0, 2).map((idx) => (
-                              <span
-                                key={idx}
-                                className="text-[9.5px] font-semibold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 whitespace-nowrap"
-                              >
-                                {idx}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
                       </tr>
                     )
                   })}
@@ -657,6 +739,7 @@ export const MarketPage: React.FC = () => {
               onSelectStock={(stock) => setSelectedStock(stock)}
               selectedSector={selectedSector}
               onSectorChange={setSelectedSector}
+              isIndices={isTickerUniverse || selectedSector === 'Índices'}
             />
           </div>
         </div>
@@ -671,6 +754,7 @@ export const MarketPage: React.FC = () => {
             onSelectStock={(stock) => setSelectedStock(stock)}
             selectedSector={selectedSector}
             onSectorChange={setSelectedSector}
+            isIndices={isTickerUniverse || selectedSector === 'Índices'}
           />
         </motion.div>
       ) : viewMode === 'grid' ? (
@@ -712,7 +796,6 @@ export const MarketPage: React.FC = () => {
                 <th className="py-3.5 px-4 text-right">Cap. Bursátil</th>
                 <th className="py-3.5 px-4 text-right">Volumen</th>
                 <th className="py-3.5 px-4">Rango 24h</th>
-                <th className="py-3.5 px-4 text-right">Índices</th>
               </tr>
             </thead>
             <tbody>

@@ -14,8 +14,8 @@ interface AppState {
   // Period & Theme
   period: Period
   setPeriod: (p: Period) => void
-  selectedBroker: 'all' | 'myinvestor' | 'bbva' | 'indexa'
-  setSelectedBroker: (b: 'all' | 'myinvestor' | 'bbva' | 'indexa') => void
+  selectedBroker: string
+  setSelectedBroker: (b: string) => void
   theme: Theme
   setTheme: (t: Theme) => void
   toggleTheme: () => void
@@ -289,7 +289,48 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
     }
 
+    // If no password provided, try restoring from stored auth token (user-switching from demo back to real user)
+    if (!password && typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('portfolio_auth_token')
+      if (storedToken) {
+        // Token format is "<userId>.<ts>.<sig>": switch instantly, confirm with the server in the background
+        if (storedToken.startsWith(`${userId}.`)) {
+          const target = get().users.find((u) => u.id === userId) || getUserProfileById(userId)
+          localStorage.setItem('portfolio_active_user_id', userId)
+          set({ currentUser: target, useMock: target.isDemo })
+          fetch('/api/auth/me', { headers: { Authorization: `Bearer ${storedToken}` } })
+            .then((res) => {
+              if (res.status === 401 || res.status === 404) get().logout()
+            })
+            .catch(() => {})
+          return true
+        }
+        try {
+          const res = await fetch('/api/auth/me', {
+            headers: { Authorization: `Bearer ${storedToken}` },
+          })
+          if (res.ok) {
+            const me = await res.json()
+            if (me && me.id === userId) {
+              localStorage.setItem('portfolio_active_user_id', userId)
+              const state = get()
+              const target = state.users.find((u) => u.id === userId) || getUserProfileById(userId)
+              const updatedUser: UserProfile = {
+                ...target,
+                passwordHash: me.has_password ? (target.passwordHash || 'server-hash') : undefined,
+              }
+              set({ currentUser: updatedUser, useMock: updatedUser.isDemo })
+              return true
+            }
+          }
+        } catch {
+          // Token verify failed, fall through to other methods
+        }
+      }
+    }
+
     // Attempt backend authentication
+    let backendOffline = false
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -319,10 +360,13 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
       }
     } catch {
-      // Backend offline fallback
+      backendOffline = true
     }
 
-    // Fallback client-side verification
+    // The backend answered but did not authenticate: never fall back to client-side login
+    if (!backendOffline) return false
+
+    // Fallback client-side verification (backend unreachable)
     const state = get()
     const target = state.users.find((u) => u.id === userId) || INITIAL_USER_PROFILES.find((u) => u.id === userId)
     if (!target) return false

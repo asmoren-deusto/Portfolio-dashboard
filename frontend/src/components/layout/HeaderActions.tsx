@@ -157,7 +157,7 @@ export function HeaderActions({
                     return (
                       <button
                         key={u.id}
-                        onClick={() => {
+                        onClick={async () => {
                           if (isSelected) {
                             setUserMenuOpen(false)
                             return
@@ -166,7 +166,13 @@ export function HeaderActions({
                           if (u.id === 'demo' || u.isDemo) {
                             login('demo')
                           } else {
-                            login(u.id)
+                            // Try to restore session via stored token first
+                            const success = await login(u.id)
+                            if (!success) {
+                              // No valid session — go to login with the profile preselected
+                              logout()
+                              navigate('/login', { state: { selectedUserId: u.id } })
+                            }
                           }
                         }}
                         className={cn(

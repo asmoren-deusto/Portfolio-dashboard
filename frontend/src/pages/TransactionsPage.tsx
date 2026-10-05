@@ -413,7 +413,7 @@ export function TransactionsPage() {
                             ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/60'
                             : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/60'
                         )}>
-                          {t.broker === 'bbva' ? 'BBVA' : t.broker === 'indexa' ? 'Indexa Capital' : 'MyInvestor'}
+                          {({ bbva: 'BBVA', indexa: 'Indexa Capital', kutxabank: 'Kutxabank', scalable: 'Scalable', traderepublic: 'Trade Republic' } as Record<string, string>)[t.broker] ?? 'MyInvestor'}
                         </span>
                       </td>
 
