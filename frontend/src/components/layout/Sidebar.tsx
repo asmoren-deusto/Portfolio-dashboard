@@ -247,7 +247,7 @@ export function Sidebar({}: SidebarProps) {
               <span>{syncTime ?? 'En vivo'}</span>
             </span>
             <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500/80 tracking-wider">
-              v2.5
+              v2.6
             </span>
           </div>
         </div>
