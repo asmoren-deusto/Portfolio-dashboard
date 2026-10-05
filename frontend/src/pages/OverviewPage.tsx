@@ -455,6 +455,7 @@ export function OverviewPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5">
           <KpiCard
+            hoverGlow
             hero
             label="Valor Total de la Cartera"
             value={fmt.currency(displaySummary?.total_value)}
@@ -504,6 +505,7 @@ export function OverviewPage() {
             loading={isGlobalUpdating}
           />
           <KpiCard
+            hoverGlow
             label="Rendimiento Anualizado"
             value={
               analytics?.annualized_return !== undefined
@@ -523,6 +525,7 @@ export function OverviewPage() {
             loading={isGlobalUpdating || isPeriodUpdating}
           />
           <KpiCard
+            hoverGlow
             label="Plusvalía Acumulada"
             value={displaySummary ? `${pnlPositive ? '+' : ''}${fmt.currency(displaySummary.total_pnl)}` : '—'}
             valueColor={pnlPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
@@ -536,7 +539,7 @@ export function OverviewPage() {
             loading={isGlobalUpdating}
           />
           <div
-            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300 dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16] hover:border-indigo-500/40 dark:hover:border-indigo-500/40"
+            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-default backdrop-blur-md transition-all duration-300 bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300 dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16]"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
             {isGlobalUpdating ? (
@@ -544,6 +547,12 @@ export function OverviewPage() {
             ) : (
               <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/15" />
             )}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{ backgroundImage: 'radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.05), transparent 58%), linear-gradient(90deg, rgba(99, 102, 241, 0.015), transparent 78%)' }}
+            />
+            <div className="relative z-10">
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5 min-w-0 pr-1">
                 <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
@@ -570,16 +579,17 @@ export function OverviewPage() {
                 {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos.
               </span>
             </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* 2. Métricas del Periodo Seleccionado */}
       <div className="space-y-1.5">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5">
           <KpiCard
+            hoverGlow
             hideTagOnMobile
-            hideChangeOnMobile
             label={`Rentabilidad (${periodLabel})`}
             value={
               perfStats
@@ -589,22 +599,32 @@ export function OverviewPage() {
                 : '—'
             }
             valueColor={(perfStats?.periodProfit ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
-            change={
-              perfStats
-                ? `${perfStats.periodProfit >= 0 ? '+' : ''}${fmt.currency(perfStats.periodProfit)}`
-                : undefined
-            }
             tag={(perfStats?.realReturnPct ?? 0) >= 0 ? "Rentabilidad" : "Pérdida"}
             tagColor={(perfStats?.realReturnPct ?? 0) >= 0 ? "emerald" : "rose"}
             borderAccent={(perfStats?.realReturnPct ?? 0) >= 0 ? "emerald" : "rose"}
-            sub={`ganancia neta de mercado en ${periodLabel}`}
-            changePositive={(perfStats?.periodProfit ?? 0) >= 0}
+            sub={`rendimiento del periodo ${periodLabel}`}
             delay={0.1}
             icon={<TrendingUp size={15} className={(perfStats?.realReturnPct ?? 0) >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
             iconBg={(perfStats?.realReturnPct ?? 0) >= 0 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
             loading={isPeriodUpdating}
           />
           <KpiCard
+            hoverGlow
+            hideTagOnMobile
+            label={`Plusvalía (${periodLabel})`}
+            value={perfStats ? `${perfStats.periodProfit >= 0 ? '+' : ''}${fmt.currency(perfStats.periodProfit)}` : '—'}
+            valueColor={(perfStats?.periodProfit ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
+            tag={(perfStats?.periodProfit ?? 0) >= 0 ? "+ Ganancia" : "- Pérdida"}
+            tagColor={(perfStats?.periodProfit ?? 0) >= 0 ? "emerald" : "rose"}
+            borderAccent={(perfStats?.periodProfit ?? 0) >= 0 ? "emerald" : "rose"}
+            sub={`ganancia neta de mercado en ${periodLabel}`}
+            delay={0.12}
+            icon={<TrendingUp size={15} className={(perfStats?.periodProfit ?? 0) >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
+            iconBg={(perfStats?.periodProfit ?? 0) >= 0 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
+            loading={isPeriodUpdating}
+          />
+          <KpiCard
+            hoverGlow
             hideTagOnMobile
             label={`Aportaciones (${periodLabel})`}
             value={perfStats ? fmt.currency(perfStats.periodInflow) : '—'}
@@ -613,12 +633,13 @@ export function OverviewPage() {
             tagColor="blue"
             borderAccent="blue"
             sub={`capital neto ingresado en ${periodLabel}`}
-            delay={0.12}
+            delay={0.14}
             icon={<Wallet size={15} className="text-blue-500 dark:text-blue-400" />}
             iconBg="bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400"
             loading={isPeriodUpdating}
           />
           <KpiCard
+            hoverGlow
             hideTagOnMobile
             label={`Volatilidad (${periodLabel})`}
             value={volVal !== null ? fmt.pct(volVal, false) : '—'}
@@ -627,12 +648,13 @@ export function OverviewPage() {
             tagColor="amber"
             borderAccent="amber"
             sub="fluctuación anualizada de mercado (σ)"
-            delay={0.14}
+            delay={0.16}
             icon={<Activity size={15} className="text-amber-500 dark:text-amber-400" />}
             iconBg="bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400"
             loading={isPeriodUpdating}
           />
           <KpiCard
+            hoverGlow
             hideTagOnMobile
             label={`Máxima Caída (${periodLabel})`}
             value={ddVal !== null ? fmt.pct(ddVal) : '—'}
@@ -642,7 +664,7 @@ export function OverviewPage() {
             borderAccent="rose"
             sub={`peor caída en ${periodLabel}`}
             changePositive={false}
-            delay={0.16}
+            delay={0.18}
             icon={<TrendingDown size={15} className="text-rose-500 dark:text-rose-400" />}
             iconBg="bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"
             loading={isPeriodUpdating}
