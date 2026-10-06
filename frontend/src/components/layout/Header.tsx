@@ -4,6 +4,7 @@ import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { HeaderActions } from '@/components/layout/HeaderActions'
+import { useHeaderContext } from '@/context/HeaderContext'
 
 const PERIODS = [
   { label: '1M', value: '1mo' },
@@ -43,7 +44,7 @@ export function Header({
   subtitle,
   badge,
   badgeColor = 'blue',
-  showPeriodSelector = false,
+  showPeriodSelector = true,
   showBrokerSelector = true,
   children,
 }: HeaderProps) {
@@ -62,12 +63,14 @@ export function Header({
     violet: 'bg-violet-50 text-violet-600 border-violet-200 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20 dark:shadow-violet-500/10',
   }[badgeColor]
 
+  const { portalNode, setPortalNode, hasExtra } = useHeaderContext()
+
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-1">
+    <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 pb-1">
       {/* Title & Subtitle */}
       <div>
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+        <div className="h-9 flex items-center gap-2.5 flex-wrap">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white leading-none">
             {title}
           </h1>
 
@@ -85,7 +88,7 @@ export function Header({
 
           {useMock && !badge && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-1.5 py-px rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
-              Demo Data
+              DEMO DATA
             </span>
           )}
         </div>
@@ -97,19 +100,21 @@ export function Header({
         )}
       </div>
 
-      {/* Right side controls */}
-      <div className="w-full md:w-auto flex items-center gap-3 flex-wrap">
-        {children}
+      {/* Right side controls: EXACT fixed position across all pages */}
+      <div className="w-full md:w-auto h-9 flex items-center justify-end gap-2.5 shrink-0 ml-auto flex-wrap">
+        {/* Extra page actions (e.g. Transactions actions) appear to the left of the fixed controls */}
+        <div ref={setPortalNode} className="flex items-center gap-2 shrink-0 empty:hidden" />
+        {children && <div className="flex items-center gap-2 shrink-0">{children}</div>}
 
         {/* Broker / Entity Selector Pill */}
         {showBrokerSelector && (
-          <div className="w-full md:w-auto flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-none dark:border-white/[0.08] dark:bg-[#111625]/90">
+          <div className="w-full sm:w-auto h-9 flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-none dark:border-white/10 dark:bg-[#181922]/90">
             {brokers.map((b) => (
               <button
                 key={b.value}
                 onClick={() => setSelectedBroker(b.value)}
                 className={cn(
-                  'relative flex-1 md:flex-initial text-center rounded-lg px-2 sm:px-2.5 py-1.5 md:py-1 text-xs font-semibold transition-colors duration-150',
+                  'relative flex-1 sm:flex-initial text-center rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-1 text-xs font-semibold transition-all duration-150',
                   selectedBroker === b.value
                     ? 'text-white'
                     : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -119,7 +124,7 @@ export function Header({
                   <motion.div
                     layoutId="headerBrokerPill"
                     className={cn(
-                      'absolute inset-0 rounded-lg',
+                      'absolute inset-0 rounded-lg shadow-sm',
                       b.value === 'bbva'
                         ? 'bg-blue-600'
                         : b.value === 'myinvestor'
@@ -134,7 +139,7 @@ export function Header({
                         ? 'bg-slate-700 dark:bg-slate-600'
                         : 'bg-slate-800 dark:bg-slate-700'
                     )}
-                    transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                   />
                 )}
                 <span className="relative z-10">{b.label}</span>
@@ -143,27 +148,9 @@ export function Header({
           </div>
         )}
 
-        {/* Period selector if requested (desktop only; on mobile it is in the sticky top navbar) */}
-        {showPeriodSelector && (
-          <div className="hidden md:block relative">
-            <select
-              value={period}
-              onChange={(e) => setPeriod(e.target.value as typeof period)}
-              className="appearance-none pl-3 pr-7 py-2 rounded-xl border border-slate-200/90 bg-white shadow-none text-xs font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/[0.08] dark:bg-[#111625]/90 dark:text-slate-300"
-            >
-              {PERIODS.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
-          </div>
-        )}
-
-        {/* User profile, privacy mode, theme, and refresh controls (on desktop; on mobile they are in the top sticky navbar) */}
-        <div className="hidden md:flex items-center">
-          <HeaderActions />
+        {/* User profile, privacy mode, theme, period selector (1A), and refresh controls */}
+        <div className="hidden md:flex items-center shrink-0">
+          <HeaderActions showPeriod={showPeriodSelector} />
         </div>
       </div>
     </div>

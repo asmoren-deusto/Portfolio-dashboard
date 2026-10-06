@@ -89,16 +89,12 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-300',
-        !hoverGlow && 'hover:-translate-y-0.5',
-        hoverGlow && 'cursor-default',
-        'bg-white/95 border shadow-none',
-        !hoverGlow && 'border-slate-200/90 hover:border-slate-300 dark:border-white/[0.08] dark:hover:border-white/[0.16]',
-        hoverGlow && 'border-slate-200/90 hover:border-slate-300 dark:border-white/[0.08] dark:hover:border-white/[0.16]',
-        'dark:bg-[#111625]/85 dark:shadow-lg dark:shadow-black/20 dark:hover:shadow-xl',
-        borderAccent && !hoverGlow && ACCENT_BORDERS[borderAccent],
+        'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-200 ease-out cursor-card',
+        'bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
+        'dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-white/[0.16]',
+        borderAccent && ACCENT_BORDERS[borderAccent],
         hero &&
-          'bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/50 border-blue-200 shadow-none dark:bg-gradient-to-br dark:from-[#111625]/95 dark:via-[#161d36]/90 dark:to-[#12182b]/95 dark:border-blue-500/30 dark:shadow-blue-500/10 dark:shadow-2xl',
+          'bg-gradient-to-br from-blue-50/90 via-white to-indigo-50/50 border-blue-200/90 shadow-hero hover:shadow-[0_10px_32px_-4px_rgba(37,99,235,0.18)] dark:bg-gradient-to-br dark:from-[#1e202a]/95 dark:via-[#20222d]/90 dark:to-[#181922]/95 dark:border-white/[0.12] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]',
         className
       )}
     >
@@ -108,7 +104,7 @@ export function KpiCard({
       ) : (
         <div
           className={cn(
-            'pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-white/15',
+            'pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.06] to-transparent dark:via-white/[0.12] z-10',
             borderAccent && `via-${borderAccent}-500/30 dark:${ACCENT_GLOWS[borderAccent]}`
           )}
         />
@@ -178,7 +174,7 @@ export function KpiCard({
             {change && (
               <span data-private
                 className={cn(
-                  'items-center gap-1.5 rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 font-mono text-xs sm:text-[13px] font-bold border shadow-xs transition-all shrink-0',
+                  'items-center gap-1.5 rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 font-mono text-xs sm:text-[13px] font-bold border transition-all shrink-0',
                   hideChangeOnMobile ? 'hidden sm:inline-flex' : 'inline-flex',
                   changeClass
                 )}

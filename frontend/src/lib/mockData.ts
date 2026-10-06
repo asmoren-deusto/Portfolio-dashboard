@@ -265,6 +265,7 @@ export const MOCK_ANALYTICS: Analytics = {
   return_1m: 2.15,
   return_3m: 5.40,
   return_6m: 9.75,
+  return_1y: 16.80,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -910,15 +911,18 @@ const ASIER_USER: UserProfile = {
   summary: ASIER_REAL_SUMMARY,
   positions: ASIER_REAL_POSITIONS,
   analytics: {
-    twr: 18.58,
-    cagr: 16.20,
-    volatility: 12.40,
-    max_drawdown: -6.80,
-    sharpe_ratio: 1.38,
-    return_ytd: 18.58,
-    return_1m: 2.10,
-    return_3m: 5.60,
-    return_6m: 11.20,
+    twr: 18.06,
+    cagr: 18.08,
+    volatility: 4.08,
+    max_drawdown: -5.95,
+    sharpe_ratio: 3.82,
+    return_1d: 0.17,
+    return_1w: 1.73,
+    return_ytd: 16.59,
+    return_1m: 1.34,
+    return_3m: 5.02,
+    return_6m: 13.95,
+    return_1y: 18.06,
   },
   performance: {
     '1m': generateRealisticPerformanceSeries(30, 27800, 33700.28, 42, 300),

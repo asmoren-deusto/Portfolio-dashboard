@@ -41,6 +41,7 @@ backend/data/*.db
 backend/data/*.sqlite
 backend/data/*.sqlite3
 data/*.db
+*.db
 *.sqlite
 *.sqlite3
 

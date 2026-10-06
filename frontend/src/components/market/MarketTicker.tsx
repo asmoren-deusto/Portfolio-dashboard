@@ -162,8 +162,8 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
     PRE: 'Pre',
     POST: 'Post',
     POSTPOST: 'Post',
-    FUTURES: 'FUT',
-    OVERNIGHT: 'FUT',
+    FUTURES: 'FUTURES',
+    OVERNIGHT: 'FUTURES',
     CLOSED: 'Closed',
   }
   const tooltips: Record<string, string> = {
@@ -246,7 +246,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
     usState === 'REGULAR' ? 'En Vivo' :
     usState === 'PRE' ? 'Pre-mercado' :
     (usState === 'POST' || usState === 'POSTPOST') ? 'Post-mercado' :
-    (usState === 'FUTURES' || usState === 'OVERNIGHT') ? 'FUT' :
+    (usState === 'FUTURES' || usState === 'OVERNIGHT') ? 'FUTURES' :
     'Cerrado'
 
   // Last updated = from cache_timestamp if available, else most recent per-ticker timestamp
@@ -270,10 +270,10 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300 backdrop-blur-md px-3.5 py-1.5 dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14] transition-colors duration-200">
+      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover backdrop-blur-md px-3.5 py-1.5 dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200">
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
-          <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/90 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#111625]/90">
+          <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#181922]/92">
             {mainStatusLabel === 'Cerrado' ? (
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="inline-flex rounded-full h-2 w-2 bg-slate-400 dark:bg-slate-500" />
@@ -288,7 +288,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                 <span className="animate-ping absolute -inset-0.5 rounded-full bg-purple-500 opacity-70" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
               </span>
-            ) : mainStatusLabel === 'FUT' ? (
+            ) : mainStatusLabel === 'FUTURES' ? (
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute -inset-0.5 rounded-full bg-sky-400 opacity-50" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
@@ -315,8 +315,8 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           {/* Marquee Ticker Track (Rotates slowly, pauses on hover) */}
           <div className="relative flex-1 overflow-hidden ml-2 py-1 group">
             {/* Subtle fade edges for smooth transition */}
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#111625]/90 to-transparent z-10" />
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#111625]/90 to-transparent z-10" />
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#181922] to-transparent z-10" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#181922] to-transparent z-10" />
 
             {/* Seamless scrolling marquee track */}
             <div className="animate-ticker-marquee flex items-center gap-2 pt-1 pb-0.5">

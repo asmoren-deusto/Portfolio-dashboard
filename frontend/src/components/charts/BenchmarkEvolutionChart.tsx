@@ -11,6 +11,7 @@ import {
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
 import { Calendar } from 'lucide-react'
+import { triggerChartAnimation } from '@/lib/chartAnimation'
 import type { BenchmarkComparisonPoint, BenchmarkComparisonData } from '@/api/queries'
 
 export type BenchmarkChartMode = 'percent' | 'currency'
@@ -74,6 +75,7 @@ export function BenchmarkEvolutionChart({
   const nikkeiLineRef = useRef<any>(null)
   const investedLineRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
+  const lastSweepKeyRef = useRef<string>('')
 
   const [internalMode, setInternalMode] = useState<BenchmarkChartMode>(defaultMode)
   const mode = propMode !== undefined ? propMode : internalMode
@@ -520,6 +522,15 @@ export function BenchmarkEvolutionChart({
       }
 
       chart.timeScale().fitContent()
+
+      // Trigger timeline sweep animation on load & when benchmark, mode or period changes
+      const sweepKey = `${points?.length || 0}_${mode}_${showPortfolio}_${showSp500}_${showBce}_${showMsci}_${showNasdaq}_${showStoxx}_${showNikkei}_${points?.[0]?.date || ''}_${points?.[points.length - 1]?.date || ''}`
+      if (points.length > 0 && sweepKey !== lastSweepKeyRef.current) {
+        lastSweepKeyRef.current = sweepKey
+        requestAnimationFrame(() => {
+          triggerChartAnimation(containerRef.current)
+        })
+      }
     } catch (err) {
       console.warn('Failed to update benchmark series:', err)
     }
@@ -543,7 +554,7 @@ export function BenchmarkEvolutionChart({
           {/* Toggle Mode: % (Rentabilidad vs Benchmarks) vs € (Patrimonio Total) */}
           {showModeSelector && (
             <div className="flex items-center gap-1.5">
-              <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+              <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
                 <button
                   onClick={() => setMode('percent')}
                   className={`min-w-[28px] px-2.5 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${

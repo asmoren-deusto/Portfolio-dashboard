@@ -23,9 +23,9 @@ export function Card({ children, className, glass = true, loading = false }: Car
     <CardContext.Provider value={{ loading }}>
       <div
         className={cn(
-          'relative rounded-2xl overflow-hidden transition-all duration-200',
-          'bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300',
-          'dark:bg-[#111625]/90 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/20 dark:hover:border-white/[0.14]',
+          'relative rounded-2xl overflow-hidden transition-all duration-200 ease-out cursor-card',
+          'bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
+          'dark:bg-[#181922]/94 dark:border-white/[0.08] dark:hover:border-white/[0.15]',
           glass && 'backdrop-blur-md',
           className
         )}
@@ -34,7 +34,7 @@ export function Card({ children, className, glass = true, loading = false }: Car
         {loading ? (
           <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
         ) : (
-          <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-white/10" />
+          <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.06] to-transparent dark:via-white/[0.12] z-10" />
         )}
         {children}
       </div>
@@ -44,7 +44,7 @@ export function Card({ children, className, glass = true, loading = false }: Car
 
 export function CardHeader({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn('flex items-center justify-between px-5 sm:px-6 pt-3.5 pb-2.5 border-b border-slate-100 dark:border-white/[0.04]', className)}>
+    <div className={cn('flex items-center justify-between px-5 sm:px-6 pt-3.5 pb-2.5 border-b border-slate-100 dark:border-white/[0.05]', className)}>
       {children}
     </div>
   )

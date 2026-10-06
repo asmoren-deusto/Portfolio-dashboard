@@ -92,19 +92,11 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   const [loaded, setLoaded] = useState<boolean>(false)
 
   const sizeClasses = {
-    xs: 'w-6 h-6 text-[10px] font-bold',
-    sm: 'w-7 h-7 text-xs font-bold',
-    md: 'w-10 h-10 text-xs font-bold',
-    lg: 'w-12 h-12 text-sm font-bold',
-    xl: 'w-14 h-14 text-base font-bold',
-  }[size]
-
-  const imgPadding = {
-    xs: 'p-0.5',
-    sm: 'p-1',
-    md: 'p-1.5',
-    lg: 'p-2',
-    xl: 'p-2.5',
+    xs: 'w-[22px] h-[22px] text-[9.5px] font-bold',
+    sm: 'w-[26px] h-[26px] text-[11px] font-bold',
+    md: 'w-[34px] h-[34px] text-xs font-bold',
+    lg: 'w-[42px] h-[42px] text-sm font-bold',
+    xl: 'w-[50px] h-[50px] text-base font-bold',
   }[size]
 
   let targetDomain = domain
@@ -129,6 +121,32 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
     else if (nl.includes('myinvestor')) targetDomain = 'myinvestor.es'
   }
   const cleanDomain = targetDomain?.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
+
+  const isIShares =
+    Boolean(cleanDomain?.includes('ishares')) ||
+    (name || '').toLowerCase().includes('ishares') ||
+    Boolean(ticker && ticker.toLowerCase().includes('ishares')) ||
+    Boolean(isin && (isin === 'IE000QAZP7L2' || isin === 'IE000ZYRH0Q7'))
+
+  const roundedClass = 'rounded-full'
+
+  const imgPadding = isIShares
+    ? {
+        xs: 'p-0.5',
+        sm: 'p-0.5',
+        md: 'p-1',
+        lg: 'p-1.5',
+        xl: 'p-2',
+      }[size]
+    : 'p-0'
+
+  const containerBg = isIShares
+    ? 'bg-slate-200 dark:bg-slate-200 shadow-sm text-slate-900'
+    : 'bg-slate-100/90 dark:bg-[#1a1c22] shadow-sm'
+
+  const imgFit = isIShares
+    ? 'object-contain'
+    : 'object-cover scale-100'
 
   const getSource = (step: number) => {
     if (!cleanDomain && !logoUrl) return null
@@ -159,13 +177,12 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
     }
   }
 
-  const roundedClass = size === 'xs' ? 'rounded-lg' : 'rounded-xl'
   const marketIcon = getMarketIcon(ticker)
 
   if (marketIcon) {
     return (
       <div
-        className={`${sizeClasses} ${roundedClass} bg-slate-100 border border-slate-200/90 flex items-center justify-center shrink-0 dark:bg-slate-800/90 dark:border-white/10 ${className}`}
+        className={`${sizeClasses} ${roundedClass} bg-slate-100 flex items-center justify-center shrink-0 dark:bg-slate-800/90 ${className}`}
         title={`${name} (${ticker})`}
       >
         {marketIcon}
@@ -174,9 +191,20 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   }
 
   if (attempt >= 3 || !currentSrc) {
+    if (isIShares) {
+      return (
+        <div
+          className={`${sizeClasses} ${roundedClass} bg-slate-200 dark:bg-slate-200 flex items-center justify-center font-bold tracking-tight text-slate-900 shadow-sm shrink-0 ${className}`}
+          title={`${name} (${fallbackStr})`}
+        >
+          <span className="font-serif italic text-base leading-none select-none text-slate-900">i</span>
+        </div>
+      )
+    }
+
     return (
       <div
-        className={`${sizeClasses} ${roundedClass} bg-gradient-to-br ${getAvatarGradient(fallbackStr)} flex items-center justify-center font-bold tracking-tight text-white shadow-md ring-1 ring-white/15 shrink-0 ${className}`}
+        className={`${sizeClasses} ${roundedClass} bg-gradient-to-br ${getAvatarGradient(fallbackStr)} flex items-center justify-center font-bold tracking-tight text-white shadow-md shrink-0 ${className}`}
         title={`${name} (${fallbackStr})`}
       >
         {initials}
@@ -186,20 +214,20 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
 
   return (
     <div
-      className={`${sizeClasses} ${imgPadding} relative ${roundedClass} bg-slate-100/90 border border-slate-200/90 shadow-sm flex items-center justify-center overflow-hidden shrink-0 transition-all dark:bg-slate-800/90 dark:border-white/10 ${className}`}
+      className={`${sizeClasses} ${imgPadding} relative ${roundedClass} ${containerBg} flex items-center justify-center overflow-hidden shrink-0 transition-all ${className}`}
     >
       <img
         src={currentSrc}
         alt={name}
-        className={`w-full h-full object-contain ${size === 'xs' ? 'rounded-sm' : 'rounded-md'} transition-all duration-300 ${
-          loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        className={`w-full h-full ${imgFit} ${roundedClass} transition-all duration-300 ${
+          loaded ? 'opacity-100' : 'opacity-0'
         }`}
         loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={handleError}
       />
       {!loaded && (
-        <div className="absolute inset-0 bg-white/[0.04] animate-pulse rounded-xl" />
+        <div className="absolute inset-0 bg-white/[0.04] animate-pulse rounded-full" />
       )}
     </div>
   )

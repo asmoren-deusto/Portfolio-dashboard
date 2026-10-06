@@ -286,7 +286,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
         style={tableMaxHeight ? { maxHeight: tableMaxHeight } : undefined}
       >
         <table className="w-full text-center border-collapse min-w-[620px]">
-          <thead className={tableMaxHeight ? "sticky top-0 bg-white/95 dark:bg-[#111625]/95 backdrop-blur-xs z-10" : ""}>
+          <thead className={tableMaxHeight ? "sticky top-0 bg-white/95 dark:bg-[#181922]/95 backdrop-blur-xs z-10" : ""}>
             <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               <th className="py-2 px-2.5 text-left font-bold text-slate-800 dark:text-slate-200 w-16">
                 Año

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
-import { PALETTE, fmt } from '@/lib/utils'
+import { PALETTE_LIGHT, PALETTE_DARK, fmt } from '@/lib/utils'
+import { useAppStore } from '@/store/appStore'
 import type { Position } from '@/lib/mockData'
 
 interface AllocationChartProps {
@@ -29,6 +30,8 @@ export function AllocationChart({
   height,
 }: AllocationChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const theme = useAppStore((s) => s.theme)
+  const palette = theme === 'dark' ? PALETTE_DARK : PALETTE_LIGHT
 
   const chartHeight = height ?? (showLegend ? 235 : 295)
   const isCompact = chartHeight <= 265
@@ -161,7 +164,7 @@ export function AllocationChart({
               {data.map((d, i) => (
                 <Cell
                   key={d.isin || d.name || i}
-                  fill={PALETTE[i % PALETTE.length]}
+                  fill={palette[i % palette.length]}
                   opacity={activeIndex === null || activeIndex === i ? 1 : 0.4}
                   style={{
                     cursor: 'pointer',
@@ -234,7 +237,7 @@ export function AllocationChart({
                 <div
                   className="h-2 w-2 flex-shrink-0 rounded-full transition-transform"
                   style={{
-                    background: PALETTE[i % PALETTE.length],
+                    background: palette[i % palette.length],
                     transform: isHovered ? 'scale(1.25)' : 'scale(1)',
                   }}
                 />

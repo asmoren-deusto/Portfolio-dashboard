@@ -15,7 +15,6 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
-import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
@@ -124,17 +123,13 @@ export function PositionsPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      {/* Unified Header */}
-      <Header
-        title="Posiciones de Cartera"
-        subtitle="Seguimiento detallado de activos con rentabilidad latente, peso relativo y desglose por coste."
-      />
+      {/* Summary KPI Highlights */}
 
       {/* Summary KPI Highlights */}
       {stats && (
         <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Valor Total */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#111625]/85 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#181922]/90 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20 cursor-card">
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <span>Valor Total Cartera</span>
               <Layers className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
@@ -148,7 +143,7 @@ export function PositionsPage() {
           </div>
 
           {/* Plusvalía Latente */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#111625]/85 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#181922]/90 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20 cursor-card">
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <span>Ganancia Latente Total</span>
               {stats.totalPnl >= 0 ? (
@@ -179,7 +174,7 @@ export function PositionsPage() {
           </div>
 
           {/* Estado de Activos */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#111625]/85 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#181922]/90 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20 cursor-card">
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <span>Distribución Rentabilidad</span>
               <PieChart className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
@@ -194,7 +189,7 @@ export function PositionsPage() {
           </div>
 
           {/* TER Medio Ponderado */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#111625]/85 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#181922]/90 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20 cursor-card">
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <span>Comisión Media (TER)</span>
               <Percent className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
@@ -212,7 +207,7 @@ export function PositionsPage() {
       {/* Control Bar: Asset Tabs, Search, Sort & View Mode */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100/90 border border-slate-200/80 shadow-sm dark:bg-[#111625]/90 dark:border-white/[0.07] overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100/90 border border-slate-200/80 shadow-sm dark:bg-[#191a21] dark:border-white/[0.07] overflow-x-auto">
           {FILTER_TABS.map((tab) => {
             const active = activeFilter === tab.id
             return (
@@ -246,7 +241,7 @@ export function PositionsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por nombre, ticker o ISIN..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 text-xs shadow-sm dark:bg-[#111625]/90 dark:border-white/[0.08] dark:text-white dark:placeholder-slate-500 transition-all"
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 text-xs shadow-sm dark:bg-[#181922] dark:border-white/[0.08] dark:text-white dark:placeholder-slate-500 transition-all"
             />
           </div>
 
@@ -258,7 +253,7 @@ export function PositionsPage() {
                 setSortField(e.target.value as SortField)
                 setSortDir(-1)
               }}
-              className="appearance-none pl-3.5 pr-8 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-medium focus:outline-none focus:border-blue-500 shadow-sm cursor-pointer transition-all dark:bg-[#111625]/90 dark:border-white/[0.08] dark:text-slate-300"
+              className="appearance-none pl-3.5 pr-8 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-medium focus:outline-none focus:border-blue-500 shadow-sm cursor-pointer transition-all dark:bg-[#181922] dark:border-white/[0.08] dark:text-slate-300"
             >
               <option value="current_value">Ordenar: Mayor Valor</option>
               <option value="unrealized_pnl_pct">Ordenar: Mayor Ganancia %</option>
@@ -270,7 +265,7 @@ export function PositionsPage() {
           </div>
 
           {/* View Toggle */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 shadow-sm dark:bg-[#111625]/90 dark:border-white/[0.08]">
+          <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 shadow-sm dark:bg-[#191a21] dark:border-white/[0.08]">
             <button
               onClick={() => setViewMode('table')}
               className={`p-1.5 rounded-lg transition-colors ${
@@ -476,7 +471,7 @@ export function PositionsPage() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ delay: i * 0.03 }}
                 onClick={() => setSelectedPosition(p)}
-                className="group relative rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow-md dark:bg-[#111625]/90 dark:border-white/[0.07] dark:hover:border-blue-500/40 p-5 shadow-black/20 hover:shadow-blue-500/5 transition-all cursor-pointer backdrop-blur-md flex flex-col justify-between"
+                className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-blue-500/40 p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between"
               >
                 <div>
                   {/* Top Bar with Logo & Badges */}

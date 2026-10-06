@@ -2,6 +2,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer, Cell, LabelList
 } from 'recharts'
+import { motion } from 'framer-motion'
 import type { Analytics } from '@/lib/mockData'
 
 interface ReturnsChartProps {
@@ -10,12 +11,29 @@ interface ReturnsChartProps {
   height?: number
 }
 
+export function ReturnsChartSkeleton({ compact = false, height = 240 }: { compact?: boolean; height?: number }) {
+  const bars = [35, 52, 44, 68, 80, 95]
+  return (
+    <div style={{ height }} className="w-full flex items-end justify-between px-5 pb-6 pt-6 gap-2.5 sm:gap-3 animate-pulse">
+      {bars.map((h, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+          <div
+            className="w-full max-w-[36px] bg-slate-200/70 dark:bg-white/[0.06] rounded-t-lg transition-all"
+            style={{ height: `${h}%` }}
+          />
+          <div className="w-6 h-2.5 bg-slate-200/50 dark:bg-white/[0.04] rounded" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length || payload[0]?.value == null) return null
   const v: number = payload[0].value
   const fullName = payload[0]?.payload?.fullName || label
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#1a2035]/95 backdrop-blur-md px-3.5 py-2.5 text-xs shadow-xl">
+    <div className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white/95 dark:bg-[#181922]/95 backdrop-blur-md px-3.5 py-2.5 text-xs shadow-xl">
       <p className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5">{fullName}</p>
       <div className="flex items-center gap-1.5 font-mono">
         <span className="text-slate-500 dark:text-slate-400">Rendimiento:</span>
@@ -32,25 +50,21 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function ReturnsChart({ analytics, compact = false, height = 240 }: ReturnsChartProps) {
   if (!analytics) {
-    return (
-      <div style={{ height }} className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-        Sin datos de rentabilidad
-      </div>
-    )
+    return <ReturnsChartSkeleton compact={compact} height={height} />
   }
 
   const data = compact
     ? [
-        { name: '1D', fullName: '1 Día (Hoy)', value: analytics.return_1d ?? 0.24 },
-        { name: '1S', fullName: '1 Semana (7D)', value: analytics.return_1w ?? 1.15 },
+        { name: '1D', fullName: '1 Día (Hoy)', value: analytics.return_1d ?? 0 },
+        { name: '1S', fullName: '1 Semana (7D)', value: analytics.return_1w ?? 0 },
         { name: '1M', fullName: '1 Mes', value: analytics.return_1m ?? 0 },
         { name: '3M', fullName: '3 Meses', value: analytics.return_3m ?? 0 },
         { name: '6M', fullName: '6 Meses', value: analytics.return_6m ?? 0 },
         { name: '1A', fullName: '1 Año', value: analytics.return_1y ?? analytics.return_ytd ?? 0 },
       ]
     : [
-        { name: '1 Día', fullName: '1 Día (Hoy)', value: analytics.return_1d ?? 0.24 },
-        { name: '1 Semana', fullName: '1 Semana (7D)', value: analytics.return_1w ?? 1.15 },
+        { name: '1 Día', fullName: '1 Día (Hoy)', value: analytics.return_1d ?? 0 },
+        { name: '1 Semana', fullName: '1 Semana (7D)', value: analytics.return_1w ?? 0 },
         { name: '1 Mes', fullName: '1 Mes', value: analytics.return_1m ?? 0 },
         { name: '3 Meses', fullName: '3 Meses', value: analytics.return_3m ?? 0 },
         { name: '6 Meses', fullName: '6 Meses', value: analytics.return_6m ?? 0 },
@@ -58,11 +72,18 @@ export function ReturnsChart({ analytics, compact = false, height = 240 }: Retur
       ]
 
   return (
-    <div data-private style={{ height }} className="w-full">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      data-private
+      style={{ height }}
+      className="w-full"
+    >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={compact ? { top: 16, right: 4, left: -22, bottom: 0 } : { top: 16, right: 12, left: -10, bottom: 0 }}
+          margin={compact ? { top: 18, right: 4, left: -22, bottom: 0 } : { top: 18, right: 12, left: -10, bottom: 0 }}
         >
           <defs>
             <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
@@ -89,7 +110,12 @@ export function ReturnsChart({ analytics, compact = false, height = 240 }: Retur
           />
           <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-          <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={compact ? 34 : 44}>
+          <Bar
+            dataKey="value"
+            radius={[6, 6, 0, 0]}
+            maxBarSize={compact ? 34 : 44}
+            isAnimationActive={false}
+          >
             <LabelList
               dataKey="value"
               position="top"
@@ -110,6 +136,6 @@ export function ReturnsChart({ analytics, compact = false, height = 240 }: Retur
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </motion.div>
   )
 }

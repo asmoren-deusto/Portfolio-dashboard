@@ -61,7 +61,7 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="group relative rounded-2xl bg-white/95 hover:bg-white border border-slate-200/90 hover:border-blue-500/50 p-5 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 cursor-pointer flex flex-col justify-between backdrop-blur-md overflow-hidden dark:bg-[#111625]/80 dark:hover:bg-[#151c2e] dark:border-white/[0.07] dark:hover:border-blue-500/40"
+      className="group relative rounded-2xl bg-white/95 hover:bg-white border border-slate-200/80 hover:border-blue-400/70 p-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover cursor-pointer flex flex-col justify-between backdrop-blur-md overflow-hidden dark:bg-[#181922]/92 dark:hover:bg-[#20222d] dark:border-white/[0.08] dark:hover:border-blue-500/40"
     >
       {/* Subtle hover gradient reflection */}
       <div className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-blue-500/[0.04] dark:from-white/[0.06] via-transparent to-transparent" />
@@ -99,7 +99,7 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
                 )}
                 {(stock.market_state === 'FUTURES' || stock.market_state === 'OVERNIGHT') && (
                   <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
-                    FUT
+                    FUTURES
                   </span>
                 )}
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
@@ -131,7 +131,7 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
         {/* Price & Change */}
         <div className="flex items-baseline justify-between gap-2 my-2">
           <div>
-            <div className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white tabular-nums group-hover:scale-[1.02] transition-transform origin-left">
+            <div className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white tabular-nums">
               {fmt.price(stock.price, cur)}
             </div>
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
@@ -150,14 +150,14 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
                     ? 'bg-purple-50 text-purple-700 border-purple-300/70 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20'
                     : 'bg-sky-50 text-sky-700 border-sky-200/70 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20'
                 }`}>
-                  {stock.market_state === 'PRE' ? 'Pre-mercado' : (stock.market_state === 'POST' || stock.market_state === 'POSTPOST') ? 'Post-mercado' : 'FUT'}
+                  {stock.market_state === 'PRE' ? 'Pre-mercado' : (stock.market_state === 'POST' || stock.market_state === 'POSTPOST') ? 'Post-mercado' : 'FUTURES'}
                 </span>
               )}
             </div>
           </div>
 
           <div
-            className={`flex items-center gap-1 text-xs font-semibold tabular-nums px-2.5 py-1 rounded-xl shadow-xs transition-transform group-hover:scale-105 ${
+            className={`flex items-center gap-1 text-xs font-semibold tabular-nums px-2.5 py-1 rounded-xl shadow-xs ${
               isPos
                 ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
                 : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'

@@ -1,4 +1,5 @@
 """Price service — fetches NAV/prices from Yahoo Finance, FT, Azvalor, Indexa Capital and Morningstar."""
+import asyncio
 import re
 import csv
 import httpx
@@ -9,6 +10,20 @@ from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)
+
+import sys
+from pathlib import Path
+
+# Ensure backend root is in sys.path if invoked from parent directory
+_backend_dir = str(Path(__file__).resolve().parent.parent.parent)
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
+
+try:
+    from app.models import PriceCache, Transaction
+    from app.database import SessionLocal
+except ImportError:
+    PriceCache, Transaction, SessionLocal = None, None, None
 
 # Simple in-memory cache: {isin: {"price": float, "date": Optional[str], "ts": datetime}}
 _price_cache: dict = {}
@@ -27,10 +42,12 @@ KNOWN_TICKERS: dict[str, str] = {
     "LU1598719752": "0P0001A94B.F",  # Cobas Lux SICAV - Cobas International Fund P EUR Acc
     "LU0996182563": "0P00012PP6.F",  # Amundi Index MSCI World AE-C
     "IE00BYX5M476": "0P0001CJGK.F",  # Fidelity MSCI Emerging Markets Index Fund EUR P Acc
+    "IE00BYX5NH74": "0P0001CJGR.F",  # Fidelity MSCI Japan Index Fund EUR P Acc
     "IE000ZYRH0Q7": "0P0001XF40.F",  # iShares Developed World Index (IE) S Acc EUR
     "IE00BM95B621": "0P0001LT4H.F",  # Polar Capital Global Technology Fund R Acc
     "LU1623762843": "0P0001FE3K.F",  # Carmignac Portfolio Credit A EUR Acc
     "LU2145461757": "0P0001XYYU.F",  # Robeco Capital Growth - Robeco Smart Energy D EUR
+    "LU0302296495": "0P00009PQ4.F",  # DNB Fund - Technology A EUR Acc
 }
 
 
@@ -65,9 +82,8 @@ async def get_price_with_date(
 
     # For other non-standard ISINs (e.g. Kutxabank 0201G), look up DB PriceCache
     is_standard_isin = len(isin) == 12 and isin.isalnum()
-    if price is None and not is_standard_isin and db is not None:
+    if price is None and not is_standard_isin and db is not None and PriceCache is not None:
         try:
-            from app.models import PriceCache
             entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
             if entry and entry.price > 0:
                 _price_cache[isin] = {"price": entry.price, "date": entry.date, "ts": datetime.now()}
@@ -79,26 +95,54 @@ async def get_price_with_date(
     if price is None and isin.startswith("ES011261"):
         price, price_date = await _fetch_azvalor_official(isin)
 
-    # 2. Try Financial Times Markets (official European fund data provider)
+    # 2. Try European fund providers (Financial Times, Quefondos, Yahoo Finance) in parallel
     if price is None and is_standard_isin:
-        price, price_date = await _fetch_ft_official(isin)
+        tasks = [_fetch_ft_official(isin), _fetch_quefondos_price(isin)]
+        if ticker:
+            tasks.append(_fetch_yahoo_price(ticker))
 
-    # 3. Try Quefondos by ISIN
-    if price is None and is_standard_isin:
-        price, price_date = await _fetch_quefondos_price(isin)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        ft_res = results[0] if len(results) > 0 and not isinstance(results[0], Exception) else (None, None)
+        qf_res = results[1] if len(results) > 1 and not isinstance(results[1], Exception) else (None, None)
+        yf_res = results[2] if len(results) > 2 and not isinstance(results[2], Exception) else (None, None)
 
-    # 4. Try Yahoo Finance if ticker provided or previous scrapers failed
-    if price is None and ticker:
-        price, price_date = await _fetch_yahoo_price(ticker)
+        ft_price, ft_date = ft_res
+        qf_price, qf_date = qf_res
+        yf_price, yf_date = yf_res
+
+        # Candidates with (date, decimal_precision_priority, price, source)
+        # Date is strictly priority #1: freshest/most recent liquidation date always wins immediately!
+        candidates = []
+        if yf_price is not None and yf_date:
+            candidates.append((yf_date, 4, yf_price, "yahoo"))
+        if qf_price is not None and qf_date:
+            candidates.append((qf_date, 4, qf_price, "quefondos"))
+        if ft_price is not None and ft_date:
+            candidates.append((ft_date, 2, ft_price, "ft"))
+
+        if candidates:
+            # Sort by: 1. Date descending (most recent date wins first, ensuring earliest NAV)
+            #          2. Precision descending (tie-breaker for same date)
+            candidates.sort(key=lambda c: (c[0], c[1]), reverse=True)
+            best_date, _, best_price, _ = candidates[0]
+            price, price_date = best_price, best_date
 
     # If successfully fetched from live provider, persist to DB PriceCache & in-memory cache
-    if price is not None and db is not None:
+    if price is not None and db is not None and PriceCache is not None:
         try:
-            from app.models import PriceCache
             target_date = price_date or datetime.now().strftime("%Y-%m-%d")
             existing = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == target_date).first()
             if existing:
-                existing.price = price
+                # Do not downgrade high-precision NAV (4 decimals) with a rounded quote (2 decimals)
+                existing_str = f"{existing.price:.6f}".rstrip("0")
+                new_str = f"{price:.6f}".rstrip("0")
+                existing_decs = len(existing_str.split(".")[1]) if "." in existing_str else 0
+                new_decs = len(new_str.split(".")[1]) if "." in new_str else 0
+                is_same_quote = (abs(existing.price - price) / price < 0.005) if price > 0 else True
+                if is_same_quote and existing_decs > new_decs:
+                    price = existing.price
+                else:
+                    existing.price = price
             else:
                 db.add(PriceCache(isin=isin, date=target_date, price=price, currency="EUR", source="live"))
             db.commit()
@@ -106,9 +150,8 @@ async def get_price_with_date(
             logger.warning(f"Error persisting live price for {isin}: {e}")
 
     # 5. Fallback to DB PriceCache if live fetch failed
-    if price is None and db is not None:
+    if price is None and db is not None and PriceCache is not None:
         try:
-            from app.models import PriceCache
             entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
             if entry and entry.price > 0:
                 price = entry.price

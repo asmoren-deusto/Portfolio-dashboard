@@ -157,20 +157,20 @@ export function usePerformance() {
 
 // ── Analytics ──────────────────────────────────────────────────────────────────
 export function useAnalytics() {
-  const { useMock, period, selectedBroker, currentUser } = useAppStore()
+  const { useMock, selectedBroker, currentUser } = useAppStore()
   const isDemo = Boolean(useMock || currentUser?.isDemo)
   const userAnalytics = currentUser?.analytics ?? MOCK_ANALYTICS
   const brokerQuery = selectedBroker !== 'all' ? `&broker=${selectedBroker}` : ''
 
   return useQuery<Analytics>({
-    queryKey: ['analytics', currentUser?.id, period, selectedBroker],
+    queryKey: ['analytics', currentUser?.id, selectedBroker],
     queryFn: () =>
       isDemo
         ? Promise.resolve(userAnalytics)
-        : get<Analytics>(`/portfolio/analytics?period=${period}${brokerQuery}`),
-    initialData: isDemo ? userAnalytics : undefined,
+        : get<Analytics>(`/portfolio/analytics?period=2y${brokerQuery}`),
+    initialData: isDemo ? userAnalytics : (currentUser?.analytics?.return_1d !== undefined ? currentUser.analytics : undefined),
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: isDemo ? 1000 * 60 * 5 : 0,
+    staleTime: isDemo ? 1000 * 60 * 5 : 1000 * 60 * 2,
     refetchOnMount: true,
   })
 }

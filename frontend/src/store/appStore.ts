@@ -435,7 +435,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       role: 'Inversor Registrado',
       strategy: strategy || 'Cartera Personalizada',
       badge: 'Personal',
-      broker: 'MyInvestor',
+      broker: 'Indexa Capital',
       isDemo: false,
       color: 'bg-indigo-600 text-white',
       bgGradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',

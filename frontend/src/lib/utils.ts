@@ -4,7 +4,7 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs)
 }
 
-export const PALETTE = [
+export const PALETTE_LIGHT = [
   '#3b82f6', // blue
   '#10b981', // emerald
   '#f59e0b', // amber
@@ -18,6 +18,23 @@ export const PALETTE = [
   '#e11d48', // rose
   '#64748b', // slate
 ]
+
+export const PALETTE_DARK = [
+  '#3b82f6', // vibrant royal blue
+  '#10b981', // vibrant emerald
+  '#f59e0b', // warm radiant amber
+  '#8b5cf6', // luminous violet
+  '#f43f5e', // vivid coral rose
+  '#06b6d4', // crisp cyan
+  '#f97316', // bright orange
+  '#6366f1', // vivid indigo
+  '#14b8a6', // clear teal
+  '#84cc16', // fresh lime
+  '#ec4899', // radiant pink
+  '#64748b', // balanced slate
+]
+
+export const PALETTE = PALETTE_LIGHT
 
 export const ASSET_TYPE_LABELS: Record<string, string> = {
   fund: 'Fondo de Inversión',

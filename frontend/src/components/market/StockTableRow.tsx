@@ -97,7 +97,7 @@ export const StockTableRow: React.FC<StockTableRowProps> = ({ stock, onClick, ra
               )}
               {(stock.market_state === 'FUTURES' || stock.market_state === 'OVERNIGHT') && (
                 <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
-                  FUT
+                  FUTURES
                 </span>
               )}
               <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">

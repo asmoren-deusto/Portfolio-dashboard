@@ -1,4 +1,5 @@
 """Portfolio router — summary, positions, performance."""
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
@@ -189,16 +190,23 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
     positions = calculate_positions(transactions)
     active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
 
-    results = {}
-    for isin, pos in active.items():
+    async def _fetch_one(isin, pos):
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
-        price, price_date = await get_price_with_date(isin, ticker, db=db, force=True)
-        results[isin] = {
+        p, p_date = await get_price_with_date(isin, ticker, db=db, force=True)
+        return isin, {
             "name": asset.name if asset else isin,
-            "price": price,
-            "price_date": price_date,
+            "price": p,
+            "price_date": p_date,
         }
+
+    tasks = [_fetch_one(isin, pos) for isin, pos in active.items()]
+    items = await asyncio.gather(*tasks, return_exceptions=True)
+    results = {}
+    for res in items:
+        if isinstance(res, tuple):
+            isin_key, data = res
+            results[isin_key] = data
 
     logger.info(f"Refreshed prices for {len(results)} assets: {results}")
     return {
@@ -548,10 +556,13 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     positions = calculate_positions(transactions)
     price_history = {}
     all_isins = set(t["isin"] for t in transactions)
+    # Analytics computes multi-horizon returns (1d, 1w, 1m, 3m, 6m, 1y, ytd).
+    # Ensure at least 2y of price history so all horizons can be computed reliably.
+    history_period = "max" if period == "max" else "2y"
     for isin in all_isins:
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
-        history = await get_price_history(isin, ticker, period)
+        history = await get_price_history(isin, ticker, history_period)
         curr_p = await get_current_price(isin, ticker, db=db)
         if history:
             if curr_p and curr_p > 0:

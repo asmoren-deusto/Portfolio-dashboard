@@ -16,10 +16,9 @@ import {
   Layers,
   Globe,
 } from 'lucide-react'
-import { Header } from '@/components/layout/Header'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { KpiCard } from '@/components/ui/KpiCard'
-import { ReturnsChart } from '@/components/charts/ReturnsChart'
+import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
 import { BenchmarkEvolutionChart, type BenchmarkChartMode } from '@/components/charts/BenchmarkEvolutionChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
@@ -65,12 +64,7 @@ export function AnalyticsPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      {/* Unified Header */}
-      <Header
-        title="Analítica y Riesgo"
-        subtitle="Métricas cuantitativas avanzadas, rentabilidad ponderada en el tiempo (TWR) y perfil de volatilidad."
-        showPeriodSelector
-      />
+      {/* KPI grid with luxury styling */}
 
       {/* KPI grid with luxury styling */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
@@ -232,7 +226,7 @@ export function AnalyticsPage() {
             </div>
 
             {/* Mode Switch between % TWR and € Total */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5 shrink-0">
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5 shrink-0">
               {(['percent', 'currency'] as const).map((m) => (
                 <button
                   key={m}
@@ -299,7 +293,7 @@ export function AnalyticsPage() {
             </div>
 
             {/* Toggle Switch between Returns and Distribution */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5 shrink-0">
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5 shrink-0">
               {(['returns', 'distribution'] as const).map((view) => (
                 <button
                   key={view}
@@ -346,7 +340,7 @@ export function AnalyticsPage() {
               {allocStats && (
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                   <div
-                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                     title={allocStats.box1Title}
                   >
                     <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -363,7 +357,7 @@ export function AnalyticsPage() {
                   </div>
 
                   <div
-                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                     title={allocStats.box2Title}
                   >
                     <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -384,7 +378,9 @@ export function AnalyticsPage() {
           ) : (
             <div className={cn("px-4 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
               <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-                {analytics ? (
+                {analyticsFetching && !analytics ? (
+                  <ReturnsChartSkeleton compact={false} height={260} />
+                ) : analytics ? (
                   <ReturnsChart analytics={analytics} compact={false} height={260} />
                 ) : (
                   <div className="flex h-full items-center justify-center text-slate-500 text-sm">
@@ -396,8 +392,8 @@ export function AnalyticsPage() {
               {/* Quick Stats Strip */}
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 <div
-                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
-                  title={`Rentabilidad del día (1D): ${fmt.pct(analytics?.return_1d ?? 0.24)}`}
+                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  title={analytics?.return_1d !== undefined ? `Rentabilidad del día (1D): ${fmt.pct(analytics.return_1d)}` : 'Rentabilidad del día (1D)'}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
                     <div className="w-5 h-5 rounded-md flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -412,13 +408,13 @@ export function AnalyticsPage() {
                       (analytics?.return_1d ?? 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                     )}
                   >
-                    {fmt.pct(analytics?.return_1d ?? 0.24)}
+                    {analytics?.return_1d !== undefined ? fmt.pct(analytics.return_1d) : '—'}
                   </span>
                 </div>
 
                 <div
-                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
-                  title={`Rentabilidad acumulada en el año (YTD): ${fmt.pct(analytics?.return_ytd ?? analytics?.return_1y ?? 14.5)}`}
+                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  title={analytics?.return_ytd !== undefined ? `Rentabilidad acumulada en el año (YTD): ${fmt.pct(analytics.return_ytd)}` : 'Rentabilidad acumulada en el año (YTD)'}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
                     <div className="w-5 h-5 rounded-md flex items-center justify-center bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
@@ -454,12 +450,6 @@ export function AnalyticsPage() {
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-blue-500 dark:text-blue-400" />
             <CardTitle>Matriz de Rendimientos Mensuales</CardTitle>
-            {analyticsFetching && (
-              <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-              </span>
-            )}
           </div>
           <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
             Rendimiento neto ponderado en el tiempo mes a mes y acumulación anual
@@ -476,12 +466,6 @@ export function AnalyticsPage() {
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
             <CardTitle>Diagnóstico de Riesgo y Resiliencia</CardTitle>
-            {analyticsFetching && (
-              <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-              </span>
-            )}
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400">Evaluación estadística del portfolio</span>
         </CardHeader>

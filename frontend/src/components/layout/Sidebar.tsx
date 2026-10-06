@@ -71,7 +71,7 @@ export function Sidebar({}: SidebarProps) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.06] dark:bg-[#0f1420] transition-transform duration-300 ease-in-out shadow-lg',
+          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#181922] transition-transform duration-300 ease-in-out shadow-lg',
           sidebarCollapsed
             ? mobileSidebarOpen
               ? 'translate-x-0'
@@ -82,9 +82,9 @@ export function Sidebar({}: SidebarProps) {
         )}
       >
         {/* Logo & Close / Collapse Button (v2.5 removed to eliminate collision with X and redundancy) */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.06] px-4 py-3.5">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.08] px-4 py-3.5">
           <div className="flex flex-1 min-w-0 items-center gap-2.5">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 ring-1 ring-blue-500/20">
               <TrendingUp size={18} strokeWidth={2.5} />
             </div>
             <span className="font-bold text-[17px] tracking-tight text-slate-950 dark:text-white truncate">
@@ -139,10 +139,10 @@ export function Sidebar({}: SidebarProps) {
                 onClick={() => setMobileSidebarOpen(false)}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14.8px] font-semibold transition-all duration-150',
+                    'flex items-center gap-2.5 rounded-xl px-3 py-2 text-[14px] font-medium transition-all duration-150',
                     isActive
-                      ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-500/5 dark:bg-blue-500/15 dark:text-blue-400 dark:shadow-none relative'
-                      : 'text-slate-700 hover:bg-slate-100/90 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/[0.04] dark:hover:text-slate-200'
+                      ? 'bg-blue-50/90 text-blue-700 font-bold dark:bg-blue-500/[0.12] dark:text-blue-300 shadow-xs relative'
+                      : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/[0.04] dark:hover:text-slate-200'
                   )
                 }
               >
@@ -151,10 +151,11 @@ export function Sidebar({}: SidebarProps) {
                     {isActive && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute left-0 top-1/2 h-5 w-[3.5px] -translate-y-1/2 rounded-r-full bg-blue-600 dark:bg-blue-500"
+                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-blue-600 dark:bg-blue-400"
+                        transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                       />
                     )}
-                    <Icon size={17} strokeWidth={isActive ? 2.3 : 1.8} />
+                    <Icon size={16.5} strokeWidth={isActive ? 2.3 : 1.8} className={isActive ? 'text-blue-600 dark:text-blue-400' : ''} />
                     <span>{label}</span>
                   </>
                 )}
@@ -167,7 +168,7 @@ export function Sidebar({}: SidebarProps) {
         <div className="border-t border-slate-100 dark:border-white/[0.06] p-3 space-y-2.5">
           {/* Active User Card */}
           {currentUser && (
-            <div className="p-2 rounded-xl bg-slate-100/90 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06] flex items-center justify-between gap-2 shadow-2xs">
+            <div className="p-2 rounded-xl bg-slate-100/90 dark:bg-[#13141b] border border-slate-200/90 dark:border-white/[0.08] flex items-center justify-between gap-2 shadow-2xs">
               <div className="flex items-center gap-2 min-w-0">
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] text-white shrink-0 shadow-xs ring-1 ring-black/10 dark:ring-white/10"
@@ -198,7 +199,7 @@ export function Sidebar({}: SidebarProps) {
           )}
 
           {/* Theme Segmented Switcher */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-[#141928] border border-slate-200/90 dark:border-white/[0.06]">
+          <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-[#13141b] border border-slate-200/90 dark:border-white/[0.08]">
             <button
               onClick={() => setTheme('light')}
               className={cn(

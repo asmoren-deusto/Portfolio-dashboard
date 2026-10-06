@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, TrendingUp, TrendingDown, ExternalLink, Globe } from 'lucide-react'
@@ -122,7 +122,7 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({ stock, onClo
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            className="relative z-10 w-full max-w-[990px] my-auto rounded-3xl bg-white dark:bg-[#0f1424] border border-slate-200 dark:border-white/10 shadow-2xl p-5 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
+            className="relative z-10 w-full max-w-[990px] my-auto rounded-3xl bg-white dark:bg-[#20222a] border border-slate-200 dark:border-white/10 shadow-2xl p-5 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Subtle background glow */}
@@ -202,7 +202,7 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({ stock, onClo
                     )}
                     {(stock.market_state === 'FUTURES' || stock.market_state === 'OVERNIGHT') && (
                       <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
-                        FUT
+                        FUTURES
                       </span>
                     )}
                   </div>

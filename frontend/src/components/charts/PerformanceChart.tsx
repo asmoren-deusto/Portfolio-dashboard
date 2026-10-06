@@ -12,6 +12,7 @@ import {
 import type { PricePoint } from '@/lib/mockData'
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
+import { triggerChartAnimation } from '@/lib/chartAnimation'
 import {
   TrendingUp,
   TrendingDown,
@@ -113,6 +114,7 @@ export function PerformanceChart({
   const investedSeriesRef = useRef<any>(null)
   const markersRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
+  const lastSweepKeyRef = useRef<string>('')
 
   const theme = useAppStore(s => s.theme)
   const isDark = theme === 'dark'
@@ -479,6 +481,15 @@ export function PerformanceChart({
 
       // Automatically auto-fit the view to the full period data width without needing a button
       chart.timeScale().fitContent()
+
+      // Trigger timeline sweep animation on load & when period or mode changes
+      const sweepKey = `${data?.length || 0}_${chartMode}_${data?.[0]?.date || ''}_${data?.[data.length - 1]?.date || ''}`
+      if (data && data.length > 0 && sweepKey !== lastSweepKeyRef.current) {
+        lastSweepKeyRef.current = sweepKey
+        requestAnimationFrame(() => {
+          triggerChartAnimation(containerRef.current)
+        })
+      }
     } catch (err) {
       console.warn('Failed to update performance chart:', err)
     }
@@ -559,7 +570,7 @@ export function PerformanceChart({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
           {/* Max Peak */}
           <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
             title={`Máximo del periodo (ATH): ${fmt.currency(metrics.maxPoint.value)} el ${formatDateSpanish(metrics.maxPoint.date)}`}
           >
             <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -575,7 +586,7 @@ export function PerformanceChart({
 
           {/* Period Low */}
           <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
             title={`Mínimo del periodo: ${fmt.currency(metrics.minPoint.value)} el ${formatDateSpanish(metrics.minPoint.date)}`}
           >
             <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
@@ -591,7 +602,7 @@ export function PerformanceChart({
 
           {/* Current Drawdown */}
           <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
             title={metrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${metrics.drawdownPct.toFixed(2)}%`}
           >
             <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
@@ -614,7 +625,7 @@ export function PerformanceChart({
 
           {/* Net Return */}
           <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
             title={`Ganancia neta del periodo: ${fmt.currency(metrics.periodProfit)} (${fmt.pct(metrics.periodReturnPct)})`}
           >
             <div className={cn(

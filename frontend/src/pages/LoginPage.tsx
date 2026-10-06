@@ -263,7 +263,7 @@ export const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center p-4 sm:p-6 bg-slate-50 dark:bg-[#080c16] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center p-4 sm:p-6 bg-slate-50 dark:bg-[#1d1f26] text-slate-900 dark:text-slate-100 transition-colors">
       {/* Background glow effects */}
       <div className="pointer-events-none fixed top-10 left-1/4 w-[600px] h-[300px] bg-blue-500/[0.05] dark:bg-blue-600/[0.07] blur-[130px] rounded-full -z-10" />
       <div className="pointer-events-none fixed bottom-10 right-1/4 w-[500px] h-[300px] bg-indigo-500/[0.04] dark:bg-indigo-600/[0.06] blur-[120px] rounded-full -z-10" />
@@ -272,7 +272,7 @@ export const LoginPage: React.FC = () => {
       <div className="w-full max-w-2xl">
         {/* Brand Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-2.5 p-2 rounded-2xl bg-white dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-sm mb-3">
+          <div className="inline-flex items-center gap-2.5 p-2 rounded-2xl bg-white dark:bg-[#181922] border border-slate-200/90 dark:border-white/[0.08] shadow-sm mb-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
               <TrendingUp size={20} strokeWidth={2.5} />
             </div>
@@ -290,14 +290,14 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Card Frame */}
-        <div className="rounded-3xl bg-white/95 dark:bg-[#0f1424] border border-slate-200/90 dark:border-white/[0.08] shadow-xl dark:shadow-2xl overflow-hidden backdrop-blur-xl">
+        <div className="rounded-3xl bg-white/95 dark:bg-[#181922] border border-slate-200/90 dark:border-white/[0.08] shadow-xl dark:shadow-2xl overflow-hidden backdrop-blur-xl">
           {/* Navigation Tabs */}
           <div className="grid grid-cols-3 border-b border-slate-200/80 dark:border-white/[0.06] bg-slate-50/80 dark:bg-white/[0.02] p-1.5 gap-1">
             <button
               onClick={() => handleTabChange('profiles')}
               className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'profiles'
-                  ? 'bg-white dark:bg-[#151b2e] text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/60 dark:border-white/[0.08]'
+                  ? 'bg-white dark:bg-[#191a21] text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/60 dark:border-white/[0.08]'
                   : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
@@ -309,7 +309,7 @@ export const LoginPage: React.FC = () => {
               onClick={() => handleTabChange('form')}
               className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'form'
-                  ? 'bg-white dark:bg-[#151b2e] text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/60 dark:border-white/[0.08]'
+                  ? 'bg-white dark:bg-[#191a21] text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/60 dark:border-white/[0.08]'
                   : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
@@ -496,7 +496,7 @@ export const LoginPage: React.FC = () => {
                                 onChange={(e) => setProfileCurrentPassword(e.target.value)}
                                 placeholder="Tu contraseña actual..."
                                 autoFocus
-                                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                               />
                               <button
                                 type="button"
@@ -521,7 +521,7 @@ export const LoginPage: React.FC = () => {
                               onChange={(e) => setProfileNewPassword(e.target.value)}
                               placeholder="Mínimo 4 caracteres..."
                               autoFocus={!selectedProfile.passwordHash}
-                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                             />
                             <button
                               type="button"
@@ -544,7 +544,7 @@ export const LoginPage: React.FC = () => {
                               value={profileConfirmPassword}
                               onChange={(e) => setProfileConfirmPassword(e.target.value)}
                               placeholder="Repite la nueva contraseña..."
-                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                             />
                           </div>
                         </div>
@@ -606,7 +606,7 @@ export const LoginPage: React.FC = () => {
                               onChange={(e) => setProfilePassword(e.target.value)}
                               placeholder="Introduce tu contraseña..."
                               autoFocus
-                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                             />
                             <button
                               type="button"
@@ -662,7 +662,7 @@ export const LoginPage: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="demo@portfoliopro.app o asier@portfoliopro.app"
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
                 </div>
@@ -687,7 +687,7 @@ export const LoginPage: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                     />
                     <button
                       type="button"
@@ -722,7 +722,7 @@ export const LoginPage: React.FC = () => {
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       placeholder="Ej: Carlos Santos"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
@@ -735,7 +735,7 @@ export const LoginPage: React.FC = () => {
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
                       placeholder="carlos@ejemplo.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -750,7 +750,7 @@ export const LoginPage: React.FC = () => {
                       value={newStrategy}
                       onChange={(e) => setNewStrategy(e.target.value)}
                       placeholder="Ej: Boglehead Global / Dividendos"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
@@ -768,7 +768,7 @@ export const LoginPage: React.FC = () => {
                       max={1000000}
                       value={newBalance}
                       onChange={(e) => setNewBalance(Number(e.target.value) || 10000)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -786,7 +786,7 @@ export const LoginPage: React.FC = () => {
                         value={newUserPassword}
                         onChange={(e) => setNewUserPassword(e.target.value)}
                         placeholder="Mínimo 4 caracteres"
-                        className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                        className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                       />
                       <button
                         type="button"
@@ -809,7 +809,7 @@ export const LoginPage: React.FC = () => {
                         value={newUserConfirmPassword}
                         onChange={(e) => setNewUserConfirmPassword(e.target.value)}
                         placeholder="Repite la contraseña"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                       />
                     </div>
                   </div>

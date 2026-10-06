@@ -23,12 +23,11 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { Header } from '@/components/layout/Header'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PerformanceChart } from '@/components/charts/PerformanceChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
-import { ReturnsChart } from '@/components/charts/ReturnsChart'
+import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
@@ -37,7 +36,7 @@ import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { fmt, cn, PALETTE } from '@/lib/utils'
+import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
 
 import {
@@ -71,7 +70,7 @@ const PERIOD_LABELS: Record<string, string> = {
 }
 
 export function OverviewPage() {
-  const { currentUser, period } = useAppStore()
+  const { currentUser, period, theme } = useAppStore()
   const periodLabel = PERIOD_LABELS[period] || 'Periodo'
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
@@ -86,13 +85,14 @@ export function OverviewPage() {
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
 
+  const palette = theme === 'dark' ? PALETTE_DARK : PALETTE_LIGHT
   const assetColorMap = useMemo(() => {
     const map: Record<string, string> = {}
     positions.forEach((p, idx) => {
-      map[p.isin] = PALETTE[idx % PALETTE.length]
+      map[p.isin] = palette[idx % palette.length]
     })
     return map
-  }, [positions])
+  }, [positions, palette])
   const sortedPositions = useMemo(
     () =>
       [...positions].sort((a, b) => {
@@ -331,32 +331,30 @@ export function OverviewPage() {
       }
     }
 
-    if (dayPct === undefined) dayPct = 0.24
-    if (dayAmount === null && displaySummary?.total_value) {
+    if (dayAmount === null && displaySummary?.total_value && dayPct !== undefined) {
       dayAmount = Math.round(displaySummary.total_value * (dayPct / 100) * 100) / 100
     }
-    if (weekPct === undefined) weekPct = 1.15
-    if (weekAmount === null && displaySummary?.total_value) {
+    if (weekAmount === null && displaySummary?.total_value && weekPct !== undefined) {
       weekAmount = Math.round(displaySummary.total_value * (weekPct / 100) * 100) / 100
     }
 
     return {
-      dayPct: Number(dayPct.toFixed(2)),
-      dayAmount: Math.round((dayAmount ?? 0) * 100) / 100,
-      weekPct: Number(weekPct.toFixed(2)),
-      weekAmount: Math.round((weekAmount ?? 0) * 100) / 100,
+      dayPct: dayPct !== undefined ? Number(dayPct.toFixed(2)) : undefined,
+      dayAmount: dayAmount !== null && !isNaN(dayAmount) ? Math.round(dayAmount * 100) / 100 : undefined,
+      weekPct: weekPct !== undefined ? Number(weekPct.toFixed(2)) : undefined,
+      weekAmount: weekAmount !== null && !isNaN(weekAmount) ? Math.round(weekAmount * 100) / 100 : undefined,
     }
   }, [performance, analytics, positions, displaySummary])
 
   const secondaryStats = useMemo(() => {
     if (secondaryChartMode === 'returns') {
-      const dayPct = shortTermMetrics?.dayPct ?? analytics?.return_1d ?? 0.24
+      const dayPct = analytics?.return_1d ?? shortTermMetrics?.dayPct
       const ytd = analytics?.return_ytd
       return {
         box1Label: '1D:',
-        box1Val: fmt.pct(dayPct),
-        box1Title: `Rendimiento de hoy (1 Día): ${fmt.pct(dayPct)}`,
-        box1Positive: dayPct >= 0,
+        box1Val: dayPct !== undefined ? fmt.pct(dayPct) : '—',
+        box1Title: dayPct !== undefined ? `Rendimiento de hoy (1 Día): ${fmt.pct(dayPct)}` : 'Rendimiento de hoy (1 Día)',
+        box1Positive: (dayPct ?? 0) >= 0,
         box2Label: 'YTD:',
         box2Val: ytd !== undefined ? fmt.pct(ytd) : '—',
         box2Title: 'Rentabilidad acumulada en el año en curso (YTD)',
@@ -422,16 +420,7 @@ export function OverviewPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      {/* Unified High-End Header */}
-      <Header
-        title="Visión General"
-        subtitle={
-          currentUser
-            ? currentUser.strategy
-            : 'Resumen ejecutivo del patrimonio, evolución de rentabilidad y asignación global.'
-        }
-        showPeriodSelector
-      />
+      {/* Live Market Ticker */}
 
       {/* Live Market Ticker */}
       <MarketTicker onSelectStock={setSelectedStock} />
@@ -460,37 +449,41 @@ export function OverviewPage() {
             label="Valor Total de la Cartera"
             value={fmt.currency(displaySummary?.total_value)}
             extra={
-              shortTermMetrics && (
+              shortTermMetrics && (shortTermMetrics.dayPct !== undefined || shortTermMetrics.weekPct !== undefined) && (
                 <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
-                  <span
-                    data-private
-                    title={`Rendimiento Hoy (1D): ${shortTermMetrics.dayAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.dayAmount)} (${fmt.pct(shortTermMetrics.dayPct)})`}
-                    className={cn(
-                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-help',
-                      shortTermMetrics.dayPct >= 0
-                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
-                        : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
-                    )}
-                  >
-                    <Zap className="w-3 h-3 stroke-[2.5]" />
-                    <span>Hoy:</span>
-                    <span className="font-bold">{fmt.pct(shortTermMetrics.dayPct)}</span>
-                  </span>
+                  {shortTermMetrics.dayPct !== undefined && (
+                    <span
+                      data-private
+                      title={shortTermMetrics.dayAmount !== undefined ? `Rendimiento Hoy (1D): ${shortTermMetrics.dayAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.dayAmount)} (${fmt.pct(shortTermMetrics.dayPct)})` : `Rendimiento Hoy (1D): ${fmt.pct(shortTermMetrics.dayPct)}`}
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-default',
+                        shortTermMetrics.dayPct >= 0
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
+                      )}
+                    >
+                      <Zap className="w-3 h-3 stroke-[2.5]" />
+                      <span>Hoy:</span>
+                      <span className="font-bold">{fmt.pct(shortTermMetrics.dayPct)}</span>
+                    </span>
+                  )}
 
-                  <span
-                    data-private
-                    title={`Rendimiento 7 Días: ${shortTermMetrics.weekAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.weekAmount)} (${fmt.pct(shortTermMetrics.weekPct)})`}
-                    className={cn(
-                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-help',
-                      shortTermMetrics.weekPct >= 0
-                        ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20'
-                        : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
-                    )}
-                  >
-                    <Calendar className="w-3 h-3 stroke-[2.5]" />
-                    <span>7D:</span>
-                    <span className="font-bold">{fmt.pct(shortTermMetrics.weekPct)}</span>
-                  </span>
+                  {shortTermMetrics.weekPct !== undefined && (
+                    <span
+                      data-private
+                      title={shortTermMetrics.weekAmount !== undefined ? `Rendimiento 7 Días: ${shortTermMetrics.weekAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.weekAmount)} (${fmt.pct(shortTermMetrics.weekPct)})` : `Rendimiento 7 Días: ${fmt.pct(shortTermMetrics.weekPct)}`}
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-default',
+                        shortTermMetrics.weekPct >= 0
+                          ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20'
+                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
+                      )}
+                    >
+                      <Calendar className="w-3 h-3 stroke-[2.5]" />
+                      <span>7D:</span>
+                      <span className="font-bold">{fmt.pct(shortTermMetrics.weekPct)}</span>
+                    </span>
+                  )}
                 </div>
               )
             }
@@ -539,13 +532,13 @@ export function OverviewPage() {
             loading={isGlobalUpdating}
           />
           <div
-            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-default backdrop-blur-md transition-all duration-300 bg-white/95 border border-slate-200/90 shadow-none hover:border-slate-300 dark:bg-[#111625]/85 dark:border-white/[0.08] dark:shadow-lg dark:shadow-black/20 dark:hover:border-white/[0.16]"
+            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card backdrop-blur-md transition-all duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90 dark:bg-[#181922]/90 dark:border-white/[0.08] dark:hover:border-white/[0.16]"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
             {isGlobalUpdating ? (
               <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
             ) : (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/15" />
+              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/[0.12] z-10" />
             )}
             <div
               aria-hidden="true"
@@ -684,12 +677,6 @@ export function OverviewPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-sm sm:text-[15px] truncate">Evolución Patrimonial</CardTitle>
-                  {isPeriodUpdating && (
-                    <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                    </span>
-                  )}
                 </div>
                 <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
                   Trayectoria histórica del valor liquidativo acumulado
@@ -702,7 +689,7 @@ export function OverviewPage() {
               {chartView === 'evolution' && (
                 <div className="hidden sm:flex items-center gap-1.5">
                   {/* Mode Selector (€ vs %) */}
-                  <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+                  <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
                     <button
                       onClick={() => setPerfChartMode('currency')}
                       className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
@@ -760,7 +747,7 @@ export function OverviewPage() {
               )}
 
               {/* Curva / Matriz Mensual ALWAYS on the far right */}
-              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5 shrink-0">
+              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5 shrink-0">
                 <button
                   onClick={() => setChartView('evolution')}
                   className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
@@ -814,7 +801,7 @@ export function OverviewPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Max Peak */}
                 <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={`Máximo del periodo (ATH): ${fmt.currency(perfMetrics.maxPoint.value)}`}
                 >
                   <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -830,7 +817,7 @@ export function OverviewPage() {
 
                 {/* Period Low */}
                 <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={`Mínimo del periodo: ${fmt.currency(perfMetrics.minPoint.value)}`}
                 >
                   <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
@@ -846,7 +833,7 @@ export function OverviewPage() {
 
                 {/* Current Drawdown */}
                 <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={perfMetrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${perfMetrics.drawdownPct.toFixed(2)}%`}
                 >
                   <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
@@ -877,7 +864,7 @@ export function OverviewPage() {
 
                 {/* Net Return */}
                 <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={`Ganancia neta del periodo: ${fmt.currency(perfMetrics.periodProfit)} (${fmt.pct(perfMetrics.periodReturnPct)})`}
                 >
                   <div className={cn(
@@ -925,7 +912,7 @@ export function OverviewPage() {
             </div>
 
             {/* Toggle Mode */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
               {(['asset', 'type'] as AllocMode[]).map((m) => (
                 <button
                   key={m}
@@ -974,7 +961,7 @@ export function OverviewPage() {
               <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
-                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={allocStats.box1Title}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -992,7 +979,7 @@ export function OverviewPage() {
 
                 {/* Box 2 */}
                 <div
-                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={allocStats.box2Title}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -1027,7 +1014,7 @@ export function OverviewPage() {
               </div>
             </div>
 
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#0d121f] p-0.5">
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
               <button
                 onClick={() => setSecondaryChartMode('returns')}
                 className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${
@@ -1068,7 +1055,9 @@ export function OverviewPage() {
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {secondaryChartMode === 'returns' ? (
-                analytics ? (
+                analyticsFetching && !analytics ? (
+                  <ReturnsChartSkeleton compact height={260} />
+                ) : analytics ? (
                   <ReturnsChart analytics={analytics} compact height={260} />
                 ) : (
                   <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
@@ -1091,7 +1080,7 @@ export function OverviewPage() {
               <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
-                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={secondaryStats.box1Title}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -1128,7 +1117,7 @@ export function OverviewPage() {
 
                 {/* Box 2 */}
                 <div
-                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#121727] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={secondaryStats.box2Title}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -1482,7 +1471,7 @@ export function OverviewPage() {
               showViewAllLink
             />
           ) : (
-            <div className="h-64 rounded-2xl bg-slate-100 dark:bg-[#0f1424] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
+            <div className="h-64 rounded-2xl bg-slate-100 dark:bg-[#181922] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
               Cargando mapa de calor del mercado...
             </div>
           )}

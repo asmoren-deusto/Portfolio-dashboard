@@ -19,7 +19,6 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { fmt, cn } from '@/lib/utils'
@@ -60,6 +59,7 @@ export function TransactionsPage() {
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [notification, setNotification] = useState<{ text: string; error?: boolean } | null>(null)
   const [isDeleting, setIsDeleting] = useState<string | number | null>(null)
+
 
   const positionMap = useMemo(() => {
     const map = new Map<string, Position>()
@@ -155,55 +155,10 @@ export function TransactionsPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {notification && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className={`fixed top-5 right-5 z-[99999] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md text-xs font-medium border ${
-              notification.error
-                ? 'bg-rose-950/90 border-rose-500/40 text-rose-200'
-                : 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200'
-            }`}
-          >
-            {notification.error ? (
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            ) : (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            )}
-            <span>{notification.text}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Unified Header */}
-      <Header
-        title="Registro de Operaciones"
-        subtitle="Historial de compras periódicas (DCA), reembolsos, traspasos e importación de extractos."
-      >
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200/90 dark:bg-[#111625]/90 dark:hover:bg-[#151c2e] dark:text-slate-300 dark:hover:text-white dark:border-white/[0.08] dark:hover:border-white/20 text-xs font-semibold transition-all shadow-sm active:scale-95"
-          >
-            <Upload className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
-            <span>Importar Extracto</span>
-          </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all shadow-md shadow-blue-500/20 active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Nueva Operación</span>
-          </button>
-        </div>
-      </Header>
 
       {/* Summary KPI Highlights */}
       <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#111625]/85 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#181922]/90 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Total Operaciones</span>
             <Layers className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
@@ -216,7 +171,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#111625]/85 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#181922]/90 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Inversión Neta Total</span>
             <TrendingUp className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
@@ -229,7 +184,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#111625]/85 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#181922]/90 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Dividendos Percibidos</span>
             <DollarSign className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
@@ -242,7 +197,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#111625]/85 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#181922]/90 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Reembolsos / Ventas</span>
             <TrendingDown className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
@@ -256,10 +211,10 @@ export function TransactionsPage() {
         </div>
       </div>
 
-      {/* Control Bar: Type Tabs & Search */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      {/* Control Bar: Type Tabs, Actions & Search */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
         {/* Type tabs with sliding pill */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 dark:bg-[#111625]/90 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 dark:bg-[#191a21] border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm overflow-x-auto">
           {TYPE_TABS.map((tab) => {
             const active = activeType === tab.id
             return (
@@ -283,16 +238,32 @@ export function TransactionsPage() {
           })}
         </div>
 
-        {/* Search Input */}
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar por activo, ISIN o broker..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-white dark:bg-[#111625]/90 border border-slate-200/90 dark:border-white/[0.08] focus:border-blue-500/50 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all shadow-sm"
-          />
+        {/* Action Buttons & Search Input */}
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200/90 dark:bg-[#181922] dark:hover:bg-[#20222d] dark:text-slate-300 dark:hover:text-white dark:border-white/[0.08] dark:hover:border-white/20 text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+          >
+            <Upload className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+            <span>Importar Extracto</span>
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all shadow-sm shadow-blue-500/20 active:scale-95 shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Nueva Operación</span>
+          </button>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar por activo, ISIN o broker..."
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-white dark:bg-[#181922] border border-slate-200/90 dark:border-white/[0.08] focus:border-blue-500/50 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all shadow-sm"
+            />
+          </div>
         </div>
       </div>
 
@@ -469,6 +440,29 @@ export function TransactionsPage() {
         position={selectedPosition}
         onClose={() => setSelectedPosition(null)}
       />
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-5 right-5 z-[99999] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md text-xs font-medium border ${
+              notification.error
+                ? 'bg-rose-950/90 border-rose-500/40 text-rose-200'
+                : 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200'
+            }`}
+          >
+            {notification.error ? (
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            )}
+            <span>{notification.text}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -541,7 +535,7 @@ function AddTransactionModal({
         initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}
-        className="relative z-10 w-full max-w-lg my-auto rounded-3xl bg-white dark:bg-[#0f1424] border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
+        className="relative z-10 w-full max-w-lg my-auto rounded-3xl bg-white dark:bg-[#20222a] border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/[0.08]">
@@ -582,7 +576,7 @@ function AddTransactionModal({
                   className={`py-2 text-center rounded-xl font-semibold transition-all border ${
                     type === t.id
                       ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/20'
-                      : 'bg-slate-50 dark:bg-[#141928] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/20'
+                      : 'bg-slate-50 dark:bg-[#191a21] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/20'
                   }`}
                 >
                   {t.label}
@@ -603,7 +597,7 @@ function AddTransactionModal({
                 const found = positions.find((p) => p.isin === e.target.value)
                 if (found && found.current_price) setPrice(String(found.current_price))
               }}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
             >
               {positions.map((p) => (
                 <option key={p.isin} value={p.isin}>
@@ -623,7 +617,7 @@ function AddTransactionModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
               />
             </div>
             <div>
@@ -633,7 +627,7 @@ function AddTransactionModal({
               <select
                 value={broker}
                 onChange={(e) => setBroker(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
               >
                 <option value="MyInvestor">MyInvestor</option>
                 <option value="Degiro">Degiro</option>
@@ -655,7 +649,7 @@ function AddTransactionModal({
                 step="any"
                 value={shares}
                 onChange={(e) => setShares(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] font-mono text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] font-mono text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
               />
             </div>
             <div>
@@ -667,7 +661,7 @@ function AddTransactionModal({
                 step="any"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] font-mono text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] font-mono text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
               />
             </div>
           </div>
@@ -806,7 +800,7 @@ function ImportExtractoModal({
         initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}
-        className="relative z-10 w-full max-w-xl my-auto rounded-3xl bg-white dark:bg-[#0f1424] border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
+        className="relative z-10 w-full max-w-xl my-auto rounded-3xl bg-white dark:bg-[#20222a] border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -883,7 +877,7 @@ function ImportExtractoModal({
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
                 placeholder="Ejemplo:&#10;10/07/2026&#10;Suscripción por Traspaso Interno&#10;116,72 €&#10;Azvalor Internacional FI&#10;Finalizada&#10;0,345743 participaciones..."
-                className="w-full p-3 font-mono text-xs rounded-2xl bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500/50 resize-none shadow-inner"
+                className="w-full p-3 font-mono text-xs rounded-2xl bg-slate-50 dark:bg-[#191a21] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500/50 resize-none shadow-inner"
               />
             </div>
 
