@@ -563,13 +563,19 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         history = await get_price_history(isin, ticker, history_period)
-        curr_p = await get_current_price(isin, ticker, db=db)
+        curr_p, curr_date = await get_price_with_date(isin, ticker, db=db)
         if history:
+            history = [dict(h) for h in history]
             if curr_p and curr_p > 0:
-                history[-1]["price"] = round(curr_p, 4)
+                last_dt = history[-1]["date"]
+                target_dt = curr_date or datetime.now().strftime("%Y-%m-%d")
+                if target_dt > last_dt:
+                    history.append({"date": target_dt, "price": round(curr_p, 4)})
+                else:
+                    history[-1]["price"] = round(curr_p, 4)
             price_history[isin] = history
         elif curr_p and curr_p > 0:
-            price_history[isin] = [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
+            price_history[isin] = [{"date": curr_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
     value_series = calculate_portfolio_value_series(transactions, price_history)
     nav_series = calculate_portfolio_nav_series(transactions, price_history)
@@ -592,6 +598,27 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     series_for_returns = nav_series if nav_series and len(nav_series) >= 2 else value_series
     days_ytd = max(1, (datetime.now() - datetime(datetime.now().year, 1, 1)).days)
 
+    # Compute weighted daily return directly from active positions for exact 1D consistency
+    weighted_1d = 0.0
+    active_val = 0.0
+    for isin, pos in positions.items():
+        if pos.get("shares", 0) <= 0.0001:
+            continue
+        p = price_history.get(isin, [])
+        pos_val = pos["shares"] * (p[-1]["price"] if p else pos.get("avg_cost", 0))
+        active_val += pos_val
+        cached_prices = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(2).all()
+        asset_daily_pct = None
+        if len(cached_prices) >= 2 and cached_prices[1].price and cached_prices[1].price > 0:
+            asset_daily_pct = (cached_prices[0].price - cached_prices[1].price) / cached_prices[1].price * 100
+        elif len(p) >= 2 and p[-2]["price"] > 0:
+            asset_daily_pct = (p[-1]["price"] - p[-2]["price"]) / p[-2]["price"] * 100
+        if asset_daily_pct is not None:
+            weighted_1d += pos_val * asset_daily_pct
+
+    portfolio_daily_ret = round(weighted_1d / active_val, 2) if active_val > 0 else None
+    ret_1d = portfolio_daily_ret if portfolio_daily_ret is not None else calculate_period_return(series_for_returns, 1)
+
     return {
         "annualized_return": annualized_ret,
         "net_profit": net_profit,
@@ -603,7 +630,7 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         "volatility": vol,
         "max_drawdown": max_dd,
         "sharpe_ratio": sharpe,
-        "return_1d": calculate_period_return(series_for_returns, 1),
+        "return_1d": ret_1d,
         "return_1w": calculate_period_return(series_for_returns, 7),
         "return_ytd": calculate_period_return(series_for_returns, days_ytd),
         "return_1m": calculate_period_return(series_for_returns, 30),

@@ -57,7 +57,7 @@ export function AssetBadge({ type, className }: BadgeProps) {
   const cfg = configs[type] ?? configs.fund
   return (
     <span className={cn(
-      'inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide leading-none shadow-2xs',
+      'inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide leading-none shadow-2xs',
       cfg.bg, cfg.text, cfg.border, className
     )}>
       {cfg.label}
@@ -82,7 +82,7 @@ export function BrokerBadge({ broker, className }: BrokerBadgeProps) {
 
   return (
     <span className={cn(
-      'inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide leading-none shadow-2xs',
+      'inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide leading-none shadow-2xs',
       cfg.bg, cfg.text, cfg.border, className
     )}>
       {cfg.label}
@@ -101,7 +101,7 @@ export function PnlBadge({ value, suffix = '', className }: PnlBadgeProps) {
   const pos = value >= 0
   return (
     <span data-private className={cn(
-      'font-mono font-bold text-xs tabular-nums',
+      'font-mono font-bold text-[13px] tabular-nums',
       pos ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400',
       className
     )}>

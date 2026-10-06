@@ -1180,7 +1180,7 @@ export function OverviewPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                   <th className="py-2 px-2.5">Activo / Fondo</th>
                   <th className="py-2 px-2 text-right">NAV</th>
@@ -1236,7 +1236,7 @@ export function OverviewPage() {
                             <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
                               {p.name}
                             </div>
-                            <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-500 dark:text-slate-400">
+                            <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
                               <span>{p.isin}</span>
                               <AssetBadge type={p.asset_type} />
                             </div>
@@ -1244,10 +1244,10 @@ export function OverviewPage() {
                         </div>
                       </td>
                       <td className="py-2.5 px-2 text-right">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[12px] sm:text-[13px] leading-tight whitespace-nowrap">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[13px] sm:text-[14px] leading-tight whitespace-nowrap">
                           {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                         </div>
-                        <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                        <div className="text-[11.5px] font-mono font-medium text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
                           {(() => {
                             const raw = p.price_date || p.last_updated
                             if (!raw) return '—'
@@ -1264,7 +1264,7 @@ export function OverviewPage() {
                         {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
                           <span
                             className={cn(
-                              'inline-flex items-center gap-0.5 font-mono text-[12px] font-bold',
+                              'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
                               p.daily_change_pct > 0
                                 ? 'text-emerald-600 dark:text-emerald-400'
                                 : p.daily_change_pct < 0
@@ -1273,9 +1273,9 @@ export function OverviewPage() {
                             )}
                           >
                             {p.daily_change_pct > 0 ? (
-                              <TrendingUp className="w-3 h-3 stroke-[2.5]" />
+                              <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
                             ) : p.daily_change_pct < 0 ? (
-                              <TrendingDown className="w-3 h-3 stroke-[2.5]" />
+                              <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
                             ) : null}
                             <span>{fmt.pct(p.daily_change_pct)}</span>
                           </span>
@@ -1289,7 +1289,7 @@ export function OverviewPage() {
                       <td data-private className="py-2.5 px-2 text-right">
                         <div className="flex flex-col items-end">
                           <PnlBadge value={p.unrealized_pnl} />
-                          <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                          <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
                             {fmt.pct(p.unrealized_pnl_pct)}
                           </span>
                         </div>
@@ -1302,7 +1302,7 @@ export function OverviewPage() {
                           <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
                           <span
                             className={cn(
-                              'font-mono font-bold text-right text-[12px] transition-colors',
+                              'font-mono font-bold text-right text-[13px] transition-colors',
                               isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'
                             )}
                           >
@@ -1321,7 +1321,7 @@ export function OverviewPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead className="hidden xl:table-header-group">
-                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                   <th className="py-2 px-2.5">Activo / Fondo</th>
                   <th className="py-2 px-2 text-right">NAV</th>
@@ -1377,7 +1377,7 @@ export function OverviewPage() {
                             <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
                               {p.name}
                             </div>
-                            <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-500 dark:text-slate-400">
+                            <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
                               <span>{p.isin}</span>
                               <AssetBadge type={p.asset_type} />
                             </div>
@@ -1385,10 +1385,10 @@ export function OverviewPage() {
                         </div>
                       </td>
                       <td className="py-2.5 px-2 text-right">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[12px] sm:text-[13px] leading-tight whitespace-nowrap">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[13px] sm:text-[14px] leading-tight whitespace-nowrap">
                           {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                         </div>
-                        <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                        <div className="text-[11.5px] font-mono font-medium text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
                           {(() => {
                             const raw = p.price_date || p.last_updated
                             if (!raw) return '—'
@@ -1405,7 +1405,7 @@ export function OverviewPage() {
                         {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
                           <span
                             className={cn(
-                              'inline-flex items-center gap-0.5 font-mono text-[12px] font-bold',
+                              'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
                               p.daily_change_pct > 0
                                 ? 'text-emerald-600 dark:text-emerald-400'
                                 : p.daily_change_pct < 0
@@ -1414,9 +1414,9 @@ export function OverviewPage() {
                             )}
                           >
                             {p.daily_change_pct > 0 ? (
-                              <TrendingUp className="w-3 h-3 stroke-[2.5]" />
+                              <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
                             ) : p.daily_change_pct < 0 ? (
-                              <TrendingDown className="w-3 h-3 stroke-[2.5]" />
+                              <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
                             ) : null}
                             <span>{fmt.pct(p.daily_change_pct)}</span>
                           </span>
@@ -1430,7 +1430,7 @@ export function OverviewPage() {
                       <td data-private className="py-2.5 px-2 text-right">
                         <div className="flex flex-col items-end">
                           <PnlBadge value={p.unrealized_pnl} />
-                          <span className="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                          <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
                             {fmt.pct(p.unrealized_pnl_pct)}
                           </span>
                         </div>
@@ -1443,7 +1443,7 @@ export function OverviewPage() {
                           <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
                           <span
                             className={cn(
-                              'font-mono font-bold text-right text-[12px] transition-colors',
+                              'font-mono font-bold text-right text-[13px] transition-colors',
                               isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'
                             )}
                           >

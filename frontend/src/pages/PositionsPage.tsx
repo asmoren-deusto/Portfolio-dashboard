@@ -382,7 +382,7 @@ export function PositionsPage() {
                                 )}
                                 <BrokerBadge broker={p.broker} className="ml-1" />
                                 {p.asset_type === 'epsv' && (
-                                  <span data-private className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
+                                  <span data-private className="ml-1 px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
                                     DCA 416,66 €/mes (día 7)
                                   </span>
                                 )}
@@ -413,7 +413,7 @@ export function PositionsPage() {
                             const raw = p.price_date || p.last_updated
                             if (!raw) return null
                             const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                            return <div className="text-[10.5px] font-normal text-slate-500 dark:text-slate-400">{dateOnly}</div>
+                            return <div className="text-[12px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">{dateOnly}</div>
                           })()}
                         </td>
 
@@ -492,7 +492,7 @@ export function PositionsPage() {
                           <span>{p.isin}</span>
                           <BrokerBadge broker={p.broker} className="shrink-0" />
                           {p.asset_type === 'epsv' && (
-                            <span data-private className="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shrink-0">
+                            <span data-private className="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shrink-0">
                               DCA 416,66 € (día 7)
                             </span>
                           )}
@@ -537,7 +537,7 @@ export function PositionsPage() {
                         const raw = p.price_date || p.last_updated
                         if (!raw) return null
                         const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                        return <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-normal">({dateOnly})</span>
+                        return <span className="text-[11.5px] text-slate-500 dark:text-slate-400 block font-medium">({dateOnly})</span>
                       })()}
                     </div>
                     <div>
