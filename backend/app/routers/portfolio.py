@@ -77,7 +77,7 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         price = await get_current_price(isin, ticker, db=db)
-        effective_price = price if (price and price > 0) else pos["avg_cost"]
+        effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
         total_value += pos["shares"] * effective_price
         total_invested += pos["invested_amount"]
 
@@ -122,28 +122,38 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         pos_broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
 
         price, price_date = await get_price_with_date(isin, ticker, db=db, force=refresh)
-        effective_price = price if (price and price > 0) else pos["avg_cost"]
+        effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
         current_value = pos["shares"] * effective_price
         total_value += current_value
 
         pnl = current_value - pos["invested_amount"]
         pnl_pct = (pnl / pos["invested_amount"] * 100) if pos["invested_amount"] > 0 else 0.0
-        # Calculate daily return from price history
-        cached_prices = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(2).all()
+        # Calculate daily return from price history (comparing against previous distinct trading session)
         daily_change = None
         daily_change_pct = None
-        if len(cached_prices) >= 2 and cached_prices[1].price and cached_prices[1].price > 0:
-            p_last = effective_price
-            p_prev = cached_prices[1].price
-            daily_change = round(p_last - p_prev, 4)
-            daily_change_pct = round((p_last - p_prev) / p_prev * 100, 2)
-        else:
-            h = await get_price_history(isin, ticker, "1m")
-            if h and len(h) >= 2 and h[-2].get("price", 0) > 0:
-                p_last = effective_price
-                p_prev = h[-2]["price"]
-                daily_change = round(p_last - p_prev, 4)
-                daily_change_pct = round((p_last - p_prev) / p_prev * 100, 2)
+        p_prev = None
+
+        h = await get_price_history(isin, ticker, "1mo")
+        if h and len(h) >= 2:
+            last_h_price = effective_price
+            for pt in reversed(h):
+                if pt.get("price", 0) > 0 and abs(pt["price"] - last_h_price) > 0.0001:
+                    p_prev = pt["price"]
+                    break
+
+        if (p_prev is None or p_prev <= 0) and db is not None:
+            distinct_cached = []
+            for cp in db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).all():
+                if cp.price and cp.price > 0:
+                    if not distinct_cached or abs(cp.price - distinct_cached[-1]) > 0.0001:
+                        distinct_cached.append(cp.price)
+                    if len(distinct_cached) >= 2:
+                        p_prev = distinct_cached[1]
+                        break
+
+        if p_prev and p_prev > 0 and effective_price and effective_price > 0:
+            daily_change = round(effective_price - p_prev, 4)
+            daily_change_pct = round((effective_price - p_prev) / p_prev * 100, 2)
 
         position_data.append({
             "isin": isin,
@@ -621,13 +631,19 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         if pos.get("shares", 0) <= 0.0001:
             continue
         p = price_history.get(isin, [])
-        pos_val = pos["shares"] * (p[-1]["price"] if p else pos.get("avg_cost", 0))
+        pos_val = pos["shares"] * (p[-1]["price"] if p and p[-1].get("price") is not None and p[-1]["price"] >= 0 else pos.get("avg_cost", 0))
         active_val += pos_val
-        cached_prices = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(2).all()
+        cached_prices = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(10).all()
+        distinct_cached = []
+        for cp in cached_prices:
+            if not distinct_cached or abs(cp.price - distinct_cached[-1].price) > 0.0001:
+                distinct_cached.append(cp)
+            if len(distinct_cached) >= 2:
+                break
         asset_daily_pct = None
-        if len(cached_prices) >= 2 and cached_prices[1].price and cached_prices[1].price > 0:
-            asset_daily_pct = (cached_prices[0].price - cached_prices[1].price) / cached_prices[1].price * 100
-        elif len(p) >= 2 and p[-2]["price"] > 0:
+        if len(distinct_cached) >= 2 and distinct_cached[1].price and distinct_cached[1].price > 0:
+            asset_daily_pct = (distinct_cached[0].price - distinct_cached[1].price) / distinct_cached[1].price * 100
+        elif len(p) >= 2 and p[-2].get("price", 0) > 0:
             asset_daily_pct = (p[-1]["price"] - p[-2]["price"]) / p[-2]["price"] * 100
         if asset_daily_pct is not None:
             weighted_1d += pos_val * asset_daily_pct

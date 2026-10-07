@@ -108,7 +108,7 @@ async def get_price_with_date(
     if price is None and not is_standard_isin and db is not None and PriceCache is not None:
         try:
             entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
-            if entry and entry.price > 0:
+            if entry and entry.price is not None and entry.price >= 0:
                 _price_cache[isin] = {"price": entry.price, "date": entry.date, "ts": datetime.now()}
                 return entry.price, entry.date
         except Exception as e:
@@ -180,7 +180,7 @@ async def get_price_with_date(
     if price is None and db is not None and PriceCache is not None:
         try:
             entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
-            if entry and entry.price > 0:
+            if entry and entry.price is not None and entry.price >= 0:
                 price = entry.price
                 price_date = entry.date
         except Exception as e:
@@ -719,7 +719,7 @@ async def get_price_history(
     if isin.startswith("0192") or isin == "0192#0011":
         y_ticker = ticker or KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
         try:
-            yf_period = "max" if period == "all" else period
+            yf_period = "1mo" if period in ["1m", "1mo"] else ("3mo" if period in ["3m", "3mo"] else ("6mo" if period in ["6m", "6mo"] else ("1y" if period in ["1y", "12mo"] else ("max" if period == "all" else period))))
             t = yf.Ticker(y_ticker)
             hist = t.history(period=yf_period)
             if not hist.empty and len(hist) > 1:
@@ -781,7 +781,7 @@ async def get_price_history(
     # 1. Try Yahoo Finance (works for stocks, ETFs and European funds)
     if ticker:
         try:
-            yf_period = "max" if period == "all" else period
+            yf_period = "1mo" if period in ["1m", "1mo"] else ("3mo" if period in ["3m", "3mo"] else ("6mo" if period in ["6m", "6mo"] else ("1y" if period in ["1y", "12mo"] else ("max" if period == "all" else period))))
             t = yf.Ticker(ticker)
             hist = t.history(period=yf_period)
             if not hist.empty and len(hist) > 1:

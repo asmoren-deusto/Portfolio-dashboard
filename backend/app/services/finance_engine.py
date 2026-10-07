@@ -110,7 +110,7 @@ def calculate_portfolio_value_series(
                     price = float(available.iloc[-1])
                 elif not series.empty:
                     price = float(series.iloc[0])
-            if not price or price <= 0:
+            if price is None or price < 0:
                 price = pos.get("avg_cost", 0)
             total += pos["shares"] * price
 
@@ -186,7 +186,7 @@ def calculate_portfolio_nav_series(
                     price = float(avail.iloc[-1])
                 elif not s.empty:
                     price = float(s.iloc[0])
-            if not price or price <= 0:
+            if price is None or price < 0:
                 price = pos.get("avg_cost", 0)
             cur_total_val += pos["shares"] * price
 
@@ -204,7 +204,7 @@ def calculate_portfolio_nav_series(
                         price = float(avail.iloc[-1])
                     elif not s.empty:
                         price = float(s.iloc[0])
-                if not price or price <= 0:
+                if price is None or price < 0:
                     price = pos.get("avg_cost", 0)
                 val_market_prev += pos["shares"] * price
 

@@ -163,8 +163,14 @@ PRICES = json.loads(r'''[
   },
   {
     "isin": "TR_TRANSFER",
-    "date": "2026-09-25",
-    "price": 1.0,
+    "date": "2026-01-15",
+    "price": 0.0,
+    "currency": "EUR"
+  },
+  {
+    "isin": "TR_TRANSFER",
+    "date": "2026-10-07",
+    "price": 0.0,
     "currency": "EUR"
   },
   {
@@ -2551,5 +2557,17 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-10-06",
     "broker": "indexa",
     "notes": "Aportación periódica mensual DCA (416,66 € cada día 7)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "TR_TRANSFER",
+    "type": "buy",
+    "shares": 2000.0,
+    "price": 1.0,
+    "amount": 2000.0,
+    "fees": 0.0,
+    "date": "2026-01-15",
+    "broker": "traderepublic",
+    "notes": "Aportación a Trade Republic (Pérdida patrimonial 2026)"
   }
 ]''')
