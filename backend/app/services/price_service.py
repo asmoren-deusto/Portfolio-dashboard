@@ -78,6 +78,10 @@ async def get_price_with_date(
     price = None
     price_date = None
 
+    if isin == "TR_TRANSFER":
+        _price_cache[isin] = {"price": 0.0, "date": datetime.now().strftime("%Y-%m-%d"), "ts": datetime.now()}
+        return 0.0, datetime.now().strftime("%Y-%m-%d")
+
     # Check if this is an Indexa EPSV (e.g. 0192#0011)
     if isin.startswith("0192") or isin == "0192#0011":
         # 1. First priority: Live Yahoo Finance / Morningstar quote
@@ -714,6 +718,17 @@ async def get_price_history(
         ts, cached_data = _history_cache[cache_key]
         if (datetime.now() - ts).total_seconds() < 1800:
             return cached_data
+
+    if isin == "TR_TRANSFER":
+        res = [
+            {"date": "2025-08-01", "price": 1.0},
+            {"date": "2025-10-29", "price": 1.0},
+            {"date": "2026-01-01", "price": 0.0},
+            {"date": "2026-01-15", "price": 0.0},
+            {"date": datetime.now().strftime("%Y-%m-%d"), "price": 0.0},
+        ]
+        _history_cache[cache_key] = (datetime.now(), res)
+        return res
 
     # 0. If it's an Indexa EPSV, query Yahoo Finance (Morningstar Frankfurt feed 0P0001FTQ7.F) first
     if isin.startswith("0192") or isin == "0192#0011":

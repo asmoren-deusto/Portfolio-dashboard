@@ -118,6 +118,12 @@ def _seed_asier_data():
                             existing.category = a_data["category"]
 
             # 2. Seed prices
+            # Clean up any obsolete non-zero prices for TR_TRANSFER in 2026 on persistent volumes
+            db.query(PriceCache).filter(
+                PriceCache.isin == "TR_TRANSFER",
+                PriceCache.date >= "2026-01-01",
+            ).delete()
+
             for p_data in PRICES:
                 entry = db.query(PriceCache).filter(
                     PriceCache.isin == p_data["isin"],
@@ -125,7 +131,7 @@ def _seed_asier_data():
                 ).first()
                 if not entry:
                     db.add(PriceCache(**p_data))
-                elif p_data.get("price") and abs(entry.price - p_data["price"]) > 0.0001:
+                elif p_data.get("price") is not None and abs(entry.price - p_data["price"]) > 0.0001:
                     entry.price = p_data["price"]
 
             # 3. Seed transactions — ensure all seed transactions exist even on persistent DB volumes
