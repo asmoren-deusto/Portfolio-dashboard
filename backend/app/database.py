@@ -114,33 +114,37 @@ def _seed_asier_data():
 
             # 2. Seed prices
             for p_data in PRICES:
-                exists = db.query(PriceCache).filter(
+                entry = db.query(PriceCache).filter(
                     PriceCache.isin == p_data["isin"],
                     PriceCache.date == p_data["date"],
                 ).first()
-                if not exists:
+                if not entry:
                     db.add(PriceCache(**p_data))
+                elif p_data.get("price") and abs(entry.price - p_data["price"]) > 0.0001:
+                    entry.price = p_data["price"]
 
-            # 3. Seed transactions if user 'asier' has none
-            asier_tx_count = db.query(Transaction).filter(Transaction.user_id == "asier").count()
-            if asier_tx_count == 0:
-                for t_data in TRANSACTIONS:
+            # 3. Seed transactions — ensure all seed transactions exist even on persistent DB volumes
+            existing_txs = {
+                (t.user_id, t.isin, t.date, round(float(t.amount), 2), t.type)
+                for t in db.query(Transaction).filter(Transaction.user_id == "asier").all()
+            }
+            for t_data in TRANSACTIONS:
+                sig = (
+                    t_data.get("user_id", "asier"),
+                    t_data["isin"],
+                    t_data["date"],
+                    round(float(t_data["amount"]), 2),
+                    t_data["type"],
+                )
+                if sig not in existing_txs:
                     db.add(Transaction(**t_data))
-            else:
-                # Ensure TR_TRANSFER transactions exist if missing on existing DB volume
-                tr_count = db.query(Transaction).filter(
-                    Transaction.user_id == "asier",
-                    Transaction.isin == "TR_TRANSFER"
-                ).count()
-                if tr_count == 0:
-                    for t_data in TRANSACTIONS:
-                        if t_data.get("isin") == "TR_TRANSFER":
-                            db.add(Transaction(**t_data))
-                    db.query(Transaction).filter(
-                        Transaction.user_id == "asier",
-                        Transaction.isin == "IE000ZYRH0Q7",
-                        Transaction.date == "2025-10-29"
-                    ).update({"notes": "Traspaso de Entrada desde Trade Republic"})
+                    existing_txs.add(sig)
+
+            db.query(Transaction).filter(
+                Transaction.user_id == "asier",
+                Transaction.isin == "IE000ZYRH0Q7",
+                Transaction.date == "2025-10-29"
+            ).update({"notes": "Traspaso de Entrada desde Trade Republic"})
 
             db.commit()
         except Exception:
