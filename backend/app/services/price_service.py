@@ -80,6 +80,15 @@ async def get_price_with_date(
     # Check if this is an Indexa EPSV (e.g. 0192#0011)
     if isin.startswith("0192") or isin == "0192#0011":
         price, price_date = await _fetch_indexa_epsv_official(isin, db=db)
+        if db is not None and PriceCache is not None:
+            try:
+                db_entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+                if db_entry and db_entry.price > 0:
+                    if not price_date or db_entry.date > price_date or (db_entry.date == price_date and db_entry.source != "live_indexa"):
+                        price = db_entry.price
+                        price_date = db_entry.date
+            except Exception:
+                pass
 
     # For other non-standard ISINs (e.g. Kutxabank 0201G), look up DB PriceCache
     is_standard_isin = len(isin) == 12 and isin.isalnum()
@@ -240,6 +249,18 @@ async def _fetch_indexa_epsv_official(isin: str, db=None) -> tuple[Optional[floa
                                     db.commit()
                                 except Exception as e:
                                     logger.warning(f"Error persisting Indexa recent points to PriceCache: {e}")
+
+                            # Return newer or confirmed DB PriceCache entry if available
+                            if db is not None:
+                                try:
+                                    from app.models import PriceCache
+                                    latest_entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+                                    if latest_entry and latest_entry.price > 0:
+                                        if latest_entry.date > date_str or (latest_entry.date == date_str and latest_entry.source != "live_indexa"):
+                                            return latest_entry.price, latest_entry.date
+                                except Exception:
+                                    pass
+
                             return nav, date_str
                     except ValueError:
                         continue
