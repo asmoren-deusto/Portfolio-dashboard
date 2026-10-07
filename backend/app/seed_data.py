@@ -121,10 +121,11 @@ ASSETS = json.loads(r'''[
   {
     "isin": "0192#0011",
     "name": "Indexa EPSV Más Rentabilidad Acciones",
-    "ticker": null,
+    "ticker": "0P0001FTQ7.F",
+    "morningstar_id": "0P0001FTQ7",
     "asset_type": "epsv",
     "currency": "EUR",
-    "category": null,
+    "category": "Renta Variable Global (EPSV)",
     "ter": 0.52
   },
   {

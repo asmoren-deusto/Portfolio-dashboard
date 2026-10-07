@@ -109,8 +109,13 @@ def _seed_asier_data():
                     seen_assets.add(a_data["isin"])
                 else:
                     existing = db.query(Asset).filter(Asset.isin == a_data["isin"]).first()
-                    if existing and a_data.get("ticker") and not existing.ticker:
-                        existing.ticker = a_data["ticker"]
+                    if existing:
+                        if a_data.get("ticker"):
+                            existing.ticker = a_data["ticker"]
+                        if a_data.get("morningstar_id"):
+                            existing.morningstar_id = a_data["morningstar_id"]
+                        if a_data.get("category") and not existing.category:
+                            existing.category = a_data["category"]
 
             # 2. Seed prices
             for p_data in PRICES:

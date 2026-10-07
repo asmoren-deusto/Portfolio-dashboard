@@ -39,6 +39,8 @@ def _is_cache_valid(isin: str) -> bool:
 
 
 KNOWN_TICKERS: dict[str, str] = {
+    "0192#0011": "0P0001FTQ7.F",  # Indexa Más Rentabilidad Acciones EPSV (Morningstar: 0P0001FTQ7)
+    "01920011": "0P0001FTQ7.F",
     "IE00BYX5NX33": "0P0001CLDK.F",  # Fidelity MSCI World Index Fund EUR P Acc
     "LU1598719752": "0P0001A94B.F",  # Cobas Lux SICAV - Cobas International Fund P EUR Acc
     "LU0996182563": "0P00012PP6.F",  # Amundi Index MSCI World AE-C
@@ -62,13 +64,12 @@ async def get_price_with_date(
     Get current NAV and date for an asset dynamically.
     Order of precedence:
       1. In-memory cache (if valid within 15 min TTL and not forced)
-      2. Indexa Capital official website (for EPSV 0192#0011 / 0192...)
-      3. Direct Official Gestora Website (e.g. Azvalor official website for ES011261...)
-      4. Financial Times Markets (official European institutional fund tearsheet feed)
-      5. Live fetch from Quefondos (Spanish distributor fund page)
-      6. Live fetch from Yahoo Finance (using ticker)
+      2. Yahoo Finance / Morningstar Frankfurt feed (e.g. 0P0001FTQ7.F for Indexa EPSV)
+      3. Indexa Capital official website (for EPSV 0192#0011 / 0192...)
+      4. Direct Official Gestora Website (e.g. Azvalor official website for ES011261...)
+      5. Financial Times Markets (official European institutional fund tearsheet feed)
+      6. Live fetch from Quefondos (Spanish distributor fund page)
       7. Database PriceCache fallback (cached historical NAV)
-      8. Morningstar public search
     """
     ticker = KNOWN_TICKERS.get(isin) or ticker
     if not force and _is_cache_valid(isin):
@@ -79,7 +80,19 @@ async def get_price_with_date(
 
     # Check if this is an Indexa EPSV (e.g. 0192#0011)
     if isin.startswith("0192") or isin == "0192#0011":
-        price, price_date = await _fetch_indexa_epsv_official(isin, db=db)
+        # 1. First priority: Live Yahoo Finance / Morningstar quote
+        y_ticker = ticker or KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
+        y_price, y_date = await _fetch_yahoo_price(y_ticker)
+        if y_price and y_price > 0:
+            price, price_date = round(y_price, 4), y_date
+
+        # 2. Check official Indexa website dataset
+        idx_price, idx_date = await _fetch_indexa_epsv_official(isin, db=db)
+        if idx_price and idx_price > 0:
+            if not price_date or (idx_date and idx_date > price_date):
+                price, price_date = idx_price, idx_date
+
+        # 3. Check if database PriceCache has a newer or confirmed NAV
         if db is not None and PriceCache is not None:
             try:
                 db_entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
@@ -702,8 +715,42 @@ async def get_price_history(
         if (datetime.now() - ts).total_seconds() < 1800:
             return cached_data
 
-    # 0. If it's an Indexa EPSV, fetch official daily history directly from Indexa Capital
+    # 0. If it's an Indexa EPSV, query Yahoo Finance (Morningstar Frankfurt feed 0P0001FTQ7.F) first
     if isin.startswith("0192") or isin == "0192#0011":
+        y_ticker = ticker or KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
+        try:
+            yf_period = "max" if period == "all" else period
+            t = yf.Ticker(y_ticker)
+            hist = t.history(period=yf_period)
+            if not hist.empty and len(hist) > 1:
+                res = [
+                    {"date": str(idx.date()), "price": round(float(row["Close"]), 4)}
+                    for idx, row in hist.iterrows()
+                    if float(row["Close"]) > 0
+                ]
+                if res:
+                    # Merge any newer points from DB PriceCache
+                    try:
+                        from app.database import SessionLocal
+                        from app.models import PriceCache
+                        db_s = SessionLocal()
+                        recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                        existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
+                        for rp in recent_prices:
+                            if rp.date in existing_dates:
+                                res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                            else:
+                                res.append({"date": rp.date, "price": round(rp.price, 4)})
+                        res.sort(key=lambda x: x["date"])
+                        db_s.close()
+                    except Exception:
+                        pass
+                    _history_cache[cache_key] = (datetime.now(), res)
+                    return res
+        except Exception as e:
+            logger.debug(f"Yahoo history error for Indexa {y_ticker}: {e}")
+
+        # Fallback to Indexa Capital website dataset
         indexa_hist = await _fetch_indexa_epsv_history(isin, period=period)
         if indexa_hist:
             try:
