@@ -84,12 +84,17 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
     total_pnl = total_value - total_invested
     total_pnl_pct = (total_pnl / total_invested * 100) if total_invested > 0 else 0
 
+    valid_positions = [
+        isin for isin in active_positions
+        if isin != "TR_TRANSFER" and not isin.startswith("TR_") and (not _get_asset(db, isin) or "Trade Republic" not in (_get_asset(db, isin).name or ""))
+    ]
+
     return PortfolioSummary(
         total_value=round(total_value, 2),
         total_invested=round(total_invested, 2),
         total_pnl=round(total_pnl, 2),
         total_pnl_pct=round(total_pnl_pct, 2),
-        num_positions=len(active_positions),
+        num_positions=len(valid_positions),
         last_updated=datetime.now().isoformat(),
     )
 
@@ -116,6 +121,10 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         name = asset.name if asset else isin
         asset_type = asset.asset_type if asset else "fund"
         currency = asset.currency if asset else "EUR"
+
+        # Do not include Cartera Trade Republic in positions listing
+        if isin == "TR_TRANSFER" or isin.startswith("TR_") or "Trade Republic" in name:
+            continue
 
         # Find broker for this position
         pos_txs = [t for t in transactions if t["isin"] == isin]
@@ -304,13 +313,13 @@ async def get_performance(
         curr_p, curr_p_date = await get_price_with_date(isin, ticker, db=db)
         if history:
             latest_date = curr_p_date or datetime.now().strftime("%Y-%m-%d")
-            if curr_p and curr_p > 0:
+            if curr_p is not None and curr_p >= 0:
                 if history[-1]["date"] == latest_date:
                     history[-1]["price"] = round(curr_p, 4)
                 elif history[-1]["date"] < latest_date:
                     history.append({"date": latest_date, "price": round(curr_p, 4)})
             price_history[isin] = history
-        elif curr_p and curr_p > 0:
+        elif curr_p is not None and curr_p >= 0:
             price_history[isin] = [{"date": curr_p_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
     value_series = calculate_portfolio_value_series(transactions, price_history, start_date=effective_start)

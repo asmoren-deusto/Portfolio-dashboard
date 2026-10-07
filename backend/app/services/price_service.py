@@ -817,12 +817,12 @@ async def get_price_history(
             # Real historical NAVs stored in PriceCache
             cached_rows = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.asc()).all()
             for row in cached_rows:
-                if row.price and row.price > 0:
+                if row.price is not None and row.price >= 0:
                     points_dict[row.date] = round(float(row.price), 4)
 
             # Latest live price
             current, current_date = await get_price_with_date(isin, ticker, db=db)
-            if current and current > 0:
+            if current is not None and current >= 0:
                 t_date = current_date or datetime.now().strftime("%Y-%m-%d")
                 points_dict[t_date] = round(float(current), 4)
 
@@ -837,7 +837,7 @@ async def get_price_history(
 
     # Fallback to single latest known price without synthetic random generation
     current = await get_current_price(isin, ticker)
-    if current and current > 0:
+    if current is not None and current >= 0:
         return [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(float(current), 4)}]
 
     return []

@@ -19,7 +19,7 @@ import { Card } from '@/components/ui/Card'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { fmt, cn } from '@/lib/utils'
-import { usePositions } from '@/api/queries'
+import { usePositions, usePortfolioSummary } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
 type AssetFilter = 'all' | 'fund' | 'epsv' | 'etf' | 'stock'
@@ -36,6 +36,7 @@ const FILTER_TABS: { id: AssetFilter; label: string }[] = [
 
 export function PositionsPage() {
   const { data: positions = [], isLoading } = usePositions()
+  const { data: summary } = usePortfolioSummary()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<AssetFilter>('all')
@@ -46,11 +47,11 @@ export function PositionsPage() {
 
   // Summary Metrics
   const stats = useMemo(() => {
-    if (positions.length === 0) return null
-    const totalValue = positions.reduce((sum, p) => sum + p.current_value, 0)
-    const totalInvested = positions.reduce((sum, p) => sum + p.invested_amount, 0)
-    const totalPnl = totalValue - totalInvested
-    const totalPnlPct = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0
+    if (positions.length === 0 && !summary) return null
+    const totalValue = summary?.total_value ?? positions.reduce((sum, p) => sum + p.current_value, 0)
+    const totalInvested = summary?.total_invested ?? positions.reduce((sum, p) => sum + p.invested_amount, 0)
+    const totalPnl = summary?.total_pnl ?? (totalValue - totalInvested)
+    const totalPnlPct = summary?.total_pnl_pct ?? (totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0)
     const gainers = positions.filter((p) => p.unrealized_pnl >= 0).length
     const losers = positions.filter((p) => p.unrealized_pnl < 0).length
 
@@ -67,13 +68,15 @@ export function PositionsPage() {
     const weightedTer = validWeightSum > 0 ? (weightedTerSum / (validWeightSum / 100)) : null
 
     return { totalValue, totalInvested, totalPnl, totalPnlPct, gainers, losers, weightedTer }
-  }, [positions])
+  }, [positions, summary])
 
   // Filter and sort
   const filteredPositions = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
     return [...positions]
       .filter((p) => {
+        // Never include Cartera Trade Republic or 0-value placeholder transfer positions
+        if (p.isin === 'TR_TRANSFER' || p.isin.startsWith('TR_') || p.name?.includes('Trade Republic')) return false
         // Asset type filter
         if (activeFilter !== 'all' && p.asset_type !== activeFilter) return false
         // Search query
