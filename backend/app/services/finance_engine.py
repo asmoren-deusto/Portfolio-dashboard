@@ -78,6 +78,10 @@ def calculate_portfolio_value_series(
     tx_sorted = sorted(transactions, key=lambda x: x["date"])
     first_tx_date = pd.to_datetime(tx_sorted[0]["date"])
     all_dates.add(first_tx_date)
+    all_dates.add(pd.to_datetime(tx_sorted[-1]["date"]))
+    today = pd.to_datetime(datetime.now().date())
+    if today >= first_tx_date:
+        all_dates.add(today)
 
     date_range = pd.date_range(min(all_dates), max(all_dates), freq="B")  # business days
 
@@ -153,6 +157,10 @@ def calculate_portfolio_nav_series(
     tx_sorted = sorted(transactions, key=lambda x: x["date"])
     first_tx_date = pd.to_datetime(tx_sorted[0]["date"])
     all_dates.add(first_tx_date)
+    all_dates.add(pd.to_datetime(tx_sorted[-1]["date"]))
+    today = pd.to_datetime(datetime.now().date())
+    if today >= first_tx_date:
+        all_dates.add(today)
 
     date_range = pd.date_range(min(all_dates), max(all_dates), freq="B")
 

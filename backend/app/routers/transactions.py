@@ -9,6 +9,7 @@ from app.schemas import TransactionCreate, TransactionOut, ImportTextRequest
 from app.services.csv_importer import parse_myinvestor_csv
 from app.services.parse_web_orders import parse_web_text, KNOWN_NAMES
 from app.routers.auth import get_current_user_id
+from app.routers.portfolio import clear_portfolio_caches
 
 router = APIRouter(prefix="/api/transactions", tags=["transactions"])
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ def create_transaction(tx: TransactionCreate, user_id: str = Depends(get_current
 
     db.commit()
     db.refresh(db_tx)
+    clear_portfolio_caches()
     return db_tx
 
 
@@ -53,6 +55,7 @@ def delete_transaction(tx_id: int, user_id: str = Depends(get_current_user_id), 
         raise HTTPException(status_code=404, detail="Transaction not found")
     db.delete(tx)
     db.commit()
+    clear_portfolio_caches()
     return {"ok": True}
 
 

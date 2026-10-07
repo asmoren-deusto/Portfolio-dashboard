@@ -270,6 +270,18 @@ PRICES = json.loads(r'''[
   },
   {
     "isin": "0192#0011",
+    "date": "2026-10-06",
+    "price": 24.00942,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-10-05",
+    "price": 24.00942,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
     "date": "2026-09-25",
     "price": 23.576068,
     "currency": "EUR"
@@ -2526,5 +2538,17 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-09-24",
     "broker": "bbva",
     "notes": "Traspaso fondos a favor (desde Fidelity World, coste fiscal originario 5.285,63 € de valor 6.042,08 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0192#0011",
+    "type": "buy",
+    "shares": 17.354023,
+    "price": 24.00942,
+    "amount": 416.66,
+    "fees": 0.0,
+    "date": "2026-10-06",
+    "broker": "indexa",
+    "notes": "Aportación periódica mensual DCA (416,66 € cada día 7)"
   }
 ]''')

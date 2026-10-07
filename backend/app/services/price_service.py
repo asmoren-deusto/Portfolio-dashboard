@@ -685,6 +685,21 @@ async def get_price_history(
     if isin.startswith("0192") or isin == "0192#0011":
         indexa_hist = await _fetch_indexa_epsv_history(isin, period=period)
         if indexa_hist:
+            try:
+                from app.database import SessionLocal
+                from app.models import PriceCache
+                db_s = SessionLocal()
+                recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                existing_dates = {h["date"]: idx for idx, h in enumerate(indexa_hist)}
+                for rp in recent_prices:
+                    if rp.date in existing_dates:
+                        indexa_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                    else:
+                        indexa_hist.append({"date": rp.date, "price": round(rp.price, 4)})
+                indexa_hist.sort(key=lambda x: x["date"])
+                db_s.close()
+            except Exception:
+                pass
             _history_cache[cache_key] = (datetime.now(), indexa_hist)
             return indexa_hist
 

@@ -236,6 +236,18 @@ async def update_price(req: UpdatePriceRequest, user_id: str = Depends(get_curre
 _perf_cache: dict[str, tuple[datetime, list[dict]]] = {}
 
 
+def clear_portfolio_caches():
+    _perf_cache.clear()
+    _bench_cache.clear()
+    _price_cache.clear()
+    try:
+        from app.services.price_service import _history_cache, _price_cache as _svc_price_cache
+        _history_cache.clear()
+        _svc_price_cache.clear()
+    except Exception:
+        pass
+
+
 @router.get("/performance", response_model=list[PerformancePoint])
 async def get_performance(
     period: str = "1y",
@@ -279,13 +291,17 @@ async def get_performance(
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         history = await get_price_history(isin, ticker, period)
-        curr_p = await get_current_price(isin, ticker, db=db)
+        curr_p, curr_p_date = await get_price_with_date(isin, ticker, db=db)
         if history:
+            latest_date = curr_p_date or datetime.now().strftime("%Y-%m-%d")
             if curr_p and curr_p > 0:
-                history[-1]["price"] = round(curr_p, 4)
+                if history[-1]["date"] == latest_date:
+                    history[-1]["price"] = round(curr_p, 4)
+                elif history[-1]["date"] < latest_date:
+                    history.append({"date": latest_date, "price": round(curr_p, 4)})
             price_history[isin] = history
         elif curr_p and curr_p > 0:
-            price_history[isin] = [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
+            price_history[isin] = [{"date": curr_p_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
     value_series = calculate_portfolio_value_series(transactions, price_history, start_date=effective_start)
     _perf_cache[cache_key] = (datetime.now(), value_series)
