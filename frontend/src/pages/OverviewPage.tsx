@@ -813,7 +813,7 @@ export function OverviewPage() {
                     <button
                       onClick={() => setPerfChartMode('currency')}
                       className={`relative min-w-[24px] px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${perfChartMode === 'currency'
-                          ? 'text-white font-bold'
+                          ? 'text-slate-900 dark:text-white font-bold'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                         }`}
                       title="Ver evolución en Euros (€)"
@@ -821,7 +821,7 @@ export function OverviewPage() {
                       {perfChartMode === 'currency' && (
                         <motion.div
                           layoutId="perfChartModePill"
-                          className="absolute inset-0 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                           transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                         />
                       )}
@@ -830,7 +830,7 @@ export function OverviewPage() {
                     <button
                       onClick={() => setPerfChartMode('percent')}
                       className={`relative min-w-[24px] px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${perfChartMode === 'percent'
-                          ? 'text-white font-bold'
+                          ? 'text-slate-900 dark:text-white font-bold'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                         }`}
                       title="Ver rentabilidad acumulada en porcentaje (%)"
@@ -838,7 +838,7 @@ export function OverviewPage() {
                       {perfChartMode === 'percent' && (
                         <motion.div
                           layoutId="perfChartModePill"
-                          className="absolute inset-0 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                           transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                         />
                       )}
@@ -881,14 +881,14 @@ export function OverviewPage() {
                 <button
                   onClick={() => setChartView('evolution')}
                   className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'evolution'
-                      ? 'text-white font-bold'
+                      ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                 >
                   {chartView === 'evolution' && (
                     <motion.div
                       layoutId="overviewChartViewPill"
-                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
@@ -897,14 +897,14 @@ export function OverviewPage() {
                 <button
                   onClick={() => setChartView('heatmap')}
                   className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'heatmap'
-                      ? 'text-white font-bold'
+                      ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                 >
                   {chartView === 'heatmap' && (
                     <motion.div
                       layoutId="overviewChartViewPill"
-                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
@@ -1073,14 +1073,14 @@ export function OverviewPage() {
                   key={m}
                   onClick={() => setAllocMode(m)}
                   className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${allocMode === m
-                      ? 'text-white font-bold'
+                      ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                 >
                   {allocMode === m && (
                     <motion.div
                       layoutId="overviewAllocPill"
-                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
@@ -1184,14 +1184,14 @@ export function OverviewPage() {
                   try { localStorage.setItem('returns_period_mode', 'global') } catch { }
                 }}
                 className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'global'
-                    ? 'text-white font-bold'
+                    ? 'text-slate-900 dark:text-white font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
               >
                 {returnsPeriodMode === 'global' && (
                   <motion.div
                     layoutId="returnsPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}
@@ -1203,14 +1203,14 @@ export function OverviewPage() {
                   try { localStorage.setItem('returns_period_mode', 'weekly') } catch { }
                 }}
                 className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'weekly'
-                    ? 'text-white font-bold'
+                    ? 'text-slate-900 dark:text-white font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
               >
                 {returnsPeriodMode === 'weekly' && (
                   <motion.div
                     layoutId="returnsPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}

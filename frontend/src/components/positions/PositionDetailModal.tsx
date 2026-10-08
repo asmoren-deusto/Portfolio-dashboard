@@ -303,7 +303,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                       onClick={() => setPeriod(p.value)}
                       className={`px-2.5 py-0.5 text-xs font-semibold rounded-lg transition-all ${
                         period === p.value
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15'
+                          ? 'bg-white dark:bg-[#2d2d2d] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                       }`}
                     >
