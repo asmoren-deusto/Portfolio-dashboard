@@ -254,7 +254,7 @@ export function AllocationChart({
                 <span
                   className={`tabular-nums font-mono text-xs shrink-0 transition-colors ${
                     isHovered
-                      ? 'font-bold text-blue-600 dark:text-blue-400'
+                      ? 'font-bold text-slate-950 dark:text-white'
                       : 'font-semibold text-slate-800 dark:text-slate-200'
                   }`}
                 >

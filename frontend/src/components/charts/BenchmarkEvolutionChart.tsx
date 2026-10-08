@@ -130,14 +130,14 @@ export function BenchmarkEvolutionChart({
         },
         crosshair: {
           vertLine: {
-            color: isDark ? 'rgba(96,165,250,0.45)' : 'rgba(37,99,235,0.35)',
-            labelBackgroundColor: '#2563eb',
+            color: isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.20)',
+            labelBackgroundColor: isDark ? '#2d2d2d' : '#1e293b',
             width: 1,
             style: LineStyle.Dotted,
           },
           horzLine: {
-            color: isDark ? 'rgba(96,165,250,0.45)' : 'rgba(37,99,235,0.35)',
-            labelBackgroundColor: '#2563eb',
+            color: isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.20)',
+            labelBackgroundColor: isDark ? '#2d2d2d' : '#1e293b',
             style: LineStyle.Dotted,
           },
         },
@@ -157,7 +157,7 @@ export function BenchmarkEvolutionChart({
       // 1. Portfolio Series (Area)
       const portfolioArea = chart.addSeries(AreaSeries, {
         lineColor: '#2563eb',
-        topColor: isDark ? 'rgba(37, 99, 235, 0.28)' : 'rgba(37, 99, 235, 0.18)',
+        topColor: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(37, 99, 235, 0.18)',
         bottomColor: 'rgba(37, 99, 235, 0.00)',
         lineWidth: 2,
         priceLineVisible: false,
@@ -387,7 +387,7 @@ export function BenchmarkEvolutionChart({
         portfolio.applyOptions({
           visible: showPortfolio,
           lineColor: '#2563eb',
-          topColor: isDark ? 'rgba(37, 99, 235, 0.28)' : 'rgba(37, 99, 235, 0.18)',
+          topColor: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(37, 99, 235, 0.18)',
           bottomColor: 'rgba(37, 99, 235, 0.00)',
           lineWidth: 2,
           crosshairMarkerBackgroundColor: '#2563eb',
@@ -490,7 +490,7 @@ export function BenchmarkEvolutionChart({
         portfolio.applyOptions({
           visible: true,
           lineColor: '#2563eb',
-          topColor: isDark ? 'rgba(37, 99, 235, 0.28)' : 'rgba(37, 99, 235, 0.18)',
+          topColor: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(37, 99, 235, 0.18)',
           bottomColor: 'rgba(37, 99, 235, 0.00)',
           lineWidth: 2,
           crosshairMarkerBackgroundColor: '#2563eb',
@@ -698,7 +698,7 @@ export function BenchmarkEvolutionChart({
       )}
 
       {/* 2. Dynamic HUD Inspection Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50/90 dark:bg-[#0c101c]/80 border border-slate-200/80 dark:border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08]">
         <div className="flex flex-wrap items-center gap-x-3.5 sm:gap-x-4 gap-y-1 text-xs font-medium">
           {mode === 'percent' ? (
             <>
@@ -879,13 +879,13 @@ export function BenchmarkEvolutionChart({
 
         {/* Date inspection pill */}
         {activePoint?.date && (
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-white/[0.04] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.06] shrink-0 self-start sm:self-auto">
-            <Calendar size={11} className={hoveredPoint ? 'text-blue-500' : 'text-slate-400'} />
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-[#252526] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.08] shrink-0 self-start sm:self-auto">
+            <Calendar size={11} className={hoveredPoint ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'} />
             <span className="font-semibold text-slate-800 dark:text-slate-200">
               {formatDateSpanish(activePoint.date)}
             </span>
             {hoveredPoint && (
-              <span className="text-[9px] uppercase font-bold text-blue-600 dark:text-blue-400 ml-0.5">
+              <span className="text-[9px] uppercase font-bold text-slate-700 dark:text-slate-300 ml-0.5">
                 (Inspección)
               </span>
             )}
