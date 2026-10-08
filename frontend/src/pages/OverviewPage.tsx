@@ -80,7 +80,9 @@ export function OverviewPage() {
   const [perfChartMode, setPerfChartMode] = useState<'currency' | 'percent'>('currency')
   const [perfShowInvested, setPerfShowInvested] = useState(true)
   const [perfShowMilestones, setPerfShowMilestones] = useState(true)
-  const [returnsPeriodMode, setReturnsPeriodMode] = useState<'global' | 'weekly'>('global')
+  const [returnsPeriodMode, setReturnsPeriodMode] = useState<'global' | 'weekly'>(() => {
+    return (localStorage.getItem('returns_period_mode') as 'global' | 'weekly') || 'weekly'
+  })
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
@@ -1152,7 +1154,10 @@ export function OverviewPage() {
 
             <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
               <button
-                onClick={() => setReturnsPeriodMode('global')}
+                onClick={() => {
+                  setReturnsPeriodMode('global')
+                  try { localStorage.setItem('returns_period_mode', 'global') } catch {}
+                }}
                 className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${
                   returnsPeriodMode === 'global'
                     ? 'text-white'
@@ -1169,7 +1174,10 @@ export function OverviewPage() {
                 <span className="relative z-10 text-[11px]">Global</span>
               </button>
               <button
-                onClick={() => setReturnsPeriodMode('weekly')}
+                onClick={() => {
+                  setReturnsPeriodMode('weekly')
+                  try { localStorage.setItem('returns_period_mode', 'weekly') } catch {}
+                }}
                 className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${
                   returnsPeriodMode === 'weekly'
                     ? 'text-white'

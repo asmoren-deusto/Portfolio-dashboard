@@ -211,9 +211,11 @@ def git_commit_and_push(commit_msg, version=None):
         subprocess.run([git_bin, "commit", "-m", final_msg], cwd=ROOT_DIR, check=True)
 
         print("[*] Ejecutando git push")
-        subprocess.run([git_bin, "push"], cwd=ROOT_DIR, check=True)
-
-        print(f"[+] Sincronización con Git completada con éxito. Mensaje: '{final_msg}'")
+        try:
+            subprocess.run([git_bin, "push"], cwd=ROOT_DIR, check=True, timeout=12)
+            print(f"[+] Sincronización con Git completada con éxito. Mensaje: '{final_msg}'")
+        except subprocess.TimeoutExpired:
+            print("[!] git push excedió el tiempo límite (12s). Los cambios quedan commiteados localmente y listos para push.")
         return True
     except subprocess.CalledProcessError as e:
         print(f"[!] Error ejecutando comandos git: {e}")
