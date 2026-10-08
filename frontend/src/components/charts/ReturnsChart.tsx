@@ -16,6 +16,7 @@ interface ReturnsChartProps {
   analytics?: Analytics | null
   weeklyData?: ReturnBarItem[]
   mode?: 'global' | 'weekly'
+  day1Pct?: number
   compact?: boolean
   height?: number
 }
@@ -62,6 +63,7 @@ export function ReturnsChart({
   analytics,
   weeklyData,
   mode = 'global',
+  day1Pct,
   compact = false,
   height = 240
 }: ReturnsChartProps) {
@@ -85,9 +87,10 @@ export function ReturnsChart({
       subtitle: d.subtitle || 'Rendimiento de la sesión',
     }))
   } else {
+    const val1d = day1Pct !== undefined ? day1Pct : (analytics?.return_1d ?? 0)
     data = compact
       ? [
-          { name: '1D', fullName: '1 Día (Hoy)', value: analytics?.return_1d ?? 0, subtitle: 'TWR ponderado en el tiempo' },
+          { name: '1D', fullName: '1 Día (Hoy)', value: val1d, subtitle: 'Rendimiento diario ponderado' },
           { name: '1S', fullName: '1 Semana (7D)', value: analytics?.return_1w ?? 0, subtitle: 'TWR ponderado en el tiempo' },
           { name: '1M', fullName: '1 Mes', value: analytics?.return_1m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
           { name: '3M', fullName: '3 Meses', value: analytics?.return_3m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
@@ -95,7 +98,7 @@ export function ReturnsChart({
           { name: '1A', fullName: '1 Año', value: analytics?.return_1y ?? analytics?.return_ytd ?? 0, subtitle: 'TWR ponderado en el tiempo' },
         ]
       : [
-          { name: '1 Día', fullName: '1 Día (Hoy)', value: analytics?.return_1d ?? 0, subtitle: 'TWR ponderado en el tiempo' },
+          { name: '1 Día', fullName: '1 Día (Hoy)', value: val1d, subtitle: 'Rendimiento diario ponderado' },
           { name: '1 Semana', fullName: '1 Semana (7D)', value: analytics?.return_1w ?? 0, subtitle: 'TWR ponderado en el tiempo' },
           { name: '1 Mes', fullName: '1 Mes', value: analytics?.return_1m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
           { name: '3 Meses', fullName: '3 Meses', value: analytics?.return_3m ?? 0, subtitle: 'TWR ponderado en el tiempo' },

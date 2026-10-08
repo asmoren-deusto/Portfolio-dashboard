@@ -649,28 +649,41 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     total_positions_count = 0
 
     for isin, pos in positions.items():
-        if pos.get("shares", 0) <= 0.0001:
+        if isin == "TR_TRANSFER" or isin.startswith("TR_") or pos.get("shares", 0) <= 0.0001:
             continue
         total_positions_count += 1
         p = price_history.get(isin, [])
-        pos_val = pos["shares"] * (p[-1]["price"] if p and p[-1].get("price") is not None and p[-1]["price"] >= 0 else pos.get("avg_cost", 0))
+        eff_p = p[-1]["price"] if p and p[-1].get("price") is not None and p[-1]["price"] >= 0 else pos.get("avg_cost", 0)
+        pos_val = pos["shares"] * eff_p
         active_val += pos_val
-        cached_prices = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(10).all()
-        distinct_cached = []
-        for cp in cached_prices:
-            if not distinct_cached or abs(cp.price - distinct_cached[-1].price) > 0.0001:
-                distinct_cached.append(cp)
-            if len(distinct_cached) >= 2:
-                break
+
+        # Find previous trading session price from price_history (comparing against previous distinct day)
+        p_prev = None
+        if p and len(p) >= 2:
+            last_p = eff_p
+            for pt in reversed(p[:-1]):
+                if pt.get("price", 0) > 0 and abs(pt["price"] - last_p) > 0.0001:
+                    p_prev = pt["price"]
+                    break
+
+        if (p_prev is None or p_prev <= 0) and db is not None:
+            cached_prices = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(10).all()
+            distinct_cached = []
+            for cp in cached_prices:
+                if cp.price and cp.price > 0:
+                    if not distinct_cached or abs(cp.price - distinct_cached[-1]) > 0.0001:
+                        distinct_cached.append(cp.price)
+                    if len(distinct_cached) >= 2:
+                        p_prev = distinct_cached[1]
+                        break
 
         # Only compute non-zero daily return if this fund has updated to the latest NAV date
         asset_daily_pct = 0.0
-        if distinct_cached and distinct_cached[0].date == latest_nav_date:
+        fund_latest_date = p[-1]["date"] if p else None
+        if fund_latest_date == latest_nav_date:
             updated_positions_count += 1
-            if len(distinct_cached) >= 2 and distinct_cached[1].price and distinct_cached[1].price > 0:
-                asset_daily_pct = (distinct_cached[0].price - distinct_cached[1].price) / distinct_cached[1].price * 100
-            elif len(p) >= 2 and p[-2].get("price", 0) > 0:
-                asset_daily_pct = (p[-1]["price"] - p[-2]["price"]) / p[-2]["price"] * 100
+            if p_prev and p_prev > 0 and eff_p > 0:
+                asset_daily_pct = (eff_p - p_prev) / p_prev * 100
 
         weighted_1d += pos_val * asset_daily_pct
 

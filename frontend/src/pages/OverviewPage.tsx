@@ -1163,6 +1163,7 @@ export function OverviewPage() {
                   analytics={analytics}
                   mode={returnsPeriodMode}
                   weeklyData={weeklyReturnsData}
+                  day1Pct={shortTermMetrics?.dayPct}
                   compact
                   height={260}
                 />
