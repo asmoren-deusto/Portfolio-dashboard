@@ -655,3 +655,23 @@ export function PerformanceChart({
     </div>
   )
 }
+
+export function PerformanceChartSkeleton({ height = 260 }: { height?: number }) {
+  return (
+    <div style={{ height }} className="w-full flex flex-col justify-between p-4 animate-pulse">
+      <div className="flex-1 w-full flex items-end gap-1.5 pb-3 border-b border-slate-200/50 dark:border-white/[0.05]">
+        <div className="w-full h-full rounded-xl bg-slate-200/50 dark:bg-white/[0.04] relative overflow-hidden flex items-end">
+          <div className="w-full h-1/2 bg-gradient-to-t from-slate-200/80 dark:from-white/[0.08] to-transparent rounded-b-xl" />
+        </div>
+      </div>
+      <div className="flex justify-between items-center pt-2 px-1">
+        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+      </div>
+    </div>
+  )
+}
+

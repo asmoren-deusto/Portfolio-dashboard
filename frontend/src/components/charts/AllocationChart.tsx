@@ -268,3 +268,17 @@ export function AllocationChart({
     </div>
   )
 }
+
+export function AllocationChartSkeleton({ height = 260 }: { height?: number }) {
+  return (
+    <div style={{ height }} className="w-full flex flex-col items-center justify-center p-4 gap-4 animate-pulse">
+      <div className="w-36 h-36 rounded-full border-[18px] border-slate-200/60 dark:border-white/[0.06]" />
+      <div className="w-full flex justify-center gap-3">
+        <div className="w-16 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+        <div className="w-16 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+        <div className="w-16 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+      </div>
+    </div>
+  )
+}
+

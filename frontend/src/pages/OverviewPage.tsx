@@ -25,8 +25,8 @@ import { Link } from 'react-router-dom'
 
 import { KpiCard } from '@/components/ui/KpiCard'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
-import { PerformanceChart } from '@/components/charts/PerformanceChart'
-import { AllocationChart } from '@/components/charts/AllocationChart'
+import { PerformanceChart, PerformanceChartSkeleton } from '@/components/charts/PerformanceChart'
+import { AllocationChart, AllocationChartSkeleton } from '@/components/charts/AllocationChart'
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
@@ -773,7 +773,6 @@ export function OverviewPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-sm sm:text-[15px] truncate">Evolución Patrimonial</CardTitle>
-                  {isPeriodUpdating && <LoadingDot />}
                 </div>
                 <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
                   Trayectoria histórica del valor liquidativo acumulado
@@ -869,9 +868,11 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className={cn("px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
+          <div className="px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
             <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
-              {chartView === 'evolution' ? (
+              {isPeriodUpdating ? (
+                <PerformanceChartSkeleton height={260} />
+              ) : chartView === 'evolution' ? (
                 performance.length > 0 ? (
                   <PerformanceChart
                     data={performance}
@@ -894,7 +895,14 @@ export function OverviewPage() {
             </div>
 
             {/* Shared Milestone Strip for BOTH Curva and Matriz Mensual at the EXACT same footer */}
-            {perfMetrics && (
+            {isPeriodUpdating ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0 animate-pulse">
+                <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+              </div>
+            ) : perfMetrics && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Max Peak */}
                 <div
@@ -994,7 +1002,7 @@ export function OverviewPage() {
         </Card>
 
         {/* 2. Asset Allocation Breakdown (20% on desktop: lg:col-span-1, md:col-span-1) */}
-        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.23}>
+        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.23} loading={isGlobalUpdating}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20 shrink-0">
@@ -1003,7 +1011,6 @@ export function OverviewPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-sm">Distribución</CardTitle>
-                  {isGlobalUpdating && <LoadingDot />}
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
                   Desglose de cartera
@@ -1038,9 +1045,11 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className={cn("px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
+          <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
             <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-              {positions.length > 0 ? (
+              {isGlobalUpdating ? (
+                <AllocationChartSkeleton height={260} />
+              ) : positions.length > 0 ? (
                 <AllocationChart
                   positions={positions}
                   mode={allocMode}
@@ -1057,7 +1066,12 @@ export function OverviewPage() {
             </div>
 
             {/* Useful Stats Strip (Matching Card 1) */}
-            {allocStats && (
+            {isGlobalUpdating ? (
+              <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0 animate-pulse">
+                <div className="h-[32px] sm:h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                <div className="h-[32px] sm:h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+              </div>
+            ) : allocStats && (
               <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
@@ -1100,7 +1114,7 @@ export function OverviewPage() {
         </Card>
 
         {/* 3. Performance by Period (Global / Semanal 7D) (20% on desktop: lg:col-span-1, md:col-span-1) */}
-        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.26} loading={analyticsFetching}>
+        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.26} loading={isPeriodUpdating}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
@@ -1109,7 +1123,6 @@ export function OverviewPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-sm">Rendimiento</CardTitle>
-                  {isPeriodUpdating && <LoadingDot />}
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
                   {returnsPeriodMode === 'global' ? 'Rentabilidad por periodo' : 'Últimos 7 días'}
@@ -1155,9 +1168,9 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className={cn("px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
+          <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-              {analyticsFetching && !analytics ? (
+              {isPeriodUpdating ? (
                 <ReturnsChartSkeleton compact height={260} />
               ) : (
                 <ReturnsChart
@@ -1175,7 +1188,12 @@ export function OverviewPage() {
             </div>
 
             {/* Useful Stats Strip (Matching Card 1) */}
-            {secondaryStats && (
+            {isPeriodUpdating ? (
+              <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0 animate-pulse">
+                <div className="h-[32px] sm:h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                <div className="h-[32px] sm:h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+              </div>
+            ) : secondaryStats && (
               <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
@@ -1251,7 +1269,7 @@ export function OverviewPage() {
       </div>
 
       {/* Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
-      <Card className="w-full" delay={0.3}>
+      <Card className="w-full" delay={0.3} loading={isGlobalUpdating}>
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -1259,7 +1277,6 @@ export function OverviewPage() {
             </div>
             <div className="flex items-baseline gap-2">
               <CardTitle>Posiciones en Cartera</CardTitle>
-              {isGlobalUpdating && <LoadingDot />}
               <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden sm:inline">
                 • Indicador azul = NAV actualizado
               </span>
