@@ -429,17 +429,15 @@ export function OverviewPage() {
       const dateObj = new Date(y, m - 1, d)
       const dayName = dayNames[dateObj.getDay()] || ''
 
-      const isToday = isLatest
-
-      const name = isToday ? 'Hoy' : `${dayName} ${d}`
+      const name = `${dayName} ${d}`
       const dateFormatted = dateObj.toLocaleDateString('es-ES', {
         weekday: 'long',
         day: 'numeric',
         month: 'short',
       })
-      const fullName = isToday ? `Hoy (${dayName} ${d})` : dateFormatted
-      const subtitle = isToday
-        ? `Rendimiento de hoy según publicación de NAVs (${d}/${m})`
+      const fullName = dateFormatted
+      const subtitle = isLatest
+        ? `Última sesión de NAVs (${d}/${m})`
         : `Sesión NAVs ${d}/${m}`
 
       result.push({
