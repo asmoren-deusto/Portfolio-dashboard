@@ -337,11 +337,13 @@ export function OverviewPage() {
         .sort((a, b) => a.date.localeCompare(b.date))
 
       if (sorted.length >= 2) {
-        const last = sorted[sorted.length - 1]
+        const navSorted = latestNavDate ? sorted.filter((p) => p.date <= latestNavDate) : sorted
+        const activeSorted = navSorted.length >= 2 ? navSorted : sorted
+        const last = activeSorted[activeSorted.length - 1]
 
-        // 7 days ago
-        const weekIdx = Math.max(0, sorted.length - 1 - 7)
-        const weekPoint = sorted[weekIdx]
+        // 7 business sessions ago (or up to 7 sessions)
+        const weekIdx = Math.max(0, activeSorted.length - 1 - 7)
+        const weekPoint = activeSorted[weekIdx]
         const weekInflow = (last.invested ?? 0) - (weekPoint.invested ?? 0)
         const wProfit = (last.value - weekPoint.value) - weekInflow
         weekAmount = Math.round(wProfit * 100) / 100
@@ -385,13 +387,22 @@ export function OverviewPage() {
 
     if (uniquePoints.length < 2) return []
 
+    // In mutual funds, NAVs publish with a lag (today the NAVs of yesterday are received).
+    // The bar 'Hoy' represents the performance being realized today as those NAVs are published.
+    // Therefore, truncate curve points at latestNavDate so the last session in the chart
+    // corresponds to this reporting session ('Hoy'), and previous sessions go backwards.
+    const navPoints = latestNavDate
+      ? uniquePoints.filter((p) => p.date <= latestNavDate)
+      : uniquePoints
+    const activePoints = navPoints.length >= 2 ? navPoints : uniquePoints
+
     // Up to 7 daily returns requires up to 8 points (since daily return = (day[i] - day[i-1]))
-    const pointsNeeded = Math.min(uniquePoints.length, 8)
-    const slice = uniquePoints.slice(uniquePoints.length - pointsNeeded)
+    const pointsNeeded = Math.min(activePoints.length, 8)
+    const slice = activePoints.slice(activePoints.length - pointsNeeded)
 
     const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
-    const result: Array<{ name: string; fullName: string; value: number }> = []
+    const result: Array<{ name: string; fullName: string; value: number; subtitle?: string }> = []
 
     for (let i = 1; i < slice.length; i++) {
       const prev = slice[i - 1]
@@ -407,10 +418,9 @@ export function OverviewPage() {
       }
 
       const isLatest = i === slice.length - 1
-      if (isLatest) {
-        if (latestNavDate && cur.date === latestNavDate && shortTermMetrics?.dayPct !== undefined) {
-          dayReturnPct = shortTermMetrics.dayPct
-        }
+      if (isLatest && shortTermMetrics?.dayPct !== undefined) {
+        // Today's return takes the real-time calculated return of today's incoming NAV batch
+        dayReturnPct = shortTermMetrics.dayPct
       }
 
       dayReturnPct = Math.round(dayReturnPct * 100) / 100
@@ -422,16 +432,21 @@ export function OverviewPage() {
       const isToday = isLatest
 
       const name = isToday ? 'Hoy' : `${dayName} ${d}`
-      const fullName = `${dateObj.toLocaleDateString('es-ES', {
+      const dateFormatted = dateObj.toLocaleDateString('es-ES', {
         weekday: 'long',
         day: 'numeric',
         month: 'short',
-      })}${isToday ? ' (Hoy)' : ''}`
+      })
+      const fullName = isToday ? `Hoy (${dayName} ${d})` : dateFormatted
+      const subtitle = isToday
+        ? `Rendimiento de hoy según publicación de NAVs (${d}/${m})`
+        : `Sesión NAVs ${d}/${m}`
 
       result.push({
         name,
         fullName,
         value: dayReturnPct,
+        subtitle,
       })
     }
 
