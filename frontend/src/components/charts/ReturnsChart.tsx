@@ -117,7 +117,7 @@ export function ReturnsChart({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={compact ? { top: 18, right: 4, left: -22, bottom: 0 } : { top: 18, right: 12, left: -10, bottom: 0 }}
+          margin={compact ? { top: 18, right: 6, left: -8, bottom: 0 } : { top: 18, right: 12, left: -6, bottom: 0 }}
         >
           <defs>
             <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
@@ -132,14 +132,16 @@ export function ReturnsChart({
           <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
           <XAxis
             dataKey="name"
+            interval={0}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#64748b', fontSize: compact ? 10 : 11, fontWeight: 600 }}
+            tick={{ fill: '#64748b', fontSize: compact ? 9.5 : 11, fontWeight: 600 }}
           />
           <YAxis
+            width={compact ? 28 : 36}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#64748b', fontSize: compact ? 9.5 : 11 }}
+            tick={{ fill: '#64748b', fontSize: compact ? 9 : 11 }}
             tickFormatter={v => `${v}%`}
           />
           <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" />
