@@ -168,7 +168,7 @@ export function useAnalytics() {
       isDemo
         ? Promise.resolve(userAnalytics)
         : get<Analytics>(`/portfolio/analytics?period=2y${brokerQuery}`),
-    initialData: isDemo ? userAnalytics : (currentUser?.analytics?.return_1d !== undefined ? currentUser.analytics : undefined),
+    initialData: isDemo ? userAnalytics : undefined,
     placeholderData: keepSameUser(currentUser?.id),
     staleTime: isDemo ? 1000 * 60 * 5 : 1000 * 60 * 2,
     refetchOnMount: true,

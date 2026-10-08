@@ -919,8 +919,6 @@ const ASIER_USER: UserProfile = {
     volatility: 4.08,
     max_drawdown: -5.95,
     sharpe_ratio: 3.82,
-    return_1d: 0.17,
-    return_1w: 1.73,
     return_ytd: 16.59,
     return_1m: 1.34,
     return_3m: 5.02,

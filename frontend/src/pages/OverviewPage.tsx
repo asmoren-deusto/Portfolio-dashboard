@@ -303,13 +303,14 @@ export function OverviewPage() {
   }, [positions, latestNavDate])
 
   const shortTermMetrics = useMemo(() => {
-    let dayPct = analytics?.return_1d
+    let dayPct: number | undefined = undefined
     let dayAmount: number | null = null
-    let weekPct = analytics?.return_1w
+    let weekPct: number | undefined = undefined
     let weekAmount: number | null = null
 
-    // Compute exact daily change in euros and fallback percentage strictly from positions
-    // updated to the latest reporting NAV date (unupdated positions count as 0.00% today)
+    // 1. Compute Day Metric (1D) strictly from active positions updated to the latest reporting NAV date.
+    // Unupdated positions compute as 0.00 € (0.00%) today.
+    // dayAmount and dayPct MUST be computed together to guarantee matching signs and magnitude.
     if (positions.length > 0) {
       const totalDailyChange = positions.reduce((acc, p) => {
         const pDate = p.price_date || p.last_updated
@@ -320,11 +321,16 @@ export function OverviewPage() {
       }, 0)
       const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
       dayAmount = Math.round(totalDailyChange * 100) / 100
-      if (dayPct === undefined) {
-        dayPct = totalVal > 0 ? (totalDailyChange / (totalVal - totalDailyChange)) * 100 : 0
+      const prevVal = totalVal - totalDailyChange
+      dayPct = prevVal > 0 ? (totalDailyChange / prevVal) * 100 : 0
+    } else if (analytics?.return_1d !== undefined) {
+      dayPct = analytics.return_1d
+      if (displaySummary?.total_value) {
+        dayAmount = Math.round(displaySummary.total_value * (dayPct / 100) * 100) / 100
       }
     }
 
+    // 2. Compute Week Metric (7D) from performance history curve
     if (performance && performance.length >= 2) {
       const sorted = [...performance]
         .filter((p) => p && p.date && typeof p.value === 'number')
@@ -338,18 +344,14 @@ export function OverviewPage() {
         const weekPoint = sorted[weekIdx]
         const weekInflow = (last.invested ?? 0) - (weekPoint.invested ?? 0)
         const wProfit = (last.value - weekPoint.value) - weekInflow
-        if (weekPct === undefined) {
-          weekPct = weekPoint.value > 0 ? (wProfit / weekPoint.value) * 100 : 0
-        }
-        weekAmount = wProfit
+        weekAmount = Math.round(wProfit * 100) / 100
+        weekPct = weekPoint.value > 0 ? (wProfit / weekPoint.value) * 100 : 0
       }
-    }
-
-    if (dayAmount === null && displaySummary?.total_value && dayPct !== undefined) {
-      dayAmount = Math.round(displaySummary.total_value * (dayPct / 100) * 100) / 100
-    }
-    if (weekAmount === null && displaySummary?.total_value && weekPct !== undefined) {
-      weekAmount = Math.round(displaySummary.total_value * (weekPct / 100) * 100) / 100
+    } else if (analytics?.return_1w !== undefined) {
+      weekPct = analytics.return_1w
+      if (displaySummary?.total_value) {
+        weekAmount = Math.round(displaySummary.total_value * (weekPct / 100) * 100) / 100
+      }
     }
 
     return {
@@ -362,7 +364,7 @@ export function OverviewPage() {
 
   const secondaryStats = useMemo(() => {
     if (secondaryChartMode === 'returns') {
-      const dayPct = analytics?.return_1d ?? shortTermMetrics?.dayPct
+      const dayPct = shortTermMetrics?.dayPct ?? analytics?.return_1d
       const ytd = analytics?.return_ytd
       return {
         box1Label: '1D:',
