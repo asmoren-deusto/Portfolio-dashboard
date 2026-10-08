@@ -364,8 +364,6 @@ async def get_performance(
 
     # Fetch price history for all assets concurrently, ensuring latest date uses current price
     async def _fetch_perf_bundle(isin):
-        if isin == "TR_TRANSFER" or isin.startswith("TR_"):
-            return isin, [], 0.0, datetime.now().strftime("%Y-%m-%d")
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         (history_res, price_res) = await asyncio.gather(
@@ -373,7 +371,7 @@ async def get_performance(
             get_price_with_date(isin, ticker, db=db),
             return_exceptions=True
         )
-        history = history_res if isinstance(history_res, list) else []
+        history = [dict(h) for h in history_res] if isinstance(history_res, list) else []
         curr_p, curr_p_date = price_res if isinstance(price_res, tuple) else (None, None)
         return isin, history, curr_p, curr_p_date
 
@@ -678,8 +676,6 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     history_period = "max" if period == "max" else "2y"
 
     async def _fetch_analytics_bundle(isin):
-        if isin == "TR_TRANSFER" or isin.startswith("TR_"):
-            return isin, [], 0.0, datetime.now().strftime("%Y-%m-%d")
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         (history_res, price_res) = await asyncio.gather(

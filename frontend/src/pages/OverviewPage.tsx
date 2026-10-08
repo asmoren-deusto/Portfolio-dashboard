@@ -250,6 +250,32 @@ export function OverviewPage() {
         : 'Severa'
       : undefined
 
+  const periodProfitValue = useMemo(() => {
+    if (period === '5y' && displaySummary?.total_pnl !== undefined) {
+      return displaySummary.total_pnl
+    }
+    return perfStats?.periodProfit ?? displaySummary?.total_pnl ?? 0
+  }, [period, displaySummary, perfStats])
+
+  const periodReturnPct = useMemo(() => {
+    if (period === '5y') {
+      return analytics?.twr ?? displaySummary?.total_pnl_pct ?? perfStats?.realReturnPct ?? 0
+    }
+    if (period === '1y' && analytics?.return_1y !== undefined && analytics.return_1y !== null) {
+      return analytics.return_1y
+    }
+    if (period === '6mo' && analytics?.return_6m !== undefined && analytics.return_6m !== null) {
+      return analytics.return_6m
+    }
+    if (period === '3mo' && analytics?.return_3m !== undefined && analytics.return_3m !== null) {
+      return analytics.return_3m
+    }
+    if (period === '1mo' && analytics?.return_1m !== undefined && analytics.return_1m !== null) {
+      return analytics.return_1m
+    }
+    return perfStats?.realReturnPct ?? analytics?.return_ytd ?? 0
+  }, [period, analytics, displaySummary, perfStats])
+
   const allocStats = useMemo(() => {
     if (!positions || positions.length === 0) return null
     const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
@@ -680,36 +706,30 @@ export function OverviewPage() {
             hoverGlow
             hideTagOnMobile
             label={`Rentabilidad (${periodLabel})`}
-            value={
-              perfStats
-                ? fmt.pct(perfStats.realReturnPct)
-                : analytics?.return_ytd !== undefined
-                ? fmt.pct(analytics.return_ytd)
-                : '—'
-            }
-            valueColor={(perfStats?.periodProfit ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
-            tag={(perfStats?.realReturnPct ?? 0) >= 0 ? "Rentabilidad" : "Pérdida"}
-            tagColor={(perfStats?.realReturnPct ?? 0) >= 0 ? "emerald" : "rose"}
-            borderAccent={(perfStats?.realReturnPct ?? 0) >= 0 ? "emerald" : "rose"}
+            value={fmt.pct(periodReturnPct)}
+            valueColor={periodReturnPct >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
+            tag={periodReturnPct >= 0 ? "Rentabilidad" : "Pérdida"}
+            tagColor={periodReturnPct >= 0 ? "emerald" : "rose"}
+            borderAccent={periodReturnPct >= 0 ? "emerald" : "rose"}
             sub={`rendimiento del periodo ${periodLabel}`}
             delay={0.1}
-            icon={<TrendingUp size={15} className={(perfStats?.realReturnPct ?? 0) >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
-            iconBg={(perfStats?.realReturnPct ?? 0) >= 0 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
+            icon={<TrendingUp size={15} className={periodReturnPct >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
+            iconBg={periodReturnPct >= 0 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
             loading={isPeriodUpdating}
           />
           <KpiCard
             hoverGlow
             hideTagOnMobile
             label={`Plusvalía (${periodLabel})`}
-            value={perfStats ? `${perfStats.periodProfit >= 0 ? '+' : ''}${fmt.currency(perfStats.periodProfit)}` : '—'}
-            valueColor={(perfStats?.periodProfit ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
-            tag={(perfStats?.periodProfit ?? 0) >= 0 ? "+ Ganancia" : "- Pérdida"}
-            tagColor={(perfStats?.periodProfit ?? 0) >= 0 ? "emerald" : "rose"}
-            borderAccent={(perfStats?.periodProfit ?? 0) >= 0 ? "emerald" : "rose"}
+            value={`${periodProfitValue >= 0 ? '+' : ''}${fmt.currency(periodProfitValue)}`}
+            valueColor={periodProfitValue >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
+            tag={periodProfitValue >= 0 ? "+ Ganancia" : "- Pérdida"}
+            tagColor={periodProfitValue >= 0 ? "emerald" : "rose"}
+            borderAccent={periodProfitValue >= 0 ? "emerald" : "rose"}
             sub={`ganancia neta de mercado en ${periodLabel}`}
             delay={0.12}
-            icon={<TrendingUp size={15} className={(perfStats?.periodProfit ?? 0) >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
-            iconBg={(perfStats?.periodProfit ?? 0) >= 0 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
+            icon={<TrendingUp size={15} className={periodProfitValue >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
+            iconBg={periodProfitValue >= 0 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
             loading={isPeriodUpdating}
           />
           <KpiCard
