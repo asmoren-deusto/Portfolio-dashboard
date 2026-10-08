@@ -144,7 +144,7 @@ export function KpiCard({
               className={cn(
                 'flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border transition-all',
                 iconBg ||
-                  'bg-slate-100 border-slate-200/90 text-slate-700 group-hover:text-blue-600 group-hover:bg-blue-50 group-hover:border-blue-200 dark:bg-white/[0.04] dark:border-white/[0.06] dark:text-slate-300 dark:group-hover:text-blue-400 dark:group-hover:bg-blue-500/10 dark:group-hover:border-blue-500/20'
+                  'bg-slate-100 border-slate-200/90 text-slate-700 group-hover:text-blue-600 group-hover:bg-blue-50 group-hover:border-blue-200 dark:bg-white/[0.04] dark:border-white/[0.06] dark:text-slate-300 dark:group-hover:text-white dark:group-hover:bg-white/[0.08] dark:group-hover:border-white/[0.12]'
               )}
             >
               {icon}

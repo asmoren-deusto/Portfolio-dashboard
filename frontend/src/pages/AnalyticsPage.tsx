@@ -233,7 +233,7 @@ export function AnalyticsPage() {
                   onClick={() => setBenchmarkMode(m)}
                   className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                     benchmarkMode === m
-                      ? 'text-white'
+                      ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                   title={
@@ -245,7 +245,7 @@ export function AnalyticsPage() {
                   {benchmarkMode === m && (
                     <motion.div
                       layoutId="benchmark-mode-indicator"
-                      className="absolute inset-0 rounded-lg bg-blue-600 shadow-xs"
+                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                     />
                   )}
@@ -300,14 +300,14 @@ export function AnalyticsPage() {
                   onClick={() => setSecondaryView(view)}
                   className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                     secondaryView === view
-                      ? 'text-white'
+                      ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
                   {secondaryView === view && (
                     <motion.div
                       layoutId="analyticsSecondaryPill"
-                      className="absolute inset-0 rounded-lg bg-blue-600 shadow-xs"
+                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
@@ -571,7 +571,7 @@ export function AnalyticsPage() {
                           size="md"
                         />
                         <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors truncate max-w-[300px] text-[14.3px]">
+                          <div className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[300px] text-[14.3px]">
                             {p.name}
                           </div>
                           <div className="font-mono text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{p.isin}</div>

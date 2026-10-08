@@ -335,7 +335,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     tabIndex={0}
                     key={`${idx.name}-${index}`}
                     onClick={() => handleCardClick(idx)}
-                    className="relative flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-blue-500/40 cursor-pointer active:scale-[0.98]"
+                    className="relative flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-white/20 cursor-pointer active:scale-[0.98]"
                   >
                     {/* Floating Overlaid State Badge (Upper-right corner) */}
                     {state !== 'REGULAR' && (

@@ -222,13 +222,13 @@ export function TransactionsPage() {
                 key={tab.id}
                 onClick={() => setActiveType(tab.id)}
                 className={`relative px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
-                  active ? 'text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
                 {active && (
                   <motion.div
                     layoutId="txTypeTab"
-                    className="absolute inset-0 rounded-xl bg-blue-600/90 shadow-md shadow-blue-500/20"
+                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
                   />
                 )}
@@ -341,7 +341,7 @@ export function TransactionsPage() {
                             size="sm"
                           />
                           <div className="min-w-0">
-                            <div className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors truncate max-w-[260px]">
+                            <div className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[260px]">
                               {displayName}
                             </div>
                             <div className="font-mono text-xs text-slate-600 dark:text-slate-400 font-medium">{t.isin}</div>
@@ -379,10 +379,10 @@ export function TransactionsPage() {
                         <span className={cn(
                           "inline-block px-2.5 py-0.5 rounded-lg text-xs font-semibold uppercase tracking-wider border",
                           t.broker === 'bbva'
-                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/60'
+                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/30'
                             : t.broker === 'indexa'
-                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/60'
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/60'
+                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/30'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30'
                         )}>
                           {({ bbva: 'BBVA', indexa: 'Indexa Capital', kutxabank: 'Kutxabank', scalable: 'Scalable', traderepublic: 'Trade Republic' } as Record<string, string>)[t.broker] ?? 'MyInvestor'}
                         </span>
@@ -832,7 +832,7 @@ function ImportExtractoModal({
             onClick={() => setTab('text')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
               tab === 'text'
-                ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-[#2d2d2d] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -844,7 +844,7 @@ function ImportExtractoModal({
             onClick={() => setTab('file')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
               tab === 'file'
-                ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-[#2d2d2d] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -912,7 +912,7 @@ function ImportExtractoModal({
           <div className="mt-4 space-y-4 text-xs">
             <div
               onClick={() => !isProcessing && fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-200 dark:border-white/15 hover:border-blue-500/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-white/[0.01] hover:bg-blue-500/[0.02]"
+              className="border-2 border-dashed border-slate-200 dark:border-white/15 hover:border-blue-500/50 dark:hover:border-white/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-white/[0.01] hover:bg-slate-100/50 dark:hover:bg-white/[0.03]"
             >
               {isProcessing ? (
                 <Loader2 className="w-8 h-8 text-blue-500 dark:text-blue-400 mb-2 animate-spin" />

@@ -101,7 +101,7 @@ export function Sidebar({}: SidebarProps) {
                   setSidebarCollapsed(false)
                   setMobileSidebarOpen(false)
                 }}
-                className="hidden md:flex p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-500/10 transition-colors"
+                className="hidden md:flex p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] transition-colors"
                 title="Fijar panel lateral"
                 aria-label="Fijar panel lateral"
               >
@@ -213,7 +213,7 @@ export function Sidebar({}: SidebarProps) {
               {theme === 'light' && (
                 <motion.div
                   layoutId="sidebarThemePill"
-                  className="absolute inset-0 rounded-lg bg-white shadow-sm dark:bg-blue-600"
+                  className="absolute inset-0 rounded-lg bg-white shadow-sm"
                   transition={{ type: 'spring', bounce: 0.15, duration: 0.3 }}
                 />
               )}
@@ -226,18 +226,18 @@ export function Sidebar({}: SidebarProps) {
               className={cn(
                 'relative flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all',
                 theme === 'dark'
-                  ? 'text-white font-bold'
+                  ? 'text-slate-950 dark:text-white font-bold'
                   : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'
               )}
             >
               {theme === 'dark' && (
                 <motion.div
                   layoutId="sidebarThemePill"
-                  className="absolute inset-0 rounded-lg bg-blue-600 shadow-sm"
+                  className="absolute inset-0 rounded-lg bg-white dark:bg-[#2d2d2d] dark:border dark:border-white/10 shadow-sm"
                   transition={{ type: 'spring', bounce: 0.15, duration: 0.3 }}
                 />
               )}
-              <Moon className={cn('w-3.5 h-3.5 relative z-10', theme === 'dark' ? 'text-blue-300' : '')} />
+              <Moon className={cn('w-3.5 h-3.5 relative z-10', theme === 'dark' ? 'text-slate-700 dark:text-slate-200' : '')} />
               <span className="relative z-10">Oscuro</span>
             </button>
           </div>

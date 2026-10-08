@@ -811,7 +811,7 @@ export function OverviewPage() {
                     <button
                       onClick={() => setPerfChartMode('currency')}
                       className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${perfChartMode === 'currency'
-                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white'
+                          ? 'bg-white dark:bg-[#333333] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                         }`}
                       title="Ver evolución en Euros (€)"
@@ -821,7 +821,7 @@ export function OverviewPage() {
                     <button
                       onClick={() => setPerfChartMode('percent')}
                       className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${perfChartMode === 'percent'
-                          ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white'
+                          ? 'bg-white dark:bg-[#333333] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                         }`}
                       title="Ver rentabilidad acumulada en porcentaje (%)"
@@ -865,7 +865,7 @@ export function OverviewPage() {
                 <button
                   onClick={() => setChartView('evolution')}
                   className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'evolution'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                     }`}
                 >
@@ -874,7 +874,7 @@ export function OverviewPage() {
                 <button
                   onClick={() => setChartView('heatmap')}
                   className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'heatmap'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                     }`}
                 >
@@ -1041,14 +1041,14 @@ export function OverviewPage() {
                   key={m}
                   onClick={() => setAllocMode(m)}
                   className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${allocMode === m
-                      ? 'text-white'
+                      ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                 >
                   {allocMode === m && (
                     <motion.div
                       layoutId="overviewAllocPill"
-                      className="absolute inset-0 rounded-lg bg-blue-600"
+                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
@@ -1152,14 +1152,14 @@ export function OverviewPage() {
                   try { localStorage.setItem('returns_period_mode', 'global') } catch { }
                 }}
                 className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'global'
-                    ? 'text-white'
+                    ? 'text-slate-900 dark:text-white font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
               >
                 {returnsPeriodMode === 'global' && (
                   <motion.div
                     layoutId="returnsPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-blue-600"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}
@@ -1171,14 +1171,14 @@ export function OverviewPage() {
                   try { localStorage.setItem('returns_period_mode', 'weekly') } catch { }
                 }}
                 className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'weekly'
-                    ? 'text-white'
+                    ? 'text-slate-900 dark:text-white font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
               >
                 {returnsPeriodMode === 'weekly' && (
                   <motion.div
                     layoutId="returnsPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-blue-600"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}
@@ -1304,7 +1304,7 @@ export function OverviewPage() {
 
           <Link
             to="/positions"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08]"
           >
             <span>Ver todas ({positions.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -1347,8 +1347,8 @@ export function OverviewPage() {
                       className={cn(
                         'transition-colors group cursor-pointer relative',
                         isRowHovered
-                          ? 'bg-blue-50/70 dark:bg-blue-950/30'
-                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
+                          ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
                       )}
                     >
                       <td className="py-2.5 pl-3 pr-1 text-center relative">
@@ -1378,7 +1378,7 @@ export function OverviewPage() {
                             size="sm"
                           />
                           <div className="min-w-0">
-                            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
+                            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
                               {p.name}
                             </div>
                             <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
@@ -1448,7 +1448,7 @@ export function OverviewPage() {
                           <span
                             className={cn(
                               'font-mono font-bold text-right text-[13px] transition-colors',
-                              isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'
+                              isRowHovered ? 'text-slate-950 dark:text-white font-extrabold' : 'text-slate-800 dark:text-slate-200'
                             )}
                           >
                             {p.weight.toFixed(1)}%
@@ -1496,8 +1496,8 @@ export function OverviewPage() {
                       className={cn(
                         'transition-colors group cursor-pointer relative',
                         isRowHovered
-                          ? 'bg-blue-50/70 dark:bg-blue-950/30'
-                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
+                          ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
                       )}
                     >
                       <td className="py-2.5 pl-3 pr-1 text-center relative">
@@ -1527,7 +1527,7 @@ export function OverviewPage() {
                             size="sm"
                           />
                           <div className="min-w-0">
-                            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
+                            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
                               {p.name}
                             </div>
                             <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
@@ -1597,7 +1597,7 @@ export function OverviewPage() {
                           <span
                             className={cn(
                               'font-mono font-bold text-right text-[13px] transition-colors',
-                              isRowHovered ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'
+                              isRowHovered ? 'text-slate-950 dark:text-white font-extrabold' : 'text-slate-800 dark:text-slate-200'
                             )}
                           >
                             {p.weight.toFixed(1)}%
@@ -1642,7 +1642,7 @@ export function OverviewPage() {
 
             <Link
               to="/transactions"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08]"
             >
               <span>Historial</span>
               <ArrowRight className="w-3.5 h-3.5" />

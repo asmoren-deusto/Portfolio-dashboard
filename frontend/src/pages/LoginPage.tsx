@@ -266,8 +266,8 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center p-4 sm:p-6 bg-slate-50 dark:bg-[#181818] text-slate-900 dark:text-slate-100 transition-colors">
       {/* Background glow effects */}
-      <div className="pointer-events-none fixed top-10 left-1/4 w-[600px] h-[300px] bg-blue-500/[0.05] dark:bg-blue-600/[0.07] blur-[130px] rounded-full -z-10" />
-      <div className="pointer-events-none fixed bottom-10 right-1/4 w-[500px] h-[300px] bg-indigo-500/[0.04] dark:bg-indigo-600/[0.06] blur-[120px] rounded-full -z-10" />
+      <div className="pointer-events-none fixed top-10 left-1/4 w-[600px] h-[300px] bg-blue-500/[0.05] dark:bg-zinc-600/[0.03] blur-[130px] rounded-full -z-10" />
+      <div className="pointer-events-none fixed bottom-10 right-1/4 w-[500px] h-[300px] bg-indigo-500/[0.04] dark:bg-zinc-700/[0.02] blur-[120px] rounded-full -z-10" />
 
       {/* Main Container */}
       <div className="w-full max-w-2xl">
@@ -359,8 +359,8 @@ export const LoginPage: React.FC = () => {
                             onClick={() => handleSelectProfile(u)}
                             className={`group relative flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer ${
                               isDemo
-                                ? 'bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-transparent dark:from-blue-950/20 dark:via-indigo-950/10 dark:to-transparent border-blue-300 dark:border-blue-500/30 hover:border-blue-500 dark:hover:border-blue-400 shadow-xs'
-                                : 'bg-slate-50/80 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/[0.06] hover:border-blue-500/50 hover:bg-slate-100/70 dark:hover:bg-white/[0.04]'
+                                ? 'bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-transparent dark:from-white/[0.03] dark:via-transparent dark:to-transparent border-blue-300 dark:border-white/[0.1] hover:border-blue-500 dark:hover:border-white/25 shadow-xs'
+                                : 'bg-slate-50/80 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/[0.06] hover:border-blue-500/50 hover:bg-slate-100/70 dark:hover:bg-white/[0.04] dark:hover:border-white/15'
                             }`}
                           >
                             <div className="flex items-center gap-3.5 min-w-0">
@@ -377,13 +377,13 @@ export const LoginPage: React.FC = () => {
 
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <h3 className="font-bold text-sm text-slate-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                  <h3 className="font-bold text-sm text-slate-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-white transition-colors">
                                     {u.name}
                                   </h3>
                                   <span
                                     className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                                       isDemo
-                                        ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-500/30'
+                                        ? 'bg-blue-100 dark:bg-white/[0.08] text-blue-700 dark:text-slate-200 border-blue-300 dark:border-white/[0.12]'
                                         : 'bg-slate-200/70 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-white/[0.1]'
                                     }`}
                                   >
@@ -400,12 +400,12 @@ export const LoginPage: React.FC = () => {
                             {/* Right side action button */}
                             <div className="flex items-center gap-2 shrink-0 pl-2">
                               {isDemo ? (
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-100/90 dark:bg-blue-500/20 border border-blue-200/90 dark:border-blue-500/30 text-blue-700 dark:text-blue-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all text-xs font-semibold shadow-xs">
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-100/90 dark:bg-white/[0.06] border border-blue-200/90 dark:border-white/[0.1] text-blue-700 dark:text-slate-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 dark:group-hover:bg-white dark:group-hover:text-slate-950 dark:group-hover:border-white transition-all text-xs font-semibold shadow-xs">
                                   <span>Acceso Libre</span>
                                   <ArrowRight size={13} className="shrink-0 opacity-80 group-hover:translate-x-0.5 transition-transform" />
                                 </div>
                               ) : (
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-white/[0.08] border border-slate-200/90 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all text-xs font-semibold shadow-xs">
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-white/[0.06] border border-slate-200/90 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 dark:group-hover:bg-white dark:group-hover:text-slate-950 dark:group-hover:border-white transition-all text-xs font-semibold shadow-xs">
                                   <Lock size={13} className="shrink-0" />
                                   <span>Desbloquear</span>
                                   <ArrowRight size={13} className="shrink-0 opacity-70 group-hover:translate-x-0.5 transition-transform" />
@@ -453,7 +453,7 @@ export const LoginPage: React.FC = () => {
                             <h2 className="font-bold text-base text-slate-950 dark:text-white truncate">
                               {selectedProfile.name}
                             </h2>
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/30">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 dark:bg-white/[0.08] text-blue-700 dark:text-slate-200 border border-blue-300 dark:border-white/[0.12]">
                               {selectedProfile.badge}
                             </span>
                           </div>
@@ -473,8 +473,8 @@ export const LoginPage: React.FC = () => {
                     {isSettingPassword ? (
                       /* SETUP PASSWORD MODE (for Asier Moreno on initial setup or password reset) */
                       <form onSubmit={handleSaveProfilePassword} className="space-y-4 pt-1">
-                        <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-500/20 text-xs text-blue-800 dark:text-blue-300">
-                          <p className="font-semibold text-blue-900 dark:text-blue-200">
+                        <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-white/[0.03] border border-blue-200/80 dark:border-white/[0.08] text-xs text-blue-800 dark:text-slate-300">
+                          <p className="font-semibold text-blue-900 dark:text-white">
                             {selectedProfile.passwordHash ? 'Modificar contraseña de acceso' : 'Crea tu contraseña de acceso'}
                           </p>
                           <p className="text-[11.5px] mt-0.5 text-blue-700 dark:text-blue-300/80">
@@ -636,7 +636,7 @@ export const LoginPage: React.FC = () => {
                               setIsSettingPassword(true)
                               setError(null)
                             }}
-                            className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
+                            className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white transition-colors"
                           >
                             <Key size={12} />
                             <span>Modificar contraseña</span>

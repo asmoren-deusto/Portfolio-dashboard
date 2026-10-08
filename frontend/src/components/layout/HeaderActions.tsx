@@ -233,8 +233,8 @@ export function HeaderActions({
                         className={cn(
                           'w-full flex items-center justify-between p-2 rounded-xl text-left transition-colors',
                           isSelected
-                            ? 'bg-blue-50 text-blue-900 dark:bg-blue-500/10 dark:text-blue-200 font-semibold'
-                            : 'hover:bg-slate-50 dark:hover:bg-white/[0.03] text-slate-700 dark:text-slate-300'
+                            ? 'bg-blue-50 text-blue-900 dark:bg-white/[0.08] dark:text-white font-semibold'
+                            : 'hover:bg-slate-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
                         )}
                       >
                         <div className="flex items-center gap-2 min-w-0">
@@ -284,7 +284,7 @@ export function HeaderActions({
           'flex items-center justify-center border transition-all active:scale-95',
           btnSize,
           privacyMode
-            ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300'
+            ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-white/20 dark:bg-white/[0.08] dark:text-white'
             : 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300'
         )}
         title={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
@@ -316,8 +316,8 @@ export function HeaderActions({
           'flex items-center justify-center border border-slate-200/90 transition-all active:scale-95 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
           btnSize,
           'bg-white hover:bg-slate-50 text-slate-700',
-          isRefreshingPrices && 'opacity-85 cursor-wait bg-blue-50/60 text-blue-700 border-blue-300 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-700/50',
-          refreshSuccess && 'border-emerald-300 text-emerald-600 bg-emerald-50/40 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-950/20'
+          isRefreshingPrices && 'opacity-85 cursor-wait bg-blue-50/60 text-blue-700 border-blue-300 dark:bg-white/[0.08] dark:text-white dark:border-white/20',
+          refreshSuccess && 'border-emerald-300 text-emerald-600 bg-emerald-50/40 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-500/10'
         )}
         title={isRefreshingPrices ? 'Buscando y actualizando NAVs oficiales en directo...' : 'Buscar y actualizar los NAVs oficiales en tiempo real desde las gestoras'}
       >

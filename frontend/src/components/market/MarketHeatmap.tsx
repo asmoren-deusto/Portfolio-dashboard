@@ -426,7 +426,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               }
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all shrink-0 ${
                 heightMode === 'expanded'
-                  ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-600/20 dark:text-blue-300 dark:border-blue-500/40'
+                  ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-white/[0.08] dark:text-white dark:border-white/20'
                   : 'bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 dark:bg-[#252526] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08]'
               }`}
               title={
@@ -437,7 +437,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
             >
               {heightMode === 'expanded' ? (
                 <>
-                  <ChevronsUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <ChevronsUp className="w-3.5 h-3.5 text-blue-600 dark:text-white" />
                   <span className="hidden lg:inline">Ajustar</span>
                 </>
               ) : (
@@ -462,7 +462,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           {showViewAllLink && !isFullscreen && (
             <Link
               to="/market"
-              className="inline-flex items-center gap-1.5 p-1.5 lg:px-3 lg:py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 shrink-0"
+              className="inline-flex items-center gap-1.5 p-1.5 lg:px-3 lg:py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
               title="Ver mercado"
             >
               <span className="hidden lg:inline">Ver mercado</span>

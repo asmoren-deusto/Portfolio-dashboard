@@ -225,13 +225,13 @@ export function PositionsPage() {
                 key={tab.id}
                 onClick={() => setActiveFilter(tab.id)}
                 className={`relative px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
-                  active ? 'text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
                 {active && (
                   <motion.div
                     layoutId="posTypeTab"
-                    className="absolute inset-0 rounded-xl bg-blue-600 shadow-md shadow-blue-500/20"
+                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
                   />
                 )}
@@ -280,7 +280,7 @@ export function PositionsPage() {
               onClick={() => setViewMode('table')}
               className={`p-1.5 rounded-lg transition-colors ${
                 viewMode === 'table'
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
               title="Vista de Tabla"
@@ -291,7 +291,7 @@ export function PositionsPage() {
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
               title="Vista de Tarjetas"
@@ -388,7 +388,7 @@ export function PositionsPage() {
                               size="md"
                             />
                             <div className="min-w-0">
-                              <div className="font-semibold text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-300 transition-colors truncate max-w-[280px]">
+                              <div className="font-semibold text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-white transition-colors truncate max-w-[280px]">
                                 {p.name}
                               </div>
                               <div className="flex items-center gap-1.5 font-mono text-xs text-slate-600 dark:text-slate-400 font-medium">
@@ -493,7 +493,7 @@ export function PositionsPage() {
                   transition={{ delay: i * 0.03 }}
                   onClick={() => setSelectedPosition(p)}
                   title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                  className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-blue-500/40 p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between overflow-hidden"
+                  className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/20 dark:hover:bg-[#252526] p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between overflow-hidden"
                 >
                   {isUpdated && (
                     <span
@@ -513,7 +513,7 @@ export function PositionsPage() {
                         size="md"
                       />
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-sm text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-300 transition-colors truncate">
+                        <h3 className="font-semibold text-sm text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-white transition-colors truncate">
                           {p.name}
                         </h3>
                         <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-slate-700 dark:text-slate-300 truncate">

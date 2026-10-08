@@ -449,7 +449,7 @@ export const MarketPage: React.FC = () => {
                 onClick={() => setViewMode('split')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   viewMode === 'split'
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                    ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Vista dual: listado y heatmap paralelos"
@@ -461,7 +461,7 @@ export const MarketPage: React.FC = () => {
                 onClick={() => setViewMode('heatmap')}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   viewMode === 'heatmap'
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                    ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Mapa de calor interactivo completo"
@@ -473,7 +473,7 @@ export const MarketPage: React.FC = () => {
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg transition-all ${
                   viewMode === 'grid'
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                    ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Vista de cuadrícula con logos"
@@ -484,7 +484,7 @@ export const MarketPage: React.FC = () => {
                 onClick={() => setViewMode('table')}
                 className={`p-1.5 rounded-lg transition-all ${
                   viewMode === 'table'
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                    ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Vista de tabla densa"
@@ -590,8 +590,8 @@ export const MarketPage: React.FC = () => {
                         onClick={() => setSelectedStock(stock)}
                         className={`transition-all cursor-pointer group ${
                           isSelected
-                            ? 'bg-blue-50/90 dark:bg-blue-500/10'
-                            : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.03]'
+                            ? 'bg-blue-50/90 dark:bg-[#2a2d2e]'
+                            : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
                         }`}
                       >
                         {/* # */}
@@ -613,7 +613,7 @@ export const MarketPage: React.FC = () => {
                             />
                             <div className="min-w-0 overflow-hidden">
                               <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-sm text-slate-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                <span className="font-bold text-sm text-slate-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate">
                                   {stock.name}
                                 </span>
                                 <span className="hidden sm:inline text-[10.5px] font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/[0.05] px-1 py-px rounded truncate max-w-[60px]">

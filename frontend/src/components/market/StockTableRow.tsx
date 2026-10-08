@@ -78,7 +78,7 @@ export const StockTableRow: React.FC<StockTableRowProps> = ({ stock, onClick, ra
             size="sm"
           />
           <div className="min-w-0">
-            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors">
               {stock.name}
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">

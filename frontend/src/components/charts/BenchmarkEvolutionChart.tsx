@@ -559,7 +559,7 @@ export function BenchmarkEvolutionChart({
                   onClick={() => setMode('percent')}
                   className={`min-w-[28px] px-2.5 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
                     mode === 'percent'
-                      ? 'bg-blue-600 text-white shadow-xs'
+                      ? 'bg-white dark:bg-[#333333] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                   title="Comparativa de rentabilidad ponderada en el tiempo (TWR) neutralizando aportaciones"
@@ -570,7 +570,7 @@ export function BenchmarkEvolutionChart({
                   onClick={() => setMode('currency')}
                   className={`min-w-[28px] px-2.5 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
                     mode === 'currency'
-                      ? 'bg-blue-600 text-white shadow-xs'
+                      ? 'bg-white dark:bg-[#333333] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                   title="Patrimonio total (€) y capital neto aportado"
