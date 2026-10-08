@@ -371,9 +371,23 @@ export function OverviewPage() {
 
     if (valid.length < 2) return []
 
+    // Deduplicate by date (keep latest value if duplicate dates exist)
+    const seen = new Set<string>()
+    const uniquePoints: typeof performance = []
+    for (const p of valid) {
+      if (!seen.has(p.date)) {
+        seen.add(p.date)
+        uniquePoints.push(p)
+      } else {
+        uniquePoints[uniquePoints.length - 1] = p
+      }
+    }
+
+    if (uniquePoints.length < 2) return []
+
     // Up to 7 daily returns requires up to 8 points (since daily return = (day[i] - day[i-1]))
-    const pointsNeeded = Math.min(valid.length, 8)
-    const slice = valid.slice(valid.length - pointsNeeded)
+    const pointsNeeded = Math.min(uniquePoints.length, 8)
+    const slice = uniquePoints.slice(uniquePoints.length - pointsNeeded)
 
     const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
@@ -403,7 +417,7 @@ export function OverviewPage() {
       const dateObj = new Date(y, m - 1, d)
       const dayName = dayNames[dateObj.getDay()] || ''
 
-      const isToday = Boolean(latestNavDate && cur.date === latestNavDate) || isLatest
+      const isToday = isLatest
 
       const name = isToday ? 'Hoy' : `${dayName} ${d}`
       const fullName = `${dateObj.toLocaleDateString('es-ES', {
@@ -420,7 +434,7 @@ export function OverviewPage() {
     }
 
     return result
-  }, [performance, shortTermMetrics?.dayPct, latestNavDate])
+  }, [performance, shortTermMetrics?.dayPct])
 
   const secondaryStats = useMemo(() => {
     if (returnsPeriodMode === 'global') {
