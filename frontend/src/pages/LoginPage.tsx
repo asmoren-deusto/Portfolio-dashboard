@@ -19,6 +19,7 @@ import {
 import { useAppStore } from '@/store/appStore'
 import { type UserProfile } from '@/lib/mockData'
 import { fmt } from '@/lib/utils'
+import { APP_VERSION } from '@/version'
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
@@ -829,7 +830,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Footer */}
         <div className="flex items-center justify-center gap-2 mt-6 text-xs text-slate-500 dark:text-slate-400 font-medium">
-          <span>PortfolioPro v2.6</span>
+          <span>PortfolioPro v{APP_VERSION}</span>
           <span>•</span>
           <span>Plataforma de Inversión y Análisis de Carteras</span>
         </div>
