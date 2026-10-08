@@ -29,16 +29,18 @@ export function HeaderActions({
   showPeriod = false,
   hideUser = false,
 }: HeaderActionsProps) {
-  const { theme, toggleTheme, privacyMode, togglePrivacyMode, currentUser, users, login, logout, period, setPeriod } = useAppStore()
+  const {
+    theme, toggleTheme, privacyMode, togglePrivacyMode, currentUser, users, login, logout, period, setPeriod,
+    isRefreshingPrices, setIsRefreshingPrices, triggerRefreshAnimation
+  } = useAppStore()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [spinning, setSpinning] = useState(false)
   const [refreshSuccess, setRefreshSuccess] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const handleRefresh = async () => {
-    if (spinning) return
-    setSpinning(true)
+    if (isRefreshingPrices) return
+    setIsRefreshingPrices(true)
     setRefreshSuccess(false)
     try {
       const userId = currentUser?.id || 'asier'
@@ -46,13 +48,15 @@ export function HeaderActions({
         await refreshPortfolioPrices(userId)
       }
       await queryClient.invalidateQueries()
+      triggerRefreshAnimation()
       setRefreshSuccess(true)
       setTimeout(() => setRefreshSuccess(false), 3000)
     } catch (err) {
       console.warn('Error fetching live NAVs:', err)
       await queryClient.invalidateQueries()
+      triggerRefreshAnimation()
     } finally {
-      setSpinning(false)
+      setIsRefreshingPrices(false)
     }
   }
 
@@ -256,24 +260,24 @@ export function HeaderActions({
       {/* Refresh button */}
       <button
         onClick={handleRefresh}
-        disabled={spinning}
+        disabled={isRefreshingPrices}
         className={cn(
           'flex items-center justify-center border border-slate-200/90 transition-all active:scale-95 dark:bg-[#181922]/90 dark:hover:bg-[#20222d] dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
           btnSize,
           'bg-white hover:bg-slate-50 text-slate-700',
-          spinning && 'opacity-80 cursor-wait bg-blue-50/50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-300 dark:border-blue-800/30',
+          isRefreshingPrices && 'opacity-85 cursor-wait bg-blue-50/60 text-blue-700 border-blue-300 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-700/50',
           refreshSuccess && 'border-emerald-300 text-emerald-600 bg-emerald-50/40 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-950/20'
         )}
-        title="Buscar y actualizar los NAVs oficiales en tiempo real desde las gestoras"
+        title={isRefreshingPrices ? 'Buscando y actualizando NAVs oficiales en directo...' : 'Buscar y actualizar los NAVs oficiales en tiempo real desde las gestoras'}
       >
         {refreshSuccess ? (
           <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
         ) : (
           <motion.div
-            animate={{ rotate: spinning ? 360 : 0 }}
-            transition={{ duration: 0.8, repeat: spinning ? Infinity : 0, ease: 'linear' }}
+            animate={{ rotate: isRefreshingPrices ? 360 : 0 }}
+            transition={{ duration: 0.8, repeat: isRefreshingPrices ? Infinity : 0, ease: 'linear' }}
           >
-            <RefreshCw className={cn('w-3.5 h-3.5', spinning ? 'text-blue-500' : 'text-slate-500 dark:text-slate-400')} />
+            <RefreshCw className={cn('w-3.5 h-3.5', isRefreshingPrices ? 'text-blue-500' : 'text-slate-500 dark:text-slate-400')} />
           </motion.div>
         )}
       </button>

@@ -116,7 +116,7 @@ export function PerformanceChart({
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
   const lastSweepKeyRef = useRef<string>('')
 
-  const theme = useAppStore(s => s.theme)
+  const { theme, refreshAnimKey } = useAppStore()
   const isDark = theme === 'dark'
 
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
@@ -482,8 +482,8 @@ export function PerformanceChart({
       // Automatically auto-fit the view to the full period data width without needing a button
       chart.timeScale().fitContent()
 
-      // Trigger timeline sweep animation on load & when period or mode changes
-      const sweepKey = `${data?.length || 0}_${chartMode}_${data?.[0]?.date || ''}_${data?.[data.length - 1]?.date || ''}`
+      // Trigger timeline sweep animation on load, when period or mode changes, or on manual refresh
+      const sweepKey = `${data?.length || 0}_${chartMode}_${data?.[0]?.date || ''}_${data?.[data.length - 1]?.date || ''}_${refreshAnimKey}`
       if (data && data.length > 0 && sweepKey !== lastSweepKeyRef.current) {
         lastSweepKeyRef.current = sweepKey
         requestAnimationFrame(() => {
@@ -493,7 +493,7 @@ export function PerformanceChart({
     } catch (err) {
       console.warn('Failed to update performance chart:', err)
     }
-  }, [data, chartMode, showInvested, showMilestones, metrics, isDark])
+  }, [data, chartMode, showInvested, showMilestones, metrics, isDark, refreshAnimKey])
 
   return (
     <div data-private className="w-full flex flex-col gap-2">

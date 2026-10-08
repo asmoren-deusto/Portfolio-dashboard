@@ -70,7 +70,7 @@ const PERIOD_LABELS: Record<string, string> = {
 }
 
 export function OverviewPage() {
-  const { currentUser, period, theme } = useAppStore()
+  const { currentUser, period, theme, isRefreshingPrices } = useAppStore()
   const periodLabel = PERIOD_LABELS[period] || 'Periodo'
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
@@ -402,7 +402,7 @@ export function OverviewPage() {
 
     const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
-    const result: Array<{ name: string; fullName: string; value: number; subtitle?: string }> = []
+    const result: Array<{ name: string; fullName: string; value: number; amount?: number; subtitle?: string }> = []
 
     for (let i = 1; i < slice.length; i++) {
       const prev = slice[i - 1]
@@ -412,18 +412,25 @@ export function OverviewPage() {
       const curInvested = cur.invested ?? cur.value
       const netInflow = curInvested - prevInvested
 
+      let dayReturnAmount = (cur.value - netInflow) - prev.value
       let dayReturnPct = 0
       if (prev.value > 0) {
-        dayReturnPct = ((cur.value - netInflow - prev.value) / prev.value) * 100
+        dayReturnPct = (dayReturnAmount / prev.value) * 100
       }
 
       const isLatest = i === slice.length - 1
-      if (isLatest && shortTermMetrics?.dayPct !== undefined) {
-        // Today's return takes the real-time calculated return of today's incoming NAV batch
-        dayReturnPct = shortTermMetrics.dayPct
+      if (isLatest) {
+        if (shortTermMetrics?.dayPct !== undefined) {
+          // Today's return takes the real-time calculated return of today's incoming NAV batch
+          dayReturnPct = shortTermMetrics.dayPct
+        }
+        if (shortTermMetrics?.dayAmount !== undefined) {
+          dayReturnAmount = shortTermMetrics.dayAmount
+        }
       }
 
       dayReturnPct = Math.round(dayReturnPct * 100) / 100
+      dayReturnAmount = Math.round(dayReturnAmount * 100) / 100
 
       const [y, m, d] = cur.date.split('-').map(Number)
       const dateObj = new Date(y, m - 1, d)
@@ -444,12 +451,13 @@ export function OverviewPage() {
         name,
         fullName,
         value: dayReturnPct,
+        amount: dayReturnAmount,
         subtitle,
       })
     }
 
     return result
-  }, [performance, shortTermMetrics?.dayPct, latestNavDate])
+  }, [performance, shortTermMetrics?.dayPct, shortTermMetrics?.dayAmount, latestNavDate])
 
   const secondaryStats = useMemo(() => {
     if (returnsPeriodMode === 'global') {
@@ -874,7 +882,10 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className={cn("px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 transition-opacity duration-300", isPeriodUpdating ? "opacity-65" : "opacity-100")}>
+          <div className={cn("px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
+            {isRefreshingPrices && (
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 animate-pulse z-20" />
+            )}
             <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
               {chartView === 'evolution' ? (
                 performance.length > 0 ? (
@@ -1040,7 +1051,10 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
+          <div className={cn("px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
+            {isRefreshingPrices && (
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 animate-pulse z-20" />
+            )}
             <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {positions.length > 0 ? (
                 <AllocationChart
@@ -1154,7 +1168,10 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
+          <div className={cn("px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
+            {isRefreshingPrices && (
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 animate-pulse z-20" />
+            )}
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {analyticsFetching && !analytics ? (
                 <ReturnsChartSkeleton compact height={260} />
@@ -1164,6 +1181,9 @@ export function OverviewPage() {
                   mode={returnsPeriodMode}
                   weeklyData={weeklyReturnsData}
                   day1Pct={shortTermMetrics?.dayPct}
+                  day1Amount={shortTermMetrics?.dayAmount}
+                  weekAmount={shortTermMetrics?.weekAmount}
+                  totalPortfolioValue={displaySummary?.total_value}
                   compact
                   height={260}
                 />

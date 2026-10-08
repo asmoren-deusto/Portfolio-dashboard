@@ -4,11 +4,14 @@ import {
 } from 'recharts'
 import { motion } from 'framer-motion'
 import type { Analytics } from '@/lib/mockData'
+import { fmt, cn } from '@/lib/utils'
+import { useAppStore } from '@/store/appStore'
 
 export interface ReturnBarItem {
   name: string
   fullName: string
   value: number
+  amount?: number
   subtitle?: string
 }
 
@@ -17,6 +20,9 @@ interface ReturnsChartProps {
   weeklyData?: ReturnBarItem[]
   mode?: 'global' | 'weekly'
   day1Pct?: number
+  day1Amount?: number
+  weekAmount?: number
+  totalPortfolioValue?: number
   compact?: boolean
   height?: number
 }
@@ -41,6 +47,7 @@ export function ReturnsChartSkeleton({ compact = false, height = 240 }: { compac
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length || payload[0]?.value == null) return null
   const v: number = payload[0].value
+  const amount: number | undefined = payload[0]?.payload?.amount
   const fullName = payload[0]?.payload?.fullName || label
   const subtitle = payload[0]?.payload?.subtitle || 'TWR ponderado en el tiempo'
   return (
@@ -51,6 +58,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <span className={v >= 0 ? 'text-emerald-500 dark:text-emerald-400 font-bold' : 'text-rose-500 dark:text-rose-400 font-bold'}>
           {v >= 0 ? '+' : ''}{v.toFixed(2)}%
         </span>
+        {amount !== undefined && (
+          <span className={cn('font-bold ml-1', amount >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+            ({amount >= 0 ? '+' : ''}{fmt.currency(amount)})
+          </span>
+        )}
       </div>
       <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
         {subtitle}
@@ -64,9 +76,14 @@ export function ReturnsChart({
   weeklyData,
   mode = 'global',
   day1Pct,
+  day1Amount,
+  weekAmount,
+  totalPortfolioValue,
   compact = false,
   height = 240
 }: ReturnsChartProps) {
+  const refreshAnimKey = useAppStore(s => s.refreshAnimKey)
+
   if (mode === 'global' && !analytics) {
     return <ReturnsChartSkeleton compact={compact} height={height} />
   }
@@ -87,32 +104,45 @@ export function ReturnsChart({
       subtitle: d.subtitle || 'Rendimiento de la sesión',
     }))
   } else {
+    const calcAmt = (pct: number) =>
+      totalPortfolioValue ? Math.round(totalPortfolioValue * (pct / 100) * 100) / 100 : undefined
+
     const val1d = day1Pct !== undefined ? day1Pct : (analytics?.return_1d ?? 0)
+    const amt1d = day1Amount !== undefined ? day1Amount : calcAmt(val1d)
+
+    const val1w = analytics?.return_1w ?? 0
+    const amt1w = weekAmount !== undefined ? weekAmount : calcAmt(val1w)
+
+    const val1m = analytics?.return_1m ?? 0
+    const val3m = analytics?.return_3m ?? 0
+    const val6m = analytics?.return_6m ?? 0
+    const val1y = analytics?.return_1y ?? analytics?.return_ytd ?? 0
+
     data = compact
       ? [
-          { name: '1D', fullName: '1 Día (Hoy)', value: val1d, subtitle: 'Rendimiento diario ponderado' },
-          { name: '1S', fullName: '1 Semana (7D)', value: analytics?.return_1w ?? 0, subtitle: 'TWR ponderado en el tiempo' },
-          { name: '1M', fullName: '1 Mes', value: analytics?.return_1m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
-          { name: '3M', fullName: '3 Meses', value: analytics?.return_3m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
-          { name: '6M', fullName: '6 Meses', value: analytics?.return_6m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
-          { name: '1A', fullName: '1 Año', value: analytics?.return_1y ?? analytics?.return_ytd ?? 0, subtitle: 'TWR ponderado en el tiempo' },
+          { name: '1D', fullName: '1 Día', value: val1d, amount: amt1d, subtitle: 'Rendimiento diario ponderado' },
+          { name: '1S', fullName: '1 Semana (7D)', value: val1w, amount: amt1w, subtitle: 'TWR ponderado en el tiempo' },
+          { name: '1M', fullName: '1 Mes', value: val1m, amount: calcAmt(val1m), subtitle: 'TWR ponderado en el tiempo' },
+          { name: '3M', fullName: '3 Meses', value: val3m, amount: calcAmt(val3m), subtitle: 'TWR ponderado en el tiempo' },
+          { name: '6M', fullName: '6 Meses', value: val6m, amount: calcAmt(val6m), subtitle: 'TWR ponderado en el tiempo' },
+          { name: '1A', fullName: '1 Año', value: val1y, amount: calcAmt(val1y), subtitle: 'TWR ponderado en el tiempo' },
         ]
       : [
-          { name: '1 Día', fullName: '1 Día (Hoy)', value: val1d, subtitle: 'Rendimiento diario ponderado' },
-          { name: '1 Semana', fullName: '1 Semana (7D)', value: analytics?.return_1w ?? 0, subtitle: 'TWR ponderado en el tiempo' },
-          { name: '1 Mes', fullName: '1 Mes', value: analytics?.return_1m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
-          { name: '3 Meses', fullName: '3 Meses', value: analytics?.return_3m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
-          { name: '6 Meses', fullName: '6 Meses', value: analytics?.return_6m ?? 0, subtitle: 'TWR ponderado en el tiempo' },
-          { name: '1 Año', fullName: '1 Año', value: analytics?.return_1y ?? analytics?.return_ytd ?? 0, subtitle: 'TWR ponderado en el tiempo' },
+          { name: '1 Día', fullName: '1 Día', value: val1d, amount: amt1d, subtitle: 'Rendimiento diario ponderado' },
+          { name: '1 Semana', fullName: '1 Semana (7D)', value: val1w, amount: amt1w, subtitle: 'TWR ponderado en el tiempo' },
+          { name: '1 Mes', fullName: '1 Mes', value: val1m, amount: calcAmt(val1m), subtitle: 'TWR ponderado en el tiempo' },
+          { name: '3 Meses', fullName: '3 Meses', value: val3m, amount: calcAmt(val3m), subtitle: 'TWR ponderado en el tiempo' },
+          { name: '6 Meses', fullName: '6 Meses', value: val6m, amount: calcAmt(val6m), subtitle: 'TWR ponderado en el tiempo' },
+          { name: '1 Año', fullName: '1 Año', value: val1y, amount: calcAmt(val1y), subtitle: 'TWR ponderado en el tiempo' },
         ]
   }
 
   return (
     <motion.div
-      key={mode}
+      key={`${mode}-${refreshAnimKey}`}
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.22, ease: 'easeOut' }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
       data-private
       style={{ height }}
       className="w-full"
@@ -153,7 +183,9 @@ export function ReturnsChart({
             dataKey="value"
             radius={[6, 6, 0, 0]}
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
-            isAnimationActive={false}
+            isAnimationActive={true}
+            animationDuration={650}
+            animationEasing="ease-out"
           >
             <LabelList
               dataKey="value"

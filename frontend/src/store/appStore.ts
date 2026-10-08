@@ -34,6 +34,12 @@ interface AppState {
   useMock: boolean
   setUseMock: (v: boolean) => void
 
+  // Live Price Refresh & Re-animation State
+  isRefreshingPrices: boolean
+  setIsRefreshingPrices: (v: boolean) => void
+  refreshAnimKey: number
+  triggerRefreshAnimation: () => void
+
   // User & Authentication
   currentUser: UserProfile | null
   users: UserProfile[]
@@ -207,6 +213,11 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   useMock: initialUser?.isDemo ?? false,
   setUseMock: (useMock) => set({ useMock }),
+
+  isRefreshingPrices: false,
+  setIsRefreshingPrices: (isRefreshingPrices) => set({ isRefreshingPrices }),
+  refreshAnimKey: 0,
+  triggerRefreshAnimation: () => set((s) => ({ refreshAnimKey: s.refreshAnimKey + 1 })),
 
   // Auth State
   currentUser: initialUser,
