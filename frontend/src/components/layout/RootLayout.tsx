@@ -14,12 +14,20 @@ export function RootLayout() {
   const { theme, privacyMode, toggleMobileSidebar, sidebarCollapsed, toggleSidebarCollapsed, currentUser } = useAppStore()
 
   useEffect(() => {
-    if (theme === 'dark') {
+    const isDark = theme === 'dark'
+    if (isDark) {
       document.documentElement.classList.add('dark')
       document.documentElement.classList.remove('light')
     } else {
       document.documentElement.classList.add('light')
       document.documentElement.classList.remove('dark')
+    }
+
+    // Sync theme-color for iOS Safari / Chrome Mobile
+    const targetColor = isDark ? '#181922' : '#ffffff'
+    const themeMetas = document.querySelectorAll('meta[name="theme-color"]')
+    if (themeMetas.length > 0) {
+      themeMetas.forEach((meta) => meta.setAttribute('content', targetColor))
     }
   }, [theme])
 

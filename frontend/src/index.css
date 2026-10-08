@@ -34,6 +34,7 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    background-color: var(--bg-app);
   }
 
   body {
@@ -42,6 +43,8 @@
     font-size: 14px;
     line-height: 1.5;
     transition: background-color 0.2s ease, color 0.2s ease;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   /* Refined, discreet scrollbars */

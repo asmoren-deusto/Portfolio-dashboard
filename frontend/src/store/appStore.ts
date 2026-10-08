@@ -48,7 +48,8 @@ interface AppState {
 
 function applyTheme(theme: Theme) {
   if (typeof document !== 'undefined') {
-    if (theme === 'dark') {
+    const isDark = theme === 'dark'
+    if (isDark) {
       document.documentElement.classList.add('dark')
       document.documentElement.classList.remove('light')
     } else {
@@ -56,6 +57,18 @@ function applyTheme(theme: Theme) {
       document.documentElement.classList.remove('dark')
     }
     localStorage.setItem('theme', theme)
+
+    // Adapt iOS Safari status bar and mobile browser chrome color dynamically
+    const targetColor = isDark ? '#181922' : '#ffffff'
+    const themeMetas = document.querySelectorAll('meta[name="theme-color"]')
+    if (themeMetas.length > 0) {
+      themeMetas.forEach((meta) => meta.setAttribute('content', targetColor))
+    } else {
+      const newMeta = document.createElement('meta')
+      newMeta.name = 'theme-color'
+      newMeta.content = targetColor
+      document.head.appendChild(newMeta)
+    }
   }
 }
 
