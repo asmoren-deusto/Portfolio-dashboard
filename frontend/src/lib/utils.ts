@@ -20,18 +20,18 @@ export const PALETTE_LIGHT = [
 ]
 
 export const PALETTE_DARK = [
-  '#569cd6', // vscode keyword blue
-  '#4ec9b0', // vscode type mint / teal
-  '#dcdcaa', // vscode function warm yellow
-  '#c586c0', // vscode control purple
-  '#4fc1ff', // vscode variable light cyan
-  '#ce9178', // vscode string peach
-  '#89d185', // vscode git green
-  '#f14c4c', // vscode ruby red
-  '#9cdcfe', // vscode parameter soft sky
-  '#b5cea8', // vscode numeric sage
-  '#d7ba7d', // vscode golden amber
-  '#858585', // vscode muted gray
+  '#3b82f6', // vibrant royal blue
+  '#10b981', // vibrant emerald
+  '#f59e0b', // warm radiant amber
+  '#8b5cf6', // luminous violet
+  '#f43f5e', // vivid coral rose
+  '#06b6d4', // crisp cyan
+  '#f97316', // bright orange
+  '#6366f1', // vivid indigo
+  '#14b8a6', // clear teal
+  '#84cc16', // fresh lime
+  '#ec4899', // radiant pink
+  '#64748b', // balanced slate
 ]
 
 export const PALETTE = PALETTE_LIGHT
