@@ -15,6 +15,7 @@ import json
 import re
 import argparse
 import subprocess
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -183,25 +184,34 @@ def git_commit_and_push(commit_msg, version=None):
         print("[!] Repositorio Git no encontrado.")
         return False
 
+    git_bin = shutil.which("git")
+    if not git_bin:
+        for fallback in [r"C:\Program Files\Git\cmd\git.exe", r"C:\Program Files\Git\bin\git.exe"]:
+            if os.path.exists(fallback):
+                git_bin = fallback
+                break
+    if not git_bin:
+        git_bin = "git"
+
     final_msg = commit_msg
     if version and f"v{version}" not in commit_msg:
         final_msg = f"{commit_msg} [v{version}]"
 
     try:
         print("[*] Ejecutando git add .")
-        subprocess.run(["git", "add", "."], cwd=ROOT_DIR, check=True)
+        subprocess.run([git_bin, "add", "."], cwd=ROOT_DIR, check=True)
 
         # Check if there are changes to commit
-        status = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT_DIR, capture_output=True, text=True, check=True)
+        status = subprocess.run([git_bin, "status", "--porcelain"], cwd=ROOT_DIR, capture_output=True, text=True, check=True)
         if not status.stdout.strip():
             print("[-] No hay cambios para commitear.")
             return True
 
         print(f"[*] Ejecutando git commit -m '{final_msg}'")
-        subprocess.run(["git", "commit", "-m", final_msg], cwd=ROOT_DIR, check=True)
+        subprocess.run([git_bin, "commit", "-m", final_msg], cwd=ROOT_DIR, check=True)
 
         print("[*] Ejecutando git push")
-        subprocess.run(["git", "push"], cwd=ROOT_DIR, check=True)
+        subprocess.run([git_bin, "push"], cwd=ROOT_DIR, check=True)
 
         print(f"[+] Sincronización con Git completada con éxito. Mensaje: '{final_msg}'")
         return True

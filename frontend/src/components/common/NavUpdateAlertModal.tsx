@@ -31,23 +31,22 @@ export function NavUpdateAlertModal() {
     return () => clearInterval(interval)
   }, [notif, isPaused, clearNavAlertNotification])
 
-  if (!notif) return null
-
-  const hasUpdates = notif.updatedCount > 0
+  const hasUpdates = (notif?.updatedCount ?? 0) > 0
 
   return (
     <AnimatePresence>
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[99999] pointer-events-none flex flex-col items-end">
-        <motion.div
-          key={notif.id}
-          initial={{ opacity: 0, y: -24, scale: 0.94 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.94 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          className="pointer-events-auto w-[92vw] sm:w-[440px] max-w-full rounded-2xl overflow-hidden shadow-2xl border backdrop-blur-2xl transition-colors bg-white/95 dark:bg-[#181922]/95 border-slate-200/90 dark:border-white/10"
-        >
+      {notif && (
+        <div className="fixed top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 sm:top-6 sm:right-6 z-[99999] pointer-events-none flex flex-col items-end">
+          <motion.div
+            key={notif.id}
+            initial={{ opacity: 0, y: -24, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.94 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            className="pointer-events-auto w-[92vw] sm:w-[440px] max-w-full rounded-2xl overflow-hidden shadow-2xl border backdrop-blur-2xl transition-colors bg-white/95 dark:bg-[#181922]/95 border-slate-200/90 dark:border-white/10"
+          >
           {/* Top subtle shine / accent gradient */}
           <div
             className={cn(
@@ -155,7 +154,8 @@ export function NavUpdateAlertModal() {
             />
           </div>
         </motion.div>
-      </div>
+        </div>
+      )}
     </AnimatePresence>
   )
 }
