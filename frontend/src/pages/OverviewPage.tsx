@@ -1185,7 +1185,7 @@ export function OverviewPage() {
             <div className="flex items-baseline gap-2">
               <CardTitle>Posiciones en Cartera</CardTitle>
               <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden sm:inline">
-                • Borde azul = NAV actualizado
+                • Indicador azul = NAV actualizado
               </span>
             </div>
           </div>
@@ -1236,14 +1236,16 @@ export function OverviewPage() {
                         'transition-colors group cursor-pointer relative',
                         isRowHovered
                           ? 'bg-blue-50/70 dark:bg-blue-950/30'
-                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]',
-                        isUpdated && 'border-l-[3px] border-l-blue-500 dark:border-l-blue-400'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
                       )}
                     >
-                      <td className={cn(
-                        "py-2.5 pr-1 text-center",
-                        isUpdated ? "pl-2 border-l-[3px] border-l-blue-500 dark:border-l-blue-400" : "pl-3"
-                      )}>
+                      <td className="py-2.5 pl-3 pr-1 text-center relative">
+                        {isUpdated && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
+                          />
+                        )}
                         <div className="flex items-center justify-center">
                           <div
                             className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
@@ -1383,14 +1385,16 @@ export function OverviewPage() {
                         'transition-colors group cursor-pointer relative',
                         isRowHovered
                           ? 'bg-blue-50/70 dark:bg-blue-950/30'
-                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]',
-                        isUpdated && 'border-l-[3px] border-l-blue-500 dark:border-l-blue-400'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
                       )}
                     >
-                      <td className={cn(
-                        "py-2.5 pr-1 text-center",
-                        isUpdated ? "pl-2 border-l-[3px] border-l-blue-500 dark:border-l-blue-400" : "pl-3"
-                      )}>
+                      <td className="py-2.5 pl-3 pr-1 text-center relative">
+                        {isUpdated && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
+                          />
+                        )}
                         <div className="flex items-center justify-center">
                           <div
                             className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"

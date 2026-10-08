@@ -369,13 +369,16 @@ export function PositionsPage() {
                           transition={{ delay: i * 0.02 }}
                           onClick={() => setSelectedPosition(p)}
                           title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                          className={cn(
-                            "group border-b border-slate-100 hover:bg-slate-50/80 dark:border-white/[0.03] dark:hover:bg-white/[0.035] cursor-pointer last:border-0 transition-colors relative",
-                            isUpdated && "border-l-[3.5px] border-l-blue-500 dark:border-l-blue-400"
-                          )}
+                          className="group border-b border-slate-100 hover:bg-slate-50/80 dark:border-white/[0.03] dark:hover:bg-white/[0.035] cursor-pointer last:border-0 transition-colors"
                         >
                         {/* Activo / Logo */}
-                        <td className="px-4 py-3.5">
+                        <td className="px-4 py-3.5 relative">
+                          {isUpdated && (
+                            <span
+                              aria-hidden="true"
+                              className="absolute left-0 top-2.5 bottom-2.5 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
+                            />
+                          )}
                           <div className="flex items-center gap-3">
                             <CompanyLogo
                               isin={p.isin}
@@ -490,11 +493,14 @@ export function PositionsPage() {
                   transition={{ delay: i * 0.03 }}
                   onClick={() => setSelectedPosition(p)}
                   title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                  className={cn(
-                    "group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-blue-500/40 p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between",
-                    isUpdated && "border-l-[4px] border-l-blue-500 dark:border-l-blue-400"
-                  )}
+                  className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-blue-500/40 p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between overflow-hidden"
                 >
+                  {isUpdated && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute left-0 top-3 bottom-3 w-[2.5px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
+                    />
+                  )}
                 <div>
                   {/* Top Bar with Logo & Badges */}
                   <div className="flex items-start justify-between gap-3">
