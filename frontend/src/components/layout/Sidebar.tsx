@@ -72,7 +72,7 @@ export function Sidebar({}: SidebarProps) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#181818] transition-transform duration-300 ease-in-out shadow-lg',
+          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#141414] transition-transform duration-300 ease-in-out shadow-lg',
           sidebarCollapsed
             ? mobileSidebarOpen
               ? 'translate-x-0'
@@ -142,7 +142,7 @@ export function Sidebar({}: SidebarProps) {
                   cn(
                     'flex items-center gap-2.5 rounded-xl px-3 py-2 text-[14px] font-medium transition-all duration-150',
                     isActive
-                      ? 'bg-blue-50/90 text-blue-700 font-bold dark:bg-blue-500/[0.12] dark:text-blue-300 shadow-xs relative'
+                      ? 'bg-blue-50/90 text-blue-700 font-bold dark:bg-white/[0.08] dark:text-white shadow-xs relative'
                       : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/[0.04] dark:hover:text-slate-200'
                   )
                 }
