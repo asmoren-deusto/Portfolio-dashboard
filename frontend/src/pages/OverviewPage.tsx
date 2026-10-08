@@ -812,23 +812,37 @@ export function OverviewPage() {
                   <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
                     <button
                       onClick={() => setPerfChartMode('currency')}
-                      className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${perfChartMode === 'currency'
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-sm shadow-blue-600/25 border border-white/15'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      className={`relative min-w-[24px] px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${perfChartMode === 'currency'
+                          ? 'text-white font-bold'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                         }`}
                       title="Ver evolución en Euros (€)"
                     >
-                      €
+                      {perfChartMode === 'currency' && (
+                        <motion.div
+                          layoutId="perfChartModePill"
+                          className="absolute inset-0 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                          transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                        />
+                      )}
+                      <span className="relative z-10">€</span>
                     </button>
                     <button
                       onClick={() => setPerfChartMode('percent')}
-                      className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${perfChartMode === 'percent'
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-sm shadow-blue-600/25 border border-white/15'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      className={`relative min-w-[24px] px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${perfChartMode === 'percent'
+                          ? 'text-white font-bold'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                         }`}
                       title="Ver rentabilidad acumulada en porcentaje (%)"
                     >
-                      %
+                      {perfChartMode === 'percent' && (
+                        <motion.div
+                          layoutId="perfChartModePill"
+                          className="absolute inset-0 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                          transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                        />
+                      )}
+                      <span className="relative z-10">%</span>
                     </button>
                   </div>
 
@@ -866,21 +880,37 @@ export function OverviewPage() {
               <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
                 <button
                   onClick={() => setChartView('evolution')}
-                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'evolution'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-sm shadow-blue-600/25 border border-white/15'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'evolution'
+                      ? 'text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                 >
-                  Curva
+                  {chartView === 'evolution' && (
+                    <motion.div
+                      layoutId="overviewChartViewPill"
+                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                    />
+                  )}
+                  <span className="relative z-10">Curva</span>
                 </button>
                 <button
                   onClick={() => setChartView('heatmap')}
-                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'heatmap'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-sm shadow-blue-600/25 border border-white/15'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'heatmap'
+                      ? 'text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                 >
-                  Matriz<span className="hidden sm:inline"> Mensual</span>
+                  {chartView === 'heatmap' && (
+                    <motion.div
+                      layoutId="overviewChartViewPill"
+                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    Matriz<span className="hidden sm:inline"> Mensual</span>
+                  </span>
                 </button>
               </div>
             </div>
