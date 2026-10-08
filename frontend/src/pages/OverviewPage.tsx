@@ -407,8 +407,10 @@ export function OverviewPage() {
       }
 
       const isLatest = i === slice.length - 1
-      if (isLatest && shortTermMetrics?.dayPct !== undefined) {
-        dayReturnPct = shortTermMetrics.dayPct
+      if (isLatest) {
+        if (latestNavDate && cur.date === latestNavDate && shortTermMetrics?.dayPct !== undefined) {
+          dayReturnPct = shortTermMetrics.dayPct
+        }
       }
 
       dayReturnPct = Math.round(dayReturnPct * 100) / 100
@@ -434,7 +436,7 @@ export function OverviewPage() {
     }
 
     return result
-  }, [performance, shortTermMetrics?.dayPct])
+  }, [performance, shortTermMetrics?.dayPct, latestNavDate])
 
   const secondaryStats = useMemo(() => {
     if (returnsPeriodMode === 'global') {
