@@ -1182,7 +1182,12 @@ export function OverviewPage() {
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
               <Layers className="w-4 h-4" />
             </div>
-            <CardTitle>Posiciones en Cartera</CardTitle>
+            <div className="flex items-baseline gap-2">
+              <CardTitle>Posiciones en Cartera</CardTitle>
+              <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden sm:inline">
+                • Borde azul = NAV actualizado
+              </span>
+            </div>
           </div>
 
           <Link
@@ -1215,6 +1220,7 @@ export function OverviewPage() {
                 {sortedPositions.slice(0, 5).map((p, i) => {
                   const isRowHovered = hoveredIsin === p.isin
                   const assetColor = assetColorMap[p.isin]
+                  const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
 
                   return (
                     <motion.tr
@@ -1225,14 +1231,19 @@ export function OverviewPage() {
                       onClick={() => setSelectedPosition(p)}
                       onMouseEnter={() => setHoveredIsin(p.isin)}
                       onMouseLeave={() => setHoveredIsin(null)}
+                      title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
                       className={cn(
-                        'transition-colors group cursor-pointer',
+                        'transition-colors group cursor-pointer relative',
                         isRowHovered
                           ? 'bg-blue-50/70 dark:bg-blue-950/30'
-                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]',
+                        isUpdated && 'border-l-[3px] border-l-blue-500 dark:border-l-blue-400'
                       )}
                     >
-                      <td className="py-2.5 pl-3 pr-1 text-center">
+                      <td className={cn(
+                        "py-2.5 pr-1 text-center",
+                        isUpdated ? "pl-2 border-l-[3px] border-l-blue-500 dark:border-l-blue-400" : "pl-3"
+                      )}>
                         <div className="flex items-center justify-center">
                           <div
                             className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
@@ -1356,6 +1367,7 @@ export function OverviewPage() {
                 {sortedPositions.slice(5, 10).map((p, i) => {
                   const isRowHovered = hoveredIsin === p.isin
                   const assetColor = assetColorMap[p.isin]
+                  const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
 
                   return (
                     <motion.tr
@@ -1366,14 +1378,19 @@ export function OverviewPage() {
                       onClick={() => setSelectedPosition(p)}
                       onMouseEnter={() => setHoveredIsin(p.isin)}
                       onMouseLeave={() => setHoveredIsin(null)}
+                      title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
                       className={cn(
-                        'transition-colors group cursor-pointer',
+                        'transition-colors group cursor-pointer relative',
                         isRowHovered
                           ? 'bg-blue-50/70 dark:bg-blue-950/30'
-                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]',
+                        isUpdated && 'border-l-[3px] border-l-blue-500 dark:border-l-blue-400'
                       )}
                     >
-                      <td className="py-2.5 pl-3 pr-1 text-center">
+                      <td className={cn(
+                        "py-2.5 pr-1 text-center",
+                        isUpdated ? "pl-2 border-l-[3px] border-l-blue-500 dark:border-l-blue-400" : "pl-3"
+                      )}>
                         <div className="flex items-center justify-center">
                           <div
                             className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"

@@ -45,6 +45,13 @@ export function PositionsPage() {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
 
+  const latestNavDate = useMemo(() => {
+    return positions.reduce((max, p) => {
+      const d = p.price_date || p.last_updated
+      return d && d > max ? d : max
+    }, '')
+  }, [positions])
+
   // Summary Metrics
   const stats = useMemo(() => {
     if (positions.length === 0 && !summary) return null
@@ -351,16 +358,22 @@ export function PositionsPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredPositions.map((p, i) => (
-                      <motion.tr
-                        key={p.isin}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ delay: i * 0.02 }}
-                        onClick={() => setSelectedPosition(p)}
-                        className="group border-b border-slate-100 hover:bg-slate-50/80 dark:border-white/[0.03] dark:hover:bg-white/[0.035] cursor-pointer last:border-0 transition-colors"
-                      >
+                    filteredPositions.map((p, i) => {
+                      const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                      return (
+                        <motion.tr
+                          key={p.isin}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ delay: i * 0.02 }}
+                          onClick={() => setSelectedPosition(p)}
+                          title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
+                          className={cn(
+                            "group border-b border-slate-100 hover:bg-slate-50/80 dark:border-white/[0.03] dark:hover:bg-white/[0.035] cursor-pointer last:border-0 transition-colors relative",
+                            isUpdated && "border-l-[3.5px] border-l-blue-500 dark:border-l-blue-400"
+                          )}
+                        >
                         {/* Activo / Logo */}
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-3">
@@ -455,7 +468,7 @@ export function PositionsPage() {
                           </div>
                         </td>
                       </motion.tr>
-                    ))
+                    )})
                   )}
                 </AnimatePresence>
               </tbody>
@@ -466,16 +479,22 @@ export function PositionsPage() {
         /* Grid Mode */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence>
-            {filteredPositions.map((p, i) => (
-              <motion.div
-                key={p.isin}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: i * 0.03 }}
-                onClick={() => setSelectedPosition(p)}
-                className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-blue-500/40 p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between"
-              >
+            {filteredPositions.map((p, i) => {
+              const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+              return (
+                <motion.div
+                  key={p.isin}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: i * 0.03 }}
+                  onClick={() => setSelectedPosition(p)}
+                  title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
+                  className={cn(
+                    "group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-blue-500/40 p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between",
+                    isUpdated && "border-l-[4px] border-l-blue-500 dark:border-l-blue-400"
+                  )}
+                >
                 <div>
                   {/* Top Bar with Logo & Badges */}
                   <div className="flex items-start justify-between gap-3">
@@ -568,7 +587,7 @@ export function PositionsPage() {
                   <span className="font-mono text-slate-900 dark:text-slate-200 font-bold">{p.weight.toFixed(1)}%</span>
                 </div>
               </motion.div>
-            ))}
+            )})}
           </AnimatePresence>
         </div>
       )}
