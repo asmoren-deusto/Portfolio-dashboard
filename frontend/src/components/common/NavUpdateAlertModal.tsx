@@ -45,7 +45,7 @@ export function NavUpdateAlertModal() {
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className="pointer-events-auto w-[92vw] sm:w-[440px] max-w-full rounded-2xl overflow-hidden shadow-2xl border backdrop-blur-2xl transition-colors bg-white/95 dark:bg-[#181922]/95 border-slate-200/90 dark:border-white/10"
+            className="pointer-events-auto w-[92vw] sm:w-[440px] max-w-full rounded-2xl overflow-hidden shadow-2xl border backdrop-blur-2xl transition-colors bg-white/95 dark:bg-[#1e1e1e]/98 border-slate-200/90 dark:border-white/10"
           >
           {/* Top subtle shine / accent gradient */}
           <div

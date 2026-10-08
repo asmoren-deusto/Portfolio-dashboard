@@ -270,10 +270,10 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover backdrop-blur-md px-3.5 py-1.5 dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200">
+      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover backdrop-blur-md px-3.5 py-1.5 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200">
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
-          <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#181922]/92">
+          <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#1e1e1e]/96">
             {mainStatusLabel === 'Cerrado' ? (
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="inline-flex rounded-full h-2 w-2 bg-slate-400 dark:bg-slate-500" />
@@ -315,8 +315,8 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           {/* Marquee Ticker Track (Rotates slowly, pauses on hover) */}
           <div className="relative flex-1 overflow-hidden ml-2 py-1 group">
             {/* Subtle fade edges for smooth transition */}
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#181922] to-transparent z-10" />
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#181922] to-transparent z-10" />
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
 
             {/* Seamless scrolling marquee track */}
             <div className="animate-ticker-marquee flex items-center gap-2 pt-1 pb-0.5">

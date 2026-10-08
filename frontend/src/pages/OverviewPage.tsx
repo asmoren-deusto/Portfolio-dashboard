@@ -224,32 +224,32 @@ export function OverviewPage() {
     analytics?.volatility !== undefined && (periodLabel === '1 Año' || periodLabel === 'Todo')
       ? analytics.volatility
       : perfStats?.periodVolatility !== null && perfStats?.periodVolatility !== undefined
-      ? perfStats.periodVolatility
-      : null
+        ? perfStats.periodVolatility
+        : null
 
   const volTag =
     volVal !== null
       ? volVal < 14
         ? 'Baja / Defensiva'
         : volVal < 22
-        ? 'Moderada'
-        : 'Elevada'
+          ? 'Moderada'
+          : 'Elevada'
       : undefined
 
   const ddVal =
     analytics?.max_drawdown !== undefined && (periodLabel === '1 Año' || periodLabel === 'Todo')
       ? analytics.max_drawdown
       : perfStats?.maxDrawdown !== undefined
-      ? perfStats.maxDrawdown
-      : null
+        ? perfStats.maxDrawdown
+        : null
 
   const ddTag =
     ddVal !== null
       ? ddVal > -8
         ? 'Bajo impacto'
         : ddVal > -16
-        ? 'Controlada'
-        : 'Severa'
+          ? 'Controlada'
+          : 'Severa'
       : undefined
 
   const periodProfitValue = useMemo(() => {
@@ -637,8 +637,8 @@ export function OverviewPage() {
               analytics?.annualized_return !== undefined
                 ? fmt.pct(analytics.annualized_return)
                 : displaySummary
-                ? fmt.pct(displaySummary.total_pnl_pct)
-                : '—'
+                  ? fmt.pct(displaySummary.total_pnl_pct)
+                  : '—'
             }
             valueColor="text-emerald-600 dark:text-emerald-400"
             tag="TIR Anual"
@@ -665,7 +665,7 @@ export function OverviewPage() {
             loading={isGlobalUpdating}
           />
           <div
-            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card backdrop-blur-md transition-all duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90 dark:bg-[#181922]/90 dark:border-white/[0.08] dark:hover:border-white/[0.16]"
+            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card backdrop-blur-md transition-all duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
             <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/[0.12] z-10" />
@@ -675,27 +675,27 @@ export function OverviewPage() {
               style={{ backgroundImage: 'radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.05), transparent 58%), linear-gradient(90deg, rgba(99, 102, 241, 0.015), transparent 78%)' }}
             />
             <div className="relative z-10">
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-1.5 min-w-0 pr-1">
-                <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
-                  Total Invertido
-                </p>
-                {isGlobalUpdating && <LoadingDot />}
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                  <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
+                    Total Invertido
+                  </p>
+                  {isGlobalUpdating && <LoadingDot />}
+                </div>
+                <span data-private className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
+                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                  {currentUser?.isDemo ? 'DCA 1.200 €/m' : 'DCA 416,66 €/m'}
+                </span>
               </div>
-              <span data-private className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
-                <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                {currentUser?.isDemo ? 'DCA 1.200 €/m' : 'DCA 416,66 €/m'}
-              </span>
-            </div>
 
-            <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isGlobalUpdating ? "opacity-65" : "opacity-100")}>
-              <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
-                {fmt.currency(displaySummary?.total_invested)}
+              <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isGlobalUpdating ? "opacity-65" : "opacity-100")}>
+                <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
+                  {fmt.currency(displaySummary?.total_invested)}
+                </div>
+                <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
+                  {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos. (act. {updatedPositionsCount}/{displaySummary?.num_positions ?? positions.length})
+                </span>
               </div>
-              <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-                {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos. (act. {updatedPositionsCount}/{displaySummary?.num_positions ?? positions.length})
-              </span>
-            </div>
             </div>
           </div>
         </div>
@@ -807,25 +807,23 @@ export function OverviewPage() {
               {chartView === 'evolution' && (
                 <div className="hidden sm:flex items-center gap-1.5">
                   {/* Mode Selector (€ vs %) */}
-                  <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
+                  <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
                     <button
                       onClick={() => setPerfChartMode('currency')}
-                      className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
-                        perfChartMode === 'currency'
+                      className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${perfChartMode === 'currency'
                           ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                      }`}
+                        }`}
                       title="Ver evolución en Euros (€)"
                     >
                       €
                     </button>
                     <button
                       onClick={() => setPerfChartMode('percent')}
-                      className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
-                        perfChartMode === 'percent'
+                      className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${perfChartMode === 'percent'
                           ? 'bg-white dark:bg-blue-600 text-blue-700 dark:text-white'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                      }`}
+                        }`}
                       title="Ver rentabilidad acumulada en porcentaje (%)"
                     >
                       %
@@ -836,11 +834,10 @@ export function OverviewPage() {
                   {perfChartMode === 'currency' && (
                     <button
                       onClick={() => setPerfShowInvested(v => !v)}
-                      className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${
-                        perfShowInvested
+                      className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${perfShowInvested
                           ? 'bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 font-semibold'
                           : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
-                      }`}
+                        }`}
                       title="Mostrar u ocultar aportaciones"
                     >
                       <span className={`w-2.5 h-0.5 border-t-2 border-dashed ${perfShowInvested ? 'border-purple-600 dark:border-purple-400' : 'border-slate-400'}`} />
@@ -851,11 +848,10 @@ export function OverviewPage() {
                   {/* Toggle Milestones */}
                   <button
                     onClick={() => setPerfShowMilestones(v => !v)}
-                    className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${
-                      perfShowMilestones
+                    className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${perfShowMilestones
                         ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold'
                         : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
-                    }`}
+                      }`}
                     title="Mostrar u ocultar picos máximos y mínimos"
                   >
                     <Target size={11} className={perfShowMilestones ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} />
@@ -865,24 +861,22 @@ export function OverviewPage() {
               )}
 
               {/* Curva / Matriz Mensual ALWAYS on the far right */}
-              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5 shrink-0">
+              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
                 <button
                   onClick={() => setChartView('evolution')}
-                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-                    chartView === 'evolution'
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'evolution'
                       ? 'bg-blue-600 text-white'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   Curva
                 </button>
                 <button
                   onClick={() => setChartView('heatmap')}
-                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-                    chartView === 'heatmap'
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'heatmap'
                       ? 'bg-blue-600 text-white'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   Matriz<span className="hidden sm:inline"> Mensual</span>
                 </button>
@@ -928,7 +922,7 @@ export function OverviewPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Max Peak */}
                 <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={`Máximo del periodo (ATH): ${fmt.currency(perfMetrics.maxPoint.value)}`}
                 >
                   <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -944,7 +938,7 @@ export function OverviewPage() {
 
                 {/* Period Low */}
                 <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={`Mínimo del periodo: ${fmt.currency(perfMetrics.minPoint.value)}`}
                 >
                   <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
@@ -960,7 +954,7 @@ export function OverviewPage() {
 
                 {/* Current Drawdown */}
                 <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={perfMetrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${perfMetrics.drawdownPct.toFixed(2)}%`}
                 >
                   <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
@@ -991,7 +985,7 @@ export function OverviewPage() {
 
                 {/* Net Return */}
                 <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                   title={`Ganancia neta del periodo: ${fmt.currency(perfMetrics.periodProfit)} (${fmt.pct(perfMetrics.periodReturnPct)})`}
                 >
                   <div className={cn(
@@ -1041,16 +1035,15 @@ export function OverviewPage() {
             </div>
 
             {/* Toggle Mode */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
               {(['asset', 'type'] as AllocMode[]).map((m) => (
                 <button
                   key={m}
                   onClick={() => setAllocMode(m)}
-                  className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${
-                    allocMode === m
+                  className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${allocMode === m
                       ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
+                    }`}
                 >
                   {allocMode === m && (
                     <motion.div
@@ -1097,7 +1090,7 @@ export function OverviewPage() {
               <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
-                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={allocStats.box1Title}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -1115,7 +1108,7 @@ export function OverviewPage() {
 
                 {/* Box 2 */}
                 <div
-                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={allocStats.box2Title}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -1147,22 +1140,21 @@ export function OverviewPage() {
                   <CardTitle className="text-sm">Rendimiento</CardTitle>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
-                  {returnsPeriodMode === 'global' ? 'Rentabilidad por periodo' : 'Últimos 7 días'}
+                  {returnsPeriodMode === 'global' ? 'Por periodo' : 'Últimos 7 días'}
                 </p>
               </div>
             </div>
 
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
               <button
                 onClick={() => {
                   setReturnsPeriodMode('global')
-                  try { localStorage.setItem('returns_period_mode', 'global') } catch {}
+                  try { localStorage.setItem('returns_period_mode', 'global') } catch { }
                 }}
-                className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${
-                  returnsPeriodMode === 'global'
+                className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'global'
                     ? 'text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
+                  }`}
               >
                 {returnsPeriodMode === 'global' && (
                   <motion.div
@@ -1176,13 +1168,12 @@ export function OverviewPage() {
               <button
                 onClick={() => {
                   setReturnsPeriodMode('weekly')
-                  try { localStorage.setItem('returns_period_mode', 'weekly') } catch {}
+                  try { localStorage.setItem('returns_period_mode', 'weekly') } catch { }
                 }}
-                className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${
-                  returnsPeriodMode === 'weekly'
+                className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'weekly'
                     ? 'text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
+                  }`}
               >
                 {returnsPeriodMode === 'weekly' && (
                   <motion.div
@@ -1225,7 +1216,7 @@ export function OverviewPage() {
               <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Box 1 */}
                 <div
-                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={secondaryStats.box1Title}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -1258,7 +1249,7 @@ export function OverviewPage() {
 
                 {/* Box 2 */}
                 <div
-                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1 px-2 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={secondaryStats.box2Title}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -1268,8 +1259,8 @@ export function OverviewPage() {
                         returnsPeriodMode === 'global'
                           ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                           : secondaryStats.box2Positive
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
                       )}
                     >
                       {returnsPeriodMode === 'global' ? <Calendar size={12} /> : <Euro size={12} />}
@@ -1422,8 +1413,8 @@ export function OverviewPage() {
                               p.daily_change_pct > 0
                                 ? 'text-emerald-600 dark:text-emerald-400'
                                 : p.daily_change_pct < 0
-                                ? 'text-rose-600 dark:text-rose-400'
-                                : 'text-slate-500 dark:text-slate-400'
+                                  ? 'text-rose-600 dark:text-rose-400'
+                                  : 'text-slate-500 dark:text-slate-400'
                             )}
                           >
                             {p.daily_change_pct > 0 ? (
@@ -1571,8 +1562,8 @@ export function OverviewPage() {
                               p.daily_change_pct > 0
                                 ? 'text-emerald-600 dark:text-emerald-400'
                                 : p.daily_change_pct < 0
-                                ? 'text-rose-600 dark:text-rose-400'
-                                : 'text-slate-500 dark:text-slate-400'
+                                  ? 'text-rose-600 dark:text-rose-400'
+                                  : 'text-slate-500 dark:text-slate-400'
                             )}
                           >
                             {p.daily_change_pct > 0 ? (
@@ -1633,7 +1624,7 @@ export function OverviewPage() {
               showViewAllLink
             />
           ) : (
-            <div className="h-64 rounded-2xl bg-slate-100 dark:bg-[#181922] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
+            <div className="h-64 rounded-2xl bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
               Cargando mapa de calor del mercado...
             </div>
           )}
@@ -1673,13 +1664,12 @@ export function OverviewPage() {
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                        isBuy
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${isBuy
                           ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20'
                           : isDiv
-                          ? 'bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20'
-                          : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                      }`}
+                            ? 'bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20'
+                            : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                        }`}
                     >
                       {isBuy ? 'C' : isDiv ? 'D' : 'V'}
                     </div>

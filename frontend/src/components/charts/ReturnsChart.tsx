@@ -51,7 +51,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const fullName = payload[0]?.payload?.fullName || label
   const subtitle = payload[0]?.payload?.subtitle || 'TWR ponderado en el tiempo'
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white/95 dark:bg-[#181922]/95 backdrop-blur-md px-3.5 py-2.5 text-xs shadow-xl">
+    <div className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white/95 dark:bg-[#1e1e1e]/95 backdrop-blur-md px-3.5 py-2.5 text-xs shadow-xl">
       <p className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5">{fullName}</p>
       <div className="flex items-center gap-1.5 font-mono">
         <span className="text-slate-500 dark:text-slate-400">Rendimiento:</span>

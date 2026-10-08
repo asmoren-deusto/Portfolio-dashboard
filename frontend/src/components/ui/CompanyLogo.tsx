@@ -142,7 +142,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
 
   const containerBg = isIShares
     ? 'bg-slate-200 dark:bg-slate-200 shadow-sm text-slate-900'
-    : 'bg-slate-100/90 dark:bg-[#1a1c22] shadow-sm'
+    : 'bg-slate-100/90 dark:bg-[#252526] shadow-sm'
 
   const imgFit = isIShares
     ? 'object-contain'

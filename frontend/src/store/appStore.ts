@@ -92,7 +92,7 @@ function applyTheme(theme: Theme) {
     localStorage.setItem('theme', theme)
 
     // Adapt iOS Safari status bar and mobile browser chrome color dynamically
-    const targetColor = isDark ? '#181922' : '#ffffff'
+    const targetColor = isDark ? '#181818' : '#ffffff'
     const themeMetas = document.querySelectorAll('meta[name="theme-color"]')
     if (themeMetas.length > 0) {
       themeMetas.forEach((meta) => meta.setAttribute('content', targetColor))

@@ -226,7 +226,7 @@ export function AnalyticsPage() {
             </div>
 
             {/* Mode Switch between % TWR and € Total */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5 shrink-0">
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
               {(['percent', 'currency'] as const).map((m) => (
                 <button
                   key={m}
@@ -293,7 +293,7 @@ export function AnalyticsPage() {
             </div>
 
             {/* Toggle Switch between Returns and Distribution */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5 shrink-0">
+            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
               {(['returns', 'distribution'] as const).map((view) => (
                 <button
                   key={view}
@@ -340,7 +340,7 @@ export function AnalyticsPage() {
               {allocStats && (
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                   <div
-                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                     title={allocStats.box1Title}
                   >
                     <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -357,7 +357,7 @@ export function AnalyticsPage() {
                   </div>
 
                   <div
-                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                     title={allocStats.box2Title}
                   >
                     <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -392,7 +392,7 @@ export function AnalyticsPage() {
               {/* Quick Stats Strip */}
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 <div
-                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={analytics?.return_1d !== undefined ? `Rentabilidad del día (1D): ${fmt.pct(analytics.return_1d)}` : 'Rentabilidad del día (1D)'}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
@@ -413,7 +413,7 @@ export function AnalyticsPage() {
                 </div>
 
                 <div
-                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#1a1c22] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                  className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
                   title={analytics?.return_ytd !== undefined ? `Rentabilidad acumulada en el año (YTD): ${fmt.pct(analytics.return_ytd)}` : 'Rentabilidad acumulada en el año (YTD)'}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">

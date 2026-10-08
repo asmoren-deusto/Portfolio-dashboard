@@ -91,10 +91,10 @@ export function KpiCard({
       className={cn(
         'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-all duration-200 ease-out cursor-card',
         'bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
-        'dark:bg-[#181922]/92 dark:border-white/[0.08] dark:hover:border-white/[0.16]',
+        'dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]',
         borderAccent && ACCENT_BORDERS[borderAccent],
         hero &&
-          'bg-gradient-to-br from-blue-50/90 via-white to-indigo-50/50 border-blue-200/90 shadow-hero hover:shadow-[0_10px_32px_-4px_rgba(37,99,235,0.18)] dark:bg-gradient-to-br dark:from-[#1e202a]/95 dark:via-[#20222d]/90 dark:to-[#181922]/95 dark:border-white/[0.12] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]',
+          'bg-gradient-to-br from-blue-50/90 via-white to-indigo-50/50 border-blue-200/90 shadow-hero hover:shadow-[0_10px_32px_-4px_rgba(37,99,235,0.18)] dark:bg-gradient-to-br dark:from-[#252526]/95 dark:via-[#1e1e1e]/90 dark:to-[#1e1e1e]/95 dark:border-white/[0.12] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]',
         className
       )}
     >

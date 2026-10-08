@@ -61,7 +61,7 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="group relative rounded-2xl bg-white/95 hover:bg-white border border-slate-200/80 hover:border-blue-400/70 p-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover cursor-pointer flex flex-col justify-between backdrop-blur-md overflow-hidden dark:bg-[#181922]/92 dark:hover:bg-[#20222d] dark:border-white/[0.08] dark:hover:border-blue-500/40"
+      className="group relative rounded-2xl bg-white/95 hover:bg-white border border-slate-200/80 hover:border-blue-400/70 p-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover cursor-pointer flex flex-col justify-between backdrop-blur-md overflow-hidden dark:bg-[#1e1e1e]/96 dark:hover:bg-[#2a2d2e] dark:border-white/[0.08] dark:hover:border-blue-500/40"
     >
       {/* Subtle hover gradient reflection */}
       <div className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-blue-500/[0.04] dark:from-white/[0.06] via-transparent to-transparent" />

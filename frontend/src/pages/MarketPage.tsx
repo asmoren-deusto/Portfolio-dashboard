@@ -237,7 +237,7 @@ export const MarketPage: React.FC = () => {
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Total Companies */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#181922]/90 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
             {isFetching && (
               <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
             )}
@@ -261,7 +261,7 @@ export const MarketPage: React.FC = () => {
           {bestStock && (
             <div
               onClick={() => setSelectedStock(bestStock)}
-              className="relative overflow-hidden p-4 rounded-2xl bg-white/95 hover:bg-slate-50/80 dark:bg-[#181922]/90 dark:hover:bg-[#20222d] border border-emerald-500/25 hover:border-emerald-500/40 backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-emerald-500/5 cursor-pointer transition-all group"
+              className="relative overflow-hidden p-4 rounded-2xl bg-white/95 hover:bg-slate-50/80 dark:bg-[#1e1e1e]/96 dark:hover:bg-[#2a2d2e] border border-emerald-500/25 hover:border-emerald-500/40 backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-emerald-500/5 cursor-pointer transition-all group"
             >
               {isFetching && (
                 <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
@@ -291,7 +291,7 @@ export const MarketPage: React.FC = () => {
           {worstStock && (
             <div
               onClick={() => setSelectedStock(worstStock)}
-              className="relative overflow-hidden p-4 rounded-2xl bg-white/95 hover:bg-slate-50/80 dark:bg-[#181922]/90 dark:hover:bg-[#20222d] border border-rose-500/25 hover:border-rose-500/40 backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-rose-500/5 cursor-pointer transition-all group"
+              className="relative overflow-hidden p-4 rounded-2xl bg-white/95 hover:bg-slate-50/80 dark:bg-[#1e1e1e]/96 dark:hover:bg-[#2a2d2e] border border-rose-500/25 hover:border-rose-500/40 backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-rose-500/5 cursor-pointer transition-all group"
             >
               {isFetching && (
                 <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
@@ -318,7 +318,7 @@ export const MarketPage: React.FC = () => {
           )}
 
           {/* Combined Capitalization */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#181922]/90 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
             {isFetching && (
               <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
             )}
@@ -340,7 +340,7 @@ export const MarketPage: React.FC = () => {
       )}
 
       {/* Controls & Filter Bar */}
-      <div className="p-4 rounded-2xl bg-white/95 dark:bg-[#181922]/90 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 space-y-4">
+      <div className="p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 space-y-4">
         {/* Row 1: Index Tabs with fluid sliding indicator */}
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 relative">
           {INDEX_TABS.map((tab) => {
@@ -502,7 +502,7 @@ export const MarketPage: React.FC = () => {
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="h-56 rounded-2xl bg-slate-100 dark:bg-[#181922]/60 border border-slate-200 dark:border-white/[0.05] animate-pulse p-5 flex flex-col justify-between"
+              className="h-56 rounded-2xl bg-slate-100 dark:bg-[#1e1e1e]/60 border border-slate-200 dark:border-white/[0.05] animate-pulse p-5 flex flex-col justify-between"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/[0.05]" />
@@ -519,7 +519,7 @@ export const MarketPage: React.FC = () => {
           ))}
         </div>
       ) : filteredStocks.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl bg-slate-100 dark:bg-[#181922]/60 border border-slate-200 dark:border-white/[0.05]">
+        <div className="p-12 text-center rounded-2xl bg-slate-100 dark:bg-[#1e1e1e]/60 border border-slate-200 dark:border-white/[0.05]">
           <Building2 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
           <h3 className="text-base font-semibold text-slate-300">
             No se encontraron acciones
@@ -533,7 +533,7 @@ export const MarketPage: React.FC = () => {
           {/* Left Column: Interactive Stock List — Explicit Height Synchronized with Heatmap */}
           <div
             style={{ height: `${heatmapHeight}px` }}
-            className="xl:col-span-7 rounded-2xl bg-white/95 dark:bg-[#181922] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col relative"
+            className="xl:col-span-7 rounded-2xl bg-white/95 dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col relative"
           >
             {isFetching && (
               <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
@@ -564,7 +564,7 @@ export const MarketPage: React.FC = () => {
                   <col className="hidden lg:table-column w-[13%]" />
                   <col className="hidden xl:table-column w-[12%]" />
                 </colgroup>
-                <thead className="sticky top-0 z-10 bg-slate-50/95 dark:bg-[#181922]/95 backdrop-blur-sm border-b border-slate-200/80 dark:border-white/[0.06]">
+                <thead className="sticky top-0 z-10 bg-slate-50/95 dark:bg-[#1e1e1e]/95 backdrop-blur-sm border-b border-slate-200/80 dark:border-white/[0.06]">
                   <tr>
                     <th className="px-3 py-1.5 text-center text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">#</th>
                     <th className="px-3 py-1.5 text-left text-[9.5px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 font-normal">Empresa</th>
@@ -779,7 +779,7 @@ export const MarketPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="overflow-x-auto rounded-2xl bg-white/95 dark:bg-[#181922]/90 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-xl"
+          className="overflow-x-auto rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-xl"
         >
           <table className="w-full text-left border-collapse">
             <thead>

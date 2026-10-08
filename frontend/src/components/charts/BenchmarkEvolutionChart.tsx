@@ -554,7 +554,7 @@ export function BenchmarkEvolutionChart({
           {/* Toggle Mode: % (Rentabilidad vs Benchmarks) vs € (Patrimonio Total) */}
           {showModeSelector && (
             <div className="flex items-center gap-1.5">
-              <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
+              <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
                 <button
                   onClick={() => setMode('percent')}
                   className={`min-w-[28px] px-2.5 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${

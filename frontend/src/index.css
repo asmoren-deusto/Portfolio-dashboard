@@ -15,14 +15,14 @@
 }
 
 .dark {
-  --bg-app: #1d1f26;
-  --bg-sidebar: #181922;
+  --bg-app: #181818;
+  --bg-sidebar: #181818;
   --border-sidebar: rgba(255, 255, 255, 0.08);
-  --bg-card: rgba(24, 25, 34, 0.95);
-  --border-card: rgba(255, 255, 255, 0.085);
+  --bg-card: rgba(30, 30, 30, 0.96);
+  --border-card: rgba(255, 255, 255, 0.08);
   --text-title: #ffffff;
-  --text-primary: #f1f5f9;
-  --text-muted: #94a3b8;
+  --text-primary: #cccccc;
+  --text-muted: #858585;
 }
 
 @layer base {
@@ -89,6 +89,10 @@
     background: rgba(59, 130, 246, 0.22);
     color: inherit;
   }
+  .dark ::selection {
+    background: #264f78;
+    color: inherit;
+  }
 }
 
 @layer utilities {
@@ -107,7 +111,7 @@
     background: rgba(255, 255, 255, 0.85);
   }
   .dark .glass {
-    background: rgba(34, 36, 44, 0.85);
+    background: rgba(30, 30, 30, 0.88);
   }
 
   /* Professional elevation shadows */

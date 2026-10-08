@@ -25,7 +25,7 @@ export function Card({ children, className, glass = true, loading = false }: Car
         className={cn(
           'relative rounded-2xl overflow-hidden transition-all duration-200 ease-out cursor-card',
           'bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
-          'dark:bg-[#181922]/94 dark:border-white/[0.08] dark:hover:border-white/[0.15]',
+          'dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.15]',
           glass && 'backdrop-blur-md',
           className
         )}

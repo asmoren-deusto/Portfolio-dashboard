@@ -354,9 +354,9 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
 
   return (
     <div
-      className={`flex flex-col rounded-2xl bg-white/95 dark:bg-[#181922] border border-slate-200/90 dark:border-white/[0.08] shadow-none dark:shadow-2xl transition-all ${
+      className={`flex flex-col rounded-2xl bg-white/95 dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-none dark:shadow-2xl transition-all ${
         isFullscreen
-          ? 'fixed inset-0 z-[99999] rounded-none p-5 sm:p-6 bg-slate-100 dark:bg-[#1d1f26] overflow-hidden'
+          ? 'fixed inset-0 z-[99999] rounded-none p-5 sm:p-6 bg-slate-100 dark:bg-[#181818] overflow-hidden'
           : 'relative p-4 md:p-5'
       }`}
     >
@@ -385,7 +385,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
             <select
               value={activeSector}
               onChange={(e) => setSector(e.target.value)}
-              className="appearance-none max-w-[120px] sm:max-w-none pl-2.5 pr-6 py-1.5 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200/90 dark:border-white/[0.08] text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500/50 cursor-pointer truncate"
+              className="appearance-none max-w-[120px] sm:max-w-none pl-2.5 pr-6 py-1.5 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500/50 cursor-pointer truncate"
             >
               {sectors.map((sec) => (
                 <option key={sec} value={sec}>
@@ -398,7 +398,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
 
           {/* Color Scale Legend */}
           <div
-            className="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#191a21] border border-slate-200/90 dark:border-white/[0.06] text-xs font-mono font-medium"
+            className="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.06] text-xs font-mono font-medium"
             title={isIndicesMode ? 'Escala de rendimiento para índices: -1% a +1%' : 'Escala de rendimiento para acciones: -3% a +3%'}
           >
             <span className="text-rose-600 dark:text-rose-400 font-bold">
@@ -427,7 +427,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all shrink-0 ${
                 heightMode === 'expanded'
                   ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-600/20 dark:text-blue-300 dark:border-blue-500/40'
-                  : 'bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 dark:bg-[#191a21] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08]'
+                  : 'bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 dark:bg-[#252526] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08]'
               }`}
               title={
                 heightMode === 'expanded'
@@ -452,7 +452,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           {/* Fullscreen Button */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/90 dark:bg-[#191a21] dark:hover:bg-[#20222d] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08] transition-colors shrink-0"
+            className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08] transition-colors shrink-0"
             title={isFullscreen ? 'Salir de pantalla completa (Esc)' : 'Pantalla completa'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -479,7 +479,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
         style={{
           height: isFullscreen ? 'calc(100vh - 110px)' : `${dimensions.height}px`,
         }}
-        className="relative w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-[#1d1f26] border border-slate-200/90 dark:border-black/50 select-none transition-[height] duration-200"
+        className="relative w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-[#181818] border border-slate-200/90 dark:border-black/50 select-none transition-[height] duration-200"
       >
         {sectorNodes.map((sectorNode) => {
           const { x, y, width, height } = sectorNode.rect
@@ -494,12 +494,12 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
                 width: `${width}px`,
                 height: `${height}px`,
               }}
-              className="overflow-hidden border border-slate-300/80 dark:border-black/90 bg-slate-100 dark:bg-[#191a21] pointer-events-none"
+              className="overflow-hidden border border-slate-300/80 dark:border-black/90 bg-slate-100 dark:bg-[#252526] pointer-events-none"
             >
               {/* Sector Header Bar */}
               <div
                 style={{ height: `${HEADER_HEIGHT}px` }}
-                className="px-2.5 flex items-center justify-between bg-slate-200/90 dark:bg-[#181922] border-b border-slate-300/90 dark:border-black/80 text-xs font-bold text-slate-900 dark:text-slate-300 tracking-wide uppercase select-none"
+                className="px-2.5 flex items-center justify-between bg-slate-200/90 dark:bg-[#1e1e1e] border-b border-slate-300/90 dark:border-black/80 text-xs font-bold text-slate-900 dark:text-slate-300 tracking-wide uppercase select-none"
               >
                 <span className="truncate">{sectorNode.sector}</span>
                 {width > 140 && (
@@ -614,7 +614,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               left: `${Math.min(hoveredStock.x + 14, (dimensions.width || 800) - 260)}px`,
               top: `${Math.min(hoveredStock.y + 14, (dimensions.height || 500) - 170)}px`,
             }}
-            className="pointer-events-none z-50 w-64 rounded-2xl bg-white/95 dark:bg-[#20222a]/95 border border-slate-200/90 dark:border-white/15 p-4 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
+            className="pointer-events-none z-50 w-64 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/95 border border-slate-200/90 dark:border-white/15 p-4 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
           >
             {/* Header with Logo */}
             <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-200/80 dark:border-white/[0.08]">
