@@ -797,7 +797,9 @@ export function OverviewPage() {
                   <CardTitle className="text-sm sm:text-[15px] truncate">Evolución Patrimonial</CardTitle>
                 </div>
                 <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
-                  Trayectoria histórica del valor liquidativo acumulado
+                  {chartView === 'evolution'
+                    ? 'Trayectoria histórica del valor liquidativo acumulado'
+                    : 'Rentabilidad neta mes a mes y acumulación anual de la cartera'}
                 </p>
               </div>
             </div>
@@ -886,7 +888,7 @@ export function OverviewPage() {
 
           <div className="px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
             <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
-              {isPeriodUpdating ? (
+              {isPeriodUpdating && chartView === 'evolution' ? (
                 <PerformanceChartSkeleton height={260} />
               ) : chartView === 'evolution' ? (
                 performance.length > 0 ? (
@@ -904,8 +906,8 @@ export function OverviewPage() {
                   </div>
                 )
               ) : (
-                <div className="py-0.5 flex-1 flex flex-col justify-between min-h-0 overflow-hidden">
-                  <MonthlyReturnsHeatmap data={performance} tableMaxHeight="200px" />
+                <div className="py-0.5 flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
+                  <MonthlyReturnsHeatmap compact tableMaxHeight="260px" />
                 </div>
               )}
             </div>

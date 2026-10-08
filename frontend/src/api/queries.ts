@@ -12,7 +12,7 @@ import {
   type Transaction,
 } from '@/lib/mockData'
 export type { Position, PortfolioSummary, Analytics, Transaction, PricePoint }
-import { useAppStore } from '@/store/appStore'
+import { useAppStore, type Period } from '@/store/appStore'
 
 const API = '/api'
 
@@ -131,12 +131,13 @@ export function usePositions() {
 }
 
 // ── Performance ────────────────────────────────────────────────────────────────
-export function usePerformance() {
-  const { useMock, period, selectedBroker, currentUser } = useAppStore()
+export function usePerformance(overridePeriod?: Period | 'all' | '5y' | 'max') {
+  const { useMock, period: storePeriod, selectedBroker, currentUser } = useAppStore()
+  const period = overridePeriod || storePeriod
   const isDemo = Boolean(useMock || currentUser?.isDemo)
   const userPerf = currentUser?.performance ?? MOCK_PERFORMANCE
   const userPoints = demoScale(
-    userPerf[period] ?? userPerf['1y'] ?? [],
+    userPerf[period] ?? (period === '5y' || period === 'all' || period === 'max' ? (userPerf['5y'] ?? userPerf['max']) : (userPerf['1y'] ?? [])),
     currentUser?.positions ?? MOCK_POSITIONS,
     selectedBroker
   )
@@ -150,7 +151,7 @@ export function usePerformance() {
         : get<PricePoint[]>(`/portfolio/performance?period=${period}${brokerQuery}`),
     initialData: isDemo ? userPoints : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: isDemo ? 1000 * 60 * 5 : 0,
+    staleTime: isDemo ? 1000 * 60 * 5 : 1000 * 60 * 2,
     refetchOnMount: true,
   })
 }

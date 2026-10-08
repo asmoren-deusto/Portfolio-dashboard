@@ -3,20 +3,19 @@ import {
   TrendingUp,
   TrendingDown,
   CheckCircle2,
-  Award,
   Flame,
-  ArrowUpRight,
-  Info,
+  RotateCcw,
 } from 'lucide-react'
 import type { PricePoint } from '@/lib/mockData'
 import { usePerformance } from '@/api/queries'
-import { fmt, cn } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
-interface MonthlyReturnsHeatmapProps {
+export interface MonthlyReturnsHeatmapProps {
   data?: PricePoint[]
   className?: string
   compact?: boolean
   tableMaxHeight?: string
+  isLoading?: boolean
 }
 
 interface MonthData {
@@ -41,10 +40,52 @@ const FULL_MONTH_NAMES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ]
 
-export function MonthlyReturnsHeatmap({ data: propData, className, compact = false, tableMaxHeight }: MonthlyReturnsHeatmapProps) {
-  // If data is not provided, fetch 5y performance to cover all years
-  const { data: fetchedData = [] } = usePerformance()
-  const rawData = propData || fetchedData
+export function MonthlyReturnsSkeleton({ compact = false, tableMaxHeight }: { compact?: boolean; tableMaxHeight?: string }) {
+  return (
+    <div className="space-y-3.5 animate-pulse w-full">
+      {!compact && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-[68px] rounded-xl bg-slate-100/90 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.05]" />
+          ))}
+        </div>
+      )}
+      <div
+        className={cn("overflow-x-auto pb-1", tableMaxHeight && "overflow-y-auto")}
+        style={tableMaxHeight ? { maxHeight: tableMaxHeight } : undefined}
+      >
+        <div className="min-w-[620px] space-y-2 py-1">
+          <div className="h-8 rounded-lg bg-slate-100 dark:bg-white/[0.04]" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-9 rounded-lg bg-slate-100/60 dark:bg-white/[0.02]" />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function MonthlyReturnsHeatmap({
+  data: propData,
+  className,
+  compact = false,
+  tableMaxHeight,
+  isLoading: propLoading,
+}: MonthlyReturnsHeatmapProps) {
+  // If data is not provided or if propData has less than 150 points (~6 months), fetch full 5y historical series to guarantee a complete matrix
+  const shouldFetch5y = !propData || propData.length < 150
+  const {
+    data: fetchedData = [],
+    isLoading: isQueryLoading,
+    isFetching: isQueryFetching,
+    isError,
+    refetch,
+  } = usePerformance(shouldFetch5y ? '5y' : undefined)
+
+  const rawData = propData && propData.length >= 150 ? propData : fetchedData
+  const isLoading = propLoading !== undefined
+    ? propLoading
+    : (shouldFetch5y ? (isQueryLoading || (rawData.length === 0 && isQueryFetching)) : false)
 
   const { rows, stats } = useMemo(() => {
     if (!rawData || rawData.length < 2) {
@@ -194,9 +235,33 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
     return 'bg-rose-500/25 text-rose-700 dark:text-rose-300 font-bold border border-rose-500/35 hover:brightness-110 shadow-xs'
   }
 
+  // 1. Loading Skeleton state
+  if (isLoading) {
+    return <MonthlyReturnsSkeleton compact={compact} tableMaxHeight={tableMaxHeight} />
+  }
+
+  // 2. Error state with retry
+  if (isError && rawData.length === 0) {
+    return (
+      <div className="flex flex-col h-48 items-center justify-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
+        <p className="font-medium">No se pudo cargar el histórico para la matriz mensual</p>
+        {refetch && (
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-xs"
+          >
+            <RotateCcw size={12} />
+            <span>Reintentar</span>
+          </button>
+        )}
+      </div>
+    )
+  }
+
+  // 3. Empty state
   if (rows.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center text-xs text-slate-400 dark:text-slate-500">
+      <div className="flex h-48 items-center justify-center text-xs text-slate-400 dark:text-slate-500 font-medium">
         Sin suficiente histórico para generar la matriz mensual
       </div>
     )
@@ -230,7 +295,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
                 Mejor Mes
               </span>
               <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 block">
-                {stats.bestMonth ? `+${stats.bestMonth.val.toFixed(2)}%` : '—'}
+                {stats.bestMonth ? `${stats.bestMonth.val >= 0 ? '+' : ''}${stats.bestMonth.val.toFixed(2)}%` : '—'}
               </span>
               <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">
                 {stats.bestMonth ? stats.bestMonth.label : '—'}
@@ -247,7 +312,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
                 Peor Mes
               </span>
               <span className="text-xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-0.5 block">
-                {stats.worstMonth ? `${stats.worstMonth.val.toFixed(2)}%` : '—'}
+                {stats.worstMonth ? `${stats.worstMonth.val >= 0 ? '+' : ''}${stats.worstMonth.val.toFixed(2)}%` : '—'}
               </span>
               <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">
                 {stats.worstMonth ? stats.worstMonth.label : '—'}
@@ -263,8 +328,8 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
                 Media Mensual
               </span>
-              <span className={cn("text-xl font-bold font-mono mt-0.5 block", stats.avgMonthly >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
-                {stats.avgMonthly >= 0 ? '+' : ''}{stats.avgMonthly.toFixed(2)}%
+              <span className={cn("text-xl font-bold font-mono mt-0.5 block", (stats.avgMonthly ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
+                {(stats.avgMonthly ?? 0) >= 0 ? '+' : ''}{(stats.avgMonthly ?? 0).toFixed(2)}%
               </span>
               <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">
                 tasa promedio / mes
@@ -291,7 +356,7 @@ export function MonthlyReturnsHeatmap({ data: propData, className, compact = fal
               <th className="py-2 px-2.5 text-left font-bold text-slate-800 dark:text-slate-200 w-16">
                 Año
               </th>
-              {MONTH_NAMES.map((m, idx) => (
+              {MONTH_NAMES.map((m) => (
                 <th key={m} className="py-2 px-1 text-center font-semibold">
                   {m}
                 </th>
