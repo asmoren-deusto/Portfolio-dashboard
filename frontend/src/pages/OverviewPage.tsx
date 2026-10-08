@@ -80,7 +80,7 @@ export function OverviewPage() {
   const [perfChartMode, setPerfChartMode] = useState<'currency' | 'percent'>('currency')
   const [perfShowInvested, setPerfShowInvested] = useState(true)
   const [perfShowMilestones, setPerfShowMilestones] = useState(true)
-  const [secondaryChartMode, setSecondaryChartMode] = useState<'returns' | 'broker'>('returns')
+  const [returnsPeriodMode, setReturnsPeriodMode] = useState<'global' | 'weekly'>('global')
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
@@ -362,8 +362,68 @@ export function OverviewPage() {
     }
   }, [performance, analytics, positions, displaySummary, latestNavDate])
 
+  const weeklyReturnsData = useMemo(() => {
+    if (!performance || performance.length < 2) return []
+
+    const valid = [...performance]
+      .filter((p) => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    if (valid.length < 2) return []
+
+    // Up to 7 daily returns requires up to 8 points (since daily return = (day[i] - day[i-1]))
+    const pointsNeeded = Math.min(valid.length, 8)
+    const slice = valid.slice(valid.length - pointsNeeded)
+
+    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+
+    const result: Array<{ name: string; fullName: string; value: number }> = []
+
+    for (let i = 1; i < slice.length; i++) {
+      const prev = slice[i - 1]
+      const cur = slice[i]
+
+      const prevInvested = prev.invested ?? prev.value
+      const curInvested = cur.invested ?? cur.value
+      const netInflow = curInvested - prevInvested
+
+      let dayReturnPct = 0
+      if (prev.value > 0) {
+        dayReturnPct = ((cur.value - netInflow - prev.value) / prev.value) * 100
+      }
+
+      const isLatest = i === slice.length - 1
+      if (isLatest && shortTermMetrics?.dayPct !== undefined) {
+        dayReturnPct = shortTermMetrics.dayPct
+      }
+
+      dayReturnPct = Math.round(dayReturnPct * 100) / 100
+
+      const [y, m, d] = cur.date.split('-').map(Number)
+      const dateObj = new Date(y, m - 1, d)
+      const dayName = dayNames[dateObj.getDay()] || ''
+
+      const isToday = Boolean(latestNavDate && cur.date === latestNavDate) || isLatest
+
+      const name = isToday ? 'Hoy' : `${dayName} ${d}`
+      const fullName = `${dateObj.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'short',
+      })}${isToday ? ' (Hoy)' : ''}`
+
+      result.push({
+        name,
+        fullName,
+        value: dayReturnPct,
+      })
+    }
+
+    return result
+  }, [performance, shortTermMetrics?.dayPct, latestNavDate])
+
   const secondaryStats = useMemo(() => {
-    if (secondaryChartMode === 'returns') {
+    if (returnsPeriodMode === 'global') {
       const dayPct = shortTermMetrics?.dayPct ?? analytics?.return_1d
       const ytd = analytics?.return_ytd
       return {
@@ -377,27 +437,20 @@ export function OverviewPage() {
         box2Positive: (ytd ?? 0) >= 0,
       }
     } else {
-      const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
-      const byBroker: Record<string, number> = {}
-      for (const p of positions) {
-        const b = p.broker || 'Otros'
-        byBroker[b] = (byBroker[b] || 0) + (p.current_value || 0)
-      }
-      const sorted = Object.entries(byBroker).sort((a, b) => b[1] - a[1])
-      const top = sorted[0]
-      const topPct = totalVal > 0 && top ? (top[1] / totalVal) * 100 : 0
+      const weekPct = shortTermMetrics?.weekPct ?? analytics?.return_1w
+      const weekAmt = shortTermMetrics?.weekAmount
       return {
-        box1Label: 'Líder:',
-        box1Val: `${topPct.toFixed(1)}%`,
-        box1Title: `Entidad principal: ${top?.[0] || '—'} (${topPct.toFixed(1)}%)`,
-        box1Positive: true,
-        box2Label: 'Bancos:',
-        box2Val: `${sorted.length}`,
-        box2Title: `${sorted.length} entidades financieras / brokers`,
-        box2Positive: true,
+        box1Label: '7D:',
+        box1Val: weekPct !== undefined ? fmt.pct(weekPct) : '—',
+        box1Title: weekAmt !== undefined ? `Rendimiento últimos 7 días: ${fmt.currency(weekAmt)} (${fmt.pct(weekPct || 0)})` : 'Rendimiento últimos 7 días',
+        box1Positive: (weekPct ?? 0) >= 0,
+        box2Label: '7D €:',
+        box2Val: weekAmt !== undefined ? fmt.currency(weekAmt) : '—',
+        box2Title: weekAmt !== undefined ? `Ganancia o pérdida neta últimos 7 días: ${fmt.currency(weekAmt)}` : 'Ganancia o pérdida neta 7 días',
+        box2Positive: (weekAmt ?? 0) >= 0,
       }
     }
-  }, [secondaryChartMode, analytics, positions])
+  }, [returnsPeriodMode, shortTermMetrics, analytics])
 
   const perfMetrics = useMemo(() => {
     if (!performance || performance.length === 0) return null
@@ -1019,7 +1072,7 @@ export function OverviewPage() {
           </div>
         </Card>
 
-        {/* 3. Performance by Period / Broker Distribution (20% on desktop: lg:col-span-1, md:col-span-1) */}
+        {/* 3. Performance by Period (Global / Semanal 7D) (20% on desktop: lg:col-span-1, md:col-span-1) */}
         <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.26} loading={analyticsFetching}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
@@ -1029,69 +1082,61 @@ export function OverviewPage() {
               <div className="min-w-0">
                 <CardTitle className="text-sm">Rendimiento</CardTitle>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
-                  Retorno y asignación
+                  {returnsPeriodMode === 'global' ? 'Rentabilidad por periodo' : 'Últimos 7 días'}
                 </p>
               </div>
             </div>
 
             <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#191a21] p-0.5">
               <button
-                onClick={() => setSecondaryChartMode('returns')}
-                className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${
-                  secondaryChartMode === 'returns'
+                onClick={() => setReturnsPeriodMode('global')}
+                className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${
+                  returnsPeriodMode === 'global'
                     ? 'text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
-                {secondaryChartMode === 'returns' && (
+                {returnsPeriodMode === 'global' && (
                   <motion.div
-                    layoutId="secondaryChartPill"
+                    layoutId="returnsPeriodPill"
                     className="absolute inset-0 rounded-lg bg-blue-600"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}
-                <span className="relative z-10 text-[11px]">Periodo</span>
+                <span className="relative z-10 text-[11px]">Global</span>
               </button>
               <button
-                onClick={() => setSecondaryChartMode('broker')}
-                className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${
-                  secondaryChartMode === 'broker'
+                onClick={() => setReturnsPeriodMode('weekly')}
+                className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${
+                  returnsPeriodMode === 'weekly'
                     ? 'text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
-                {secondaryChartMode === 'broker' && (
+                {returnsPeriodMode === 'weekly' && (
                   <motion.div
-                    layoutId="secondaryChartPill"
+                    layoutId="returnsPeriodPill"
                     className="absolute inset-0 rounded-lg bg-blue-600"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}
-                <span className="relative z-10 text-[11px]">Entidad</span>
+                <span className="relative z-10 text-[11px]">Semanal</span>
               </button>
             </div>
           </CardHeader>
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-              {secondaryChartMode === 'returns' ? (
-                analyticsFetching && !analytics ? (
-                  <ReturnsChartSkeleton compact height={260} />
-                ) : analytics ? (
-                  <ReturnsChart analytics={analytics} compact height={260} />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                    Sin datos de rendimiento
-                  </div>
-                )
+              {analyticsFetching && !analytics ? (
+                <ReturnsChartSkeleton compact height={260} />
               ) : (
-                positions.length > 0 ? (
-                  <AllocationChart positions={positions} mode="broker" showLegend={false} height={260} />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                    Sin datos de entidades
-                  </div>
-                )
+                <ReturnsChart
+                  analytics={analytics}
+                  mode={returnsPeriodMode}
+                  weeklyData={weeklyReturnsData}
+                  compact
+                  height={260}
+                />
               )}
             </div>
 
@@ -1107,14 +1152,12 @@ export function OverviewPage() {
                     <div
                       className={cn(
                         'w-5 h-5 rounded-md flex items-center justify-center shrink-0',
-                        secondaryChartMode === 'returns'
-                          ? secondaryStats.box1Positive
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                          : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                        secondaryStats.box1Positive
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
                       )}
                     >
-                      {secondaryChartMode === 'returns' ? <Zap size={12} /> : <Building2 size={12} />}
+                      <Zap size={12} />
                     </div>
                     <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
                       {secondaryStats.box1Label}
@@ -1124,11 +1167,9 @@ export function OverviewPage() {
                     data-private
                     className={cn(
                       'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
-                      secondaryChartMode === 'returns'
-                        ? secondaryStats.box1Positive
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                        : 'text-slate-950 dark:text-white'
+                      secondaryStats.box1Positive
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-rose-600 dark:text-rose-400'
                     )}
                   >
                     {secondaryStats.box1Val}
@@ -1144,12 +1185,14 @@ export function OverviewPage() {
                     <div
                       className={cn(
                         'w-5 h-5 rounded-md flex items-center justify-center shrink-0',
-                        secondaryChartMode === 'returns'
+                        returnsPeriodMode === 'global'
                           ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                          : 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                          : secondaryStats.box2Positive
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
                       )}
                     >
-                      {secondaryChartMode === 'returns' ? <Calendar size={12} /> : <Layers size={12} />}
+                      {returnsPeriodMode === 'global' ? <Calendar size={12} /> : <Euro size={12} />}
                     </div>
                     <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
                       {secondaryStats.box2Label}
@@ -1159,11 +1202,9 @@ export function OverviewPage() {
                     data-private
                     className={cn(
                       'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
-                      secondaryChartMode === 'returns'
-                        ? secondaryStats.box2Positive
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                        : 'text-slate-950 dark:text-white'
+                      secondaryStats.box2Positive
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-rose-600 dark:text-rose-400'
                     )}
                   >
                     {secondaryStats.box2Val}
