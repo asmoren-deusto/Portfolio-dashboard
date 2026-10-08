@@ -356,7 +356,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
     <div
       className={`flex flex-col rounded-2xl bg-white/95 dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-none dark:shadow-2xl transition-all ${
         isFullscreen
-          ? 'fixed inset-0 z-[99999] rounded-none p-5 sm:p-6 bg-slate-100 dark:bg-[#181818] overflow-hidden'
+          ? 'fixed inset-0 z-[99999] rounded-none p-5 sm:p-6 bg-slate-100 dark:bg-[#1c1c1c] overflow-hidden'
           : 'relative p-4 md:p-5'
       }`}
     >
@@ -479,7 +479,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
         style={{
           height: isFullscreen ? 'calc(100vh - 110px)' : `${dimensions.height}px`,
         }}
-        className="relative w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-[#181818] border border-slate-200/90 dark:border-black/50 select-none transition-[height] duration-200"
+        className="relative w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-[#1c1c1c] border border-slate-200/90 dark:border-black/50 select-none transition-[height] duration-200"
       >
         {sectorNodes.map((sectorNode) => {
           const { x, y, width, height } = sectorNode.rect

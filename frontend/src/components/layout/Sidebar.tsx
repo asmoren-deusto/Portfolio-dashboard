@@ -72,7 +72,7 @@ export function Sidebar({}: SidebarProps) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#141414] transition-transform duration-300 ease-in-out shadow-lg',
+          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#242424] transition-transform duration-300 ease-in-out shadow-lg',
           sidebarCollapsed
             ? mobileSidebarOpen
               ? 'translate-x-0'
@@ -169,7 +169,7 @@ export function Sidebar({}: SidebarProps) {
         <div className="border-t border-slate-100 dark:border-white/[0.06] p-3 space-y-2.5">
           {/* Active User Card */}
           {currentUser && (
-            <div className="p-2 rounded-xl bg-slate-100/90 dark:bg-[#1f1f1f] border border-slate-200/90 dark:border-white/[0.08] flex items-center justify-between gap-2 shadow-2xs">
+            <div className="p-2 rounded-xl bg-slate-100/90 dark:bg-[#1a1a1a] border border-slate-200/90 dark:border-white/[0.08] flex items-center justify-between gap-2 shadow-2xs">
               <div className="flex items-center gap-2 min-w-0">
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] text-white shrink-0 shadow-xs ring-1 ring-black/10 dark:ring-white/10"
@@ -200,7 +200,7 @@ export function Sidebar({}: SidebarProps) {
           )}
 
           {/* Theme Segmented Switcher */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-[#1f1f1f] border border-slate-200/90 dark:border-white/[0.08]">
+          <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-[#1a1a1a] border border-slate-200/90 dark:border-white/[0.08]">
             <button
               onClick={() => setTheme('light')}
               className={cn(

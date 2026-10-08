@@ -264,7 +264,7 @@ export const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center p-4 sm:p-6 bg-slate-50 dark:bg-[#181818] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center p-4 sm:p-6 bg-slate-50 dark:bg-[#1c1c1c] text-slate-900 dark:text-slate-100 transition-colors">
       {/* Background glow effects */}
       <div className="pointer-events-none fixed top-10 left-1/4 w-[600px] h-[300px] bg-blue-500/[0.05] dark:bg-zinc-600/[0.03] blur-[130px] rounded-full -z-10" />
       <div className="pointer-events-none fixed bottom-10 right-1/4 w-[500px] h-[300px] bg-indigo-500/[0.04] dark:bg-zinc-700/[0.02] blur-[120px] rounded-full -z-10" />

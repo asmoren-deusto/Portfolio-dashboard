@@ -25,7 +25,7 @@ export function RootLayout() {
     }
 
     // Sync theme-color for iOS Safari / Chrome Mobile
-    const targetColor = isDark ? '#181818' : '#ffffff'
+    const targetColor = isDark ? '#1c1c1c' : '#ffffff'
     const themeMetas = document.querySelectorAll('meta[name="theme-color"]')
     if (themeMetas.length > 0) {
       themeMetas.forEach((meta) => meta.setAttribute('content', targetColor))
@@ -79,7 +79,7 @@ export function RootLayout() {
 
   return (
     <HeaderProvider>
-      <div className={`relative flex min-h-screen bg-[#f6f8fb] text-slate-800 dark:bg-[#181818] dark:text-slate-100 overflow-x-hidden selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-[#264f78] dark:selection:text-white transition-colors duration-200${privacyMode ? ' privacy-mode' : ''}`}>
+      <div className={`relative flex min-h-screen bg-[#f6f8fb] text-slate-800 dark:bg-[#1c1c1c] dark:text-slate-100 overflow-x-hidden selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-[#264f78] dark:selection:text-white transition-colors duration-200${privacyMode ? ' privacy-mode' : ''}`}>
         {/* Refined ambient background lighting — subtle graphite and neutral cool haze */}
         <div className="pointer-events-none fixed top-0 left-1/4 w-[750px] h-[350px] bg-gradient-to-br from-blue-500/[0.05] via-indigo-500/[0.03] to-transparent blur-[140px] rounded-full -z-10 dark:from-slate-600/[0.04] dark:via-zinc-600/[0.02]" />
         <div className="pointer-events-none fixed top-1/3 right-4 w-[500px] h-[300px] bg-gradient-to-bl from-violet-500/[0.04] to-transparent blur-[130px] rounded-full -z-10 dark:from-slate-500/[0.03]" />
@@ -88,7 +88,7 @@ export function RootLayout() {
 
         <div className={`flex flex-1 flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
           {/* Mobile / Collapsed Desktop Header Bar */}
-          <header className={`sticky top-0 z-30 flex items-center justify-between px-4 py-2.5 bg-white/90 dark:bg-[#141414]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+          <header className={`sticky top-0 z-30 flex items-center justify-between px-4 py-2.5 bg-white/90 dark:bg-[#242424]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
             <div className="flex items-center gap-2.5">
               <button
                 onClick={toggleMobileSidebar}
