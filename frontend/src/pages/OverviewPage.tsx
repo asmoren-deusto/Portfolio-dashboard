@@ -811,7 +811,7 @@ export function OverviewPage() {
                     <button
                       onClick={() => setPerfChartMode('currency')}
                       className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${perfChartMode === 'currency'
-                          ? 'bg-white dark:bg-[#333333] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-sm shadow-blue-600/25 border border-white/15'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                         }`}
                       title="Ver evolución en Euros (€)"
@@ -821,7 +821,7 @@ export function OverviewPage() {
                     <button
                       onClick={() => setPerfChartMode('percent')}
                       className={`min-w-[24px] px-2 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${perfChartMode === 'percent'
-                          ? 'bg-white dark:bg-[#333333] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-sm shadow-blue-600/25 border border-white/15'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                         }`}
                       title="Ver rentabilidad acumulada en porcentaje (%)"
@@ -865,7 +865,7 @@ export function OverviewPage() {
                 <button
                   onClick={() => setChartView('evolution')}
                   className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'evolution'
-                      ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-xs'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-sm shadow-blue-600/25 border border-white/15'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                     }`}
                 >
@@ -874,7 +874,7 @@ export function OverviewPage() {
                 <button
                   onClick={() => setChartView('heatmap')}
                   className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'heatmap'
-                      ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-xs'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-sm shadow-blue-600/25 border border-white/15'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                     }`}
                 >
@@ -1041,14 +1041,14 @@ export function OverviewPage() {
                   key={m}
                   onClick={() => setAllocMode(m)}
                   className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${allocMode === m
-                      ? 'text-slate-900 dark:text-white font-bold'
+                      ? 'text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                 >
                   {allocMode === m && (
                     <motion.div
                       layoutId="overviewAllocPill"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
@@ -1152,14 +1152,14 @@ export function OverviewPage() {
                   try { localStorage.setItem('returns_period_mode', 'global') } catch { }
                 }}
                 className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'global'
-                    ? 'text-slate-900 dark:text-white font-bold'
+                    ? 'text-white font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
               >
                 {returnsPeriodMode === 'global' && (
                   <motion.div
                     layoutId="returnsPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}
@@ -1171,14 +1171,14 @@ export function OverviewPage() {
                   try { localStorage.setItem('returns_period_mode', 'weekly') } catch { }
                 }}
                 className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'weekly'
-                    ? 'text-slate-900 dark:text-white font-bold'
+                    ? 'text-white font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
               >
                 {returnsPeriodMode === 'weekly' && (
                   <motion.div
                     layoutId="returnsPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}

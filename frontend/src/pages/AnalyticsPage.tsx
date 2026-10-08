@@ -233,7 +233,7 @@ export function AnalyticsPage() {
                   onClick={() => setBenchmarkMode(m)}
                   className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                     benchmarkMode === m
-                      ? 'text-slate-900 dark:text-white font-bold'
+                      ? 'text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                   title={
@@ -245,7 +245,7 @@ export function AnalyticsPage() {
                   {benchmarkMode === m && (
                     <motion.div
                       layoutId="benchmark-mode-indicator"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
                       transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                     />
                   )}
@@ -300,14 +300,14 @@ export function AnalyticsPage() {
                   onClick={() => setSecondaryView(view)}
                   className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                     secondaryView === view
-                      ? 'text-slate-900 dark:text-white font-bold'
+                      ? 'text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
                   {secondaryView === view && (
                     <motion.div
                       layoutId="analyticsSecondaryPill"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15"
                       transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}

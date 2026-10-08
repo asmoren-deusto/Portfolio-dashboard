@@ -222,13 +222,13 @@ export function TransactionsPage() {
                 key={tab.id}
                 onClick={() => setActiveType(tab.id)}
                 className={`relative px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
-                  active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  active ? 'text-white font-bold' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
                 {active && (
                   <motion.div
                     layoutId="txTypeTab"
-                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md shadow-blue-600/30 border border-white/20"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
                   />
                 )}
@@ -832,7 +832,7 @@ function ImportExtractoModal({
             onClick={() => setTab('text')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
               tab === 'text'
-                ? 'bg-white dark:bg-[#2d2d2d] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-sm'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -844,7 +844,7 @@ function ImportExtractoModal({
             onClick={() => setTab('file')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
               tab === 'file'
-                ? 'bg-white dark:bg-[#2d2d2d] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-sm'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-600/25 border border-white/15'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
