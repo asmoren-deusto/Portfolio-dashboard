@@ -1,6 +1,7 @@
 """Portfolio router — summary, positions, performance."""
 import asyncio
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import logging
@@ -70,23 +71,25 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
 
     positions = calculate_positions(transactions)
     active_positions = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
-    total_value = 0.0
-    total_invested = 0.0
+    all_assets = {a.isin: a for a in db.query(Asset).all()}
 
-    for isin, pos in active_positions.items():
-        asset = _get_asset(db, isin)
+    async def _fetch_pos_val(isin, pos):
+        asset = all_assets.get(isin)
         ticker = asset.ticker if asset else None
         price = await get_current_price(isin, ticker, db=db)
         effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
-        total_value += pos["shares"] * effective_price
-        total_invested += pos["invested_amount"]
+        return pos["shares"] * effective_price, pos["invested_amount"]
+
+    pos_results = await asyncio.gather(*[_fetch_pos_val(isin, pos) for isin, pos in active_positions.items()], return_exceptions=True)
+    total_value = sum(r[0] for r in pos_results if isinstance(r, tuple))
+    total_invested = sum(r[1] for r in pos_results if isinstance(r, tuple))
 
     total_pnl = total_value - total_invested
     total_pnl_pct = (total_pnl / total_invested * 100) if total_invested > 0 else 0
 
     valid_positions = [
         isin for isin in active_positions
-        if isin != "TR_TRANSFER" and not isin.startswith("TR_") and (not _get_asset(db, isin) or "Trade Republic" not in (_get_asset(db, isin).name or ""))
+        if isin != "TR_TRANSFER" and not isin.startswith("TR_") and (not all_assets.get(isin) or "Trade Republic" not in (all_assets.get(isin).name or ""))
     ]
 
     return PortfolioSummary(
@@ -114,35 +117,31 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
     result = []
     total_value = 0.0
 
-    position_data = []
-    for isin, pos in active_positions.items():
+    async def _fetch_position_bundle(isin, pos):
         asset = _get_asset(db, isin)
-        ticker = asset.ticker if asset else None
         name = asset.name if asset else isin
-        asset_type = asset.asset_type if asset else "fund"
-        currency = asset.currency if asset else "EUR"
-
-        # Do not include Cartera Trade Republic in positions listing
         if isin == "TR_TRANSFER" or isin.startswith("TR_") or "Trade Republic" in name:
-            continue
-
-        # Find broker for this position
+            return None
+        ticker = asset.ticker if asset else None
         pos_txs = [t for t in transactions if t["isin"] == isin]
         pos_broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
 
-        price, price_date = await get_price_with_date(isin, ticker, db=db, force=refresh)
+        price_task = get_price_with_date(isin, ticker, db=db, force=refresh)
+        hist_task = get_price_history(isin, ticker, "1mo")
+        (price_res, h_res) = await asyncio.gather(price_task, hist_task, return_exceptions=True)
+
+        price, price_date = (price_res if isinstance(price_res, tuple) else (None, None))
+        h = h_res if isinstance(h_res, list) else []
+
         effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
         current_value = pos["shares"] * effective_price
-        total_value += current_value
-
         pnl = current_value - pos["invested_amount"]
         pnl_pct = (pnl / pos["invested_amount"] * 100) if pos["invested_amount"] > 0 else 0.0
-        # Calculate daily return from price history (comparing against previous distinct trading session)
+
         daily_change = None
         daily_change_pct = None
         p_prev = None
 
-        h = await get_price_history(isin, ticker, "1mo")
         if h and len(h) >= 2:
             last_h_price = effective_price
             for pt in reversed(h):
@@ -164,13 +163,13 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             daily_change = round(effective_price - p_prev, 4)
             daily_change_pct = round((effective_price - p_prev) / p_prev * 100, 2)
 
-        position_data.append({
+        return {
             "isin": isin,
             "name": name,
             "ticker": ticker,
             "domain": getattr(asset, "domain", None) if asset else None,
-            "asset_type": asset_type,
-            "currency": currency,
+            "asset_type": asset.asset_type if asset else "fund",
+            "currency": asset.currency if asset else "EUR",
             "shares": round(pos["shares"], 6),
             "avg_cost": round(pos["avg_cost"], 4),
             "current_price": round(effective_price, 4),
@@ -184,7 +183,17 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             "ter": getattr(asset, "ter", None) if asset else None,
             "last_updated": price_date or datetime.now().strftime("%Y-%m-%d"),
             "price_date": price_date or datetime.now().strftime("%Y-%m-%d"),
-        })
+        }
+
+    tasks = [_fetch_position_bundle(isin, pos) for isin, pos in active_positions.items()]
+    fetched = await asyncio.gather(*tasks, return_exceptions=True)
+
+    position_data = []
+    for item in fetched:
+        if isinstance(item, dict):
+            total_value += item["current_value"]
+            position_data.append(item)
+
 
     # Add weight
     for p in position_data:
@@ -207,7 +216,7 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
     _perf_cache.clear()
     transactions = _get_all_transactions(db, user_id)
     positions = calculate_positions(transactions)
-    active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
+    active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001 and not isin.startswith("TR_")}
 
     async def _fetch_one(isin, pos):
         asset = _get_asset(db, isin)
@@ -303,14 +312,29 @@ async def get_performance(
 
     positions = calculate_positions(transactions)
 
-    # Fetch price history for all assets, ensuring latest date uses current price
-    price_history = {}
-    all_isins = set(t["isin"] for t in transactions)
-    for isin in all_isins:
+    # Fetch price history for all assets concurrently, ensuring latest date uses current price
+    async def _fetch_perf_bundle(isin):
+        if isin == "TR_TRANSFER" or isin.startswith("TR_"):
+            return isin, [], 0.0, datetime.now().strftime("%Y-%m-%d")
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
-        history = await get_price_history(isin, ticker, period)
-        curr_p, curr_p_date = await get_price_with_date(isin, ticker, db=db)
+        (history_res, price_res) = await asyncio.gather(
+            get_price_history(isin, ticker, period),
+            get_price_with_date(isin, ticker, db=db),
+            return_exceptions=True
+        )
+        history = history_res if isinstance(history_res, list) else []
+        curr_p, curr_p_date = price_res if isinstance(price_res, tuple) else (None, None)
+        return isin, history, curr_p, curr_p_date
+
+    all_isins = set(t["isin"] for t in transactions)
+    bundles = await asyncio.gather(*[_fetch_perf_bundle(isin) for isin in all_isins], return_exceptions=True)
+
+    price_history = {}
+    for item in bundles:
+        if not isinstance(item, tuple):
+            continue
+        isin, history, curr_p, curr_p_date = item
         if history:
             latest_date = curr_p_date or datetime.now().strftime("%Y-%m-%d")
             if curr_p is not None and curr_p >= 0:
@@ -442,12 +466,20 @@ async def get_benchmark_comparison(
             "twr": twr_val,
         })
 
-    # 2. Fetch S&P 500, MSCI World, NASDAQ 100 and Euro Stoxx 50 historical prices
-    sp_hist = await get_price_history("^GSPC", "^GSPC", period)
-    msci_hist = await get_price_history("URTH", "URTH", period)
-    nasdaq_hist = await get_price_history("QQQ", "QQQ", period)
-    stoxx_hist = await get_price_history("^STOXX50E", "^STOXX50E", period)
-    nikkei_hist = await get_price_history("^N225", "^N225", period)
+    # 2. Fetch S&P 500, MSCI World, NASDAQ 100, Euro Stoxx 50 and Nikkei 225 concurrently
+    bench_results = await asyncio.gather(
+        get_price_history("^GSPC", "^GSPC", period),
+        get_price_history("URTH", "URTH", period),
+        get_price_history("QQQ", "QQQ", period),
+        get_price_history("^STOXX50E", "^STOXX50E", period),
+        get_price_history("^N225", "^N225", period),
+        return_exceptions=True
+    )
+    sp_hist = bench_results[0] if isinstance(bench_results[0], list) else []
+    msci_hist = bench_results[1] if isinstance(bench_results[1], list) else []
+    nasdaq_hist = bench_results[2] if isinstance(bench_results[2], list) else []
+    stoxx_hist = bench_results[3] if isinstance(bench_results[3], list) else []
+    nikkei_hist = bench_results[4] if isinstance(bench_results[4], list) else []
 
     sp_dict = {p["date"]: p["price"] for p in sp_hist if p.get("price")}
     msci_dict = {p["date"]: p["price"] for p in msci_hist if p.get("price")}
@@ -594,13 +626,29 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     # Analytics computes multi-horizon returns (1d, 1w, 1m, 3m, 6m, 1y, ytd).
     # Ensure at least 2y of price history so all horizons can be computed reliably.
     history_period = "max" if period == "max" else "2y"
-    for isin in all_isins:
+
+    async def _fetch_analytics_bundle(isin):
+        if isin == "TR_TRANSFER" or isin.startswith("TR_"):
+            return isin, [], 0.0, datetime.now().strftime("%Y-%m-%d")
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
-        history = await get_price_history(isin, ticker, history_period)
-        curr_p, curr_date = await get_price_with_date(isin, ticker, db=db)
+        (history_res, price_res) = await asyncio.gather(
+            get_price_history(isin, ticker, history_period),
+            get_price_with_date(isin, ticker, db=db),
+            return_exceptions=True
+        )
+        history = [dict(h) for h in history_res] if isinstance(history_res, list) else []
+        curr_p, curr_date = price_res if isinstance(price_res, tuple) else (None, None)
+        return isin, history, curr_p, curr_date
+
+    analytics_bundles = await asyncio.gather(*[_fetch_analytics_bundle(isin) for isin in all_isins], return_exceptions=True)
+
+    price_history = {}
+    for item in analytics_bundles:
+        if not isinstance(item, tuple):
+            continue
+        isin, history, curr_p, curr_date = item
         if history:
-            history = [dict(h) for h in history]
             if curr_p and curr_p > 0:
                 last_dt = history[-1]["date"]
                 target_dt = curr_date or datetime.now().strftime("%Y-%m-%d")
@@ -636,12 +684,8 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     # Compute weighted daily return directly from active positions for exact 1D consistency.
     # Funds that have NOT yet updated to the latest reporting NAV date compute with 0.00% daily change
     # to avoid falsely attributing past days' returns to today's session.
-    all_dates = []
-    for isin in positions.keys():
-        c = db.query(PriceCache.date).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
-        if c and c[0]:
-            all_dates.append(c[0])
-    latest_nav_date = max(all_dates) if all_dates else datetime.now().strftime("%Y-%m-%d")
+    latest_nav_date_res = db.query(func.max(PriceCache.date)).filter(PriceCache.isin.in_(list(positions.keys()))).scalar()
+    latest_nav_date = latest_nav_date_res or datetime.now().strftime("%Y-%m-%d")
 
     weighted_1d = 0.0
     active_val = 0.0

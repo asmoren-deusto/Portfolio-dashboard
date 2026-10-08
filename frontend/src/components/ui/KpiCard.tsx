@@ -98,17 +98,13 @@ export function KpiCard({
         className
       )}
     >
-      {/* Top subtle light reflection line or active loading shimmer */}
-      {loading ? (
-        <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-      ) : (
-        <div
-          className={cn(
-            'pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.06] to-transparent dark:via-white/[0.12] z-10',
-            borderAccent && `via-${borderAccent}-500/30 dark:${ACCENT_GLOWS[borderAccent]}`
-          )}
-        />
-      )}
+      {/* Top subtle light reflection line */}
+      <div
+        className={cn(
+          'pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.06] to-transparent dark:via-white/[0.12] z-10',
+          borderAccent && `via-${borderAccent}-500/30 dark:${ACCENT_GLOWS[borderAccent]}`
+        )}
+      />
       {hoverGlow && (
         <div
           aria-hidden="true"

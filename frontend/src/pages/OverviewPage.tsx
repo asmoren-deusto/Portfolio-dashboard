@@ -24,7 +24,7 @@ import {
 import { Link } from 'react-router-dom'
 
 import { KpiCard } from '@/components/ui/KpiCard'
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { PerformanceChart } from '@/components/charts/PerformanceChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
@@ -108,8 +108,8 @@ export function OverviewPage() {
   const { data: transactions = [] } = useTransactions()
   const { data: marketData } = useMarketQuotes('Todos')
 
-  const isGlobalUpdating = summaryFetching || positionsFetching
-  const isPeriodUpdating = perfFetching || analyticsFetching
+  const isGlobalUpdating = summaryFetching || positionsFetching || isRefreshingPrices
+  const isPeriodUpdating = perfFetching || analyticsFetching || isRefreshingPrices
   const isAnyUpdating = isGlobalUpdating || isPeriodUpdating
 
   // Real portfolio summary directly from backend or calculated from active positions if loading
@@ -537,12 +537,7 @@ export function OverviewPage() {
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <Wallet size={13.5} className="text-blue-500" />
             <span>Métricas Globales y del Periodo ({periodLabel})</span>
-            {isAnyUpdating && (
-              <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-              </span>
-            )}
+            {isAnyUpdating && <LoadingDot />}
           </div>
           <span data-private className="hidden sm:inline text-[11px] font-mono text-slate-500 dark:text-slate-400">
             {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
@@ -645,11 +640,7 @@ export function OverviewPage() {
             className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card backdrop-blur-md transition-all duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90 dark:bg-[#181922]/90 dark:border-white/[0.08] dark:hover:border-white/[0.16]"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
-            {isGlobalUpdating ? (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-            ) : (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/[0.12] z-10" />
-            )}
+            <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/[0.12] z-10" />
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -661,12 +652,7 @@ export function OverviewPage() {
                 <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
                   Total Invertido
                 </p>
-                {isGlobalUpdating && (
-                  <span className="relative flex h-2 w-2 shrink-0" title="Actualizando...">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                  </span>
-                )}
+                {isGlobalUpdating && <LoadingDot />}
               </div>
               <span data-private className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
                 <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
@@ -787,6 +773,7 @@ export function OverviewPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-sm sm:text-[15px] truncate">Evolución Patrimonial</CardTitle>
+                  {isPeriodUpdating && <LoadingDot />}
                 </div>
                 <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
                   Trayectoria histórica del valor liquidativo acumulado
@@ -883,9 +870,6 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className={cn("px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
-            {isRefreshingPrices && (
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 animate-pulse z-20" />
-            )}
             <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
               {chartView === 'evolution' ? (
                 performance.length > 0 ? (
@@ -1017,7 +1001,10 @@ export function OverviewPage() {
                 <PieChart className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <CardTitle className="text-sm">Distribución</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm">Distribución</CardTitle>
+                  {isGlobalUpdating && <LoadingDot />}
+                </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
                   Desglose de cartera
                 </p>
@@ -1052,9 +1039,6 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className={cn("px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
-            {isRefreshingPrices && (
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 animate-pulse z-20" />
-            )}
             <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {positions.length > 0 ? (
                 <AllocationChart
@@ -1123,7 +1107,10 @@ export function OverviewPage() {
                 <BarChart3 className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <CardTitle className="text-sm">Rendimiento</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm">Rendimiento</CardTitle>
+                  {isPeriodUpdating && <LoadingDot />}
+                </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
                   {returnsPeriodMode === 'global' ? 'Rentabilidad por periodo' : 'Últimos 7 días'}
                 </p>
@@ -1169,9 +1156,6 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className={cn("px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300 relative", (isPeriodUpdating || isRefreshingPrices) ? "opacity-65" : "opacity-100")}>
-            {isRefreshingPrices && (
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 animate-pulse z-20" />
-            )}
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {analyticsFetching && !analytics ? (
                 <ReturnsChartSkeleton compact height={260} />
@@ -1275,6 +1259,7 @@ export function OverviewPage() {
             </div>
             <div className="flex items-baseline gap-2">
               <CardTitle>Posiciones en Cartera</CardTitle>
+              {isGlobalUpdating && <LoadingDot />}
               <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden sm:inline">
                 • Indicador azul = NAV actualizado
               </span>

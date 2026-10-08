@@ -30,12 +30,8 @@ export function Card({ children, className, glass = true, loading = false }: Car
           className
         )}
       >
-        {/* Subtle shine line at top or active loading shimmer */}
-        {loading ? (
-          <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-        ) : (
-          <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.06] to-transparent dark:via-white/[0.12] z-10" />
-        )}
+        {/* Subtle shine line at top */}
+        <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.06] to-transparent dark:via-white/[0.12] z-10" />
         {children}
       </div>
     </CardContext.Provider>
