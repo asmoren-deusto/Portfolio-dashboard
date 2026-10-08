@@ -31,7 +31,7 @@ export function HeaderActions({
 }: HeaderActionsProps) {
   const {
     theme, toggleTheme, privacyMode, togglePrivacyMode, currentUser, users, login, logout, period, setPeriod,
-    isRefreshingPrices, setIsRefreshingPrices, triggerRefreshAnimation
+    isRefreshingPrices, setIsRefreshingPrices, triggerRefreshAnimation, setNavAlertNotification
   } = useAppStore()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -44,13 +44,64 @@ export function HeaderActions({
     setRefreshSuccess(false)
     try {
       const userId = currentUser?.id || 'asier'
+      let refreshResult: any = null
       if (!currentUser?.isDemo) {
-        await refreshPortfolioPrices(userId)
+        refreshResult = await refreshPortfolioPrices(userId)
+      } else {
+        // Demo mode simulated response with realistic updated NAVs
+        refreshResult = {
+          status: 'ok',
+          count: 5,
+          updated_count: 2,
+          updated_items: [
+            {
+              isin: '0192#0011',
+              name: 'Indexa Más Rentabilidad Acciones EPSV',
+              broker: 'indexa',
+              price: 18.4523,
+              price_date: new Date().toISOString().split('T')[0],
+              previous_price: 18.3880,
+              previous_date: '2026-10-06',
+              diff: 0.0643,
+              diff_pct: 0.35,
+              is_updated: true,
+            },
+            {
+              isin: 'IE00BYX5NX33',
+              name: 'Fidelity MSCI World Index Fund EUR P Acc',
+              broker: 'myinvestor',
+              price: 42.152,
+              price_date: new Date().toISOString().split('T')[0],
+              previous_price: 42.203,
+              previous_date: '2026-10-06',
+              diff: -0.051,
+              diff_pct: -0.12,
+              is_updated: true,
+            }
+          ],
+          all_items: []
+        }
       }
+
       await queryClient.invalidateQueries()
       triggerRefreshAnimation()
       setRefreshSuccess(true)
       setTimeout(() => setRefreshSuccess(false), 3000)
+
+      if (refreshResult) {
+        const updatedItems = refreshResult.updated_items || []
+        const allItems = refreshResult.all_items || []
+        const totalCount = refreshResult.count || allItems.length || updatedItems.length
+
+        setNavAlertNotification({
+          id: String(Date.now()),
+          timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+          updatedCount: updatedItems.length,
+          totalCount,
+          items: updatedItems.length > 0 ? updatedItems : allItems.slice(0, 4),
+          allCheckedItems: allItems,
+        })
+      }
     } catch (err) {
       console.warn('Error fetching live NAVs:', err)
       await queryClient.invalidateQueries()

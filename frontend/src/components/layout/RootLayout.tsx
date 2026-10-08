@@ -8,6 +8,7 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { HeaderActions } from '@/components/layout/HeaderActions'
 import { Header } from '@/components/layout/Header'
 import { HeaderProvider } from '@/context/HeaderContext'
+import { NavUpdateAlertModal } from '@/components/common/NavUpdateAlertModal'
 
 export function RootLayout() {
   const location = useLocation()
@@ -140,6 +141,9 @@ export function RootLayout() {
             </ErrorBoundary>
           </main>
         </div>
+
+        {/* Global Floating NAV Update Alert Window */}
+        <NavUpdateAlertModal />
       </div>
     </HeaderProvider>
   )

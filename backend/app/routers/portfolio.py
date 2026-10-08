@@ -218,30 +218,80 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
     positions = calculate_positions(transactions)
     active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001 and not isin.startswith("TR_")}
 
+    # Read previous price cache before scraping to detect exact changes
+    prev_prices = {}
+    for isin in active.keys():
+        c_list = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(2).all()
+        if c_list:
+            prev_prices[isin] = {
+                "price": c_list[0].price,
+                "date": c_list[0].date,
+                "older_price": c_list[1].price if len(c_list) > 1 else None,
+                "older_date": c_list[1].date if len(c_list) > 1 else None,
+            }
+
     async def _fetch_one(isin, pos):
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
         p, p_date = await get_price_with_date(isin, ticker, db=db, force=True)
+        prev = prev_prices.get(isin, {})
+        prev_p = prev.get("price")
+        prev_d = prev.get("date")
+
+        is_updated = False
+        if p and p > 0:
+            if not prev_d:
+                is_updated = True
+            elif p_date and p_date > prev_d:
+                is_updated = True
+            elif prev_p and abs(p - prev_p) > 0.0001:
+                is_updated = True
+
+        # Base reference for diff
+        ref_p = prev_p if (prev_p and is_updated) else prev.get("older_price") or prev_p
+        ref_d = prev_d if (prev_d and is_updated) else prev.get("older_date") or prev_d
+
+        diff = round(p - ref_p, 4) if (p and ref_p and ref_p > 0) else 0.0
+        diff_pct = round((p - ref_p) / ref_p * 100, 2) if (p and ref_p and ref_p > 0) else 0.0
+
+        pos_txs = [t for t in transactions if t["isin"] == isin]
+        broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
+
         return isin, {
+            "isin": isin,
             "name": asset.name if asset else isin,
+            "broker": broker,
             "price": p,
             "price_date": p_date,
+            "previous_price": ref_p,
+            "previous_date": ref_d,
+            "is_updated": is_updated,
+            "diff": diff,
+            "diff_pct": diff_pct,
         }
 
     tasks = [_fetch_one(isin, pos) for isin, pos in active.items()]
     items = await asyncio.gather(*tasks, return_exceptions=True)
     results = {}
+    updated_items = []
+    all_items = []
     for res in items:
         if isinstance(res, tuple):
             isin_key, data = res
             results[isin_key] = data
+            all_items.append(data)
+            if data.get("is_updated"):
+                updated_items.append(data)
 
-    logger.info(f"Refreshed prices for {len(results)} assets: {results}")
+    logger.info(f"Refreshed prices for {len(results)} assets: {len(updated_items)} updated")
     return {
         "status": "ok",
         "updated_at": datetime.now().isoformat(),
         "count": len(results),
         "results": results,
+        "updated_count": len(updated_items),
+        "updated_items": updated_items,
+        "all_items": all_items,
     }
 
 

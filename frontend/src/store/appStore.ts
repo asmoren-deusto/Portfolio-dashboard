@@ -10,6 +10,28 @@ import { hashPassword, verifyPassword } from '@/lib/security'
 export type Period = '1mo' | '3mo' | '6mo' | '1y' | '2y' | '5y'
 export type Theme = 'light' | 'dark'
 
+export interface NavAlertItem {
+  isin: string
+  name: string
+  broker?: string
+  price: number
+  price_date: string
+  previous_price?: number
+  previous_date?: string
+  diff?: number
+  diff_pct?: number
+  is_updated?: boolean
+}
+
+export interface NavAlertNotification {
+  id: string
+  timestamp: string
+  updatedCount: number
+  totalCount: number
+  items: NavAlertItem[]
+  allCheckedItems?: NavAlertItem[]
+}
+
 interface AppState {
   // Period & Theme
   period: Period
@@ -39,6 +61,11 @@ interface AppState {
   setIsRefreshingPrices: (v: boolean) => void
   refreshAnimKey: number
   triggerRefreshAnimation: () => void
+
+  // NAV Update Alert Windows State
+  navAlertNotification: NavAlertNotification | null
+  setNavAlertNotification: (notif: NavAlertNotification | null) => void
+  clearNavAlertNotification: () => void
 
   // User & Authentication
   currentUser: UserProfile | null
@@ -218,6 +245,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   setIsRefreshingPrices: (isRefreshingPrices) => set({ isRefreshingPrices }),
   refreshAnimKey: 0,
   triggerRefreshAnimation: () => set((s) => ({ refreshAnimKey: s.refreshAnimKey + 1 })),
+
+  navAlertNotification: null,
+  setNavAlertNotification: (navAlertNotification) => set({ navAlertNotification }),
+  clearNavAlertNotification: () => set({ navAlertNotification: null }),
 
   // Auth State
   currentUser: initialUser,
