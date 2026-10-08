@@ -289,11 +289,41 @@ export function OverviewPage() {
     }
   }, [positions, allocMode])
 
+  // Latest reporting NAV date across active positions
+  const latestNavDate = useMemo(() => {
+    return positions.reduce((max, p) => {
+      const d = p.price_date || p.last_updated
+      return d && d > max ? d : max
+    }, '')
+  }, [positions])
+
+  const updatedPositionsCount = useMemo(() => {
+    if (!positions.length || !latestNavDate) return 0
+    return positions.filter((p) => (p.price_date || p.last_updated) === latestNavDate).length
+  }, [positions, latestNavDate])
+
   const shortTermMetrics = useMemo(() => {
     let dayPct = analytics?.return_1d
     let dayAmount: number | null = null
     let weekPct = analytics?.return_1w
     let weekAmount: number | null = null
+
+    // Compute exact daily change in euros and fallback percentage strictly from positions
+    // updated to the latest reporting NAV date (unupdated positions count as 0.00% today)
+    if (positions.length > 0) {
+      const totalDailyChange = positions.reduce((acc, p) => {
+        const pDate = p.price_date || p.last_updated
+        if (pDate && pDate === latestNavDate) {
+          return acc + (p.daily_change || 0) * (p.shares || 1)
+        }
+        return acc
+      }, 0)
+      const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
+      dayAmount = Math.round(totalDailyChange * 100) / 100
+      if (dayPct === undefined) {
+        dayPct = totalVal > 0 ? (totalDailyChange / (totalVal - totalDailyChange)) * 100 : 0
+      }
+    }
 
     if (performance && performance.length >= 2) {
       const sorted = [...performance]
@@ -302,13 +332,6 @@ export function OverviewPage() {
 
       if (sorted.length >= 2) {
         const last = sorted[sorted.length - 1]
-        const prevDay = sorted[sorted.length - 2]
-        const dayInflow = (last.invested ?? 0) - (prevDay.invested ?? 0)
-        const dProfit = (last.value - prevDay.value) - dayInflow
-        if (dayPct === undefined) {
-          dayPct = prevDay.value > 0 ? (dProfit / prevDay.value) * 100 : 0
-        }
-        dayAmount = dProfit
 
         // 7 days ago
         const weekIdx = Math.max(0, sorted.length - 1 - 7)
@@ -319,15 +342,6 @@ export function OverviewPage() {
           weekPct = weekPoint.value > 0 ? (wProfit / weekPoint.value) * 100 : 0
         }
         weekAmount = wProfit
-      }
-    }
-
-    if ((dayAmount === null || isNaN(dayAmount)) && positions.length > 0) {
-      const totalDailyChange = positions.reduce((acc, p) => acc + (p.daily_change || 0) * (p.shares || 1), 0)
-      const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
-      dayAmount = Math.round(totalDailyChange * 100) / 100
-      if (dayPct === undefined) {
-        dayPct = totalVal > 0 ? (totalDailyChange / (totalVal - totalDailyChange)) * 100 : 0
       }
     }
 
@@ -344,7 +358,7 @@ export function OverviewPage() {
       weekPct: weekPct !== undefined ? Number(weekPct.toFixed(2)) : undefined,
       weekAmount: weekAmount !== null && !isNaN(weekAmount) ? Math.round(weekAmount * 100) / 100 : undefined,
     }
-  }, [performance, analytics, positions, displaySummary])
+  }, [performance, analytics, positions, displaySummary, latestNavDate])
 
   const secondaryStats = useMemo(() => {
     if (secondaryChartMode === 'returns') {
@@ -488,7 +502,11 @@ export function OverviewPage() {
               )
             }
             sub={displaySummary ? `Aportado: ${fmt.currency(displaySummary.total_invested)}` : undefined}
-            tag={displaySummary ? `${displaySummary.num_positions ?? positions.length} pos.` : undefined}
+            tag={
+              displaySummary
+                ? `${displaySummary.num_positions ?? positions.length} pos. (act. ${updatedPositionsCount}/${displaySummary.num_positions ?? positions.length})`
+                : undefined
+            }
             tagColor="blue"
             borderAccent="blue"
             delay={0}
@@ -569,7 +587,7 @@ export function OverviewPage() {
                 {fmt.currency(displaySummary?.total_invested)}
               </div>
               <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-                {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos.
+                {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos. (act. {updatedPositionsCount}/{displaySummary?.num_positions ?? positions.length})
               </span>
             </div>
             </div>
@@ -1155,14 +1173,14 @@ export function OverviewPage() {
         </Card>
       </div>
 
-      {/* Mayores Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
+      {/* Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
       <Card className="w-full" delay={0.3}>
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
               <Layers className="w-4 h-4" />
             </div>
-            <CardTitle>Mayores Posiciones en Cartera</CardTitle>
+            <CardTitle>Posiciones en Cartera</CardTitle>
           </div>
 
           <Link

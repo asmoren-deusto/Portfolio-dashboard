@@ -44,6 +44,9 @@ export interface Analytics {
   max_drawdown: number
   sharpe_ratio: number
   return_1d?: number
+  updated_positions_count?: number
+  total_positions_count?: number
+  latest_nav_date?: string
   return_1w?: number
   return_ytd: number
   return_1m: number

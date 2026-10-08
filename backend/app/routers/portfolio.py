@@ -633,12 +633,25 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     series_for_returns = nav_series if nav_series and len(nav_series) >= 2 else value_series
     days_ytd = max(1, (datetime.now() - datetime(datetime.now().year, 1, 1)).days)
 
-    # Compute weighted daily return directly from active positions for exact 1D consistency
+    # Compute weighted daily return directly from active positions for exact 1D consistency.
+    # Funds that have NOT yet updated to the latest reporting NAV date compute with 0.00% daily change
+    # to avoid falsely attributing past days' returns to today's session.
+    all_dates = []
+    for isin in positions.keys():
+        c = db.query(PriceCache.date).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+        if c and c[0]:
+            all_dates.append(c[0])
+    latest_nav_date = max(all_dates) if all_dates else datetime.now().strftime("%Y-%m-%d")
+
     weighted_1d = 0.0
     active_val = 0.0
+    updated_positions_count = 0
+    total_positions_count = 0
+
     for isin, pos in positions.items():
         if pos.get("shares", 0) <= 0.0001:
             continue
+        total_positions_count += 1
         p = price_history.get(isin, [])
         pos_val = pos["shares"] * (p[-1]["price"] if p and p[-1].get("price") is not None and p[-1]["price"] >= 0 else pos.get("avg_cost", 0))
         active_val += pos_val
@@ -649,13 +662,17 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
                 distinct_cached.append(cp)
             if len(distinct_cached) >= 2:
                 break
-        asset_daily_pct = None
-        if len(distinct_cached) >= 2 and distinct_cached[1].price and distinct_cached[1].price > 0:
-            asset_daily_pct = (distinct_cached[0].price - distinct_cached[1].price) / distinct_cached[1].price * 100
-        elif len(p) >= 2 and p[-2].get("price", 0) > 0:
-            asset_daily_pct = (p[-1]["price"] - p[-2]["price"]) / p[-2]["price"] * 100
-        if asset_daily_pct is not None:
-            weighted_1d += pos_val * asset_daily_pct
+
+        # Only compute non-zero daily return if this fund has updated to the latest NAV date
+        asset_daily_pct = 0.0
+        if distinct_cached and distinct_cached[0].date == latest_nav_date:
+            updated_positions_count += 1
+            if len(distinct_cached) >= 2 and distinct_cached[1].price and distinct_cached[1].price > 0:
+                asset_daily_pct = (distinct_cached[0].price - distinct_cached[1].price) / distinct_cached[1].price * 100
+            elif len(p) >= 2 and p[-2].get("price", 0) > 0:
+                asset_daily_pct = (p[-1]["price"] - p[-2]["price"]) / p[-2]["price"] * 100
+
+        weighted_1d += pos_val * asset_daily_pct
 
     portfolio_daily_ret = round(weighted_1d / active_val, 2) if active_val > 0 else None
     ret_1d = portfolio_daily_ret if portfolio_daily_ret is not None else calculate_period_return(series_for_returns, 1)
@@ -672,6 +689,9 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         "max_drawdown": max_dd,
         "sharpe_ratio": sharpe,
         "return_1d": ret_1d,
+        "updated_positions_count": updated_positions_count,
+        "total_positions_count": total_positions_count,
+        "latest_nav_date": latest_nav_date,
         "return_1w": calculate_period_return(series_for_returns, 7),
         "return_ytd": calculate_period_return(series_for_returns, days_ytd),
         "return_1m": calculate_period_return(series_for_returns, 30),
