@@ -14,6 +14,7 @@ export interface MonthlyReturnsHeatmapProps {
   data?: PricePoint[]
   className?: string
   compact?: boolean
+  showStats?: boolean
   tableMaxHeight?: string
   isLoading?: boolean
 }
@@ -40,10 +41,19 @@ const FULL_MONTH_NAMES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ]
 
-export function MonthlyReturnsSkeleton({ compact = false, tableMaxHeight }: { compact?: boolean; tableMaxHeight?: string }) {
+export function MonthlyReturnsSkeleton({
+  compact = false,
+  showStats,
+  tableMaxHeight,
+}: {
+  compact?: boolean
+  showStats?: boolean
+  tableMaxHeight?: string
+}) {
+  const displayStats = showStats !== undefined ? showStats : !compact
   return (
     <div className="space-y-3.5 animate-pulse w-full">
-      {!compact && (
+      {displayStats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-[68px] rounded-xl bg-slate-100/90 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.05]" />
@@ -69,9 +79,12 @@ export function MonthlyReturnsHeatmap({
   data: propData,
   className,
   compact = false,
+  showStats,
   tableMaxHeight,
   isLoading: propLoading,
 }: MonthlyReturnsHeatmapProps) {
+  const displayStats = showStats !== undefined ? showStats : !compact
+
   // Fetch performance series starting from 2025 onwards (2025-01-01)
   const shouldFetchFrom2025 = !propData || propData.length < 150
   const {
@@ -241,7 +254,7 @@ export function MonthlyReturnsHeatmap({
 
   // 1. Loading Skeleton state
   if (isLoading) {
-    return <MonthlyReturnsSkeleton compact={compact} tableMaxHeight={tableMaxHeight} />
+    return <MonthlyReturnsSkeleton compact={compact} showStats={showStats} tableMaxHeight={tableMaxHeight} />
   }
 
   // 2. Error state with retry
@@ -274,7 +287,7 @@ export function MonthlyReturnsHeatmap({
   return (
     <div data-private className={cn("space-y-3.5", className)}>
       {/* Institutional Metric Highlights */}
-      {stats && !compact && (
+      {stats && displayStats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           <div className="p-3 rounded-xl bg-slate-50/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] flex items-center justify-between">
             <div>

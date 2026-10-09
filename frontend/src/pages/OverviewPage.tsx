@@ -936,22 +936,23 @@ export function OverviewPage() {
                   </div>
                 )
               ) : (
-                <div className="py-0.5 flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
-                  <MonthlyReturnsHeatmap compact tableMaxHeight="260px" />
+                <div className="py-0.5 flex-1 flex flex-col justify-center min-h-0">
+                  <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="260px" />
                 </div>
               )}
             </div>
 
-            {/* Shared Milestone Strip for BOTH Curva and Matriz Mensual at the EXACT same footer */}
-            {isPeriodUpdating ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0 animate-pulse">
-                <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
-                <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
-                <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
-                <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
-              </div>
-            ) : perfMetrics && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+            {/* Milestone Strip: sólo para vista Curva de evolución */}
+            {chartView === 'evolution' && (
+              isPeriodUpdating ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0 animate-pulse">
+                  <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                  <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                  <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                  <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
+                </div>
+              ) : perfMetrics ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
                 {/* Max Peak */}
                 <div
                   className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
@@ -1045,7 +1046,7 @@ export function OverviewPage() {
                   </div>
                 </div>
               </div>
-            )}
+            ) : null)}
           </div>
         </Card>
 
