@@ -249,7 +249,7 @@ export function TransactionsPage() {
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all shadow-sm shadow-blue-500/20 active:scale-95 shrink-0"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white text-xs font-semibold transition-all shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-95 shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Nueva Operación</span>
@@ -575,7 +575,7 @@ function AddTransactionModal({
                   onClick={() => setType(t.id as any)}
                   className={`py-2 text-center rounded-xl font-semibold transition-all border ${
                     type === t.id
-                      ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/20'
+                      ? 'bg-slate-900 text-white border-slate-900 dark:bg-[#333333] dark:text-white dark:border-white/15 shadow-xs'
                       : 'bg-slate-50 dark:bg-[#252526] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/20'
                   }`}
                 >
@@ -685,7 +685,7 @@ function AddTransactionModal({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all shadow-md shadow-blue-500/20 active:scale-95"
+              className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white font-semibold transition-all shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-95"
             >
               Guardar Operación
             </button>
@@ -897,7 +897,7 @@ function ImportExtractoModal({
                 <button
                   type="submit"
                   disabled={isProcessing || !pastedText.trim()}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white font-semibold transition-all shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
                 >
                   {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{isProcessing ? 'Procesando...' : 'Importar Operaciones'}</span>

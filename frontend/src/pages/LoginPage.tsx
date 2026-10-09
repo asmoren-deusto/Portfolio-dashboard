@@ -622,7 +622,7 @@ export const LoginPage: React.FC = () => {
                         {/* Submit button: unlock icon on the left */}
                         <button
                           type="submit"
-                          className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                          className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white font-bold text-xs uppercase tracking-wider shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                         >
                           <Unlock size={15} />
                           <span>Desbloquear Cartera</span>
@@ -702,7 +702,7 @@ export const LoginPage: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full mt-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                  className="w-full mt-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white font-bold text-xs uppercase tracking-wider shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                 >
                   <Unlock size={15} />
                   <span>Iniciar Sesión</span>

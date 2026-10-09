@@ -444,7 +444,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                 href={`https://www.morningstar.es/es/funds/snapshot/snapshot.aspx?id=${position.isin}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition-all shadow-md shadow-blue-600/20 active:scale-95"
+                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white font-medium text-xs transition-all shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-95"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 Ficha en Morningstar
