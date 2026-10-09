@@ -72,29 +72,32 @@ export function MonthlyReturnsHeatmap({
   tableMaxHeight,
   isLoading: propLoading,
 }: MonthlyReturnsHeatmapProps) {
-  // If data is not provided or if propData has less than 150 points (~6 months), fetch full 5y historical series to guarantee a complete matrix
-  const shouldFetch5y = !propData || propData.length < 150
+  // Fetch performance series starting from 2025 onwards (2025-01-01)
+  const shouldFetchFrom2025 = !propData || propData.length < 150
   const {
     data: fetchedData = [],
     isLoading: isQueryLoading,
     isFetching: isQueryFetching,
     isError,
     refetch,
-  } = usePerformance(shouldFetch5y ? '5y' : undefined)
+  } = usePerformance(
+    shouldFetchFrom2025 ? '2y' : undefined,
+    shouldFetchFrom2025 ? '2025-01-01' : undefined
+  )
 
   const rawData = propData && propData.length >= 150 ? propData : fetchedData
   const isLoading = propLoading !== undefined
     ? propLoading
-    : (shouldFetch5y ? (isQueryLoading || (rawData.length === 0 && isQueryFetching)) : false)
+    : (shouldFetchFrom2025 ? (isQueryLoading || (rawData.length === 0 && isQueryFetching)) : false)
 
   const { rows, stats } = useMemo(() => {
     if (!rawData || rawData.length < 2) {
       return { rows: [], stats: null }
     }
 
-    // Sort chronologically
+    // Sort chronologically and ensure only data from 2025 onwards is evaluated
     const sorted = [...rawData]
-      .filter(p => p && p.date && typeof p.value === 'number')
+      .filter(p => p && p.date && p.date >= '2025-01-01' && typeof p.value === 'number')
       .sort((a, b) => a.date.localeCompare(b.date))
 
     if (sorted.length < 2) {
@@ -142,6 +145,7 @@ export function MonthlyReturnsHeatmap({
 
     const years = Object.keys(yearMonthDailyRets)
       .map(Number)
+      .filter((y) => y >= 2025)
       .sort((a, b) => b - a) // Descending: newest year first
 
     for (const year of years) {

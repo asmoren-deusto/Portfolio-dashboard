@@ -131,24 +131,31 @@ export function usePositions() {
 }
 
 // ── Performance ────────────────────────────────────────────────────────────────
-export function usePerformance(overridePeriod?: Period | 'all' | '5y' | 'max') {
+export function usePerformance(
+  overridePeriod?: Period | 'all' | '5y' | 'max',
+  startDate?: string
+) {
   const { useMock, period: storePeriod, selectedBroker, currentUser } = useAppStore()
   const period = overridePeriod || storePeriod
   const isDemo = Boolean(useMock || currentUser?.isDemo)
   const userPerf = currentUser?.performance ?? MOCK_PERFORMANCE
-  const userPoints = demoScale(
+  let userPoints = demoScale(
     userPerf[period] ?? (period === '5y' || period === 'all' || period === 'max' ? (userPerf['5y'] ?? userPerf['max']) : (userPerf['1y'] ?? [])),
     currentUser?.positions ?? MOCK_POSITIONS,
     selectedBroker
   )
+  if (startDate) {
+    userPoints = userPoints.filter((p) => p.date >= startDate)
+  }
   const brokerQuery = selectedBroker !== 'all' ? `&broker=${selectedBroker}` : ''
+  const startQuery = startDate ? `&start_date=${startDate}` : ''
 
   return useQuery<PricePoint[]>({
-    queryKey: ['performance', currentUser?.id, period, selectedBroker],
+    queryKey: ['performance', currentUser?.id, period, selectedBroker, startDate],
     queryFn: (): Promise<PricePoint[]> =>
       isDemo
         ? Promise.resolve(userPoints)
-        : get<PricePoint[]>(`/portfolio/performance?period=${period}${brokerQuery}`),
+        : get<PricePoint[]>(`/portfolio/performance?period=${period}${startQuery}${brokerQuery}`),
     initialData: isDemo ? userPoints : undefined,
     placeholderData: keepSameUser(currentUser?.id),
     staleTime: isDemo ? 1000 * 60 * 5 : 1000 * 60 * 2,

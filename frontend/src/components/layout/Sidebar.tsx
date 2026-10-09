@@ -27,9 +27,9 @@ const NAV = [
   { to: '/transactions', icon: List, label: 'Operaciones' },
 ]
 
-interface SidebarProps {}
+interface SidebarProps { }
 
-export function Sidebar({}: SidebarProps) {
+export function Sidebar({ }: SidebarProps) {
   const {
     theme,
     setTheme,
@@ -72,14 +72,14 @@ export function Sidebar({}: SidebarProps) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#161616] transition-transform duration-300 ease-in-out shadow-lg',
+          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#1c1c1c] transition-transform duration-300 ease-in-out shadow-lg',
           sidebarCollapsed
             ? mobileSidebarOpen
               ? 'translate-x-0'
               : '-translate-x-full'
             : mobileSidebarOpen
-            ? 'translate-x-0'
-            : '-translate-x-full md:translate-x-0 md:shadow-none'
+              ? 'translate-x-0'
+              : '-translate-x-full md:translate-x-0 md:shadow-none'
         )}
       >
         {/* Logo & Close / Collapse Button (v2.5 removed to eliminate collision with X and redundancy) */}
