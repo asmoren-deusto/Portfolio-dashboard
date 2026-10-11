@@ -49,7 +49,7 @@ STOCK_UNIVERSE = [
     {"ticker": "COST",   "name": "Costco",             "domain": "costco.com",         "sector": "Consumo",       "index": ["SP500","NASDAQ100"], "default_market_cap": 410000000000},
     {"ticker": "HD",     "name": "Home Depot",         "domain": "homedepot.com",      "sector": "Consumo",       "index": ["SP500"],             "default_market_cap": 390000000000},
     {"ticker": "PG",     "name": "Procter & Gamble",   "domain": "pg.com",             "sector": "Consumo",       "index": ["SP500"],             "default_market_cap": 380000000000},
-    {"ticker": "LVMH.PA","name": "LVMH",              "domain": "lvmh.com",           "sector": "Consumo",       "index": ["CAC40"],             "default_market_cap": 350000000000},
+    {"ticker": "MC.PA",  "name": "LVMH",              "domain": "lvmh.com",           "sector": "Consumo",       "index": ["CAC40"],             "default_market_cap": 350000000000},
     {"ticker": "KO",     "name": "Coca-Cola",          "domain": "coca-colacompany.com","sector": "Consumo",      "index": ["SP500"],             "default_market_cap": 280000000000},
     {"ticker": "PEP",    "name": "PepsiCo",            "domain": "pepsico.com",        "sector": "Consumo",       "index": ["SP500","NASDAQ100"], "default_market_cap": 210000000000},
     {"ticker": "MCD",    "name": "McDonald's",         "domain": "mcdonalds.com",      "sector": "Consumo",       "index": ["SP500"],             "default_market_cap": 210000000000},
@@ -383,57 +383,37 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         market_cap    = getattr(fi, "market_cap", None)
         currency      = getattr(fi, "currency", "USD")
 
-        # Extended hours prices from .info (slower but richer)
+        # Extended hours prices & fallback via fast chart quote
         pre_price  = None
         post_price = None
-        market_state = get_market_session_for_ticker(ticker)
-        try:
-            info = t.info
-            pre_price    = info.get("preMarketPrice")
-            post_price   = info.get("postMarketPrice")
-            # Official previous close and price from quote
-            inf_prev = info.get("regularMarketPreviousClose") or info.get("previousClose")
-            if inf_prev:
-                prev_close = inf_prev
-            inf_reg = info.get("regularMarketPrice") or info.get("currentPrice")
-            if inf_reg:
-                regular_price = inf_reg
-
-            if not regular_price:
-                regular_price = getattr(fi, "last_price", None)
-            if not prev_close:
-                prev_close = getattr(fi, "previous_close", None)
-            if not day_high:
-                day_high = info.get("dayHigh") or info.get("regularMarketDayHigh")
-            if not day_low:
-                day_low = info.get("dayLow") or info.get("regularMarketDayLow")
-            if not volume:
-                volume = info.get("volume") or info.get("regularMarketVolume")
-            if not market_cap:
-                market_cap = info.get("marketCap")
-            if not currency:
-                currency = info.get("currency", "USD")
-        except Exception:
-            pass
-
-        # Pre/post change figures from Yahoo (already returned as percentages, e.g. 0.22 = +0.22%)
         pre_chg_pct  = None
         post_chg_pct = None
-        try:
-            raw_pre  = info.get("preMarketChangePercent")
-            raw_post = info.get("postMarketChangePercent")
-            if raw_pre is not None:
-                pre_chg_pct = round(raw_pre, 2)
-            if raw_post is not None:
-                post_chg_pct = round(raw_post, 2)
-        except Exception:
-            pass
+        market_state = get_market_session_for_ticker(ticker)
 
-        # Compute pre/post change percent if price is available but percent wasn't returned
-        if pre_price and regular_price and regular_price > 0 and pre_chg_pct is None:
-            pre_chg_pct = round((pre_price - regular_price) / regular_price * 100, 2)
-        if post_price and regular_price and regular_price > 0 and post_chg_pct is None:
-            post_chg_pct = round((post_price - regular_price) / regular_price * 100, 2)
+        # If regular price is missing or market is PRE/POST, use fast chart quote fallback
+        if regular_price is None or market_state in ("PRE", "POST", "POSTPOST"):
+            chart_q = _fetch_yahoo_chart_quote(ticker)
+            if chart_q:
+                if regular_price is None:
+                    regular_price = chart_q.get("regular_price")
+                if not prev_close:
+                    prev_close = chart_q.get("prev_close")
+                if not day_high:
+                    day_high = chart_q.get("day_high")
+                if not day_low:
+                    day_low = chart_q.get("day_low")
+                if not volume:
+                    volume = chart_q.get("volume")
+                if not market_cap:
+                    market_cap = chart_q.get("market_cap")
+                if not currency:
+                    currency = chart_q.get("currency")
+                if market_state == "PRE":
+                    pre_price = chart_q.get("pre_market_price")
+                    pre_chg_pct = chart_q.get("pre_market_change_pct")
+                elif market_state in ("POST", "POSTPOST"):
+                    post_price = chart_q.get("post_market_price")
+                    post_chg_pct = chart_q.get("post_market_change_pct")
 
         # Choose the most current price based on the active physical market state
         if market_state == "PRE":

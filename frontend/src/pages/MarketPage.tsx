@@ -229,7 +229,22 @@ export const MarketPage: React.FC = () => {
   const worstStock = stats?.worstStock
 
   return (
-    <div className="space-y-4 pb-8">
+    <div className="space-y-4 pb-8 relative">
+      {/* Sleek Global Loading / Fetching Progress Bar */}
+      <AnimatePresence>
+        {(isLoading || isFetching) && (
+          <motion.div
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed top-0 left-0 right-0 z-50 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 shadow-[0_0_12px_rgba(99,102,241,0.8)] origin-left"
+          >
+            <div className="w-full h-full bg-white/30 animate-pulse" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Real-time Ticker Bar */}
       <MarketTicker onSelectStock={setSelectedStock} />
 
