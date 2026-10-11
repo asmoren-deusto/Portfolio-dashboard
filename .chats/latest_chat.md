@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 21:07:27
+- **Fecha de exportación:** 2026-10-11 21:08:35
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 84
+- **Total de interacciones registradas:** 86
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1323,6 +1323,33 @@ revisa la carga de datos, parece que algunos estan fallando y que es muy lenta. 
 ---
 
 ### 👤 Usuario (2026-10-11 19:01:39)
+
+15px menos de altura
+
+---
+
+### 🤖 Asistente (2026-10-11 19:07:30)
+
+He aplicado la reducción de **15px** y las mejoras de rendimiento y feedback visual solicitadas:
+
+1. **Ajuste de altura (-15px)**:
+   - Contenedor de la gráfica interactiva TradingView ajustado en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx) de `350px` a `335px` (`315px` en pantallas móviles).
+   - Altura máxima de la tabla de desglose (*Por Fondos* y *ETFs Agrupados*) reducida de `470px` a `455px`, manteniendo la alineación entre la columna izquierda y derecha.
+
+2. **Optimización en la carga de datos**:
+   - Corrección del ticker de Euronext París de LVMH a `MC.PA` (evitando fallos 404).
+   - Eliminación de llamadas síncronas bloqueantes a perfiles de empresa en Yahoo Finance (`fast_info` + fallback ligero de gráficos), evitando el *rate limit* 429 y reduciendo drásticamente el tiempo de respuesta.
+
+3. **Barras de progreso**:
+   - Barra con degradado animado y brillo (*glow*) en el borde superior de la tarjeta durante actualizaciones en directo.
+   - Barra superior global en la página de mercado en [MarketPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/MarketPage.tsx) para cambios de pestaña o refrescos.
+
+4. **Release y Sincronización**:
+   - Cambios integrados, verificados y publicados bajo la versión **v2.7.56** mediante el protocolo de [AGENTS.md](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/AGENTS.md).
+
+---
+
+### 👤 Usuario (2026-10-11 19:06:34)
 
 15px menos de altura
 
