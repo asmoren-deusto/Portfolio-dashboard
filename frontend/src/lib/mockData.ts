@@ -364,11 +364,20 @@ export function generateRealisticPerformanceSeries(
     const invBase = startVal * 0.85
     const invEnd = endVal * 0.84
     const invVal = Math.round((invBase + (invEnd - invBase) * (t / days)) * 100) / 100
+    const totalVal = finalValues[t]
+    const kVal = Math.round(totalVal * 0.48 * 100) / 100
+    const sVal = Math.round(totalVal * 0.32 * 100) / 100
+    const trVal = Math.round((totalVal - kVal - sVal) * 100) / 100
     points.push({
       date: dates[t],
-      value: finalValues[t],
-      price: finalValues[t],
+      value: totalVal,
+      price: totalVal,
       invested: invVal,
+      brokers: {
+        kutxabank: { value: kVal, invested: Math.round(invVal * 0.48 * 100) / 100 },
+        scalable: { value: sVal, invested: Math.round(invVal * 0.32 * 100) / 100 },
+        traderepublic: { value: trVal, invested: Math.round(invVal * 0.20 * 100) / 100 },
+      },
     })
   }
 

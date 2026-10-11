@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 19:21:51
+- **Fecha de exportación:** 2026-10-11 19:32:30
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 53
+- **Total de interacciones registradas:** 55
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -909,5 +909,21 @@ Los cambios ya están sincronizados y subidos al repositorio.
 ### 👤 Usuario (2026-10-11 17:19:36)
 
 quita el selector de picos
+
+---
+
+### 🤖 Asistente (2026-10-11 17:21:53)
+
+Se ha eliminado el selector de **Picos** y los marcadores de máximos/mínimos en la gráfica de evolución:
+
+1. **Cabecera simplificada**: Eliminado el botón selector `Picos` de la barra superior de herramientas en [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx), dejando únicamente los controles esenciales (`€ / %`, línea de `Aportado` y vista `Curva / Matriz Mensual`).
+2. **Gráfica limpia**: Se ha configurado `showMilestones={false}` por defecto en [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) para que no se superpongan flechas ni etiquetas sobre las curvas acumuladas.
+3. **Versión y despliegue**: Sincronizado y publicado en el repositorio bajo la versión **`v2.7.41`**.
+
+---
+
+### 👤 Usuario (2026-10-11 17:21:52)
+
+muestra en el eje y en color los valores parciales de las entidades, como el total y el aportado
 
 ---

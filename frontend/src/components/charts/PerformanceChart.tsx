@@ -72,10 +72,46 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
     badgeBorder: 'border-amber-500/30',
   },
+  kutxabank: {
+    id: 'kutxabank',
+    label: 'Kutxabank',
+    color: '#f43f5e', // rose
+    topColorDark: 'rgba(244, 63, 94, 0.52)',
+    topColorLight: 'rgba(244, 63, 94, 0.38)',
+    bottomColorDark: 'rgba(244, 63, 94, 0.28)',
+    bottomColorLight: 'rgba(244, 63, 94, 0.18)',
+    textColor: 'text-rose-600 dark:text-rose-400',
+    badgeBg: 'bg-rose-500/10 dark:bg-rose-500/20',
+    badgeBorder: 'border-rose-500/30',
+  },
+  traderepublic: {
+    id: 'traderepublic',
+    label: 'Trade Republic',
+    color: '#8b5cf6', // violet
+    topColorDark: 'rgba(139, 92, 246, 0.52)',
+    topColorLight: 'rgba(139, 92, 246, 0.38)',
+    bottomColorDark: 'rgba(139, 92, 246, 0.28)',
+    bottomColorLight: 'rgba(139, 92, 246, 0.18)',
+    textColor: 'text-violet-600 dark:text-violet-400',
+    badgeBg: 'bg-violet-500/10 dark:bg-violet-500/20',
+    badgeBorder: 'border-violet-500/30',
+  },
+  scalable: {
+    id: 'scalable',
+    label: 'Scalable Capital',
+    color: '#06b6d4', // cyan
+    topColorDark: 'rgba(6, 182, 212, 0.52)',
+    topColorLight: 'rgba(6, 182, 212, 0.38)',
+    bottomColorDark: 'rgba(6, 182, 212, 0.28)',
+    bottomColorLight: 'rgba(6, 182, 212, 0.18)',
+    textColor: 'text-cyan-600 dark:text-cyan-400',
+    badgeBg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
+    badgeBorder: 'border-cyan-500/30',
+  },
 }
 
-// Canonical stacking order from bottom to top: Indexa on bottom, BBVA in middle, MyInvestor on top
-const CANONICAL_ORDER = ['indexa', 'bbva', 'myinvestor']
+// Canonical stacking order from bottom to top
+const CANONICAL_ORDER = ['indexa', 'bbva', 'kutxabank', 'traderepublic', 'scalable', 'myinvestor']
 
 interface PerformanceChartProps {
   data: PricePoint[]
@@ -119,6 +155,7 @@ export function PerformanceChart({
   const investedSeriesRef = useRef<any>(null)
   const markersRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
+  const entityPriceLinesRef = useRef<IPriceLine[]>([])
 
   const { theme } = useAppStore()
   const isDark = theme === 'dark'
@@ -419,6 +456,7 @@ export function PerformanceChart({
       investedSeriesRef.current = null
       markersRef.current = null
       zeroPriceLineRef.current = null
+      entityPriceLinesRef.current = []
     }
   }, [height, isDark])
 
@@ -443,6 +481,16 @@ export function PerformanceChart({
             slot2.removePriceLine(zeroPriceLineRef.current)
           } catch {}
           zeroPriceLineRef.current = null
+        }
+
+        // Clean up entity price lines before re-creating
+        if (entityPriceLinesRef.current.length > 0 && slot2) {
+          entityPriceLinesRef.current.forEach(pl => {
+            try {
+              slot2.removePriceLine(pl)
+            } catch {}
+          })
+          entityPriceLinesRef.current = []
         }
 
         if (n === 3) {
@@ -491,6 +539,17 @@ export function PerformanceChart({
             topColor: isDark ? cfg2.topColorDark : cfg2.topColorLight,
             bottomColor: isDark ? cfg2.bottomColorDark : cfg2.bottomColorLight,
             lastValueVisible: true, // ONLY the total shows on right axis
+            autoscaleInfoProvider: (original: any) => {
+              const res = original()
+              if (!res) return null
+              return {
+                priceRange: {
+                  minValue: 0,
+                  maxValue: res.priceRange.maxValue,
+                },
+                margins: res.margins,
+              }
+            },
           })
         } else if (n === 2) {
           // Bottom layer: activeStackList[0]
@@ -522,6 +581,17 @@ export function PerformanceChart({
             topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
             bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
             lastValueVisible: true,
+            autoscaleInfoProvider: (original: any) => {
+              const res = original()
+              if (!res) return null
+              return {
+                priceRange: {
+                  minValue: 0,
+                  maxValue: res.priceRange.maxValue,
+                },
+                margins: res.margins,
+              }
+            },
           })
         } else if (n === 1) {
           slot0.applyOptions({ visible: false })
@@ -538,6 +608,41 @@ export function PerformanceChart({
             topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
             bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
             lastValueVisible: true,
+            autoscaleInfoProvider: (original: any) => {
+              const res = original()
+              if (!res) return null
+              return {
+                priceRange: {
+                  minValue: 0,
+                  maxValue: res.priceRange.maxValue,
+                },
+                margins: res.margins,
+              }
+            },
+          })
+        } else {
+          slot0.applyOptions({ visible: false })
+          slot1.applyOptions({ visible: false })
+
+          const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+          slot2.setData(pts2)
+          slot2.applyOptions({
+            visible: true,
+            lineColor: '#2563eb',
+            topColor: isDark ? 'rgba(37, 99, 235, 0.42)' : 'rgba(37, 99, 235, 0.28)',
+            bottomColor: isDark ? 'rgba(37, 99, 235, 0.20)' : 'rgba(37, 99, 235, 0.12)',
+            lastValueVisible: true,
+            autoscaleInfoProvider: (original: any) => {
+              const res = original()
+              if (!res) return null
+              return {
+                priceRange: {
+                  minValue: 0,
+                  maxValue: res.priceRange.maxValue,
+                },
+                margins: res.margins,
+              }
+            },
           })
         }
 
@@ -578,10 +683,52 @@ export function PerformanceChart({
             markersRef.current.setMarkers([])
           }
         }
+
+        // Colored Entity Partial Value Badges on Y-Axis
+        const latestPoint = data && data.length > 0 ? data[data.length - 1] : null
+        if (latestPoint?.brokers && slot2 && n > 1) {
+          const newPriceLines: IPriceLine[] = []
+          activeStackList.forEach(b => {
+            const bVal = latestPoint.brokers?.[b]?.value ?? 0
+            if (bVal > 0) {
+              const cfg = ENTITY_CONFIGS[b] || {
+                color: '#64748b',
+                label: b,
+              }
+              try {
+                const pl = slot2.createPriceLine({
+                  price: bVal,
+                  color: cfg.color,
+                  lineWidth: 1,
+                  lineStyle: LineStyle.Dotted,
+                  lineVisible: false,
+                  axisLabelVisible: true,
+                  axisLabelColor: cfg.color,
+                  axisLabelTextColor: '#ffffff',
+                  title: '',
+                })
+                newPriceLines.push(pl)
+              } catch (e) {
+                console.warn('Error creating entity price line', e)
+              }
+            }
+          })
+          entityPriceLinesRef.current = newPriceLines
+        }
       } else {
         // Percent Mode
         slot0.applyOptions({ visible: false })
         slot1.applyOptions({ visible: false })
+
+        // Clean up entity price lines in percent mode
+        if (entityPriceLinesRef.current.length > 0 && slot2) {
+          entityPriceLinesRef.current.forEach(pl => {
+            try {
+              slot2.removePriceLine(pl)
+            } catch {}
+          })
+          entityPriceLinesRef.current = []
+        }
 
         const baseVal = metrics.first.value
         const baseInv = metrics.first.invested
@@ -606,6 +753,7 @@ export function PerformanceChart({
           topColor: topGrad,
           bottomColor: isPositive ? 'rgba(16, 185, 129, 0.01)' : 'rgba(244, 63, 94, 0.01)',
           lastValueVisible: true,
+          autoscaleInfoProvider: undefined,
           priceFormat: {
             type: 'custom',
             formatter: (p: number) => `${p >= 0 ? '+' : ''}${p.toFixed(2)}%`,
