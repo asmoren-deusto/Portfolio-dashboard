@@ -604,153 +604,204 @@ export const SimulatedPortfolioCard: React.FC = () => {
 
             {/* TAB 1: Desglose por Fondos en Cartera */}
             {activeTab === 'funds' && (
-              <div className="overflow-y-auto max-h-[305px] pr-1 divide-y divide-slate-100 dark:divide-white/[0.05]">
-                {holdings.map((h) => {
-                  const etfInfo = ETF_INFO_MAP[h.etf_ticker]
-                  const displayName = etfInfo?.name || h.etf_desc || h.etf_name || h.etf_ticker
-                  const isEtfPos = (h.etf_change_pct ?? 0) >= 0
-                  const isGainPos = (h.simulated_gain_amount ?? 0) >= 0
+              <div className="overflow-x-auto overflow-y-auto max-h-[305px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
+                    <tr>
+                      <th className="py-2 px-3">ETF Réplica / Fondo Asignado</th>
+                      <th className="py-2 px-2 text-center">Entidad</th>
+                      <th className="py-2 px-2 text-right">Valor Cartera</th>
+                      <th className="py-2 px-2 text-right">Peso</th>
+                      <th className="py-2 px-2.5 text-right">Cotiz. ETF</th>
+                      <th className="py-2 px-3 text-right">Impacto Hoy</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
+                    {holdings.map((h) => {
+                      const etfInfo = ETF_INFO_MAP[h.etf_ticker]
+                      const displayName = etfInfo?.name || h.etf_desc || h.etf_name || h.etf_ticker
+                      const isEtfPos = (h.etf_change_pct ?? 0) >= 0
+                      const isGainPos = (h.simulated_gain_amount ?? 0) >= 0
 
-                  return (
-                    <div
-                      key={h.isin}
-                      className="py-2.5 px-2 hover:bg-slate-100/70 dark:hover:bg-white/[0.03] rounded-xl transition-colors flex items-center justify-between gap-3 group"
-                    >
-                      {/* Left: Prominent ETF Name + Ticker badge + Replicated Fund name */}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {/* HIGHLIGHTED ETF NAME: Big, clear, legible */}
-                          <span
-                            className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[260px] sm:max-w-[320px]"
-                            title={displayName}
-                          >
-                            {displayName}
-                          </span>
-
-                          {/* Secondary subtle ticker badge */}
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
-                            {h.etf_ticker}
-                          </span>
-
-                          {/* Matching broker badge with unified colored dot */}
-                          <BrokerBadge broker={h.broker} className="scale-90 origin-left" />
-                        </div>
-
-                        {/* Replicated fund name */}
-                        <p
-                          className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium"
-                          title={h.fund_name}
+                      return (
+                        <tr
+                          key={h.isin}
+                          className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                         >
-                          {h.fund_name}
-                        </p>
-                      </div>
+                          {/* ETF Name, Ticker badge and Fund name */}
+                          <td className="py-2.5 px-3">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span
+                                className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[210px]"
+                                title={displayName}
+                              >
+                                {displayName}
+                              </span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
+                                {h.etf_ticker}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[240px] mt-0.5 font-medium" title={h.fund_name}>
+                              {h.fund_name}
+                            </div>
+                          </td>
 
-                      {/* Middle: Portfolio Weight & Progress Bar */}
-                      <div className="text-right shrink-0 min-w-[55px] hidden sm:block">
-                        <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
-                          {h.weight.toFixed(1)}%
-                        </span>
-                        <div className="w-12 h-1.5 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-1">
-                          <div
-                            className="h-full rounded-full bg-indigo-500"
-                            style={{ width: `${Math.min(100, (h.weight / 35) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
+                          {/* Broker badge */}
+                          <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                            <BrokerBadge broker={h.broker} />
+                          </td>
 
-                      {/* Right: Live Quote Change % & Estimated Impact € */}
-                      <div className="text-right shrink-0 min-w-[85px]">
-                        <div
-                          className={cn(
-                            'font-mono font-bold text-xs',
-                            isEtfPos
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-rose-600 dark:text-rose-400'
-                          )}
-                        >
-                          {isEtfPos ? '+' : ''}
-                          {h.etf_change_pct?.toFixed(2)}%
-                        </div>
-                        <div
-                          className={cn(
-                            'font-mono text-[11px] font-semibold mt-0.5',
-                            isGainPos
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-rose-600 dark:text-rose-400'
-                          )}
-                        >
-                          {isGainPos ? '+' : ''}
-                          {fmt.currency(h.simulated_gain_amount ?? 0)}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
+                          {/* Fund Value in Portfolio */}
+                          <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                            <div className="font-mono font-bold text-xs text-slate-900 dark:text-white">
+                              {fmt.currency(h.fund_value)}
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-mono">
+                              {fmt.num(h.shares, 2)} part.
+                            </div>
+                          </td>
+
+                          {/* Weight */}
+                          <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                            <div className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
+                              {h.weight.toFixed(1)}%
+                            </div>
+                            <div className="w-12 h-1 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-1">
+                              <div
+                                className="h-full rounded-full bg-indigo-500"
+                                style={{ width: `${Math.min(100, (h.weight / 35) * 100)}%` }}
+                              />
+                            </div>
+                          </td>
+
+                          {/* Live ETF Quote Price and Daily % */}
+                          <td className="py-2.5 px-2.5 text-right whitespace-nowrap">
+                            <div className={cn('font-mono font-bold text-xs', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                              {isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%
+                            </div>
+                            {h.etf_price && (
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                                {fmt.currency(h.etf_price, 'USD')}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Estimated Impact in € */}
+                          <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                            <span
+                              className={cn(
+                                'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
+                                isGainPos
+                                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                                  : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                              )}
+                            >
+                              {isGainPos ? '+' : ''}{fmt.currency(h.simulated_gain_amount ?? 0)}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
 
             {/* TAB 2: Resumen Ponderado por ETFs Réplica */}
             {activeTab === 'etfs' && (
-              <div className="overflow-y-auto max-h-[305px] pr-1 divide-y divide-slate-100 dark:divide-white/[0.05]">
-                {etfs.map((etf) => {
-                  const info = ETF_INFO_MAP[etf.ticker]
-                  const displayName = info?.name || etf.name || etf.ticker
-                  const isPos = (etf.change_pct ?? 0) >= 0
+              <div className="overflow-x-auto overflow-y-auto max-h-[305px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
+                    <tr>
+                      <th className="py-2 px-3">ETF Réplica / Mercado</th>
+                      <th className="py-2 px-2 text-right">Cotiz. en Vivo</th>
+                      <th className="py-2 px-2 text-right">Var. Día</th>
+                      <th className="py-2 px-2 text-right">Peso Cartera</th>
+                      <th className="py-2 px-2 text-right">Capital Replicado</th>
+                      <th className="py-2 px-3 text-right">Impacto Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
+                    {etfs.map((etf) => {
+                      const info = ETF_INFO_MAP[etf.ticker]
+                      const displayName = info?.name || etf.name || etf.ticker
+                      const isPos = (etf.change_pct ?? 0) >= 0
+                      const replicatedVal = (summary?.total_value ?? 0) * (etf.weight / 100)
+                      const totalImpact = replicatedVal * ((etf.change_pct ?? 0) / 100)
+                      const isImpactPos = totalImpact >= 0
 
-                  return (
-                    <div
-                      key={etf.ticker}
-                      className="py-2.5 px-2 hover:bg-slate-100/70 dark:hover:bg-white/[0.03] rounded-xl transition-colors flex items-center justify-between gap-3 group"
-                    >
-                      {/* Left: Prominent Name + Ticker badge + Category */}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span
-                            className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[260px] sm:max-w-[340px]"
-                            title={displayName}
-                          >
-                            {displayName}
-                          </span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
-                            {etf.ticker}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
-                          {info?.category || 'Renta Variable'}
-                          {etf.price ? ` • Cotiz: ${fmt.currency(etf.price, etf.currency)}` : ''}
-                        </p>
-                      </div>
-
-                      {/* Middle: Relative Weight in Portfolio */}
-                      <div className="text-right shrink-0 min-w-[70px]">
-                        <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
-                          {etf.weight}%
-                        </span>
-                        <div className="w-14 h-1.5 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-1">
-                          <div
-                            className="h-full rounded-full bg-indigo-500"
-                            style={{ width: `${Math.min(100, (etf.weight / 35) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Right: Live Quote Change */}
-                      <div className="text-right shrink-0 min-w-[75px]">
-                        <span
-                          className={cn(
-                            'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
-                            isPos
-                              ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
-                              : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
-                          )}
+                      return (
+                        <tr
+                          key={etf.ticker}
+                          className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                         >
-                          {isPos ? '+' : ''}
-                          {etf.change_pct?.toFixed(2)}%
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
+                          <td className="py-2.5 px-3">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span
+                                className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[230px]"
+                                title={displayName}
+                              >
+                                {displayName}
+                              </span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
+                                {etf.ticker}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[250px] mt-0.5 font-medium">
+                              {info?.category || 'Renta Variable'}
+                            </div>
+                          </td>
+
+                          <td className="py-2.5 px-2 text-right font-mono font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                            {etf.price ? fmt.currency(etf.price, etf.currency) : '-'}
+                          </td>
+
+                          <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                            <span
+                              className={cn(
+                                'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
+                                isPos
+                                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                                  : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                              )}
+                            >
+                              {isPos ? '+' : ''}{etf.change_pct?.toFixed(2)}%
+                            </span>
+                          </td>
+
+                          <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                            <div className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
+                              {etf.weight}%
+                            </div>
+                            <div className="w-12 h-1 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-1">
+                              <div
+                                className="h-full rounded-full bg-indigo-500"
+                                style={{ width: `${Math.min(100, (etf.weight / 35) * 100)}%` }}
+                              />
+                            </div>
+                          </td>
+
+                          <td className="py-2.5 px-2 text-right font-mono font-bold text-xs text-slate-900 dark:text-white whitespace-nowrap">
+                            {fmt.currency(replicatedVal)}
+                          </td>
+
+                          <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                            <span
+                              className={cn(
+                                'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
+                                isImpactPos
+                                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                                  : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                              )}
+                            >
+                              {isImpactPos ? '+' : ''}{fmt.currency(totalImpact)}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

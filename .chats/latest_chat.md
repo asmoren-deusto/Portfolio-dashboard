@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 20:08:52
+- **Fecha de exportación:** 2026-10-11 20:12:14
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 63
+- **Total de interacciones registradas:** 65
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1055,5 +1055,39 @@ He rediseñado por completo la tarjeta de **Simulación en Directo de Cartera** 
 ### 👤 Usuario (2026-10-11 18:02:15)
 
 por que la grafica diaria va de 9:30 a 15:55 y de que dia es? no me gustan los espacios vacios a los lados
+
+---
+
+### 🤖 Asistente (2026-10-11 18:08:55)
+
+### ¿Por qué iba de 9:30 a 15:55 y de qué día es?
+
+1. **Horario original (9:30 - 15:55 EDT):**
+   - Los ETFs equivalentes (`URTH`, `ACWI`, `XLK`, `COWZ`, `EEM`, etc.) cotizan en las bolsas de **Nueva York (NYSE / NASDAQ)**, cuya jornada bursátil es de **9:30 a 16:00 (hora de Wall Street / EDT)**. Las barras de 5 minutos cerraban en su última marca intradía a las 15:55.
+   - **Solución implementada:** Se ha convertido todo a la **hora local española (Madrid CEST)**, por lo que la gráfica ahora muestra de forma natural **15:30 a 21:55 / 22:00**.
+
+2. **¿De qué día es?**
+   - Al ser fin de semana, los mercados bursátiles permanecen cerrados y los datos corresponden a la **última sesión cerrada: el viernes, 9 de octubre**.
+   - **Solución implementada:** Ahora la tarjeta indica explícitamente la fecha en todo momento:
+     - Título: **`CIERRE ÚLTIMA SESIÓN • VIERNES, 9 OCT.`**
+     - Píldora de estado: **`CERRADO (Viernes, 9 oct.)`**
+     - Pie de gráfica y tooltip: **`Hora española (Madrid CEST) • Viernes, 9 oct.`**
+
+---
+
+### Eliminación de los espacios vacíos a los lados
+
+- **Gráfica de borde a borde (*Edge-to-Edge*):** Se ajustó la escala para ocupar el **100% del ancho del recuadro**. La curva y el gradiente comienzan exactamente en el borde izquierdo (`x=0`) y terminan pegados al borde derecho (`x=100%`).
+- **Integración de escala Y:** Los porcentajes (`+0.58%`, `+0.23%`) y la etiqueta flotante en vivo (`+0.53%`) ahora están superpuestos limpiamente en el interior derecho de la gráfica, eliminando el margen vacío lateral de 80 px.
+- **Eje horizontal alineado:** Las marcas de tiempo (`15:30` ... `21:55`) quedan enrasadas a izquierda y derecha sin separadores ni huecos en blanco.
+
+---
+*Cambios aplicados en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx) y [market.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py), y subidos bajo la versión **v2.7.46**.*
+
+---
+
+### 👤 Usuario (2026-10-11 18:07:02)
+
+en la tabla de la derecha caben columnas, mete datos relevantes o recoloca
 
 ---
