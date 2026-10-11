@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 18:23:33
+- **Fecha de exportación:** 2026-10-11 19:14:06
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 45
+- **Total de interacciones registradas:** 47
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -776,5 +776,60 @@ Comprobando el cálculo de rendimiento histórico con desglose por entidad...
 ### 🤖 Asistente (2026-10-11 16:23:16)
 
 Ejecutando pruebas de integración en el backend...
+
+---
+
+### 🤖 Asistente (2026-10-11 16:23:35)
+
+Ya tienes implementadas ambas funcionalidades en producción (**v2.7.37**):
+
+---
+
+### 1. 📈 En "Mercado": Simulación en Directo de la Cartera de Fondos con ETFs Equivalentes
+
+Dado que los fondos de inversión publican su valor liquidativo una vez al día con desfase de 24h, hemos creado un sistema de **réplica sintética en tiempo real**:
+
+- **Mapeo de Fondos a ETFs Líquidos de Réplica:**
+  - **Fidelity MSCI World:** replica en `URTH` (*iShares MSCI World ETF*, peso ~26,1%).
+  - **Indexa EPSV Acciones:** replica en `ACWI` (*iShares MSCI ACWI ETF*, peso ~14,7%).
+  - **DNB Fund Technology:** replica en `XLK` (*Technology Select Sector SPDR*, peso ~9,4%).
+  - **Azvalor Internacional:** replica en `COWZ` (*Pacer US Cash Cows 100 ETF / Value Global*, peso ~8,9%).
+  - **iShares y Fidelity Emergentes:** replican en `EEM` (*iShares MSCI Emerging Markets ETF*, peso ~16,7%).
+  - **Fidelity MSCI Japan:** replica en `EWJ` (*iShares MSCI Japan ETF*, peso ~8,4%).
+  - **Fidelity Euro 50:** replica en `FEZ` (*SPDR EURO STOXX 50 ETF*, peso ~8,0%).
+  - **Cobas Internacional:** replica en `EFV` (*iShares MSCI EAFE Value ETF*, peso ~7,7%).
+
+- **Nueva Tarjeta Interactiva en la página de Mercado (`SimulatedPortfolioCard`):**
+  - **Estimación en tiempo real:** Muestra el rendimiento intradía ponderado en `%` y en `€` calculado en directo (ej. `+0,55%` / `+430,51 €`).
+  - **Gráfica Intradía Interactiva:** Curva en tiempo real con selector de periodos (`1D`, `5D`, `1M`), línea base de `0,0%`, gradiente dinámico y cursor de inspección con cálculo minuto a minuto.
+  - **Desglose Desplegable de Posiciones:** Tabla con tus 9 fondos reales, sus entidades (MyInvestor, BBVA, Indexa), su ETF réplica, la cotización en vivo del ETF y la contribución estimada en euros hoy.
+  - **Añadidos al listado de cotizadas:** En el universo de acciones de Mercado ahora dispones de la pestaña **"ETFs Cartera"** (y en *"Todos los Mercados"*), donde puedes consultar y ordenar estos ETFs (`URTH`, `ACWI`, `XLK`, `COWZ`, `EEM`, `EWJ`, `FEZ`, `EFV`).
+
+---
+
+### 2. 🏛️ En "Visión General": Desglose por Entidad en la Gráfica de Evolución
+
+En la gráfica de evolución patrimonial de la pantalla de inicio ahora dispones de **selectores interactivos por entidad**:
+
+- **Barra de Selectores:**
+  - **Total Cartera:** Muestra el área y curva del sumatorio total.
+  - **🔵 MyInvestor** (`#3b82f6`): Activa/desactiva la curva propia de MyInvestor.
+  - **🟢 BBVA** (`#10b981`): Activa/desactiva la curva propia de BBVA.
+  - **🟡 Indexa Capital** (`#f59e0b`): Activa/desactiva la curva propia de Indexa.
+
+- **Sumatorio Dinámico:**
+  - El **Total** representa el sumatorio dinámico de las entidades que tengas activadas (si activas solo MyInvestor y BBVA, la curva total suma exactamente esas dos).
+  - Cada entidad seleccionada dibuja su propia línea con su color corporativo sobre el gráfico.
+  - **Inspección en el HUD:** Al pasar el ratón por cualquier punto de la historia, verás el total seleccionado y el desglose desglosado por entidad:
+    - *MyInvestor:* `33.998 €` (43,4%)
+    - *BBVA:* `32.776 €` (41,9%)
+    - *Indexa Capital:* `11.499 €` (14,7%)
+  - Compatible tanto en modo **Euros (€)** como en modo **Porcentaje (%)** (mostrando la rentabilidad acumulada de cada entidad desde el inicio del periodo).
+
+---
+
+### 👤 Usuario (2026-10-11 17:12:00)
+
+en evolucion lleva los selectores abajo como te marco en la foto para que ocupe menos. en la grafica acumulativa quiero que el fondo de cada valor sea tb de su color para identificar mejor el estaqueado. el total se sobreentiende sumando asi que no hace falta. tb en la leyenda derecha no marques los valores de cada entidad solo el total y lo aportado
 
 ---

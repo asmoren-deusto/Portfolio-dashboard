@@ -12,15 +12,12 @@ import {
 import type { PricePoint } from '@/lib/mockData'
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
-import { triggerChartAnimation } from '@/lib/chartAnimation'
 import {
   TrendingUp,
   TrendingDown,
   Calendar,
   ArrowUpRight,
   Flame,
-  Layers,
-  Building2,
 } from 'lucide-react'
 
 export type ChartMode = 'currency' | 'percent'
@@ -29,8 +26,10 @@ export interface EntityConfig {
   id: string
   label: string
   color: string
-  areaTopColor: string
-  areaBottomColor: string
+  topColorDark: string
+  topColorLight: string
+  bottomColorDark: string
+  bottomColorLight: string
   textColor: string
   badgeBg: string
   badgeBorder: string
@@ -41,8 +40,10 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'myinvestor',
     label: 'MyInvestor',
     color: '#3b82f6', // blue
-    areaTopColor: 'rgba(59, 130, 246, 0.16)',
-    areaBottomColor: 'rgba(59, 130, 246, 0.00)',
+    topColorDark: 'rgba(59, 130, 246, 0.42)',
+    topColorLight: 'rgba(37, 99, 235, 0.28)',
+    bottomColorDark: 'rgba(59, 130, 246, 0.20)',
+    bottomColorLight: 'rgba(37, 99, 235, 0.12)',
     textColor: 'text-blue-600 dark:text-blue-400',
     badgeBg: 'bg-blue-500/10 dark:bg-blue-500/20',
     badgeBorder: 'border-blue-500/30',
@@ -51,8 +52,10 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'bbva',
     label: 'BBVA',
     color: '#10b981', // emerald
-    areaTopColor: 'rgba(16, 185, 129, 0.16)',
-    areaBottomColor: 'rgba(16, 185, 129, 0.00)',
+    topColorDark: 'rgba(16, 185, 129, 0.52)',
+    topColorLight: 'rgba(16, 185, 129, 0.38)',
+    bottomColorDark: 'rgba(16, 185, 129, 0.28)',
+    bottomColorLight: 'rgba(16, 185, 129, 0.18)',
     textColor: 'text-emerald-600 dark:text-emerald-400',
     badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
     badgeBorder: 'border-emerald-500/30',
@@ -61,13 +64,18 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'indexa',
     label: 'Indexa Capital',
     color: '#f59e0b', // amber
-    areaTopColor: 'rgba(245, 158, 11, 0.16)',
-    areaBottomColor: 'rgba(245, 158, 11, 0.00)',
+    topColorDark: 'rgba(245, 158, 11, 0.62)',
+    topColorLight: 'rgba(245, 158, 11, 0.48)',
+    bottomColorDark: 'rgba(245, 158, 11, 0.35)',
+    bottomColorLight: 'rgba(245, 158, 11, 0.25)',
     textColor: 'text-amber-600 dark:text-amber-400',
     badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
     badgeBorder: 'border-amber-500/30',
   },
 }
+
+// Canonical stacking order from bottom to top: Indexa on bottom, BBVA in middle, MyInvestor on top
+const CANONICAL_ORDER = ['indexa', 'bbva', 'myinvestor']
 
 interface PerformanceChartProps {
   data: PricePoint[]
@@ -89,135 +97,6 @@ function formatDateSpanish(dateStr: string): string {
   }
 }
 
-// Helper to sanitize selected sum points in currency mode
-function sanitizeSelectedSumPoints(
-  points: PricePoint[],
-  selected: Set<string>,
-  allBrokers: string[]
-): { time: any; value: number }[] {
-  if (!points || !points.length) return []
-  const valid = points.filter(p => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
-    .sort((a, b) => a.date.localeCompare(b.date))
-
-  const unique: { time: any; value: number }[] = []
-  const seen = new Set<string>()
-
-  for (const p of valid) {
-    if (!seen.has(p.date)) {
-      seen.add(p.date)
-      let val = p.value
-      if (p.brokers && selected.size > 0 && selected.size < allBrokers.length) {
-        val = 0
-        for (const b of selected) {
-          val += p.brokers[b]?.value ?? 0
-        }
-      }
-      unique.push({ time: p.date as any, value: Math.max(0, val) })
-    }
-  }
-  return unique
-}
-
-// Helper to sanitize selected invested points
-function sanitizeSelectedInvestedPoints(
-  points: PricePoint[],
-  selected: Set<string>,
-  allBrokers: string[]
-): { time: any; value: number }[] {
-  if (!points || !points.length) return []
-  const valid = points.filter(p => p && p.date).sort((a, b) => a.date.localeCompare(b.date))
-  const unique: { time: any; value: number }[] = []
-  const seen = new Set<string>()
-
-  for (const p of valid) {
-    if (!seen.has(p.date)) {
-      seen.add(p.date)
-      let inv = p.invested ?? 0
-      if (p.brokers && selected.size > 0 && selected.size < allBrokers.length) {
-        inv = 0
-        for (const b of selected) {
-          inv += p.brokers[b]?.invested ?? 0
-        }
-      }
-      unique.push({ time: p.date as any, value: Math.max(0, inv) })
-    }
-  }
-  return unique
-}
-
-// Helper to sanitize selected sum in percent mode
-function sanitizeSelectedSumPercentPoints(
-  points: PricePoint[],
-  selected: Set<string>,
-  allBrokers: string[]
-): { time: any; value: number }[] {
-  const sumPoints = sanitizeSelectedSumPoints(points, selected, allBrokers)
-  if (!sumPoints.length) return []
-  const base = sumPoints[0]
-  if (base.value <= 0) return []
-
-  const invPoints = sanitizeSelectedInvestedPoints(points, selected, allBrokers)
-  const baseInv = invPoints[0]?.value ?? 0
-
-  const unique: { time: any; value: number }[] = []
-  for (let i = 0; i < sumPoints.length; i++) {
-    const curVal = sumPoints[i].value
-    const curInv = invPoints[i]?.value ?? 0
-    const periodInflow = curInv - baseInv
-    const profit = (curVal - base.value) - periodInflow
-    const pct = base.value > 0 ? (profit / base.value) * 100 : 0
-    unique.push({ time: sumPoints[i].time, value: Number(pct.toFixed(2)) })
-  }
-  return unique
-}
-
-// Helper to sanitize an individual entity line in currency mode
-function sanitizeEntityCurrencyPoints(
-  points: PricePoint[],
-  broker: string
-): { time: any; value: number }[] {
-  if (!points || !points.length) return []
-  const valid = points.filter(p => p && p.date).sort((a, b) => a.date.localeCompare(b.date))
-  const unique: { time: any; value: number }[] = []
-  const seen = new Set<string>()
-
-  for (const p of valid) {
-    if (!seen.has(p.date)) {
-      seen.add(p.date)
-      const val = p.brokers?.[broker]?.value ?? 0
-      if (val > 0) {
-        unique.push({ time: p.date as any, value: val })
-      }
-    }
-  }
-  return unique
-}
-
-// Helper to sanitize an individual entity line in percent mode
-function sanitizeEntityPercentPoints(
-  points: PricePoint[],
-  broker: string
-): { time: any; value: number }[] {
-  const currPoints = sanitizeEntityCurrencyPoints(points, broker)
-  if (!currPoints.length) return []
-  const base = currPoints[0]
-  if (base.value <= 0) return []
-
-  const baseOrig = points.find(p => p.date === base.time)
-  const baseInv = baseOrig?.brokers?.[broker]?.invested ?? 0
-
-  const unique: { time: any; value: number }[] = []
-  for (const pt of currPoints) {
-    const orig = points.find(p => p.date === pt.time)
-    const curInv = orig?.brokers?.[broker]?.invested ?? 0
-    const periodInflow = curInv - baseInv
-    const profit = (pt.value - base.value) - periodInflow
-    const pct = base.value > 0 ? (profit / base.value) * 100 : 0
-    unique.push({ time: pt.time, value: Number(pct.toFixed(2)) })
-  }
-  return unique
-}
-
 export function PerformanceChart({
   data,
   height = 260,
@@ -228,18 +107,25 @@ export function PerformanceChart({
 }: PerformanceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
-  const areaSeriesRef = useRef<any>(null)
+
+  // 3 stacked AreaSeries slots:
+  // slot2 = Top layer (added 1st, drawn at back)
+  // slot1 = Middle layer (added 2nd, drawn above slot2)
+  // slot0 = Bottom layer (added 3rd, drawn in front of slot1)
+  const slot2Ref = useRef<any>(null)
+  const slot1Ref = useRef<any>(null)
+  const slot0Ref = useRef<any>(null)
+
   const investedSeriesRef = useRef<any>(null)
-  const entitySeriesMapRef = useRef<Map<string, any>>(new Map())
   const markersRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
 
-  const { theme, refreshAnimKey } = useAppStore()
+  const { theme } = useAppStore()
   const isDark = theme === 'dark'
 
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
-  // Dynamically detect available brokers in data
+  // Dynamically detect available brokers
   const availableBrokers = useMemo(() => {
     if (!data || !data.length) return []
     const found = new Set<string>()
@@ -250,14 +136,13 @@ export function PerformanceChart({
         }
       }
     }
-    return Array.from(found).sort()
+    // Sort according to canonical order
+    return CANONICAL_ORDER.filter(b => found.has(b))
   }, [data])
 
-  // Selectors State: showTotal and set of active entities
-  const [showTotal, setShowTotal] = useState<boolean>(true)
-  const [selectedEntities, setSelectedEntities] = useState<Set<string>>(() => new Set(['myinvestor', 'bbva', 'indexa']))
+  // Selected entities state (default: all active)
+  const [selectedEntities, setSelectedEntities] = useState<Set<string>>(() => new Set(['indexa', 'bbva', 'myinvestor']))
 
-  // Auto-sync available brokers on initial load if empty
   useEffect(() => {
     if (availableBrokers.length > 0 && selectedEntities.size === 0) {
       setSelectedEntities(new Set(availableBrokers))
@@ -268,7 +153,7 @@ export function PerformanceChart({
     setSelectedEntities(prev => {
       const next = new Set(prev)
       if (next.has(b)) {
-        if (next.size === 1 && !showTotal) return prev // keep at least one visible
+        if (next.size === 1) return prev // Keep at least one active
         next.delete(b)
       } else {
         next.add(b)
@@ -277,27 +162,46 @@ export function PerformanceChart({
     })
   }
 
-  const toggleTotal = () => {
-    if (showTotal && selectedEntities.size === 0) return // keep something visible
-    setShowTotal(v => !v)
-  }
-
   const dataRef = useRef<PricePoint[]>(data)
   dataRef.current = data
 
-  // Metrics computation for selected entities sum
+  // Active stack list in canonical order (bottom to top)
+  const activeStackList = useMemo(() => {
+    return availableBrokers.filter(b => selectedEntities.has(b))
+  }, [availableBrokers, selectedEntities])
+
+  // Metrics computation for selected sum
   const metrics = useMemo(() => {
     if (!data || data.length === 0) return null
 
-    const sumPoints = sanitizeSelectedSumPoints(data, selectedEntities, availableBrokers)
-    if (sumPoints.length === 0) return null
+    const valid = data.filter(p => p && p.date).sort((a, b) => a.date.localeCompare(b.date))
+    if (!valid.length) return null
 
-    const invPoints = sanitizeSelectedInvestedPoints(data, selectedEntities, availableBrokers)
+    const sumPoints: { date: string; value: number; invested: number }[] = []
+    const seen = new Set<string>()
+
+    for (const p of valid) {
+      if (!seen.has(p.date)) {
+        seen.add(p.date)
+        let val = 0
+        let inv = 0
+        if (p.brokers && activeStackList.length > 0) {
+          for (const b of activeStackList) {
+            val += p.brokers[b]?.value ?? 0
+            inv += p.brokers[b]?.invested ?? 0
+          }
+        } else {
+          val = p.value
+          inv = p.invested ?? 0
+        }
+        sumPoints.push({ date: p.date, value: Math.max(0, val), invested: Math.max(0, inv) })
+      }
+    }
+
+    if (!sumPoints.length) return null
 
     const first = sumPoints[0]
     const last = sumPoints[sumPoints.length - 1]
-    const firstInv = invPoints[0]?.value ?? 0
-    const lastInv = invPoints[invPoints.length - 1]?.value ?? 0
 
     let maxPoint = sumPoints[0]
     let minPoint = sumPoints[0]
@@ -311,58 +215,56 @@ export function PerformanceChart({
     const maxVal = maxPoint.value
     const drawdownPct = maxVal > 0 ? ((currentVal - maxVal) / maxVal) * 100 : 0
 
-    const periodInflow = lastInv - firstInv
+    const periodInflow = last.invested - first.invested
     const periodProfit = (last.value - first.value) - periodInflow
     const periodReturnPct = first.value > 0 ? (periodProfit / first.value) * 100 : 0
 
     return {
       first,
       last,
-      firstInv,
-      lastInv,
       maxPoint,
       minPoint,
       drawdownPct,
       periodProfit,
       periodReturnPct,
       periodInflow,
+      sumPoints,
     }
-  }, [data, selectedEntities, availableBrokers])
+  }, [data, activeStackList])
 
-  // Active point (either crosshair inspection or latest)
+  // Active point (crosshair hover or latest)
   const activePoint = hoveredPoint || (data.length ? data[data.length - 1] : null)
 
-  // Compute active selected values on active point
   const activeSelectedMetrics = useMemo(() => {
     if (!activePoint) return null
 
-    let val = activePoint.value
-    let inv = activePoint.invested ?? 0
+    let val = 0
+    let inv = 0
 
-    if (activePoint.brokers && selectedEntities.size > 0 && selectedEntities.size < availableBrokers.length) {
-      val = 0
-      inv = 0
-      for (const b of selectedEntities) {
+    if (activePoint.brokers && activeStackList.length > 0) {
+      for (const b of activeStackList) {
         val += activePoint.brokers[b]?.value ?? 0
         inv += activePoint.brokers[b]?.invested ?? 0
       }
+    } else {
+      val = activePoint.value
+      inv = activePoint.invested ?? 0
     }
 
     const diff = inv > 0 ? val - inv : (metrics?.first ? val - metrics.first.value : 0)
     const pct = inv > 0 ? (diff / inv) * 100 : (metrics?.first && metrics.first.value > 0 ? (diff / metrics.first.value) * 100 : 0)
 
-    // Return from period start in percent mode
     let periodPct = 0
     if (metrics && metrics.first) {
-      const inflow = inv - (metrics.firstInv ?? 0)
+      const inflow = inv - metrics.first.invested
       const profit = (val - metrics.first.value) - inflow
       periodPct = metrics.first.value > 0 ? (profit / metrics.first.value) * 100 : 0
     }
 
     return { val, inv, diff, pct, periodPct }
-  }, [activePoint, selectedEntities, availableBrokers, metrics])
+  }, [activePoint, activeStackList, metrics])
 
-  // Initialize Lightweight-Charts canvas
+  // Initialize Lightweight Charts
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -410,16 +312,16 @@ export function PerformanceChart({
         handleScale: true,
       })
 
-      // 1. Primary Area Series (Sumatorio / Total Cartera)
-      const areaSeries = chart.addSeries(AreaSeries, {
-        lineColor: '#2563eb',
-        topColor: isDark ? 'rgba(59, 130, 246, 0.14)' : 'rgba(37, 99, 235, 0.20)',
-        bottomColor: 'rgba(59, 130, 246, 0.00)',
+      // 1. Slot 2: Top Layer AreaSeries (Added FIRST, drawn in background)
+      const slot2 = chart.addSeries(AreaSeries, {
+        lineColor: '#3b82f6',
+        topColor: isDark ? 'rgba(59, 130, 246, 0.42)' : 'rgba(37, 99, 235, 0.28)',
+        bottomColor: isDark ? 'rgba(59, 130, 246, 0.20)' : 'rgba(37, 99, 235, 0.12)',
         lineWidth: 2,
         priceLineVisible: false,
-        lastValueVisible: true,
+        lastValueVisible: true, // Only Top layer shows badge on right axis
         crosshairMarkerRadius: 5,
-        crosshairMarkerBackgroundColor: '#2563eb',
+        crosshairMarkerBackgroundColor: '#3b82f6',
         crosshairMarkerBorderColor: '#ffffff',
         crosshairMarkerBorderWidth: 2,
         priceFormat: {
@@ -428,13 +330,49 @@ export function PerformanceChart({
         },
       })
 
-      // 2. Secondary Line Series (Net Invested Capital of Selected Entities)
+      // 2. Slot 1: Middle Layer AreaSeries (Added SECOND, drawn above slot 2)
+      const slot1 = chart.addSeries(AreaSeries, {
+        lineColor: '#10b981',
+        topColor: isDark ? 'rgba(16, 185, 129, 0.52)' : 'rgba(16, 185, 129, 0.38)',
+        bottomColor: isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)',
+        lineWidth: 2,
+        priceLineVisible: false,
+        lastValueVisible: false, // Hidden on right axis
+        crosshairMarkerRadius: 4,
+        crosshairMarkerBackgroundColor: '#10b981',
+        crosshairMarkerBorderColor: '#ffffff',
+        crosshairMarkerBorderWidth: 1.5,
+        priceFormat: {
+          type: 'custom',
+          formatter: (p: number) => fmt.currency(p),
+        },
+      })
+
+      // 3. Slot 0: Bottom Layer AreaSeries (Added THIRD, drawn in front of slot 1)
+      const slot0 = chart.addSeries(AreaSeries, {
+        lineColor: '#f59e0b',
+        topColor: isDark ? 'rgba(245, 158, 11, 0.62)' : 'rgba(245, 158, 11, 0.48)',
+        bottomColor: isDark ? 'rgba(245, 158, 11, 0.35)' : 'rgba(245, 158, 11, 0.25)',
+        lineWidth: 2,
+        priceLineVisible: false,
+        lastValueVisible: false, // Hidden on right axis
+        crosshairMarkerRadius: 4,
+        crosshairMarkerBackgroundColor: '#f59e0b',
+        crosshairMarkerBorderColor: '#ffffff',
+        crosshairMarkerBorderWidth: 1.5,
+        priceFormat: {
+          type: 'custom',
+          formatter: (p: number) => fmt.currency(p),
+        },
+      })
+
+      // 4. Invested Series (Dashed Line) (Added FOURTH, drawn on top of all area fills)
       const investedSeries = chart.addSeries(LineSeries, {
         color: isDark ? '#c084fc' : '#9333ea',
         lineWidth: 2,
         lineStyle: LineStyle.Dashed,
         priceLineVisible: false,
-        lastValueVisible: true,
+        lastValueVisible: true, // Visible on right axis
         crosshairMarkerRadius: 4,
         crosshairMarkerBackgroundColor: isDark ? '#c084fc' : '#9333ea',
         crosshairMarkerBorderColor: '#ffffff',
@@ -445,40 +383,14 @@ export function PerformanceChart({
         },
       })
 
-      // 3. Individual Entity Line Series (MyInvestor, BBVA, Indexa)
-      const entityMap = new Map<string, any>()
-      for (const [bKey, cfg] of Object.entries(ENTITY_CONFIGS)) {
-        const entSeries = chart.addSeries(LineSeries, {
-          color: cfg.color,
-          lineWidth: 2,
-          priceLineVisible: false,
-          lastValueVisible: true,
-          crosshairMarkerRadius: 4,
-          crosshairMarkerBackgroundColor: cfg.color,
-          crosshairMarkerBorderColor: '#ffffff',
-          crosshairMarkerBorderWidth: 1.5,
-          priceFormat: {
-            type: 'custom',
-            formatter: (p: number) => fmt.currency(p),
-          },
-        })
-        entityMap.set(bKey, entSeries)
-      }
-
-      const markersPlugin = createSeriesMarkers(areaSeries, [])
+      const markersPlugin = createSeriesMarkers(slot2, [])
 
       chartRef.current = chart
-      areaSeriesRef.current = areaSeries
+      slot2Ref.current = slot2
+      slot1Ref.current = slot1
+      slot0Ref.current = slot0
       investedSeriesRef.current = investedSeries
-      entitySeriesMapRef.current = entityMap
       markersRef.current = markersPlugin
-
-      // Auto-fit immediately on mount
-      const sumPoints = sanitizeSelectedSumPoints(dataRef.current, selectedEntities, availableBrokers)
-      if (sumPoints.length) {
-        areaSeries.setData(sumPoints)
-        chart.timeScale().fitContent()
-      }
 
       // Crosshair inspection listener
       chart.subscribeCrosshairMove(param => {
@@ -525,54 +437,141 @@ export function PerformanceChart({
         } catch {}
       }
       chartRef.current = null
-      areaSeriesRef.current = null
+      slot2Ref.current = null
+      slot1Ref.current = null
+      slot0Ref.current = null
       investedSeriesRef.current = null
-      entitySeriesMapRef.current.clear()
       markersRef.current = null
       zeroPriceLineRef.current = null
     }
   }, [height, isDark])
 
-  // Update Series Data, Active Entities, Mode, Colors, Markers
+  // Update Stacked Series Data on Changes
   useEffect(() => {
-    if (!areaSeriesRef.current || !chartRef.current || !data) return
+    if (!slot2Ref.current || !chartRef.current || !data || !metrics) return
 
     try {
-      const area = areaSeriesRef.current
-      const inv = investedSeriesRef.current
       const chart = chartRef.current
-      const entMap = entitySeriesMapRef.current
+      const slot2 = slot2Ref.current
+      const slot1 = slot1Ref.current
+      const slot0 = slot0Ref.current
+      const inv = investedSeriesRef.current
+
+      const validDates = metrics.sumPoints.map(p => p.date)
+      const n = activeStackList.length
 
       if (chartMode === 'currency') {
-        // 1. Total / Sumatorio Area Series
-        const sumPoints = sanitizeSelectedSumPoints(data, selectedEntities, availableBrokers)
-        area.setData(sumPoints)
-        area.applyOptions({
-          visible: showTotal,
-          lineColor: '#2563eb',
-          topColor: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(37, 99, 235, 0.20)',
-          bottomColor: 'rgba(59, 130, 246, 0.00)',
-          crosshairMarkerBackgroundColor: '#2563eb',
-          priceFormat: {
-            type: 'custom',
-            formatter: (p: number) => fmt.currency(p),
-          },
-        })
-
         // Clean up zero line if was in percent mode
         if (zeroPriceLineRef.current) {
           try {
-            area.removePriceLine(zeroPriceLineRef.current)
+            slot2.removePriceLine(zeroPriceLineRef.current)
           } catch {}
           zeroPriceLineRef.current = null
         }
 
-        // 2. Invested Line Series for selected entities
+        if (n === 3) {
+          // Bottom layer: activeStackList[0] (Indexa, amber)
+          const b0 = activeStackList[0]
+          const cfg0 = ENTITY_CONFIGS[b0]
+          const pts0 = validDates.map(d => {
+            const orig = data.find(p => p.date === d)
+            return { time: d, value: orig?.brokers?.[b0]?.value ?? 0 }
+          })
+          slot0.setData(pts0)
+          slot0.applyOptions({
+            visible: true,
+            lineColor: cfg0.color,
+            topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
+            bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
+            lastValueVisible: false,
+          })
+
+          // Middle layer: activeStackList[0] + activeStackList[1] (BBVA, emerald)
+          const b1 = activeStackList[1]
+          const cfg1 = ENTITY_CONFIGS[b1]
+          const pts1 = validDates.map(d => {
+            const orig = data.find(p => p.date === d)
+            const v0 = orig?.brokers?.[b0]?.value ?? 0
+            const v1 = orig?.brokers?.[b1]?.value ?? 0
+            return { time: d, value: v0 + v1 }
+          })
+          slot1.setData(pts1)
+          slot1.applyOptions({
+            visible: true,
+            lineColor: cfg1.color,
+            topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
+            bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
+            lastValueVisible: false,
+          })
+
+          // Top layer: Total sum of all 3 (MyInvestor, blue)
+          const b2 = activeStackList[2]
+          const cfg2 = ENTITY_CONFIGS[b2]
+          const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+          slot2.setData(pts2)
+          slot2.applyOptions({
+            visible: true,
+            lineColor: cfg2.color,
+            topColor: isDark ? cfg2.topColorDark : cfg2.topColorLight,
+            bottomColor: isDark ? cfg2.bottomColorDark : cfg2.bottomColorLight,
+            lastValueVisible: true, // ONLY the total shows on right axis
+          })
+        } else if (n === 2) {
+          // Bottom layer: activeStackList[0]
+          const b0 = activeStackList[0]
+          const cfg0 = ENTITY_CONFIGS[b0]
+          const pts0 = validDates.map(d => {
+            const orig = data.find(p => p.date === d)
+            return { time: d, value: orig?.brokers?.[b0]?.value ?? 0 }
+          })
+          slot0.setData(pts0)
+          slot0.applyOptions({
+            visible: true,
+            lineColor: cfg0.color,
+            topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
+            bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
+            lastValueVisible: false,
+          })
+
+          slot1.applyOptions({ visible: false })
+
+          // Top layer: sum of the 2 active
+          const b1 = activeStackList[1]
+          const cfg1 = ENTITY_CONFIGS[b1]
+          const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+          slot2.setData(pts2)
+          slot2.applyOptions({
+            visible: true,
+            lineColor: cfg1.color,
+            topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
+            bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
+            lastValueVisible: true,
+          })
+        } else if (n === 1) {
+          slot0.applyOptions({ visible: false })
+          slot1.applyOptions({ visible: false })
+
+          // Only 1 entity: slot2 shows that entity
+          const b0 = activeStackList[0]
+          const cfg0 = ENTITY_CONFIGS[b0]
+          const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+          slot2.setData(pts2)
+          slot2.applyOptions({
+            visible: true,
+            lineColor: cfg0.color,
+            topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
+            bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
+            lastValueVisible: true,
+          })
+        }
+
+        // Invested Line Series
         if (inv) {
-          const invPoints = sanitizeSelectedInvestedPoints(data, selectedEntities, availableBrokers)
+          const invPoints = metrics.sumPoints.map(p => ({ time: p.date, value: p.invested }))
           inv.setData(invPoints)
           inv.applyOptions({
-            visible: showInvested && showTotal,
+            visible: showInvested,
+            lastValueVisible: showInvested,
             priceFormat: {
               type: 'custom',
               formatter: (p: number) => fmt.currency(p),
@@ -580,39 +579,19 @@ export function PerformanceChart({
           })
         }
 
-        // 3. Individual Entity Lines
-        for (const [bKey, s] of entMap.entries()) {
-          const cfg = ENTITY_CONFIGS[bKey]
-          const isSelected = selectedEntities.has(bKey)
-          if (isSelected) {
-            const entPoints = sanitizeEntityCurrencyPoints(data, bKey)
-            s.setData(entPoints)
-            s.applyOptions({
-              visible: true,
-              color: cfg.color,
-              priceFormat: {
-                type: 'custom',
-                formatter: (p: number) => fmt.currency(p),
-              },
-            })
-          } else {
-            s.applyOptions({ visible: false })
-          }
-        }
-
-        // 4. ATH / Low Markers
-        if (markersRef.current && metrics) {
-          if (showMilestones && showTotal && metrics.maxPoint && metrics.minPoint && metrics.maxPoint.time !== metrics.minPoint.time) {
+        // ATH / Low Markers
+        if (markersRef.current) {
+          if (showMilestones && metrics.maxPoint && metrics.minPoint && metrics.maxPoint.date !== metrics.minPoint.date) {
             markersRef.current.setMarkers([
               {
-                time: metrics.maxPoint.time,
+                time: metrics.maxPoint.date,
                 position: 'aboveBar',
                 color: '#10b981',
                 shape: 'arrowDown',
                 text: `Pico: ${fmt.currency(metrics.maxPoint.value)}`,
               },
               {
-                time: metrics.minPoint.time,
+                time: metrics.minPoint.date,
                 position: 'belowBar',
                 color: '#f43f5e',
                 shape: 'arrowUp',
@@ -625,21 +604,32 @@ export function PerformanceChart({
         }
       } else {
         // Percent Mode
-        const sumPctPoints = sanitizeSelectedSumPercentPoints(data, selectedEntities, availableBrokers)
-        area.setData(sumPctPoints)
+        slot0.applyOptions({ visible: false })
+        slot1.applyOptions({ visible: false })
 
-        const isPositive = (metrics?.periodReturnPct ?? 0) >= 0
+        const baseVal = metrics.first.value
+        const baseInv = metrics.first.invested
+
+        const pctPoints = metrics.sumPoints.map(p => {
+          const inflow = p.invested - baseInv
+          const profit = (p.value - baseVal) - inflow
+          const pct = baseVal > 0 ? (profit / baseVal) * 100 : 0
+          return { time: p.date, value: Number(pct.toFixed(2)) }
+        })
+
+        const isPositive = (metrics.periodReturnPct ?? 0) >= 0
         const mainColor = isPositive ? '#10b981' : '#f43f5e'
         const topGrad = isPositive
-          ? (isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.20)')
-          : (isDark ? 'rgba(244, 63, 94, 0.28)' : 'rgba(244, 63, 94, 0.20)')
+          ? (isDark ? 'rgba(16, 185, 129, 0.32)' : 'rgba(16, 185, 129, 0.22)')
+          : (isDark ? 'rgba(244, 63, 94, 0.32)' : 'rgba(244, 63, 94, 0.22)')
 
-        area.applyOptions({
-          visible: showTotal,
+        slot2.setData(pctPoints)
+        slot2.applyOptions({
+          visible: true,
           lineColor: mainColor,
           topColor: topGrad,
           bottomColor: isPositive ? 'rgba(16, 185, 129, 0.01)' : 'rgba(244, 63, 94, 0.01)',
-          crosshairMarkerBackgroundColor: mainColor,
+          lastValueVisible: true,
           priceFormat: {
             type: 'custom',
             formatter: (p: number) => `${p >= 0 ? '+' : ''}${p.toFixed(2)}%`,
@@ -647,32 +637,12 @@ export function PerformanceChart({
         })
 
         if (inv) {
-          inv.applyOptions({ visible: false })
-        }
-
-        // Individual Entity Lines in percent mode
-        for (const [bKey, s] of entMap.entries()) {
-          const cfg = ENTITY_CONFIGS[bKey]
-          const isSelected = selectedEntities.has(bKey)
-          if (isSelected) {
-            const entPctPoints = sanitizeEntityPercentPoints(data, bKey)
-            s.setData(entPctPoints)
-            s.applyOptions({
-              visible: true,
-              color: cfg.color,
-              priceFormat: {
-                type: 'custom',
-                formatter: (p: number) => `${p >= 0 ? '+' : ''}${p.toFixed(2)}%`,
-              },
-            })
-          } else {
-            s.applyOptions({ visible: false })
-          }
+          inv.applyOptions({ visible: false, lastValueVisible: false })
         }
 
         // 0% Baseline
         if (!zeroPriceLineRef.current) {
-          zeroPriceLineRef.current = area.createPriceLine({
+          zeroPriceLineRef.current = slot2.createPriceLine({
             price: 0,
             color: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.25)',
             lineWidth: 1,
@@ -691,119 +661,81 @@ export function PerformanceChart({
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
-  }, [data, chartMode, showInvested, showMilestones, showTotal, selectedEntities, availableBrokers, isDark, metrics])
+  }, [data, chartMode, showInvested, showMilestones, activeStackList, isDark, metrics])
 
   return (
     <div className="w-full flex flex-col justify-between select-none space-y-2">
-      {/* 1. Entity Selectors Toolbar: Desglose por Entidad & Sumatorio */}
-      {availableBrokers.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-1.5 p-2 rounded-xl bg-slate-100/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.07] text-xs">
-          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1 shrink-0 pr-1">
-              <Layers className="w-3.5 h-3.5 text-indigo-500" />
-              Entidades:
-            </span>
-
-            {/* Total / Sumatorio Toggle */}
-            <button
-              onClick={toggleTotal}
-              className={cn(
-                'flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all',
-                showTotal
-                  ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30 shadow-xs font-bold'
-                  : 'bg-white/60 dark:bg-white/[0.03] text-slate-400 border-slate-200/80 dark:border-white/[0.06] hover:text-slate-700 dark:hover:text-slate-200'
-              )}
-              title="Mostrar u ocultar el sumatorio total en la gráfica"
-            >
-              <span className={cn('w-2 h-2 rounded-full', showTotal ? 'bg-blue-500' : 'bg-slate-400')} />
-              <span>
-                {selectedEntities.size < availableBrokers.length ? 'Sumatorio' : 'Total'}
-              </span>
-            </button>
-
-            {/* Individual Broker Toggles */}
-            {availableBrokers.map((b) => {
-              const cfg = ENTITY_CONFIGS[b] || {
-                label: b,
-                color: '#64748b',
-                badgeBg: 'bg-slate-500/10',
-                textColor: 'text-slate-700 dark:text-slate-300',
-                badgeBorder: 'border-slate-500/30',
-              }
-              const isSelected = selectedEntities.has(b)
-
-              return (
-                <button
-                  key={b}
-                  onClick={() => toggleEntity(b)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all',
-                    isSelected
-                      ? `${cfg.badgeBg} ${cfg.textColor} ${cfg.badgeBorder} shadow-xs font-bold`
-                      : 'bg-white/60 dark:bg-white/[0.03] text-slate-400 border-slate-200/80 dark:border-white/[0.06] hover:text-slate-700 dark:hover:text-slate-200'
-                  )}
-                  title={`Mostrar u ocultar ${cfg.label} en la gráfica`}
-                >
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: isSelected ? cfg.color : '#94a3b8' }}
-                  />
-                  <span>{cfg.label}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          <span className="text-[10px] text-slate-600 dark:text-slate-300 font-mono font-medium hidden sm:inline shrink-0">
-            {selectedEntities.size} de {availableBrokers.length} activas
-          </span>
-        </div>
-      )}
-
-      {/* 2. Dynamic HUD: Interactive Inspection & Live Metric Strip */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08]">
-        {/* Main values */}
-        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-x-3.5 sm:gap-x-4 gap-y-1 text-xs font-medium">
-          {/* Main Portfolio Value / Return */}
+      {/* Dynamic HUD Bar with Inlined Entity Selectors (Matches exact mockup from user) */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
+        {/* Left: Patrimonio & Aportado */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
-            <span className="text-slate-500 dark:text-slate-400">
-              {chartMode === 'currency'
-                ? selectedEntities.size < availableBrokers.length
-                  ? 'Sumatorio:'
-                  : 'Patrimonio:'
-                : 'Rentabilidad:'}
-            </span>
-            <span className="font-mono font-bold text-slate-900 dark:text-white">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Patrimonio:</span>
+            <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
               {chartMode === 'currency'
                 ? fmt.currency(activeSelectedMetrics?.val)
                 : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
             </span>
           </div>
 
-          {/* Invested Capital */}
-          {activeSelectedMetrics?.inv !== undefined && activeSelectedMetrics.inv > 0 && chartMode === 'currency' && (
+          {showInvested && chartMode === 'currency' && activeSelectedMetrics?.inv !== undefined && (
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-0.5 border-t-2 border-dashed border-purple-500" />
-              <span className="text-slate-500 dark:text-slate-400">Aportado:</span>
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+              <span className="w-2.5 h-0.5 border-t-2 border-dashed border-purple-500 shrink-0" />
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
                 {fmt.currency(activeSelectedMetrics.inv)}
               </span>
             </div>
           )}
         </div>
 
-        {/* Right side: Beneficio + Date pill */}
-        <div className="flex items-center justify-between sm:justify-end gap-2 text-xs font-medium pt-1 sm:pt-0 border-t border-slate-200/60 dark:border-white/[0.04] sm:border-0">
+        {/* Middle: Inlined Entity Selectors (Exact position from user screenshot) */}
+        <div className="flex items-center gap-1.5 order-last sm:order-none w-full sm:w-auto justify-center sm:justify-start pt-1 sm:pt-0 border-t sm:border-0 border-slate-200/60 dark:border-white/[0.06]">
+          {availableBrokers.map((b) => {
+            const cfg = ENTITY_CONFIGS[b] || {
+              label: b,
+              color: '#64748b',
+              badgeBg: 'bg-slate-500/10',
+              textColor: 'text-slate-700',
+              badgeBorder: 'border-slate-500/20',
+            }
+            const isSelected = selectedEntities.has(b)
+
+            return (
+              <button
+                key={b}
+                type="button"
+                onClick={() => toggleEntity(b)}
+                className={cn(
+                  'flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all cursor-pointer select-none',
+                  isSelected
+                    ? `${cfg.badgeBg} ${cfg.textColor} ${cfg.badgeBorder} shadow-xs font-bold`
+                    : 'bg-white/50 dark:bg-white/[0.02] text-slate-400 border-slate-200/80 dark:border-white/[0.06] hover:text-slate-700 dark:hover:text-slate-200 opacity-60 line-through'
+                )}
+                title={`Haz clic para mostrar u ocultar ${cfg.label} en la gráfica`}
+              >
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: isSelected ? cfg.color : '#94a3b8' }}
+                />
+                <span>{cfg.label}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Right: Beneficio & Fecha */}
+        <div className="flex items-center justify-between sm:justify-end gap-2">
           {activeSelectedMetrics && (
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500 dark:text-slate-400">Beneficio:</span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Beneficio:</span>
               <span
                 className={cn(
                   'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
                   activeSelectedMetrics.diff >= 0
-                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
-                    : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
+                    : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
                 )}
               >
                 {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
@@ -817,62 +749,21 @@ export function PerformanceChart({
               <span className="font-semibold text-slate-800 dark:text-slate-200">
                 {formatDateSpanish(activePoint.date)}
               </span>
-              {hoveredPoint && (
-                <span className="text-[9px] uppercase font-bold text-slate-700 dark:text-slate-300 ml-0.5">
-                  (Inspección)
-                </span>
-              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* 3. Entity Breakdown Chips for the active inspection date */}
-      {activePoint?.brokers && (
-        <div className="flex flex-wrap items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-50/60 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.05] text-[11px]">
-          {availableBrokers.map((b) => {
-            const bData = activePoint.brokers?.[b]
-            const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
-            const isSelected = selectedEntities.has(b)
-            if (!bData || bData.value <= 0) return null
-
-            const totalForPct = activeSelectedMetrics?.val || activePoint.value || 1
-            const sharePct = (bData.value / totalForPct) * 100
-
-            return (
-              <div
-                key={b}
-                className={cn(
-                  'flex items-center gap-1.5 transition-opacity',
-                  isSelected ? 'opacity-100' : 'opacity-40 line-through'
-                )}
-              >
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
-                <span className="font-semibold text-slate-600 dark:text-slate-400">{cfg.label}:</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">
-                  {fmt.currency(bData.value)}
-                </span>
-                {isSelected && (
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-                    ({sharePct.toFixed(1)}%)
-                  </span>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {/* 4. Canvas Container */}
+      {/* Canvas Container */}
       <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden" />
 
-      {/* 5. Useful Milestones Strip */}
+      {/* Useful Milestones Strip */}
       {metrics && showFooterStrip && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
           {/* Max Peak */}
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-            title={`Máximo de la selección: ${fmt.currency(metrics.maxPoint.value)}`}
+            title={`Máximo del periodo (ATH): ${fmt.currency(metrics.maxPoint.value)}`}
           >
             <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
               <TrendingUp size={14} />
@@ -888,7 +779,7 @@ export function PerformanceChart({
           {/* Period Low */}
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-            title={`Mínimo de la selección: ${fmt.currency(metrics.minPoint.value)}`}
+            title={`Mínimo del periodo: ${fmt.currency(metrics.minPoint.value)}`}
           >
             <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
               <TrendingDown size={14} />
