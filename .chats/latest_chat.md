@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 20:25:24
+- **Fecha de exportación:** 2026-10-11 20:29:52
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 69
+- **Total de interacciones registradas:** 71
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1149,6 +1149,34 @@ Se ha sustituido por completo la gráfica SVG personalizada por el **motor ofici
 ---
 
 ### 👤 Usuario (2026-10-11 18:19:45)
+
+
+
+---
+
+### 🤖 Asistente (2026-10-11 18:25:26)
+
+Se han aplicado los cambios indicados en el boceto:
+
+1. **Subir KPIs de mercado bajo el gráfico de simulación (`SUBIR`)**:
+   - Integrados los tres indicadores en la columna izquierda, justo debajo del gráfico intradía de TradingView:
+     - **Seguimiento**: total de valores en seguimiento con recuento en verde/rojo de al alza y a la baja.
+     - **Mayor Ganancia Hoy**: destacando el activo con mayor subida (e.g. *Oro +1.43%*), clickable para abrir su ficha detallada.
+     - **Mayor Caída Hoy**: destacando el activo con mayor corrección (e.g. *EUR/USD -0.09%*), clickable para abrir su ficha detallada.
+
+2. **Eliminar Capitalización Agregada (❌)**:
+   - Se ha suprimido por completo la tarjeta de *Cap. Agregada* y la fila redundante inferior, permitiendo que la tabla de cotizaciones y el mapa de calor suban de forma limpia y directa.
+
+3. **Aumentar altura del desglose de réplicas (`+ ALTO`)**:
+   - Ampliada la altura útil de la tabla en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx) para dar cabida a todos los fondos y ETFs sin comprimir la visualización, equilibrando la altura de ambas columnas.
+
+4. **Sincronización y Release**:
+   - Compilación verificada sin errores (`npm run build`).
+   - Liberada la versión **v2.7.49** y sincronizada en Git mediante `python scripts/sync_release.py`.
+
+---
+
+### 👤 Usuario (2026-10-11 18:26:56)
 
 
 

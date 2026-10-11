@@ -136,10 +136,11 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
     try {
       const containerWidth = Math.max(10, chartContainerRef.current.clientWidth || 300)
+      const containerHeight = Math.max(10, chartContainerRef.current.clientHeight || 390)
 
       chart = createChart(chartContainerRef.current, {
         width: containerWidth,
-        height: 250,
+        height: containerHeight,
         layout: {
           background: { type: ColorType.Solid, color: 'transparent' },
           textColor: isDark ? '#94a3b8' : '#64748b',
@@ -165,7 +166,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         },
         rightPriceScale: {
           borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-          scaleMargins: { top: 0.12, bottom: 0.12 },
+          scaleMargins: { top: 0.10, bottom: 0.10 },
           autoScale: true,
         },
         timeScale: {
@@ -226,12 +227,13 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
       console.warn('Failed to initialize simulated TradingView chart:', err)
     }
 
-    // Auto-resize observer to dynamically adapt width without distortion
+    // Auto-resize observer to dynamically adapt width and height without distortion
     const ro = new ResizeObserver((entries) => {
       if (disposed || !entries[0] || !chartRef.current) return
       try {
         const w = Math.max(10, entries[0].contentRect.width)
-        chartRef.current.applyOptions({ width: w })
+        const h = Math.max(10, entries[0].contentRect.height)
+        chartRef.current.applyOptions({ width: w, height: h })
         chartRef.current.timeScale().fitContent()
       } catch {}
     })
@@ -445,7 +447,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           </div>
 
           {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
-          <div className="relative w-full h-[255px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">
+          <div className="relative w-full h-[390px] sm:h-[410px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">
             {isLoading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40">
                 <LoadingDot />
@@ -583,7 +585,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
             {/* TAB 1: Desglose por Fondos en Cartera */}
             {activeTab === 'funds' && (
-              <div className="overflow-x-auto overflow-y-auto max-h-[465px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+              <div className="overflow-x-auto overflow-y-auto max-h-[530px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
@@ -688,7 +690,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
             {/* TAB 2: Resumen Ponderado por ETFs Réplica */}
             {activeTab === 'etfs' && (
-              <div className="overflow-x-auto overflow-y-auto max-h-[465px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+              <div className="overflow-x-auto overflow-y-auto max-h-[530px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
