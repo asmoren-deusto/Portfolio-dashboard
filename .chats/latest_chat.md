@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 19:32:30
+- **Fecha de exportación:** 2026-10-11 19:39:59
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 55
+- **Total de interacciones registradas:** 57
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -925,5 +925,31 @@ Se ha eliminado el selector de **Picos** y los marcadores de máximos/mínimos e
 ### 👤 Usuario (2026-10-11 17:21:52)
 
 muestra en el eje y en color los valores parciales de las entidades, como el total y el aportado
+
+---
+
+### 🤖 Asistente (2026-10-11 17:32:32)
+
+Se han integrado los **valores parciales de cada entidad** en el eje Y (escala de precios derecha) con sus respectivos colores corporativos, tal y como se muestran el Total y el Capital Aportado:
+
+### 🎯 Qué se ha implementado
+1. **Badges de valores parciales por entidad en el eje Y**:
+   - Cada entidad de la cartera muestra su valor numérico parcial exacto en su altura correspondiente del eje Y con su propia píldora de color (ej. Azul para **MyInvestor**, Verde para **BBVA**, Ámbar para **Indexa Capital**, Rosa para **Kutxabank**, Cian para **Scalable**, Violeta para **Trade Republic**).
+   - Sin líneas horizontales invasivas cruzando el gráfico (`lineVisible: false`), manteniendo las curvas apiladas limpias y elegantes.
+2. **Escala completa desde 0,00 €**:
+   - Se ha configurado el autoscale del gráfico para que parta desde la base, garantizando que todos los valores parciales (incluso los más bajos) queden perfectamente encuadrados y legibles en el eje vertical.
+3. **Coexistencia con Total y Aportado**:
+   - El eje derecho muestra simultáneamente:
+     - **Patrimonio / Total**: Valor liquidativo total de la cartera.
+     - **Capital Aportado**: Línea discontinua y etiqueta morada.
+     - **Entidades individuales**: Sus importes parciales en sus respectivos colores.
+
+Versión actualizada y desplegada en **`v2.7.42`**.
+
+---
+
+### 👤 Usuario (2026-10-11 17:30:00)
+
+arregla esa visualización, curratelo, ahora mismo se ve fatal. grafica ancha, valores en pequeño, etc
 
 ---

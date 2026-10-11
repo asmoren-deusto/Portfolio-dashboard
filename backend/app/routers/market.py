@@ -940,7 +940,10 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
     import yfinance as yf
     import pandas as pd
 
-    txs = _get_all_transactions(db, user_id=user_id or "asier")
+    target_user = user_id if user_id and user_id != "demo" else "asier"
+    txs = _get_all_transactions(db, user_id=target_user)
+    if not txs:
+        txs = _get_all_transactions(db, user_id="asier")
     positions = calculate_positions(txs)
     active = {k: v for k, v in positions.items() if v.get("shares", 0) > 0.0001 and not k.startswith("TR_")}
     if not active:
