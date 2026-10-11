@@ -666,23 +666,7 @@ export function PerformanceChart({
           )}
         </div>
 
-        {/* Middle: Clean Stacked Color Legend (Non-interactive) */}
-        {availableBrokers.length > 1 && (
-          <div className="hidden sm:flex items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-            {availableBrokers.map((b) => {
-              const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
-              return (
-                <div key={b} className="flex items-center gap-1.5">
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: cfg.color }}
-                  />
-                  <span>{cfg.label}</span>
-                </div>
-              )
-            })}
-          </div>
-        )}
+
 
         {/* Right: Beneficio & Fecha */}
         <div className="flex items-center justify-between sm:justify-end gap-2">
@@ -714,7 +698,25 @@ export function PerformanceChart({
       </div>
 
       {/* Canvas Container */}
-      <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden" />
+      <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
+        {/* Floating Small In-Chart Legend */}
+        {availableBrokers.length > 1 && (
+          <div className="absolute top-2 left-2.5 z-10 pointer-events-none flex items-center gap-2.5 px-2 py-0.5 rounded-md bg-white/80 dark:bg-[#181818]/80 border border-slate-200/60 dark:border-white/[0.08] backdrop-blur-xs text-[10px] text-slate-600 dark:text-slate-300 font-medium shadow-2xs">
+            {availableBrokers.map((b) => {
+              const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
+              return (
+                <div key={b} className="flex items-center gap-1">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ backgroundColor: cfg.color }}
+                  />
+                  <span className="font-semibold">{cfg.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Useful Milestones Strip */}
       {metrics && showFooterStrip && (

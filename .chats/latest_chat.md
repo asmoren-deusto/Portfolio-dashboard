@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 19:17:44
+- **Fecha de exportación:** 2026-10-11 19:18:51
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 49
+- **Total de interacciones registradas:** 51
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -870,5 +870,27 @@ Los cambios ya están subidos al repositorio y desplegados en `main`.
 ### 👤 Usuario (2026-10-11 17:16:52)
 
 elimina por completo los selectores, con ver los valores estackeados me vale sin necesidad de seleccionar cosas
+
+---
+
+### 🤖 Asistente (2026-10-11 17:17:47)
+
+Listo. He eliminado por completo los selectores interactivos en la versión **v2.7.39**:
+
+1. **Sin botones ni selectores:** Se han suprimido todos los botones de selección. Todas las entidades se apilan y visualizan automáticamente siempre juntas.
+2. **Gráfica apilada continua y limpia:**
+   - **Capa base:** Indexa Capital (relleno ámbar).
+   - **Capa media:** BBVA (relleno verde esmeralda apilado).
+   - **Capa superior (Total):** MyInvestor (relleno azul apilado hasta el patrimonio total).
+3. **Barra HUD minimalista:** En el centro solo aparece una discreta leyenda indicativa de los 3 colores (`🟡 Indexa  🟢 BBVA  🔵 MyInvestor`), sin ningún elemento clickeable que sature la interfaz.
+4. **Eje derecho limpio:** Solo muestra el badge del **Total de la cartera** en la cúspide y el **Capital Aportado** (línea morada discontinua).
+
+Los cambios ya están subidos al repositorio.
+
+---
+
+### 👤 Usuario (2026-10-11 17:18:10)
+
+mete la leyenda dentro del grafico en pequeño
 
 ---
