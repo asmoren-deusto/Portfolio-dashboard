@@ -124,6 +124,13 @@ def _seed_asier_data():
                 PriceCache.date >= "2026-01-01",
             ).delete()
 
+            # Purge any weekend dates from price_cache (funds do not liquidate on Saturdays or Sundays)
+            try:
+                from sqlalchemy import text
+                db.execute(text("DELETE FROM price_cache WHERE strftime('%w', date) IN ('0', '6')"))
+            except Exception:
+                pass
+
             for p_data in PRICES:
                 entry = db.query(PriceCache).filter(
                     PriceCache.isin == p_data["isin"],

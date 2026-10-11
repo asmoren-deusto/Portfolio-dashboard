@@ -142,22 +142,33 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         daily_change_pct = None
         p_prev = None
 
-        if h and len(h) >= 2:
-            last_h_price = effective_price
-            for pt in reversed(h):
-                if pt.get("price", 0) > 0 and abs(pt["price"] - last_h_price) > 0.0001:
-                    p_prev = pt["price"]
-                    break
+        if h:
+            prev_points = [
+                pt for pt in h
+                if pt.get("date") and (not price_date or pt["date"] < price_date) and pt.get("price", 0) > 0
+            ]
+            if prev_points:
+                p_prev = prev_points[-1]["price"]
+            elif len(h) >= 2 and h[-2].get("price", 0) > 0:
+                p_prev = h[-2]["price"]
 
         if (p_prev is None or p_prev <= 0) and db is not None:
-            distinct_cached = []
-            for cp in db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).all():
-                if cp.price and cp.price > 0:
-                    if not distinct_cached or abs(cp.price - distinct_cached[-1]) > 0.0001:
-                        distinct_cached.append(cp.price)
-                    if len(distinct_cached) >= 2:
-                        p_prev = distinct_cached[1]
-                        break
+            query = db.query(PriceCache).filter(
+                PriceCache.isin == isin,
+                PriceCache.price > 0,
+            )
+            if price_date:
+                query = query.filter(PriceCache.date < price_date)
+            prev_cp = query.order_by(PriceCache.date.desc()).first()
+            if prev_cp:
+                p_prev = prev_cp.price
+            else:
+                all_cps = db.query(PriceCache).filter(
+                    PriceCache.isin == isin,
+                    PriceCache.price > 0
+                ).order_by(PriceCache.date.desc()).limit(2).all()
+                if len(all_cps) >= 2:
+                    p_prev = all_cps[1].price
 
         if p_prev and p_prev > 0 and effective_price and effective_price > 0:
             daily_change = round(effective_price - p_prev, 4)
@@ -730,7 +741,10 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     # Compute weighted daily return directly from active positions for exact 1D consistency.
     # Funds that have NOT yet updated to the latest reporting NAV date compute with 0.00% daily change
     # to avoid falsely attributing past days' returns to today's session.
-    latest_nav_date_res = db.query(func.max(PriceCache.date)).filter(PriceCache.isin.in_(list(positions.keys()))).scalar()
+    latest_nav_date_res = db.query(func.max(PriceCache.date)).filter(
+        PriceCache.isin.in_(list(positions.keys())),
+        ~func.strftime("%w", PriceCache.date).in_(["0", "6"])
+    ).scalar() if db is not None else None
     latest_nav_date = latest_nav_date_res or datetime.now().strftime("%Y-%m-%d")
 
     weighted_1d = 0.0
@@ -747,25 +761,36 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         pos_val = pos["shares"] * eff_p
         active_val += pos_val
 
-        # Find previous trading session price from price_history (comparing against previous distinct day)
+        # Find previous trading session price from price_history
         p_prev = None
-        if p and len(p) >= 2:
-            last_p = eff_p
-            for pt in reversed(p[:-1]):
-                if pt.get("price", 0) > 0 and abs(pt["price"] - last_p) > 0.0001:
-                    p_prev = pt["price"]
-                    break
+        fund_latest_date = p[-1]["date"] if p else None
+        if p:
+            prev_points = [
+                pt for pt in p
+                if pt.get("date") and (not fund_latest_date or pt["date"] < fund_latest_date) and pt.get("price", 0) > 0
+            ]
+            if prev_points:
+                p_prev = prev_points[-1]["price"]
+            elif len(p) >= 2 and p[-2].get("price", 0) > 0:
+                p_prev = p[-2]["price"]
 
         if (p_prev is None or p_prev <= 0) and db is not None:
-            cached_prices = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(10).all()
-            distinct_cached = []
-            for cp in cached_prices:
-                if cp.price and cp.price > 0:
-                    if not distinct_cached or abs(cp.price - distinct_cached[-1]) > 0.0001:
-                        distinct_cached.append(cp.price)
-                    if len(distinct_cached) >= 2:
-                        p_prev = distinct_cached[1]
-                        break
+            query = db.query(PriceCache).filter(
+                PriceCache.isin == isin,
+                PriceCache.price > 0,
+            )
+            if fund_latest_date:
+                query = query.filter(PriceCache.date < fund_latest_date)
+            prev_cp = query.order_by(PriceCache.date.desc()).first()
+            if prev_cp:
+                p_prev = prev_cp.price
+            else:
+                all_cps = db.query(PriceCache).filter(
+                    PriceCache.isin == isin,
+                    PriceCache.price > 0
+                ).order_by(PriceCache.date.desc()).limit(2).all()
+                if len(all_cps) >= 2:
+                    p_prev = all_cps[1].price
 
         # Only compute non-zero daily return if this fund has updated to the latest NAV date
         asset_daily_pct = 0.0

@@ -54,6 +54,19 @@ KNOWN_TICKERS: dict[str, str] = {
 }
 
 
+def _normalize_business_date(d_str: str) -> str:
+    """Normalize any weekend date to the preceding Friday (funds do not liquidate on weekends)."""
+    try:
+        dt = datetime.strptime(d_str, "%Y-%m-%d").date()
+        if dt.weekday() == 5:  # Saturday -> Friday
+            return (dt - timedelta(days=1)).strftime("%Y-%m-%d")
+        elif dt.weekday() == 6:  # Sunday -> Friday
+            return (dt - timedelta(days=2)).strftime("%Y-%m-%d")
+    except Exception:
+        pass
+    return d_str
+
+
 async def get_price_with_date(
     isin: str,
     ticker: str | None = None,
@@ -161,7 +174,8 @@ async def get_price_with_date(
     # If successfully fetched from live provider, persist to DB PriceCache & in-memory cache
     if price is not None and db is not None and PriceCache is not None:
         try:
-            target_date = price_date or datetime.now().strftime("%Y-%m-%d")
+            target_date = _normalize_business_date(price_date or datetime.now().strftime("%Y-%m-%d"))
+            price_date = target_date
             existing = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == target_date).first()
             if existing:
                 # Do not downgrade high-precision NAV (4 decimals) with a rounded quote (2 decimals)
@@ -247,6 +261,11 @@ async def _fetch_indexa_epsv_official(isin: str, db=None) -> tuple[Optional[floa
             for r in reversed(rows):
                 if r and len(r) > col_idx and r[0].strip() and r[col_idx].strip():
                     date_str = r[0].strip()
+                    try:
+                        if datetime.strptime(date_str, "%Y-%m-%d").date().weekday() >= 5:
+                            continue
+                    except ValueError:
+                        pass
                     val_str = r[col_idx].strip().replace(',', '.')
                     try:
                         raw_val = float(val_str)
@@ -259,6 +278,11 @@ async def _fetch_indexa_epsv_official(isin: str, db=None) -> tuple[Optional[floa
                                     for sub_r in rows[-30:]:
                                         if sub_r and len(sub_r) > col_idx and sub_r[0].strip() and sub_r[col_idx].strip():
                                             s_dt = sub_r[0].strip()
+                                            try:
+                                                if datetime.strptime(s_dt, "%Y-%m-%d").date().weekday() >= 5:
+                                                    continue
+                                            except ValueError:
+                                                pass
                                             s_val = float(sub_r[col_idx].strip().replace(',', '.')) / 10.0
                                             existing = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == s_dt).first()
                                             if not existing:
@@ -335,6 +359,11 @@ async def _fetch_indexa_epsv_history(isin: str, period: str = "1y", db=None) -> 
             for r in reader:
                 if r and len(r) > col_idx and r[0].strip() and r[col_idx].strip():
                     d_str = r[0].strip()
+                    try:
+                        if datetime.strptime(d_str, "%Y-%m-%d").date().weekday() >= 5:
+                            continue
+                    except ValueError:
+                        pass
                     if cutoff_date and d_str < cutoff_date:
                         continue
                     val_str = r[col_idx].strip().replace(',', '.')

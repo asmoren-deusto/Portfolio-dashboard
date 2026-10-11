@@ -317,11 +317,14 @@ export function OverviewPage() {
     }
   }, [positions, allocMode])
 
-  // Latest reporting NAV date across active positions
+  // Latest reporting NAV date across active positions (ignoring weekend dates)
   const latestNavDate = useMemo(() => {
     return positions.reduce((max, p) => {
       const d = p.price_date || p.last_updated
-      return d && d > max ? d : max
+      if (!d) return max
+      const dayOfWeek = new Date(d + 'T12:00:00Z').getUTCDay()
+      if (dayOfWeek === 0 || dayOfWeek === 6) return max
+      return d > max ? d : max
     }, '')
   }, [positions])
 
