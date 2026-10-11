@@ -99,6 +99,7 @@ class PerformancePoint(BaseModel):
     date: str
     value: float
     invested: Optional[float] = None
+    brokers: Optional[dict[str, dict[str, float]]] = None
 
 
 class PricePoint(BaseModel):

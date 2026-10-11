@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 17:15:43
+- **Fecha de exportación:** 2026-10-11 18:23:33
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 40
+- **Total de interacciones registradas:** 45
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -707,5 +707,74 @@ Verificando los cambios tras retirar la fila del fin de semana...
 ### 🤖 Asistente (2026-10-11 15:15:15)
 
 He ejecutado la verificación de cálculo diario en segundo plano para comprobar los resultados de las posiciones y analíticas. Esperando el resultado...
+
+---
+
+### 🤖 Asistente (2026-10-11 15:15:45)
+
+He analizado en detalle lo ocurrido y el diagnóstico que tenías es **exacto al 100%**:
+
+---
+
+### 🔍 ¿Qué estaba pasando exactamente?
+
+1. **La fila artificial del sábado día 10:**
+   - El CSV oficial de Indexa publica líneas con fechas de fin de semana (sábado y domingo) donde repite el último valor liquidativo (el del viernes/jueves: `23,817`).
+   - El sistema guardó en la base de datos el sábado `2026-10-10` con precio `23.817` para Indexa.
+
+2. **Por qué el viernes día 9 se puso en rojo (-80 € / -0,10%):**
+   - **Filtro de fecha más reciente:** La interfaz detectó que la fecha más reciente de NAV era el sábado `2026-10-10`. Como los 4 fondos Fidelity (y el resto) tenían fecha de viernes `2026-10-09`, el cálculo de métricas diarias consideró que solo Indexa estaba "al día" y **excluyó los fondos de Fidelity** (que acumulaban una ganancia de **+256 €**).
+   - **El bug de búsqueda de precio anterior (`p_prev`):** En el backend había una condición que buscaba el precio previo recorriendo hacia atrás *hasta encontrar un precio diferente* (`abs(p - last_p) > 0.0001`). Como el jueves 8 y viernes 9 el valor fue prácticamente el mismo (`23.8169` y `23.817`), se saltó el jueves y comparó con el miércoles 7 (`23.984`), calculando falsamente una pérdida de **-0,70% (-80,63 €)** para un día en el que la variación real respecto a la sesión previa era del **0,00%**.
+   - **Efecto en la tabla/gráfico:** Como la curva de rentabilidad termina el viernes 9 (no hay sesiones de bolsa en sábado), la tabla asignó el valor del día más reciente (`-80,63 €`) al viernes 9, tiñendo el día de rojo.
+
+---
+
+### 🛠️ Soluciones aplicadas
+
+1. **Purga y bloqueo de fines de semana en NAVs:**
+   - Se ha añadido la función `_normalize_business_date` y filtros en los parsers de Indexa y proveedores en vivo para **ignorar filas con fecha de sábado o domingo**.
+   - Se han eliminado de la base de datos todas las fechas de fin de semana y se ha añadido un paso de limpieza automática en cada arranque.
+   - En el frontend (`OverviewPage.tsx`), la fecha `latestNavDate` ahora descarta explícitamente los días de fin de semana.
+
+2. **Cálculo estricto de la sesión anterior:**
+   - Se ha corregido la lógica tanto en `get_positions` como en `get_analytics` de `portfolio.py`: ahora se compara **estrictamente contra la sesión de trading inmediatamente anterior** a la fecha del NAV (sin saltarse días si el precio se mantiene constante). Si el valor liquidativo no varía respecto al día anterior, la rentabilidad diaria es `0,00%` (y no una variación acumulada de varios días atrás).
+
+---
+
+### 📊 Resultado verificado
+
+Para el **viernes 9 de octubre**:
+- **Fidelity MSCI World:** NAV `14.706` (**+150,71 € / +0,74%**)
+- **Fidelity MSCI Emerging Markets:** NAV `9.269` (**+45,88 € / +0,73%**)
+- **Fidelity Euro 50:** NAV `28.67` (**+46,05 € / +0,74%**)
+- **Fidelity MSCI Japan:** NAV `14.823` (**+13,65 € / +0,21%**)
+- **Indexa EPSV:** NAV `23.817` (**0,00% / +0,05 €**)
+- **Total diario del viernes 9:** **`+256,34 €` (+0,33%)** en **VERDE** 🟢.
+
+Los cambios ya han sido versionados (`v2.7.36`) y subidos a Git mediante el script de sincronización.
+
+---
+
+### 👤 Usuario (2026-10-11 16:06:11)
+
+como lo que tengo son fondos y la actualización de precio tarda un dia, quiero que en mercado me hagas una grafica con los rendimientos simulados en directo de mi cartera de fondos pero usando etfs equivalentes. añade tb los etfs que utilices al listado de cotizadas. tb, en vision general en la grafica de evolución mete selectores para mostrar/ocultar las distintas entidades mostrando su dato en la grafica y por tanto su sumatorio como el total, es decir que se desglose por entidad el grafico
+
+---
+
+### 🤖 Asistente (2026-10-11 16:11:46)
+
+Comprobando el endpoint de rendimiento histórico actual...
+
+---
+
+### 🤖 Asistente (2026-10-11 16:14:18)
+
+Comprobando el cálculo de rendimiento histórico con desglose por entidad...
+
+---
+
+### 🤖 Asistente (2026-10-11 16:23:16)
+
+Ejecutando pruebas de integración en el backend...
 
 ---

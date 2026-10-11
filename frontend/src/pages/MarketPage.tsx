@@ -24,11 +24,13 @@ import { StockTableRow } from '@/components/market/StockTableRow'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { LoadingDot } from '@/components/ui/LoadingDot'
+import { SimulatedPortfolioCard } from '@/components/market/SimulatedPortfolioCard'
 import { fmt } from '@/lib/utils'
 
 const INDEX_TABS = [
   { id: 'TICKER', label: 'Ticker superior' },
   { id: 'Todos', label: 'Todos los Mercados' },
+  { id: 'ETFs', label: 'ETFs Cartera' },
   { id: 'SP500', label: 'S&P 500' },
   { id: 'NASDAQ100', label: 'NASDAQ 100' },
   { id: 'IBEX35', label: 'IBEX 35' },
@@ -229,9 +231,10 @@ export const MarketPage: React.FC = () => {
   return (
     <div className="space-y-4 pb-8">
       {/* Real-time Ticker Bar */}
-
-      {/* Real-time Ticker Bar */}
       <MarketTicker onSelectStock={setSelectedStock} />
+
+      {/* Simulated Live Portfolio Performance via Proxy ETFs */}
+      <SimulatedPortfolioCard />
 
       {/* Summary KPI Highlights */}
       {stats && (

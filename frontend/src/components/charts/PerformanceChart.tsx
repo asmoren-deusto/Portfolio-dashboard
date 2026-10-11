@@ -19,9 +19,55 @@ import {
   Calendar,
   ArrowUpRight,
   Flame,
+  Layers,
+  Building2,
 } from 'lucide-react'
 
 export type ChartMode = 'currency' | 'percent'
+
+export interface EntityConfig {
+  id: string
+  label: string
+  color: string
+  areaTopColor: string
+  areaBottomColor: string
+  textColor: string
+  badgeBg: string
+  badgeBorder: string
+}
+
+export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
+  myinvestor: {
+    id: 'myinvestor',
+    label: 'MyInvestor',
+    color: '#3b82f6', // blue
+    areaTopColor: 'rgba(59, 130, 246, 0.16)',
+    areaBottomColor: 'rgba(59, 130, 246, 0.00)',
+    textColor: 'text-blue-600 dark:text-blue-400',
+    badgeBg: 'bg-blue-500/10 dark:bg-blue-500/20',
+    badgeBorder: 'border-blue-500/30',
+  },
+  bbva: {
+    id: 'bbva',
+    label: 'BBVA',
+    color: '#10b981', // emerald
+    areaTopColor: 'rgba(16, 185, 129, 0.16)',
+    areaBottomColor: 'rgba(16, 185, 129, 0.00)',
+    textColor: 'text-emerald-600 dark:text-emerald-400',
+    badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+    badgeBorder: 'border-emerald-500/30',
+  },
+  indexa: {
+    id: 'indexa',
+    label: 'Indexa Capital',
+    color: '#f59e0b', // amber
+    areaTopColor: 'rgba(245, 158, 11, 0.16)',
+    areaBottomColor: 'rgba(245, 158, 11, 0.00)',
+    textColor: 'text-amber-600 dark:text-amber-400',
+    badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
+    badgeBorder: 'border-amber-500/30',
+  },
+}
 
 interface PerformanceChartProps {
   data: PricePoint[]
@@ -43,59 +89,131 @@ function formatDateSpanish(dateStr: string): string {
   }
 }
 
-function sanitizeValuePoints(points: PricePoint[]): { time: any; value: number }[] {
+// Helper to sanitize selected sum points in currency mode
+function sanitizeSelectedSumPoints(
+  points: PricePoint[],
+  selected: Set<string>,
+  allBrokers: string[]
+): { time: any; value: number }[] {
   if (!points || !points.length) return []
-  const valid = points
-    .filter(p => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
+  const valid = points.filter(p => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
     .sort((a, b) => a.date.localeCompare(b.date))
 
   const unique: { time: any; value: number }[] = []
   const seen = new Set<string>()
+
   for (const p of valid) {
     if (!seen.has(p.date)) {
       seen.add(p.date)
-      unique.push({ time: p.date as any, value: p.value })
+      let val = p.value
+      if (p.brokers && selected.size > 0 && selected.size < allBrokers.length) {
+        val = 0
+        for (const b of selected) {
+          val += p.brokers[b]?.value ?? 0
+        }
+      }
+      unique.push({ time: p.date as any, value: Math.max(0, val) })
     }
   }
   return unique
 }
 
-function sanitizeInvestedPoints(points: PricePoint[]): { time: any; value: number }[] {
+// Helper to sanitize selected invested points
+function sanitizeSelectedInvestedPoints(
+  points: PricePoint[],
+  selected: Set<string>,
+  allBrokers: string[]
+): { time: any; value: number }[] {
   if (!points || !points.length) return []
-  const valid = points
-    .filter(p => p && p.date && typeof p.invested === 'number' && !isNaN(p.invested))
-    .sort((a, b) => a.date.localeCompare(b.date))
-
+  const valid = points.filter(p => p && p.date).sort((a, b) => a.date.localeCompare(b.date))
   const unique: { time: any; value: number }[] = []
   const seen = new Set<string>()
+
   for (const p of valid) {
     if (!seen.has(p.date)) {
       seen.add(p.date)
-      unique.push({ time: p.date as any, value: p.invested! })
+      let inv = p.invested ?? 0
+      if (p.brokers && selected.size > 0 && selected.size < allBrokers.length) {
+        inv = 0
+        for (const b of selected) {
+          inv += p.brokers[b]?.invested ?? 0
+        }
+      }
+      unique.push({ time: p.date as any, value: Math.max(0, inv) })
     }
   }
   return unique
 }
 
-function sanitizePercentPoints(points: PricePoint[]): { time: any; value: number }[] {
-  if (!points || !points.length) return []
-  const valid = points
-    .filter(p => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
-    .sort((a, b) => a.date.localeCompare(b.date))
+// Helper to sanitize selected sum in percent mode
+function sanitizeSelectedSumPercentPoints(
+  points: PricePoint[],
+  selected: Set<string>,
+  allBrokers: string[]
+): { time: any; value: number }[] {
+  const sumPoints = sanitizeSelectedSumPoints(points, selected, allBrokers)
+  if (!sumPoints.length) return []
+  const base = sumPoints[0]
+  if (base.value <= 0) return []
 
-  if (!valid.length) return []
-  const base = valid[0]
+  const invPoints = sanitizeSelectedInvestedPoints(points, selected, allBrokers)
+  const baseInv = invPoints[0]?.value ?? 0
+
+  const unique: { time: any; value: number }[] = []
+  for (let i = 0; i < sumPoints.length; i++) {
+    const curVal = sumPoints[i].value
+    const curInv = invPoints[i]?.value ?? 0
+    const periodInflow = curInv - baseInv
+    const profit = (curVal - base.value) - periodInflow
+    const pct = base.value > 0 ? (profit / base.value) * 100 : 0
+    unique.push({ time: sumPoints[i].time, value: Number(pct.toFixed(2)) })
+  }
+  return unique
+}
+
+// Helper to sanitize an individual entity line in currency mode
+function sanitizeEntityCurrencyPoints(
+  points: PricePoint[],
+  broker: string
+): { time: any; value: number }[] {
+  if (!points || !points.length) return []
+  const valid = points.filter(p => p && p.date).sort((a, b) => a.date.localeCompare(b.date))
   const unique: { time: any; value: number }[] = []
   const seen = new Set<string>()
 
   for (const p of valid) {
     if (!seen.has(p.date)) {
       seen.add(p.date)
-      const periodInflow = (p.invested ?? 0) - (base.invested ?? 0)
-      const profit = (p.value - base.value) - periodInflow
-      const pct = base.value > 0 ? (profit / base.value) * 100 : 0
-      unique.push({ time: p.date as any, value: Number(pct.toFixed(2)) })
+      const val = p.brokers?.[broker]?.value ?? 0
+      if (val > 0) {
+        unique.push({ time: p.date as any, value: val })
+      }
     }
+  }
+  return unique
+}
+
+// Helper to sanitize an individual entity line in percent mode
+function sanitizeEntityPercentPoints(
+  points: PricePoint[],
+  broker: string
+): { time: any; value: number }[] {
+  const currPoints = sanitizeEntityCurrencyPoints(points, broker)
+  if (!currPoints.length) return []
+  const base = currPoints[0]
+  if (base.value <= 0) return []
+
+  const baseOrig = points.find(p => p.date === base.time)
+  const baseInv = baseOrig?.brokers?.[broker]?.invested ?? 0
+
+  const unique: { time: any; value: number }[] = []
+  for (const pt of currPoints) {
+    const orig = points.find(p => p.date === pt.time)
+    const curInv = orig?.brokers?.[broker]?.invested ?? 0
+    const periodInflow = curInv - baseInv
+    const profit = (pt.value - base.value) - periodInflow
+    const pct = base.value > 0 ? (profit / base.value) * 100 : 0
+    unique.push({ time: pt.time, value: Number(pct.toFixed(2)) })
   }
   return unique
 }
@@ -112,35 +230,79 @@ export function PerformanceChart({
   const chartRef = useRef<IChartApi | null>(null)
   const areaSeriesRef = useRef<any>(null)
   const investedSeriesRef = useRef<any>(null)
+  const entitySeriesMapRef = useRef<Map<string, any>>(new Map())
   const markersRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
-  const lastSweepKeyRef = useRef<string>('')
 
   const { theme, refreshAnimKey } = useAppStore()
   const isDark = theme === 'dark'
 
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
+  // Dynamically detect available brokers in data
+  const availableBrokers = useMemo(() => {
+    if (!data || !data.length) return []
+    const found = new Set<string>()
+    for (const p of data) {
+      if (p.brokers) {
+        for (const [k, v] of Object.entries(p.brokers)) {
+          if (v && v.value > 0) found.add(k)
+        }
+      }
+    }
+    return Array.from(found).sort()
+  }, [data])
+
+  // Selectors State: showTotal and set of active entities
+  const [showTotal, setShowTotal] = useState<boolean>(true)
+  const [selectedEntities, setSelectedEntities] = useState<Set<string>>(() => new Set(['myinvestor', 'bbva', 'indexa']))
+
+  // Auto-sync available brokers on initial load if empty
+  useEffect(() => {
+    if (availableBrokers.length > 0 && selectedEntities.size === 0) {
+      setSelectedEntities(new Set(availableBrokers))
+    }
+  }, [availableBrokers])
+
+  const toggleEntity = (b: string) => {
+    setSelectedEntities(prev => {
+      const next = new Set(prev)
+      if (next.has(b)) {
+        if (next.size === 1 && !showTotal) return prev // keep at least one visible
+        next.delete(b)
+      } else {
+        next.add(b)
+      }
+      return next
+    })
+  }
+
+  const toggleTotal = () => {
+    if (showTotal && selectedEntities.size === 0) return // keep something visible
+    setShowTotal(v => !v)
+  }
+
   const dataRef = useRef<PricePoint[]>(data)
   dataRef.current = data
 
-  // Metrics computation for milestones & quick stats
+  // Metrics computation for selected entities sum
   const metrics = useMemo(() => {
     if (!data || data.length === 0) return null
 
-    const valid = data
-      .filter(p => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
-      .sort((a, b) => a.date.localeCompare(b.date))
+    const sumPoints = sanitizeSelectedSumPoints(data, selectedEntities, availableBrokers)
+    if (sumPoints.length === 0) return null
 
-    if (valid.length === 0) return null
+    const invPoints = sanitizeSelectedInvestedPoints(data, selectedEntities, availableBrokers)
 
-    const first = valid[0]
-    const last = valid[valid.length - 1]
+    const first = sumPoints[0]
+    const last = sumPoints[sumPoints.length - 1]
+    const firstInv = invPoints[0]?.value ?? 0
+    const lastInv = invPoints[invPoints.length - 1]?.value ?? 0
 
-    let maxPoint = valid[0]
-    let minPoint = valid[0]
+    let maxPoint = sumPoints[0]
+    let minPoint = sumPoints[0]
 
-    for (const p of valid) {
+    for (const p of sumPoints) {
       if (p.value > maxPoint.value) maxPoint = p
       if (p.value < minPoint.value) minPoint = p
     }
@@ -149,13 +311,15 @@ export function PerformanceChart({
     const maxVal = maxPoint.value
     const drawdownPct = maxVal > 0 ? ((currentVal - maxVal) / maxVal) * 100 : 0
 
-    const periodInflow = (last.invested ?? 0) - (first.invested ?? 0)
+    const periodInflow = lastInv - firstInv
     const periodProfit = (last.value - first.value) - periodInflow
     const periodReturnPct = first.value > 0 ? (periodProfit / first.value) * 100 : 0
 
     return {
       first,
       last,
+      firstInv,
+      lastInv,
       maxPoint,
       minPoint,
       drawdownPct,
@@ -163,34 +327,42 @@ export function PerformanceChart({
       periodReturnPct,
       periodInflow,
     }
-  }, [data])
+  }, [data, selectedEntities, availableBrokers])
 
-  const activePoint = hoveredPoint || (metrics ? metrics.last : null)
+  // Active point (either crosshair inspection or latest)
+  const activePoint = hoveredPoint || (data.length ? data[data.length - 1] : null)
 
-  const activePnl = useMemo(() => {
+  // Compute active selected values on active point
+  const activeSelectedMetrics = useMemo(() => {
     if (!activePoint) return null
-    if (activePoint.invested !== undefined && activePoint.invested > 0) {
-      const diff = activePoint.value - activePoint.invested
-      const pct = (diff / activePoint.invested) * 100
-      return { diff, pct }
+
+    let val = activePoint.value
+    let inv = activePoint.invested ?? 0
+
+    if (activePoint.brokers && selectedEntities.size > 0 && selectedEntities.size < availableBrokers.length) {
+      val = 0
+      inv = 0
+      for (const b of selectedEntities) {
+        val += activePoint.brokers[b]?.value ?? 0
+        inv += activePoint.brokers[b]?.invested ?? 0
+      }
     }
+
+    const diff = inv > 0 ? val - inv : (metrics?.first ? val - metrics.first.value : 0)
+    const pct = inv > 0 ? (diff / inv) * 100 : (metrics?.first && metrics.first.value > 0 ? (diff / metrics.first.value) * 100 : 0)
+
+    // Return from period start in percent mode
+    let periodPct = 0
     if (metrics && metrics.first) {
-      const diff = activePoint.value - metrics.first.value
-      const pct = metrics.first.value > 0 ? (diff / metrics.first.value) * 100 : 0
-      return { diff, pct }
+      const inflow = inv - (metrics.firstInv ?? 0)
+      const profit = (val - metrics.first.value) - inflow
+      periodPct = metrics.first.value > 0 ? (profit / metrics.first.value) * 100 : 0
     }
-    return null
-  }, [activePoint, metrics])
 
-  // Active percent return from period start if in percent mode
-  const activePercentReturn = useMemo(() => {
-    if (!activePoint || !metrics || !metrics.first) return 0
-    const periodInflow = (activePoint.invested ?? 0) - (metrics.first.invested ?? 0)
-    const profit = (activePoint.value - metrics.first.value) - periodInflow
-    return metrics.first.value > 0 ? (profit / metrics.first.value) * 100 : 0
-  }, [activePoint, metrics])
+    return { val, inv, diff, pct, periodPct }
+  }, [activePoint, selectedEntities, availableBrokers, metrics])
 
-  // Initialize and maintain chart instance
+  // Initialize Lightweight-Charts canvas
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -238,10 +410,10 @@ export function PerformanceChart({
         handleScale: true,
       })
 
-      // Primary Area Series (Portfolio Value or %)
+      // 1. Primary Area Series (Sumatorio / Total Cartera)
       const areaSeries = chart.addSeries(AreaSeries, {
         lineColor: '#2563eb',
-        topColor: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(37, 99, 235, 0.20)',
+        topColor: isDark ? 'rgba(59, 130, 246, 0.14)' : 'rgba(37, 99, 235, 0.20)',
         bottomColor: 'rgba(59, 130, 246, 0.00)',
         lineWidth: 2,
         priceLineVisible: false,
@@ -256,7 +428,7 @@ export function PerformanceChart({
         },
       })
 
-      // Secondary Line Series (Net Invested Capital)
+      // 2. Secondary Line Series (Net Invested Capital of Selected Entities)
       const investedSeries = chart.addSeries(LineSeries, {
         color: isDark ? '#c084fc' : '#9333ea',
         lineWidth: 2,
@@ -273,27 +445,38 @@ export function PerformanceChart({
         },
       })
 
-      // Markers handle
+      // 3. Individual Entity Line Series (MyInvestor, BBVA, Indexa)
+      const entityMap = new Map<string, any>()
+      for (const [bKey, cfg] of Object.entries(ENTITY_CONFIGS)) {
+        const entSeries = chart.addSeries(LineSeries, {
+          color: cfg.color,
+          lineWidth: 2,
+          priceLineVisible: false,
+          lastValueVisible: true,
+          crosshairMarkerRadius: 4,
+          crosshairMarkerBackgroundColor: cfg.color,
+          crosshairMarkerBorderColor: '#ffffff',
+          crosshairMarkerBorderWidth: 1.5,
+          priceFormat: {
+            type: 'custom',
+            formatter: (p: number) => fmt.currency(p),
+          },
+        })
+        entityMap.set(bKey, entSeries)
+      }
+
       const markersPlugin = createSeriesMarkers(areaSeries, [])
 
       chartRef.current = chart
       areaSeriesRef.current = areaSeries
       investedSeriesRef.current = investedSeries
+      entitySeriesMapRef.current = entityMap
       markersRef.current = markersPlugin
 
-      // Initial data population & automatic fit
-      const valPoints = sanitizeValuePoints(dataRef.current)
-      if (valPoints.length) {
-        areaSeries.setData(valPoints)
-      }
-
-      const invPoints = sanitizeInvestedPoints(dataRef.current)
-      if (invPoints.length) {
-        investedSeries.setData(invPoints)
-      }
-
       // Auto-fit immediately on mount
-      if (valPoints.length) {
+      const sumPoints = sanitizeSelectedSumPoints(dataRef.current, selectedEntities, availableBrokers)
+      if (sumPoints.length) {
+        areaSeries.setData(sumPoints)
         chart.timeScale().fitContent()
       }
 
@@ -344,12 +527,13 @@ export function PerformanceChart({
       chartRef.current = null
       areaSeriesRef.current = null
       investedSeriesRef.current = null
+      entitySeriesMapRef.current.clear()
       markersRef.current = null
       zeroPriceLineRef.current = null
     }
   }, [height, isDark])
 
-  // Update Series Data, Mode, Colors, Markers, and Auto-fit automatically
+  // Update Series Data, Active Entities, Mode, Colors, Markers
   useEffect(() => {
     if (!areaSeriesRef.current || !chartRef.current || !data) return
 
@@ -357,11 +541,14 @@ export function PerformanceChart({
       const area = areaSeriesRef.current
       const inv = investedSeriesRef.current
       const chart = chartRef.current
+      const entMap = entitySeriesMapRef.current
 
       if (chartMode === 'currency') {
-        const valPoints = sanitizeValuePoints(data)
-        area.setData(valPoints)
+        // 1. Total / Sumatorio Area Series
+        const sumPoints = sanitizeSelectedSumPoints(data, selectedEntities, availableBrokers)
+        area.setData(sumPoints)
         area.applyOptions({
+          visible: showTotal,
           lineColor: '#2563eb',
           topColor: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(37, 99, 235, 0.20)',
           bottomColor: 'rgba(59, 130, 246, 0.00)',
@@ -380,28 +567,52 @@ export function PerformanceChart({
           zeroPriceLineRef.current = null
         }
 
-        // Invested line series
+        // 2. Invested Line Series for selected entities
         if (inv) {
-          inv.applyOptions({ visible: showInvested })
-          if (showInvested) {
-            const invPoints = sanitizeInvestedPoints(data)
-            inv.setData(invPoints)
+          const invPoints = sanitizeSelectedInvestedPoints(data, selectedEntities, availableBrokers)
+          inv.setData(invPoints)
+          inv.applyOptions({
+            visible: showInvested && showTotal,
+            priceFormat: {
+              type: 'custom',
+              formatter: (p: number) => fmt.currency(p),
+            },
+          })
+        }
+
+        // 3. Individual Entity Lines
+        for (const [bKey, s] of entMap.entries()) {
+          const cfg = ENTITY_CONFIGS[bKey]
+          const isSelected = selectedEntities.has(bKey)
+          if (isSelected) {
+            const entPoints = sanitizeEntityCurrencyPoints(data, bKey)
+            s.setData(entPoints)
+            s.applyOptions({
+              visible: true,
+              color: cfg.color,
+              priceFormat: {
+                type: 'custom',
+                formatter: (p: number) => fmt.currency(p),
+              },
+            })
+          } else {
+            s.applyOptions({ visible: false })
           }
         }
 
-        // High / Low markers
+        // 4. ATH / Low Markers
         if (markersRef.current && metrics) {
-          if (showMilestones && metrics.maxPoint && metrics.minPoint && metrics.maxPoint.date !== metrics.minPoint.date) {
+          if (showMilestones && showTotal && metrics.maxPoint && metrics.minPoint && metrics.maxPoint.time !== metrics.minPoint.time) {
             markersRef.current.setMarkers([
               {
-                time: metrics.maxPoint.date,
+                time: metrics.maxPoint.time,
                 position: 'aboveBar',
                 color: '#10b981',
                 shape: 'arrowDown',
                 text: `Pico: ${fmt.currency(metrics.maxPoint.value)}`,
               },
               {
-                time: metrics.minPoint.date,
+                time: metrics.minPoint.time,
                 position: 'belowBar',
                 color: '#f43f5e',
                 shape: 'arrowUp',
@@ -413,17 +624,18 @@ export function PerformanceChart({
           }
         }
       } else {
-        // Percent mode
-        const pctPoints = sanitizePercentPoints(data)
-        area.setData(pctPoints)
+        // Percent Mode
+        const sumPctPoints = sanitizeSelectedSumPercentPoints(data, selectedEntities, availableBrokers)
+        area.setData(sumPctPoints)
 
         const isPositive = (metrics?.periodReturnPct ?? 0) >= 0
         const mainColor = isPositive ? '#10b981' : '#f43f5e'
         const topGrad = isPositive
-          ? (isDark ? 'rgba(16, 185, 129, 0.30)' : 'rgba(16, 185, 129, 0.22)')
-          : (isDark ? 'rgba(244, 63, 94, 0.30)' : 'rgba(244, 63, 94, 0.22)')
+          ? (isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.20)')
+          : (isDark ? 'rgba(244, 63, 94, 0.28)' : 'rgba(244, 63, 94, 0.20)')
 
         area.applyOptions({
+          visible: showTotal,
           lineColor: mainColor,
           topColor: topGrad,
           bottomColor: isPositive ? 'rgba(16, 185, 129, 0.01)' : 'rgba(244, 63, 94, 0.01)',
@@ -434,12 +646,31 @@ export function PerformanceChart({
           },
         })
 
-        // In percent mode, invested line is hidden as reference is 0%
         if (inv) {
           inv.applyOptions({ visible: false })
         }
 
-        // Add 0% baseline price line
+        // Individual Entity Lines in percent mode
+        for (const [bKey, s] of entMap.entries()) {
+          const cfg = ENTITY_CONFIGS[bKey]
+          const isSelected = selectedEntities.has(bKey)
+          if (isSelected) {
+            const entPctPoints = sanitizeEntityPercentPoints(data, bKey)
+            s.setData(entPctPoints)
+            s.applyOptions({
+              visible: true,
+              color: cfg.color,
+              priceFormat: {
+                type: 'custom',
+                formatter: (p: number) => `${p >= 0 ? '+' : ''}${p.toFixed(2)}%`,
+              },
+            })
+          } else {
+            s.applyOptions({ visible: false })
+          }
+        }
+
+        // 0% Baseline
         if (!zeroPriceLineRef.current) {
           zeroPriceLineRef.current = area.createPriceLine({
             price: 0,
@@ -451,101 +682,135 @@ export function PerformanceChart({
           })
         }
 
-        // Markers for % mode
-        if (markersRef.current && metrics) {
-          if (showMilestones && metrics.maxPoint && metrics.minPoint && metrics.maxPoint.date !== metrics.minPoint.date) {
-            const maxPct = sanitizePercentPoints([metrics.first, metrics.maxPoint])[1]?.value ?? 0
-            const minPct = sanitizePercentPoints([metrics.first, metrics.minPoint])[1]?.value ?? 0
-
-            markersRef.current.setMarkers([
-              {
-                time: metrics.maxPoint.date,
-                position: 'aboveBar',
-                color: '#10b981',
-                shape: 'arrowDown',
-                text: `Pico: +${maxPct.toFixed(1)}%`,
-              },
-              {
-                time: metrics.minPoint.date,
-                position: 'belowBar',
-                color: '#f43f5e',
-                shape: 'arrowUp',
-                text: `Mín: ${minPct.toFixed(1)}%`,
-              },
-            ])
-          } else {
-            markersRef.current.setMarkers([])
-          }
+        if (markersRef.current) {
+          markersRef.current.setMarkers([])
         }
       }
 
-      // Automatically auto-fit the view to the full period data width without needing a button
       chart.timeScale().fitContent()
-
-      // Trigger timeline sweep animation on load, when period or mode changes, or on manual refresh
-      const sweepKey = `${data?.length || 0}_${chartMode}_${data?.[0]?.date || ''}_${data?.[data.length - 1]?.date || ''}_${refreshAnimKey}`
-      if (data && data.length > 0 && sweepKey !== lastSweepKeyRef.current) {
-        lastSweepKeyRef.current = sweepKey
-        requestAnimationFrame(() => {
-          triggerChartAnimation(containerRef.current)
-        })
-      }
     } catch (err) {
-      console.warn('Failed to update performance chart:', err)
+      console.warn('Error updating chart series:', err)
     }
-  }, [data, chartMode, showInvested, showMilestones, metrics, isDark, refreshAnimKey])
+  }, [data, chartMode, showInvested, showMilestones, showTotal, selectedEntities, availableBrokers, isDark, metrics])
 
   return (
-    <div data-private className="w-full flex flex-col gap-2">
-      {/* 1. Dynamic HUD: Interactive Inspection & Live Metric Strip (Compact) */}
+    <div className="w-full flex flex-col justify-between select-none space-y-2">
+      {/* 1. Entity Selectors Toolbar: Desglose por Entidad & Sumatorio */}
+      {availableBrokers.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-1.5 p-2 rounded-xl bg-slate-100/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.07] text-xs">
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1 shrink-0 pr-1">
+              <Layers className="w-3.5 h-3.5 text-indigo-500" />
+              Entidades:
+            </span>
+
+            {/* Total / Sumatorio Toggle */}
+            <button
+              onClick={toggleTotal}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all',
+                showTotal
+                  ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30 shadow-xs font-bold'
+                  : 'bg-white/60 dark:bg-white/[0.03] text-slate-400 border-slate-200/80 dark:border-white/[0.06] hover:text-slate-700 dark:hover:text-slate-200'
+              )}
+              title="Mostrar u ocultar el sumatorio total en la gráfica"
+            >
+              <span className={cn('w-2 h-2 rounded-full', showTotal ? 'bg-blue-500' : 'bg-slate-400')} />
+              <span>
+                {selectedEntities.size < availableBrokers.length ? 'Sumatorio' : 'Total'}
+              </span>
+            </button>
+
+            {/* Individual Broker Toggles */}
+            {availableBrokers.map((b) => {
+              const cfg = ENTITY_CONFIGS[b] || {
+                label: b,
+                color: '#64748b',
+                badgeBg: 'bg-slate-500/10',
+                textColor: 'text-slate-700 dark:text-slate-300',
+                badgeBorder: 'border-slate-500/30',
+              }
+              const isSelected = selectedEntities.has(b)
+
+              return (
+                <button
+                  key={b}
+                  onClick={() => toggleEntity(b)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all',
+                    isSelected
+                      ? `${cfg.badgeBg} ${cfg.textColor} ${cfg.badgeBorder} shadow-xs font-bold`
+                      : 'bg-white/60 dark:bg-white/[0.03] text-slate-400 border-slate-200/80 dark:border-white/[0.06] hover:text-slate-700 dark:hover:text-slate-200'
+                  )}
+                  title={`Mostrar u ocultar ${cfg.label} en la gráfica`}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: isSelected ? cfg.color : '#94a3b8' }}
+                  />
+                  <span>{cfg.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <span className="text-[10px] text-slate-600 dark:text-slate-300 font-mono font-medium hidden sm:inline shrink-0">
+            {selectedEntities.size} de {availableBrokers.length} activas
+          </span>
+        </div>
+      )}
+
+      {/* 2. Dynamic HUD: Interactive Inspection & Live Metric Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08]">
-        {/* Left / Top on mobile: Main metrics */}
+        {/* Main values */}
         <div className="flex flex-wrap items-center justify-between sm:justify-start gap-x-3.5 sm:gap-x-4 gap-y-1 text-xs font-medium">
           {/* Main Portfolio Value / Return */}
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
             <span className="text-slate-500 dark:text-slate-400">
-              {chartMode === 'currency' ? 'Patrimonio:' : 'Rentabilidad:'}
+              {chartMode === 'currency'
+                ? selectedEntities.size < availableBrokers.length
+                  ? 'Sumatorio:'
+                  : 'Patrimonio:'
+                : 'Rentabilidad:'}
             </span>
             <span className="font-mono font-bold text-slate-900 dark:text-white">
               {chartMode === 'currency'
-                ? fmt.currency(activePoint?.value)
-                : `${activePercentReturn >= 0 ? '+' : ''}${activePercentReturn.toFixed(2)}%`}
+                ? fmt.currency(activeSelectedMetrics?.val)
+                : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
             </span>
           </div>
 
           {/* Invested Capital */}
-          {activePoint?.invested !== undefined && chartMode === 'currency' && (
+          {activeSelectedMetrics?.inv !== undefined && activeSelectedMetrics.inv > 0 && chartMode === 'currency' && (
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-0.5 border-t-2 border-dashed border-purple-500" />
               <span className="text-slate-500 dark:text-slate-400">Aportado:</span>
               <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                {fmt.currency(activePoint.invested)}
+                {fmt.currency(activeSelectedMetrics.inv)}
               </span>
             </div>
           )}
         </div>
 
-        {/* Right / Bottom on mobile: Beneficio + Date pill */}
+        {/* Right side: Beneficio + Date pill */}
         <div className="flex items-center justify-between sm:justify-end gap-2 text-xs font-medium pt-1 sm:pt-0 border-t border-slate-200/60 dark:border-white/[0.04] sm:border-0">
-          {/* Net Profit (Plusvalía) */}
-          {activePnl && (
+          {activeSelectedMetrics && (
             <div className="flex items-center gap-1.5">
               <span className="text-slate-500 dark:text-slate-400">Beneficio:</span>
               <span
                 className={cn(
                   'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
-                  activePnl.diff >= 0
+                  activeSelectedMetrics.diff >= 0
                     ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
                     : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
                 )}
               >
-                {activePnl.diff >= 0 ? '+' : ''}{fmt.currency(activePnl.diff)} ({fmt.pct(activePnl.pct)})
+                {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
               </span>
             </div>
           )}
 
-          {/* Date inspection pill */}
           {activePoint?.date && (
             <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-[#252526] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.08] shrink-0">
               <Calendar size={11} className={hoveredPoint ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'} />
@@ -562,16 +827,52 @@ export function PerformanceChart({
         </div>
       </div>
 
-      {/* 2. Canvas Container */}
+      {/* 3. Entity Breakdown Chips for the active inspection date */}
+      {activePoint?.brokers && (
+        <div className="flex flex-wrap items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-50/60 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.05] text-[11px]">
+          {availableBrokers.map((b) => {
+            const bData = activePoint.brokers?.[b]
+            const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
+            const isSelected = selectedEntities.has(b)
+            if (!bData || bData.value <= 0) return null
+
+            const totalForPct = activeSelectedMetrics?.val || activePoint.value || 1
+            const sharePct = (bData.value / totalForPct) * 100
+
+            return (
+              <div
+                key={b}
+                className={cn(
+                  'flex items-center gap-1.5 transition-opacity',
+                  isSelected ? 'opacity-100' : 'opacity-40 line-through'
+                )}
+              >
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
+                <span className="font-semibold text-slate-600 dark:text-slate-400">{cfg.label}:</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">
+                  {fmt.currency(bData.value)}
+                </span>
+                {isSelected && (
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                    ({sharePct.toFixed(1)}%)
+                  </span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* 4. Canvas Container */}
       <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden" />
 
-      {/* 3. Useful Milestones Strip (Larger, higher contrast, and with label on 4th box) */}
+      {/* 5. Useful Milestones Strip */}
       {metrics && showFooterStrip && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-100 dark:border-white/[0.06] text-xs">
           {/* Max Peak */}
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-            title={`Máximo del periodo (ATH): ${fmt.currency(metrics.maxPoint.value)} el ${formatDateSpanish(metrics.maxPoint.date)}`}
+            title={`Máximo de la selección: ${fmt.currency(metrics.maxPoint.value)}`}
           >
             <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
               <TrendingUp size={14} />
@@ -587,7 +888,7 @@ export function PerformanceChart({
           {/* Period Low */}
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-            title={`Mínimo del periodo: ${fmt.currency(metrics.minPoint.value)} el ${formatDateSpanish(metrics.minPoint.date)}`}
+            title={`Mínimo de la selección: ${fmt.currency(metrics.minPoint.value)}`}
           >
             <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
               <TrendingDown size={14} />
@@ -603,7 +904,7 @@ export function PerformanceChart({
           {/* Current Drawdown */}
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-            title={metrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${metrics.drawdownPct.toFixed(2)}%`}
+            title={metrics.drawdownPct >= -0.05 ? 'En máximos' : `Distancia al pico: ${metrics.drawdownPct.toFixed(2)}%`}
           >
             <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
               <Flame size={14} />
@@ -674,4 +975,3 @@ export function PerformanceChartSkeleton({ height = 260 }: { height?: number }) 
     </div>
   )
 }
-

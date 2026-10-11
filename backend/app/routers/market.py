@@ -2,12 +2,18 @@
 Market data router — real-time stock quotes via Yahoo Finance.
 Includes pre/post market prices, market state, and data freshness timestamps.
 """
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from typing import Optional
 import asyncio
 import logging
 import time
 from datetime import datetime, timezone
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import PriceCache
+from app.routers.portfolio import _get_all_transactions, _get_asset
+from app.services.finance_engine import calculate_positions
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/market", tags=["market"])
@@ -100,6 +106,16 @@ STOCK_UNIVERSE = [
     {"ticker": "NEE",    "name": "NextEra Energy",     "domain": "nexteraenergy.com",  "sector": "Energía",       "index": ["SP500"],             "default_market_cap": 160000000000},
     {"ticker": "IBE.MC", "name": "Iberdrola",          "domain": "iberdrola.com",      "sector": "Energía",       "index": ["IBEX35"],            "default_market_cap": 90000000000},
     {"ticker": "REP.MC", "name": "Repsol",             "domain": "repsol.com",         "sector": "Energía",       "index": ["IBEX35"],            "default_market_cap": 20000000000},
+
+    # ── ETFs Cartera (Réplicas de Fondos) ──────────────────────
+    {"ticker": "URTH",   "name": "iShares MSCI World ETF",            "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "MSCI World"], "default_market_cap": 4500000000},
+    {"ticker": "ACWI",   "name": "iShares MSCI ACWI ETF",             "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "MSCI World"], "default_market_cap": 22000000000},
+    {"ticker": "XLK",    "name": "Technology Select Sector SPDR",     "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs", "SP500"],      "default_market_cap": 72000000000},
+    {"ticker": "COWZ",   "name": "Pacer US Cash Cows 100 ETF",        "domain": "paceretfs.com", "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 24000000000},
+    {"ticker": "EEM",    "name": "iShares MSCI Emerging Markets ETF", "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "Emergentes"], "default_market_cap": 20000000000},
+    {"ticker": "EWJ",    "name": "iShares MSCI Japan ETF",            "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 14000000000},
+    {"ticker": "FEZ",    "name": "SPDR EURO STOXX 50 ETF",            "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs", "Euro 50"],    "default_market_cap": 4000000000},
+    {"ticker": "EFV",    "name": "iShares MSCI EAFE Value ETF",       "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 17000000000},
 ]
 
 # Index quotes for ticker bar
@@ -901,6 +917,213 @@ async def get_benchmarks(period: str = "1y"):
     if data["points"]:
         _benchmark_cache[period] = {"data": data, "ts": time.time()}
     return data
+
+
+# ── Simulated Fund Portfolio via Equivalent Proxy ETFs ──────────────────────────
+PORTFOLIO_ETF_PROXIES = {
+    "IE00BYX5NX33": {"ticker": "URTH", "name": "iShares MSCI World ETF", "desc": "MSCI World (Acciones Globales)"},
+    "0192#0011":    {"ticker": "ACWI", "name": "iShares MSCI ACWI ETF", "desc": "MSCI ACWI (Indexa Acciones)"},
+    "LU0302296495": {"ticker": "XLK",  "name": "Technology Select SPDR", "desc": "Tecnología Global"},
+    "ES0112611001": {"ticker": "COWZ", "name": "Pacer US Cash Cows 100", "desc": "Value Internacional & Cash Flow"},
+    "IE000QAZP7L2": {"ticker": "EEM",  "name": "iShares MSCI Emerging Markets", "desc": "Mercados Emergentes"},
+    "IE00BYX5M476": {"ticker": "EEM",  "name": "iShares MSCI Emerging Markets", "desc": "Mercados Emergentes"},
+    "IE00BYX5NH74": {"ticker": "EWJ",  "name": "iShares MSCI Japan ETF", "desc": "Renta Variable Japón"},
+    "LU0261952682": {"ticker": "FEZ",  "name": "SPDR EURO STOXX 50 ETF", "desc": "Euro Stoxx 50 (Europa)"},
+    "LU1598719752": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE"},
+}
+
+_sim_portfolio_cache: dict[str, dict] = {}
+SIM_PORTFOLIO_CACHE_TTL = 45  # 45 seconds for responsive live feel
+
+
+def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> dict:
+    import yfinance as yf
+    import pandas as pd
+
+    txs = _get_all_transactions(db, user_id=user_id or "asier")
+    positions = calculate_positions(txs)
+    active = {k: v for k, v in positions.items() if v.get("shares", 0) > 0.0001 and not k.startswith("TR_")}
+    if not active:
+        return {
+            "summary": {
+                "total_value": 0.0,
+                "simulated_daily_pct": 0.0,
+                "simulated_daily_amount": 0.0,
+                "market_state": "CLOSED",
+                "as_of": _now_iso(),
+                "period": period,
+            },
+            "holdings": [],
+            "etfs_summary": [],
+            "chart_points": [],
+        }
+
+    # Latest NAVs for active positions
+    navs = {}
+    for isin in active.keys():
+        cp = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+        navs[isin] = cp.price if cp and cp.price and cp.price > 0 else active[isin].get("avg_cost", 0)
+
+    fund_values = {isin: active[isin]["shares"] * navs[isin] for isin in active.keys()}
+    total_val = sum(fund_values.values())
+
+    etf_weights = {}
+    holdings = []
+    unique_etfs = set()
+
+    for isin, f_val in fund_values.items():
+        proxy_info = PORTFOLIO_ETF_PROXIES.get(
+            isin,
+            {"ticker": "URTH", "name": "iShares MSCI World ETF", "desc": "Global Equities"}
+        )
+        etf_ticker = proxy_info["ticker"]
+        unique_etfs.add(etf_ticker)
+        w = (f_val / total_val) if total_val > 0 else 0
+        etf_weights[etf_ticker] = etf_weights.get(etf_ticker, 0.0) + w
+
+        asset = _get_asset(db, isin)
+        pos_txs = [t for t in txs if t["isin"] == isin]
+        broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
+
+        holdings.append({
+            "isin": isin,
+            "fund_name": asset.name if asset else isin,
+            "broker": broker,
+            "shares": round(active[isin]["shares"], 4),
+            "nav": round(navs[isin], 4),
+            "fund_value": round(f_val, 2),
+            "weight": round(w * 100, 2),
+            "etf_ticker": etf_ticker,
+            "etf_name": proxy_info["name"],
+            "etf_desc": proxy_info["desc"],
+        })
+
+    etf_tickers_list = sorted(list(unique_etfs))
+
+    # Extended quotes for all ETF proxies
+    quotes = _fetch_quotes_extended(etf_tickers_list)
+
+    # Attach live ETF quote info & simulated gain to each holding
+    for h in holdings:
+        q = quotes.get(h["etf_ticker"], {})
+        chg_pct = q.get("change_pct", 0.0) or 0.0
+        h["etf_price"] = q.get("price")
+        h["etf_change_pct"] = chg_pct
+        h["etf_change"] = q.get("change")
+        h["simulated_gain_amount"] = round(h["fund_value"] * (chg_pct / 100.0), 2)
+
+    # Aggregated simulated daily % & €
+    simulated_daily_pct = round(
+        sum(etf_weights.get(t, 0.0) * (quotes.get(t, {}).get("change_pct", 0.0) or 0.0) for t in etf_tickers_list),
+        2
+    )
+    simulated_daily_amount = round(total_val * (simulated_daily_pct / 100.0), 2)
+
+    urth_state = quotes.get("URTH", {}).get("market_state") or get_market_session_for_ticker("URTH")
+
+    # Fetch history series for the chart
+    chart_points = []
+    try:
+        valid_periods = {"1d", "5d", "1mo"}
+        fetch_period = period if period in valid_periods else "1d"
+        interval = "5m" if fetch_period == "1d" else "15m" if fetch_period == "5d" else "1d"
+
+        df = yf.download(etf_tickers_list, period=fetch_period, interval=interval, progress=False)
+        if df is not None and not df.empty:
+            closes = df["Close"] if "Close" in df else df
+            if isinstance(closes, pd.DataFrame):
+                closes = closes.ffill().bfill()
+                weights_series = pd.Series(etf_weights)
+
+                # Base reference: for 1d use previous close if available or first point
+                if fetch_period == "1d":
+                    base_dict = {}
+                    for t in etf_tickers_list:
+                        pc = quotes.get(t, {}).get("prev_close")
+                        if pc and pc > 0:
+                            base_dict[t] = pc
+                        elif t in closes.columns and not closes[t].empty:
+                            base_dict[t] = float(closes[t].iloc[0])
+                        else:
+                            base_dict[t] = 1.0
+                    base_s = pd.Series(base_dict)
+                    norm_df = (closes - base_s) / base_s * 100.0
+                else:
+                    base_s = closes.iloc[0]
+                    norm_df = (closes - base_s) / base_s * 100.0
+
+                sim_pct = norm_df.dot(weights_series)
+
+                for idx, val in sim_pct.items():
+                    dt = idx.to_pydatetime()
+                    if fetch_period == "1d":
+                        lbl = dt.strftime("%H:%M")
+                    elif fetch_period == "5d":
+                        lbl = dt.strftime("%d %b %H:%M")
+                    else:
+                        lbl = dt.strftime("%d %b")
+
+                    pct_val = round(float(val), 2)
+                    chart_points.append({
+                        "time": dt.isoformat(),
+                        "time_unix": int(dt.timestamp()),
+                        "label": lbl,
+                        "simulated_pct": pct_val,
+                        "simulated_amount": round(total_val * (pct_val / 100.0), 2),
+                    })
+    except Exception as e:
+        logger.warning(f"Error fetching ETF history download: {e}")
+
+    # ETFs summary list
+    etfs_summary = []
+    for t in etf_tickers_list:
+        q = quotes.get(t, {})
+        etfs_summary.append({
+            "ticker": t,
+            "name": q.get("name") or t,
+            "weight": round(etf_weights.get(t, 0.0) * 100, 2),
+            "price": q.get("price"),
+            "change_pct": q.get("change_pct"),
+            "currency": q.get("currency", "USD"),
+        })
+
+    return {
+        "summary": {
+            "total_value": round(total_val, 2),
+            "simulated_daily_pct": simulated_daily_pct,
+            "simulated_daily_amount": simulated_daily_amount,
+            "market_state": urth_state,
+            "as_of": _now_iso(),
+            "period": period,
+        },
+        "holdings": sorted(holdings, key=lambda x: x["fund_value"], reverse=True),
+        "etfs_summary": sorted(etfs_summary, key=lambda x: x["weight"], reverse=True),
+        "chart_points": chart_points,
+        "cache_timestamp": _now_iso(),
+    }
+
+
+@router.get("/simulated-portfolio")
+async def get_simulated_portfolio(
+    period: str = "1d",
+    user_id: Optional[str] = "asier",
+    db: Session = Depends(get_db),
+):
+    """
+    Simulated real-time fund portfolio performance based on liquid ETF equivalents
+    (URTH, ACWI, XLK, COWZ, EEM, EWJ, FEZ, EFV) with intraday historical trajectory.
+    """
+    cache_key = f"{user_id}:{period}"
+    now = time.time()
+    if cache_key in _sim_portfolio_cache:
+        entry = _sim_portfolio_cache[cache_key]
+        if now - entry["ts"] < SIM_PORTFOLIO_CACHE_TTL:
+            return entry["data"]
+
+    data = await asyncio.to_thread(_fetch_simulated_portfolio_sync, period, user_id or "asier", db)
+    _sim_portfolio_cache[cache_key] = {"data": data, "ts": now}
+    return data
+
 
 
 

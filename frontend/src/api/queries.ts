@@ -411,4 +411,64 @@ export function useMarketHistory(ticker?: string, period: string = '1mo') {
   })
 }
 
+// ── Simulated Fund Portfolio via ETF Proxies ───────────────────────────────────
+export interface SimulatedHolding {
+  isin: string
+  fund_name: string
+  broker: string
+  shares: number
+  nav: number
+  fund_value: number
+  weight: number
+  etf_ticker: string
+  etf_name: string
+  etf_desc: string
+  etf_price?: number
+  etf_change_pct?: number
+  etf_change?: number
+  simulated_gain_amount?: number
+}
+
+export interface SimulatedEtfSummary {
+  ticker: string
+  name: string
+  weight: number
+  price?: number
+  change_pct?: number
+  currency: string
+}
+
+export interface SimulatedChartPoint {
+  time: string
+  time_unix: number
+  label: string
+  simulated_pct: number
+  simulated_amount: number
+}
+
+export interface SimulatedPortfolioResponse {
+  summary: {
+    total_value: number
+    simulated_daily_pct: number
+    simulated_daily_amount: number
+    market_state: string
+    as_of: string
+    period: string
+  }
+  holdings: SimulatedHolding[]
+  etfs_summary: SimulatedEtfSummary[]
+  chart_points: SimulatedChartPoint[]
+  cache_timestamp: string
+}
+
+export function useSimulatedPortfolio(period: string = '1d') {
+  const { currentUser } = useAppStore()
+  return useQuery<SimulatedPortfolioResponse>({
+    queryKey: ['simulated-portfolio', currentUser?.id, period],
+    queryFn: () => get<SimulatedPortfolioResponse>(`/market/simulated-portfolio?period=${period}&user_id=${currentUser?.id || 'asier'}`),
+    staleTime: 1000 * 30, // 30s
+    refetchInterval: 1000 * 45, // poll every 45s
+  })
+}
+
 

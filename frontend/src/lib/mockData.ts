@@ -74,6 +74,7 @@ export interface PricePoint {
   value: number
   price?: number
   invested?: number
+  brokers?: Record<string, { value: number; invested?: number }>
 }
 
 export const MOCK_SUMMARY: PortfolioSummary = {

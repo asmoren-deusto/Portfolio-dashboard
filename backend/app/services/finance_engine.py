@@ -123,11 +123,50 @@ def calculate_portfolio_value_series(
         # Exact active invested capital as of this date
         active_invested = sum(pos["invested_amount"] for pos in positions.values() if pos["shares"] > 0.0001) + cash_in_transit
 
+        # Entity / Broker breakdown
+        distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in active_tx)
+        brokers_data = {}
+        for b in sorted(distinct_brokers):
+            if b in ("trade_republic", "traderepublic"):
+                continue
+            b_tx = [tx for tx in active_tx if (tx.get("broker") or "myinvestor").lower() == b]
+            if not b_tx:
+                continue
+            b_positions = calculate_positions(b_tx)
+            b_val = 0.0
+            b_inv = 0.0
+            for isin, pos in b_positions.items():
+                if isin.startswith("TR_") or pos.get("shares", 0) <= 0.0001:
+                    continue
+                price = None
+                if isin in price_frames:
+                    series = price_frames[isin]
+                    available = series[series.index <= d]
+                    if not available.empty:
+                        price = float(available.iloc[-1])
+                    elif not series.empty:
+                        price = float(series.iloc[0])
+                if price is None or (price <= 0 and isin != "TR_TRANSFER"):
+                    price = pos.get("avg_cost", 0)
+                b_val += pos["shares"] * price
+                b_inv += pos["invested_amount"]
+
+            if b == "myinvestor":
+                b_val += cash_in_transit
+                b_inv += cash_in_transit
+
+            if b_val > 0 or b_inv > 0:
+                brokers_data[b] = {
+                    "value": round(b_val, 2),
+                    "invested": round(b_inv, 2),
+                }
+
         if total > 0:
             portfolio_values.append({
                 "date": d_str,
                 "value": round(total, 2),
                 "invested": round(active_invested, 2),
+                "brokers": brokers_data,
             })
 
     return portfolio_values
