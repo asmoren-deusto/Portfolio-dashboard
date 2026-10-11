@@ -87,6 +87,11 @@ export async function refreshPortfolioPrices(userId = 'asier') {
   return res.json()
 }
 
+export async function fetchLatestNavAlert(since?: string | null) {
+  const query = since ? `?since=${encodeURIComponent(since)}` : ''
+  return get<{ has_update: boolean; alert: any }>(`/portfolio/latest-nav-alert${query}`)
+}
+
 // ── Summary ────────────────────────────────────────────────────────────────────
 export function usePortfolioSummary() {
   const { useMock, period, selectedBroker, currentUser } = useAppStore()
@@ -104,7 +109,7 @@ export function usePortfolioSummary() {
     placeholderData: keepSameUser(currentUser?.id),
     staleTime: isDemo ? 1000 * 60 * 5 : 0,
     refetchOnMount: true,
-    refetchInterval: 1000 * 60 * 15,
+    refetchInterval: 1000 * 60 * 5, // Keep fresh every 5 min
   })
 }
 
@@ -127,6 +132,7 @@ export function usePositions() {
     placeholderData: keepSameUser(currentUser?.id),
     staleTime: isDemo ? 1000 * 60 * 5 : 0,
     refetchOnMount: true,
+    refetchInterval: 1000 * 60 * 5, // Keep fresh every 5 min
   })
 }
 

@@ -65,8 +65,25 @@ async def startup():
         except Exception as e:
             logger.warning(f"Error pre-warming performance cache: {e}")
 
+    async def _periodic_nav_scanner():
+        # Allow initial app boot and warm-up to finish first
+        await asyncio.sleep(20)
+        while True:
+            try:
+                from app.database import SessionLocal
+                from app.routers.portfolio import check_portfolio_navs
+                db = SessionLocal()
+                logger.info("Executing periodic NAV scanner (10 min interval)...")
+                await check_portfolio_navs(user_id="asier", db=db)
+                db.close()
+            except Exception as e:
+                logger.warning(f"Error in periodic NAV scanner: {e}")
+            # Wait 10 minutes (600 seconds)
+            await asyncio.sleep(600)
+
     import asyncio
     asyncio.create_task(_warm_cache())
+    asyncio.create_task(_periodic_nav_scanner())
 
 
 @app.get("/api/health")

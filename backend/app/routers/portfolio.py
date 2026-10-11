@@ -217,12 +217,11 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
     return sorted(result, key=lambda x: x.current_value or 0, reverse=True)
 
 
-@router.post("/refresh-prices")
-async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
-    """
-    Force re-scraping of all active positions from official gestora websites,
-    Financial Times tearsheets, and Quefondos. Clears in-memory price cache.
-    """
+_latest_nav_alert: dict | None = None
+
+
+async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> dict:
+    global _latest_nav_alert
     _price_cache.clear()
     _perf_cache.clear()
     transactions = _get_all_transactions(db, user_id)
@@ -295,7 +294,7 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
                 updated_items.append(data)
 
     logger.info(f"Refreshed prices for {len(results)} assets: {len(updated_items)} updated")
-    return {
+    res_payload = {
         "status": "ok",
         "updated_at": datetime.now().isoformat(),
         "count": len(results),
@@ -304,6 +303,39 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
         "updated_items": updated_items,
         "all_items": all_items,
     }
+
+    if len(updated_items) > 0:
+        import time
+        _latest_nav_alert = {
+            "id": f"nav_{int(time.time()*1000)}",
+            "timestamp": datetime.now().strftime("%H:%M"),
+            "updatedCount": len(updated_items),
+            "totalCount": len(all_items),
+            "items": updated_items,
+            "allCheckedItems": all_items,
+        }
+
+    return res_payload
+
+
+@router.post("/refresh-prices")
+async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Force re-scraping of all active positions from official gestora websites,
+    Financial Times tearsheets, and Quefondos. Clears in-memory price cache.
+    """
+    return await check_portfolio_navs(user_id=user_id, db=db)
+
+
+@router.get("/latest-nav-alert")
+def get_latest_nav_alert(since: str | None = None):
+    """Return latest detected NAV update notification if newer than 'since'."""
+    global _latest_nav_alert
+    if not _latest_nav_alert:
+        return {"has_update": False, "alert": None}
+    if since and _latest_nav_alert.get("id") == since:
+        return {"has_update": False, "alert": None}
+    return {"has_update": True, "alert": _latest_nav_alert}
 
 
 @router.post("/update-price")

@@ -10,9 +10,21 @@ import { Header } from '@/components/layout/Header'
 import { HeaderProvider } from '@/context/HeaderContext'
 import { NavUpdateAlertModal } from '@/components/common/NavUpdateAlertModal'
 
+import { useQueryClient } from '@tanstack/react-query'
+import { fetchLatestNavAlert } from '@/api/queries'
+
 export function RootLayout() {
   const location = useLocation()
-  const { theme, privacyMode, toggleMobileSidebar, sidebarCollapsed, toggleSidebarCollapsed, currentUser } = useAppStore()
+  const queryClient = useQueryClient()
+  const {
+    theme,
+    privacyMode,
+    toggleMobileSidebar,
+    sidebarCollapsed,
+    toggleSidebarCollapsed,
+    currentUser,
+    setNavAlertNotification,
+  } = useAppStore()
 
   useEffect(() => {
     const isDark = theme === 'dark'
@@ -31,6 +43,46 @@ export function RootLayout() {
       themeMetas.forEach((meta) => meta.setAttribute('content', targetColor))
     }
   }, [theme])
+
+  // Periodic Watcher for New NAVs detected by backend (checks every 45s, background scanner in backend runs every 10 min)
+  useEffect(() => {
+    if (!currentUser || currentUser.isDemo) return
+
+    let isMounted = true
+    const checkNavAlerts = async () => {
+      try {
+        const lastSeen = sessionStorage.getItem('last_seen_nav_alert_id')
+        const res = await fetchLatestNavAlert(lastSeen)
+        if (isMounted && res.has_update && res.alert) {
+          const alert = res.alert
+          const updatedCount = alert.updatedCount ?? alert.updated_count ?? 0
+          if (alert.id && alert.id !== lastSeen && updatedCount > 0) {
+            sessionStorage.setItem('last_seen_nav_alert_id', alert.id)
+            // Trigger automatic UI refresh across all tabs
+            await queryClient.invalidateQueries()
+            // Show pop-up notification
+            setNavAlertNotification({
+              id: alert.id,
+              timestamp: alert.timestamp || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+              updatedCount,
+              totalCount: alert.totalCount ?? alert.total_count ?? 0,
+              items: alert.items || [],
+              allCheckedItems: alert.allCheckedItems || alert.all_items || [],
+            })
+          }
+        }
+      } catch (err) {
+        // Silently catch network errors
+      }
+    }
+
+    checkNavAlerts()
+    const timer = setInterval(checkNavAlerts, 45000)
+    return () => {
+      isMounted = false
+      clearInterval(timer)
+    }
+  }, [currentUser, queryClient, setNavAlertNotification])
 
   // If no user is logged in, redirect to /login
   if (!currentUser) {
