@@ -234,113 +234,13 @@ export const MarketPage: React.FC = () => {
       <MarketTicker onSelectStock={setSelectedStock} />
 
       {/* Simulated Live Portfolio Performance via Proxy ETFs */}
-      <SimulatedPortfolioCard />
-
-      {/* Summary KPI Highlights */}
-      {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-          {/* Total Companies */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
-            {isFetching && (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-            )}
-            <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span>Total Seguimiento</span>
-                {isFetching && <LoadingDot />}
-              </div>
-              <Layers className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
-            </div>
-            <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
-              {data?.stocks.length ?? 0} <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">valores</span>
-            </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{stats.advancing} ↑</span> al alza /{' '}
-              <span className="text-rose-600 dark:text-rose-400 font-bold">{stats.declining} ↓</span> a la baja
-            </div>
-          </div>
-
-          {/* Top Gainer */}
-          {bestStock && (
-            <div
-              onClick={() => setSelectedStock(bestStock)}
-              className="relative overflow-hidden p-4 rounded-2xl bg-white/95 hover:bg-slate-50/80 dark:bg-[#1e1e1e]/96 dark:hover:bg-[#2a2d2e] border border-emerald-500/25 hover:border-emerald-500/40 backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-emerald-500/5 cursor-pointer transition-all group"
-            >
-              {isFetching && (
-                <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-              )}
-              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span>Mayor Ganancia Hoy</span>
-                  {isFetching && <LoadingDot />}
-                </div>
-                <Flame className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-              </div>
-              <div className="flex items-baseline justify-between mt-1">
-                <span className="text-lg font-bold text-slate-950 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate max-w-[120px]">
-                  {bestStock.name}
-                </span>
-                <span className="text-sm font-bold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/20">
-                  +{bestStock.change_pct?.toFixed(2)}%
-                </span>
-              </div>
-              <div className="text-xs font-mono text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-                {bestStock.ticker} • {fmt.price(bestStock.price, bestStock.currency)}
-              </div>
-            </div>
-          )}
-
-          {/* Top Loser */}
-          {worstStock && (
-            <div
-              onClick={() => setSelectedStock(worstStock)}
-              className="relative overflow-hidden p-4 rounded-2xl bg-white/95 hover:bg-slate-50/80 dark:bg-[#1e1e1e]/96 dark:hover:bg-[#2a2d2e] border border-rose-500/25 hover:border-rose-500/40 backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-rose-500/5 cursor-pointer transition-all group"
-            >
-              {isFetching && (
-                <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-              )}
-              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span>Mayor Caída Hoy</span>
-                  {isFetching && <LoadingDot />}
-                </div>
-                <TrendingDown className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
-              </div>
-              <div className="flex items-baseline justify-between mt-1">
-                <span className="text-lg font-bold text-slate-950 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate max-w-[120px]">
-                  {worstStock.name}
-                </span>
-                <span className="text-sm font-bold font-mono text-rose-700 dark:text-rose-300 bg-rose-500/10 px-2.5 py-0.5 rounded-lg border border-rose-500/20">
-                  {worstStock.change_pct?.toFixed(2)}%
-                </span>
-              </div>
-              <div className="text-xs font-mono text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-                {worstStock.ticker} • {fmt.price(worstStock.price, worstStock.currency)}
-              </div>
-            </div>
-          )}
-
-          {/* Combined Capitalization */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
-            {isFetching && (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-            )}
-            <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span>Cap. Agregada</span>
-                {isFetching && <LoadingDot />}
-              </div>
-              <Sparkles className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" />
-            </div>
-            <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
-              {fmt.marketCap(stats.totalCap, 'USD')}
-            </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-              Megacaps USA & Europa
-            </div>
-          </div>
-        </div>
-      )}
+      <SimulatedPortfolioCard
+        marketStats={stats}
+        bestStock={bestStock}
+        worstStock={worstStock}
+        totalStocks={data?.stocks.length}
+        onSelectStock={setSelectedStock}
+      />
 
       {/* Controls & Filter Bar */}
       <div className="p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 space-y-4">

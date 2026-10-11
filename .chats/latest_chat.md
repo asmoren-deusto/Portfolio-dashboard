@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 20:16:46
+- **Fecha de exportación:** 2026-10-11 20:25:24
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 67
+- **Total de interacciones registradas:** 69
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1125,5 +1125,31 @@ Muestra la consolidación macro de cada índice réplica con:
 ### 👤 Usuario (2026-10-11 18:11:17)
 
 la grafica esta distorsionada, prioridad 100% de todas las graficas que no se distorsionen, sí me gustaria que se adapten al ancho, si tienes que usar graficas de otro proveedor o tipo miralo, la de tradingview de general está bien por ejemplo
+
+---
+
+### 🤖 Asistente (2026-10-11 18:16:49)
+
+Se ha sustituido por completo la gráfica SVG personalizada por el **motor oficial de TradingView ([Lightweight Charts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx))**, exactamente el mismo motor matemático que utiliza la gráfica general de la aplicación:
+
+### ¿Por qué se eliminó la distorsión al 100%?
+1. **Renderizado en Canvas HTML5 nativo (TradingView):**
+   - Ya no se utilizan polígonos SVG con deformación (`preserveAspectRatio="none"`). TradingView proyecta matemáticamente cada punto de cotización en tiempo y precio real en el lienzo de Canvas a 60 fps.
+2. **Adaptabilidad fluida a cualquier ancho de pantalla:**
+   - Incorpora un `ResizeObserver` vinculado a `chart.timeScale().fitContent()`. Si cambias la resolución, redimensionas la ventana o trabajas en monitores ultra-panorámicos (como tus 2390 px de ancho), la gráfica recalcula sus márgenes de escala Y y la distribución temporal en el eje X de forma automática sin aplastar ni estirar la curva.
+3. **Escala de precios y retícula profesional:**
+   - La escala porcentual derecha se autoajusta dinámicamente con las cotizaciones reales (`+0.25%` a `+0.60%`).
+   - Muestra la línea de precio en vivo de TradingView con el último valor (`+0.53%`), retícula punteada (*crosshair*) interactiva y línea de base en `0.00%`.
+4. **Coherencia visual global:**
+   - Mantiene la misma tipografía, colores del tema claro/oscuro y suavizado que la gráfica principal de la pantalla de Visión General.
+
+---
+*Compilado y sincronizado en el repositorio bajo la versión **v2.7.48**.*
+
+---
+
+### 👤 Usuario (2026-10-11 18:19:45)
+
+
 
 ---

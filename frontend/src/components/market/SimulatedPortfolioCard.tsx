@@ -16,8 +16,10 @@ import {
   PieChart,
   Clock,
   Calendar,
+  Flame,
+  TrendingDown,
 } from 'lucide-react'
-import { useSimulatedPortfolio, type SimulatedChartPoint } from '@/api/queries'
+import { useSimulatedPortfolio, type SimulatedChartPoint, type MarketStock } from '@/api/queries'
 import { fmt, cn } from '@/lib/utils'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
@@ -71,7 +73,25 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
   },
 }
 
-export const SimulatedPortfolioCard: React.FC = () => {
+export interface SimulatedPortfolioCardProps {
+  marketStats?: {
+    advancing: number
+    declining: number
+    unchanged?: number
+  } | null
+  bestStock?: MarketStock | null
+  worstStock?: MarketStock | null
+  totalStocks?: number
+  onSelectStock?: (stock: MarketStock) => void
+}
+
+export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
+  marketStats,
+  bestStock,
+  worstStock,
+  totalStocks,
+  onSelectStock,
+}) => {
   const [period, setPeriod] = useState<string>('1d')
   const [activeTab, setActiveTab] = useState<'funds' | 'etfs'>('funds')
   const [hoveredPoint, setHoveredPoint] = useState<SimulatedChartPoint | null>(null)
@@ -450,6 +470,74 @@ export const SimulatedPortfolioCard: React.FC = () => {
               <span>{summary?.session_display || 'Viernes 9 oct.'}</span>
             </span>
           </div>
+
+          {/* Market Overview Highlights (Moved UP under chart) */}
+          {marketStats && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-200/60 dark:border-white/[0.06]">
+              {/* Total Seguimiento */}
+              <div className="p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <span>Seguimiento</span>
+                  <Layers className="w-3 h-3 text-blue-500" />
+                </div>
+                <div className="text-base font-bold font-mono text-slate-900 dark:text-white mt-0.5">
+                  {totalStocks ?? 0} <span className="text-[10px] font-semibold text-slate-500">valores</span>
+                </div>
+                <div className="text-[10px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{marketStats.advancing} ↑</span> /{' '}
+                  <span className="text-rose-600 dark:text-rose-400 font-bold">{marketStats.declining} ↓</span>
+                </div>
+              </div>
+
+              {/* Mayor Ganancia Hoy */}
+              {bestStock && (
+                <div
+                  onClick={() => onSelectStock?.(bestStock)}
+                  className="p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5 border border-emerald-500/25 hover:border-emerald-500/40 cursor-pointer transition-all shadow-2xs group"
+                >
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <span>Mayor Ganancia</span>
+                    <Flame className="w-3 h-3 text-emerald-500" />
+                  </div>
+                  <div className="flex items-baseline justify-between mt-0.5">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate max-w-[70px]" title={bestStock.name}>
+                      {bestStock.name}
+                    </span>
+                    <span className="text-[10px] font-bold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+                      +{bestStock.change_pct?.toFixed(2)}%
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                    {bestStock.ticker} • {fmt.price(bestStock.price, bestStock.currency)}
+                  </div>
+                </div>
+              )}
+
+              {/* Mayor Caída Hoy */}
+              {worstStock && (
+                <div
+                  onClick={() => onSelectStock?.(worstStock)}
+                  className="p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] hover:bg-rose-50/50 dark:hover:bg-rose-500/5 border border-rose-500/25 hover:border-rose-500/40 cursor-pointer transition-all shadow-2xs group"
+                >
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <span>Mayor Caída</span>
+                    <TrendingDown className="w-3 h-3 text-rose-500" />
+                  </div>
+                  <div className="flex items-baseline justify-between mt-0.5">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate max-w-[70px]" title={worstStock.name}>
+                      {worstStock.name}
+                    </span>
+                    <span className="text-[10px] font-bold font-mono text-rose-700 dark:text-rose-300 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/20">
+                      {worstStock.change_pct?.toFixed(2)}%
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                    {worstStock.ticker} • {fmt.price(worstStock.price, worstStock.currency)}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right Column (lg:col-span-7): Combined Breakdown Table & Live Proxies */}
@@ -495,7 +583,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
 
             {/* TAB 1: Desglose por Fondos en Cartera */}
             {activeTab === 'funds' && (
-              <div className="overflow-x-auto overflow-y-auto max-h-[305px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+              <div className="overflow-x-auto overflow-y-auto max-h-[465px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
@@ -600,7 +688,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
 
             {/* TAB 2: Resumen Ponderado por ETFs Réplica */}
             {activeTab === 'etfs' && (
-              <div className="overflow-x-auto overflow-y-auto max-h-[305px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+              <div className="overflow-x-auto overflow-y-auto max-h-[465px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
