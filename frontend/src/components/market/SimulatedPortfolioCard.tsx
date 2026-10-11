@@ -166,7 +166,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         },
         rightPriceScale: {
           borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-          scaleMargins: { top: 0.10, bottom: 0.10 },
+          scaleMargins: { top: 0.18, bottom: 0.10 },
           autoScale: true,
         },
         timeScale: {
@@ -376,7 +376,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         {/* Left Column (lg:col-span-5): Official TradingView Chart (Zero Distortion, 100% Adaptive) */}
         <div className="lg:col-span-5 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-4">
           {/* KPI Summary Header */}
-          <div className="flex items-start justify-between gap-2 mb-2 pb-2.5 border-b border-slate-200/60 dark:border-white/[0.06]">
+          <div className="flex items-start justify-between gap-2 mb-4 pb-3 border-b border-slate-200/60 dark:border-white/[0.06]">
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
                 <span>
