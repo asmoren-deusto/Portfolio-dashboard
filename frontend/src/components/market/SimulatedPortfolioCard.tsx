@@ -1,75 +1,68 @@
 import React, { useState, useMemo } from 'react'
 import {
   Activity,
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  Layers,
-  ChevronDown,
-  ChevronUp,
-  ExternalLink,
-  Info,
-  Sparkles,
   Zap,
+  Layers,
+  Sparkles,
+  PieChart,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useSimulatedPortfolio, type SimulatedHolding } from '@/api/queries'
+import { useSimulatedPortfolio } from '@/api/queries'
 import { fmt, cn } from '@/lib/utils'
 import { LoadingDot } from '@/components/ui/LoadingDot'
+import { BrokerBadge } from '@/components/ui/Badge'
 
-const ETF_FRIENDLY_NAMES: Record<string, string> = {
-  URTH: 'MSCI World',
-  ACWI: 'Global ACWI',
-  XLK: 'Tecnología EE.UU.',
-  COWZ: 'Cash Cows Value',
-  EEM: 'Emergentes',
-  EWJ: 'Japón Nikkei',
-  FEZ: 'Euro Stoxx 50',
-  EFV: 'EAFE Value',
+export interface EtfInfo {
+  name: string
+  shortName: string
+  category: string
 }
 
-const BROKER_BADGES: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  myinvestor: {
-    label: 'MyInvestor',
-    bg: 'bg-blue-500/10 dark:bg-blue-500/20',
-    text: 'text-blue-700 dark:text-blue-300',
-    border: 'border-blue-500/30',
+export const ETF_INFO_MAP: Record<string, EtfInfo> = {
+  URTH: {
+    name: 'MSCI World (Acciones Globales)',
+    shortName: 'MSCI World',
+    category: 'Renta Variable Global Desarrollada',
   },
-  bbva: {
-    label: 'BBVA',
-    bg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
-    text: 'text-emerald-700 dark:text-emerald-300',
-    border: 'border-emerald-500/30',
+  ACWI: {
+    name: 'MSCI ACWI (Global All Country)',
+    shortName: 'MSCI ACWI',
+    category: 'Renta Variable Global Indexada',
   },
-  indexa: {
-    label: 'Indexa Capital',
-    bg: 'bg-amber-500/10 dark:bg-amber-500/20',
-    text: 'text-amber-700 dark:text-amber-300',
-    border: 'border-amber-500/30',
+  XLK: {
+    name: 'Tecnología EE.UU. (Big Tech)',
+    shortName: 'Tecnología EE.UU.',
+    category: 'Sector Tecnológico Global',
   },
-  kutxabank: {
-    label: 'Kutxabank',
-    bg: 'bg-rose-500/10 dark:bg-rose-500/20',
-    text: 'text-rose-700 dark:text-rose-300',
-    border: 'border-rose-500/30',
+  COWZ: {
+    name: 'Alto Cash Flow & Value EE.UU.',
+    shortName: 'Cash Cows Value',
+    category: 'Renta Variable Value Dividendos',
   },
-  scalable: {
-    label: 'Scalable',
-    bg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
-    text: 'text-cyan-700 dark:text-cyan-300',
-    border: 'border-cyan-500/30',
+  EEM: {
+    name: 'Mercados Emergentes (Global)',
+    shortName: 'Emergentes',
+    category: 'Renta Variable Emergente',
   },
-  traderepublic: {
-    label: 'Trade Republic',
-    bg: 'bg-violet-500/10 dark:bg-violet-500/20',
-    text: 'text-violet-700 dark:text-violet-300',
-    border: 'border-violet-500/30',
+  EWJ: {
+    name: 'Japón (Nikkei 225)',
+    shortName: 'Japón Nikkei',
+    category: 'Renta Variable Japón',
+  },
+  FEZ: {
+    name: 'Euro Stoxx 50 (Europa)',
+    shortName: 'Euro Stoxx 50',
+    category: 'Renta Variable Europea',
+  },
+  EFV: {
+    name: 'EAFE Internacional Value',
+    shortName: 'EAFE Value',
+    category: 'RV Internacional Value',
   },
 }
 
 export const SimulatedPortfolioCard: React.FC = () => {
   const [period, setPeriod] = useState<string>('1d')
-  const [showHoldings, setShowHoldings] = useState<boolean>(false)
+  const [activeTab, setActiveTab] = useState<'funds' | 'etfs'>('funds')
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
 
   const { data, isLoading, isFetching } = useSimulatedPortfolio(period)
@@ -81,23 +74,32 @@ export const SimulatedPortfolioCard: React.FC = () => {
 
   const isPositive = (summary?.simulated_daily_pct ?? 0) >= 0
 
-  // SVG Chart calculation with dedicated Y-axis and balanced proportions
+  // SVG Chart calculation: natural proportional scaling without horizontal distortion
   const svgData = useMemo(() => {
     if (!chartPoints || chartPoints.length < 2) return null
 
     const pcts = chartPoints.map((p) => p.simulated_pct)
     const minVal = Math.min(...pcts)
     const maxVal = Math.max(...pcts)
-    const minWithZero = Math.min(minVal, 0)
-    const maxWithZero = Math.max(maxVal, 0)
-    const span = maxWithZero - minWithZero || 0.4
-    const pad = span * 0.18
-    const yMin = minWithZero - pad
-    const yMax = maxWithZero + pad
+
+    // Dynamic amplitude scaling with breathing room (no artificial compression)
+    const dataSpan = maxVal - minVal
+    const span = Math.max(dataSpan, 0.25)
+    const pad = span * 0.16
+    let yMin = minVal - pad
+    let yMax = maxVal + pad
+
+    // If 0% is close to the range, include 0% cleanly
+    if (minVal > 0 && minVal - pad <= 0.12) {
+      yMin = Math.min(yMin, -0.04)
+    } else if (maxVal < 0 && maxVal + pad >= -0.12) {
+      yMax = Math.max(yMax, 0.04)
+    }
+
     const yRange = yMax - yMin || 1
 
-    const width = 800
-    const chartWidth = 720
+    const width = 540
+    const chartWidth = 460
     const height = 240
 
     const points = chartPoints.map((p, i) => {
@@ -107,29 +109,39 @@ export const SimulatedPortfolioCard: React.FC = () => {
     })
 
     const zeroY = height - ((0 - yMin) / yRange) * height
+    const hasZeroLine = zeroY >= 0 && zeroY <= height
 
-    const linePath = points.reduce((acc, curr, i) => {
-      return i === 0
-        ? `M ${curr.x.toFixed(1)},${curr.y.toFixed(1)}`
-        : `${acc} L ${curr.x.toFixed(1)},${curr.y.toFixed(1)}`
+    // Smooth bezier curve path
+    const linePath = points.reduce((acc, curr, i, arr) => {
+      if (i === 0) return `M ${curr.x.toFixed(1)},${curr.y.toFixed(1)}`
+      const prev = arr[i - 1]
+      const cp1x = (prev.x + (curr.x - prev.x) * 0.5).toFixed(1)
+      const cp1y = prev.y.toFixed(1)
+      const cp2x = (prev.x + (curr.x - prev.x) * 0.5).toFixed(1)
+      const cp2y = curr.y.toFixed(1)
+      return `${acc} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${curr.x.toFixed(1)},${curr.y.toFixed(1)}`
     }, '')
 
     const areaPath = `${linePath} L ${chartWidth},${height} L 0,${height} Z`
     const lastPoint = points[points.length - 1]
 
-    // Reference horizontal ticks for Y-axis
-    const topTickVal = maxWithZero + pad * 0.4
-    const botTickVal = minWithZero - pad * 0.4
+    // 3 Reference horizontal ticks for Y-axis
+    const topTickVal = yMax - pad * 0.5
+    const botTickVal = yMin + pad * 0.5
     const ticks = [
       {
         pct: topTickVal,
         y: height - ((topTickVal - yMin) / yRange) * height,
       },
-      {
-        pct: 0,
-        y: zeroY,
-        isZero: true,
-      },
+      ...(hasZeroLine
+        ? [
+            {
+              pct: 0,
+              y: zeroY,
+              isZero: true,
+            },
+          ]
+        : []),
       {
         pct: botTickVal,
         y: height - ((botTickVal - yMin) / yRange) * height,
@@ -141,6 +153,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
       linePath,
       areaPath,
       zeroY,
+      hasZeroLine,
       width,
       chartWidth,
       height,
@@ -249,23 +262,24 @@ export const SimulatedPortfolioCard: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content Grid: Balanced Chart on Left + Legible ETFs Panel on Right */}
+      {/* Main Content Grid: Balanced Proportions (5 Cols Chart + 7 Cols Combined Breakdown Table) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-4 items-stretch">
-        {/* Left Column (lg:col-span-8): Hero Metric & High-Res Proportional Chart */}
-        <div className="lg:col-span-8 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-4">
-          {/* Hero KPI Summary Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-200/60 dark:border-white/[0.06]">
+        
+        {/* Left Column (lg:col-span-5): Proportional, High-Def Chart */}
+        <div className="lg:col-span-5 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-4">
+          {/* KPI Summary Header */}
+          <div className="flex items-start justify-between gap-2 mb-2 pb-2.5 border-b border-slate-200/60 dark:border-white/[0.06]">
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <span>
                   {activeHoverPoint
-                    ? `Estimación a las ${activeHoverPoint.label}`
+                    ? `A las ${activeHoverPoint.label}`
                     : period === '1d'
-                    ? 'Rendimiento Estimado Hoy'
-                    : `Rendimiento Periodo (${period.toUpperCase()})`}
+                    ? 'Rendimiento Hoy'
+                    : `Periodo (${period.toUpperCase()})`}
                 </span>
                 {activeHoverPoint ? (
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                     Inspección
                   </span>
                 ) : (
@@ -273,10 +287,10 @@ export const SimulatedPortfolioCard: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex items-baseline gap-3 mt-1.5">
+              <div className="flex items-baseline gap-2.5 mt-1">
                 <span
                   className={cn(
-                    'text-3xl sm:text-4xl font-extrabold font-mono tracking-tight',
+                    'text-2xl sm:text-3xl font-extrabold font-mono tracking-tight',
                     currentPct >= 0
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-rose-600 dark:text-rose-400'
@@ -288,7 +302,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
 
                 <span
                   className={cn(
-                    'text-base sm:text-lg font-bold font-mono px-2.5 py-0.5 rounded-xl border shadow-2xs',
+                    'text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs',
                     currentAmount >= 0
                       ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                       : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
@@ -300,42 +314,22 @@ export const SimulatedPortfolioCard: React.FC = () => {
               </div>
             </div>
 
-            {/* Context Pills: Base Cartera & Rango Intradía */}
-            <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 text-xs">
-              <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                <span className="text-[11px] font-medium">Base Cartera:</span>
+            {/* Context Pills: Base & Min/Max */}
+            <div className="flex flex-col items-end gap-1 text-xs">
+              <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[11px]">
+                <span>Base:</span>
                 <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                   {fmt.currency(summary?.total_value ?? 0)}
                 </span>
               </div>
               {svgData && (
-                <div className="flex items-center gap-2 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-white/[0.04] px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-white/[0.06]">
-                  <span>
-                    Mín:{' '}
-                    <strong
-                      className={
-                        svgData.minPct >= 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      }
-                    >
-                      {svgData.minPct >= 0 ? '+' : ''}
-                      {svgData.minPct.toFixed(2)}%
-                    </strong>
+                <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-white/[0.04] px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-white/[0.06]">
+                  <span className={svgData.minPct >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold'}>
+                    {svgData.minPct >= 0 ? '+' : ''}{svgData.minPct.toFixed(2)}%
                   </span>
-                  <span>·</span>
-                  <span>
-                    Máx:{' '}
-                    <strong
-                      className={
-                        svgData.maxPct >= 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      }
-                    >
-                      {svgData.maxPct >= 0 ? '+' : ''}
-                      {svgData.maxPct.toFixed(2)}%
-                    </strong>
+                  <span>↔</span>
+                  <span className={svgData.maxPct >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold'}>
+                    {svgData.maxPct >= 0 ? '+' : ''}{svgData.maxPct.toFixed(2)}%
                   </span>
                 </div>
               )}
@@ -343,7 +337,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
           </div>
 
           {/* Intraday SVG Chart with Dedicated Right Y-Axis */}
-          <div className="relative w-full h-[260px] select-none">
+          <div className="relative w-full h-[250px] select-none">
             {isLoading ? (
               <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">
                 <LoadingDot />
@@ -353,7 +347,6 @@ export const SimulatedPortfolioCard: React.FC = () => {
               <svg
                 viewBox={`0 0 ${svgData.width} ${svgData.height}`}
                 className="w-full h-full overflow-visible"
-                preserveAspectRatio="none"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setHoveredIdx(null)}
               >
@@ -362,7 +355,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
                     <stop
                       offset="0%"
                       stopColor={isPositive ? '#10b981' : '#f43f5e'}
-                      stopOpacity="0.32"
+                      stopOpacity="0.28"
                     />
                     <stop
                       offset="100%"
@@ -391,7 +384,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
                     />
                     {/* Y-axis percentage text label */}
                     <text
-                      x={svgData.chartWidth + 10}
+                      x={svgData.chartWidth + 8}
                       y={t.y + 3.5}
                       className={cn(
                         'text-[10px] font-mono select-none font-semibold',
@@ -425,13 +418,13 @@ export const SimulatedPortfolioCard: React.FC = () => {
                     <rect
                       x={svgData.chartWidth + 6}
                       y={svgData.lastPoint.y - 10}
-                      width="68"
+                      width="66"
                       height="20"
                       rx="4"
                       fill={isPositive ? '#10b981' : '#f43f5e'}
                     />
                     <text
-                      x={svgData.chartWidth + 40}
+                      x={svgData.chartWidth + 39}
                       y={svgData.lastPoint.y + 4}
                       textAnchor="middle"
                       fill="#ffffff"
@@ -462,14 +455,14 @@ export const SimulatedPortfolioCard: React.FC = () => {
                     <circle
                       cx={svgData.points[hoveredIdx].x}
                       cy={svgData.points[hoveredIdx].y}
-                      r="6"
+                      r="5.5"
                       fill="#ffffff"
                       stroke={
                         svgData.points[hoveredIdx].point.simulated_pct >= 0
                           ? '#10b981'
                           : '#f43f5e'
                       }
-                      strokeWidth="3.5"
+                      strokeWidth="3"
                       className="shadow-md"
                     />
 
@@ -478,7 +471,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
                       const pt = svgData.points[hoveredIdx]
                       const tooltipWidth = 135
                       const tooltipHeight = 44
-                      const isNearRight = pt.x > svgData.chartWidth - 150
+                      const isNearRight = pt.x > svgData.chartWidth - 140
                       const tx = isNearRight ? pt.x - tooltipWidth - 10 : pt.x + 10
                       const ty = Math.max(10, Math.min(svgData.height - tooltipHeight - 10, pt.y - tooltipHeight / 2))
                       const ptPositive = pt.point.simulated_pct >= 0
@@ -504,7 +497,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
                             x="10"
                             y="34"
                             fill={ptPositive ? '#34d399' : '#fb7185'}
-                            className="text-[12px] font-mono font-bold"
+                            className="text-[11px] font-mono font-bold"
                           >
                             {ptPositive ? '+' : ''}
                             {pt.point.simulated_pct.toFixed(2)}% ({fmt.currency(pt.point.simulated_amount)})
@@ -524,224 +517,217 @@ export const SimulatedPortfolioCard: React.FC = () => {
 
           {/* Time X-Axis Markers */}
           {svgData && svgData.points.length > 0 && (
-            <div className="flex justify-between items-center text-[10px] font-mono text-slate-600 dark:text-slate-400 px-2 mt-2 font-semibold">
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-600 dark:text-slate-400 px-1 mt-1 font-semibold">
               <span>{svgData.points[0]?.point.label}</span>
-              <span>{svgData.points[Math.floor(svgData.points.length * 0.25)]?.point.label}</span>
-              <span>{svgData.points[Math.floor(svgData.points.length * 0.5)]?.point.label}</span>
-              <span>{svgData.points[Math.floor(svgData.points.length * 0.75)]?.point.label}</span>
+              <span>{svgData.points[Math.floor(svgData.points.length * 0.33)]?.point.label}</span>
+              <span>{svgData.points[Math.floor(svgData.points.length * 0.66)]?.point.label}</span>
               <span>{svgData.points[svgData.points.length - 1]?.point.label}</span>
-              <span className="w-16" /> {/* Spacer for Y-axis align */}
+              <span className="w-14" /> {/* Spacer for Y-axis align */}
             </div>
           )}
         </div>
 
-        {/* Right Column (lg:col-span-4): Legible, High-Contrast ETF Proxies Panel */}
-        <div className="lg:col-span-4 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-4">
+        {/* Right Column (lg:col-span-7): Combined Breakdown Table & Live Proxies */}
+        <div className="lg:col-span-7 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-4">
           <div>
-            <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60 dark:border-white/[0.06]">
+            {/* Top Toolbar: View Switcher & Title */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200/60 dark:border-white/[0.06]">
               <div className="flex items-center gap-1.5">
                 <Zap className="w-4 h-4 text-amber-500 fill-amber-500/20" />
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                  ETFs Réplica en Directo
+                  Desglose de Fondos y Réplicas
                 </span>
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-200/80 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 font-mono">
-                {etfs.length} índices
-              </span>
+
+              {/* View Toggle Tabs */}
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-200/70 dark:bg-white/[0.06] text-xs">
+                <button
+                  onClick={() => setActiveTab('funds')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-md transition-all text-xs font-bold flex items-center gap-1.5',
+                    activeTab === 'funds'
+                      ? 'bg-white dark:bg-[#2c2c2d] text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  )}
+                >
+                  <Layers className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Por Fondos ({holdings.length})</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('etfs')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-md transition-all text-xs font-bold flex items-center gap-1.5',
+                    activeTab === 'etfs'
+                      ? 'bg-white dark:bg-[#2c2c2d] text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  )}
+                >
+                  <PieChart className="w-3.5 h-3.5 text-amber-500" />
+                  <span>ETFs Agrupados ({etfs.length})</span>
+                </button>
+              </div>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3">
-              Pesos relativos y cotizaciones en vivo de los ETFs asignados a tus fondos:
-            </p>
 
-            {/* 2-Column Spacious Grid of ETF Cards */}
-            <div className="grid grid-cols-2 gap-2">
-              {etfs.map((etf) => {
-                const pos = (etf.change_pct ?? 0) >= 0
-                const friendlyName = ETF_FRIENDLY_NAMES[etf.ticker] || etf.name
+            {/* TAB 1: Desglose por Fondos en Cartera */}
+            {activeTab === 'funds' && (
+              <div className="overflow-y-auto max-h-[305px] pr-1 divide-y divide-slate-100 dark:divide-white/[0.05]">
+                {holdings.map((h) => {
+                  const etfInfo = ETF_INFO_MAP[h.etf_ticker]
+                  const displayName = etfInfo?.name || h.etf_desc || h.etf_name || h.etf_ticker
+                  const isEtfPos = (h.etf_change_pct ?? 0) >= 0
+                  const isGainPos = (h.simulated_gain_amount ?? 0) >= 0
 
-                return (
-                  <div
-                    key={etf.ticker}
-                    className="p-2.5 rounded-xl bg-white dark:bg-[#252526] border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:border-indigo-500/30 transition-all flex flex-col justify-between"
-                  >
-                    {/* Top Row: Ticker badge & Percentage */}
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                      <span className="font-mono font-bold text-xs text-slate-900 dark:text-white px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/[0.08]">
-                        {etf.ticker}
-                      </span>
+                  return (
+                    <div
+                      key={h.isin}
+                      className="py-2.5 px-2 hover:bg-slate-100/70 dark:hover:bg-white/[0.03] rounded-xl transition-colors flex items-center justify-between gap-3 group"
+                    >
+                      {/* Left: Prominent ETF Name + Ticker badge + Replicated Fund name */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {/* HIGHLIGHTED ETF NAME: Big, clear, legible */}
+                          <span
+                            className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[260px] sm:max-w-[320px]"
+                            title={displayName}
+                          >
+                            {displayName}
+                          </span>
 
-                      <span
-                        className={cn(
-                          'text-xs font-bold font-mono px-1.5 py-0.5 rounded shrink-0',
-                          pos
-                            ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
-                            : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
-                        )}
-                      >
-                        {pos ? '+' : ''}
-                        {etf.change_pct?.toFixed(2)}%
-                      </span>
-                    </div>
+                          {/* Secondary subtle ticker badge */}
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
+                            {h.etf_ticker}
+                          </span>
 
-                    {/* Middle Row: Friendly asset class name */}
-                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 truncate block mb-1.5" title={friendlyName}>
-                      {friendlyName}
-                    </span>
+                          {/* Matching broker badge with unified colored dot */}
+                          <BrokerBadge broker={h.broker} className="scale-90 origin-left" />
+                        </div>
 
-                    {/* Bottom Row: Weight progress bar */}
-                    <div className="flex items-center gap-1.5 w-full">
-                      <div className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-white/[0.08] overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-indigo-500/80 dark:bg-indigo-400/80"
-                          style={{ width: `${Math.min(100, (etf.weight / 35) * 100)}%` }}
-                        />
+                        {/* Replicated fund name */}
+                        <p
+                          className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium"
+                          title={h.fund_name}
+                        >
+                          {h.fund_name}
+                        </p>
                       </div>
-                      <span className="font-mono text-[10px] font-bold text-slate-600 dark:text-slate-300 shrink-0">
-                        {etf.weight}%
-                      </span>
+
+                      {/* Middle: Portfolio Weight & Progress Bar */}
+                      <div className="text-right shrink-0 min-w-[55px] hidden sm:block">
+                        <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          {h.weight.toFixed(1)}%
+                        </span>
+                        <div className="w-12 h-1.5 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-1">
+                          <div
+                            className="h-full rounded-full bg-indigo-500"
+                            style={{ width: `${Math.min(100, (h.weight / 35) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right: Live Quote Change % & Estimated Impact € */}
+                      <div className="text-right shrink-0 min-w-[85px]">
+                        <div
+                          className={cn(
+                            'font-mono font-bold text-xs',
+                            isEtfPos
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-rose-600 dark:text-rose-400'
+                          )}
+                        >
+                          {isEtfPos ? '+' : ''}
+                          {h.etf_change_pct?.toFixed(2)}%
+                        </div>
+                        <div
+                          className={cn(
+                            'font-mono text-[11px] font-semibold mt-0.5',
+                            isGainPos
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-rose-600 dark:text-rose-400'
+                          )}
+                        >
+                          {isGainPos ? '+' : ''}
+                          {fmt.currency(h.simulated_gain_amount ?? 0)}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* TAB 2: Resumen Ponderado por ETFs Réplica */}
+            {activeTab === 'etfs' && (
+              <div className="overflow-y-auto max-h-[305px] pr-1 divide-y divide-slate-100 dark:divide-white/[0.05]">
+                {etfs.map((etf) => {
+                  const info = ETF_INFO_MAP[etf.ticker]
+                  const displayName = info?.name || etf.name || etf.ticker
+                  const isPos = (etf.change_pct ?? 0) >= 0
+
+                  return (
+                    <div
+                      key={etf.ticker}
+                      className="py-2.5 px-2 hover:bg-slate-100/70 dark:hover:bg-white/[0.03] rounded-xl transition-colors flex items-center justify-between gap-3 group"
+                    >
+                      {/* Left: Prominent Name + Ticker badge + Category */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span
+                            className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[260px] sm:max-w-[340px]"
+                            title={displayName}
+                          >
+                            {displayName}
+                          </span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
+                            {etf.ticker}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
+                          {info?.category || 'Renta Variable'}
+                          {etf.price ? ` • Cotiz: ${fmt.currency(etf.price, etf.currency)}` : ''}
+                        </p>
+                      </div>
+
+                      {/* Middle: Relative Weight in Portfolio */}
+                      <div className="text-right shrink-0 min-w-[70px]">
+                        <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          {etf.weight}%
+                        </span>
+                        <div className="w-14 h-1.5 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-1">
+                          <div
+                            className="h-full rounded-full bg-indigo-500"
+                            style={{ width: `${Math.min(100, (etf.weight / 35) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right: Live Quote Change */}
+                      <div className="text-right shrink-0 min-w-[75px]">
+                        <span
+                          className={cn(
+                            'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
+                            isPos
+                              ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                              : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                          )}
+                        >
+                          {isPos ? '+' : ''}
+                          {etf.change_pct?.toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
-          <div className="pt-2.5 mt-2 border-t border-slate-200/60 dark:border-white/[0.06] text-[10px] text-slate-600 dark:text-slate-300 flex items-center justify-between font-semibold">
-            <span>Suma total cartera: 100%</span>
-            <span className="text-indigo-600 dark:text-indigo-400 font-bold">Ponderación real</span>
+          {/* Panel Footer Summary */}
+          <div className="pt-2.5 mt-2 border-t border-slate-200/60 dark:border-white/[0.06] text-[11px] text-slate-600 dark:text-slate-300 flex items-center justify-between font-semibold">
+            <span>Suma ponderada cartera: 100%</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-bold">Ponderación real asignada</span>
           </div>
         </div>
-      </div>
 
-      {/* Expand / Collapse Holdings Breakdown Drawer */}
-      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
-        <button
-          onClick={() => setShowHoldings((v) => !v)}
-          className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.06] text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-indigo-500" />
-            <span>Desglose de Fondos y su ETF Réplica ({holdings.length} posiciones asignadas)</span>
-          </div>
-          <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-medium">
-            <span>{showHoldings ? 'Ocultar' : 'Ver detalle'}</span>
-            {showHoldings ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </div>
-        </button>
-
-        <AnimatePresence>
-          {showHoldings && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="overflow-hidden"
-            >
-              <div className="mt-2.5 overflow-x-auto rounded-xl border border-slate-200/80 dark:border-white/[0.06]">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-100/90 dark:bg-[#252526] text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/[0.06]">
-                    <tr>
-                      <th className="py-2.5 px-3">Fondo en Cartera</th>
-                      <th className="py-2.5 px-2">Entidad</th>
-                      <th className="py-2.5 px-2 text-right">Valor Cartera</th>
-                      <th className="py-2.5 px-2 text-right">Peso</th>
-                      <th className="py-2.5 px-2.5">ETF Equivalente</th>
-                      <th className="py-2.5 px-2 text-right">Cotización ETF</th>
-                      <th className="py-2.5 px-3 text-right">Impacto Estimado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.05]">
-                    {holdings.map((h) => {
-                      const badge = BROKER_BADGES[h.broker.toLowerCase()] || {
-                        label: h.broker,
-                        bg: 'bg-slate-500/10',
-                        text: 'text-slate-700 dark:text-slate-300',
-                        border: 'border-slate-500/20',
-                      }
-                      const etfGainPositive = (h.simulated_gain_amount ?? 0) >= 0
-
-                      return (
-                        <tr
-                          key={h.isin}
-                          className="hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition-colors"
-                        >
-                          <td className="py-2.5 px-3">
-                            <span
-                              className="font-semibold text-slate-900 dark:text-white block truncate max-w-[240px]"
-                              title={h.fund_name}
-                            >
-                              {h.fund_name}
-                            </span>
-                            <span className="text-[10px] text-slate-600 dark:text-slate-300 font-mono">
-                              {h.isin}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-2">
-                            <span
-                              className={cn(
-                                'inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border',
-                                badge.bg,
-                                badge.text,
-                                badge.border
-                              )}
-                            >
-                              {badge.label}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-2 text-right font-mono font-medium text-slate-800 dark:text-slate-200">
-                            {fmt.currency(h.fund_value)}
-                          </td>
-                          <td className="py-2.5 px-2 text-right font-mono text-slate-600 dark:text-slate-400">
-                            {h.weight.toFixed(1)}%
-                          </td>
-                          <td className="py-2.5 px-2.5">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">
-                                {h.etf_ticker}
-                              </span>
-                              <span
-                                className="text-[11px] text-slate-600 dark:text-slate-300 truncate max-w-[160px]"
-                                title={h.etf_name}
-                              >
-                                {ETF_FRIENDLY_NAMES[h.etf_ticker] || h.etf_desc}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-2 text-right font-mono">
-                            <span
-                              className={cn(
-                                'font-bold',
-                                (h.etf_change_pct ?? 0) >= 0
-                                  ? 'text-emerald-600 dark:text-emerald-400'
-                                  : 'text-rose-600 dark:text-rose-400'
-                              )}
-                            >
-                              {(h.etf_change_pct ?? 0) >= 0 ? '+' : ''}
-                              {h.etf_change_pct?.toFixed(2)}%
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-mono font-bold">
-                            <span
-                              className={
-                                etfGainPositive
-                                  ? 'text-emerald-600 dark:text-emerald-400'
-                                  : 'text-rose-600 dark:text-rose-400'
-                              }
-                            >
-                              {etfGainPositive ? '+' : ''}
-                              {fmt.currency(h.simulated_gain_amount ?? 0)}
-                            </span>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   )
