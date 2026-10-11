@@ -243,56 +243,44 @@ export const MarketPage: React.FC = () => {
       />
 
       {/* Controls & Filter Bar */}
-      <div className="p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 space-y-4">
-        {/* Row 1: Index Tabs with fluid sliding indicator */}
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 relative">
-          {INDEX_TABS.map((tab) => {
-            const active = selectedIndex === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setSelectedIndex(tab.id)
-                  setSelectedSector('Todos')
-                  if (tab.id === 'TICKER') {
-                    setSortBy('ticker')
-                  } else if (sortBy === 'ticker') {
-                    setSortBy('market_cap_desc')
-                  }
-                }}
-                className={`relative px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors z-10 ${
-                  active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.03]'
-                }`}
-              >
-                {active && (
-                  <motion.div
-                    layoutId="activeMarketTabPill"
-                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm -z-10"
-                    transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
-                  />
-                )}
-                <span>{tab.label}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Row 2: Search, Sector dropdown, Sort options, View mode */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/[0.05]">
-          {/* Search bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Buscar por empresa, ticker (ej. Apple, AAPL, Inditex)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-            />
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 space-y-3">
+        {/* Row 1: Index Tabs on left + Sector, Sort, and View Mode Switcher on right */}
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 pb-0.5">
+          {/* Index Tabs with fluid sliding indicator */}
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 relative">
+            {INDEX_TABS.map((tab) => {
+              const active = selectedIndex === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setSelectedIndex(tab.id)
+                    setSelectedSector('Todos')
+                    if (tab.id === 'TICKER') {
+                      setSortBy('ticker')
+                    } else if (sortBy === 'ticker') {
+                      setSortBy('market_cap_desc')
+                    }
+                  }}
+                  className={`relative px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors z-10 ${
+                    active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.03]'
+                  }`}
+                >
+                  {active && (
+                    <motion.div
+                      layoutId="activeMarketTabPill"
+                      className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm -z-10"
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+                    />
+                  )}
+                  <span>{tab.label}</span>
+                </button>
+              )
+            })}
           </div>
 
-          {/* Quick preset filters and sorting */}
-          <div className="flex items-center gap-2.5 flex-wrap">
+          {/* Right controls: Sector dropdown, Sort options, View mode (Moved to Row 1 as shown in diagram) */}
+          <div className="flex items-center gap-2.5 flex-wrap shrink-0">
             {/* Sector selector */}
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
@@ -395,6 +383,20 @@ export const MarketPage: React.FC = () => {
                 <List className="w-4 h-4" />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Row 2: Search bar */}
+        <div className="pt-2.5 border-t border-slate-100 dark:border-white/[0.05]">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Buscar por empresa, ticker (ej. Apple, AAPL, Inditex)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+            />
           </div>
         </div>
       </div>
