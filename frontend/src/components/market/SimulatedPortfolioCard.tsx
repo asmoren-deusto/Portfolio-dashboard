@@ -136,7 +136,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
     try {
       const containerWidth = Math.max(10, chartContainerRef.current.clientWidth || 300)
-      const containerHeight = Math.max(10, chartContainerRef.current.clientHeight || 390)
+      const containerHeight = Math.max(10, chartContainerRef.current.clientHeight || 350)
 
       chart = createChart(chartContainerRef.current, {
         width: containerWidth,
@@ -447,7 +447,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           </div>
 
           {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
-          <div className="relative w-full h-[390px] sm:h-[410px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">
+          <div className="relative w-full h-[345px] sm:h-[355px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">
             {isLoading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40">
                 <LoadingDot />
@@ -585,7 +585,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
             {/* TAB 1: Desglose por Fondos en Cartera */}
             {activeTab === 'funds' && (
-              <div className="overflow-x-auto overflow-y-auto max-h-[530px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+              <div className="overflow-x-auto overflow-y-auto max-h-[415px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
@@ -690,7 +690,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
             {/* TAB 2: Resumen Ponderado por ETFs Réplica */}
             {activeTab === 'etfs' && (
-              <div className="overflow-x-auto overflow-y-auto max-h-[530px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+              <div className="overflow-x-auto overflow-y-auto max-h-[415px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 20:29:52
+- **Fecha de exportación:** 2026-10-11 20:34:11
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 71
+- **Total de interacciones registradas:** 73
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1179,5 +1179,28 @@ Se han aplicado los cambios indicados en el boceto:
 ### 👤 Usuario (2026-10-11 18:26:56)
 
 
+
+---
+
+### 🤖 Asistente (2026-10-11 18:29:54)
+
+Se ha ampliado la altura del gráfico tal como indicaban las flechas del boceto:
+
+1. **Ampliación vertical del gráfico TradingView (`Amplia`)**:
+   - Se ha incrementado la altura del contenedor del gráfico de `255px` a `410px` en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx).
+   - Se ha actualizado el `ResizeObserver` para recalcular tanto el ancho como la altura dinámicamente, asegurando que el gráfico ocupe todo el espacio entre la cabecera superior y los KPIs inferiores sin bandas vacías ni distorsión.
+
+2. **Alineación con el panel de réplicas**:
+   - La tabla derecha de *Desglose de Fondos y Réplicas* se ha ajustado en altura (`max-h-[530px]`), mostrando los fondos de la cartera al completo sin necesidad de scroll forzado, dejando ambas columnas niveladas.
+
+3. **Release y Sincronización**:
+   - Verificado con captura en navegador y compilación limpia (`npm run build`).
+   - Versión **v2.7.50** generada y sincronizada en Git mediante `python scripts/sync_release.py`.
+
+---
+
+### 👤 Usuario (2026-10-11 18:31:32)
+
+reduce un pelo la altura deda la seccion de simulacion, que me quepan 6 filas en la tabla derecha, ahora mismo caben 7 y meida
 
 ---
