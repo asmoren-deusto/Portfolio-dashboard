@@ -242,11 +242,10 @@ export const MarketPage: React.FC = () => {
         onSelectStock={setSelectedStock}
       />
 
-      {/* Controls & Filter Bar */}
-      <div className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 space-y-3">
-        {/* Row 1: Index Tabs on left + Sector, Sort, and View Mode Switcher on right */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 pb-0.5">
-          {/* Index Tabs with fluid sliding indicator */}
+      {/* Controls & Filter Bar (Single Unified Row) */}
+      <div className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Left: Index Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 relative">
             {INDEX_TABS.map((tab) => {
               const active = selectedIndex === tab.id
@@ -279,59 +278,18 @@ export const MarketPage: React.FC = () => {
             })}
           </div>
 
-          {/* Right controls: Sector dropdown, Sort options, View mode (Moved to Row 1 as shown in diagram) */}
-          <div className="flex items-center gap-2.5 flex-wrap shrink-0">
-            {/* Sector selector */}
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                <Filter className="w-3.5 h-3.5" />
-              </div>
-              <select
-                value={selectedSector}
-                onChange={(e) => setSelectedSector(e.target.value)}
-                className="appearance-none pl-8 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/15 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer transition-colors"
-              >
-                {sectors.map((sec) => (
-                  <option key={sec} value={sec} className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
-                    Sector: {sec}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-            </div>
-
-            {/* Sort selector */}
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                <ArrowUpDown className="w-3.5 h-3.5" />
-              </div>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="appearance-none pl-8 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/15 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer transition-colors"
-              >
-                {isTickerUniverse && (
-                  <option value="ticker" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
-                    Orden del Ticker (S&P 500 primero)
-                  </option>
-                )}
-                <option value="market_cap_desc" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
-                  Más Capitalización ↓
-                </option>
-                <option value="change_pct_desc" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
-                  Mejor Rendimiento Hoy (Gainers)
-                </option>
-                <option value="change_pct_asc" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
-                  Peor Rendimiento Hoy (Losers)
-                </option>
-                <option value="volume_desc" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
-                  Más Volumen ↓
-                </option>
-                <option value="price_desc" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-white">
-                  Mayor Precio ↓
-                </option>
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          {/* Right: Search Bar + View Mode Switcher (Moved up as requested, Sector/Sort eliminated) */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Search bar */}
+            <div className="relative w-60 sm:w-72 lg:w-80">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Buscar por empresa, ticker..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+              />
             </div>
 
             {/* View Mode Switcher (Dual / Heatmap / Grid / Table) */}
@@ -383,20 +341,6 @@ export const MarketPage: React.FC = () => {
                 <List className="w-4 h-4" />
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* Row 2: Search bar */}
-        <div className="pt-2.5 border-t border-slate-100 dark:border-white/[0.05]">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Buscar por empresa, ticker (ej. Apple, AAPL, Inditex)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-            />
           </div>
         </div>
       </div>
