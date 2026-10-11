@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 19:14:06
+- **Fecha de exportación:** 2026-10-11 19:17:44
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 47
+- **Total de interacciones registradas:** 49
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -831,5 +831,44 @@ En la gráfica de evolución patrimonial de la pantalla de inicio ahora dispones
 ### 👤 Usuario (2026-10-11 17:12:00)
 
 en evolucion lleva los selectores abajo como te marco en la foto para que ocupe menos. en la grafica acumulativa quiero que el fondo de cada valor sea tb de su color para identificar mejor el estaqueado. el total se sobreentiende sumando asi que no hace falta. tb en la leyenda derecha no marques los valores de cada entidad solo el total y lo aportado
+
+---
+
+### 🤖 Asistente (2026-10-11 17:14:08)
+
+Listo. He aplicado todos los cambios solicitados en la versión **v2.7.38**:
+
+---
+
+### 1. 🎯 Selectores reubicados en la barra principal (Ahorro de espacio)
+- **Eliminada la barra superior redundante:** Se ha suprimido la fila de *"ENTIDADES:"*, *"Total"* y *"3 de 3 activas"*, además de la tercera fila de texto.
+- **Selectores integrados en el HUD:** Los botones de entidad (`🟢 BBVA`, `🟡 Indexa Capital`, `🔵 MyInvestor`) se sitúan ahora directamente en el centro de la barra de información (entre *Patrimonio / Aportado* a la izquierda y *Beneficio / Fecha* a la derecha), tal como marcaste en el recuadro rojo.
+- Al pulsar cualquiera de ellos, se activa o desactiva la entidad correspondiente de forma instantánea.
+
+---
+
+### 2. 📊 Gráfica apilada (Stacked Area) con el fondo de color de cada entidad
+- **Áreas apiladas acumulativas:**
+  - **Base (Abajo):** **Indexa Capital** con su relleno ámbar cálido (`#f59e0b`).
+  - **Medio:** **BBVA** apilado sobre Indexa con su relleno verde esmeralda (`#10b981`).
+  - **Cúspide:** **MyInvestor** apilado sobre BBVA e Indexa con su relleno azul (`#3b82f6`).
+- **El total se forma naturalmente sumando:** Como cada capa se monta sobre la anterior, la línea superior de la gráfica representa por sí misma el **Patrimonio Total** (o la suma exacta de las entidades que tengas activadas).
+- Si desactivas alguna entidad (por ejemplo, BBVA), la capa desaparece y la altura total se recalcula dinámicamente con las restantes.
+
+---
+
+### 3. 🏷️ Eje derecho limpio (Solo Total y Aportado)
+- Se han ocultado las etiquetas numéricas individuales de cada entidad en la escala derecha (`lastValueVisible: false`).
+- En la leyenda derecha del gráfico ahora solo aparecen **dos badges limpios y legibles**:
+  1. El **Total / Patrimonio** en la parte superior (ej. `78.273,80 €`).
+  2. El **Capital Aportado** con su línea discontinua morada (ej. `67.613,19 €`).
+
+Los cambios ya están subidos al repositorio y desplegados en `main`.
+
+---
+
+### 👤 Usuario (2026-10-11 17:16:52)
+
+elimina por completo los selectores, con ver los valores estackeados me vale sin necesidad de seleccionar cosas
 
 ---

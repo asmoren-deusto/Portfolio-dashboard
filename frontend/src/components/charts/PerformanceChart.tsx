@@ -140,35 +140,11 @@ export function PerformanceChart({
     return CANONICAL_ORDER.filter(b => found.has(b))
   }, [data])
 
-  // Selected entities state (default: all active)
-  const [selectedEntities, setSelectedEntities] = useState<Set<string>>(() => new Set(['indexa', 'bbva', 'myinvestor']))
-
-  useEffect(() => {
-    if (availableBrokers.length > 0 && selectedEntities.size === 0) {
-      setSelectedEntities(new Set(availableBrokers))
-    }
-  }, [availableBrokers])
-
-  const toggleEntity = (b: string) => {
-    setSelectedEntities(prev => {
-      const next = new Set(prev)
-      if (next.has(b)) {
-        if (next.size === 1) return prev // Keep at least one active
-        next.delete(b)
-      } else {
-        next.add(b)
-      }
-      return next
-    })
-  }
-
   const dataRef = useRef<PricePoint[]>(data)
   dataRef.current = data
 
-  // Active stack list in canonical order (bottom to top)
-  const activeStackList = useMemo(() => {
-    return availableBrokers.filter(b => selectedEntities.has(b))
-  }, [availableBrokers, selectedEntities])
+  // All detected entities are always stacked automatically
+  const activeStackList = availableBrokers
 
   // Metrics computation for selected sum
   const metrics = useMemo(() => {
@@ -690,40 +666,23 @@ export function PerformanceChart({
           )}
         </div>
 
-        {/* Middle: Inlined Entity Selectors (Exact position from user screenshot) */}
-        <div className="flex items-center gap-1.5 order-last sm:order-none w-full sm:w-auto justify-center sm:justify-start pt-1 sm:pt-0 border-t sm:border-0 border-slate-200/60 dark:border-white/[0.06]">
-          {availableBrokers.map((b) => {
-            const cfg = ENTITY_CONFIGS[b] || {
-              label: b,
-              color: '#64748b',
-              badgeBg: 'bg-slate-500/10',
-              textColor: 'text-slate-700',
-              badgeBorder: 'border-slate-500/20',
-            }
-            const isSelected = selectedEntities.has(b)
-
-            return (
-              <button
-                key={b}
-                type="button"
-                onClick={() => toggleEntity(b)}
-                className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all cursor-pointer select-none',
-                  isSelected
-                    ? `${cfg.badgeBg} ${cfg.textColor} ${cfg.badgeBorder} shadow-xs font-bold`
-                    : 'bg-white/50 dark:bg-white/[0.02] text-slate-400 border-slate-200/80 dark:border-white/[0.06] hover:text-slate-700 dark:hover:text-slate-200 opacity-60 line-through'
-                )}
-                title={`Haz clic para mostrar u ocultar ${cfg.label} en la gráfica`}
-              >
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: isSelected ? cfg.color : '#94a3b8' }}
-                />
-                <span>{cfg.label}</span>
-              </button>
-            )
-          })}
-        </div>
+        {/* Middle: Clean Stacked Color Legend (Non-interactive) */}
+        {availableBrokers.length > 1 && (
+          <div className="hidden sm:flex items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+            {availableBrokers.map((b) => {
+              const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
+              return (
+                <div key={b} className="flex items-center gap-1.5">
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: cfg.color }}
+                  />
+                  <span>{cfg.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* Right: Beneficio & Fecha */}
         <div className="flex items-center justify-between sm:justify-end gap-2">
