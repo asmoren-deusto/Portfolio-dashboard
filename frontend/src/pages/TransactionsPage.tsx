@@ -21,6 +21,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
+import { BrokerBadge } from '@/components/ui/Badge'
 import { fmt, cn } from '@/lib/utils'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { useAppStore } from '@/store/appStore'
@@ -376,16 +377,7 @@ export function TransactionsPage() {
 
                       {/* Broker */}
                       <td className="px-5 py-3.5 text-center">
-                        <span className={cn(
-                          "inline-block px-2.5 py-0.5 rounded-lg text-xs font-semibold uppercase tracking-wider border",
-                          t.broker === 'bbva'
-                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/30'
-                            : t.broker === 'indexa'
-                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/30'
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30'
-                        )}>
-                          {({ bbva: 'BBVA', indexa: 'Indexa Capital', kutxabank: 'Kutxabank', scalable: 'Scalable', traderepublic: 'Trade Republic' } as Record<string, string>)[t.broker] ?? 'MyInvestor'}
-                        </span>
+                        <BrokerBadge broker={t.broker} />
                       </td>
 
                       {/* Actions */}

@@ -29,6 +29,37 @@ const DEMO_BROKERS = [
   { label: 'Trade Rep.', value: 'traderepublic' },
 ]
 
+const BROKER_CONFIG: Record<string, { dot: string; activeBg: string }> = {
+  all: {
+    dot: '',
+    activeBg: 'bg-slate-800 dark:bg-slate-700',
+  },
+  myinvestor: {
+    dot: 'bg-blue-500',
+    activeBg: 'bg-blue-600',
+  },
+  bbva: {
+    dot: 'bg-emerald-500',
+    activeBg: 'bg-emerald-600',
+  },
+  indexa: {
+    dot: 'bg-amber-500',
+    activeBg: 'bg-amber-600 dark:bg-amber-500',
+  },
+  kutxabank: {
+    dot: 'bg-rose-500',
+    activeBg: 'bg-rose-600',
+  },
+  scalable: {
+    dot: 'bg-cyan-500',
+    activeBg: 'bg-cyan-600',
+  },
+  traderepublic: {
+    dot: 'bg-violet-500',
+    activeBg: 'bg-violet-600',
+  },
+}
+
 interface HeaderProps {
   title: string
   subtitle?: string
@@ -107,44 +138,49 @@ export function Header({
         {children && <div className="flex items-center gap-2 shrink-0">{children}</div>}
 
         {/* Broker / Entity Selector Pill */}
+        {/* Global Broker Switcher with Matching Entity Color Dots */}
         {showBrokerSelector && (
           <div className="w-full sm:w-auto h-9 flex items-center rounded-xl border border-slate-200/90 bg-white p-1 shadow-none dark:border-white/10 dark:bg-[#252526]">
-            {brokers.map((b) => (
-              <button
-                key={b.value}
-                onClick={() => setSelectedBroker(b.value)}
-                className={cn(
-                  'relative flex-1 sm:flex-initial text-center rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-1 text-xs font-semibold transition-all duration-150',
-                  selectedBroker === b.value
-                    ? 'text-white'
-                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                )}
-              >
-                {selectedBroker === b.value && (
-                  <motion.div
-                    layoutId="headerBrokerPill"
-                    className={cn(
-                      'absolute inset-0 rounded-lg shadow-sm',
-                      b.value === 'bbva'
-                        ? 'bg-blue-600'
-                        : b.value === 'myinvestor'
-                        ? 'bg-emerald-600'
-                        : b.value === 'indexa'
-                        ? 'bg-orange-600 dark:bg-orange-500'
-                        : b.value === 'kutxabank'
-                        ? 'bg-rose-600'
-                        : b.value === 'scalable'
-                        ? 'bg-cyan-600'
-                        : b.value === 'traderepublic'
-                        ? 'bg-slate-700 dark:bg-slate-600'
-                        : 'bg-slate-800 dark:bg-slate-700'
+            {brokers.map((b) => {
+              const cfg = BROKER_CONFIG[b.value] || {
+                dot: '',
+                activeBg: 'bg-slate-800 dark:bg-slate-700',
+              }
+              const isSelected = selectedBroker === b.value
+
+              return (
+                <button
+                  key={b.value}
+                  onClick={() => setSelectedBroker(b.value)}
+                  className={cn(
+                    'relative flex-1 sm:flex-initial text-center rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-1 text-xs font-semibold transition-all duration-150',
+                    isSelected
+                      ? 'text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                  )}
+                >
+                  {isSelected && (
+                    <motion.div
+                      layoutId="headerBrokerPill"
+                      className={cn('absolute inset-0 rounded-lg shadow-sm', cfg.activeBg)}
+                      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center justify-center gap-1.5">
+                    {cfg.dot && (
+                      <span
+                        className={cn(
+                          'w-2 h-2 rounded-full shrink-0 transition-all',
+                          cfg.dot,
+                          isSelected ? 'ring-1.5 ring-white/90 shadow-2xs scale-105' : 'opacity-90'
+                        )}
+                      />
                     )}
-                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                  />
-                )}
-                <span className="relative z-10">{b.label}</span>
-              </button>
-            ))}
+                    <span>{b.label}</span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
         )}
 
