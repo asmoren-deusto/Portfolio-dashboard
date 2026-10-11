@@ -1057,20 +1057,27 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
 
                 sim_pct = norm_df.dot(weights_series)
 
+                from zoneinfo import ZoneInfo
+                madrid_tz = ZoneInfo("Europe/Madrid")
+
                 for idx, val in sim_pct.items():
                     dt = idx.to_pydatetime()
+                    dt_madrid = dt.astimezone(madrid_tz) if dt.tzinfo is not None else dt
+                    
                     if fetch_period == "1d":
-                        lbl = dt.strftime("%H:%M")
+                        lbl = dt_madrid.strftime("%H:%M")
                     elif fetch_period == "5d":
-                        lbl = dt.strftime("%d %b %H:%M")
+                        lbl = dt_madrid.strftime("%d %b %H:%M")
                     else:
-                        lbl = dt.strftime("%d %b")
+                        lbl = dt_madrid.strftime("%d %b")
 
                     pct_val = round(float(val), 2)
                     chart_points.append({
-                        "time": dt.isoformat(),
-                        "time_unix": int(dt.timestamp()),
+                        "time": dt_madrid.isoformat(),
+                        "time_unix": int(dt_madrid.timestamp()),
                         "label": lbl,
+                        "time_ny": dt.strftime("%H:%M") if dt.tzinfo else lbl,
+                        "date": dt_madrid.strftime("%Y-%m-%d"),
                         "simulated_pct": pct_val,
                         "simulated_amount": round(total_val * (pct_val / 100.0), 2),
                     })
@@ -1090,6 +1097,17 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
             "currency": q.get("currency", "USD"),
         })
 
+    # Session date & human-readable label
+    DIAS_ES = {0: "Lunes", 1: "Martes", 2: "Miércoles", 3: "Jueves", 4: "Viernes", 5: "Sábado", 6: "Domingo"}
+    MESES_ES = {1: "ene", 2: "feb", 3: "mar", 4: "abr", 5: "may", 6: "jun", 7: "jul", 8: "ago", 9: "sep", 10: "oct", 11: "nov", 12: "dic"}
+    latest_date_str = chart_points[-1]["date"] if chart_points else datetime.now().strftime("%Y-%m-%d")
+    is_session_today = (latest_date_str == datetime.now().strftime("%Y-%m-%d"))
+    try:
+        ld = datetime.strptime(latest_date_str, "%Y-%m-%d")
+        session_display = f"{DIAS_ES[ld.weekday()]}, {ld.day} {MESES_ES[ld.month]}."
+    except Exception:
+        session_display = latest_date_str
+
     return {
         "summary": {
             "total_value": round(total_val, 2),
@@ -1097,6 +1115,10 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
             "simulated_daily_amount": simulated_daily_amount,
             "market_state": urth_state,
             "as_of": _now_iso(),
+            "session_date": latest_date_str,
+            "session_display": session_display,
+            "is_session_today": is_session_today,
+            "timezone": "Europe/Madrid",
             "period": period,
         },
         "holdings": sorted(holdings, key=lambda x: x["fund_value"], reverse=True),

@@ -442,6 +442,8 @@ export interface SimulatedChartPoint {
   time: string
   time_unix: number
   label: string
+  time_ny?: string
+  date?: string
   simulated_pct: number
   simulated_amount: number
 }
@@ -453,6 +455,10 @@ export interface SimulatedPortfolioResponse {
     simulated_daily_amount: number
     market_state: string
     as_of: string
+    session_date?: string
+    session_display?: string
+    is_session_today?: boolean
+    timezone?: string
     period: string
   }
   holdings: SimulatedHolding[]

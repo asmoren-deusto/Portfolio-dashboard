@@ -3,8 +3,9 @@ import {
   Activity,
   Zap,
   Layers,
-  Sparkles,
   PieChart,
+  Clock,
+  Calendar,
 } from 'lucide-react'
 import { useSimulatedPortfolio } from '@/api/queries'
 import { fmt, cn } from '@/lib/utils'
@@ -74,7 +75,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
 
   const isPositive = (summary?.simulated_daily_pct ?? 0) >= 0
 
-  // SVG Chart calculation: natural proportional scaling without horizontal distortion
+  // SVG Chart calculation: 100% Edge-to-Edge with ZERO empty margins on either side
   const svgData = useMemo(() => {
     if (!chartPoints || chartPoints.length < 2) return null
 
@@ -82,7 +83,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
     const minVal = Math.min(...pcts)
     const maxVal = Math.max(...pcts)
 
-    // Dynamic amplitude scaling with breathing room (no artificial compression)
+    // Dynamic amplitude scaling with natural breathing room
     const dataSpan = maxVal - minVal
     const span = Math.max(dataSpan, 0.25)
     const pad = span * 0.16
@@ -98,8 +99,9 @@ export const SimulatedPortfolioCard: React.FC = () => {
 
     const yRange = yMax - yMin || 1
 
-    const width = 540
-    const chartWidth = 460
+    // Chart spans 100% of the SVG width (chartWidth === width) so points start at 0 and end at 500
+    const width = 500
+    const chartWidth = 500
     const height = 240
 
     const points = chartPoints.map((p, i) => {
@@ -111,7 +113,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
     const zeroY = height - ((0 - yMin) / yRange) * height
     const hasZeroLine = zeroY >= 0 && zeroY <= height
 
-    // Smooth bezier curve path
+    // Smooth bezier curve path from edge to edge
     const linePath = points.reduce((acc, curr, i, arr) => {
       if (i === 0) return `M ${curr.x.toFixed(1)},${curr.y.toFixed(1)}`
       const prev = arr[i - 1]
@@ -191,7 +193,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
             <Activity className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
                 Simulación en Directo de Cartera
                 <span className="hidden sm:inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
@@ -200,14 +202,19 @@ export const SimulatedPortfolioCard: React.FC = () => {
               </h2>
               {isFetching && <LoadingDot />}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Estimación intradía en tiempo real de tus fondos ponderando cotizaciones de ETFs equivalentes
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1 flex-wrap">
+              <span>Estimación intradía de tus fondos ponderando cotizaciones de Wall Street</span>
+              <span className="hidden md:inline text-slate-400">•</span>
+              <span className="hidden md:inline-flex items-center gap-1 text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
+                <Clock className="w-3 h-3" />
+                15:30 - 22:00 (Hora española)
+              </span>
             </p>
           </div>
         </div>
 
         {/* Status Badge & Period Toggle */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {/* Market status badge */}
           <span
             className={cn(
@@ -235,6 +242,8 @@ export const SimulatedPortfolioCard: React.FC = () => {
               ? 'PRE-MERCADO'
               : summary?.market_state === 'POST'
               ? 'AFTER-HOURS'
+              : summary?.session_display
+              ? `CERRADO (${summary.session_display})`
               : 'MERCADO CERRADO'}
           </span>
 
@@ -265,22 +274,24 @@ export const SimulatedPortfolioCard: React.FC = () => {
       {/* Main Content Grid: Balanced Proportions (5 Cols Chart + 7 Cols Combined Breakdown Table) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-4 items-stretch">
         
-        {/* Left Column (lg:col-span-5): Proportional, High-Def Chart */}
+        {/* Left Column (lg:col-span-5): 100% Edge-to-Edge Proportional Chart */}
         <div className="lg:col-span-5 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-4">
           {/* KPI Summary Header */}
           <div className="flex items-start justify-between gap-2 mb-2 pb-2.5 border-b border-slate-200/60 dark:border-white/[0.06]">
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
                 <span>
                   {activeHoverPoint
-                    ? `A las ${activeHoverPoint.label}`
+                    ? `A las ${activeHoverPoint.label} (Madrid)`
                     : period === '1d'
-                    ? 'Rendimiento Hoy'
+                    ? summary?.is_session_today
+                      ? 'Rendimiento Sesión Hoy'
+                      : `Cierre Última Sesión • ${summary?.session_display || 'Viernes 9 oct.'}`
                     : `Periodo (${period.toUpperCase()})`}
                 </span>
                 {activeHoverPoint ? (
                   <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                    Inspección
+                    {activeHoverPoint.time_ny ? `${activeHoverPoint.time_ny} NY` : 'Inspección'}
                   </span>
                 ) : (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -336,8 +347,8 @@ export const SimulatedPortfolioCard: React.FC = () => {
             </div>
           </div>
 
-          {/* Intraday SVG Chart with Dedicated Right Y-Axis */}
-          <div className="relative w-full h-[250px] select-none">
+          {/* Intraday SVG Chart: 100% Edge-to-Edge with In-Chart Overlaid Ticks and No Side Gaps */}
+          <div className="relative w-full h-[250px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">
             {isLoading ? (
               <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">
                 <LoadingDot />
@@ -346,7 +357,8 @@ export const SimulatedPortfolioCard: React.FC = () => {
             ) : svgData ? (
               <svg
                 viewBox={`0 0 ${svgData.width} ${svgData.height}`}
-                className="w-full h-full overflow-visible"
+                className="w-full h-full"
+                preserveAspectRatio="none"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setHoveredIdx(null)}
               >
@@ -365,7 +377,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
                   </linearGradient>
                 </defs>
 
-                {/* Horizontal Gridlines & Y-Axis Scale Marks */}
+                {/* Horizontal Gridlines & In-Chart Y-Axis Scale Marks */}
                 {svgData.ticks.map((t, idx) => (
                   <g key={idx}>
                     <line
@@ -382,15 +394,16 @@ export const SimulatedPortfolioCard: React.FC = () => {
                       }
                       strokeWidth={t.isZero ? '1.2' : '0.8'}
                     />
-                    {/* Y-axis percentage text label */}
+                    {/* Y-axis percentage text label overlaid cleanly on the right edge */}
                     <text
-                      x={svgData.chartWidth + 8}
-                      y={t.y + 3.5}
+                      x={svgData.chartWidth - 6}
+                      y={t.y - 4}
+                      textAnchor="end"
                       className={cn(
-                        'text-[10px] font-mono select-none font-semibold',
+                        'text-[10px] font-mono select-none font-bold',
                         t.isZero
-                          ? 'fill-slate-500 dark:fill-slate-400 font-bold'
-                          : 'fill-slate-400 dark:fill-slate-500'
+                          ? 'fill-slate-600 dark:fill-slate-300'
+                          : 'fill-slate-400/90 dark:fill-slate-500'
                       )}
                     >
                       {t.pct >= 0 ? '+' : ''}
@@ -399,7 +412,7 @@ export const SimulatedPortfolioCard: React.FC = () => {
                   </g>
                 ))}
 
-                {/* Gradient Area Fill */}
+                {/* Gradient Area Fill (from 0 to chartWidth edge-to-edge) */}
                 <path d={svgData.areaPath} fill="url(#simAreaGrad)" />
 
                 {/* Main Trajectory Line */}
@@ -412,20 +425,20 @@ export const SimulatedPortfolioCard: React.FC = () => {
                   strokeLinejoin="round"
                 />
 
-                {/* Last Value Live Badge on Y-Axis */}
+                {/* Last Value Live Badge overlaid cleanly on right */}
                 {svgData.lastPoint && (
                   <g>
                     <rect
-                      x={svgData.chartWidth + 6}
-                      y={svgData.lastPoint.y - 10}
-                      width="66"
+                      x={svgData.chartWidth - 66}
+                      y={Math.max(4, Math.min(svgData.height - 24, svgData.lastPoint.y - 10))}
+                      width="62"
                       height="20"
                       rx="4"
                       fill={isPositive ? '#10b981' : '#f43f5e'}
                     />
                     <text
-                      x={svgData.chartWidth + 39}
-                      y={svgData.lastPoint.y + 4}
+                      x={svgData.chartWidth - 35}
+                      y={Math.max(18, Math.min(svgData.height - 10, svgData.lastPoint.y + 4))}
                       textAnchor="middle"
                       fill="#ffffff"
                       className="text-[10px] font-mono font-bold select-none"
@@ -469,11 +482,11 @@ export const SimulatedPortfolioCard: React.FC = () => {
                     {/* Floating Tooltip Pill */}
                     {(() => {
                       const pt = svgData.points[hoveredIdx]
-                      const tooltipWidth = 135
-                      const tooltipHeight = 44
-                      const isNearRight = pt.x > svgData.chartWidth - 140
+                      const tooltipWidth = 160
+                      const tooltipHeight = 52
+                      const isNearRight = pt.x > svgData.chartWidth - 170
                       const tx = isNearRight ? pt.x - tooltipWidth - 10 : pt.x + 10
-                      const ty = Math.max(10, Math.min(svgData.height - tooltipHeight - 10, pt.y - tooltipHeight / 2))
+                      const ty = Math.max(8, Math.min(svgData.height - tooltipHeight - 8, pt.y - tooltipHeight / 2))
                       const ptPositive = pt.point.simulated_pct >= 0
 
                       return (
@@ -482,20 +495,29 @@ export const SimulatedPortfolioCard: React.FC = () => {
                             width={tooltipWidth}
                             height={tooltipHeight}
                             rx="8"
-                            className="fill-slate-900/90 dark:fill-[#121212]/95 stroke-slate-700/60 dark:stroke-white/15"
+                            className="fill-slate-900/95 dark:fill-[#121212]/95 stroke-slate-700/60 dark:stroke-white/15 shadow-xl"
                             strokeWidth="1"
                           />
                           <text
                             x="10"
                             y="16"
                             fill="#94a3b8"
-                            className="text-[9px] font-mono font-bold"
+                            className="text-[9.5px] font-mono font-bold"
                           >
-                            Hora: {pt.point.label}
+                            Hora: {pt.point.label} (Madrid)
                           </text>
                           <text
                             x="10"
-                            y="34"
+                            y="29"
+                            fill="#64748b"
+                            className="text-[9px] font-mono"
+                          >
+                            {pt.point.time_ny ? `Wall St: ${pt.point.time_ny} EDT • ` : ''}
+                            {pt.point.date || summary?.session_date || ''}
+                          </text>
+                          <text
+                            x="10"
+                            y="44"
                             fill={ptPositive ? '#34d399' : '#fb7185'}
                             className="text-[11px] font-mono font-bold"
                           >
@@ -515,16 +537,28 @@ export const SimulatedPortfolioCard: React.FC = () => {
             )}
           </div>
 
-          {/* Time X-Axis Markers */}
+          {/* Time X-Axis Markers: 100% Flush to Both Left and Right Edges, Zero Empty Gap */}
           {svgData && svgData.points.length > 0 && (
-            <div className="flex justify-between items-center text-[10px] font-mono text-slate-600 dark:text-slate-400 px-1 mt-1 font-semibold">
-              <span>{svgData.points[0]?.point.label}</span>
-              <span>{svgData.points[Math.floor(svgData.points.length * 0.33)]?.point.label}</span>
-              <span>{svgData.points[Math.floor(svgData.points.length * 0.66)]?.point.label}</span>
-              <span>{svgData.points[svgData.points.length - 1]?.point.label}</span>
-              <span className="w-14" /> {/* Spacer for Y-axis align */}
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-2 font-semibold px-0">
+              <span className="text-left">{svgData.points[0]?.point.label}</span>
+              <span className="text-center">{svgData.points[Math.floor(svgData.points.length * 0.25)]?.point.label}</span>
+              <span className="text-center">{svgData.points[Math.floor(svgData.points.length * 0.5)]?.point.label}</span>
+              <span className="text-center">{svgData.points[Math.floor(svgData.points.length * 0.75)]?.point.label}</span>
+              <span className="text-right">{svgData.points[svgData.points.length - 1]?.point.label}</span>
             </div>
           )}
+
+          {/* Session Footer Context Note */}
+          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-1 pt-1 border-t border-slate-200/50 dark:border-white/[0.04]">
+            <span className="flex items-center gap-1 font-medium">
+              <Clock className="w-3 h-3 text-indigo-500" />
+              <span>Hora española (Madrid CEST)</span>
+            </span>
+            <span className="flex items-center gap-1 font-medium">
+              <Calendar className="w-3 h-3 text-slate-400" />
+              <span>{summary?.session_display || 'Viernes 9 oct.'}</span>
+            </span>
+          </div>
         </div>
 
         {/* Right Column (lg:col-span-7): Combined Breakdown Table & Live Proxies */}

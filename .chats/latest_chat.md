@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 19:50:59
+- **Fecha de exportación:** 2026-10-11 20:08:52
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 61
+- **Total de interacciones registradas:** 63
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1026,5 +1026,34 @@ Se ha unificado la paleta de colores de las entidades en toda la aplicación par
 ### 👤 Usuario (2026-10-11 17:44:15)
 
 mejor pero la grafica sigue anchada y se ve distorsionada, intenta combinar la tabla del desplegable inferior que me gusta con la columna que has hecho a la derecha que esta bien, eso si, gestaca el nombre de los etfs y no el simbolo que con el simbolo no se lo que es cada cosa
+
+---
+
+### 🤖 Asistente (2026-10-11 17:51:01)
+
+He rediseñado por completo la tarjeta de **Simulación en Directo de Cartera** en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx) atendiendo a cada una de tus indicaciones:
+
+### 1. Gráfica Proporcionada y Sin Distorsión
+- **Aspect Ratio natural:** Se reestructuró la cuadrícula a un reparto equilibrado (`5 columnas` para la gráfica y `7 columnas` para el panel derecho). La gráfica ya no se estira horizontalmente ni se aplana.
+- **Autoescalado dinámico:** Se eliminó la compresión forzada a 0.0%, permitiendo que el rango vertical aproveche toda la altura para mostrar con nitidez las oscilaciones y tendencia intradía con curvas Bézier suaves estilo *TradingView* o *Apple Stocks*.
+
+### 2. Tabla Desplegable Integrada en la Columna Derecha
+- Se combinó la información de la tabla inferior con la columna lateral, eliminando la necesidad de un desplegable inferior.
+- Se añadieron pestañas rápidas en la parte superior:
+  - **`Por Fondos (9)`**: Muestra cada posición de la cartera con el ETF réplica asignado, su fondo real debajo, su entidad con el punto de color unificado (`• BBVA`, `• INDEXA`, `• MYINVESTOR`), su peso relativo, la cotización en vivo y el impacto en euros.
+  - **`ETFs Agrupados (8)`**: Muestra el resumen consolidado por ETF réplica con su peso acumulado en cartera y cotización en tiempo real.
+
+### 3. Nombres de ETFs Destacados en Primer Plano
+- El nombre descriptivo y claro del índice/activo aparece ahora **grande y en negrita** (ej.: **MSCI World (Acciones Globales)**, **MSCI ACWI (Global All Country)**, **Tecnología EE.UU. (Big Tech)**, **Alto Cash Flow & Value**, **Mercados Emergentes**, etc.).
+- Los símbolos o tickers (`URTH`, `ACWI`, `XLK`, `COWZ`, `EEM`, etc.) pasan a ser una pequeña etiqueta secundaria discreta al lado del nombre.
+
+---
+*Cambios compilados y desplegados bajo la versión **v2.7.45**.*
+
+---
+
+### 👤 Usuario (2026-10-11 18:02:15)
+
+por que la grafica diaria va de 9:30 a 15:55 y de que dia es? no me gustan los espacios vacios a los lados
 
 ---
