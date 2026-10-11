@@ -102,7 +102,7 @@ export function PerformanceChart({
   height = 260,
   chartMode = 'currency',
   showInvested = true,
-  showMilestones = true,
+  showMilestones = false,
   showFooterStrip = true,
 }: PerformanceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 19:18:51
+- **Fecha de exportación:** 2026-10-11 19:21:51
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 51
+- **Total de interacciones registradas:** 53
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -892,5 +892,22 @@ Los cambios ya están subidos al repositorio.
 ### 👤 Usuario (2026-10-11 17:18:10)
 
 mete la leyenda dentro del grafico en pequeño
+
+---
+
+### 🤖 Asistente (2026-10-11 17:18:54)
+
+Listo. He reubicado la leyenda al interior del gráfico en la versión **v2.7.40**:
+
+- **Leyenda flotante integrada:** Se muestra ahora como una pequeña cápsula semitransparente con desenfoque de fondo (`backdrop-blur`) en la esquina superior izquierda del propio lienzo del gráfico (`🟡 Indexa  🟢 BBVA  🔵 MyInvestor`), con texto en tamaño `10px` y `pointer-events-none` para no interferir en el arrastre ni en la inspección de la gráfica.
+- **Barra superior limpia al máximo:** La barra de métricas solo contiene *Patrimonio* y *Aportado* a la izquierda, y *Beneficio* con la *Fecha* a la derecha, optimizando todo el espacio vertical.
+
+Los cambios ya están sincronizados y subidos al repositorio.
+
+---
+
+### 👤 Usuario (2026-10-11 17:19:36)
+
+quita el selector de picos
 
 ---

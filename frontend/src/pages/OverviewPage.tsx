@@ -16,7 +16,6 @@ import {
   Sparkles,
   Euro,
   Percent,
-  Target,
   Building2,
   Flame,
   Zap,
@@ -79,7 +78,6 @@ export function OverviewPage() {
   const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
   const [perfChartMode, setPerfChartMode] = useState<'currency' | 'percent'>('currency')
   const [perfShowInvested, setPerfShowInvested] = useState(true)
-  const [perfShowMilestones, setPerfShowMilestones] = useState(true)
   const [returnsPeriodMode, setReturnsPeriodMode] = useState<'global' | 'weekly'>(() => {
     return (localStorage.getItem('returns_period_mode') as 'global' | 'weekly') || 'weekly'
   })
@@ -863,19 +861,6 @@ export function OverviewPage() {
                       <span>Aportado</span>
                     </button>
                   )}
-
-                  {/* Toggle Milestones */}
-                  <button
-                    onClick={() => setPerfShowMilestones(v => !v)}
-                    className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${perfShowMilestones
-                        ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold'
-                        : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
-                      }`}
-                    title="Mostrar u ocultar picos máximos y mínimos"
-                  >
-                    <Target size={11} className={perfShowMilestones ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} />
-                    <span>Picos</span>
-                  </button>
                 </div>
               )}
 
@@ -930,7 +915,7 @@ export function OverviewPage() {
                     height={260}
                     chartMode={perfChartMode}
                     showInvested={perfShowInvested}
-                    showMilestones={perfShowMilestones}
+                    showMilestones={false}
                     showFooterStrip={false}
                   />
                 ) : (
