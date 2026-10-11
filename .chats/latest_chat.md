@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 21:09:50
+- **Fecha de exportación:** 2026-10-11 21:12:01
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 88
+- **Total de interacciones registradas:** 90
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1374,5 +1374,26 @@ Se han reducido **15px adicionales** en la sección de simulación:
 ### 👤 Usuario (2026-10-11 19:08:41)
 
 5px menos de altura
+
+---
+
+### 🤖 Asistente (2026-10-11 19:09:52)
+
+Se han reducido **5px de altura** en la sección de simulación de cartera:
+
+- **Gráfica TradingView**:
+  - Altura del contenedor en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx) ajustada a `315px` (`295px` en móviles).
+  - Inicialización por defecto adaptada a `315px`.
+- **Tabla de desglose**:
+  - `max-height` ajustada de `440px` a `435px` para ambas pestañas (*Por Fondos* y *ETFs Agrupados*).
+- **Release y Sincronización**:
+  - Build completado con éxito.
+  - Sincronizado y publicado en Git bajo la versión **v2.7.58**.
+
+---
+
+### 👤 Usuario (2026-10-11 19:10:50)
+
+elimina esto: Barras de progreso:
 
 ---

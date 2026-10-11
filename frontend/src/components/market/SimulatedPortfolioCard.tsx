@@ -285,10 +285,6 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 p-4 sm:p-5 transition-all">
-      {/* Sleek Loading / Fetching Progress Bar */}
-      {isFetching && (
-        <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-blue-500 via-indigo-400 to-emerald-400 animate-pulse z-30 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
-      )}
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/[0.06]">
         <div className="flex items-center gap-2.5">
