@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 17:43:38
+- **Fecha de exportación:** 2026-10-12 17:46:01
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 115
+- **Total de interacciones registradas:** 117
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1938,5 +1938,58 @@ Los cambios han sido compilados y sincronizados en la versión **v2.7.66**.
 ### 👤 Usuario (2026-10-12 15:32:47)
 
 revisa en el rendimiento simulado la diferencia euro/dolar y muestralo si crees que es relevante
+
+---
+
+### 🤖 Asistente (2026-10-12 15:43:41)
+
+El impacto del **tipo de cambio Euro/Dólar (EUR/USD)** no solo es relevante: es **determinante** para entender la rentabilidad real de los fondos en España.
+
+---
+
+### ¿Por qué es crucial para tu cartera?
+
+1. **Moneda de cotización vs Moneda de los fondos**:
+   - Tus fondos en MyInvestor o Indexa liquidan su valor liquidativo diario (**NAV**) en **Euros (€)**.
+   - Sin embargo, los ETFs réplica (`URTH`, `XLK`, `COWZ`, `ACWI`, etc.) cotizan en Wall Street en **Dólares ($)**.
+   - Ponderando los fondos de tu cartera, **un 60.3% del capital está expuesto a activos en Dólares**.
+
+2. **Efecto de la variación del Dólar**:
+   - Si Wall Street cae un **-0.31%**, pero el Dólar se fortalece un **+0.36%** frente al Euro (caída del EUR/USD de 1.1206 a 1.1166):
+     - Para un inversor estadounidense, la pérdida es del **-0.31%**.
+     - Para un inversor europeo en Euros, el aumento de valor del dólar compensa la caída de las acciones en un **+0.22%** sobre el total de la cartera:
+       $$\text{Rendimiento Real en EUR} \approx -0.31\% + 0.22\% = \mathbf{-0.09\%} \ (-70.57\ \text{€})$$
+   - Sin tener en cuenta la divisa, parecería que la cartera pierde `-243 €`, cuando en realidad tus fondos solo retroceden `-70 €` al liquidar en euros.
+
+---
+
+### Qué he incorporado en la plataforma:
+
+1. **Cálculo exacto del impacto de divisa en backend (`/api/market/simulated-portfolio`)**:
+   - Obtención en tiempo real de `EURUSD=X` sincronizado a nivel de cada barra intradía de 5 minutos.
+   - Ponderación de la exposición real a divisa estadounidense según cada ETF réplica (ej. `XLK`/`COWZ`: 100%, `URTH`: 70%, `ACWI`: 65%, `FEZ`: 0% por ser Eurozona pura).
+   - Generación de métricas duales: **Rendimiento en USD de las réplicas** vs **Rendimiento Neto Ajustado a EUR**.
+
+2. **Pastilla de Divisa en Tiempo Real (Cabecera)**:
+   - Se muestra el par en vivo: `EUR/USD: 1.1166 (-0.36%)` con código de color dinámico y tooltip explicativo.
+
+3. **Selector de visualización dual (`EUR (€) Neto` / `USD ($) Réplicas`)**:
+   - Permite alternar la gráfica completa y las cifras entre:
+     - **EUR (€) Neto** *(por defecto)*: La estimación real que verás reflejada en el valor liquidativo en euros de tus fondos.
+     - **USD ($) ETFs**: La evolución pura de las cotizaciones en Wall Street.
+
+4. **Tarjeta de Desglose del Efecto Divisa**:
+   - Situada justo encima de la gráfica, resume de un vistazo:
+     - **Wall St. (USD)**: `-0.31%`
+     - **Aportación Dólar (60.3% de la cartera)**: `+0.22%` *(colchón de amortiguación)*
+     - **Estimación en EUR**: `-0.09%`
+
+Todo ha sido compilado y publicado en la versión **v2.7.67**.
+
+---
+
+### 👤 Usuario (2026-10-12 15:40:05)
+
+
 
 ---
