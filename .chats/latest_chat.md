@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:22:09
+- **Fecha de exportación:** 2026-10-12 18:23:11
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 133
+- **Total de interacciones registradas:** 135
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2180,5 +2180,33 @@ Publicado y desplegado en la versión **`v2.7.75`**.
 ### 👤 Usuario (2026-10-12 16:16:06)
 
 elimina todo eso, ajusta la tabla y haz menos alta toda la tarjeta en general
+
+---
+
+### 🤖 Asistente (2026-10-12 16:22:12)
+
+Se han aplicado todos los cambios solicitados en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+1. **Eliminada la sección tachada en la gráfica**:
+   - Se suprimió la barra inferior completa de leyenda de horarios (`Horarios: Apertura Regular (15:30) • After-Hours (22:00)` y `Hora española Madrid CEST`).
+   - Se retiró la píldora de divisa `EUR/USD` y los selectores EUR/USD de la cabecera, dejando el header limpio y sin elementos superpuestos ni texto cortado.
+
+2. **Ajustada la tabla de fondos y réplicas**:
+   - Altura máxima reducida y equilibrada a `max-h-[350px] sm:max-h-[365px]` (antes `580px`).
+   - Padding de filas compactado a `py-1.5 px-2.5` para que quepan más activos a la vista sin scroll excesivo.
+   - Anchos de columnas optimizados (`min-w-[240px]` y `min-w-[190px]`) para evitar huecos en blanco.
+
+3. **Altura general de la tarjeta reducida sensiblemente**:
+   - Gráfica TradingView compactada a `h-[250px] sm:h-[270px]` (antes `370px`).
+   - Paddings y márgenes generales de la tarjeta reducidos (`p-3.5 sm:p-4`, grid con `gap-3 pt-3`).
+   - Bloques resumen de mercado (Seguimiento, Mayor Ganancia, Mayor Caída) integrados de forma compacta con `p-2`.
+
+🚀 **Release sincronizada:** `v2.7.76` subida y desplegada a Git.
+
+---
+
+### 👤 Usuario (2026-10-12 16:16:54)
+
+
 
 ---

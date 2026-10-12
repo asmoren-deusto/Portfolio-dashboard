@@ -424,6 +424,34 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               : 'MERCADO CERRADO'}
           </span>
 
+          {/* Currency display toggle: EUR (Neto) vs USD (Réplicas) */}
+          <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+            <button
+              onClick={() => setCurrencyMode('eur')}
+              className={cn(
+                'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors flex items-center gap-1',
+                currencyMode === 'eur'
+                  ? 'bg-white dark:bg-[#333333] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              )}
+              title="Estimación neta en Euros (incluye el efecto divisa EUR/USD sobre activos internacionales)"
+            >
+              <span>EUR (€)</span>
+            </button>
+            <button
+              onClick={() => setCurrencyMode('usd')}
+              className={cn(
+                'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors flex items-center gap-1',
+                currencyMode === 'usd'
+                  ? 'bg-white dark:bg-[#333333] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              )}
+              title="Rendimiento nominal en Dólares de los ETFs réplica de Wall Street"
+            >
+              <span>USD ($)</span>
+            </button>
+          </div>
+
           {/* Period selector */}
           <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             {[
