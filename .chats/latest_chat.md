@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:24:38
+- **Fecha de exportación:** 2026-10-12 18:25:18
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 137
+- **Total de interacciones registradas:** 139
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2228,5 +2228,30 @@ Se ha eliminado la pastilla azul `EUR/USD` tachada en la imagen, conservando el 
 ### 👤 Usuario (2026-10-12 16:20:12)
 
 esto no se lee, y acompañalo de la descriocion
+
+---
+
+### 🤖 Asistente (2026-10-12 16:24:41)
+
+Se ha mejorado la legibilidad y añadido la descripción a las etiquetas de los marcadores en la gráfica en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+1. **Descripción incorporada:**
+   - **`15:30 • Apertura`**: Apertura de mercado regular de Wall Street.
+   - **`22:00 • After-Hours`**: Cierre de sesión regular e inicio de negociación fuera de horas.
+
+2. **Legibilidad y contraste mejorados:**
+   - Tipografía más grande (`text-[10px] font-bold`) y con padding adecuado.
+   - Colores con alto contraste en fondo sólido:
+     - **Verde esmeralda sólido** con texto blanco en modo claro (`bg-emerald-600 text-white`) y esmeralda brillante en modo oscuro.
+     - **Ámbar intenso** con texto oscuro de alto contraste (`bg-amber-500 text-slate-950`).
+   - Borde visible y sombra para destacar con nitidez sobre cualquier trazo de la gráfica.
+
+🚀 **Release actualizada:** `v2.7.78` sincronizada y desplegada en Git.
+
+---
+
+### 👤 Usuario (2026-10-12 16:21:04)
+
+amplia un poco
 
 ---

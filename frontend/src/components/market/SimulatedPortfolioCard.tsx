@@ -551,19 +551,19 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             </div>
 
             {/* Context Pills: Base & Min/Max */}
-            <div className="flex flex-col items-end gap-1 text-xs">
-              <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[11px]">
-                <span>Base:</span>
-                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+            <div className="flex flex-col items-end gap-1.5">
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <span className="font-medium">Base:</span>
+                <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                   {fmt.currency(summary?.total_value ?? 0)}
                 </span>
               </div>
               {chartPoints.length > 0 && (
-                <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-white/[0.04] px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-white/[0.06]">
+                <div className="flex items-center gap-2 text-xs sm:text-[13px] font-mono text-slate-600 dark:text-slate-400 bg-white/90 dark:bg-white/[0.06] px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-white/[0.08] shadow-2xs">
                   <span className={minPct >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold'}>
                     {minPct >= 0 ? '+' : ''}{minPct.toFixed(2)}%
                   </span>
-                  <span>↔</span>
+                  <span className="text-slate-400 dark:text-slate-500 text-xs font-sans">↔</span>
                   <span className={maxPct >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold'}>
                     {maxPct >= 0 ? '+' : ''}{maxPct.toFixed(2)}%
                   </span>
