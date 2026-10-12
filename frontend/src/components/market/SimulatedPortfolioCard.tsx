@@ -19,7 +19,12 @@ import {
   Flame,
   TrendingDown,
 } from 'lucide-react'
-import { useSimulatedPortfolio, type SimulatedChartPoint, type MarketStock } from '@/api/queries'
+import {
+  useSimulatedPortfolio,
+  type SimulatedChartPoint,
+  type MarketStock,
+  type SessionMarker,
+} from '@/api/queries'
 import { fmt, cn } from '@/lib/utils'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
@@ -105,15 +110,56 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   const holdings = data?.holdings ?? []
   const etfs = data?.etfs_summary ?? []
   const chartPoints = data?.chart_points ?? []
+  const sessionMarkers = data?.session_markers ?? []
+  const hasExtendedHours = data?.has_extended_hours ?? data?.summary?.has_extended_hours ?? false
 
   const isPositive = (summary?.simulated_daily_pct ?? 0) >= 0
 
-  // Chart refs
+  // Chart refs and state
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const seriesRef = useRef<ISeriesApi<'Area'> | null>(null)
   const chartPointsRef = useRef<SimulatedChartPoint[]>(chartPoints)
   chartPointsRef.current = chartPoints
+  const sessionMarkersRef = useRef<SessionMarker[]>(sessionMarkers)
+  sessionMarkersRef.current = sessionMarkers
+
+  // Dynamic vertical dotted line markers
+  const [markerPositions, setMarkerPositions] = useState<
+    Array<{ marker: SessionMarker; x: number }>
+  >([])
+
+  const updateMarkerPositions = () => {
+    if (!chartRef.current || !chartPointsRef.current.length || !sessionMarkersRef.current.length) {
+      setMarkerPositions([])
+      return
+    }
+    const timeScale = chartRef.current.timeScale()
+    const pts = chartPointsRef.current
+    const positions: Array<{ marker: SessionMarker; x: number }> = []
+
+    for (const marker of sessionMarkersRef.current) {
+      // Find closest time_unix in dataset
+      let closestTime = pts[0].time_unix
+      let minDiff = Math.abs(pts[0].time_unix - marker.time_unix)
+      for (let i = 1; i < pts.length; i++) {
+        const diff = Math.abs(pts[i].time_unix - marker.time_unix)
+        if (diff < minDiff) {
+          minDiff = diff
+          closestTime = pts[i].time_unix
+        }
+      }
+
+      const x = timeScale.timeToCoordinate(closestTime as UTCTimestamp)
+      if (x !== null && !isNaN(x)) {
+        positions.push({ marker, x })
+      }
+    }
+    setMarkerPositions(positions)
+  }
+
+  const updateMarkerPositionsRef = useRef<() => void>(updateMarkerPositions)
+  updateMarkerPositionsRef.current = updateMarkerPositions
 
   // Min and max percentages
   const { minPct, maxPct } = useMemo(() => {
@@ -223,6 +269,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         const match = chartPointsRef.current.find((p) => p.time_unix === tUnix)
         setHoveredPoint(match || null)
       })
+
+      // Sync marker positions on timeScale visible range changes
+      const handleRangeChange = () => {
+        requestAnimationFrame(() => {
+          updateMarkerPositionsRef.current()
+        })
+      }
+      chart.timeScale().subscribeVisibleTimeRangeChange(handleRangeChange)
+      chart.timeScale().subscribeVisibleLogicalRangeChange(handleRangeChange)
     } catch (err) {
       console.warn('Failed to initialize simulated TradingView chart:', err)
     }
@@ -235,6 +290,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         const h = Math.max(10, entries[0].contentRect.height)
         chartRef.current.applyOptions({ width: w, height: h })
         chartRef.current.timeScale().fitContent()
+        requestAnimationFrame(() => {
+          updateMarkerPositionsRef.current()
+        })
       } catch {}
     })
 
@@ -277,11 +335,16 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
       if (formatted.length > 0) {
         seriesRef.current.setData(formatted)
         chartRef.current.timeScale().fitContent()
+
+        // Update markers coordinate mapping after paint
+        requestAnimationFrame(() => {
+          updateMarkerPositions()
+        })
       }
     } catch (err) {
       console.warn('Error setting simulated chart data:', err)
     }
-  }, [chartPoints])
+  }, [chartPoints, sessionMarkers])
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 p-4 sm:p-5 transition-all">
@@ -306,7 +369,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               <span className="hidden md:inline text-slate-400">•</span>
               <span className="hidden md:inline-flex items-center gap-1 text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
                 <Clock className="w-3 h-3" />
-                15:30 - 22:00 (Hora española)
+                {hasExtendedHours
+                  ? 'Pre 10:00 • Regular 15:30 - 22:00 • Post 22:00 (Madrid)'
+                  : '15:30 - 22:00 (Hora española)'}
               </span>
             </p>
           </div>
@@ -389,9 +454,29 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     : `Periodo (${period.toUpperCase()})`}
                 </span>
                 {hoveredPoint ? (
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                    {hoveredPoint.time_ny ? `${hoveredPoint.time_ny} NY` : 'Inspección'}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                      {hoveredPoint.time_ny ? `${hoveredPoint.time_ny} NY` : 'Inspección'}
+                    </span>
+                    {hoveredPoint.phase && (
+                      <span
+                        className={cn(
+                          'px-1.5 py-0.2 rounded text-[9px] font-bold border',
+                          hoveredPoint.phase === 'REGULAR'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25'
+                            : hoveredPoint.phase === 'PRE'
+                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25'
+                            : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/25'
+                        )}
+                      >
+                        {hoveredPoint.phase === 'REGULAR'
+                          ? 'REGULAR'
+                          : hoveredPoint.phase === 'PRE'
+                          ? 'PRE-MKT'
+                          : 'AFTER-HOURS'}
+                      </span>
+                    )}
+                  </div>
                 ) : (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 )}
@@ -449,11 +534,44 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
           <div className="relative w-full h-[295px] sm:h-[315px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">
             {isLoading && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40">
+              <div className="absolute inset-0 z-20 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40">
                 <LoadingDot />
                 <span className="ml-2 font-medium">Cargando gráfica TradingView...</span>
               </div>
             )}
+
+            {/* Dotted Vertical Session & Phase Markers */}
+            <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+              {markerPositions.map(({ marker, x }) => (
+                <div
+                  key={`${marker.time_unix}-${marker.label}`}
+                  className="absolute top-0 bottom-6 flex flex-col items-center"
+                  style={{ left: `${Math.round(x)}px` }}
+                >
+                  {/* Floating session / phase badge */}
+                  <div
+                    className="px-1.5 py-0.5 rounded text-[9px] font-bold font-mono tracking-tight shadow-xs whitespace-nowrap -translate-x-1/2 border mt-1 select-none backdrop-blur-xs"
+                    style={{
+                      backgroundColor: isDark ? 'rgba(24, 24, 27, 0.92)' : 'rgba(255, 255, 255, 0.95)',
+                      borderColor: `${marker.color}70`,
+                      color: marker.color,
+                      boxShadow: `0 2px 6px -1px ${marker.color}35`,
+                    }}
+                  >
+                    {marker.label}
+                  </div>
+                  {/* Vertical dotted line from badge to bottom axis */}
+                  <div
+                    className="w-0 flex-1 border-l-2 border-dotted mt-0.5"
+                    style={{
+                      borderColor: marker.color,
+                      opacity: 0.9,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
             <div
               ref={chartContainerRef}
               className="w-full h-full"
@@ -461,16 +579,38 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             />
           </div>
 
-          {/* Session Footer Context Note */}
-          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-2 pt-1.5 border-t border-slate-200/50 dark:border-white/[0.04]">
-            <span className="flex items-center gap-1 font-medium">
-              <Clock className="w-3 h-3 text-indigo-500" />
-              <span>Hora española (Madrid CEST)</span>
-            </span>
-            <span className="flex items-center gap-1 font-medium">
-              <Calendar className="w-3 h-3 text-slate-400" />
-              <span>{summary?.session_display || 'Viernes 9 oct.'}</span>
-            </span>
+          {/* Session Legend and Footer Context Note */}
+          <div className="flex flex-col gap-1.5 mt-2 pt-1.5 border-t border-slate-200/50 dark:border-white/[0.04]">
+            {sessionMarkers.length > 0 && (
+              <div className="flex items-center gap-2.5 text-[10px] text-slate-500 dark:text-slate-400 flex-wrap">
+                <span className="font-semibold text-slate-600 dark:text-slate-300">Sesiones:</span>
+                <span className="inline-flex items-center gap-1 font-mono">
+                  <span className="w-2.5 h-0 border-t-2 border-dotted border-[#818cf8]" />
+                  <span>Día / Sesión</span>
+                </span>
+                <span className="inline-flex items-center gap-1 font-mono">
+                  <span className="w-2.5 h-0 border-t-2 border-dotted border-[#10b981]" />
+                  <span>Apertura Regular (15:30)</span>
+                </span>
+                {hasExtendedHours && (
+                  <span className="inline-flex items-center gap-1 font-mono">
+                    <span className="w-2.5 h-0 border-t-2 border-dotted border-[#f59e0b]" />
+                    <span>After-Hours (22:00)</span>
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
+              <span className="flex items-center gap-1 font-medium">
+                <Clock className="w-3 h-3 text-indigo-500" />
+                <span>Hora española (Madrid CEST)</span>
+              </span>
+              <span className="flex items-center gap-1 font-medium">
+                <Calendar className="w-3 h-3 text-slate-400" />
+                <span>{summary?.session_display || 'Viernes 9 oct.'}</span>
+              </span>
+            </div>
           </div>
 
           {/* Market Overview Highlights (Moved UP under chart) */}
@@ -657,8 +797,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
                           {/* Live ETF Quote Price and Daily % */}
                           <td className="py-2.5 px-2.5 text-right whitespace-nowrap">
-                            <div className={cn('font-mono font-bold text-xs', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-                              {isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%
+                            <div className="flex items-center justify-end gap-1">
+                              {(summary?.market_state === 'PRE' || summary?.market_state === 'POST') && (
+                                <span className="text-[9px] font-bold font-mono px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                  {summary.market_state}
+                                </span>
+                              )}
+                              <span className={cn('font-mono font-bold text-xs', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                                {isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%
+                              </span>
                             </div>
                             {h.etf_price && (
                               <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
@@ -734,7 +881,14 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           </td>
 
                           <td className="py-2.5 px-2 text-right font-mono font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
-                            {etf.price ? fmt.currency(etf.price, etf.currency) : '-'}
+                            <div className="flex items-center justify-end gap-1">
+                              {(summary?.market_state === 'PRE' || summary?.market_state === 'POST') && (
+                                <span className="text-[9px] font-bold font-mono px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                  {summary.market_state}
+                                </span>
+                              )}
+                              <span>{etf.price ? fmt.currency(etf.price, etf.currency) : '-'}</span>
+                            </div>
                           </td>
 
                           <td className="py-2.5 px-2 text-right whitespace-nowrap">

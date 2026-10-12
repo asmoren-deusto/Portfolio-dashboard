@@ -440,8 +440,19 @@ export interface SimulatedEtfSummary {
   name: string
   weight: number
   price?: number
+  regular_price?: number
+  pre_market_price?: number
+  post_market_price?: number
   change_pct?: number
   currency: string
+}
+
+export interface SessionMarker {
+  time_unix: number
+  label: string
+  type: 'session_break' | 'regular_open' | 'post_market' | 'pre_market'
+  color: string
+  phase?: string
 }
 
 export interface SimulatedChartPoint {
@@ -450,6 +461,8 @@ export interface SimulatedChartPoint {
   label: string
   time_ny?: string
   date?: string
+  session_date?: string
+  phase?: 'PRE' | 'REGULAR' | 'POST'
   simulated_pct: number
   simulated_amount: number
 }
@@ -466,10 +479,13 @@ export interface SimulatedPortfolioResponse {
     is_session_today?: boolean
     timezone?: string
     period: string
+    has_extended_hours?: boolean
   }
   holdings: SimulatedHolding[]
   etfs_summary: SimulatedEtfSummary[]
   chart_points: SimulatedChartPoint[]
+  session_markers?: SessionMarker[]
+  has_extended_hours?: boolean
   cache_timestamp: string
 }
 

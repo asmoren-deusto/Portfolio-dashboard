@@ -314,6 +314,18 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
         previous_close = meta.get("previousClose") or meta.get("chartPreviousClose")
         raw_pre = meta.get("preMarketPrice")
         raw_post = meta.get("postMarketPrice")
+
+        # Fallback to actual pre/post trades from valid_prices if meta leaves them empty
+        current_period = meta.get("currentTradingPeriod", {})
+        pre_start = current_period.get("pre", {}).get("start", 0)
+        post_start = current_period.get("post", {}).get("start", 0)
+
+        if raw_pre is None and market_state == "PRE" and valid_prices and valid_prices[-1][0] >= pre_start:
+            raw_pre = valid_prices[-1][1]
+
+        if raw_post is None and market_state in ("POST", "POSTPOST") and valid_prices and valid_prices[-1][0] >= post_start:
+            raw_post = valid_prices[-1][1]
+
         pre_price = raw_pre if market_state == "PRE" else None
         post_price = raw_post if market_state in ("POST", "POSTPOST") else None
         display_price = (
@@ -322,13 +334,7 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
             else regular_price
         )
 
-        if market_state == "PRE" and pre_price is not None:
-            reference = regular_price
-        elif market_state in ("POST", "POSTPOST") and post_price is not None:
-            reference = regular_price
-        else:
-            reference = previous_close or regular_price
-
+        reference = previous_close or regular_price
         change = display_price - reference if reference else 0.0
         change_pct = change / reference * 100 if reference else 0.0
 
@@ -1004,22 +1010,50 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
 
     urth_state = quotes.get("URTH", {}).get("market_state") or get_market_session_for_ticker("URTH")
 
-    # Fetch history series for the chart
+    # Fetch history series for the chart with pre/post market support
     chart_points = []
+    session_markers = []
+    DIAS_ES = {0: "Lunes", 1: "Martes", 2: "Miércoles", 3: "Jueves", 4: "Viernes", 5: "Sábado", 6: "Domingo"}
+    MESES_ES = {1: "ene", 2: "feb", 3: "mar", 4: "abr", 5: "may", 6: "jun", 7: "jul", 8: "ago", 9: "sep", 10: "oct", 11: "nov", 12: "dic"}
+
     try:
         valid_periods = {"1d", "5d", "1mo"}
         fetch_period = period if period in valid_periods else "1d"
         interval = "5m" if fetch_period == "1d" else "15m" if fetch_period == "5d" else "1d"
+        download_period = "2d" if fetch_period == "1d" else fetch_period
+        include_prepost = fetch_period in ("1d", "5d")
 
-        df = yf.download(etf_tickers_list, period=fetch_period, interval=interval, progress=False)
+        df = yf.download(etf_tickers_list, period=download_period, interval=interval, prepost=include_prepost, progress=False)
         if df is not None and not df.empty:
             closes = df["Close"] if "Close" in df else df
             if isinstance(closes, pd.DataFrame):
                 closes = closes.ffill().bfill()
                 weights_series = pd.Series(etf_weights)
 
-                # Base reference: for 1d use previous close if available or first point
-                if fetch_period == "1d":
+                from zoneinfo import ZoneInfo
+                madrid_tz = ZoneInfo("Europe/Madrid")
+                ny_tz = ZoneInfo("America/New_York")
+
+                session_dates = [idx.astimezone(ny_tz).date() for idx in closes.index]
+                unique_sessions = sorted(list(set(session_dates)))
+
+                # Calculate norm_df normalized by session
+                if fetch_period in ("1d", "5d") and len(unique_sessions) > 1:
+                    norm_dfs = []
+                    for s_idx, s in enumerate(unique_sessions):
+                        idx_s = [idx for idx, d in zip(closes.index, session_dates) if d == s]
+                        sub_closes = closes.loc[idx_s]
+                        if s_idx == 0:
+                            # For the initial session, base is its first row or prev_close
+                            base_s = sub_closes.iloc[0]
+                        else:
+                            # For subsequent sessions, base is the last close of the previous session!
+                            prev_session_dates = [idx for idx, d in zip(closes.index, session_dates) if d == unique_sessions[s_idx - 1]]
+                            base_s = closes.loc[prev_session_dates].iloc[-1]
+                        norm_s = (sub_closes - base_s) / base_s * 100.0
+                        norm_dfs.append(norm_s)
+                    norm_df = pd.concat(norm_dfs)
+                elif fetch_period == "1d":
                     base_dict = {}
                     for t in etf_tickers_list:
                         pc = quotes.get(t, {}).get("prev_close")
@@ -1037,13 +1071,56 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
 
                 sim_pct = norm_df.dot(weights_series)
 
-                from zoneinfo import ZoneInfo
-                madrid_tz = ZoneInfo("Europe/Madrid")
+                prev_ny_d = None
+                prev_phase = None
 
                 for idx, val in sim_pct.items():
                     dt = idx.to_pydatetime()
                     dt_madrid = dt.astimezone(madrid_tz) if dt.tzinfo is not None else dt
-                    
+                    dt_ny = dt.astimezone(ny_tz) if dt.tzinfo is not None else dt
+                    ny_d = dt_ny.date()
+
+                    # Determine market phase in NY
+                    mins_ny = dt_ny.hour * 60 + dt_ny.minute
+                    if mins_ny < 9 * 60 + 30:
+                        phase = "PRE"
+                    elif mins_ny < 16 * 60:
+                        phase = "REGULAR"
+                    else:
+                        phase = "POST"
+
+                    t_unix = int(dt_madrid.timestamp())
+
+                    # Session change marker (between days or market phases)
+                    if prev_ny_d is not None and ny_d != prev_ny_d:
+                        session_markers.append({
+                            "time_unix": t_unix,
+                            "label": f"Sesión {dt_madrid.day} {MESES_ES[dt_madrid.month]}",
+                            "type": "session_break",
+                            "color": "#818cf8",
+                            "phase": phase,
+                        })
+                    elif prev_phase is not None and phase != prev_phase:
+                        if phase == "REGULAR":
+                            session_markers.append({
+                                "time_unix": t_unix,
+                                "label": "Apertura Regular (15:30)",
+                                "type": "regular_open",
+                                "color": "#10b981",
+                                "phase": phase,
+                            })
+                        elif phase == "POST":
+                            session_markers.append({
+                                "time_unix": t_unix,
+                                "label": "Post-Market (22:00)",
+                                "type": "post_market",
+                                "color": "#f59e0b",
+                                "phase": phase,
+                            })
+
+                    prev_ny_d = ny_d
+                    prev_phase = phase
+
                     if fetch_period == "1d":
                         lbl = dt_madrid.strftime("%H:%M")
                     elif fetch_period == "5d":
@@ -1054,10 +1131,12 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                     pct_val = round(float(val), 2)
                     chart_points.append({
                         "time": dt_madrid.isoformat(),
-                        "time_unix": int(dt_madrid.timestamp()),
+                        "time_unix": t_unix,
                         "label": lbl,
-                        "time_ny": dt.strftime("%H:%M") if dt.tzinfo else lbl,
+                        "time_ny": dt_ny.strftime("%H:%M") if dt_ny.tzinfo else lbl,
                         "date": dt_madrid.strftime("%Y-%m-%d"),
+                        "session_date": ny_d.isoformat(),
+                        "phase": phase,
                         "simulated_pct": pct_val,
                         "simulated_amount": round(total_val * (pct_val / 100.0), 2),
                     })
@@ -1073,13 +1152,14 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
             "name": q.get("name") or t,
             "weight": round(etf_weights.get(t, 0.0) * 100, 2),
             "price": q.get("price"),
+            "regular_price": q.get("regular_price"),
+            "pre_market_price": q.get("pre_market_price"),
+            "post_market_price": q.get("post_market_price"),
             "change_pct": q.get("change_pct"),
             "currency": q.get("currency", "USD"),
         })
 
     # Session date & human-readable label
-    DIAS_ES = {0: "Lunes", 1: "Martes", 2: "Miércoles", 3: "Jueves", 4: "Viernes", 5: "Sábado", 6: "Domingo"}
-    MESES_ES = {1: "ene", 2: "feb", 3: "mar", 4: "abr", 5: "may", 6: "jun", 7: "jul", 8: "ago", 9: "sep", 10: "oct", 11: "nov", 12: "dic"}
     latest_date_str = chart_points[-1]["date"] if chart_points else datetime.now().strftime("%Y-%m-%d")
     is_session_today = (latest_date_str == datetime.now().strftime("%Y-%m-%d"))
     try:
@@ -1100,10 +1180,12 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
             "is_session_today": is_session_today,
             "timezone": "Europe/Madrid",
             "period": period,
+            "has_extended_hours": True,
         },
         "holdings": sorted(holdings, key=lambda x: x["fund_value"], reverse=True),
         "etfs_summary": sorted(etfs_summary, key=lambda x: x["weight"], reverse=True),
         "chart_points": chart_points,
+        "session_markers": session_markers,
         "cache_timestamp": _now_iso(),
     }
 
