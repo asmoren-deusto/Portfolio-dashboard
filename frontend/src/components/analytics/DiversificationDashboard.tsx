@@ -356,15 +356,15 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
           {/* Dual Panel: Comparative Bars + Interactive Donut */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             {/* Left: Dual Bar Comparison vs World (lg:col-span-8) */}
-            <Card className="lg:col-span-8 p-5 sm:p-6 flex flex-col justify-between">
+            <Card className="lg:col-span-8 p-4 sm:p-5 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
+                <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-white/[0.06]">
                   <div>
                     <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                       <Scale className="w-4 h-4 text-blue-500" />
                       Comparativa Región a Región vs MSCI ACWI
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       Tu porcentaje ponderado (barra azul) frente a la capitalización real de mercado del mundo (barra de fondo).
                     </p>
                   </div>
@@ -379,7 +379,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 </div>
 
                 {/* Region Comparison Rows */}
-                <div className="flex flex-col gap-3 sm:gap-3.5">
+                <div className="flex flex-col gap-2 sm:gap-2.5">
                   {geographicBreakdown.map((item) => {
                     const isHovered = hoveredGeoId === item.region.id
                     const isDimmed = hoveredGeoId !== null && !isHovered
@@ -389,7 +389,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         onMouseEnter={() => setHoveredGeoId(item.region.id)}
                         onMouseLeave={() => setHoveredGeoId(null)}
                         className={cn(
-                          'px-4 py-2.5 sm:py-3 rounded-xl transition-all border cursor-pointer',
+                          'px-3.5 py-2 sm:py-2.5 rounded-xl transition-all border cursor-pointer',
                           isHovered
                             ? 'bg-blue-500/10 dark:bg-blue-500/15 border-blue-400/50 dark:border-blue-400/40 shadow-xs ring-1 ring-blue-500/20'
                             : isDimmed
@@ -398,7 +398,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         )}
                       >
                         {/* Top line: Name, Flag, Weights & Status */}
-                        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                        <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
                           <div className="flex items-center gap-2.5">
                             <span className="text-xl select-none leading-none">{item.region.flag}</span>
                             <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
@@ -444,7 +444,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         </div>
 
                         {/* Comparative Dual Progress Bar */}
-                        <div className="relative w-full h-3 sm:h-3.5 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
+                        <div className="relative w-full h-2.5 sm:h-3 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
                           {/* Benchmark World Marker Background */}
                           <div
                             className="absolute top-0 bottom-0 bg-slate-300/80 dark:bg-white/20 rounded-full"
@@ -461,7 +461,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                           />
                         </div>
 
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 truncate leading-relaxed">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate leading-relaxed">
                           {item.region.description}
                         </p>
                       </div>
@@ -472,20 +472,20 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </Card>
 
             {/* Right: Geographic Allocation Donut (lg:col-span-4) */}
-            <Card className="lg:col-span-4 p-5 sm:p-6 flex flex-col justify-between">
+            <Card className="lg:col-span-4 p-4 sm:p-5 flex flex-col justify-between">
               <div>
-                <div className="pb-3.5 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
+                <div className="pb-2.5 mb-3 border-b border-slate-100 dark:border-white/[0.06]">
                   <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <PieChartIcon className="w-4 h-4 text-emerald-500" />
                     Distribución de Tu Cartera
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Ponderación porcentual efectiva por geografía.
                   </p>
                 </div>
 
-                <div className="h-[320px] sm:h-[340px] w-full relative flex items-center justify-center min-w-0">
-                  <ResponsiveContainer width="100%" height={330}>
+                <div className="h-[300px] sm:h-[320px] w-full relative flex items-center justify-center min-w-0">
+                  <ResponsiveContainer width="100%" height={310}>
                     <PieChart>
                       <Pie
                         data={geoDonutData}
@@ -493,8 +493,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         cy="50%"
                         dataKey="value"
                         nameKey="shortName"
-                        innerRadius={92}
-                        outerRadius={132}
+                        innerRadius={88}
+                        outerRadius={126}
                         paddingAngle={1.5}
                         minAngle={4}
                         animationDuration={350}
@@ -569,7 +569,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 </div>
 
                 {/* Mini Legend Grid (2 Columnas) with amounts, percentages and bidirectional hover */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 mt-4 pt-3.5 border-t border-slate-100 dark:border-white/[0.06]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/[0.06]">
                   {geoDonutData.map((d) => {
                     const isRowHovered = hoveredGeoId === d.id
                     const isRowDimmed = hoveredGeoId !== null && !isRowHovered
@@ -579,7 +579,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         onMouseEnter={() => setHoveredGeoId(d.id)}
                         onMouseLeave={() => setHoveredGeoId(null)}
                         className={cn(
-                          'flex items-center justify-between text-xs font-medium py-1.5 px-2 rounded-lg transition-all cursor-pointer',
+                          'flex items-center justify-between text-xs font-medium py-1 px-2 rounded-lg transition-all cursor-pointer',
                           isRowHovered
                             ? 'bg-blue-500/10 dark:bg-blue-500/15 shadow-2xs font-semibold'
                             : isRowDimmed
