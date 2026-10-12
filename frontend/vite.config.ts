@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
@@ -12,10 +16,15 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    watch: {
+      usePolling: true,
+      interval: 400,
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
+        timeout: 30000,
       },
     },
   },

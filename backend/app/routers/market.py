@@ -513,6 +513,23 @@ def _fetch_quotes_extended(tickers: list[str]) -> dict:
     return result
 
 
+_refreshing_keys: set = set()
+
+
+async def _refresh_quotes_in_background(cache_key: str, tickers: list[str]):
+    if cache_key in _refreshing_keys:
+        return
+    _refreshing_keys.add(cache_key)
+    try:
+        quotes = await asyncio.to_thread(_fetch_quotes_extended, tickers)
+        if quotes:
+            _quote_cache[cache_key] = {"data": quotes, "ts": time.time()}
+    except Exception as e:
+        logger.debug(f"Background quotes refresh error: {e}")
+    finally:
+        _refreshing_keys.discard(cache_key)
+
+
 @router.get("/quotes")
 async def get_quotes(index: Optional[str] = None):
     """Return quotes for the full stock universe, optionally filtered by index."""
@@ -522,12 +539,17 @@ async def get_quotes(index: Optional[str] = None):
 
     tickers = [s["ticker"] for s in universe]
 
-    # Check cache
+    # Check cache (stale-while-revalidate for instantaneous responses)
     cache_key = ",".join(sorted(tickers))
     if _is_fresh(cache_key):
         cached_data = _quote_cache[cache_key]
         quotes = cached_data["data"]
         cache_ts = cached_data["ts"]
+    elif cache_key in _quote_cache:
+        cached_data = _quote_cache[cache_key]
+        quotes = cached_data["data"]
+        cache_ts = cached_data["ts"]
+        asyncio.create_task(_refresh_quotes_in_background(cache_key, tickers))
     else:
         quotes = await asyncio.to_thread(_fetch_quotes_extended, tickers)
         cache_ts = time.time()
@@ -563,6 +585,18 @@ async def get_quotes(index: Optional[str] = None):
     }
 
 
+async def _refresh_indices_in_background():
+    if "indices" in _refreshing_keys:
+        return
+    _refreshing_keys.add("indices")
+    try:
+        await _fetch_indices_fresh()
+    except Exception as e:
+        logger.debug(f"Background indices refresh error: {e}")
+    finally:
+        _refreshing_keys.discard("indices")
+
+
 @router.get("/indices")
 async def get_indices():
     """Return live index quotes for the ticker bar — with extended hours and futures proxies."""
@@ -570,6 +604,15 @@ async def get_indices():
     if _is_fresh(cache_key):
         return _quote_cache[cache_key]["data"]
 
+    if cache_key in _quote_cache:
+        asyncio.create_task(_refresh_indices_in_background())
+        return _quote_cache[cache_key]["data"]
+
+    return await _fetch_indices_fresh()
+
+
+async def _fetch_indices_fresh():
+    cache_key = "indices"
     tickers = list(INDEX_TICKERS.values())
     proxy_tickers = [p for p in INDEX_PROXY_MAP.values() if p not in tickers]
     all_tickers = tickers + proxy_tickers

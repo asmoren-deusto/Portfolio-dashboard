@@ -126,12 +126,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         pos_txs = [t for t in transactions if t["isin"] == isin]
         pos_broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
 
-        price_task = get_price_with_date(isin, ticker, db=db, force=refresh)
-        hist_task = get_price_history(isin, ticker, "1mo")
-        (price_res, h_res) = await asyncio.gather(price_task, hist_task, return_exceptions=True)
-
-        price, price_date = (price_res if isinstance(price_res, tuple) else (None, None))
-        h = h_res if isinstance(h_res, list) else []
+        price, price_date = await get_price_with_date(isin, ticker, db=db, force=refresh)
 
         effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
         current_value = pos["shares"] * effective_price
@@ -142,17 +137,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         daily_change_pct = None
         p_prev = None
 
-        if h:
-            prev_points = [
-                pt for pt in h
-                if pt.get("date") and (not price_date or pt["date"] < price_date) and pt.get("price", 0) > 0
-            ]
-            if prev_points:
-                p_prev = prev_points[-1]["price"]
-            elif len(h) >= 2 and h[-2].get("price", 0) > 0:
-                p_prev = h[-2]["price"]
-
-        if (p_prev is None or p_prev <= 0) and db is not None:
+        if db is not None:
             query = db.query(PriceCache).filter(
                 PriceCache.isin == isin,
                 PriceCache.price > 0,
@@ -169,6 +154,22 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
                 ).order_by(PriceCache.date.desc()).limit(2).all()
                 if len(all_cps) >= 2:
                     p_prev = all_cps[1].price
+
+        # Fallback ultra-ligero solo si la BD no tenía ningún precio histórico
+        if (p_prev is None or p_prev <= 0) and ticker:
+            try:
+                h = await get_price_history(isin, ticker, "5d")
+                if h:
+                    prev_points = [
+                        pt for pt in h
+                        if pt.get("date") and (not price_date or pt["date"] < price_date) and pt.get("price", 0) > 0
+                    ]
+                    if prev_points:
+                        p_prev = prev_points[-1]["price"]
+                    elif len(h) >= 2 and h[-2].get("price", 0) > 0:
+                        p_prev = h[-2]["price"]
+            except Exception:
+                pass
 
         if p_prev and p_prev > 0 and effective_price and effective_price > 0:
             daily_change = round(effective_price - p_prev, 4)

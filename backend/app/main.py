@@ -52,18 +52,26 @@ async def startup():
     logger.info("Initializing database...")
     init_db()
     logger.info("Database ready.")
+    try:
+        from app.services.price_service import preload_price_cache_from_db
+        preload_price_cache_from_db()
+    except Exception as e:
+        logger.warning(f"Failed to preload price cache: {e}")
     async def _warm_cache():
         try:
             import asyncio
             from app.database import SessionLocal
             from app.routers.portfolio import get_performance
+            from app.routers.market import get_indices
             db = SessionLocal()
             for p in ["1y", "all"]:
                 await get_performance(period=p, user_id="asier", broker=None, db=db)
             db.close()
-            logger.info("Performance cache pre-warmed successfully.")
+            # Pre-calentar caché de índices para el Ticker superior
+            await get_indices()
+            logger.info("Caches pre-warmed successfully (performance & market indices).")
         except Exception as e:
-            logger.warning(f"Error pre-warming performance cache: {e}")
+            logger.warning(f"Error pre-warming cache: {e}")
 
     async def _periodic_nav_scanner():
         # Allow initial app boot and warm-up to finish first
