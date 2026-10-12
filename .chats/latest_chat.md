@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-11 21:31:33
+- **Fecha de exportación:** 2026-10-12 13:54:37
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 96
+- **Total de interacciones registradas:** 99
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1577,5 +1577,62 @@ Podemos transformar la arquitectura actual con 4 mejoras clave:
 ### 👤 Usuario (2026-10-11 19:23:52)
 
 Hoy: El backend comprueba si hay nuevo NAV cuando un usuario abre la app o refresca la página. -> Esto quiero que se haga al menos cada 10 minutos y si se encuentran nuevos salga un popup. del resto mi prioridad es tener los datos lo mas actualizados posibles
+
+---
+
+### 🤖 Asistente (2026-10-11 19:31:35)
+
+He implementado el sistema de **escaneo automático de NAVs cada 10 minutos** con **detección de cambios y notificación emergente (popup/modal)** en la interfaz:
+
+---
+
+### 1. Escaneo en Background en Backend (cada 10 minutos)
+- **Worker periódico continuo** en [main.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/main.py):
+  - Inicia una tarea en segundo plano (`_periodic_nav_scanner`) que se ejecuta cada 10 minutos (`600s`).
+  - Consulta en paralelo las fuentes oficiales (Indexa Capital, Azvalor, Financial Times, Morningstar/Yahoo Frankfurt, Quefondos).
+- **Detección inteligente de novedades** en [portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py):
+  - Compara el nuevo valor liquidativo y su fecha con los registros previos en SQLite (`PriceCache`).
+  - Si una o varias gestoras han publicado nuevo NAV (`updated_count > 0`), calcula la diferencia en euros y en porcentaje, y publica el evento en `_latest_nav_alert`.
+- **Nuevo Endpoint**:
+  - `GET /api/portfolio/latest-nav-alert?since=<id>`: devuelve de forma instantánea si hay un nuevo lote de NAVs actualizado.
+
+---
+
+### 2. Detección en Tiempo Real y Popup Automático en Frontend
+- **Watcher reactivo** en [RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx):
+  - Monitoriza el estado del backend cada 45 segundos sin recargar la página.
+  - En cuanto el backend detecta nuevos NAVs:
+    1. **Invalida automáticamente las cachés de React Query** (`queryClient.invalidateQueries()`), actualizando en caliente el valor total de la cartera, rentabilidades y gráficos en todas las pantallas.
+    2. **Dispara el popup flotante** ([NavUpdateAlertModal.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/common/NavUpdateAlertModal.tsx)) en la esquina superior derecha con el desglose detallado:
+       - Número de NAVs actualizados (ej. *"2 NAVs Actualizados"*).
+       - Nombre de cada fondo y gestora (Indexa, Fidelity, Azvalor...).
+       - Nuevo valor liquidativo, fecha y variación porcentual (+0.35%, etc.).
+       - Barra de progreso de auto-cierre (10 segundos) o botón de cerrar.
+    3. Registra el identificador del aviso en sesión para evitar duplicados molestos.
+
+---
+
+### 3. Máxima Frescura de Datos
+- **Intervalos de refresco acortados** en [queries.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/api/queries.ts):
+  - `usePortfolioSummary` y `usePositions`: refresco activo reducido a **5 minutos** (antes 15 min), garantizando que las métricas y posiciones se mantengan siempre al día.
+  - Los ETFs de simulación intradía continúan sondeándose en tiempo real cada **45 segundos**.
+
+---
+
+### 4. Release y Despliegue
+- Código compilado sin errores (`npm run build`).
+- Versión actualizada e integrada a Git bajo **v2.7.60** mediante el script de release.
+
+---
+
+### 👤 Usuario (2026-10-12 11:36:53)
+
+revisa las fuentes de datos de NAVs de los fondos y añade nuevas. haz un esfuerzo relevante por encontrar fuentes nuevas y resolver errores. EL fondo de Cobas tiene nav del dia 9
+
+---
+
+### 🤖 Asistente (2026-10-12 11:53:54)
+
+He lanzado la actualización completa de NAVs de todos los activos de la cartera utilizando las nuevas fuentes añadidas (Cobas oficial, Finect ampliado, Investing, etc.). En cuanto finalice el proceso comprobaré los resultados.
 
 ---

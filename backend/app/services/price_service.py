@@ -21,6 +21,11 @@ if _backend_dir not in sys.path:
     sys.path.insert(0, _backend_dir)
 
 try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
+
+try:
     from app.models import PriceCache, Transaction
     from app.database import SessionLocal
 except ImportError:
@@ -146,6 +151,11 @@ async def get_price_with_date(
             tasks.append(_fetch_azvalor_official(isin))
             task_names.append("azvalor")
 
+        # For Cobas funds, query direct official Cobas AM gestora endpoint
+        if isin in COBAS_PRODUCT_SLUGS or isin.startswith("ES011919") or isin == "LU1598719752":
+            tasks.append(_fetch_cobas_official(isin))
+            task_names.append("cobas")
+
         if ticker:
             tasks.append(_fetch_yahoo_price(ticker))
             task_names.append("yahoo")
@@ -160,7 +170,7 @@ async def get_price_with_date(
                 r_price, r_date = res
                 if r_price is not None and r_date:
                     name = task_names[i]
-                    prec = 6 if name in ("azvalor", "quefondos") else (5 if name == "finect" else (4 if name == "yahoo" else (3 if name == "investing" else 2)))
+                    prec = 6 if name in ("azvalor", "cobas", "quefondos") else (5 if name == "finect" else (4 if name == "yahoo" else (3 if name == "investing" else 2)))
                     candidates.append((r_date, prec, r_price, name))
 
         if candidates:
@@ -519,13 +529,106 @@ async def _fetch_azvalor_history(isin: str, period: str = "1y", db=None) -> list
         return []
 
 
+COBAS_PRODUCT_SLUGS: dict[str, str] = {
+    "LU1598719752": "https://www.cobasam.com/productos/cobas-lux-sicav/lux_international_eur/",
+    "LU1598720172": "https://www.cobasam.com/productos/cobas-lux-sicav/lux_selection_eur/",
+    "LU1598720503": "https://www.cobasam.com/productos/cobas-lux-sicav/lux_large_cap_eur/",
+    "LU1598720925": "https://www.cobasam.com/productos/cobas-lux-sicav/lux_concentrated_eur/",
+    "ES0119199000": "https://www.cobasam.com/productos/inversion-libre/cobas_internacional/",
+    "ES0119198002": "https://www.cobasam.com/productos/inversion-libre/cobas_seleccion/",
+    "ES0119197004": "https://www.cobasam.com/productos/inversion-libre/cobas_grandes_companias/",
+    "ES0119196006": "https://www.cobasam.com/productos/inversion-libre/cobas_iberia/",
+}
+
+
+def _fetch_cobas_official_sync(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Fetch official NAV and date directly from Cobas Asset Management (cobasam.com).
+    Cobas publishes daily official NAVs on its product pages before external aggregators.
+    """
+    url = COBAS_PRODUCT_SLUGS.get(isin)
+    if not url:
+        return None, None
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+    }
+    try:
+        with httpx.Client(timeout=10, follow_redirects=True, headers=headers) as client:
+            resp = client.get(url)
+            if resp.status_code == 200:
+                price = None
+                date_str = None
+
+                # 1. Parse via BeautifulSoup if available
+                if BeautifulSoup:
+                    try:
+                        soup = BeautifulSoup(resp.text, "html.parser")
+                        num_el = soup.find(class_="number")
+                        if num_el:
+                            clean = num_el.get_text(strip=True).replace("€", "").strip()
+                            clean = clean.replace(".", "").replace(",", ".")
+                            price = float(clean)
+                        date_el = soup.find(class_="date")
+                        if date_el:
+                            m_d = re.search(r'(\d{1,2})[-/](\d{1,2})[-/](\d{4})', date_el.get_text(strip=True))
+                            if m_d:
+                                d, m, y = int(m_d.group(1)), int(m_d.group(2)), int(m_d.group(3))
+                                date_str = f"{y:04d}-{m:02d}-{d:02d}"
+                    except Exception:
+                        pass
+
+                # 2. Regex fallbacks
+                if price is None:
+                    m = re.search(r'class=[\'"]number[\'"][^>]*>([0-9\.,]+)\s*€', resp.text)
+                    if not m:
+                        m = re.search(r'([0-9]{2,3}[,\.][0-9]{4,6})\s*€', resp.text)
+                    if m:
+                        clean = m.group(1).replace(".", "").replace(",", ".")
+                        price = float(clean)
+
+                if not date_str:
+                    m_d = re.search(r'Fecha valor liquidativo:\s*(\d{1,2})[-/](\d{1,2})[-/](\d{4})', resp.text)
+                    if m_d:
+                        d, m, y = int(m_d.group(1)), int(m_d.group(2)), int(m_d.group(3))
+                        date_str = f"{y:04d}-{m:02d}-{d:02d}"
+
+                if price is not None:
+                    return price, date_str
+    except Exception as e:
+        logger.warning(f"Error fetching official Cobas NAV for {isin}: {e}")
+    return None, None
+
+
+async def _fetch_cobas_official(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """Async wrapper for Cobas official NAV scraper."""
+    return await asyncio.to_thread(_fetch_cobas_official_sync, isin)
+
+
+FINECT_SLUGS: dict[str, str] = {
+    "ES0112611001": "ES0112611001-Azvalor_internacional_fi",
+    "ES0112609005": "ES0112609005-Azvalor_iberia_fi",
+    "ES0112612009": "ES0112612009-Azvalor_capital_fi",
+    "ES0112613007": "ES0112613007-Azvalor_blue_chips_fi",
+    "LU1598719752": "LU1598719752-Cobas_international_fund_p_eur_acc",
+    "LU0302296495": "LU0302296495-Dnb_fund_technology_a_eur",
+    "LU1623762843": "LU1623762843-Carmignac_portfolio_credit_a_eur_acc",
+    "LU2145461757": "LU2145461757-Robeco_smart_energy_d_eur",
+    "IE00BM95B621": "IE00BM95B621-Polar_capital_funds_plc_polar_capital_global_technology_fund_r_eur_acc",
+    "LU0996182563": "LU0996182563-Amundi_index_msci_world_ae_c",
+    "IE000QAZP7L2": "IE000QAZP7L2-Ishares_emerging_markets_index_ie_s_acc_eur",
+    "IE000ZYRH0Q7": "IE000ZYRH0Q7-Ishares_developed_world_index_ie_s_acc_eur",
+    "IE00BYX5NX33": "IE00BYX5NX33-Fidelity_msci_world_index_p_acc_eur",
+    "IE00BYX5M476": "IE00BYX5M476-Fidelity_msci_emerging_markets_index_p_acc_eur",
+    "IE00BYX5NH74": "IE00BYX5NH74-Fidelity_msci_japan_index_p_acc_eur",
+    "LU0261952682": "LU0261952682-Fidelity_funds__euro_stoxx_50_tm_aacc_eur",
+}
+
+
 async def _fetch_finect_price(isin: str) -> tuple[Optional[float], Optional[str]]:
     """Fetch NAV and date from Finect Spanish fund portal."""
-    finect_slugs = {
-        "ES0112611001": "ES0112611001-Azvalor_internacional_fi",
-        "LU1598719752": "LU1598719752-Cobas_international_fund_p_eur_acc",
-    }
-    slug = finect_slugs.get(isin, isin)
+    slug = FINECT_SLUGS.get(isin, isin)
     try:
         url = f"https://www.finect.com/fondos-inversion/{slug}"
         headers = {
@@ -555,6 +658,16 @@ INVESTING_FUND_SLUGS: dict[str, str] = {
     "ES0112614005": "azvalor-managers-fi",
     "LU0302296495": "dnb-fund-technology-retail-a-eure",
     "LU0996182563": "amundi-msci-wrld-ae-c",
+    "LU2145461757": "robeco-smart-energy-equities-d-eur",
+    "IE00BM95B621": "polar-capital-funds-plc---polar-c",
+    "LU1623762843": "carmignac-portfolio-credit-a-eur",
+    "LU1598719752": "cobas-lux-sicav---cobas-internati",
+    "IE00BYX5NX33": "fidelity-msci-world-index-eur-p-a",
+    "IE00BYX5M476": "fidelity-msci-emerging-markets-in",
+    "IE00BYX5NH74": "fidelity-msci-japan-index-eur-p-a",
+    "LU0261952682": "fidelity-funds---euro-stoxx-50-fu",
+    "IE000ZYRH0Q7": "ishares-developed-world-index-d-a",
+    "IE000QAZP7L2": "ishares-emerging-market-index-s-e",
 }
 
 
