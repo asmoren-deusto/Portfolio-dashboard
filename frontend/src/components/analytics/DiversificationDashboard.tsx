@@ -391,7 +391,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         className={cn(
                           'px-3.5 py-2 sm:py-2.5 rounded-xl transition-all border cursor-pointer',
                           isHovered
-                            ? 'bg-blue-500/10 dark:bg-blue-500/15 border-blue-400/50 dark:border-blue-400/40 shadow-xs ring-1 ring-blue-500/20'
+                            ? 'bg-blue-500/[0.06] dark:bg-blue-500/[0.1] border-blue-400/30 shadow-2xs'
                             : isDimmed
                             ? 'opacity-40 border-transparent'
                             : 'border-transparent hover:border-slate-200/70 dark:hover:border-white/[0.05]'
@@ -495,9 +495,10 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         nameKey="shortName"
                         innerRadius={88}
                         outerRadius={126}
-                        paddingAngle={1.5}
+                        paddingAngle={2}
                         minAngle={4}
-                        animationDuration={350}
+                        strokeWidth={0}
+                        animationDuration={400}
                         onMouseEnter={(_, index) => {
                           if (geoDonutData[index]) {
                             setHoveredGeoId(geoDonutData[index].id)
@@ -512,13 +513,12 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                             <Cell
                               key={`geo-donut-${entry.id}`}
                               fill={entry.color}
-                              stroke={isHovered ? (isDark ? '#ffffff' : '#0f172a') : (isDark ? '#1e1e1e' : '#ffffff')}
-                              strokeWidth={isHovered ? 2.5 : 1}
-                              opacity={isDimmed ? 0.35 : 1}
+                              stroke="none"
+                              opacity={isDimmed ? 0.4 : 1}
                               style={{
                                 cursor: 'pointer',
-                                transition: 'opacity 0.2s ease, stroke-width 0.2s ease',
-                                filter: isHovered ? 'drop-shadow(0 4px 10px rgba(0,0,0,0.3))' : 'none',
+                                transition: 'opacity 0.2s ease, filter 0.2s ease',
+                                filter: isHovered ? 'drop-shadow(0 2px 8px rgba(0,0,0,0.18))' : 'none',
                               }}
                             />
                           )
@@ -581,7 +581,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         className={cn(
                           'flex items-center justify-between text-xs font-medium py-1 px-2 rounded-lg transition-all cursor-pointer',
                           isRowHovered
-                            ? 'bg-blue-500/10 dark:bg-blue-500/15 shadow-2xs font-semibold'
+                            ? 'bg-blue-500/[0.06] dark:bg-blue-500/[0.1] font-semibold'
                             : isRowDimmed
                             ? 'opacity-40'
                             : 'hover:bg-slate-50 dark:hover:bg-white/[0.03]'
@@ -592,7 +592,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                             className="w-2 h-2 rounded-full shrink-0 transition-transform"
                             style={{
                               backgroundColor: d.color,
-                              transform: isRowHovered ? 'scale(1.25)' : 'scale(1)',
+                              transform: isRowHovered ? 'scale(1.1)' : 'scale(1)',
                             }}
                           />
                           <span className="text-xs select-none leading-none">{d.flag}</span>
