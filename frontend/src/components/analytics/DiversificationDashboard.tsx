@@ -223,9 +223,9 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
           </div>
 
           {/* 4 Executive KPI Badges */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 pt-2.5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 pt-2.5">
             {/* KPI 1: Exposición a EE.UU. */}
-            <div className="px-3 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
+            <div className="px-3.5 py-2.5 sm:py-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
               <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span>Norteamérica (EE.UU.)</span>
                 <span>🇺🇸</span>
@@ -237,7 +237,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 63.8% mundo</span>
               </div>
               <span className={cn(
-                'text-[10.5px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border',
+                'text-xs font-bold font-mono px-2.5 py-1 rounded-lg inline-block mt-1.5 border leading-tight shadow-2xs',
                 Math.abs(usExposurePct - 63.8) <= 4
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
                   : usExposurePct > 63.8
@@ -249,7 +249,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </div>
 
             {/* KPI 2: Sesgo Local (Home Bias) */}
-            <div className="px-3 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
+            <div className="px-3.5 py-2.5 sm:py-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
               <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span>Sesgo Europeo (Local)</span>
                 <span>🇪🇺</span>
@@ -261,7 +261,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 15.4% mundo</span>
               </div>
               <span className={cn(
-                'text-[10.5px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border',
+                'text-xs font-bold font-mono px-2.5 py-1 rounded-lg inline-block mt-1.5 border leading-tight shadow-2xs',
                 homeBiasPct > 4
                   ? 'bg-blue-50 text-blue-800 border-blue-200/90 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
                   : 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
@@ -271,7 +271,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </div>
 
             {/* KPI 3: Brecha en Emergentes */}
-            <div className="px-3 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
+            <div className="px-3.5 py-2.5 sm:py-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
               <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span>Mercados Emergentes</span>
                 <span>🌏</span>
@@ -283,7 +283,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 10.2% mundo</span>
               </div>
               <span className={cn(
-                'text-[10.5px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border',
+                'text-xs font-bold font-mono px-2.5 py-1 rounded-lg inline-block mt-1.5 border leading-tight shadow-2xs',
                 emergingGapPct <= 2
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
                   : 'bg-amber-50 text-amber-800 border-amber-200/90 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30'
@@ -293,7 +293,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </div>
 
             {/* KPI 4: Exposición a Divisa */}
-            <div className="px-3 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
+            <div className="px-3.5 py-2.5 sm:py-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
               <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span>Riesgo Divisa (USD)</span>
                 <span>💵</span>
@@ -304,7 +304,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 </span>
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">en Dólares</span>
               </div>
-              <span className="text-[10.5px] font-bold text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md inline-block mt-1 bg-slate-100 dark:bg-white/[0.07] border border-slate-200/80 dark:border-white/10 font-mono">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg inline-block mt-1.5 bg-slate-100 dark:bg-white/[0.07] border border-slate-200/80 dark:border-white/10 font-mono leading-tight shadow-2xs">
                 {(currencyBreakdown.find((c) => c.code === 'EUR')?.weight ?? 0).toFixed(1)}% en Euro (sin riesgo)
               </span>
             </div>
