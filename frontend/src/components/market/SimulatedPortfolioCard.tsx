@@ -623,15 +623,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     className="absolute top-1 bottom-6 flex flex-col items-center"
                     style={{ left: `${Math.round(x)}px` }}
                   >
-                    {/* High-contrast readable session tag with description */}
+                    {/* Softened, readable session tag with description */}
                     <div
                       className={cn(
-                        'px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-xs z-20',
+                        'px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-2xs z-20 backdrop-blur-xs',
                         isApertura
-                          ? 'bg-emerald-600 text-white border-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:border-emerald-400 font-extrabold'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-400/40 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-500/40'
                           : isAfterHours
-                          ? 'bg-amber-500 text-slate-950 border-amber-600 dark:bg-amber-400 dark:text-slate-950 dark:border-amber-300 font-extrabold'
-                          : 'bg-indigo-600 text-white border-indigo-700 font-extrabold'
+                          ? 'bg-amber-50 text-amber-800 border-amber-400/40 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-500/40'
+                          : 'bg-indigo-50 text-indigo-800 border-indigo-400/40 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-500/40'
                       )}
                     >
                       {labelText}
