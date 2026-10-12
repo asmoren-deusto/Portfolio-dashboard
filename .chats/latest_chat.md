@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:23:11
+- **Fecha de exportación:** 2026-10-12 18:24:38
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 135
+- **Total de interacciones registradas:** 137
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2208,5 +2208,25 @@ Se han aplicado todos los cambios solicitados en [SimulatedPortfolioCard.tsx](fi
 ### 👤 Usuario (2026-10-12 16:16:54)
 
 
+
+---
+
+### 🤖 Asistente (2026-10-12 16:23:13)
+
+Se ha eliminado la pastilla azul `EUR/USD` tachada en la imagen, conservando el selector de divisa y periodos en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+- **Eliminada:** La píldora informativa `EUR/USD: 1.1162 -0.39%` que sobrecargaba la cabecera.
+- **Mantenidos:**
+  - Badge de estado de mercado (`MERCADO ABIERTO`).
+  - Selector de divisa `EUR (€)` vs `USD ($)`.
+  - Selector de periodo `1D` | `5D` | `1M`.
+
+🚀 **Release actualizada:** `v2.7.77` subida y sincronizada en Git.
+
+---
+
+### 👤 Usuario (2026-10-12 16:20:12)
+
+esto no se lee, y acompañalo de la descriocion
 
 ---

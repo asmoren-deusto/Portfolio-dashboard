@@ -583,33 +583,45 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
             {/* Dotted Vertical Session & Phase Markers */}
             <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-              {markerPositions.map(({ marker, x }) => (
-                <div
-                  key={`${marker.time_unix}-${marker.label}`}
-                  className="absolute top-0 bottom-6 flex flex-col items-center"
-                  style={{ left: `${Math.round(x)}px` }}
-                >
-                  {/* Minimalist session / phase tag */}
+              {markerPositions.map(({ marker, x }) => {
+                const isApertura = marker.label.includes('15:30') || marker.type === 'regular_open'
+                const isAfterHours = marker.label.includes('22:00') || marker.type === 'post_market'
+                const labelText = isApertura
+                  ? '15:30 • Apertura'
+                  : isAfterHours
+                  ? '22:00 • After-Hours'
+                  : marker.label
+
+                return (
                   <div
-                    className="px-1 py-0.2 rounded text-[8px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border mt-0.5 select-none backdrop-blur-xs opacity-90 shadow-2xs"
-                    style={{
-                      backgroundColor: isDark ? 'rgba(24, 24, 27, 0.92)' : 'rgba(255, 255, 255, 0.95)',
-                      borderColor: `${marker.color}50`,
-                      color: marker.color,
-                    }}
+                    key={`${marker.time_unix}-${marker.label}`}
+                    className="absolute top-1 bottom-6 flex flex-col items-center"
+                    style={{ left: `${Math.round(x)}px` }}
                   >
-                    {marker.label.includes('15:30') ? '15:30' : marker.label.includes('22:00') ? '22:00' : marker.label}
+                    {/* High-contrast readable session tag with description */}
+                    <div
+                      className={cn(
+                        'px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-xs z-20',
+                        isApertura
+                          ? 'bg-emerald-600 text-white border-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:border-emerald-400 font-extrabold'
+                          : isAfterHours
+                          ? 'bg-amber-500 text-slate-950 border-amber-600 dark:bg-amber-400 dark:text-slate-950 dark:border-amber-300 font-extrabold'
+                          : 'bg-indigo-600 text-white border-indigo-700 font-extrabold'
+                      )}
+                    >
+                      {labelText}
+                    </div>
+                    {/* Vertical dotted line from badge to bottom axis */}
+                    <div
+                      className="w-0 flex-1 border-l-2 border-dotted mt-0.5"
+                      style={{
+                        borderColor: marker.color,
+                        opacity: 0.9,
+                      }}
+                    />
                   </div>
-                  {/* Vertical dotted line from badge to bottom axis */}
-                  <div
-                    className="w-0 flex-1 border-l-2 border-dotted mt-0.5"
-                    style={{
-                      borderColor: marker.color,
-                      opacity: 0.9,
-                    }}
-                  />
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             <div
