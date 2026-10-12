@@ -168,15 +168,213 @@ PRICES = json.loads(r'''[
     "currency": "EUR"
   },
   {
-    "isin": "TR_TRANSFER",
-    "date": "2026-10-07",
-    "price": 0.0,
+    "isin": "0192#0011",
+    "date": "2026-08-21",
+    "price": 23.204167,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-22",
+    "price": 23.204167,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-23",
+    "price": 23.204167,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-24",
+    "price": 23.300846,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-25",
+    "price": 23.274784,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-26",
+    "price": 23.386426,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-27",
+    "price": 23.384103,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-28",
+    "price": 23.477611,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-29",
+    "price": 23.477611,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-30",
+    "price": 23.477611,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-08-31",
+    "price": 23.468231,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-01",
+    "price": 23.444313,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-02",
+    "price": 23.321594,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-03",
+    "price": 23.360542,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-04",
+    "price": 23.53456,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-05",
+    "price": 23.53456,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-06",
+    "price": 23.53456,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-07",
+    "price": 23.518815,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-08",
+    "price": 23.546892,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-09",
+    "price": 23.456745,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-10",
+    "price": 23.241818,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-11",
+    "price": 23.106705,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-12",
+    "price": 23.106705,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-13",
+    "price": 23.106705,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-14",
+    "price": 23.306249,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-15",
+    "price": 23.233525,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-16",
+    "price": 23.136482,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-17",
+    "price": 23.123892,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-18",
+    "price": 23.456122,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-19",
+    "price": 23.456122,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-20",
+    "price": 23.456122,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-21",
+    "price": 23.362666,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-22",
+    "price": 23.633129,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-23",
+    "price": 23.692619,
     "currency": "EUR"
   },
   {
     "isin": "ES0112611001",
     "date": "2026-09-23",
-    "price": 348.40,
+    "price": 348.4,
     "currency": "EUR"
   },
   {
@@ -186,27 +384,21 @@ PRICES = json.loads(r'''[
     "currency": "EUR"
   },
   {
+    "isin": "LU0302296495",
+    "date": "2026-09-23",
+    "price": 2030.9108,
+    "currency": "EUR"
+  },
+  {
     "isin": "LU1598719752",
     "date": "2026-09-23",
     "price": 176.16,
     "currency": "EUR"
   },
   {
-    "isin": "IE00BYX5NX33",
+    "isin": "0192#0011",
     "date": "2026-09-24",
-    "price": 14.5392,
-    "currency": "EUR"
-  },
-  {
-    "isin": "IE00BYX5M476",
-    "date": "2026-09-24",
-    "price": 9.1697,
-    "currency": "EUR"
-  },
-  {
-    "isin": "LU0302296495",
-    "date": "2026-09-25",
-    "price": 2023.1774,
+    "price": 23.580837,
     "currency": "EUR"
   },
   {
@@ -222,15 +414,21 @@ PRICES = json.loads(r'''[
     "currency": "EUR"
   },
   {
+    "isin": "IE00BYX5M476",
+    "date": "2026-09-24",
+    "price": 9.1697,
+    "currency": "EUR"
+  },
+  {
     "isin": "IE00BYX5NH74",
     "date": "2026-09-24",
     "price": 14.544,
     "currency": "EUR"
   },
   {
-    "isin": "LU0261952682",
-    "date": "2026-09-25",
-    "price": 29.25,
+    "isin": "IE00BYX5NX33",
+    "date": "2026-09-24",
+    "price": 14.5392,
     "currency": "EUR"
   },
   {
@@ -241,32 +439,8 @@ PRICES = json.loads(r'''[
   },
   {
     "isin": "LU0302296495",
-    "date": "2026-09-23",
-    "price": 2030.9108,
-    "currency": "EUR"
-  },
-  {
-    "isin": "IE00BYX5NH74",
-    "date": "2026-09-25",
-    "price": 14.75,
-    "currency": "EUR"
-  },
-  {
-    "isin": "LU0302296495",
     "date": "2026-09-24",
     "price": 2023.18,
-    "currency": "EUR"
-  },
-  {
-    "isin": "IE00BYX5NX33",
-    "date": "2026-09-25",
-    "price": 14.42,
-    "currency": "EUR"
-  },
-  {
-    "isin": "IE00BYX5M476",
-    "date": "2026-09-25",
-    "price": 9.21,
     "currency": "EUR"
   },
   {
@@ -277,8 +451,236 @@ PRICES = json.loads(r'''[
   },
   {
     "isin": "0192#0011",
-    "date": "2026-10-06",
-    "price": 24.00942,
+    "date": "2026-09-25",
+    "price": 23.576068,
+    "currency": "EUR"
+  },
+  {
+    "isin": "ES0112611001",
+    "date": "2026-09-25",
+    "price": 350.05,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-09-25",
+    "price": 9.21,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-09-25",
+    "price": 14.75,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-09-25",
+    "price": 14.42,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-09-25",
+    "price": 29.25,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0302296495",
+    "date": "2026-09-25",
+    "price": 2023.1774,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1623762843",
+    "date": "2026-09-25",
+    "price": 155.74,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-28",
+    "price": 23.59304,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000QAZP7L2",
+    "date": "2026-09-28",
+    "price": 14.19,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000ZYRH0Q7",
+    "date": "2026-09-28",
+    "price": 12.34,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BM95B621",
+    "date": "2026-09-28",
+    "price": 41.27,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-09-28",
+    "price": 9.12,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-09-28",
+    "price": 14.67,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-09-28",
+    "price": 14.36,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-09-28",
+    "price": 29.24,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0302296495",
+    "date": "2026-09-28",
+    "price": 2010.5,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0996182563",
+    "date": "2026-09-28",
+    "price": 432.5,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1598719752",
+    "date": "2026-09-28",
+    "price": 176.84,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU2145461757",
+    "date": "2026-09-28",
+    "price": 94.51,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-29",
+    "price": 23.58877,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-09-30",
+    "price": 23.532,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-10-01",
+    "price": 23.52249,
+    "currency": "EUR"
+  },
+  {
+    "isin": "ES0112611001",
+    "date": "2026-10-01",
+    "price": 344.28,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1623762843",
+    "date": "2026-10-01",
+    "price": 155.1,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-10-02",
+    "price": 23.81108,
+    "currency": "EUR"
+  },
+  {
+    "isin": "ES0112611001",
+    "date": "2026-10-02",
+    "price": 345.2,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000QAZP7L2",
+    "date": "2026-10-02",
+    "price": 14.31,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000ZYRH0Q7",
+    "date": "2026-10-02",
+    "price": 12.45,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BM95B621",
+    "date": "2026-10-02",
+    "price": 42.78,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-02",
+    "price": 9.2,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-10-02",
+    "price": 14.79,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-02",
+    "price": 14.49,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-10-02",
+    "price": 28.94,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0302296495",
+    "date": "2026-10-02",
+    "price": 2049.66,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0996182563",
+    "date": "2026-10-02",
+    "price": 436.29,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1598719752",
+    "date": "2026-10-02",
+    "price": 173.93,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1623762843",
+    "date": "2026-10-02",
+    "price": 154.85,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU2145461757",
+    "date": "2026-10-02",
+    "price": 99.97,
     "currency": "EUR"
   },
   {
@@ -288,219 +690,291 @@ PRICES = json.loads(r'''[
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-25",
-    "price": 23.576068,
+    "isin": "ES0112611001",
+    "date": "2026-10-05",
+    "price": 354.593476,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000QAZP7L2",
+    "date": "2026-10-05",
+    "price": 14.648,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000ZYRH0Q7",
+    "date": "2026-10-05",
+    "price": 12.596,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BM95B621",
+    "date": "2026-10-05",
+    "price": 43.54,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-05",
+    "price": 9.437,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-10-05",
+    "price": 15.015,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-05",
+    "price": 14.659,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-10-05",
+    "price": 28.96,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0302296495",
+    "date": "2026-10-05",
+    "price": 2088.277344,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0996182563",
+    "date": "2026-10-05",
+    "price": 441.36,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1598719752",
+    "date": "2026-10-05",
+    "price": 175.65,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1623762843",
+    "date": "2026-10-05",
+    "price": 154.79,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU2145461757",
+    "date": "2026-10-05",
+    "price": 100.36,
     "currency": "EUR"
   },
   {
     "isin": "0192#0011",
-    "date": "2026-09-24",
-    "price": 23.580837,
+    "date": "2026-10-06",
+    "price": 24.018,
+    "currency": "EUR"
+  },
+  {
+    "isin": "ES0112611001",
+    "date": "2026-10-06",
+    "price": 355.22,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000QAZP7L2",
+    "date": "2026-10-06",
+    "price": 14.615,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000ZYRH0Q7",
+    "date": "2026-10-06",
+    "price": 12.625,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BM95B621",
+    "date": "2026-10-06",
+    "price": 43.44,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-06",
+    "price": 9.4,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-10-06",
+    "price": 15.149,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-06",
+    "price": 14.692,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-10-06",
+    "price": 29.1,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0302296495",
+    "date": "2026-10-06",
+    "price": 2093.196,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0996182563",
+    "date": "2026-10-06",
+    "price": 442.14,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1598719752",
+    "date": "2026-10-06",
+    "price": 176.41,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1623762843",
+    "date": "2026-10-06",
+    "price": 155.34,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU2145461757",
+    "date": "2026-10-06",
+    "price": 100.95,
     "currency": "EUR"
   },
   {
     "isin": "0192#0011",
-    "date": "2026-09-23",
-    "price": 23.692619,
+    "date": "2026-10-07",
+    "price": 23.984,
+    "currency": "EUR"
+  },
+  {
+    "isin": "TR_TRANSFER",
+    "date": "2026-10-07",
+    "price": 0.0,
     "currency": "EUR"
   },
   {
     "isin": "0192#0011",
-    "date": "2026-09-22",
-    "price": 23.633129,
+    "date": "2026-10-08",
+    "price": 23.817,
+    "currency": "EUR"
+  },
+  {
+    "isin": "ES0112611001",
+    "date": "2026-10-08",
+    "price": 357.17831,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000QAZP7L2",
+    "date": "2026-10-08",
+    "price": 14.31,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000ZYRH0Q7",
+    "date": "2026-10-08",
+    "price": 12.543,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BM95B621",
+    "date": "2026-10-08",
+    "price": 42.200001,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0302296495",
+    "date": "2026-10-08",
+    "price": 2084.162842,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0996182563",
+    "date": "2026-10-08",
+    "price": 439.519989,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1598719752",
+    "date": "2026-10-08",
+    "price": 176.009995,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU1623762843",
+    "date": "2026-10-08",
+    "price": 155.229996,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU2145461757",
+    "date": "2026-10-08",
+    "price": 96.93,
     "currency": "EUR"
   },
   {
     "isin": "0192#0011",
-    "date": "2026-09-21",
-    "price": 23.362666,
+    "date": "2026-10-09",
+    "price": 23.817,
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-20",
-    "price": 23.456122,
+    "isin": "IE00BM95B621",
+    "date": "2026-10-09",
+    "price": 42.4,
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-19",
-    "price": 23.456122,
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-09",
+    "price": 9.2689,
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-18",
-    "price": 23.456122,
+    "isin": "IE00BYX5NH74",
+    "date": "2026-10-09",
+    "price": 14.8227,
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-17",
-    "price": 23.123892,
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-09",
+    "price": 14.7063,
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-16",
-    "price": 23.136482,
+    "isin": "LU0261952682",
+    "date": "2026-10-09",
+    "price": 28.67,
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-15",
-    "price": 23.233525,
+    "isin": "LU0302296495",
+    "date": "2026-10-09",
+    "price": 2099.065,
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-14",
-    "price": 23.306249,
+    "isin": "LU1598719752",
+    "date": "2026-10-09",
+    "price": 178.37,
     "currency": "EUR"
   },
   {
-    "isin": "0192#0011",
-    "date": "2026-09-13",
-    "price": 23.106705,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-12",
-    "price": 23.106705,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-11",
-    "price": 23.106705,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-10",
-    "price": 23.241818,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-09",
-    "price": 23.456745,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-08",
-    "price": 23.546892,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-07",
-    "price": 23.518815,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-06",
-    "price": 23.53456,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-05",
-    "price": 23.53456,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-04",
-    "price": 23.53456,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-03",
-    "price": 23.360542,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-02",
-    "price": 23.321594,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-09-01",
-    "price": 23.444313,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-31",
-    "price": 23.468231,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-30",
-    "price": 23.477611,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-29",
-    "price": 23.477611,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-28",
-    "price": 23.477611,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-27",
-    "price": 23.384103,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-26",
-    "price": 23.386426,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-25",
-    "price": 23.274784,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-24",
-    "price": 23.300846,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-23",
-    "price": 23.204167,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-22",
-    "price": 23.204167,
-    "currency": "EUR"
-  },
-  {
-    "isin": "0192#0011",
-    "date": "2026-08-21",
-    "price": 23.204167,
+    "isin": "LU2145461757",
+    "date": "2026-10-09",
+    "price": 97.31,
     "currency": "EUR"
   }
 ]''')
