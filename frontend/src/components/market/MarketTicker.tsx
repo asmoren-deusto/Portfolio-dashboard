@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { TrendingUp, TrendingDown, Clock } from 'lucide-react'
 import { useMarketIndices, type MarketStock } from '@/api/queries'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
+import { cn } from '@/lib/utils'
 
 interface MarketTickerProps {
   onSelectStock?: (stock: MarketStock) => void
@@ -257,7 +258,143 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
       return i.last_updated > latest ? i.last_updated : latest
     }, null)
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const isMouseDownRef = useRef(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const startXRef = useRef(0)
+  const lastMouseXRef = useRef(0)
+  const hasDraggedRef = useRef(false)
+  const isHoveredRef = useRef(false)
+  const isInteractingRef = useRef(false)
+  const touchTimerRef = useRef<number | null>(null)
+  const touchStartXRef = useRef(0)
+  const currentScrollPosRef = useRef(0)
+
+  // Auto-scroll loop using requestAnimationFrame (pauses when hovering, dragging or touching)
+  useEffect(() => {
+    const speed = 36 // pixels per second for a gentle, readable pace
+    let lastTime = performance.now()
+    let rafId: number
+
+    const animate = (time: number) => {
+      const dt = Math.min((time - lastTime) / 1000, 0.1)
+      lastTime = time
+
+      const el = scrollContainerRef.current
+      if (
+        el &&
+        !isHoveredRef.current &&
+        !isMouseDownRef.current &&
+        !isInteractingRef.current
+      ) {
+        currentScrollPosRef.current += speed * dt
+        el.scrollLeft = currentScrollPosRef.current
+      }
+
+      rafId = requestAnimationFrame(animate)
+    }
+
+    rafId = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(rafId)
+  }, [])
+
+  // Window mousemove and mouseup listeners for uninterrupted drag across the screen
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isMouseDownRef.current || !scrollContainerRef.current) return
+      const dx = e.pageX - lastMouseXRef.current
+      if (Math.abs(e.pageX - startXRef.current) > 5) {
+        hasDraggedRef.current = true
+      }
+      lastMouseXRef.current = e.pageX
+      scrollContainerRef.current.scrollLeft -= dx
+      currentScrollPosRef.current = scrollContainerRef.current.scrollLeft
+    }
+
+    const handleMouseUp = () => {
+      if (isMouseDownRef.current) {
+        isMouseDownRef.current = false
+        setIsDragging(false)
+        setTimeout(() => {
+          hasDraggedRef.current = false
+        }, 100)
+      }
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
+
+  // Seamless wrap-around on scroll (infinite loop in both directions)
+  const handleScroll = () => {
+    const el = scrollContainerRef.current
+    if (!el) return
+
+    const oneSetWidth = el.scrollWidth / 3
+    if (oneSetWidth <= 0) return
+
+    if (el.scrollLeft >= 2 * oneSetWidth) {
+      el.scrollLeft -= oneSetWidth
+    } else if (el.scrollLeft < oneSetWidth) {
+      el.scrollLeft += oneSetWidth
+    }
+
+    currentScrollPosRef.current = el.scrollLeft
+  }
+
+  // Initial scroll position in the middle third
+  useEffect(() => {
+    const el = scrollContainerRef.current
+    if (!el) return
+    const setInitialScroll = () => {
+      if (!el) return
+      const oneSetWidth = el.scrollWidth / 3
+      if (oneSetWidth > 0 && el.scrollLeft === 0) {
+        el.scrollLeft = oneSetWidth
+        currentScrollPosRef.current = oneSetWidth
+      }
+    }
+    setInitialScroll()
+    const timer = setTimeout(setInitialScroll, 100)
+    return () => clearTimeout(timer)
+  }, [rawIndices.length])
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0 || !scrollContainerRef.current) return
+    isMouseDownRef.current = true
+    hasDraggedRef.current = false
+    startXRef.current = e.pageX
+    lastMouseXRef.current = e.pageX
+    setIsDragging(true)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isInteractingRef.current = true
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    touchStartXRef.current = e.touches[0].pageX
+    hasDraggedRef.current = false
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (Math.abs(e.touches[0].pageX - touchStartXRef.current) > 6) {
+      hasDraggedRef.current = true
+    }
+  }
+
+  const handleTouchEnd = () => {
+    touchTimerRef.current = window.setTimeout(() => {
+      isInteractingRef.current = false
+      hasDraggedRef.current = false
+    }, 1500)
+  }
+
   const handleCardClick = (idx: any) => {
+    if (hasDraggedRef.current) return
     const stockObj = normalizeStock(idx)
     if (onSelectStock) {
       onSelectStock(stockObj)
@@ -312,15 +449,36 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
             </div>
           </div>
 
-          {/* Marquee Ticker Track (Rotates slowly, pauses on hover) */}
+          {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
           <div className="relative flex-1 overflow-hidden ml-2 py-1 group">
             {/* Subtle fade edges for smooth transition */}
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
 
-            {/* Seamless scrolling marquee track */}
-            <div className="animate-ticker-marquee flex items-center gap-2 pt-1 pb-0.5">
-              {[...rawIndices, ...rawIndices].map((idx: any, index: number) => {
+            {/* Seamless scrolling marquee track with interactive drag */}
+            <div
+              ref={scrollContainerRef}
+              onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onMouseEnter={() => {
+                isHoveredRef.current = true
+              }}
+              onMouseLeave={() => {
+                isHoveredRef.current = false
+              }}
+              onScroll={handleScroll}
+              onDragStart={(e) => e.preventDefault()}
+              className={cn(
+                'overflow-x-auto select-none',
+                'scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                isDragging ? 'cursor-grabbing' : 'cursor-grab'
+              )}
+              style={{ touchAction: 'pan-x' }}
+            >
+              <div className="flex items-center gap-2 pt-1 pb-0.5 w-max">
+                {[...rawIndices, ...rawIndices, ...rawIndices].map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
                 const extPrice: number | null =
@@ -379,6 +537,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                   </div>
                 )
               })}
+              </div>
             </div>
           </div>
         </div>
