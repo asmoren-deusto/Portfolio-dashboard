@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:02:26
+- **Fecha de exportación:** 2026-10-12 18:11:36
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 125
+- **Total de interacciones registradas:** 127
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2090,5 +2090,30 @@ Ambas correcciones han sido verificadas y sincronizadas en la versión **`v2.7.7
 ### 👤 Usuario (2026-10-12 15:49:10)
 
 todo lo que has puesto es un lio y no se lee nada
+
+---
+
+### 🤖 Asistente (2026-10-12 16:02:29)
+
+Tienes toda la razón, se había sobrecargado la tarjeta con demasiadas cajas y números redundantes. Se ha limpiado por completo en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+### 🧹 Limpieza realizada:
+1. **Eliminado el cuadro de "Efecto Divisa (EUR/USD)"**:
+   - Se ha quitado el recuadro gris intermedio y las 3 columnas con porcentajes contradictorios que restaban espacio a la gráfica.
+   - El dato de divisa se mantiene discretamente en la píldora superior (`EUR/USD`).
+2. **Quitado el badge duplicado `EUR (€) Neto`**:
+   - Ahora el KPI principal vuelve a ser limpio y directo: **`-0.05%`** y **`-39,20 €`**.
+3. **Corregido el solapamiento en el eje de precios de la gráfica**:
+   - La línea base discontinua en 0.00% ya no estampa una etiqueta sobre el eje derecho, evitando que se tapen entre sí los números de `0.00%`, `+0.00%` y `-0.05%`. Ahora solo se muestra el valor actual de la cotización nítido y legible.
+4. **Simplificados los marcadores verticales**:
+   - Los carteles anchos que tapaban las curvas se han reducido a etiquetas mínimas (`15:30`, `22:00`), dejando la gráfica con espacio y despejada.
+
+Publicado y desplegado en la versión **`v2.7.72`**.
+
+---
+
+### 👤 Usuario (2026-10-12 16:10:09)
+
+el% no se ve, y reduce el alto de toda la tarjeta un 20%
 
 ---

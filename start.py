@@ -32,9 +32,9 @@ def run_frontend(frontend_dir):
     # En Windows usamos 'npm.cmd', en Linux/Mac 'npm'
     npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
     try:
-        subprocess.run([npm_cmd, "run", "dev"], cwd=frontend_dir, check=True)
-    except Exception as e:
-        print(f"[WARN] No se pudo iniciar el frontend dev server: {e}")
+        subprocess.run([npm_cmd, "run", "dev"], cwd=frontend_dir)
+    except Exception:
+        pass
 
 if __name__ == "__main__":
     root_dir = os.path.dirname(os.path.abspath(__file__))
