@@ -305,11 +305,11 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
           {/* Dual Panel: Comparative Bars + Interactive Donut */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Left: Dual Bar Comparison vs World (lg:col-span-8) */}
-            <Card className="lg:col-span-8 p-3.5 sm:p-4 flex flex-col justify-between">
+            <Card className="lg:col-span-8 p-4 sm:p-5 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100 dark:border-white/[0.06]">
+                <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                       <Scale className="w-4 h-4 text-blue-500" />
                       Comparativa Región a Región vs MSCI ACWI
                     </h3>
@@ -318,17 +318,17 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                     </p>
                   </div>
                   <div className="flex items-center gap-3 text-xs font-semibold">
-                    <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                    <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
                       <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Tu Cartera
                     </span>
-                    <span className="flex items-center gap-1 text-slate-400">
+                    <span className="flex items-center gap-1.5 text-slate-400">
                       <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-white/20" /> Mercado Mundial
                     </span>
                   </div>
                 </div>
 
                 {/* Region Comparison Rows */}
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2.5 sm:gap-3">
                   {geographicBreakdown.map((item) => {
                     const isHovered = hoveredGeoId === item.region.id
                     const isDimmed = hoveredGeoId !== null && !isHovered
@@ -338,7 +338,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         onMouseEnter={() => setHoveredGeoId(item.region.id)}
                         onMouseLeave={() => setHoveredGeoId(null)}
                         className={cn(
-                          'px-2.5 py-1.5 rounded-xl transition-all border cursor-pointer',
+                          'px-3.5 py-2 sm:py-2.5 rounded-xl transition-all border cursor-pointer',
                           isHovered
                             ? 'bg-blue-500/10 dark:bg-blue-500/15 border-blue-400/50 dark:border-blue-400/40 shadow-xs ring-1 ring-blue-500/20'
                             : isDimmed
@@ -347,30 +347,30 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         )}
                       >
                         {/* Top line: Name, Flag, Weights & Status */}
-                        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                        <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm select-none">{item.region.flag}</span>
+                            <span className="text-base select-none">{item.region.flag}</span>
                             <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                               {item.region.name}
                             </span>
-                            <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
+                            <span className="text-xs text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
                               ({fmt.currency(item.portfolioValue)})
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2 font-mono">
+                          <div className="flex items-center gap-2.5 font-mono">
                             <div className="text-right">
                               <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">
                                 {item.portfolioWeight.toFixed(1)}%
                               </span>
-                              <span className="text-[11px] text-slate-400 ml-1">
+                              <span className="text-xs text-slate-400 ml-1">
                                 (Mundo: {item.worldWeight.toFixed(1)}%)
                               </span>
                             </div>
 
                             <span
                               className={cn(
-                                'text-[10px] font-bold px-1.5 py-0.2 rounded-md whitespace-nowrap border',
+                                'text-[11px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap border',
                                 item.status === 'aligned'
                                   ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
                                   : item.status === 'overweight'
@@ -384,7 +384,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         </div>
 
                         {/* Comparative Dual Progress Bar */}
-                        <div className="relative w-full h-2 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
+                        <div className="relative w-full h-2.5 sm:h-3 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
                           {/* Benchmark World Marker Background */}
                           <div
                             className="absolute top-0 bottom-0 bg-slate-300/80 dark:bg-white/20 rounded-full"
@@ -401,7 +401,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                           />
                         </div>
 
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate leading-tight">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate leading-tight">
                           {item.region.description}
                         </p>
                       </div>
@@ -412,10 +412,10 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </Card>
 
             {/* Right: Geographic Allocation Donut (lg:col-span-4) */}
-            <Card className="lg:col-span-4 p-3.5 sm:p-4 flex flex-col justify-between">
+            <Card className="lg:col-span-4 p-4 sm:p-5 flex flex-col justify-between">
               <div>
-                <div className="pb-2.5 mb-2 border-b border-slate-100 dark:border-white/[0.06]">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <div className="pb-3 mb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <PieChartIcon className="w-4 h-4 text-emerald-500" />
                     Distribución de Tu Cartera
                   </h3>
@@ -424,8 +424,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </p>
                 </div>
 
-                <div className="h-[235px] w-full relative flex items-center justify-center min-w-0">
-                  <ResponsiveContainer width="100%" height={235}>
+                <div className="h-[270px] sm:h-[285px] w-full relative flex items-center justify-center min-w-0">
+                  <ResponsiveContainer width="100%" height={275}>
                     <PieChart>
                       <Pie
                         data={geoDonutData}
@@ -433,8 +433,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         cy="50%"
                         dataKey="value"
                         nameKey="shortName"
-                        innerRadius={58}
-                        outerRadius={90}
+                        innerRadius={66}
+                        outerRadius={98}
                         paddingAngle={1.5}
                         minAngle={4}
                         animationDuration={350}
@@ -481,27 +481,27 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-2 text-center transition-all duration-200">
                     {activeGeoItem ? (
                       <div className="flex flex-col items-center animate-in fade-in duration-150">
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-1.5">
-                          <span className="text-sm select-none">{activeGeoItem.flag}</span>
-                          <span className="truncate max-w-[125px]">{activeGeoItem.shortName}</span>
+                        <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-1.5">
+                          <span className="text-base select-none">{activeGeoItem.flag}</span>
+                          <span className="truncate max-w-[135px]">{activeGeoItem.shortName}</span>
                         </span>
-                        <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-950 dark:text-white leading-tight mt-0.5">
+                        <span className="text-xl sm:text-2xl font-extrabold font-mono text-slate-950 dark:text-white leading-tight mt-1">
                           {fmt.currency(activeGeoItem.value)}
                         </span>
-                        <span className="text-[11px] font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
+                        <span className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-1">
                           {activeGeoItem.pct.toFixed(1)}% de cartera
                         </span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                        <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                           Total Cartera
                         </span>
-                        <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-900 dark:text-white leading-tight mt-0.5">
+                        <span className="text-xl sm:text-2xl font-extrabold font-mono text-slate-950 dark:text-white leading-tight mt-1">
                           {fmt.currency(totalPortfolioValue)}
                         </span>
-                        <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
-                          {positions.length} activos
+                        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
+                          {positions.length} activos evaluados
                         </span>
                       </div>
                     )}
@@ -509,7 +509,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 </div>
 
                 {/* Mini Legend List with amounts, percentages and bidirectional hover */}
-                <div className="flex flex-col gap-1 mt-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
+                <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
                   {geoDonutData.map((d) => {
                     const isRowHovered = hoveredGeoId === d.id
                     const isRowDimmed = hoveredGeoId !== null && !isRowHovered
@@ -519,7 +519,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         onMouseEnter={() => setHoveredGeoId(d.id)}
                         onMouseLeave={() => setHoveredGeoId(null)}
                         className={cn(
-                          'flex items-center justify-between text-xs font-medium py-1 px-1.5 rounded-lg transition-all cursor-pointer',
+                          'flex items-center justify-between text-xs font-medium py-1.5 px-2 rounded-lg transition-all cursor-pointer',
                           isRowHovered
                             ? 'bg-blue-500/10 dark:bg-blue-500/15 shadow-2xs font-semibold'
                             : isRowDimmed
@@ -527,7 +527,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                             : 'hover:bg-slate-50 dark:hover:bg-white/[0.03]'
                         )}
                       >
-                        <span className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 min-w-0">
+                        <span className="flex items-center gap-2 text-slate-800 dark:text-slate-200 min-w-0">
                           <span
                             className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform"
                             style={{
@@ -538,10 +538,10 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                           <span className="truncate text-xs font-medium">{d.flag} {d.shortName}</span>
                         </span>
                         <div className="flex items-center gap-2 shrink-0 font-mono">
-                          <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+                          <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                             {fmt.currency(d.value)}
                           </span>
-                          <span className="font-bold text-slate-900 dark:text-white w-11 text-right text-xs">
+                          <span className="font-bold text-slate-950 dark:text-white w-12 text-right text-xs">
                             {d.pct.toFixed(1)}%
                           </span>
                         </div>

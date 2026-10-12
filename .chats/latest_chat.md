@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 19:04:26
+- **Fecha de exportación:** 2026-10-12 19:06:57
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 165
+- **Total de interacciones registradas:** 167
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2561,5 +2561,31 @@ He mejorado la legibilidad y el contraste de los textos en las tarjetas de KPIs 
 ### 👤 Usuario (2026-10-12 16:58:13)
 
 el donut se ve raro, y haz que sea interactivo al hacer hover sobre la tabla de la izquierda
+
+---
+
+### 🤖 Asistente (2026-10-12 17:04:28)
+
+He corregido el renderizado del donut y añadido interactividad bidireccional completa en [**`DiversificationDashboard.tsx`**](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx):
+
+1. **Corrección geométrica del Donut**:
+   - Se ajustó `paddingAngle={1.5}` y se añadió `minAngle={4}`: anteriormente, el espaciado angular excesivo colapsaba las posiciones pequeñas (*Otros / Caja* y *Pacífico*, que rondan el 1.6% - 1.8%) convirtiéndolas en líneas cortadas y deformadas.
+   - Ahora todos los sectores mantienen una curvatura armónica y continua sin artefactos visuales.
+
+2. **Interactividad bidireccional al pasar el cursor (Hover)**:
+   - **Al hacer hover sobre cualquier región en la tabla de la izquierda**:
+     - El sector correspondiente en el donut se ilumina con sombra y borde destacado, mientras el resto de sectores se atenúan suavemente.
+     - **El centro del donut cambia dinámicamente**: muestra la bandera, el nombre de la región seleccionada, su importe exacto en euros (`19.811,26 €`) y su peso sobre la cartera (`15.4% de cartera`).
+     - La fila correspondiente en la leyenda inferior también se resalta en sincronía.
+   - **Al salir del hover**: el centro del donut vuelve automáticamente a mostrar el resumen global (*Total Cartera* y *Nº de activos evaluados*).
+   - Funciona también a la inversa si pasas el ratón directamente sobre los sectores del gráfico o sobre la leyenda.
+
+*Verificado en navegador con capturas en vivo y sincronizado en la versión **v2.7.92**.*
+
+---
+
+### 👤 Usuario (2026-10-12 17:00:16)
+
+puedes ampliar un poco en alto, tienes hueco
 
 ---
