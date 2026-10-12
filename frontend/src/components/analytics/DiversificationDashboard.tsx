@@ -26,6 +26,20 @@ import {
   Flame,
   Pickaxe,
   Lightbulb,
+  Calculator,
+  Sliders,
+  ShieldAlert,
+  Gauge,
+  Zap,
+  BarChart3,
+  ArrowRight,
+  DollarSign,
+  Check,
+  RotateCcw,
+  Percent,
+  Clock,
+  Activity,
+  Wallet,
 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -33,10 +47,16 @@ import { fmt, cn } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
 import {
   analyzePortfolioDiversification,
+  calculateCashFlowRebalance,
   type GeographicComparisonItem,
   type SectorComparisonItem,
   type CurrencyItem,
   type AssetClassItem,
+  type SuperSectorItem,
+  type FxSensitivityScenario,
+  type InferredRiskProfile,
+  type RebalanceBandItem,
+  type CashFlowRebalanceItem,
 } from '@/lib/diversificationEngine'
 import type { Position } from '@/lib/mockData'
 
@@ -66,6 +86,11 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
   const [activeTab, setActiveTab] = useState<'geo' | 'sectors' | 'currency' | 'assets' | 'rebalance'>('geo')
   const [hoveredGeoId, setHoveredGeoId] = useState<string | null>(null)
 
+  // Interactive controls for deep-dive tabs
+  const [sectorFilter, setSectorFilter] = useState<'all' | 'defensive' | 'cyclical' | 'sensitive'>('all')
+  const [selectedFxIdx, setSelectedFxIdx] = useState<number>(0)
+  const [rebalanceCashInput, setRebalanceCashInput] = useState<number>(1000)
+
   // Compute quantitative diagnosis
   const diagnosis = useMemo(() => {
     return analyzePortfolioDiversification(positions)
@@ -83,10 +108,33 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
     rebalanceSuggestions,
     geographicBreakdown,
     sectorBreakdown,
+    superSectors,
+    sectorHhi,
+    top3SectorsWeight,
     currencyBreakdown,
+    fxSensitivity,
     assetClassBreakdown,
+    inferredProfile,
+    rebalanceBands,
     totalPortfolioValue,
   } = diagnosis
+
+  // Dynamic cash-flow rebalance allocation
+  const cashRebalanceAllocation = useMemo(() => {
+    return calculateCashFlowRebalance(totalPortfolioValue, geographicBreakdown, rebalanceCashInput)
+  }, [totalPortfolioValue, geographicBreakdown, rebalanceCashInput])
+
+  // Filtered sectors for Tab 2
+  const filteredSectors = useMemo(() => {
+    if (sectorFilter === 'all') return sectorBreakdown
+    const defensiveIds = ['health', 'consumer_stap', 'utilities']
+    const cyclicalIds = ['financials', 'consumer_disc', 'materials']
+    const sensitiveIds = ['tech', 'comms', 'industrials', 'energy']
+    if (sectorFilter === 'defensive') return sectorBreakdown.filter((s) => defensiveIds.includes(s.sector.id))
+    if (sectorFilter === 'cyclical') return sectorBreakdown.filter((s) => cyclicalIds.includes(s.sector.id))
+    if (sectorFilter === 'sensitive') return sectorBreakdown.filter((s) => sensitiveIds.includes(s.sector.id))
+    return sectorBreakdown
+  }, [sectorBreakdown, sectorFilter])
 
   // Donut data for geographic breakdown
   const geoDonutData = useMemo(() => {
@@ -574,230 +622,775 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
         </div>
       )}
 
-      {/* ── 4. TAB 2: Sectores vs MSCI World ─────────────────────────────────── */}
+      {/* ── 4. TAB 2: Sectores vs MSCI World & Macro Super-Sectores ───────────── */}
       {activeTab === 'sectors' && (
-        <Card delay={0.15} className="p-4 sm:p-5">
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-white/[0.06]">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                <Factory className="w-4 h-4 text-indigo-500" />
-                Diversificación Sectorial (10 Sectores GICS vs MSCI World)
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Ponderación por industrias de tus fondos frente al índice sectorial global.
-              </p>
-            </div>
-            <div className="flex items-center gap-3 text-xs font-semibold">
-              <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Tu Cartera
-              </span>
-              <span className="flex items-center gap-1 text-slate-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-white/20" /> MSCI World
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {sectorBreakdown.map((item) => {
-              const Icon = SECTOR_ICON_MAP[item.sector.iconName] || Factory
+        <div className="flex flex-col gap-4">
+          {/* Top: Macro Super-Sectors (Defensive vs Cyclical vs Sensitive) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            {superSectors.map((ss) => {
+              const isSensitive = ss.id === 'sensitive'
+              const isCyclical = ss.id === 'cyclical'
               return (
-                <div
-                  key={item.sector.id}
-                  className="p-3 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]"
+                <Card
+                  key={ss.id}
+                  className={cn(
+                    'p-4 sm:p-5 border-l-4 transition-all',
+                    isSensitive
+                      ? 'border-l-blue-500 bg-gradient-to-br from-blue-500/[0.03] to-transparent'
+                      : isCyclical
+                      ? 'border-l-emerald-500 bg-gradient-to-br from-emerald-500/[0.03] to-transparent'
+                      : 'border-l-pink-500 bg-gradient-to-br from-pink-500/[0.03] to-transparent'
+                  )}
                 >
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="p-1 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
-                        <Icon size={14} />
-                      </div>
-                      <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                        {item.sector.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 font-mono shrink-0">
-                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                        {item.portfolioWeight.toFixed(1)}%
-                      </span>
-                      <span className="text-xs text-slate-400">
-                        (Mundo: {item.worldWeight.toFixed(1)}%)
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="relative w-full h-2.5 rounded-full bg-slate-200/70 dark:bg-white/[0.06] overflow-hidden">
-                    <div
-                      className="absolute top-0 bottom-0 bg-slate-300 dark:bg-white/20 rounded-full"
-                      style={{ width: `${Math.min(100, item.worldWeight)}%` }}
-                    />
-                    <div
-                      className="absolute top-0 bottom-0 rounded-full transition-all duration-700 bg-indigo-500"
-                      style={{ width: `${Math.min(100, item.portfolioWeight)}%` }}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between mt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                    <span>Capital asignado: {fmt.currency(item.portfolioValue)}</span>
-                    <span className={cn(
-                      'font-bold',
-                      item.delta >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500'
-                    )}>
-                      {item.delta >= 0 ? `+${item.delta.toFixed(1)}% sobrepeso` : `${item.delta.toFixed(1)}% infra`}
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
+                    <span className="flex items-center gap-1.5 text-xs sm:text-sm">
+                      {isSensitive ? '⚡' : isCyclical ? '📈' : '🛡️'}
+                      {ss.name.split(' (')[0]}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-[10px] font-mono px-2 py-0.5 rounded-md border font-bold',
+                        ss.delta >= 0
+                          ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20'
+                          : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10'
+                      )}
+                    >
+                      {ss.delta >= 0 ? `+${ss.delta.toFixed(1)}%` : `${ss.delta.toFixed(1)}%`}
                     </span>
                   </div>
-                </div>
+
+                  <div className="flex items-baseline gap-2 mt-1.5">
+                    <span className="text-xl sm:text-2xl font-extrabold font-mono text-slate-950 dark:text-white">
+                      {ss.portfolioWeight.toFixed(1)}%
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      vs {ss.worldWeight.toFixed(1)}% mundo
+                    </span>
+                  </div>
+
+                  <div className="relative w-full h-2.5 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden mt-2.5">
+                    <div
+                      className="absolute top-0 bottom-0 bg-slate-300 dark:bg-white/20 rounded-full"
+                      style={{ width: `${Math.min(100, ss.worldWeight)}%` }}
+                      title={`MSCI World: ${ss.worldWeight}%`}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0 rounded-full transition-all duration-700"
+                      style={{
+                        width: `${Math.min(100, ss.portfolioWeight)}%`,
+                        backgroundColor: ss.color,
+                      }}
+                    />
+                  </div>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2.5 leading-relaxed">
+                    {ss.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/[0.06]">
+                    {ss.sectorNames.map((sName) => (
+                      <span
+                        key={sName}
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10"
+                      >
+                        {sName}
+                      </span>
+                    ))}
+                  </div>
+                </Card>
               )
             })}
           </div>
-        </Card>
-      )}
 
-      {/* ── 5. TAB 3: Divisas & Riesgo Cambiario (FX) ────────────────────────── */}
-      {activeTab === 'currency' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="lg:col-span-2 p-4 sm:p-5">
-            <div className="pb-3 mb-3 border-b border-slate-100 dark:border-white/[0.06]">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                <Coins className="w-4 h-4 text-amber-500" />
-                Desglose de Exposición a Divisas
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Identificación del riesgo de tipo de cambio frente a tu moneda base (EUR).
-              </p>
+          {/* Concentration KPI Strip */}
+          <Card className="p-4 sm:p-5 bg-slate-50/70 dark:bg-white/[0.02]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/80 dark:divide-white/[0.08]">
+              <div className="px-2 py-1">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">
+                  Concentración Top 3 Sectores
+                </span>
+                <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-900 dark:text-white mt-1 block">
+                  {top3SectorsWeight.toFixed(1)}% de cartera
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block truncate">
+                  {sectorBreakdown.slice(0, 3).map((s) => s.sector.name.split(' ')[0]).join(', ')}
+                </span>
+              </div>
+
+              <div className="px-2 py-1 sm:pl-4">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">
+                  Índice de Concentración (HHI)
+                </span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-900 dark:text-white">
+                    {sectorHhi.toLocaleString()}
+                  </span>
+                  <span
+                    className={cn(
+                      'text-[10px] font-bold px-2 py-0.5 rounded-md border',
+                      sectorHhi < 1800
+                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
+                        : sectorHhi < 2500
+                        ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20'
+                        : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
+                    )}
+                  >
+                    {sectorHhi < 1800 ? 'Alta Diversificación' : sectorHhi < 2500 ? 'Concentración Moderada' : 'Concentrado'}
+                  </span>
+                </div>
+                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">
+                  Benchmark MSCI World: ~1.350 puntos
+                </span>
+              </div>
+
+              <div className="px-2 py-1 sm:pl-4">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">
+                  Líder Sectorial Absoluto
+                </span>
+                <span className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mt-1 block truncate">
+                  {sectorBreakdown[0]?.sector.name}
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 block">
+                  {sectorBreakdown[0]?.portfolioWeight.toFixed(1)}% ({fmt.currency(sectorBreakdown[0]?.portfolioValue || 0)})
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          {/* 10 GICS Sectors with Filter Chips */}
+          <Card className="p-5 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Factory className="w-4 h-4 text-indigo-500" />
+                  Diversificación Sectorial (10 Sectores GICS vs MSCI World)
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Ponderación por industrias de tus fondos frente al índice sectorial global.
+                </p>
+              </div>
+
+              {/* Filter Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                {[
+                  { id: 'all', label: 'Todos (10)' },
+                  { id: 'sensitive', label: '⚡ Sensibles (4)' },
+                  { id: 'cyclical', label: '📈 Cíclicos (3)' },
+                  { id: 'defensive', label: '🛡️ Defensivos (3)' },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setSectorFilter(f.id as typeof sectorFilter)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer',
+                      sectorFilter === f.id
+                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs'
+                        : 'bg-transparent text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
+                    )}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex flex-col gap-3">
-              {currencyBreakdown.map((c) => (
-                <div
-                  key={c.code}
-                  className="p-3 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{c.flag}</span>
-                      <div>
-                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                          {c.name}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredSectors.map((item) => {
+                const Icon = SECTOR_ICON_MAP[item.sector.iconName] || Factory
+                return (
+                  <div
+                    key={item.sector.id}
+                    className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] hover:border-slate-300 dark:hover:border-white/10 transition-all"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className="p-1.5 rounded-lg shrink-0"
+                          style={{
+                            backgroundColor: `${item.sector.color}15`,
+                            color: item.sector.color,
+                          }}
+                        >
+                          <Icon size={16} />
+                        </div>
+                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                          {item.sector.name}
                         </span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200/60 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 ml-2">
-                          {c.code}
+                      </div>
+                      <div className="flex items-center gap-2 font-mono shrink-0">
+                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                          {item.portfolioWeight.toFixed(1)}%
+                        </span>
+                        <span className="text-xs text-slate-400">
+                          (Mundo: {item.worldWeight.toFixed(1)}%)
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-right font-mono">
-                      <span className="text-sm font-bold text-slate-900 dark:text-white block">
-                        {c.weight.toFixed(1)}%
-                      </span>
-                      <span className="text-xs text-slate-400">
-                        {fmt.currency(c.value)}
+                    <div className="relative w-full h-2.5 sm:h-3 rounded-full bg-slate-200/70 dark:bg-white/[0.06] overflow-hidden">
+                      <div
+                        className="absolute top-0 bottom-0 bg-slate-300 dark:bg-white/20 rounded-full"
+                        style={{ width: `${Math.min(100, item.worldWeight)}%` }}
+                        title={`MSCI World: ${item.worldWeight}%`}
+                      />
+                      <div
+                        className="absolute top-0 bottom-0 rounded-full transition-all duration-700"
+                        style={{
+                          width: `${Math.min(100, item.portfolioWeight)}%`,
+                          backgroundColor: item.sector.color,
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      <span>Capital asignado: <strong className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{fmt.currency(item.portfolioValue)}</strong></span>
+                      <span
+                        className={cn(
+                          'font-bold font-mono text-[11px] px-2 py-0.5 rounded-md border',
+                          item.delta >= 0
+                            ? 'text-blue-700 dark:text-blue-300 bg-blue-500/10 border-blue-500/20'
+                            : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.05] border-slate-200/70 dark:border-white/10'
+                        )}
+                      >
+                        {item.delta >= 0 ? `+${item.delta.toFixed(1)}% sobrepeso` : `${item.delta.toFixed(1)}% infra`}
                       </span>
                     </div>
                   </div>
-
-                  <div className="w-full h-2 rounded-full bg-slate-200/70 dark:bg-white/[0.06] overflow-hidden">
-                    <div
-                      className={cn(
-                        'h-full rounded-full transition-all duration-700',
-                        c.code === 'EUR' ? 'bg-emerald-500' : c.code === 'USD' ? 'bg-blue-500' : 'bg-amber-500'
-                      )}
-                      style={{ width: `${Math.min(100, c.weight)}%` }}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] mt-1 text-slate-500 dark:text-slate-400">
-                    <span>Clasificación de riesgo:</span>
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">{c.riskType}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* Right: Currency Risk Assessment Note */}
-          <Card className="p-4 sm:p-5 flex flex-col justify-between bg-gradient-to-br from-amber-500/[0.03] to-transparent border-amber-500/20">
-            <div>
-              <div className="flex items-center gap-2 pb-2 mb-2 border-b border-slate-100 dark:border-white/[0.06]">
-                <ShieldCheck className="w-4 h-4 text-amber-500" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                  Evaluación de Riesgo FX
-                </h4>
-              </div>
-
-              <div className="flex flex-col gap-2.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                <p>
-                  El <strong className="font-bold text-slate-900 dark:text-white">{(currencyBreakdown.find((c) => c.code === 'EUR')?.weight ?? 0).toFixed(1)}%</strong> de tu patrimonio está protegido frente a fluctuaciones de divisas al cotizar directamente en Euros.
-                </p>
-                <p>
-                  El <strong className="font-bold text-slate-900 dark:text-white">{(currencyBreakdown.find((c) => c.code === 'USD')?.weight ?? 0).toFixed(1)}%</strong> vinculado al Dólar USA aporta una cobertura natural: históricamente, en caídas bursátiles globales el Dólar actúa como divisa refugio, amortiguando las pérdidas netas en Euros para inversores europeos.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-800 dark:text-amber-300 font-medium mt-3">
-              💡 Para carteras a largo plazo (&gt; 5 años), la teoría financiera moderna recomienda no cubrir la divisa en renta variable global para no pagar el coste del swap de cobertura.
+                )
+              })}
             </div>
           </Card>
         </div>
       )}
 
-      {/* ── 6. TAB 4: Clases de Activo & Perfil ───────────────────────────────── */}
-      {activeTab === 'assets' && (
-        <Card delay={0.15} className="p-4 sm:p-5">
-          <div className="pb-3 mb-3 border-b border-slate-100 dark:border-white/[0.06]">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-blue-500" />
-              Asignación por Clase de Activo
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Distribución macro entre Renta Variable, Renta Fija y Monetarios.
-            </p>
+      {/* ── 5. TAB 3: Divisas & Riesgo Cambiario (FX) con Simulador ──────────── */}
+      {activeTab === 'currency' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Left Column: Currency Breakdown & Hedging Guide (lg:col-span-7) */}
+          <div className="lg:col-span-7 flex flex-col gap-4">
+            <Card className="p-5 sm:p-6">
+              <div className="pb-3.5 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-amber-500" />
+                  Desglose de Exposición por Divisa
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Identificación del riesgo de tipo de cambio frente a tu moneda base (EUR).
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {currencyBreakdown.map((c) => (
+                  <div
+                    key={c.code}
+                    className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl select-none leading-none">{c.flag}</span>
+                        <div>
+                          <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                            {c.name}
+                          </span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 ml-2 font-mono">
+                            {c.code}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right font-mono">
+                        <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white block">
+                          {c.weight.toFixed(1)}%
+                        </span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          {fmt.currency(c.value)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="w-full h-2.5 rounded-full bg-slate-200/70 dark:bg-white/[0.06] overflow-hidden">
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all duration-700',
+                          c.code === 'EUR' ? 'bg-emerald-500' : c.code === 'USD' ? 'bg-blue-500' : 'bg-amber-500'
+                        )}
+                        style={{ width: `${Math.min(100, c.weight)}%` }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs mt-2 text-slate-500 dark:text-slate-400">
+                      <span>Régimen cambiario:</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{c.riskType}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Hedging Drag & Long-Term Strategy */}
+            <Card className="p-5 sm:p-6 bg-gradient-to-br from-blue-500/[0.03] to-transparent border-blue-500/20">
+              <div className="flex items-center gap-2 pb-2.5 mb-2.5 border-b border-slate-100 dark:border-white/[0.06]">
+                <ShieldCheck className="w-4 h-4 text-blue-500" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                  Guía Institucional: ¿Cubrir Divisa (Hedged) o No Cubrir?
+                </h4>
+              </div>
+              <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                <p>
+                  • <strong>Coste de Cobertura (Carry Drag):</strong> Los fondos con clase con cobertura (EUR-Hedged) pagan anualmente el diferencial de tipos de interés entre el BCE y la Reserva Federal mediante contratos forwards. Históricamente esto resta entre un <strong>1.2% y 2.0% anual</strong> de rentabilidad neta.
+                </p>
+                <p>
+                  • <strong>Recomendación a Largo Plazo:</strong> Para horizontes &gt; 5 años en Renta Variable Global, los principales gestores patrimoniales recomiendan mantener las posiciones <em>unhedged</em> (sin cubrir), beneficiándose de la diversificación cambiaria sin pagar comisiones financieras ocultas.
+                </p>
+              </div>
+            </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {assetClassBreakdown.map((a) => (
-              <div
-                key={a.id}
-                className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]"
-              >
-                <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
-                  <span>{a.name}</span>
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: a.color }} />
+          {/* Right Column: FX Sensitivity Simulator (lg:col-span-5) */}
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <Card className="p-5 sm:p-6 flex flex-col justify-between border-amber-500/25 bg-gradient-to-br from-amber-500/[0.03] via-transparent to-orange-500/[0.02]">
+              <div>
+                <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <Sliders className="w-4 h-4 text-amber-500" />
+                      Simulador de Sensibilidad EUR/USD
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Impacto monetario estimado según la evolución del dólar.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                    FX Scanner
+                  </span>
                 </div>
-                <div className="text-xl font-extrabold font-mono text-slate-900 dark:text-white mt-1">
-                  {a.weight.toFixed(1)}%
+
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                  Actualmente tienes <strong className="text-slate-900 dark:text-white font-mono">{fmt.currency(currencyBreakdown.find((c) => c.code === 'USD')?.value || 0)}</strong> ({currencyBreakdown.find((c) => c.code === 'USD')?.weight.toFixed(1)}%) expuestos al Dólar USA. Selecciona un escenario cambiario:
+                </p>
+
+                {/* Scenario Selectors */}
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {fxSensitivity.map((sc, idx) => (
+                    <button
+                      key={sc.label}
+                      onClick={() => setSelectedFxIdx(idx)}
+                      className={cn(
+                        'p-2.5 rounded-xl text-left border transition-all cursor-pointer',
+                        selectedFxIdx === idx
+                          ? 'bg-amber-500/15 border-amber-500/60 shadow-xs ring-1 ring-amber-500/30 font-semibold'
+                          : 'bg-white/70 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/10 hover:border-slate-300'
+                      )}
+                    >
+                      <span className="text-[11px] font-bold block text-slate-700 dark:text-slate-300">
+                        {sc.label}
+                      </span>
+                      <span
+                        className={cn(
+                          'text-xs font-mono font-bold mt-0.5 block',
+                          sc.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                        )}
+                      >
+                        {sc.isPositive ? '+' : ''}{fmt.currency(sc.portfolioEuroImpact)}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-                <div className="text-xs text-slate-400 font-mono mt-0.5">
-                  {fmt.currency(a.value)}
-                </div>
+
+                {/* Highlighted Result Box */}
+                {fxSensitivity[selectedFxIdx] && (
+                  <div className="p-4 rounded-xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 shadow-xs">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Efecto Estimado en Patrimonio Total
+                    </span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span
+                        className={cn(
+                          'text-2xl sm:text-3xl font-extrabold font-mono',
+                          fxSensitivity[selectedFxIdx].isPositive
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                        )}
+                      >
+                        {fxSensitivity[selectedFxIdx].isPositive ? '+' : ''}
+                        {fmt.currency(fxSensitivity[selectedFxIdx].portfolioEuroImpact)}
+                      </span>
+                      <span
+                        className={cn(
+                          'text-sm font-bold font-mono',
+                          fxSensitivity[selectedFxIdx].isPositive
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                        )}
+                      >
+                        ({fxSensitivity[selectedFxIdx].isPositive ? '+' : ''}
+                        {fxSensitivity[selectedFxIdx].portfolioPctImpact.toFixed(2)}%)
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                      {fxSensitivity[selectedFxIdx].isPositive
+                        ? '🟢 Una subida del dólar incrementa el contravalor en euros de tus acciones estadounidenses, actuando como un colchón positivo.'
+                        : '🔴 Una apreciación del euro reduce temporalmente la valoración contable de tus activos en dólares, aunque abarata tus nuevas compras sistemáticas.'}
+                    </p>
+                  </div>
+                )}
               </div>
-            ))}
+
+              {/* Natural Hedge Alert */}
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-300 font-medium mt-4">
+                🛡️ <strong>Efecto Refugio Global:</strong> En momentos de pánico financiero internacional, el capital global suele refugiarse en bonos del Tesoro y Dólares USA, lo que históricamente ha mitigado las pérdidas contables para inversores en Euros.
+              </div>
+            </Card>
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* ── 7. TAB 5: Consejos de Rebalanceo ─────────────────────────────────── */}
-      {activeTab === 'rebalance' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {rebalanceSuggestions.map((sug, i) => (
-            <Card key={`sug-${i}`} className="p-4 sm:p-5 border-l-4 border-l-blue-500">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-                  <Compass className="w-5 h-5" />
+      {/* ── 6. TAB 4: Clases de Activo & Perfil Inversor ───────────────────────── */}
+      {activeTab === 'assets' && (
+        <div className="flex flex-col gap-4">
+          {/* Top Hero: Inferred Risk Profile Scanner */}
+          <Card className="p-5 sm:p-6 border-indigo-500/25 bg-gradient-to-br from-indigo-500/[0.04] via-blue-500/[0.02] to-transparent">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
+                  <Gauge className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
-                    {sug.targetRegion}
-                  </span>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
-                    {sug.title}
-                  </h4>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-1.5 font-normal">
-                    {sug.description}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                      Perfil Inferido Cuantitativo
+                    </span>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                      {(inferredProfile.equityRatio).toFixed(0)}% RV / {(100 - inferredProfile.equityRatio).toFixed(0)}% Otros
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+                    {inferredProfile.name}
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                    {inferredProfile.tagline}
                   </p>
                 </div>
               </div>
-            </Card>
-          ))}
+
+              {/* Inferred Expected Horizon Badge */}
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-white/[0.03] px-3.5 py-2 rounded-xl border border-slate-200/80 dark:border-white/10 shrink-0 self-start lg:self-auto">
+                <Clock className="w-4 h-4 text-blue-500" />
+                <div className="text-xs">
+                  <span className="text-slate-400 block font-medium">Horizonte Sugerido:</span>
+                  <span className="font-bold text-slate-900 dark:text-white font-mono">{inferredProfile.recommendedHorizon}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4 Quantitative Profile Metrics */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+              <div className="p-3.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06]">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                  <span>Volatilidad Anual</span>
+                  <Activity size={14} className="text-blue-500" />
+                </div>
+                <div className="text-lg sm:text-xl font-extrabold font-mono text-slate-950 dark:text-white mt-1">
+                  ~{inferredProfile.expectedVolatilityPct}%
+                </div>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                  Desviación estándar típica
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06]">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                  <span>Drawdown Máx Histórico</span>
+                  <ShieldAlert size={14} className="text-rose-500" />
+                </div>
+                <div className="text-lg sm:text-xl font-extrabold font-mono text-rose-600 dark:text-rose-400 mt-1">
+                  {inferredProfile.historicalMaxDrawdownPct}%
+                </div>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                  Picos de crisis (2008 / 2020)
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06]">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                  <span>Rentabilidad Real CAGR</span>
+                  <TrendingUp size={14} className="text-emerald-500" />
+                </div>
+                <div className="text-lg sm:text-xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400 mt-1">
+                  ~{inferredProfile.expectedRealReturnPct}% anual
+                </div>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                  Descontada inflación histórica
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06]">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                  <span>Pólvora Seca (Caja)</span>
+                  <Wallet size={14} className="text-cyan-500" />
+                </div>
+                <div className="text-lg sm:text-xl font-extrabold font-mono text-cyan-600 dark:text-cyan-400 mt-1">
+                  {inferredProfile.dryPowderPct.toFixed(1)}%
+                </div>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                  {fmt.currency(inferredProfile.dryPowderAmount)}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          {/* Asset Allocation Breakdown Cards */}
+          <Card className="p-5 sm:p-6">
+            <div className="pb-3.5 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Layers className="w-4 h-4 text-blue-500" />
+                Asignación Estratégica por Clase de Activo
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Distribución macro y rol de cada categoría en la cartera.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {assetClassBreakdown.map((a) => (
+                <div
+                  key={a.id}
+                  className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
+                      <span>{a.name}</span>
+                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: a.color }} />
+                    </div>
+                    <div className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white mt-1.5">
+                      {a.weight.toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                      {fmt.currency(a.value)}
+                    </div>
+
+                    <div className="w-full h-2 rounded-full bg-slate-200/70 dark:bg-white/[0.06] overflow-hidden mt-2.5">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${Math.min(100, a.weight)}%`, backgroundColor: a.color }}
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/[0.06] leading-relaxed">
+                    {a.roleDescription}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* ── 7. TAB 5: Consejos & Calculadora de Rebalanceo Inteligente ───────── */}
+      {activeTab === 'rebalance' && (
+        <div className="flex flex-col gap-4">
+          {/* Smart Cash-Flow Rebalancing Calculator (Zero-Tax via New Inflows) */}
+          <Card className="p-5 sm:p-6 border-blue-500/25 bg-gradient-to-br from-blue-500/[0.03] via-transparent to-indigo-500/[0.02]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Calculator className="w-5 h-5 text-blue-500" />
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    Calculadora de Rebalanceo Inteligente por Flujo de Caja
+                  </h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                    0% Peaje Fiscal
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Rebalancea aportando nuevo capital sin vender activos ni tributar por plusvalías en IRPF.
+                </p>
+              </div>
+
+              {/* Inflow Input and Quick Presets */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Nueva aportación:</span>
+                {[500, 1000, 2500, 5000].map((amt) => (
+                  <button
+                    key={amt}
+                    onClick={() => setRebalanceCashInput(amt)}
+                    className={cn(
+                      'px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer',
+                      rebalanceCashInput === amt
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                        : 'bg-white dark:bg-white/[0.04] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-blue-400'
+                    )}
+                  >
+                    +{amt} €
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Smart Distribution Grid */}
+            <div className="space-y-2.5">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
+                Asignación Matemática Óptima para {fmt.currency(rebalanceCashInput)}:
+              </span>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {cashRebalanceAllocation.map((rec) => {
+                  const hasAllocation = rec.suggestedCashAmount > 0.01
+                  return (
+                    <div
+                      key={rec.regionId}
+                      className={cn(
+                        'p-3.5 rounded-xl border transition-all',
+                        hasAllocation
+                          ? 'bg-blue-500/[0.05] dark:bg-blue-500/10 border-blue-400/40 dark:border-blue-500/30 shadow-2xs'
+                          : 'bg-slate-50/70 dark:bg-white/[0.02] border-slate-200/70 dark:border-white/[0.05] opacity-70'
+                      )}
+                    >
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <span>{rec.flag}</span>
+                          <span className="truncate">{rec.regionName}</span>
+                        </span>
+                        <span
+                          className={cn(
+                            'font-mono font-bold text-xs',
+                            hasAllocation ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'
+                          )}
+                        >
+                          {rec.suggestedCashShare.toFixed(0)}% del aporte
+                        </span>
+                      </div>
+
+                      <div className="flex items-baseline justify-between mt-1">
+                        <span className="text-lg font-extrabold font-mono text-slate-950 dark:text-white">
+                          {fmt.currency(rec.suggestedCashAmount)}
+                        </span>
+                        <div className="text-[11px] font-mono text-right text-slate-500 dark:text-slate-400">
+                          <span>{rec.currentWeight.toFixed(1)}%</span>
+                          <span className="mx-1">→</span>
+                          <span className="font-bold text-blue-600 dark:text-blue-400">
+                            {rec.projectedWeight.toFixed(1)}%
+                          </span>
+                          <span className="text-slate-400 text-[10px] ml-1">
+                            (obj: {rec.targetWeight.toFixed(1)}%)
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="relative w-full h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden mt-2">
+                        <div
+                          className="absolute top-0 bottom-0 bg-blue-500 rounded-full"
+                          style={{ width: `${Math.min(100, rec.projectedWeight * 1.5)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </Card>
+
+          {/* Swensen 5/25 Tolerance Bands Monitor */}
+          <Card className="p-5 sm:p-6">
+            <div className="pb-3.5 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
+              <div className="flex items-center gap-2">
+                <Compass className="w-4 h-4 text-indigo-500" />
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                  Auditoría de Bandas de Tolerancia 5/25 (Regla David Swensen)
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Determina si una posición requiere rebalanceo al desviarse &gt;5% absoluto o &gt;25% relativo de su objetivo mundial.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left">
+                <thead>
+                  <tr className="border-b border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10.5px]">
+                    <th className="pb-2.5 font-bold">Región Geográfica</th>
+                    <th className="pb-2.5 font-bold text-right">Peso Actual</th>
+                    <th className="pb-2.5 font-bold text-right">Objetivo Mundial</th>
+                    <th className="pb-2.5 font-bold text-center">Banda Permitida [Mín - Máx]</th>
+                    <th className="pb-2.5 font-bold text-right">Desviación</th>
+                    <th className="pb-2.5 font-bold text-center">Estado Auditoría</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-white/[0.05]">
+                  {rebalanceBands.map((b) => (
+                    <tr key={b.regionId} className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02]">
+                      <td className="py-3 font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span className="text-base">{b.flag}</span>
+                        <span>{b.regionName}</span>
+                      </td>
+                      <td className="py-3 text-right font-mono font-bold text-slate-900 dark:text-white">
+                        {b.currentWeight.toFixed(1)}%
+                      </td>
+                      <td className="py-3 text-right font-mono text-slate-500 dark:text-slate-400">
+                        {b.targetWeight.toFixed(1)}%
+                      </td>
+                      <td className="py-3 text-center font-mono text-slate-600 dark:text-slate-300">
+                        [{b.lowerBand.toFixed(1)}% – {b.upperBand.toFixed(1)}%]
+                      </td>
+                      <td className="py-3 text-right font-mono font-semibold">
+                        <span
+                          className={cn(
+                            b.deviationAbs <= 3.0
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : b.deviationAbs <= 6.0
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : 'text-rose-600 dark:text-rose-400'
+                          )}
+                        >
+                          {b.currentWeight >= b.targetWeight ? '+' : '-'}
+                          {b.deviationAbs.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="py-3 text-center">
+                        <span
+                          className={cn(
+                            'text-[10.5px] font-bold px-2.5 py-0.5 rounded-full border inline-flex items-center gap-1',
+                            b.urgency === 'optimal'
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                              : b.urgency === 'warning'
+                              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25'
+                              : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25'
+                          )}
+                        >
+                          {b.urgency === 'optimal' ? '🟢 En Tolerancia' : b.urgency === 'warning' ? '🟡 Desviación Moderada' : '🔴 Rebalanceo Prioritario'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Qualitative Actionable Suggestions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {rebalanceSuggestions.map((sug, i) => (
+              <Card key={`sug-${i}`} className="p-4 sm:p-5 border-l-4 border-l-blue-500">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
+                    <Compass className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
+                      {sug.targetRegion}
+                    </span>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                      {sug.title}
+                    </h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-1.5 font-normal">
+                      {sug.description}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
     </div>

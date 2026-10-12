@@ -318,6 +318,18 @@ export interface SectorComparisonItem {
   status: 'overweight' | 'underweight' | 'aligned'
 }
 
+export interface SuperSectorItem {
+  id: 'defensive' | 'cyclical' | 'sensitive'
+  name: string
+  description: string
+  portfolioWeight: number
+  portfolioValue: number
+  worldWeight: number
+  delta: number
+  color: string
+  sectorNames: string[]
+}
+
 export interface CurrencyItem {
   code: string
   name: string
@@ -327,12 +339,61 @@ export interface CurrencyItem {
   riskType: 'Local (Sin Riesgo Divisa)' | 'Riesgo Dólar (USD)' | 'Multidivisa Global'
 }
 
+export interface FxSensitivityScenario {
+  label: string
+  rateChangePct: number // +10, +5, -5, -10
+  portfolioEuroImpact: number // in €
+  portfolioPctImpact: number // in %
+  isPositive: boolean
+}
+
 export interface AssetClassItem {
   id: string
   name: string
   weight: number
   value: number
   color: string
+  roleDescription: string
+}
+
+export interface InferredRiskProfile {
+  name: string
+  tagline: string
+  equityRatio: number
+  fixedIncomeRatio: number
+  cashRatio: number
+  recommendedHorizon: string
+  expectedVolatilityPct: number
+  historicalMaxDrawdownPct: number
+  expectedRealReturnPct: number
+  dryPowderAmount: number
+  dryPowderPct: number
+}
+
+export interface RebalanceBandItem {
+  regionId: string
+  regionName: string
+  flag: string
+  currentWeight: number
+  targetWeight: number
+  currentValue: number
+  lowerBand: number
+  upperBand: number
+  inBand: boolean
+  deviationAbs: number
+  deviationRel: number
+  urgency: 'optimal' | 'warning' | 'critical'
+}
+
+export interface CashFlowRebalanceItem {
+  regionId: string
+  regionName: string
+  flag: string
+  suggestedCashAmount: number
+  suggestedCashShare: number
+  currentWeight: number
+  projectedWeight: number
+  targetWeight: number
 }
 
 export interface DiversificationDiagnosis {
@@ -353,8 +414,14 @@ export interface DiversificationDiagnosis {
   }>
   geographicBreakdown: GeographicComparisonItem[]
   sectorBreakdown: SectorComparisonItem[]
+  superSectors: SuperSectorItem[]
+  sectorHhi: number
+  top3SectorsWeight: number
   currencyBreakdown: CurrencyItem[]
+  fxSensitivity: FxSensitivityScenario[]
   assetClassBreakdown: AssetClassItem[]
+  inferredProfile: InferredRiskProfile
+  rebalanceBands: RebalanceBandItem[]
   totalPortfolioValue: number
 }
 
@@ -388,8 +455,26 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
       rebalanceSuggestions: [],
       geographicBreakdown: [],
       sectorBreakdown: [],
+      superSectors: [],
+      sectorHhi: 0,
+      top3SectorsWeight: 0,
       currencyBreakdown: [],
+      fxSensitivity: [],
       assetClassBreakdown: [],
+      inferredProfile: {
+        name: 'Sin datos',
+        tagline: 'Sin activos asignados',
+        equityRatio: 0,
+        fixedIncomeRatio: 0,
+        cashRatio: 0,
+        recommendedHorizon: 'N/A',
+        expectedVolatilityPct: 0,
+        historicalMaxDrawdownPct: 0,
+        expectedRealReturnPct: 0,
+        dryPowderAmount: 0,
+        dryPowderPct: 0,
+      },
+      rebalanceBands: [],
       totalPortfolioValue: 0,
     }
   }
@@ -452,7 +537,7 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     }
   }).sort((a, b) => b.portfolioWeight - a.portfolioWeight)
 
-  // 3. Build Sector Comparison
+  // 3. Build Sector Comparison & Macro Super-Sectors
   const sectorBreakdown: SectorComparisonItem[] = WORLD_SECTOR_BENCHMARK.map((sec) => {
     const val = sectorValues[sec.id] || 0
     const pWeight = (val / totalValue) * 100
@@ -472,7 +557,69 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     }
   }).sort((a, b) => b.portfolioWeight - a.portfolioWeight)
 
-  // 4. Build Currency Breakdown
+  // Super-Sectors definition (Morningstar Macro Taxonomy)
+  // - Defensive (Health, Consumer Staples, Utilities) -> 23.1% world
+  // - Cyclical (Financials, Consumer Discretionary, Materials) -> 29.0% world
+  // - Sensitive (Technology, Communication, Industrials, Energy) -> 47.9% world
+  const defensiveSectorIds = ['health', 'consumer_stap', 'utilities']
+  const cyclicalSectorIds = ['financials', 'consumer_disc', 'materials']
+  const sensitiveSectorIds = ['tech', 'comms', 'industrials', 'energy']
+
+  const getSuperSectorStats = (ids: string[]) => {
+    const val = ids.reduce((acc, id) => acc + (sectorValues[id] || 0), 0)
+    const pWeight = (val / totalValue) * 100
+    const wWeight = ids.reduce((acc, id) => {
+      const sec = WORLD_SECTOR_BENCHMARK.find((s) => s.id === id)
+      return acc + (sec?.worldWeight || 0)
+    }, 0)
+    return { val, pWeight, wWeight, delta: pWeight - wWeight }
+  }
+
+  const defStats = getSuperSectorStats(defensiveSectorIds)
+  const cycStats = getSuperSectorStats(cyclicalSectorIds)
+  const senStats = getSuperSectorStats(sensitiveSectorIds)
+
+  const superSectors: SuperSectorItem[] = [
+    {
+      id: 'sensitive',
+      name: 'Super-Sector Sensible (Tecnología & Capital)',
+      description: 'Sensible a tipos de interés, digitalización y capex corporativo.',
+      portfolioWeight: senStats.pWeight,
+      portfolioValue: senStats.val,
+      worldWeight: senStats.wWeight,
+      delta: senStats.delta,
+      color: '#3b82f6',
+      sectorNames: ['Tecnología', 'Comunicaciones', 'Industrial', 'Energía'],
+    },
+    {
+      id: 'cyclical',
+      name: 'Super-Sector Cíclico (Expansión del PIB)',
+      description: 'Alineado con el crecimiento económico global, consumo y crédito.',
+      portfolioWeight: cycStats.pWeight,
+      portfolioValue: cycStats.val,
+      worldWeight: cycStats.wWeight,
+      delta: cycStats.delta,
+      color: '#10b981',
+      sectorNames: ['Finanzas', 'Consumo Discrecional', 'Materiales'],
+    },
+    {
+      id: 'defensive',
+      name: 'Super-Sector Defensivo (Resistencia Macro)',
+      description: 'Baja beta frente al ciclo económico, demanda inelástica en recesión.',
+      portfolioWeight: defStats.pWeight,
+      portfolioValue: defStats.val,
+      worldWeight: defStats.wWeight,
+      delta: defStats.delta,
+      color: '#ec4899',
+      sectorNames: ['Salud', 'Consumo Básico', 'Utilities'],
+    },
+  ]
+
+  // Sector Concentration metrics
+  const sectorHhi = Math.round(sectorBreakdown.reduce((acc, s) => acc + Math.pow(s.portfolioWeight, 2), 0))
+  const top3SectorsWeight = sectorBreakdown.slice(0, 3).reduce((acc, s) => acc + s.portfolioWeight, 0)
+
+  // 4. Build Currency Breakdown & FX Sensitivity Scenarios
   const CURRENCY_META: Record<string, { name: string; flag: string; risk: CurrencyItem['riskType'] }> = {
     EUR: { name: 'Euro (Moneda Local)', flag: '🇪🇺', risk: 'Local (Sin Riesgo Divisa)' },
     USD: { name: 'Dólar Estadounidense', flag: '🇺🇸', risk: 'Riesgo Dólar (USD)' },
@@ -492,55 +639,195 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     }
   }).sort((a, b) => b.weight - a.weight)
 
-  // 5. Build Asset Class Breakdown
-  const ASSET_CLASS_META: Record<string, { name: string; color: string }> = {
-    equity: { name: 'Renta Variable Global', color: '#3b82f6' },
-    fixed_income: { name: 'Renta Fija / Crédito', color: '#10b981' },
-    cash: { name: 'Monetarios / Liquidez', color: '#06b6d4' },
-    commodity: { name: 'Materias Primas / Oro', color: '#f59e0b' },
-    crypto: { name: 'Criptoactivos', color: '#8b5cf6' },
+  // FX Scenarios (+10%, +5%, -5%, -10% on USD)
+  const usdValue = currencyValues['USD'] || 0
+  const fxSensitivity: FxSensitivityScenario[] = [
+    {
+      label: '+10% Rally del Dólar (USD Fuerte)',
+      rateChangePct: 10,
+      portfolioEuroImpact: usdValue * 0.10,
+      portfolioPctImpact: (usdValue * 0.10 / totalValue) * 100,
+      isPositive: true,
+    },
+    {
+      label: '+5% Apreciación moderada del USD',
+      rateChangePct: 5,
+      portfolioEuroImpact: usdValue * 0.05,
+      portfolioPctImpact: (usdValue * 0.05 / totalValue) * 100,
+      isPositive: true,
+    },
+    {
+      label: '-5% Apreciación del Euro vs USD',
+      rateChangePct: -5,
+      portfolioEuroImpact: -usdValue * 0.05,
+      portfolioPctImpact: (-usdValue * 0.05 / totalValue) * 100,
+      isPositive: false,
+    },
+    {
+      label: '-10% Caída pronunciada del USD',
+      rateChangePct: -10,
+      portfolioEuroImpact: -usdValue * 0.10,
+      portfolioPctImpact: (-usdValue * 0.10 / totalValue) * 100,
+      isPositive: false,
+    },
+  ]
+
+  // 5. Build Asset Class Breakdown & Inferred Risk Profile
+  const ASSET_CLASS_META: Record<string, { name: string; color: string; role: string }> = {
+    equity: {
+      name: 'Renta Variable Global',
+      color: '#3b82f6',
+      role: 'Motor principal de rentabilidad y apreciación de capital a largo plazo.',
+    },
+    fixed_income: {
+      name: 'Renta Fija / Crédito',
+      color: '#10b981',
+      role: 'Amortiguador de volatilidad y flujos periódicos de cupones.',
+    },
+    cash: {
+      name: 'Monetarios / Liquidez',
+      color: '#06b6d4',
+      role: 'Liquidez inmediata y pólvora seca (Dry Powder) para compras oportunistas.',
+    },
+    commodity: {
+      name: 'Materias Primas / Oro',
+      color: '#f59e0b',
+      role: 'Descorrelación macro y cobertura frente a inflación estructural.',
+    },
+    crypto: {
+      name: 'Criptoactivos',
+      color: '#8b5cf6',
+      role: 'Activo digital de alta volatilidad y perfil asimétrico.',
+    },
   }
 
   const assetClassBreakdown: AssetClassItem[] = Object.entries(assetClassValues).map(([id, val]) => {
-    const meta = ASSET_CLASS_META[id] || { name: id, color: '#64748b' }
+    const meta = ASSET_CLASS_META[id] || { name: id, color: '#64748b', role: 'Activo no clasificado.' }
     return {
       id,
       name: meta.name,
       weight: (val / totalValue) * 100,
       value: val,
       color: meta.color,
+      roleDescription: meta.role,
     }
   }).sort((a, b) => b.weight - a.weight)
 
-  // 6. Calculate Diversification Health Score (0 - 100)
-  // Metrics evaluated:
-  // - Regional Coverage (up to 35 pts): Having presence in NA, Europe, Emerging & Japan
-  // - Concentration Penalty (up to 35 pts): Lower score if one single region or stock dominates > 75%
-  // - Sector Coverage (up to 15 pts): Breadth across multiple sectors
-  // - Herfindahl concentration across top positions (up to 15 pts)
-  let score = 0
+  // Inferred Risk Profile Scanner
+  const equityRatio = assetClassBreakdown.find((a) => a.id === 'equity')?.weight ?? 0
+  const fixedIncomeRatio = assetClassBreakdown.find((a) => a.id === 'fixed_income')?.weight ?? 0
+  const cashRatio = assetClassBreakdown.find((a) => a.id === 'cash')?.weight ?? 0
+  const cashAmount = assetClassBreakdown.find((a) => a.id === 'cash')?.value ?? 0
 
-  // Regional presence check
+  let inferredProfile: InferredRiskProfile
+  if (equityRatio >= 80) {
+    inferredProfile = {
+      name: 'Crecimiento Decidido / Renta Variable Pura',
+      tagline: 'Máxima capitalización compuesta con tolerancia a volatilidad de mercado.',
+      equityRatio,
+      fixedIncomeRatio,
+      cashRatio,
+      recommendedHorizon: '≥ 8 - 10 años',
+      expectedVolatilityPct: 15.6,
+      historicalMaxDrawdownPct: -38.5,
+      expectedRealReturnPct: 7.2,
+      dryPowderAmount: cashAmount,
+      dryPowderPct: cashRatio,
+    }
+  } else if (equityRatio >= 60) {
+    inferredProfile = {
+      name: 'Crecimiento Dinámico (75/25)',
+      tagline: 'Predominio de renta variable con colchón de rentas defensivas.',
+      equityRatio,
+      fixedIncomeRatio,
+      cashRatio,
+      recommendedHorizon: '≥ 5 - 7 años',
+      expectedVolatilityPct: 12.2,
+      historicalMaxDrawdownPct: -26.0,
+      expectedRealReturnPct: 5.8,
+      dryPowderAmount: cashAmount,
+      dryPowderPct: cashRatio,
+    }
+  } else if (equityRatio >= 35) {
+    inferredProfile = {
+      name: 'Equilibrado / Balanceado (60/40)',
+      tagline: 'Equilibrio estricto entre crecimiento de capital y control del drawdown.',
+      equityRatio,
+      fixedIncomeRatio,
+      cashRatio,
+      recommendedHorizon: '≥ 3 - 5 años',
+      expectedVolatilityPct: 8.4,
+      historicalMaxDrawdownPct: -16.5,
+      expectedRealReturnPct: 4.2,
+      dryPowderAmount: cashAmount,
+      dryPowderPct: cashRatio,
+    }
+  } else {
+    inferredProfile = {
+      name: 'Conservador / Preservación',
+      tagline: 'Prioridad estricta en estabilidad patrimonial, liquidez y tipos de interés.',
+      equityRatio,
+      fixedIncomeRatio,
+      cashRatio,
+      recommendedHorizon: '1 - 3 años',
+      expectedVolatilityPct: 4.6,
+      historicalMaxDrawdownPct: -8.0,
+      expectedRealReturnPct: 2.2,
+      dryPowderAmount: cashAmount,
+      dryPowderPct: cashRatio,
+    }
+  }
+
+  // 6. Swensen 5/25 Tolerance Bands Monitor
+  const rebalanceBands: RebalanceBandItem[] = geographicBreakdown.map((item) => {
+    const target = item.worldWeight
+    const bandTolerance = Math.min(5.0, Math.max(1.5, target * 0.25))
+    const lowerBand = Math.max(0, target - bandTolerance)
+    const upperBand = target + bandTolerance
+    const inBand = item.portfolioWeight >= lowerBand && item.portfolioWeight <= upperBand
+    const deviationAbs = Math.abs(item.portfolioWeight - target)
+    const deviationRel = (deviationAbs / (target || 1)) * 100
+
+    let urgency: 'optimal' | 'warning' | 'critical' = 'optimal'
+    if (!inBand) {
+      urgency = deviationAbs > 7.5 ? 'critical' : 'warning'
+    }
+
+    return {
+      regionId: item.region.id,
+      regionName: item.region.name,
+      flag: item.region.flag,
+      currentWeight: item.portfolioWeight,
+      targetWeight: target,
+      currentValue: item.portfolioValue,
+      lowerBand,
+      upperBand,
+      inBand,
+      deviationAbs,
+      deviationRel,
+      urgency,
+    }
+  })
+
+  // 7. Calculate Diversification Health Score (0 - 100)
+  let score = 0
   const activeRegions = geographicBreakdown.filter((g) => g.portfolioWeight >= 2.0).length
   if (activeRegions >= 5) score += 35
   else if (activeRegions === 4) score += 30
   else if (activeRegions === 3) score += 22
   else score += 12
 
-  // Regional balance: penalize extreme concentration
   const topGeoWeight = geographicBreakdown[0]?.portfolioWeight || 100
   if (topGeoWeight <= 68) score += 35
   else if (topGeoWeight <= 78) score += 28
   else if (topGeoWeight <= 88) score += 18
   else score += 8
 
-  // Sector breadth
   const activeSectors = sectorBreakdown.filter((s) => s.portfolioWeight >= 4.0).length
   if (activeSectors >= 7) score += 15
   else if (activeSectors >= 5) score += 12
   else score += 7
 
-  // Asset concentration: weight of top 3 holdings
   const sortedPos = [...validPositions].sort((a, b) => (b.current_value || 0) - (a.current_value || 0))
   const top3Weight = sortedPos.slice(0, 3).reduce((acc, p) => acc + ((p.current_value || 0) / totalValue) * 100, 0)
   if (top3Weight <= 50) score += 15
@@ -563,7 +850,7 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     scoreColor = '#ef4444'
   }
 
-  // 7. Key metrics & Narrative Verdict Generation
+  // 8. Key metrics & Narrative Verdict Generation
   const naItem = geographicBreakdown.find((g) => g.region.id === 'north_america')
   const euItem = geographicBreakdown.find((g) => g.region.id === 'europe')
   const emItem = geographicBreakdown.find((g) => g.region.id === 'emerging')
@@ -577,7 +864,6 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
 
   const verdictParagraphs: string[] = []
 
-  // Main geographic alignment
   if (Math.abs(usExposurePct - 63.8) <= 5.0) {
     verdictParagraphs.push(
       `Tu exposición a **Norteamérica (${usExposurePct.toFixed(1)}%)** está **prácticamente calcada al índice mundial MSCI ACWI (63.8%)**, asegurando que capturas el motor de beneficios de Wall Street sin sobreexposición excesiva.`
@@ -592,7 +878,6 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     )
   }
 
-  // European / Home bias
   if (homeBiasPct > 4.0) {
     verdictParagraphs.push(
       `Presentas un **sesgo local moderado hacia Europa (${europeWeight.toFixed(1)}% vs 15.4% mundial)** (+${homeBiasPct.toFixed(1)}%). Esta sobreponderación es habitual y beneficiosa para reducir la volatilidad del tipo de cambio euro/dólar.`
@@ -603,7 +888,6 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     )
   }
 
-  // Emerging & Japan analysis
   if (emergingGapPct > 2.0) {
     verdictParagraphs.push(
       `Tu principal área de mejora para una réplica pura del mundo se sitúa en **Mercados Emergentes (${emergingWeight.toFixed(1)}% vs 10.2% mundial)**. Estás infraponderado en un **${emergingGapPct.toFixed(1)}%**.`
@@ -614,7 +898,7 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     )
   }
 
-  // 8. Rebalance Suggestions
+  // 9. Rebalance Suggestions
   const rebalanceSuggestions: DiversificationDiagnosis['rebalanceSuggestions'] = []
 
   if (emergingGapPct > 2.5) {
@@ -667,8 +951,68 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     rebalanceSuggestions,
     geographicBreakdown,
     sectorBreakdown,
+    superSectors,
+    sectorHhi,
+    top3SectorsWeight,
     currencyBreakdown,
+    fxSensitivity,
     assetClassBreakdown,
+    inferredProfile,
+    rebalanceBands,
     totalPortfolioValue: totalValue,
   }
+}
+
+/**
+ * Smart Cash-Flow Rebalancing Calculator (Zero-tax rebalancing via new inflows)
+ */
+export function calculateCashFlowRebalance(
+  totalPortfolioValue: number,
+  geographicBreakdown: GeographicComparisonItem[],
+  newCashAmount: number
+): CashFlowRebalanceItem[] {
+  const newTotal = totalPortfolioValue + newCashAmount
+
+  // 1. Calculate deficit for each region
+  const deficits = geographicBreakdown.map((item) => {
+    const targetValue = newTotal * (item.worldWeight / 100)
+    const currentValue = item.portfolioValue
+    const deficit = Math.max(0, targetValue - currentValue)
+    return {
+      regionId: item.region.id,
+      regionName: item.region.name,
+      flag: item.region.flag,
+      currentValue,
+      currentWeight: item.portfolioWeight,
+      targetWeight: item.worldWeight,
+      targetValue,
+      deficit,
+    }
+  })
+
+  const totalDeficit = deficits.reduce((acc, d) => acc + d.deficit, 0)
+
+  // 2. Allocate new cash
+  return deficits.map((d) => {
+    let allocated = 0
+    if (totalDeficit > 0 && newCashAmount > 0) {
+      allocated = newCashAmount * (d.deficit / totalDeficit)
+    } else if (newCashAmount > 0) {
+      allocated = newCashAmount * (d.targetWeight / 100)
+    }
+
+    const projectedValue = d.currentValue + allocated
+    const projectedWeight = (projectedValue / newTotal) * 100
+
+    return {
+      regionId: d.regionId,
+      regionName: d.regionName,
+      flag: d.flag,
+      suggestedCashAmount: allocated,
+      suggestedCashShare: newCashAmount > 0 ? (allocated / newCashAmount) * 100 : 0,
+      currentWeight: d.currentWeight,
+      projectedWeight,
+      targetWeight: d.targetWeight,
+    }
+  })
 }
