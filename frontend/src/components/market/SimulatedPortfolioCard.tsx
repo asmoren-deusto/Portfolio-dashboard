@@ -726,15 +726,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             {/* TAB 1: Desglose por Fondos en Cartera */}
             {activeTab === 'funds' && (
               <div className="overflow-x-auto overflow-y-auto max-h-[435px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full text-left text-xs border-collapse min-w-[860px]">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
-                      <th className="py-2 px-3">Fondo en Cartera</th>
-                      <th className="py-2 px-2.5">ETF Réplica</th>
-                      <th className="py-2 px-2 text-right">Valor Cartera</th>
-                      <th className="py-2 px-2 text-right">Peso</th>
-                      <th className="py-2 px-2.5 text-right">Cotiz. ETF</th>
-                      <th className="py-2 px-3 text-right">Impacto Hoy</th>
+                      <th className="py-2 px-3 min-w-[280px]">Fondo en Cartera</th>
+                      <th className="py-2 px-3 min-w-[220px]">ETF Réplica</th>
+                      <th className="py-2 px-2 text-right whitespace-nowrap">Valor Cartera</th>
+                      <th className="py-2 px-2 text-right whitespace-nowrap">Peso</th>
+                      <th className="py-2 px-2.5 text-right whitespace-nowrap">Cotiz. ETF</th>
+                      <th className="py-2 px-3 text-right whitespace-nowrap">Impacto Hoy</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
@@ -750,10 +750,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                         >
                           {/* Col 1: Fondo y Badge de Entidad */}
-                          <td className="py-2.5 px-3">
+                          <td className="py-2.5 px-3 min-w-[280px]">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span
-                                className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate max-w-[200px]"
+                                className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate max-w-[260px] sm:max-w-[300px]"
                                 title={h.fund_name}
                               >
                                 {h.fund_name}
@@ -766,10 +766,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           </td>
 
                           {/* Col 2: Fondo Réplica y Badge del Ticker */}
-                          <td className="py-2.5 px-2.5">
+                          <td className="py-2.5 px-3 min-w-[220px]">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span
-                                className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[170px]"
+                                className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[220px] sm:max-w-[260px]"
                                 title={displayName}
                               >
                                 {displayName}
@@ -778,7 +778,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                                 {h.etf_ticker}
                               </span>
                             </div>
-                            <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[180px] mt-0.5">
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[240px] mt-0.5">
                               {etfInfo?.category || h.etf_desc || 'Renta Variable'}
                             </div>
                           </td>

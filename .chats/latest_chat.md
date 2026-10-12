@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 17:33:37
+- **Fecha de exportación:** 2026-10-12 17:34:53
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 111
+- **Total de interacciones registradas:** 113
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1891,5 +1891,27 @@ La divergencia entre **FEZ** (negativo, aprox. **-0.18%**) y el índice **Euro S
 ### 👤 Usuario (2026-10-12 15:30:37)
 
 elimina los punteados morados en la grafica de Sesion X
+
+---
+
+### 🤖 Asistente (2026-10-12 15:33:40)
+
+He eliminado las líneas punteadas moradas y los badges de **Sesión X**:
+
+1. **Backend (`backend/app/routers/market.py`)**:
+   - Se ha retirado la generación del marcador de cambio de día/sesión (`session_break` en color `#818cf8` / morado).
+   - Se mantienen únicamente las líneas de cambio de fase horaria: **Apertura Regular (15:30)** en verde y **Post-Market (22:00)** en ámbar.
+
+2. **Frontend (`frontend/src/components/market/SimulatedPortfolioCard.tsx`)**:
+   - Se filtran de forma proactiva todos los marcadores residuales de `Sesión` o morados para que desaparezcan de inmediato de la gráfica incluso si hubiera datos en caché.
+   - Se actualizó la leyenda inferior para mostrar exclusivamente los hitos de fase horaria (**Apertura Regular 15:30** y **After-Hours 22:00**).
+
+El frontend ha sido validado y los cambios se han desplegado con la versión **v2.7.65**.
+
+---
+
+### 👤 Usuario (2026-10-12 15:31:24)
+
+amplia las dos primeras columnas de la tabla
 
 ---
