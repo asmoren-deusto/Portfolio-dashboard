@@ -275,7 +275,7 @@ export const LoginPage: React.FC = () => {
         {/* Brand Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-3 px-3 py-2 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-sm mb-3">
-            <AppLogo size={36} animated />
+            <AppLogo size={36} />
             <span className="font-bold text-lg tracking-tight pr-1 text-slate-950 dark:text-white">
               Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
             </span>

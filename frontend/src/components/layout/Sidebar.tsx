@@ -86,7 +86,7 @@ export function Sidebar({ }: SidebarProps) {
         {/* Logo & Close / Collapse Button (v2.5 removed to eliminate collision with X and redundancy) */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.08] px-4 py-3.5">
           <div className="flex flex-1 min-w-0 items-center gap-2.5">
-            <AppLogo size={32} animated />
+            <AppLogo size={32} />
             <span className="font-bold text-[17px] tracking-tight text-slate-950 dark:text-white truncate">
               Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
             </span>
