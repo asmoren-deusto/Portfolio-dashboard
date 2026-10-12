@@ -548,10 +548,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 )}
               </div>
 
-              <div className="flex items-baseline gap-2 mt-1 flex-wrap">
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
                 <span
                   className={cn(
-                    'text-2xl sm:text-3xl font-extrabold font-mono tracking-tight',
+                    'text-xl sm:text-2xl font-extrabold font-mono tracking-tight',
                     currentPct >= 0
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-rose-600 dark:text-rose-400'
@@ -563,7 +563,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
                 <span
                   className={cn(
-                    'text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs',
+                    'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs',
                     currentAmount >= 0
                       ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                       : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
