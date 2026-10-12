@@ -319,7 +319,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
 
       {/* ── 2. Tab Navigation for Analytical Deep-Dives ──────────────────────── */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/80 dark:border-white/[0.08] overflow-x-auto scrollbar-none">
           {[
             { id: 'geo', label: 'Geografía vs Mundo', icon: Globe },
             { id: 'sectors', label: 'Sectores vs MSCI World', icon: Factory },
@@ -334,13 +334,13 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={cn(
-                  'px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap',
+                  'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer',
                   isActive
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05]'
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 )}
               >
-                <Icon size={14} />
+                <Icon size={14} className={isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'} />
                 <span>{tab.label}</span>
               </button>
             )
@@ -797,26 +797,29 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
               </div>
 
               {/* Filter Chips */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/80 dark:border-white/[0.08] overflow-x-auto scrollbar-none">
                 {[
                   { id: 'all', label: 'Todos (10)' },
                   { id: 'sensitive', label: '⚡ Sensibles (4)' },
                   { id: 'cyclical', label: '📈 Cíclicos (3)' },
                   { id: 'defensive', label: '🛡️ Defensivos (3)' },
-                ].map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => setSectorFilter(f.id as typeof sectorFilter)}
-                    className={cn(
-                      'px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer',
-                      sectorFilter === f.id
-                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs'
-                        : 'bg-transparent text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                    )}
-                  >
-                    {f.label}
-                  </button>
-                ))}
+                ].map((f) => {
+                  const isSelected = sectorFilter === f.id
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => setSectorFilter(f.id as typeof sectorFilter)}
+                      className={cn(
+                        'px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer',
+                        isSelected
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm font-bold'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      )}
+                    >
+                      {f.label}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -1009,30 +1012,33 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
 
                 {/* Scenario Selectors */}
                 <div className="grid grid-cols-2 gap-2 mb-4">
-                  {fxSensitivity.map((sc, idx) => (
-                    <button
-                      key={sc.label}
-                      onClick={() => setSelectedFxIdx(idx)}
-                      className={cn(
-                        'p-2.5 rounded-xl text-left border transition-all cursor-pointer',
-                        selectedFxIdx === idx
-                          ? 'bg-amber-500/15 border-amber-500/60 shadow-xs ring-1 ring-amber-500/30 font-semibold'
-                          : 'bg-white/70 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/10 hover:border-slate-300'
-                      )}
-                    >
-                      <span className="text-[11px] font-bold block text-slate-700 dark:text-slate-300">
-                        {sc.label}
-                      </span>
-                      <span
+                  {fxSensitivity.map((sc, idx) => {
+                    const isSelected = selectedFxIdx === idx
+                    return (
+                      <button
+                        key={sc.label}
+                        onClick={() => setSelectedFxIdx(idx)}
                         className={cn(
-                          'text-xs font-mono font-bold mt-0.5 block',
-                          sc.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                          'p-2.5 rounded-xl text-left border transition-all duration-200 cursor-pointer',
+                          isSelected
+                            ? 'bg-white dark:bg-slate-700/80 border-blue-500/50 dark:border-blue-400/50 shadow-sm ring-1 ring-blue-500/20 font-semibold'
+                            : 'bg-slate-50/80 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.05]'
                         )}
                       >
-                        {sc.isPositive ? '+' : ''}{fmt.currency(sc.portfolioEuroImpact)}
-                      </span>
-                    </button>
-                  ))}
+                        <span className="text-[11px] font-bold block text-slate-800 dark:text-slate-200">
+                          {sc.label}
+                        </span>
+                        <span
+                          className={cn(
+                            'text-xs font-mono font-bold mt-0.5 block',
+                            sc.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                          )}
+                        >
+                          {sc.isPositive ? '+' : ''}{fmt.currency(sc.portfolioEuroImpact)}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
 
                 {/* Highlighted Result Box */}
@@ -1249,20 +1255,25 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
               {/* Inflow Input and Quick Presets */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Nueva aportación:</span>
-                {[500, 1000, 2500, 5000].map((amt) => (
-                  <button
-                    key={amt}
-                    onClick={() => setRebalanceCashInput(amt)}
-                    className={cn(
-                      'px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer',
-                      rebalanceCashInput === amt
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                        : 'bg-white dark:bg-white/[0.04] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-blue-400'
-                    )}
-                  >
-                    +{amt} €
-                  </button>
-                ))}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/80 dark:border-white/[0.08]">
+                  {[500, 1000, 2500, 5000].map((amt) => {
+                    const isSelected = rebalanceCashInput === amt
+                    return (
+                      <button
+                        key={amt}
+                        onClick={() => setRebalanceCashInput(amt)}
+                        className={cn(
+                          'px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all duration-200 cursor-pointer',
+                          isSelected
+                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm font-bold'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        )}
+                      >
+                        +{amt} €
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </div>
 
