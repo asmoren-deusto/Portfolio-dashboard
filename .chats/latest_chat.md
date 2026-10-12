@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 19:00:07
+- **Fecha de exportación:** 2026-10-12 19:02:08
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 161
+- **Total de interacciones registradas:** 163
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2519,5 +2519,28 @@ He aplicado los ajustes en [**`DiversificationDashboard.tsx`**](file:///c:/Users
 ### 👤 Usuario (2026-10-12 16:56:04)
 
 reduce un pelo el alto
+
+---
+
+### 🤖 Asistente (2026-10-12 17:00:09)
+
+He reducido la altura de la sección de **Comparativa Regional y Donut de Distribución** en [**`DiversificationDashboard.tsx`**](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx):
+
+- **Tarjeta izquierda (Comparativa vs MSCI ACWI)**:
+  - Padding de tarjeta reducido a `p-3.5 sm:p-4`.
+  - Filas de regiones más esbeltas (`px-2.5 py-1.5`, espaciado vertical reducido a `gap-2`).
+  - Barras de progreso afinadas a `h-2` y subtítulos en `text-[10px]` para eliminar espacio vertical ocioso.
+- **Tarjeta derecha (Donut de Distribución)**:
+  - Altura del gráfico ajustada de forma óptima a `230px` con radios proporcionados (`innerRadius={62}`, `outerRadius={92}`).
+  - El círculo y todos los segmentos se renderizan con total nitidez y centrado exacto.
+  - El texto interior (`Total`, `importe en €`, `Nº de activos`) y la leyenda inferior con valores y porcentajes quedan equilibrados sin sobrecargar la pantalla.
+
+*Cambios verificados en el navegador y sincronizados en la versión **v2.7.90**.*
+
+---
+
+### 👤 Usuario (2026-10-12 16:56:32)
+
+haz que los textos se lean mejor sin aumentar los contenedores
 
 ---

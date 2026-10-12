@@ -172,86 +172,86 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
           {/* 4 Executive KPI Badges */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 pt-2.5">
             {/* KPI 1: Exposición a EE.UU. */}
-            <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="px-3 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span>Norteamérica (EE.UU.)</span>
                 <span>🇺🇸</span>
               </div>
-              <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-base sm:text-lg font-extrabold font-mono text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-950 dark:text-white">
                   {usExposurePct.toFixed(1)}%
                 </span>
-                <span className="text-[10px] font-semibold text-slate-400">vs 63.8% mundial</span>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 63.8% mundo</span>
               </div>
               <span className={cn(
-                'text-[9px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-0.5',
+                'text-[10.5px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border',
                 Math.abs(usExposurePct - 63.8) <= 4
-                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
                   : usExposurePct > 63.8
-                  ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400'
-                  : 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                  ? 'bg-blue-50 text-blue-800 border-blue-200/90 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
+                  : 'bg-amber-50 text-amber-800 border-amber-200/90 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30'
               )}>
                 {usExposurePct >= 63.8 ? '+' : ''}{(usExposurePct - 63.8).toFixed(1)}% vs mundo
               </span>
             </div>
 
             {/* KPI 2: Sesgo Local (Home Bias) */}
-            <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="px-3 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span>Sesgo Europeo (Local)</span>
                 <span>🇪🇺</span>
               </div>
-              <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-base sm:text-lg font-extrabold font-mono text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-950 dark:text-white">
                   {(geographicBreakdown.find((g) => g.region.id === 'europe')?.portfolioWeight ?? 0).toFixed(1)}%
                 </span>
-                <span className="text-[10px] font-semibold text-slate-400">vs 15.4% mundial</span>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 15.4% mundo</span>
               </div>
               <span className={cn(
-                'text-[9px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-0.5',
+                'text-[10.5px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border',
                 homeBiasPct > 4
-                  ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400'
-                  : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                  ? 'bg-blue-50 text-blue-800 border-blue-200/90 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
               )}>
                 {homeBiasPct >= 0 ? '+' : ''}{homeBiasPct.toFixed(1)}% sobrepeso local
               </span>
             </div>
 
             {/* KPI 3: Brecha en Emergentes */}
-            <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="px-3 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span>Mercados Emergentes</span>
                 <span>🌏</span>
               </div>
-              <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-base sm:text-lg font-extrabold font-mono text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-950 dark:text-white">
                   {(geographicBreakdown.find((g) => g.region.id === 'emerging')?.portfolioWeight ?? 0).toFixed(1)}%
                 </span>
-                <span className="text-[10px] font-semibold text-slate-400">vs 10.2% mundial</span>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 10.2% mundo</span>
               </div>
               <span className={cn(
-                'text-[9px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-0.5',
+                'text-[10.5px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border',
                 emergingGapPct <= 2
-                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                  : 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
+                  : 'bg-amber-50 text-amber-800 border-amber-200/90 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30'
               )}>
                 {emergingGapPct > 0 ? `Déficit de -${emergingGapPct.toFixed(1)}%` : 'Cobertura completa'}
               </span>
             </div>
 
             {/* KPI 4: Exposición a Divisa */}
-            <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="px-3 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] shadow-2xs">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span>Riesgo Divisa (USD)</span>
                 <span>💵</span>
               </div>
-              <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-base sm:text-lg font-extrabold font-mono text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-950 dark:text-white">
                   {(currencyBreakdown.find((c) => c.code === 'USD')?.weight ?? 0).toFixed(1)}%
                 </span>
-                <span className="text-[10px] font-semibold text-slate-400">en Dólares</span>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">en Dólares</span>
               </div>
-              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 mt-0.5 block">
+              <span className="text-[10.5px] font-bold text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md inline-block mt-1 bg-slate-100 dark:bg-white/[0.07] border border-slate-200/80 dark:border-white/10 font-mono">
                 {(currencyBreakdown.find((c) => c.code === 'EUR')?.weight ?? 0).toFixed(1)}% en Euro (sin riesgo)
               </span>
             </div>
