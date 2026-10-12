@@ -181,6 +181,54 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'equity',
     currencies: { USD: 0.65, EUR: 0.30, Other: 0.05 },
   },
+  // Vanguard Global Stock Index Fund EUR Acc (IE00B03HD191)
+  IE00B03HD191: {
+    geo: { north_america: 0.708, europe: 0.182, japan: 0.058, pacific: 0.027, emerging: 0.0, other: 0.025 },
+    sectors: { tech: 0.252, financials: 0.151, health: 0.116, industrials: 0.109, consumer_disc: 0.102, comms: 0.075, consumer_stap: 0.064, energy: 0.043, materials: 0.037, utilities: 0.051 },
+    assetClass: 'equity',
+    currencies: { USD: 0.708, EUR: 0.182, JPY: 0.058, Other: 0.052 },
+  },
+  // Vanguard Global Bond Index EUR Hedged (IE00B18GC888)
+  IE00B18GC888: {
+    geo: { north_america: 0.45, europe: 0.40, japan: 0.08, other: 0.07 },
+    sectors: { financials: 0.55, utilities: 0.25, industrials: 0.20 },
+    assetClass: 'fixed_income',
+    currencies: { EUR: 1.0 }, // Clase cubierta a EUR (sin riesgo divisa neto)
+  },
+  // Vanguard Emerging Markets Stock Index Fund (IE0032620787)
+  IE0032620787: {
+    geo: { emerging: 1.0 },
+    sectors: { tech: 0.23, financials: 0.22, consumer_disc: 0.13, comms: 0.09, materials: 0.08, industrials: 0.07, consumer_stap: 0.06, health: 0.04, energy: 0.04, utilities: 0.04 },
+    assetClass: 'equity',
+    currencies: { USD: 0.25, Other: 0.75 },
+  },
+  // iShares Core MSCI World UCITS ETF (IE00B4L5Y983)
+  IE00B4L5Y983: {
+    geo: { north_america: 0.71, europe: 0.18, japan: 0.058, pacific: 0.027, emerging: 0.0, other: 0.025 },
+    sectors: { tech: 0.252, financials: 0.151, health: 0.116, industrials: 0.109, consumer_disc: 0.102, comms: 0.075, consumer_stap: 0.064, energy: 0.043, materials: 0.037, utilities: 0.051 },
+    assetClass: 'equity',
+    currencies: { USD: 0.71, EUR: 0.18, JPY: 0.06, Other: 0.05 },
+  },
+  // Vanguard FTSE All-World UCITS ETF USD Acc / EUR (IE00BK5BQT80 / IE00B3RBWM25)
+  IE00BK5BQT80: {
+    geo: { north_america: 0.638, europe: 0.154, emerging: 0.102, japan: 0.054, pacific: 0.026, other: 0.026 },
+    sectors: { tech: 0.245, financials: 0.155, health: 0.112, industrials: 0.108, consumer_disc: 0.104, comms: 0.076, consumer_stap: 0.062, energy: 0.044, materials: 0.044, utilities: 0.050 },
+    assetClass: 'equity',
+    currencies: { USD: 0.638, EUR: 0.154, Other: 0.208 },
+  },
+  IE00B3RBWM25: {
+    geo: { north_america: 0.638, europe: 0.154, emerging: 0.102, japan: 0.054, pacific: 0.026, other: 0.026 },
+    sectors: { tech: 0.245, financials: 0.155, health: 0.112, industrials: 0.108, consumer_disc: 0.104, comms: 0.076, consumer_stap: 0.062, energy: 0.044, materials: 0.044, utilities: 0.050 },
+    assetClass: 'equity',
+    currencies: { USD: 0.638, EUR: 0.154, Other: 0.208 },
+  },
+  // Cuenta Remunerada / Liquidez (ES0113900J37)
+  ES0113900J37: {
+    geo: { europe: 1.0 },
+    sectors: { financials: 1.0 },
+    assetClass: 'cash',
+    currencies: { EUR: 1.0 },
+  },
 }
 
 /**
@@ -396,6 +444,18 @@ export interface CashFlowRebalanceItem {
   targetWeight: number
 }
 
+export interface PortfolioAuditAdvice {
+  id: string
+  category: 'small_caps' | 'fees' | 'cash_drag' | 'megacap' | 'tax_traspasos' | 'factor_tilt'
+  severity: 'info' | 'warning' | 'success'
+  iconName: string
+  title: string
+  subtitle: string
+  description: string
+  actionableStep: string
+  badgeText: string
+}
+
 export interface DiversificationDiagnosis {
   score: number // 0 to 100
   scoreLabel: string
@@ -406,12 +466,14 @@ export interface DiversificationDiagnosis {
   homeBiasPct: number // % in Europe vs 15.4%
   usExposurePct: number
   emergingGapPct: number
+  weightedTer: number
   rebalanceSuggestions: Array<{
     action: 'increase' | 'decrease' | 'maintain'
     title: string
     description: string
     targetRegion: string
   }>
+  auditAdvice: PortfolioAuditAdvice[]
   geographicBreakdown: GeographicComparisonItem[]
   sectorBreakdown: SectorComparisonItem[]
   superSectors: SuperSectorItem[]
@@ -452,7 +514,9 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
       homeBiasPct: 0,
       usExposurePct: 0,
       emergingGapPct: 0,
+      weightedTer: 0,
       rebalanceSuggestions: [],
+      auditAdvice: [],
       geographicBreakdown: [],
       sectorBreakdown: [],
       superSectors: [],
@@ -938,6 +1002,134 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     })
   }
 
+  // 10. Rigorous Audit & Advisory System (5 Institutional Pillars)
+  let terAccum = 0
+  let terTotalWeight = 0
+  for (const pos of validPositions) {
+    if (typeof pos.ter === 'number' && pos.ter >= 0) {
+      terAccum += pos.ter * (pos.current_value || 0)
+      terTotalWeight += (pos.current_value || 0)
+    }
+  }
+  const weightedTer = terTotalWeight > 0 ? terAccum / terTotalWeight : 0.18
+
+  const auditAdvice: PortfolioAuditAdvice[] = []
+
+  // Pillar 1: Small Caps & Size Factor Gap
+  const hasSmallCap = validPositions.some((p) => {
+    const n = (p.name || '').toLowerCase()
+    return n.includes('small') || n.includes('russell 2000') || n.includes('pequeña')
+  })
+
+  if (!hasSmallCap) {
+    auditAdvice.push({
+      id: 'small_caps_gap',
+      category: 'small_caps',
+      severity: 'info',
+      iconName: 'Sparkles',
+      title: 'Brecha de Factor Size: Sin cobertura en Small Caps Globales',
+      subtitle: 'MSCI World y MSCI ACWI solo cubren Large y Mid Caps (~85% del mercado)',
+      description: 'Tu cartera replica de forma óptima las grandes multinacionales globales, pero no tiene presencia en el 15% inferior de la capitalización bursátil mundial (Small Caps). Históricamente, las empresas de pequeña capitalización han aportado una prima de rentabilidad adicional y descorrelación frente a las megacorporaciones.',
+      actionableStep: 'Considerar asignar un 5% - 10% a un fondo indexado global de Small Caps (ej. Vanguard Global Small-Cap o iShares MSCI World Small Cap).',
+      badgeText: 'Optimización de Estilo',
+    })
+  } else {
+    auditAdvice.push({
+      id: 'small_caps_ok',
+      category: 'small_caps',
+      severity: 'success',
+      iconName: 'CheckCircle2',
+      title: 'Cobertura Completa del Espectro de Capitalización',
+      subtitle: 'Presencia activa en empresas de pequeña capitalización',
+      description: 'Cuentas con activos en Small Caps, capturando el universo completo de acciones mundiales más allá de las megacorporaciones.',
+      actionableStep: 'Mantener la ponderación objetivo sin sobreexponer más del 15% del total.',
+      badgeText: 'Cartera Completa',
+    })
+  }
+
+  // Pillar 2: Cost & TER Drag Analysis
+  if (weightedTer <= 0.25) {
+    auditAdvice.push({
+      id: 'ter_low',
+      category: 'fees',
+      severity: 'success',
+      iconName: 'ShieldCheck',
+      title: `Estructura de Costes Ultrabaja (TER Ponderado: ~${weightedTer.toFixed(2)}%)`,
+      subtitle: 'Máxima preservación del interés compuesto a largo plazo',
+      description: `Mantienes un TER medio ponderado del ${weightedTer.toFixed(2)}%, situándote en el percentil más eficiente del mercado. En un horizonte de 25 años, pagar un 0.20% frente al 1.50% de fondos bancarios tradicionales preserva más del 25% de tu capital neto final.`,
+      actionableStep: 'Mantener la disciplina de contratar siempre clases limpias (Institutional / Index Acc) en nuevas aportaciones.',
+      badgeText: 'Ventaja Boglehead',
+    })
+  } else {
+    auditAdvice.push({
+      id: 'ter_warning',
+      category: 'fees',
+      severity: 'warning',
+      iconName: 'AlertTriangle',
+      title: `Fricción de Comisiones Detectada (TER medio: ~${weightedTer.toFixed(2)}%)`,
+      subtitle: 'Oportunidad de ahorro y optimización de costes',
+      description: 'Algunas de tus posiciones superan el coste medio de la gestión indexada. A largo plazo, cada décima porcentual de comisión acumulada frena el efecto bola de nieve del interés compuesto.',
+      actionableStep: 'Revisar fondos con TER > 0.50% y evaluar su sustitución por réplicas indexadas de bajo coste (ej. Vanguard, iShares, Fidelity o Amundi).',
+      badgeText: 'Acción Recomendada',
+    })
+  }
+
+  // Pillar 3: Megacap Big Tech Concentration ('Magnificent 7')
+  const actualTechWeight = sectorBreakdown.find((s) => s.sector.id === 'tech')?.portfolioWeight || 0
+  if (usExposurePct > 60 && actualTechWeight > 22) {
+    auditAdvice.push({
+      id: 'megacap_concentration',
+      category: 'megacap',
+      severity: 'warning',
+      iconName: 'Cpu',
+      title: 'Exposición Concentrada en Big Tech (Magnificent 7)',
+      subtitle: 'Apple, Microsoft, Nvidia, Alphabet, Amazon, Meta representan ~18% de tu cartera',
+      description: 'A través de tus fondos indexados globales y de renta variable estadounidense ya mantienes una posición muy relevante en los gigantes tecnológicos. Añadir acciones individuales de estas mismas compañías aumentaría el riesgo no compensado de un solo sector.',
+      actionableStep: 'Evitar comprar acciones individuales de las Magnificent 7 para no duplicar ni concentrar el riesgo idiosincrático del sector tecnológico.',
+      badgeText: 'Riesgo de Concentración',
+    })
+  }
+
+  // Pillar 4: Tax Optimization via Fund Transfers (Spanish Law 35/2006)
+  auditAdvice.push({
+    id: 'tax_traspasos',
+    category: 'tax_traspasos',
+    severity: 'info',
+    iconName: 'Landmark',
+    title: 'Diferimiento Fiscal: Rebalancear Mediante Traspaso (0% IRPF)',
+    subtitle: 'Régimen fiscal exclusivo de fondos de inversión en España',
+    description: 'En España, traspasar participaciones entre fondos de inversión no tributa en el IRPF (se difiere el pago del 19% al 28% sobre las plusvalías latentes hasta el reembolso definitivo). Esto permite rotar activos o rebalancear sin regalarle liquidez a Hacienda.',
+    actionableStep: 'Si necesitas reducir peso en Europa o EE.UU. hacia Emergentes, utiliza siempre la orden de "Traspaso de Fondo" en tu broker en lugar de Venta + Compra.',
+    badgeText: 'Eficiencia Fiscal',
+  })
+
+  // Pillar 5: Cash Drag & Dry Powder Audit
+  if (inferredProfile.cashRatio >= 15) {
+    auditAdvice.push({
+      id: 'cash_drag_alert',
+      category: 'cash_drag',
+      severity: 'warning',
+      iconName: 'Coins',
+      title: `Alerta de Cash Drag (Liquidez: ${inferredProfile.cashRatio.toFixed(1)}% del patrimonio)`,
+      subtitle: 'Coste de oportunidad frente a la inflación estructural',
+      description: 'Mantener más del 15% del patrimonio en efectivo o activos monetarios en horizontes a medio y largo plazo erosiona el poder adquisitivo real frente a la inflación.',
+      actionableStep: 'Planificar un plan de inversión periódica (DCA) mensual para distribuir el exceso de efectivo hacia la cartera diversificada.',
+      badgeText: 'Coste de Oportunidad',
+    })
+  } else if (inferredProfile.cashRatio < 1.0) {
+    auditAdvice.push({
+      id: 'cash_cushion_info',
+      category: 'cash_drag',
+      severity: 'info',
+      iconName: 'ShieldCheck',
+      title: 'Cartera Totalmente Invertida (100% Capitalizada)',
+      subtitle: 'Comprueba tu fondo de emergencia externo',
+      description: 'Tu dinero está trabajando al máximo para el interés compuesto. Asegúrate de tener tu colchón de imprevistos personal (3 a 6 meses de gastos corrientes) en una cuenta remunerada fuera de esta cartera para no tener que vender en caídas de mercado.',
+      actionableStep: 'Verificar que los gastos cotidianos e imprevistos están cubiertos externamente para mantener la cartera intacta.',
+      badgeText: 'Buenas Prácticas',
+    })
+  }
+
   return {
     score,
     scoreLabel,
@@ -948,7 +1140,9 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     homeBiasPct,
     usExposurePct,
     emergingGapPct,
+    weightedTer,
     rebalanceSuggestions,
+    auditAdvice,
     geographicBreakdown,
     sectorBreakdown,
     superSectors,

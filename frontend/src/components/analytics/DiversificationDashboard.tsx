@@ -57,6 +57,7 @@ import {
   type InferredRiskProfile,
   type RebalanceBandItem,
   type CashFlowRebalanceItem,
+  type PortfolioAuditAdvice,
 } from '@/lib/diversificationEngine'
 import type { Position } from '@/lib/mockData'
 
@@ -105,7 +106,9 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
     usExposurePct,
     homeBiasPct,
     emergingGapPct,
+    weightedTer,
     rebalanceSuggestions,
+    auditAdvice,
     geographicBreakdown,
     sectorBreakdown,
     superSectors,
@@ -320,7 +323,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             { id: 'sectors', label: 'Sectores vs MSCI World', icon: Factory },
             { id: 'currency', label: 'Divisas & Riesgo FX', icon: Coins },
             { id: 'assets', label: 'Clases de Activo', icon: Layers },
-            { id: 'rebalance', label: 'Consejos de Rebalanceo', icon: Sparkles },
+            { id: 'rebalance', label: 'Consejos & Auditoría', icon: Sparkles },
           ].map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
@@ -608,9 +611,18 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 <Sparkles className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  {verdictTitle}
-                </h4>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    {verdictTitle}
+                  </h4>
+                  <button
+                    onClick={() => setActiveTab('rebalance')}
+                    className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer transition-colors bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20"
+                  >
+                    <span>Ver Auditoría de 5 Pilares ({auditAdvice.length})</span>
+                    <ArrowRight size={13} />
+                  </button>
+                </div>
                 <div className="flex flex-col gap-2 mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                   {verdictParagraphs.map((p, idx) => (
                     <p key={`verdict-p-${idx}`} dangerouslySetInnerHTML={{ __html: p.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>') }} />
@@ -1365,6 +1377,81 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   ))}
                 </tbody>
               </table>
+            </div>
+          </Card>
+
+          {/* Institutional Portfolio Audit: 5 Pillars & Recommendations */}
+          <Card className="p-5 sm:p-6 border-slate-200 dark:border-white/[0.08]">
+            <div className="pb-3.5 mb-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  Auditoría Rigurosa y Consejos de Optimización (5 Pilares Institucionales)
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Detección proactiva de fricciones de costes, sesgos estructurales y ventajas fiscales aplicables.
+                </p>
+              </div>
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
+                TER medio: ~{weightedTer.toFixed(2)}%
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {auditAdvice.map((advice) => {
+                const isSuccess = advice.severity === 'success'
+                const isWarning = advice.severity === 'warning'
+                return (
+                  <div
+                    key={advice.id}
+                    className={cn(
+                      'p-4 rounded-xl border transition-all flex flex-col justify-between',
+                      isSuccess
+                        ? 'bg-emerald-500/[0.03] border-emerald-500/25 dark:border-emerald-500/20'
+                        : isWarning
+                        ? 'bg-amber-500/[0.03] border-amber-500/30 dark:border-amber-500/25'
+                        : 'bg-blue-500/[0.03] border-blue-500/25 dark:border-blue-500/20'
+                    )}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span
+                          className={cn(
+                            'text-[10.5px] font-bold px-2 py-0.5 rounded-md border font-mono uppercase tracking-wider',
+                            isSuccess
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
+                              : isWarning
+                              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
+                              : 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20'
+                          )}
+                        >
+                          {advice.badgeText}
+                        </span>
+                        <span className="text-xs font-bold text-slate-400">
+                          {isSuccess ? '✅ Cumplido' : isWarning ? '⚠️ A Corregir' : '💡 Recomendación'}
+                        </span>
+                      </div>
+
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        {advice.title}
+                      </h4>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-0.5">
+                        {advice.subtitle}
+                      </span>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-normal">
+                        {advice.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/[0.06] flex items-start gap-2">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 shrink-0">Acción:</span>
+                      <span className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-tight">
+                        {advice.actionableStep}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </Card>
 
