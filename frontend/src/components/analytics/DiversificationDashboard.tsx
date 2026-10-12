@@ -205,11 +205,13 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
                 </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="font-mono font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white leading-none">
+                <div className="absolute inset-0 flex items-center justify-center text-center">
+                  <span className="font-mono font-extrabold text-sm sm:text-base text-slate-900 dark:text-white leading-none select-none">
                     {score}
                   </span>
-                  <span className="text-[7.5px] sm:text-[8px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">/ 100</span>
+                  <span className="absolute bottom-1 text-[7px] sm:text-[7.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter leading-none select-none">
+                    / 100
+                  </span>
                 </div>
               </div>
 
