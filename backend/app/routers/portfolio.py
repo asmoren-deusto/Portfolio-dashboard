@@ -9,7 +9,7 @@ import logging
 from app.database import get_db
 from app.models import Asset, Transaction, PriceCache
 from app.schemas import PortfolioSummary, PositionOut, PerformancePoint, UpdatePriceRequest
-from app.services.price_service import get_current_price, get_price_with_date, get_price_history, _price_cache
+from app.services.price_service import get_current_price, get_price_with_date, get_price_history, _price_cache, KNOWN_TICKERS
 from app.services.finance_engine import (
     calculate_positions,
     calculate_portfolio_value_series,
@@ -136,6 +136,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         daily_change = None
         daily_change_pct = None
         p_prev = None
+        p_prev_date = None
 
         if db is not None:
             query = db.query(PriceCache).filter(
@@ -147,6 +148,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             prev_cp = query.order_by(PriceCache.date.desc()).first()
             if prev_cp:
                 p_prev = prev_cp.price
+                p_prev_date = prev_cp.date
             else:
                 all_cps = db.query(PriceCache).filter(
                     PriceCache.isin == isin,
@@ -154,19 +156,59 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
                 ).order_by(PriceCache.date.desc()).limit(2).all()
                 if len(all_cps) >= 2:
                     p_prev = all_cps[1].price
+                    p_prev_date = all_cps[1].date
 
-        # Fallback ultra-ligero solo si la BD no tenía ningún precio histórico
-        if (p_prev is None or p_prev <= 0) and ticker:
+        # Detectar si hay un hueco temporal con respecto a la sesión anterior
+        expected_prev_date = None
+        if price_date:
             try:
-                h = await get_price_history(isin, ticker, "5d")
+                dt_curr = datetime.strptime(price_date, "%Y-%m-%d").date()
+                if dt_curr.weekday() == 0:  # Lunes -> Viernes anterior (-3 días)
+                    expected_prev_date = (dt_curr - timedelta(days=3)).strftime("%Y-%m-%d")
+                elif dt_curr.weekday() == 6:  # Domingo -> Viernes anterior (-2 días)
+                    expected_prev_date = (dt_curr - timedelta(days=2)).strftime("%Y-%m-%d")
+                elif dt_curr.weekday() == 5:  # Sábado -> Viernes anterior (-1 día)
+                    expected_prev_date = (dt_curr - timedelta(days=1)).strftime("%Y-%m-%d")
+                else:
+                    expected_prev_date = (dt_curr - timedelta(days=1)).strftime("%Y-%m-%d")
+            except Exception:
+                pass
+
+        has_gap = (p_prev is None or p_prev <= 0) or (p_prev_date and expected_prev_date and p_prev_date < expected_prev_date)
+        eff_ticker = ticker or KNOWN_TICKERS.get(isin)
+
+        if has_gap:
+            try:
+                h = []
+                if isin == "ES0112611001" or isin.startswith("ES011261"):
+                    from app.services.price_service import _fetch_azvalor_history
+                    h = await _fetch_azvalor_history(isin, "1m")
+                elif eff_ticker:
+                    h = await get_price_history(isin, eff_ticker, "5d")
+
                 if h:
                     prev_points = [
                         pt for pt in h
                         if pt.get("date") and (not price_date or pt["date"] < price_date) and pt.get("price", 0) > 0
                     ]
                     if prev_points:
-                        p_prev = prev_points[-1]["price"]
-                    elif len(h) >= 2 and h[-2].get("price", 0) > 0:
+                        latest_h = prev_points[-1]
+                        if not p_prev_date or latest_h["date"] > p_prev_date:
+                            p_prev = latest_h["price"]
+                            p_prev_date = latest_h["date"]
+                            if db is not None:
+                                try:
+                                    db.add(PriceCache(
+                                        isin=isin,
+                                        date=p_prev_date,
+                                        price=p_prev,
+                                        currency="EUR",
+                                        source="history_sync"
+                                    ))
+                                    db.commit()
+                                except Exception:
+                                    db.rollback()
+                    elif (p_prev is None or p_prev <= 0) and len(h) >= 2 and h[-2].get("price", 0) > 0:
                         p_prev = h[-2]["price"]
             except Exception:
                 pass

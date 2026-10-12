@@ -858,6 +858,42 @@ PRICES = json.loads(r'''[
     "currency": "EUR"
   },
   {
+    "isin": "ES0112611001",
+    "date": "2026-10-07",
+    "price": 354.3736,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE000QAZP7L2",
+    "date": "2026-10-07",
+    "price": 14.555,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-10-07",
+    "price": 15.0164,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-07",
+    "price": 14.6948,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-07",
+    "price": 9.3588,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-10-07",
+    "price": 28.78,
+    "currency": "EUR"
+  },
+  {
     "isin": "TR_TRANSFER",
     "date": "2026-10-07",
     "price": 0.0,
@@ -921,6 +957,30 @@ PRICES = json.loads(r'''[
     "isin": "LU2145461757",
     "date": "2026-10-08",
     "price": 96.93,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-10-08",
+    "price": 14.7923,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-08",
+    "price": 14.5975,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-08",
+    "price": 9.2017,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-10-08",
+    "price": 28.46,
     "currency": "EUR"
   },
   {

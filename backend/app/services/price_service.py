@@ -82,6 +82,8 @@ KNOWN_TICKERS: dict[str, str] = {
     "LU1623762843": "0P0001FE3K.F",  # Carmignac Portfolio Credit A EUR Acc
     "LU2145461757": "0P0001XYYU.F",  # Robeco Capital Growth - Robeco Smart Energy D EUR
     "LU0302296495": "0P00009PQ4.F",  # DNB Fund - Technology A EUR Acc
+    "IE000QAZP7L2": "0P0001XF3Z.F",  # iShares Emerging Markets Index (IE) S Acc EUR
+    "LU0261952682": "0P00006DA4.F",  # Fidelity Euro 50 Index Fund A-ACC-EUR
 }
 
 
