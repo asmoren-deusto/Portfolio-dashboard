@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:16:13
+- **Fecha de exportación:** 2026-10-12 18:22:09
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 131
+- **Total de interacciones registradas:** 133
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2154,5 +2154,31 @@ Publicado y desplegado en la versión **`v2.7.74`**.
 ### 👤 Usuario (2026-10-12 16:14:52)
 
 nose ve
+
+---
+
+### 🤖 Asistente (2026-10-12 16:16:15)
+
+Corregido en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+El problema era que la esquina redondeada de la cápsula (`rounded`) recortaba el cuadrante superior derecho del símbolo `%` en fuentes monoespaciadas pequeñas.
+
+### Ajustes realizados:
+1. **Separación explícita del símbolo `%`**:
+   - Se ha renderizado el signo `%` en su propio elemento `<span>` en negrita extra (`font-extrabold text-[11px] ml-0.5`).
+2. **Ampliación del padding derecho (`pr-3`)**:
+   - 12px de margen a la derecha para que ningún carácter quede jamás pegado o recortado por el borde.
+3. **Esquinas redondeadas suaves (`rounded-md`)**:
+   - Evita la curvatura invasiva en los laterales que provocaba el recorte visual.
+
+> **Nota**: Si tienes la pestaña del navegador abierta, pulsa **`Ctrl + F5`** (o `Shift + F5`) para forzar la recarga limpia de la caché de Vite.
+
+Publicado y desplegado en la versión **`v2.7.75`**.
+
+---
+
+### 👤 Usuario (2026-10-12 16:16:06)
+
+elimina todo eso, ajusta la tabla y haz menos alta toda la tarjeta en general
 
 ---
