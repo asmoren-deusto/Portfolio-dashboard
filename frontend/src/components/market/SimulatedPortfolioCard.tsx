@@ -110,7 +110,11 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   const holdings = data?.holdings ?? []
   const etfs = data?.etfs_summary ?? []
   const chartPoints = data?.chart_points ?? []
-  const sessionMarkers = data?.session_markers ?? []
+  const sessionMarkers = useMemo(() => {
+    return (data?.session_markers ?? []).filter(
+      (m) => m.type !== 'session_break' && m.phase !== 'SESSION' && !m.label?.startsWith('Sesión')
+    )
+  }, [data?.session_markers])
   const hasExtendedHours = data?.has_extended_hours ?? data?.summary?.has_extended_hours ?? false
 
   const isPositive = (summary?.simulated_daily_pct ?? 0) >= 0
@@ -583,11 +587,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           <div className="flex flex-col gap-1.5 mt-2 pt-1.5 border-t border-slate-200/50 dark:border-white/[0.04]">
             {sessionMarkers.length > 0 && (
               <div className="flex items-center gap-2.5 text-[10px] text-slate-500 dark:text-slate-400 flex-wrap">
-                <span className="font-semibold text-slate-600 dark:text-slate-300">Sesiones:</span>
-                <span className="inline-flex items-center gap-1 font-mono">
-                  <span className="w-2.5 h-0 border-t-2 border-dotted border-[#818cf8]" />
-                  <span>Día / Sesión</span>
-                </span>
+                <span className="font-semibold text-slate-600 dark:text-slate-300">Horarios:</span>
                 <span className="inline-flex items-center gap-1 font-mono">
                   <span className="w-2.5 h-0 border-t-2 border-dotted border-[#10b981]" />
                   <span>Apertura Regular (15:30)</span>

@@ -1091,16 +1091,8 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
 
                     t_unix = int(dt_madrid.timestamp())
 
-                    # Session change marker (between days or market phases)
-                    if prev_ny_d is not None and ny_d != prev_ny_d:
-                        session_markers.append({
-                            "time_unix": t_unix,
-                            "label": f"Sesión {dt_madrid.day} {MESES_ES[dt_madrid.month]}",
-                            "type": "session_break",
-                            "color": "#818cf8",
-                            "phase": phase,
-                        })
-                    elif prev_phase is not None and phase != prev_phase:
+                    # Phase change markers (Apertura Regular 15:30, Post-Market 22:00)
+                    if prev_phase is not None and phase != prev_phase:
                         if phase == "REGULAR":
                             session_markers.append({
                                 "time_unix": t_unix,
