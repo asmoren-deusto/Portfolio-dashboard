@@ -101,6 +101,11 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
     }))
   }, [geographicBreakdown])
 
+  // Active hovered geo item for donut interactive center
+  const activeGeoItem = useMemo(() => {
+    return geoDonutData.find((d) => d.id === hoveredGeoId) ?? null
+  }, [geoDonutData, hoveredGeoId])
+
   return (
     <div className="flex flex-col gap-4">
       {/* ── 1. Hero Card: Global Health Score & Executive Summary ─────────────── */}
@@ -326,15 +331,18 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 <div className="flex flex-col gap-2">
                   {geographicBreakdown.map((item) => {
                     const isHovered = hoveredGeoId === item.region.id
+                    const isDimmed = hoveredGeoId !== null && !isHovered
                     return (
                       <div
                         key={item.region.id}
                         onMouseEnter={() => setHoveredGeoId(item.region.id)}
                         onMouseLeave={() => setHoveredGeoId(null)}
                         className={cn(
-                          'px-2.5 py-1.5 rounded-xl transition-all border',
+                          'px-2.5 py-1.5 rounded-xl transition-all border cursor-pointer',
                           isHovered
-                            ? 'bg-slate-50 dark:bg-white/[0.04] border-slate-300 dark:border-white/20 shadow-xs'
+                            ? 'bg-blue-500/10 dark:bg-blue-500/15 border-blue-400/50 dark:border-blue-400/40 shadow-xs ring-1 ring-blue-500/20'
+                            : isDimmed
+                            ? 'opacity-45 border-transparent'
                             : 'border-transparent hover:border-slate-200/70 dark:hover:border-white/[0.05]'
                         )}
                       >
@@ -416,8 +424,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </p>
                 </div>
 
-                <div className="h-[230px] w-full relative flex items-center justify-center min-w-0">
-                  <ResponsiveContainer width="100%" height={230}>
+                <div className="h-[235px] w-full relative flex items-center justify-center min-w-0">
+                  <ResponsiveContainer width="100%" height={235}>
                     <PieChart>
                       <Pie
                         data={geoDonutData}
@@ -425,19 +433,36 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         cy="50%"
                         dataKey="value"
                         nameKey="shortName"
-                        innerRadius={62}
-                        outerRadius={92}
-                        paddingAngle={2.5}
-                        animationDuration={400}
+                        innerRadius={58}
+                        outerRadius={90}
+                        paddingAngle={1.5}
+                        minAngle={4}
+                        animationDuration={350}
+                        onMouseEnter={(_, index) => {
+                          if (geoDonutData[index]) {
+                            setHoveredGeoId(geoDonutData[index].id)
+                          }
+                        }}
+                        onMouseLeave={() => setHoveredGeoId(null)}
                       >
-                        {geoDonutData.map((entry) => (
-                          <Cell
-                            key={`geo-donut-${entry.id}`}
-                            fill={entry.color}
-                            stroke={isDark ? '#1e1e1e' : '#ffffff'}
-                            strokeWidth={2}
-                          />
-                        ))}
+                        {geoDonutData.map((entry) => {
+                          const isHovered = hoveredGeoId === entry.id
+                          const isDimmed = hoveredGeoId !== null && !isHovered
+                          return (
+                            <Cell
+                              key={`geo-donut-${entry.id}`}
+                              fill={entry.color}
+                              stroke={isHovered ? (isDark ? '#ffffff' : '#0f172a') : (isDark ? '#1e1e1e' : '#ffffff')}
+                              strokeWidth={isHovered ? 2.5 : 1}
+                              opacity={isDimmed ? 0.35 : 1}
+                              style={{
+                                cursor: 'pointer',
+                                transition: 'opacity 0.2s ease, stroke-width 0.2s ease',
+                                filter: isHovered ? 'drop-shadow(0 4px 10px rgba(0,0,0,0.3))' : 'none',
+                              }}
+                            />
+                          )
+                        })}
                       </Pie>
                       <RechartsTooltip
                         formatter={(val: any) => [fmt.currency(Number(val) || 0), 'Valor']}
@@ -452,36 +477,77 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                     </PieChart>
                   </ResponsiveContainer>
 
-                  {/* Centered Total */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-2 text-center">
-                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total</span>
-                    <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-900 dark:text-white leading-tight mt-0.5">
-                      {fmt.currency(totalPortfolioValue)}
-                    </span>
-                    <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
-                      {positions.length} activos
-                    </span>
+                  {/* Centered Total / Interactive Hover Detail */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-2 text-center transition-all duration-200">
+                    {activeGeoItem ? (
+                      <div className="flex flex-col items-center animate-in fade-in duration-150">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-1.5">
+                          <span className="text-sm select-none">{activeGeoItem.flag}</span>
+                          <span className="truncate max-w-[125px]">{activeGeoItem.shortName}</span>
+                        </span>
+                        <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-950 dark:text-white leading-tight mt-0.5">
+                          {fmt.currency(activeGeoItem.value)}
+                        </span>
+                        <span className="text-[11px] font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
+                          {activeGeoItem.pct.toFixed(1)}% de cartera
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                          Total Cartera
+                        </span>
+                        <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-900 dark:text-white leading-tight mt-0.5">
+                          {fmt.currency(totalPortfolioValue)}
+                        </span>
+                        <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
+                          {positions.length} activos
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Mini Legend List with amounts and percentages */}
+                {/* Mini Legend List with amounts, percentages and bidirectional hover */}
                 <div className="flex flex-col gap-1 mt-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
-                  {geoDonutData.map((d) => (
-                    <div key={`legend-${d.id}`} className="flex items-center justify-between text-xs font-medium py-0.5">
-                      <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 min-w-0">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-                        <span className="truncate text-xs">{d.flag} {d.shortName}</span>
-                      </span>
-                      <div className="flex items-center gap-2 shrink-0 font-mono">
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                          {fmt.currency(d.value)}
+                  {geoDonutData.map((d) => {
+                    const isRowHovered = hoveredGeoId === d.id
+                    const isRowDimmed = hoveredGeoId !== null && !isRowHovered
+                    return (
+                      <div
+                        key={`legend-${d.id}`}
+                        onMouseEnter={() => setHoveredGeoId(d.id)}
+                        onMouseLeave={() => setHoveredGeoId(null)}
+                        className={cn(
+                          'flex items-center justify-between text-xs font-medium py-1 px-1.5 rounded-lg transition-all cursor-pointer',
+                          isRowHovered
+                            ? 'bg-blue-500/10 dark:bg-blue-500/15 shadow-2xs font-semibold'
+                            : isRowDimmed
+                            ? 'opacity-40'
+                            : 'hover:bg-slate-50 dark:hover:bg-white/[0.03]'
+                        )}
+                      >
+                        <span className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 min-w-0">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform"
+                            style={{
+                              backgroundColor: d.color,
+                              transform: isRowHovered ? 'scale(1.25)' : 'scale(1)',
+                            }}
+                          />
+                          <span className="truncate text-xs font-medium">{d.flag} {d.shortName}</span>
                         </span>
-                        <span className="font-bold text-slate-900 dark:text-white w-11 text-right text-xs">
-                          {d.pct.toFixed(1)}%
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0 font-mono">
+                          <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+                            {fmt.currency(d.value)}
+                          </span>
+                          <span className="font-bold text-slate-900 dark:text-white w-11 text-right text-xs">
+                            {d.pct.toFixed(1)}%
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             </Card>

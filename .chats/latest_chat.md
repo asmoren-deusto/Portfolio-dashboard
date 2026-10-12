@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 19:02:08
+- **Fecha de exportación:** 2026-10-12 19:04:26
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 163
+- **Total de interacciones registradas:** 165
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2542,5 +2542,24 @@ He reducido la altura de la sección de **Comparativa Regional y Donut de Distri
 ### 👤 Usuario (2026-10-12 16:56:32)
 
 haz que los textos se lean mejor sin aumentar los contenedores
+
+---
+
+### 🤖 Asistente (2026-10-12 17:02:10)
+
+He mejorado la legibilidad y el contraste de los textos en las tarjetas de KPIs en [**`DiversificationDashboard.tsx`**](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx) **manteniendo exactamente el mismo tamaño de contenedor**:
+
+- **Títulos de categoría**: aumentados a `text-xs font-bold text-slate-800 dark:text-slate-200` para eliminar el tono gris pálido y que resalten de un vistazo tanto en modo claro como oscuro.
+- **Subtítulo comparativo (`vs X% mundo`)**: elevado a `text-xs font-semibold text-slate-600 dark:text-slate-300`, proporcionando un contraste nítido frente al fondo blanco/oscuro.
+- **Etiquetas de estado / Badges**: texto ajustado a `text-[10.5px] font-bold font-mono` con bordes sutiles y colores más vivos y contrastados (`emerald-800`, `blue-800`, `amber-800` en claro / `emerald-300`, etc. en oscuro).
+- **Riesgo Divisa en Euro**: estilizado con un badge de fondo neutro de alto contraste para una lectura inmediata.
+
+*Verificado tanto en modo claro como en modo oscuro sin alterar la altura de la sección y sincronizado en la versión **v2.7.91**.*
+
+---
+
+### 👤 Usuario (2026-10-12 16:58:13)
+
+el donut se ve raro, y haz que sea interactivo al hacer hover sobre la tabla de la izquierda
 
 ---
