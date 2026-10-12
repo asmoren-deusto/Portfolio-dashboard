@@ -118,10 +118,9 @@ def _seed_asier_data():
                             existing.category = a_data["category"]
 
             # 2. Seed prices
-            # Clean up any obsolete non-zero prices for TR_TRANSFER in 2026 on persistent volumes
+            # Clean up any obsolete non-zero prices for TR_TRANSFER on persistent volumes
             db.query(PriceCache).filter(
                 PriceCache.isin == "TR_TRANSFER",
-                PriceCache.date >= "2026-01-01",
             ).delete()
 
             # Purge any weekend dates from price_cache (funds do not liquidate on Saturdays or Sundays)

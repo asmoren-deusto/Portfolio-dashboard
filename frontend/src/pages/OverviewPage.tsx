@@ -112,12 +112,15 @@ export function OverviewPage() {
   const isPeriodUpdating = perfFetching || analyticsFetching || isRefreshingPrices
   const isAnyUpdating = isGlobalUpdating || isPeriodUpdating
 
-  // Real portfolio summary directly from backend or calculated from active positions if loading
+  // Real portfolio summary: calculate from active valid positions when available
+  // to guarantee exact parity with the holdings table and avoid phantom transfer artifacts
   const displaySummary = React.useMemo(() => {
-    if (summary && summary.total_value > 0) return summary
     if (positions.length > 0) {
-      const total_value = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
-      const total_invested = positions.reduce((acc, p) => acc + (p.invested_amount || 0), 0)
+      const validPositions = positions.filter(
+        (p) => p.isin !== 'TR_TRANSFER' && !p.isin.startsWith('TR_') && !p.name?.includes('Trade Republic')
+      )
+      const total_value = validPositions.reduce((acc, p) => acc + (p.current_value || 0), 0)
+      const total_invested = validPositions.reduce((acc, p) => acc + (p.invested_amount || 0), 0)
       const total_pnl = total_value - total_invested
       const total_pnl_pct = total_invested > 0 ? (total_pnl / total_invested) * 100 : 0
       return {
@@ -125,10 +128,11 @@ export function OverviewPage() {
         total_invested: Math.round(total_invested * 100) / 100,
         total_pnl: Math.round(total_pnl * 100) / 100,
         total_pnl_pct: Math.round(total_pnl_pct * 100) / 100,
-        num_positions: positions.length,
-        last_updated: positions[0]?.last_updated || new Date().toISOString(),
+        num_positions: validPositions.length,
+        last_updated: validPositions[0]?.last_updated || summary?.last_updated || new Date().toISOString(),
       }
     }
+    if (summary && summary.total_value > 0) return summary
     return summary
   }, [summary, positions])
 

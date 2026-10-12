@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 20:30:45
+- **Fecha de exportación:** 2026-10-12 20:38:02
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 208
+- **Total de interacciones registradas:** 210
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -3099,5 +3099,62 @@ Se ha verificado en el navegador y publicado la versión **`v2.7.113`**.
 ### 👤 Usuario (2026-10-12 18:16:14)
 
 los datos del despliegue y el local no coinciden en cuanto bajadas y subidas diarias
+
+---
+
+### 🤖 Asistente (2026-10-12 18:30:47)
+
+### 🔍 Causa de la discrepancia
+
+Los datos mostrados en el **despliegue (Captura 1) eran los correctos correspondientes a la variación diaria (1 día de sesión bursátil)**, mientras que en local se estaba calculando una **variación acumulada de 2 o 3 días**.
+
+#### ¿Por qué ocurría esto?
+1. **Hueco de fechas en la base de datos local (`PriceCache`)**:
+   - En la base de datos local existían precios del **martes 06/10** y del **viernes 09/10** (o jueves 08/10), pero faltaban los registros de valoración intermedia del **miércoles 07/10 y jueves 08/10** para varios fondos (Fidelity Japan, Fidelity World, Azvalor e iShares EM).
+2. **Cálculo de "Rend. Día"**:
+   - En [portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py#L140-L157), el backend buscaba el precio previo con `PriceCache.date < price_date`. 
+   - Al encontrar como último registro previo el **06/10**, calculaba:
+     $$\text{Rendimiento} = \frac{\text{NAV}(09/10) - \text{NAV}(06/10)}{\text{NAV}(06/10)}$$
+     es decir, **la variación de 3 días enteros** en lugar del día anterior:
+     - **Fidelity Japan**: comparaba `14.82` (09/10) vs `15.15` (06/10) $\rightarrow$ **`-2.15%`** (en lugar de `14.82` vs `14.79` del 08/10 $\rightarrow$ **`+0.21%`**).
+     - **Azvalor**: comparaba `357.18` (08/10) vs `355.22` (06/10) $\rightarrow$ **`+0.55%`** (en lugar de `357.18` vs `354.37` del 07/10 $\rightarrow$ **`+0.79%`**).
+     - **iShares EM**: comparaba `14.31` (08/10) vs `14.615` (06/10) $\rightarrow$ **`-2.09%`** (en lugar de `14.31` vs `14.555` del 07/10 $\rightarrow$ **`-1.68%`**).
+     - **Fidelity World**: comparaba `14.71` (09/10) vs `14.69` (06/10) $\rightarrow$ **`+0.10%`** (en lugar de `14.71` vs `14.60` del 08/10 $\rightarrow$ **`+0.75%`**).
+
+---
+
+### 🛠️ Solución implementada
+
+1. **Detección inteligente de huecos temporales y auto-curación** en [portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py#L160-L210):
+   - Ahora el endpoint analiza si la fecha previa encontrada en la base de datos es anterior a la sesión bursátil inmediata esperada (ej. si para un viernes el registro previo es anterior al jueves).
+   - Si detecta un salto de días, consulta el histórico de Yahoo Finance / Azvalor para obtener el NAV real del día anterior y **lo guarda automáticamente en `PriceCache`**, evitando cálculos multidiarios erróneos.
+2. **Inclusión de Tickers en [price_service.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L82-L86)**:
+   - Se han añadido los tickers Morningstar/Yahoo de iShares EM (`0P0001XF3Z.F`) y Fidelity Euro 50 (`0P00006DA4.F`) al diccionario `KNOWN_TICKERS`.
+3. **Precios históricos completados en [seed_data.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/seed_data.py#L857-L985)**:
+   - Se han añadido las valoraciones auténticas del 07/10 y 08/10 para todos los fondos para garantizar paridad absoluta tanto en instalaciones limpias como en contenedores Docker.
+
+---
+
+### ✅ Verificación en Local
+
+| Activo / Fondo | NAV Actual | Rend. Día (Ahora en Local) | Rend. Día (Despliegue) | Estado |
+| :--- | :---: | :---: | :---: | :---: |
+| **Fidelity MSCI World** | 14,71 € | **+0.75%** | **+0.75%** | ✅ 100% Coincidente |
+| **Indexa EPSV** | 23,82 € | **0.00%** | **0.00%** | ✅ 100% Coincidente |
+| **DNB Fund - Tech** | 2099,07 € | **+0.72%** | **+0.72%** | ✅ 100% Coincidente |
+| **Azvalor Internacional** | 357,18 € | **+0.79%** | **+0.79%** | ✅ 100% Coincidente |
+| **iShares Emerging Markets**| 14,31 € | **-1.68%** | **-1.68%** | ✅ 100% Coincidente |
+| **Fidelity MSCI Japan** | 14,82 € | **+0.21%** | **+0.21%** | ✅ 100% Coincidente |
+| **Fidelity MSCI Emerging** | 9,27 € | **+0.73%** | **+0.73%** | ✅ 100% Coincidente |
+| **Fidelity Euro 50** | 28,67 € | **+0.74%** | **+0.74%** | ✅ 100% Coincidente |
+| **Cobas Lux SICAV** | 178,37 € | **+1.34%** | **+1.34%** | ✅ 100% Coincidente |
+
+Cambios sincronizados y subidos a Git bajo la versión **v2.7.114**.
+
+---
+
+### 👤 Usuario (2026-10-12 18:17:19)
+
+a veces al recarga el valor total de la cartera aparece mal, con 80.000 y pico
 
 ---

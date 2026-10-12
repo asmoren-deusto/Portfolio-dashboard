@@ -56,6 +56,8 @@ def preload_price_cache_from_db():
         rows = db.query(PriceCache).order_by(PriceCache.date.desc()).all()
         loaded = 0
         for r in rows:
+            if r.isin and (r.isin == "TR_TRANSFER" or r.isin.startswith("TR_")):
+                continue
             if r.isin and r.price is not None and r.price > 0 and r.isin not in _price_cache:
                 _price_cache[r.isin] = {
                     "price": float(r.price),
@@ -113,6 +115,10 @@ async def get_price_with_date(
       2. Database PriceCache (instant local lookup in <5ms without blocking web requests)
       3. Live external sources (when force=True or not yet in database)
     """
+    if isin == "TR_TRANSFER" or isin.startswith("TR_"):
+        _price_cache[isin] = {"price": 0.0, "date": datetime.now().strftime("%Y-%m-%d"), "ts": datetime.now()}
+        return 0.0, datetime.now().strftime("%Y-%m-%d")
+
     ticker = KNOWN_TICKERS.get(isin) or ticker
     if not force and _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
@@ -129,10 +135,6 @@ async def get_price_with_date(
 
     price = None
     price_date = None
-
-    if isin == "TR_TRANSFER":
-        _price_cache[isin] = {"price": 0.0, "date": datetime.now().strftime("%Y-%m-%d"), "ts": datetime.now()}
-        return 0.0, datetime.now().strftime("%Y-%m-%d")
 
     # Check if this is an Indexa EPSV (e.g. 0192#0011)
     if isin.startswith("0192") or isin == "0192#0011":

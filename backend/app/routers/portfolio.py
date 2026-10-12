@@ -70,15 +70,21 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
         )
 
     positions = calculate_positions(transactions)
-    active_positions = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
     all_assets = {a.isin: a for a in db.query(Asset).all()}
+    active_positions = {
+        isin: pos for isin, pos in positions.items()
+        if pos["shares"] > 0.0001
+        and isin != "TR_TRANSFER"
+        and not isin.startswith("TR_")
+        and not (all_assets.get(isin) and "Trade Republic" in (all_assets.get(isin).name or ""))
+    }
 
     async def _fetch_pos_val(isin, pos):
         asset = all_assets.get(isin)
         ticker = asset.ticker if asset else None
         price = await get_current_price(isin, ticker, db=db)
         effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
-        return pos["shares"] * effective_price, pos["invested_amount"]
+        return round(pos["shares"] * effective_price, 2), round(pos["invested_amount"], 2)
 
     pos_results = await asyncio.gather(*[_fetch_pos_val(isin, pos) for isin, pos in active_positions.items()], return_exceptions=True)
     total_value = sum(r[0] for r in pos_results if isinstance(r, tuple))
@@ -87,17 +93,12 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
     total_pnl = total_value - total_invested
     total_pnl_pct = (total_pnl / total_invested * 100) if total_invested > 0 else 0
 
-    valid_positions = [
-        isin for isin in active_positions
-        if isin != "TR_TRANSFER" and not isin.startswith("TR_") and (not all_assets.get(isin) or "Trade Republic" not in (all_assets.get(isin).name or ""))
-    ]
-
     return PortfolioSummary(
         total_value=round(total_value, 2),
         total_invested=round(total_invested, 2),
         total_pnl=round(total_pnl, 2),
         total_pnl_pct=round(total_pnl_pct, 2),
-        num_positions=len(valid_positions),
+        num_positions=len(active_positions),
         last_updated=datetime.now().isoformat(),
     )
 

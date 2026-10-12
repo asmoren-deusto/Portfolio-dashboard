@@ -152,13 +152,13 @@ PRICES = json.loads(r'''[
   {
     "isin": "TR_TRANSFER",
     "date": "2025-08-01",
-    "price": 1.0,
+    "price": 0.0,
     "currency": "EUR"
   },
   {
     "isin": "TR_TRANSFER",
     "date": "2025-10-29",
-    "price": 1.0,
+    "price": 0.0,
     "currency": "EUR"
   },
   {

@@ -57,12 +57,17 @@ export function PositionsPage() {
   // Summary Metrics
   const stats = useMemo(() => {
     if (positions.length === 0 && !summary) return null
-    const totalValue = summary?.total_value ?? positions.reduce((sum, p) => sum + p.current_value, 0)
-    const totalInvested = summary?.total_invested ?? positions.reduce((sum, p) => sum + p.invested_amount, 0)
-    const totalPnl = summary?.total_pnl ?? (totalValue - totalInvested)
-    const totalPnlPct = summary?.total_pnl_pct ?? (totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0)
-    const gainers = positions.filter((p) => p.unrealized_pnl >= 0).length
-    const losers = positions.filter((p) => p.unrealized_pnl < 0).length
+    const validPositions = positions.filter(
+      (p) => p.isin !== 'TR_TRANSFER' && !p.isin.startsWith('TR_') && !p.name?.includes('Trade Republic')
+    )
+    const posTotal = validPositions.reduce((sum, p) => sum + (p.current_value || 0), 0)
+    const posInvested = validPositions.reduce((sum, p) => sum + (p.invested_amount || 0), 0)
+    const totalValue = posTotal > 0 ? posTotal : (summary?.total_value ?? 0)
+    const totalInvested = posInvested > 0 ? posInvested : (summary?.total_invested ?? 0)
+    const totalPnl = totalValue - totalInvested
+    const totalPnlPct = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0
+    const gainers = validPositions.filter((p) => p.unrealized_pnl >= 0).length
+    const losers = validPositions.filter((p) => p.unrealized_pnl < 0).length
 
     // Weighted average TER calculated rigorously across positions with official TER
     let validWeightSum = 0
