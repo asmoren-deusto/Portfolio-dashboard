@@ -239,7 +239,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 63.8% mundo</span>
               </div>
               <span className={cn(
-                'text-[11px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border leading-tight shadow-2xs',
+                'text-xs font-bold font-mono px-2.5 py-1 rounded-md inline-block mt-1.5 border leading-tight shadow-2xs',
                 Math.abs(usExposurePct - 63.8) <= 4
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
                   : usExposurePct > 63.8
@@ -263,7 +263,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 15.4% mundo</span>
               </div>
               <span className={cn(
-                'text-[11px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border leading-tight shadow-2xs',
+                'text-xs font-bold font-mono px-2.5 py-1 rounded-md inline-block mt-1.5 border leading-tight shadow-2xs',
                 homeBiasPct > 4
                   ? 'bg-blue-50 text-blue-800 border-blue-200/90 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
                   : 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
@@ -285,7 +285,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">vs 10.2% mundo</span>
               </div>
               <span className={cn(
-                'text-[11px] font-bold font-mono px-2 py-0.5 rounded-md inline-block mt-1 border leading-tight shadow-2xs',
+                'text-xs font-bold font-mono px-2.5 py-1 rounded-md inline-block mt-1.5 border leading-tight shadow-2xs',
                 emergingGapPct <= 2
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
                   : 'bg-amber-50 text-amber-800 border-amber-200/90 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30'
@@ -306,7 +306,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 </span>
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">en Dólares</span>
               </div>
-              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md inline-block mt-1 bg-slate-100 dark:bg-white/[0.07] border border-slate-200/80 dark:border-white/10 font-mono leading-tight shadow-2xs">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md inline-block mt-1.5 bg-slate-100 dark:bg-white/[0.07] border border-slate-200/80 dark:border-white/10 font-mono leading-tight shadow-2xs">
                 {(currencyBreakdown.find((c) => c.code === 'EUR')?.weight ?? 0).toFixed(1)}% en Euro (sin riesgo)
               </span>
             </div>
