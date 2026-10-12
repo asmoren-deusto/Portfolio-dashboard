@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 17:46:01
+- **Fecha de exportación:** 2026-10-12 17:48:44
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 117
+- **Total de interacciones registradas:** 119
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1991,5 +1991,22 @@ Todo ha sido compilado y publicado en la versión **v2.7.67**.
 ### 👤 Usuario (2026-10-12 15:40:05)
 
 
+
+---
+
+### 🤖 Asistente (2026-10-12 15:46:04)
+
+He ampliado la altura de la tabla de **Desglose de Fondos y Réplicas**:
+
+1. **Eliminación del corte vertical**: Se aumentó la altura máxima de la tabla de `435px` a `600px` tanto en la pestaña de **Por Fondos** como en la de **ETFs Agrupados**.
+2. **Visibilidad completa**: Ahora los **9 fondos** (incluyendo los fondos inferiores que quedaban ocultos tras la 6ª fila) se muestran al completo de un solo vistazo, eliminando el espacio en blanco inferior que quedaba antes del pie de la tarjeta y sin requerir scroll vertical.
+
+Los cambios han sido compilados y sincronizados en la versión **v2.7.68**.
+
+---
+
+### 👤 Usuario (2026-10-12 15:41:59)
+
+20px más alta toda la tarjeta
 
 ---
