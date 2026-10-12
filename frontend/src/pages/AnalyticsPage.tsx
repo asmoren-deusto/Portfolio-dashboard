@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
+import { useSearchParams } from 'react-router-dom'
 import {
   TrendingUp,
   Activity,
@@ -15,6 +16,7 @@ import {
   Calendar,
   Layers,
   Globe,
+  Compass,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { KpiCard } from '@/components/ui/KpiCard'
@@ -25,11 +27,34 @@ import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
+import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
 import { fmt, cn } from '@/lib/utils'
 import { useAnalytics, usePositions, useBenchmarkComparison } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
 export function AnalyticsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTabParam = searchParams.get('tab')
+  const [mainTab, setMainTab] = useState<'performance' | 'diversification'>(
+    activeTabParam === 'diversification' ? 'diversification' : 'performance'
+  )
+
+  const handleTabChange = (tab: 'performance' | 'diversification') => {
+    setMainTab(tab)
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        if (tab === 'diversification') {
+          next.set('tab', 'diversification')
+        } else {
+          next.delete('tab')
+        }
+        return next
+      },
+      { replace: true }
+    )
+  }
+
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
   const { data: benchmarkData, isFetching: benchmarkFetching } = useBenchmarkComparison()
@@ -64,10 +89,69 @@ export function AnalyticsPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      {/* KPI grid with luxury styling */}
+      {/* Top Header Switcher: Performance vs Global Diversification */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-3 sm:p-3.5 rounded-2xl shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+            {mainTab === 'performance' ? <BarChart3 size={20} /> : <Globe size={20} />}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white leading-tight">
+                {mainTab === 'performance' ? 'Métricas de Rentabilidad y Benchmarks' : 'Diagnóstico de Diversificación vs Mundo'}
+              </h1>
+              {mainTab === 'diversification' && (
+                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  MSCI ACWI Benchmark
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {mainTab === 'performance'
+                ? 'Rendimiento ponderado por tiempo (TWR), ratios de riesgo y comparativa histórica'
+                : 'Ponderación geográfica vs capitalización global, sectores, exposición a divisas y salud de cartera'}
+            </p>
+          </div>
+        </div>
 
-      {/* KPI grid with luxury styling */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start sm:self-auto border border-slate-200/60 dark:border-white/5">
+          <button
+            onClick={() => handleTabChange('performance')}
+            className={cn(
+              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200',
+              mainTab === 'performance'
+                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            )}
+          >
+            <TrendingUp size={14} />
+            <span>Rentabilidad & Riesgo</span>
+          </button>
+          <button
+            onClick={() => handleTabChange('diversification')}
+            className={cn(
+              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 relative',
+              mainTab === 'diversification'
+                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            )}
+          >
+            <Globe size={14} />
+            <span>Diversificación vs Mundo</span>
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {mainTab === 'diversification' ? (
+        <DiversificationDashboard positions={positions} isLoading={positionsFetching} />
+      ) : (
+        <>
+          {/* KPI grid with luxury styling */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
         <KpiCard
           label="TWR (Time-Weighted)"
           value={analytics ? fmt.pct(analytics.twr) : '—'}
@@ -612,6 +696,8 @@ export function AnalyticsPage() {
           </table>
         </div>
       </Card>
+        </>
+      )}
 
       {/* Position Detail Modal */}
       <PositionDetailModal

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import {
   Search,
   ArrowUpDown,
@@ -13,6 +14,7 @@ import {
   Percent,
   SlidersHorizontal,
   ExternalLink,
+  Globe,
 } from 'lucide-react'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { Card } from '@/components/ui/Card'
@@ -273,6 +275,17 @@ export function PositionsPage() {
             </select>
             <ArrowUpDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
           </div>
+
+          {/* Link to Diversification Analysis */}
+          <Link
+            to="/analytics?tab=diversification"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 transition-all shadow-sm"
+            title="Comparar diversificación geográfica y sectorial con respecto a la capitalización mundial"
+          >
+            <Globe className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+            <span className="hidden sm:inline">Diagnóstico vs Mundo</span>
+            <span className="sm:hidden">Mundo</span>
+          </Link>
 
           {/* View Toggle */}
           <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 shadow-sm dark:bg-[#252526] dark:border-white/[0.08]">
