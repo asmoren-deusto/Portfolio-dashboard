@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 15:25:57
+- **Fecha de exportación:** 2026-10-12 15:27:09
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 105
+- **Total de interacciones registradas:** 107
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1804,5 +1804,35 @@ Gracias a la captura se identifica la causa exacta de la discrepancia:
 ### 👤 Usuario (2026-10-12 13:09:21)
 
 en Simulación en Directo de Cartera usa los valores de pre o post cuando esten disponibles, que el grafico pase de una sesion a otra de forma transparente ampliando su rango horario y mostrando el cambio entre sesiones con una linea vertical punteada de color
+
+---
+
+### 🤖 Asistente (2026-10-12 13:25:59)
+
+He implementado la integración de sesiones de **Pre-Market** y **Post-Market (After-Hours)** junto con la transición transparente y las líneas divisorias punteadas entre sesiones en **Simulación en Directo de Cartera**:
+
+### 1. Cotizaciones Pre-Market y Post-Market
+- **Detección en tiempo real en Yahoo Finance**: Se ha modificado el backend (`backend/app/routers/market.py`) para activar `includePrePost=true` y examinar tanto los campos de metadatos como el último precio negociado en los ticks de pre o post cuando la API de Yahoo no los expone directamente en `meta`.
+- **Badges de estado en vivo**: En la tabla de réplicas de fondos y en el desglose de ETFs se muestra la etiqueta `PRE` o `POST` junto a la cotización cuando el valor proviene de la sesión extendida.
+
+### 2. Ampliación y Transición Continua del Rango Horario
+- **Unión de sesiones**: La gráfica ahora amplía su rango horario para abarcar la sesión de Pre-mercado (desde las 10:00 hora española), la Sesión Regular (15:30 - 22:00) y el Post-mercado (22:00 - 02:00).
+- **Encadenamiento transparente**: Cada sesión se normaliza con respecto al precio de cierre de la sesión previa, permitiendo ver con continuidad el salto desde el cierre anterior hasta los primeros ticks del pre-market de hoy.
+
+### 3. Líneas Verticales Punteadas de Cambio de Sesión
+- **Trazado dinámico en la gráfica**: Se proyectan líneas verticales punteadas de color en los instantes exactos de transición mediante mapeo de coordenadas temporales (`timeToCoordinate`):
+  - **Línea azul/índigo (`#818cf8`)**: Cambio de Día / Sesión (con badge superior `Sesión {día} {mes}`).
+  - **Línea verde esmeralda (`#10b981`)**: Apertura Regular (`Apertura 15:30`).
+  - **Línea ámbar (`#f59e0b`)**: Cierre y paso a After-Hours (`Post-Market 22:00`).
+- **Adaptabilidad completa**: Las líneas se recalculan y ajustan de forma reactiva ante redimensionamiento de pantalla, inspección de cursor o cambios de escala.
+- **Leyenda y Tooltip interactivo**: Al pasar el ratón sobre cualquier punto de la curva, el tooltip indica la fase de la sesión (`PRE-MKT`, `REGULAR` o `AFTER-HOURS`) y su hora de Nueva York.
+
+Los cambios han sido compilados (`frontend` sin errores de tipo) y sincronizados en la versión **v2.7.63**.
+
+---
+
+### 👤 Usuario (2026-10-12 13:21:03)
+
+en la tabla derecha desdobla la columna fondo/replica a 2 columnas: la primera con el fondo y mete el badge de la entidad quitando esa otra columna, y la segunda con el fondo replica y su badge . el resto iguak
 
 ---

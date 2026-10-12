@@ -729,8 +729,8 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
-                      <th className="py-2 px-3">ETF Réplica / Fondo Asignado</th>
-                      <th className="py-2 px-2 text-center">Entidad</th>
+                      <th className="py-2 px-3">Fondo en Cartera</th>
+                      <th className="py-2 px-2.5">ETF Réplica</th>
                       <th className="py-2 px-2 text-right">Valor Cartera</th>
                       <th className="py-2 px-2 text-right">Peso</th>
                       <th className="py-2 px-2.5 text-right">Cotiz. ETF</th>
@@ -749,11 +749,27 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           key={h.isin}
                           className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                         >
-                          {/* ETF Name, Ticker badge and Fund name */}
+                          {/* Col 1: Fondo y Badge de Entidad */}
                           <td className="py-2.5 px-3">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span
-                                className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[210px]"
+                                className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate max-w-[200px]"
+                                title={h.fund_name}
+                              >
+                                {h.fund_name}
+                              </span>
+                              <BrokerBadge broker={h.broker} />
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                              {h.isin}
+                            </div>
+                          </td>
+
+                          {/* Col 2: Fondo Réplica y Badge del Ticker */}
+                          <td className="py-2.5 px-2.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span
+                                className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[170px]"
                                 title={displayName}
                               >
                                 {displayName}
@@ -762,14 +778,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                                 {h.etf_ticker}
                               </span>
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[240px] mt-0.5 font-medium" title={h.fund_name}>
-                              {h.fund_name}
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[180px] mt-0.5">
+                              {etfInfo?.category || h.etf_desc || 'Renta Variable'}
                             </div>
-                          </td>
-
-                          {/* Broker badge */}
-                          <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                            <BrokerBadge broker={h.broker} />
                           </td>
 
                           {/* Fund Value in Portfolio */}
