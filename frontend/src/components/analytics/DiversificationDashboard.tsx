@@ -184,8 +184,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </div>
 
             {/* Right: Circular Score Gauge */}
-            <div className="flex items-center gap-3.5 sm:gap-4 bg-slate-50/90 dark:bg-white/[0.03] px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] shrink-0 shadow-2xs self-start lg:self-auto">
-              <div className="relative w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3 sm:gap-3.5 bg-slate-50/90 dark:bg-white/[0.03] px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] shrink-0 shadow-2xs self-start lg:self-auto">
+              <div className="relative w-[44px] h-[44px] sm:w-[48px] sm:h-[48px] flex items-center justify-center shrink-0">
                 {/* SVG Radial Meter */}
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <path
@@ -206,19 +206,19 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="font-mono font-extrabold text-sm sm:text-base text-slate-900 dark:text-white leading-none">
+                  <span className="font-mono font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white leading-none">
                     {score}
                   </span>
-                  <span className="text-[8.5px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">/ 100</span>
+                  <span className="text-[7.5px] sm:text-[8px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">/ 100</span>
                 </div>
               </div>
 
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">Salud de Cartera</span>
-                <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white block mt-0.5" style={{ color: scoreColor }}>
+                <span className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">Salud de Cartera</span>
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white block mt-0.5" style={{ color: scoreColor }}>
                   {scoreLabel}
                 </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 block leading-tight mt-1">
+                <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
                   {score >= 80 ? 'Nivel institucional' : score >= 65 ? 'Adecuada y equilibrada' : 'Concentrada'}
                 </span>
               </div>

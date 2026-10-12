@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 19:40:25
+- **Fecha de exportación:** 2026-10-12 19:42:47
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 185
+- **Total de interacciones registradas:** 187
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2845,5 +2845,24 @@ Ambos paneles quedan perfectamente alineados en altura sin desperdiciar espacio 
 ### 👤 Usuario (2026-10-12 17:11:17)
 
 no seas tan agresivo con el efecto de hover del donut, haz algo mas sutil como en el donut de vision general
+
+---
+
+### 🤖 Asistente (2026-10-12 17:40:28)
+
+He suavizado el efecto de hover del gráfico donut para que sea discreto, elegante y consistente con el donut de **Visión General** ([AllocationChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/AllocationChart.tsx)), publicado y sincronizado en la versión **v2.7.103**:
+
+1. **Sin bordes gruesos agresivos**: Se eliminó el contorno rígido de 2.5px (`stroke="none"` y `strokeWidth={0}`).
+2. **Atenuación suave (Opacity Fade)**: Al pasar el cursor sobre cualquier sector o fila, las porciones no seleccionadas se atenúan de forma fluida a `opacity: 0.4`, haciendo que la porción activa destaque por contraste natural sin estridencias.
+3. **Elevación y sombra sutil**: Se sustituyó el halo oscuro pesado por una sombra suave institucional (`drop-shadow(0 2px 8px rgba(0,0,0,0.18))`), idéntica a la utilizada en la pantalla de inicio.
+4. **Resaltado armónico en la tabla y leyenda**: Las filas asociadas ahora aplican un fondo translúcido muy ligero (`bg-blue-500/[0.06]`), evitando parpadeos visuales o saltos bruscos de escala.
+
+Verificado en navegador y sincronizado en [DiversificationDashboard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx).
+
+---
+
+### 👤 Usuario (2026-10-12 17:19:57)
+
+reduce un pelo
 
 ---
