@@ -411,7 +411,16 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
 
                           <div className="flex items-center gap-2.5 font-mono">
                             <div className="text-right">
-                              <span className="text-sm sm:text-base font-extrabold text-blue-600 dark:text-blue-400">
+                              <span
+                                className={cn(
+                                  'text-sm sm:text-base font-extrabold',
+                                  item.status === 'aligned'
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : item.status === 'overweight'
+                                    ? 'text-blue-600 dark:text-blue-400'
+                                    : 'text-amber-600 dark:text-amber-400'
+                                )}
+                              >
                                 {item.portfolioWeight.toFixed(1)}%
                               </span>
                               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium ml-1.5">
@@ -833,7 +842,16 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         </span>
                       </div>
                       <div className="flex items-center gap-2 font-mono shrink-0">
-                        <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                        <span
+                          className={cn(
+                            'text-sm sm:text-base font-extrabold',
+                            item.status === 'aligned'
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : item.status === 'overweight'
+                              ? 'text-blue-600 dark:text-blue-400'
+                              : 'text-amber-600 dark:text-amber-400'
+                          )}
+                        >
                           {item.portfolioWeight.toFixed(1)}%
                         </span>
                         <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium ml-1">
@@ -862,12 +880,15 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                       <span
                         className={cn(
                           'font-bold font-mono text-xs px-2.5 py-1 rounded-md border shadow-2xs',
-                          item.delta >= 0
-                            ? 'text-blue-700 dark:text-blue-300 bg-blue-500/10 border-blue-500/20'
-                            : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.05] border-slate-200/70 dark:border-white/10'
+                          item.status === 'aligned'
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                            : item.status === 'overweight'
+                            ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/25'
+                            : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25'
                         )}
                       >
-                        {item.delta >= 0 ? `+${item.delta.toFixed(1)}% sobrepeso` : `${item.delta.toFixed(1)}% infra`}
+                        {item.delta >= 0 ? `+${item.delta.toFixed(1)}%` : `${item.delta.toFixed(1)}%`}{' '}
+                        {item.status === 'aligned' ? 'alineado' : item.status === 'overweight' ? 'sobrepeso' : 'infra'}
                       </span>
                     </div>
                   </div>

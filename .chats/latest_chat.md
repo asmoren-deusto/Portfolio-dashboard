@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 19:32:19
+- **Fecha de exportación:** 2026-10-12 19:35:17
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 179
+- **Total de interacciones registradas:** 181
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2776,5 +2776,28 @@ Verificado en navegador y sincronizado en [DiversificationDashboard.tsx](file://
 ### 👤 Usuario (2026-10-12 17:05:21)
 
 dos columnas y aprovecha para ampliar el donut y que las cifras quepan dentro y no se pisen
+
+---
+
+### 🤖 Asistente (2026-10-12 17:32:21)
+
+He reorganizado la sección y ampliado el gráfico donut, publicado y sincronizado en la versión **v2.7.100**:
+
+1. **Leyenda inferior en 2 columnas (`grid-cols-2`)**:
+   - Los 6 elementos geográficos ahora se distribuyen en 2 columnas (3 por columna) con sus puntos de color, banderas, importes monetarios y porcentajes.
+   - Reduce a la mitad la altura vertical necesaria para la leyenda, dejando espacio limpio y equilibrado.
+
+2. **Donut ampliado y cifras centradas sin solapamiento**:
+   - Radio externo ampliado a **132px** (diámetro 264px) y radio interno a **92px** (hueco central de 184px de diámetro).
+   - Altura de contenedor ampliada a **340px**.
+   - El texto central («Total Cartera», el importe monetario en euros y los activos evaluados) cuenta con espacio perimetral de sobra, garantizando que **las cifras quepan holgadamente dentro del hueco y no se pisen con el anillo** ni en vista en reposo ni en hover.
+
+Verificado visualmente y sincronizado en [DiversificationDashboard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx).
+
+---
+
+### 👤 Usuario (2026-10-12 17:06:01)
+
+las cifras del color del badge
 
 ---
