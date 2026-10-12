@@ -395,7 +395,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           {/* Market status badge */}
           <span
             className={cn(
-              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0',
+              'inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg text-[11px] font-bold border shrink-0',
               summary?.market_state === 'REGULAR'
                 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                 : summary?.market_state === 'PRE' || summary?.market_state === 'POST'
@@ -425,11 +425,11 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           </span>
 
           {/* Currency display toggle: EUR (Neto) vs USD (Réplicas) */}
-          <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+          <div className="flex items-center h-8 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             <button
               onClick={() => setCurrencyMode('eur')}
               className={cn(
-                'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors flex items-center gap-1',
+                'h-full px-2.5 text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1',
                 currencyMode === 'eur'
                   ? 'bg-white dark:bg-[#333333] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -441,7 +441,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             <button
               onClick={() => setCurrencyMode('usd')}
               className={cn(
-                'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors flex items-center gap-1',
+                'h-full px-2.5 text-xs font-semibold rounded-md transition-colors flex items-center justify-center gap-1',
                 currencyMode === 'usd'
                   ? 'bg-white dark:bg-[#333333] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -455,7 +455,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           {/* Conversión actual EUR/USD */}
           {fxInfo && (
             <div
-              className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs border border-slate-200/90 dark:border-white/[0.08] bg-white/90 dark:bg-[#252526] shadow-2xs select-none"
+              className="inline-flex items-center h-8 gap-2 px-2.5 rounded-lg text-xs border border-slate-200/90 dark:border-white/[0.08] bg-white/90 dark:bg-[#252526] shadow-2xs select-none"
               title={`Tipo de cambio EUR/USD: 1 € = ${fxInfo.eur_usd_rate.toFixed(4)} $. Variación de hoy frente al cierre anterior.`}
             >
               <div className="flex items-center gap-1 font-mono">
@@ -466,7 +466,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               </div>
               <span
                 className={cn(
-                  'text-[11px] font-bold font-mono px-1.5 py-0.2 rounded-md whitespace-nowrap inline-flex items-center',
+                  'text-[11px] font-bold font-mono px-1.5 py-0.5 rounded-md whitespace-nowrap inline-flex items-center leading-none',
                   fxInfo.eur_usd_change_pct >= 0
                     ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
                     : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25'
@@ -478,7 +478,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           )}
 
           {/* Period selector */}
-          <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+          <div className="flex items-center h-8 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             {[
               { id: '1d', label: '1D' },
               { id: '5d', label: '5D' },
@@ -488,7 +488,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 key={tab.id}
                 onClick={() => setPeriod(tab.id)}
                 className={cn(
-                  'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
+                  'h-full px-2.5 text-xs font-semibold rounded-md transition-colors flex items-center justify-center',
                   period === tab.id
                     ? 'bg-white dark:bg-[#333333] text-slate-900 dark:text-white shadow-xs font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
