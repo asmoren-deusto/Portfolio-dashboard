@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/store/appStore'
 import { useMarketIndices } from '@/api/queries'
 import { APP_VERSION } from '@/version'
+import { AppLogo } from '@/components/ui/AppLogo'
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Visión General' },
@@ -85,9 +86,7 @@ export function Sidebar({ }: SidebarProps) {
         {/* Logo & Close / Collapse Button (v2.5 removed to eliminate collision with X and redundancy) */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.08] px-4 py-3.5">
           <div className="flex flex-1 min-w-0 items-center gap-2.5">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 ring-1 ring-blue-500/20">
-              <TrendingUp size={18} strokeWidth={2.5} />
-            </div>
+            <AppLogo size={32} animated />
             <span className="font-bold text-[17px] tracking-tight text-slate-950 dark:text-white truncate">
               Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
             </span>

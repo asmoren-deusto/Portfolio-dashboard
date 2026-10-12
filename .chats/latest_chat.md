@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 20:38:02
+- **Fecha de exportación:** 2026-10-12 20:52:14
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 210
+- **Total de interacciones registradas:** 213
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -3156,5 +3156,64 @@ Cambios sincronizados y subidos a Git bajo la versión **v2.7.114**.
 ### 👤 Usuario (2026-10-12 18:17:19)
 
 a veces al recarga el valor total de la cartera aparece mal, con 80.000 y pico
+
+---
+
+### 🤖 Asistente (2026-10-12 18:38:04)
+
+### 🔍 Causa de los "80.000 y pico" al recargar
+
+El valor real y actual de tu cartera sumando los 9 fondos activos es de **78.407,71 €**. 
+
+La cifra de **80.407,71 €** (exactamente **+2.000,00 €**) aparecía de forma intermitente por lo siguiente:
+
+1. **La posición fantasma de Trade Republic (`TR_TRANSFER`)**:
+   - Existe una transacción de apunte contable interno de **2.000,00 €** asociada al ISIN `TR_TRANSFER` (con 2.000 participaciones a 1,00 € de coste medio).
+2. **El disparador al reiniciar/recargar (`preload_price_cache_from_db`)**:
+   - Cada vez que el backend se iniciaba o recargaba, la función [preload_price_cache_from_db](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L50-L68) cargaba en memoria los precios de la base de datos omitiendo valores `<= 0`.
+   - En la base de datos existía un registro histórico de 2025 para `TR_TRANSFER` con precio `1.0`. Por tanto, el backend pre-cargaba en la memoria caché que `TR_TRANSFER` valía **1,00 €**.
+3. **El endpoint `/api/portfolio/summary`**:
+   - En [portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py#L72-L86), mientras que la tabla de posiciones (`/positions`) filtraba activamente `TR_TRANSFER`, el cálculo de `get_portfolio_summary` **no lo excluía de `active_positions`**.
+   - Al consultar el precio de `TR_TRANSFER`, leía `1,00 €` de la caché en memoria y sumaba:
+     $$78.407,71\text{ €} + 2.000,00\text{ €} = \mathbf{80.407,71\text{ €}}$$
+   - Más tarde, en cuanto otra llamada sobreescribía el valor de `TR_TRANSFER` a `0,00 €`, la cifra volvía a bajar a 78.407 €. Por eso ocurría **únicamente en ciertas recargas**.
+
+---
+
+### 🛠️ Correcciones realizadas
+
+1. **Exclusión total en el cálculo del resumen (Backend)**:
+   - En [portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py#L72-L100), `active_positions` ahora filtra de raíz cualquier apunte `TR_TRANSFER` o `Trade Republic` antes de sumar el valor total y el capital invertido.
+   - Se redondea a céntimos en cada posición para garantizar que la suma del resumen y la suma de la tabla de posiciones coincidan al céntimo (**78.407,71 €** exactos).
+2. **Blindaje de la caché de precios (`price_service.py`)**:
+   - En [preload_price_cache_from_db](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L50-L68), se ignora explícitamente cualquier ISIN `TR_TRANSFER`.
+   - En [get_price_with_date](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L115-L125), `TR_TRANSFER` devuelve de inmediato `0.0` antes de consultar base de datos o caché.
+3. **Limpieza en Base de Datos y Semillas**:
+   - En [database.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/database.py#L120-L125) y [seed_data.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/seed_data.py#L152-L168), se han limpiado los precios residuales de 1.0 para `TR_TRANSFER`.
+4. **Protección en el Frontend (Overview y Posiciones)**:
+   - En [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx#L115-L135) y [PositionsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/PositionsPage.tsx#L58-L68), las tarjetas superiores ahora calculan el valor total basándose directamente en las posiciones válidas visibles en pantalla, eliminando cualquier desfase temporal al recargar la página.
+
+---
+
+### ✅ Verificación
+
+- **Suma de posiciones (`current_value`)**: `78.407,71 €`
+- **Total resumen de cartera (`total_value`)**: `78.407,71 €`
+- **Capital total invertido**: `65.613,20 €`
+- **Posiciones activas**: `9`
+
+La paridad es ahora del **100,00% al céntimo** en todas las recargas. Cambios sincronizados y subidos a Git bajo la versión **v2.7.115**.
+
+---
+
+### 👤 Usuario (2026-10-12 18:22:50)
+
+a veces el texto se corta
+
+---
+
+### 👤 Usuario (2026-10-12 18:38:22)
+
+cambia el icono de la web por algo mas chulo
 
 ---

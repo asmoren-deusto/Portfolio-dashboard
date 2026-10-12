@@ -3,12 +3,13 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/store/appStore'
 import { useEffect } from 'react'
-import { Menu, TrendingUp, PanelLeftOpen } from 'lucide-react'
+import { Menu, PanelLeftOpen } from 'lucide-react'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { HeaderActions } from '@/components/layout/HeaderActions'
 import { Header } from '@/components/layout/Header'
 import { HeaderProvider } from '@/context/HeaderContext'
 import { NavUpdateAlertModal } from '@/components/common/NavUpdateAlertModal'
+import { AppLogo } from '@/components/ui/AppLogo'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { fetchLatestNavAlert } from '@/api/queries'
@@ -151,9 +152,7 @@ export function RootLayout() {
                 <Menu size={20} />
               </button>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/20">
-                  <TrendingUp size={16} strokeWidth={2.5} />
-                </div>
+                <AppLogo size={28} />
                 <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white">
                   Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
                 </span>

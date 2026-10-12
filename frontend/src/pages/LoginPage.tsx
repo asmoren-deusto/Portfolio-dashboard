@@ -20,6 +20,7 @@ import { useAppStore } from '@/store/appStore'
 import { type UserProfile } from '@/lib/mockData'
 import { fmt } from '@/lib/utils'
 import { APP_VERSION } from '@/version'
+import { AppLogo } from '@/components/ui/AppLogo'
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
@@ -273,11 +274,9 @@ export const LoginPage: React.FC = () => {
       <div className="w-full max-w-2xl">
         {/* Brand Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-2.5 p-2 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-sm mb-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-              <TrendingUp size={20} strokeWidth={2.5} />
-            </div>
-            <span className="font-bold text-lg tracking-tight pr-2 text-slate-950 dark:text-white">
+          <div className="inline-flex items-center gap-3 px-3 py-2 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-sm mb-3">
+            <AppLogo size={36} animated />
+            <span className="font-bold text-lg tracking-tight pr-1 text-slate-950 dark:text-white">
               Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
             </span>
           </div>
