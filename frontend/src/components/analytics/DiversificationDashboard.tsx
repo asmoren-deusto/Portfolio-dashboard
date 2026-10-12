@@ -381,7 +381,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 </div>
 
                 {/* Region Comparison Rows */}
-                <div className="flex flex-col gap-2 sm:gap-2.5">
+                <div className="flex flex-col gap-1 sm:gap-1.5">
                   {geographicBreakdown.map((item) => {
                     const isHovered = hoveredGeoId === item.region.id
                     const isDimmed = hoveredGeoId !== null && !isHovered
@@ -391,7 +391,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         onMouseEnter={() => setHoveredGeoId(item.region.id)}
                         onMouseLeave={() => setHoveredGeoId(null)}
                         className={cn(
-                          'px-3.5 py-2 sm:py-2.5 rounded-xl transition-all border cursor-pointer',
+                          'px-3 py-1.5 rounded-xl transition-all border cursor-pointer',
                           isHovered
                             ? 'bg-blue-500/[0.06] dark:bg-blue-500/[0.1] border-blue-400/30 shadow-2xs'
                             : isDimmed
@@ -400,22 +400,22 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         )}
                       >
                         {/* Top line: Name, Flag, Weights & Status */}
-                        <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
-                          <div className="flex items-center gap-2.5">
-                            <span className="text-xl select-none leading-none">{item.region.flag}</span>
-                            <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg select-none leading-none">{item.region.flag}</span>
+                            <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                               {item.region.name}
                             </span>
-                            <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
+                            <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
                               ({fmt.currency(item.portfolioValue)})
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2.5 font-mono">
+                          <div className="flex items-center gap-2 font-mono">
                             <div className="text-right">
                               <span
                                 className={cn(
-                                  'text-sm sm:text-base font-extrabold',
+                                  'text-xs sm:text-sm font-extrabold',
                                   item.status === 'aligned'
                                     ? 'text-emerald-600 dark:text-emerald-400'
                                     : item.status === 'overweight'
@@ -425,14 +425,14 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                               >
                                 {item.portfolioWeight.toFixed(1)}%
                               </span>
-                              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium ml-1.5">
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium ml-1">
                                 (Mundo: {item.worldWeight.toFixed(1)}%)
                               </span>
                             </div>
 
                             <span
                               className={cn(
-                                'text-xs font-bold px-3 py-1 rounded-md whitespace-nowrap border shadow-2xs',
+                                'text-[11px] font-bold px-2.5 py-0.5 rounded-md whitespace-nowrap border shadow-2xs',
                                 item.status === 'aligned'
                                   ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
                                   : item.status === 'overweight'
@@ -446,7 +446,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         </div>
 
                         {/* Comparative Dual Progress Bar */}
-                        <div className="relative w-full h-2.5 sm:h-3 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
+                        <div className="relative w-full h-2 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
                           {/* Benchmark World Marker Background */}
                           <div
                             className="absolute top-0 bottom-0 bg-slate-300/80 dark:bg-white/20 rounded-full"
@@ -463,7 +463,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                           />
                         </div>
 
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate leading-relaxed">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate leading-tight">
                           {item.region.description}
                         </p>
                       </div>
@@ -826,10 +826,10 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 return (
                   <div
                     key={item.sector.id}
-                    className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] hover:border-slate-300 dark:hover:border-white/10 transition-all"
+                    className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] hover:border-slate-300 dark:hover:border-white/10 transition-all"
                   >
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2 min-w-0">
                         <div
                           className="p-1.5 rounded-lg shrink-0"
                           style={{
@@ -837,16 +837,16 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                             color: item.sector.color,
                           }}
                         >
-                          <Icon size={16} />
+                          <Icon size={15} />
                         </div>
-                        <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
+                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                           {item.sector.name}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 font-mono shrink-0">
+                      <div className="flex items-center gap-1.5 font-mono shrink-0">
                         <span
                           className={cn(
-                            'text-sm sm:text-base font-extrabold',
+                            'text-xs sm:text-sm font-extrabold',
                             item.status === 'aligned'
                               ? 'text-emerald-600 dark:text-emerald-400'
                               : item.status === 'overweight'
@@ -856,13 +856,13 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         >
                           {item.portfolioWeight.toFixed(1)}%
                         </span>
-                        <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium ml-1">
+                        <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium ml-1">
                           (Mundo: {item.worldWeight.toFixed(1)}%)
                         </span>
                       </div>
                     </div>
 
-                    <div className="relative w-full h-2.5 sm:h-3 rounded-full bg-slate-200/70 dark:bg-white/[0.06] overflow-hidden">
+                    <div className="relative w-full h-2 sm:h-2.5 rounded-full bg-slate-200/70 dark:bg-white/[0.06] overflow-hidden">
                       <div
                         className="absolute top-0 bottom-0 bg-slate-300 dark:bg-white/20 rounded-full"
                         style={{ width: `${Math.min(100, item.worldWeight)}%` }}
@@ -877,11 +877,11 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                       />
                     </div>
 
-                    <div className="flex items-center justify-between mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between mt-1.5 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                       <span>Capital asignado: <strong className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{fmt.currency(item.portfolioValue)}</strong></span>
                       <span
                         className={cn(
-                          'font-bold font-mono text-xs px-2.5 py-1 rounded-md border shadow-2xs',
+                          'font-bold font-mono text-[11px] px-2 py-0.5 rounded-md border shadow-2xs',
                           item.status === 'aligned'
                             ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
                             : item.status === 'overweight'
