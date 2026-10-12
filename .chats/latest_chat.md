@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:14:39
+- **Fecha de exportación:** 2026-10-12 18:16:13
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 129
+- **Total de interacciones registradas:** 131
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2137,5 +2137,22 @@ Sincronizado y publicado en la versión **`v2.7.73`**.
 ### 👤 Usuario (2026-10-12 16:13:37)
 
 
+
+---
+
+### 🤖 Asistente (2026-10-12 16:14:42)
+
+Se ha ampliado la gráfica en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+* **Altura de la gráfica ampliada**: aumentada de `268px` a **`370px`** (`h-[340px] sm:h-[370px]`), dándole más amplitud vertical para que la curva y las etiquetas del eje derecho respiren con total claridad.
+* **Tablas de fondos y réplicas**: ajustado su `max-h` a `580px` para mantener el equilibrio visual entre ambas columnas.
+
+Publicado y desplegado en la versión **`v2.7.74`**.
+
+---
+
+### 👤 Usuario (2026-10-12 16:14:52)
+
+nose ve
 
 ---

@@ -428,19 +428,20 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           {/* Live EUR/USD Currency Pill */}
           {fxInfo && (
             <div
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/25 select-none"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border shrink-0 bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/25 select-none shadow-2xs"
               title={`Tipo de cambio EUR/USD: ${fxInfo.eur_usd_rate.toFixed(4)}. El Dólar varía ${fxInfo.usd_strength_pct >= 0 ? '+' : ''}${fxInfo.usd_strength_pct}% frente al Euro.`}
             >
-              <span className="font-mono">EUR/USD: {fxInfo.eur_usd_rate.toFixed(4)}</span>
+              <span className="font-mono text-[11px] font-bold">EUR/USD: {fxInfo.eur_usd_rate.toFixed(4)}</span>
               <span
                 className={cn(
-                  'text-[10px] font-mono px-2 py-0.5 rounded font-extrabold whitespace-nowrap inline-flex items-center justify-center',
+                  'text-[11px] font-bold pl-2 pr-3 py-0.5 rounded-md whitespace-nowrap inline-flex items-center border shadow-2xs',
                   fxInfo.eur_usd_change_pct >= 0
-                    ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-                    : 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
+                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                    : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
                 )}
               >
-                {fxInfo.eur_usd_change_pct >= 0 ? '+' : ''}{fxInfo.eur_usd_change_pct.toFixed(2)}%
+                <span>{fxInfo.eur_usd_change_pct >= 0 ? '+' : ''}{fxInfo.eur_usd_change_pct.toFixed(2)}</span>
+                <span className="font-extrabold text-[11px] ml-0.5">%</span>
               </span>
             </div>
           )}
