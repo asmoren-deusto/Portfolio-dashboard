@@ -260,14 +260,13 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         crosshairMarkerBorderWidth: 2,
       })
 
-      // Add baseline at 0.00%
+      // Add clean baseline at 0.00% (hidden on price scale to avoid overlapping the current price badge)
       areaSeries.createPriceLine({
         price: 0,
         color: isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.20)',
         lineWidth: 1,
         lineStyle: LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: '0.00%',
+        axisLabelVisible: false,
       })
 
       chartRef.current = chart
@@ -569,10 +568,6 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   {currentAmount >= 0 ? '+' : ''}
                   {fmt.currency(currentAmount)}
                 </span>
-
-                <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 border border-slate-300/50 dark:border-white/[0.08]">
-                  {currencyMode === 'eur' ? 'EUR (€) Neto' : 'USD ($) ETFs'}
-                </span>
               </div>
             </div>
 
@@ -598,50 +593,6 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             </div>
           </div>
 
-          {/* FX Impact Analysis Callout Card */}
-          {fxInfo && (
-            <div className="mb-3 p-2.5 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] text-xs">
-              <div className="flex items-center justify-between gap-1 flex-wrap text-[11px]">
-                <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                  <span>Efecto Divisa (EUR/USD)</span>
-                  <span className="font-mono text-slate-500 text-[10px] font-normal">({fxInfo.eur_usd_rate.toFixed(4)})</span>
-                </div>
-                <span
-                  className={cn(
-                    'text-[10px] font-bold font-mono px-1.5 py-0.2 rounded border',
-                    fxInfo.fx_contribution_pct >= 0
-                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
-                      : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
-                  )}
-                >
-                  {fxInfo.fx_contribution_pct >= 0 ? '+' : ''}{fxInfo.fx_contribution_pct.toFixed(2)}% en Cartera ({fxInfo.fx_contribution_pct >= 0 ? '+' : ''}{fmt.currency((summary?.total_value ?? 0) * (fxInfo.fx_contribution_pct / 100))})
-                </span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-200/60 dark:border-white/[0.05] text-[10px]">
-                <div>
-                  <div className="text-slate-400 font-medium truncate">Wall St. (USD)</div>
-                  <div className={cn('font-bold font-mono text-[11px]', fxInfo.simulated_usd_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-                    {fxInfo.simulated_usd_pct >= 0 ? '+' : ''}{fxInfo.simulated_usd_pct.toFixed(2)}%
-                  </div>
-                </div>
-                <div>
-                  <div className="text-slate-400 font-medium truncate">Aportación USD ({fxInfo.portfolio_usd_exposure_pct}%)</div>
-                  <div className={cn('font-bold font-mono text-[11px]', fxInfo.fx_contribution_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-                    {fxInfo.fx_contribution_pct >= 0 ? '+' : ''}{fxInfo.fx_contribution_pct.toFixed(2)}%
-                  </div>
-                </div>
-                <div>
-                  <div className="text-slate-400 font-medium truncate">Estimación en EUR</div>
-                  <div className={cn('font-bold font-mono text-[11px]', fxInfo.simulated_eur_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-                    {fxInfo.simulated_eur_pct >= 0 ? '+' : ''}{fxInfo.simulated_eur_pct.toFixed(2)}%
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
           <div className="relative w-full h-[315px] sm:h-[335px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">
             {isLoading && (
@@ -659,17 +610,16 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   className="absolute top-0 bottom-6 flex flex-col items-center"
                   style={{ left: `${Math.round(x)}px` }}
                 >
-                  {/* Floating session / phase badge */}
+                  {/* Minimalist session / phase tag */}
                   <div
-                    className="px-1.5 py-0.5 rounded text-[9px] font-bold font-mono tracking-tight shadow-xs whitespace-nowrap -translate-x-1/2 border mt-1 select-none backdrop-blur-xs"
+                    className="px-1 py-0.2 rounded text-[8px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border mt-0.5 select-none backdrop-blur-xs opacity-90 shadow-2xs"
                     style={{
                       backgroundColor: isDark ? 'rgba(24, 24, 27, 0.92)' : 'rgba(255, 255, 255, 0.95)',
-                      borderColor: `${marker.color}70`,
+                      borderColor: `${marker.color}50`,
                       color: marker.color,
-                      boxShadow: `0 2px 6px -1px ${marker.color}35`,
                     }}
                   >
-                    {marker.label}
+                    {marker.label.includes('15:30') ? '15:30' : marker.label.includes('22:00') ? '22:00' : marker.label}
                   </div>
                   {/* Vertical dotted line from badge to bottom axis */}
                   <div
