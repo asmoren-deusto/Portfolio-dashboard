@@ -1001,16 +1001,41 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
         h["etf_change"] = q.get("change")
         h["simulated_gain_amount"] = round(h["fund_value"] * (chg_pct / 100.0), 2)
 
-    # Aggregated simulated daily % & €
+    # Currency (EUR / USD) impact analysis
+    USD_EXPOSURE_WEIGHTS = {
+        "XLK": 1.00,   # US Tech 100% USD
+        "COWZ": 1.00,  # US Cash Cows 100% USD
+        "URTH": 0.70,  # MSCI World ~70% US equities
+        "ACWI": 0.65,  # MSCI ACWI ~65% US equities
+        "EEM": 0.75,   # Emerging Markets ~75% USD linked
+        "FEZ": 0.00,   # Euro Stoxx 50 0% USD (100% EUR)
+        "EFV": 0.15,   # EAFE Value ~15% USD
+        "EWJ": 0.05,   # Japan ~5% USD
+    }
+    portfolio_usd_exposure = sum(etf_weights.get(t, 0.0) * USD_EXPOSURE_WEIGHTS.get(t, 0.70) for t in etf_tickers_list)
+
+    eurusd_q = _fetch_yahoo_chart_quote("EURUSD=X")
+    eurusd_rate = eurusd_q.get("price") or 1.1168
+    eurusd_prev = eurusd_q.get("prev_close") or 1.1206
+    eurusd_chg_pct = eurusd_q.get("change_pct", 0.0) or 0.0
+
+    # When EUR/USD falls, USD strengthens against EUR (boosting EUR value of USD assets):
+    usd_strength_pct = round(((eurusd_prev / eurusd_rate) - 1.0) * 100.0, 2) if (eurusd_rate and eurusd_prev) else round(-eurusd_chg_pct, 2)
+    fx_contribution_pct = round(usd_strength_pct * portfolio_usd_exposure, 2)
+
+    # Aggregated simulated daily % & € in local currency (USD) vs adjusted in EUR
     simulated_daily_pct = round(
         sum(etf_weights.get(t, 0.0) * (quotes.get(t, {}).get("change_pct", 0.0) or 0.0) for t in etf_tickers_list),
         2
     )
     simulated_daily_amount = round(total_val * (simulated_daily_pct / 100.0), 2)
 
+    simulated_eur_pct = round(simulated_daily_pct + fx_contribution_pct, 2)
+    simulated_eur_amount = round(total_val * (simulated_eur_pct / 100.0), 2)
+
     urth_state = quotes.get("URTH", {}).get("market_state") or get_market_session_for_ticker("URTH")
 
-    # Fetch history series for the chart with pre/post market support
+    # Fetch history series for the chart with pre/post market support & aligned FX
     chart_points = []
     session_markers = []
     DIAS_ES = {0: "Lunes", 1: "Martes", 2: "Miércoles", 3: "Jueves", 4: "Viernes", 5: "Sábado", 6: "Domingo"}
@@ -1023,12 +1048,21 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
         download_period = "2d" if fetch_period == "1d" else fetch_period
         include_prepost = fetch_period in ("1d", "5d")
 
-        df = yf.download(etf_tickers_list, period=download_period, interval=interval, prepost=include_prepost, progress=False)
+        download_tickers = list(etf_tickers_list)
+        if "EURUSD=X" not in download_tickers:
+            download_tickers.append("EURUSD=X")
+
+        df = yf.download(download_tickers, period=download_period, interval=interval, prepost=include_prepost, progress=False)
         if df is not None and not df.empty:
-            closes = df["Close"] if "Close" in df else df
-            if isinstance(closes, pd.DataFrame):
-                closes = closes.ffill().bfill()
+            closes_raw = df["Close"] if "Close" in df else df
+            if isinstance(closes_raw, pd.DataFrame):
+                fx_closes_raw = closes_raw["EURUSD=X"] if ("EURUSD=X" in closes_raw.columns) else None
+                closes = closes_raw.drop(columns=["EURUSD=X"], errors="ignore").ffill().bfill()
                 weights_series = pd.Series(etf_weights)
+
+                fx_aligned = None
+                if fx_closes_raw is not None:
+                    fx_aligned = fx_closes_raw.reindex(closes.index).ffill().bfill()
 
                 from zoneinfo import ZoneInfo
                 madrid_tz = ZoneInfo("Europe/Madrid")
@@ -1037,22 +1071,33 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                 session_dates = [idx.astimezone(ny_tz).date() for idx in closes.index]
                 unique_sessions = sorted(list(set(session_dates)))
 
+                usd_fx_series = None
+
                 # Calculate norm_df normalized by session
                 if fetch_period in ("1d", "5d") and len(unique_sessions) > 1:
                     norm_dfs = []
+                    usd_fx_sub_list = []
                     for s_idx, s in enumerate(unique_sessions):
                         idx_s = [idx for idx, d in zip(closes.index, session_dates) if d == s]
                         sub_closes = closes.loc[idx_s]
+                        prev_session_dates = [idx for idx, d in zip(closes.index, session_dates) if d == unique_sessions[s_idx - 1]] if s_idx > 0 else []
+
                         if s_idx == 0:
-                            # For the initial session, base is its first row or prev_close
                             base_s = sub_closes.iloc[0]
                         else:
-                            # For subsequent sessions, base is the last close of the previous session!
-                            prev_session_dates = [idx for idx, d in zip(closes.index, session_dates) if d == unique_sessions[s_idx - 1]]
                             base_s = closes.loc[prev_session_dates].iloc[-1]
                         norm_s = (sub_closes - base_s) / base_s * 100.0
                         norm_dfs.append(norm_s)
+
+                        if fx_aligned is not None:
+                            fx_sub = fx_aligned.loc[idx_s]
+                            fx_base_s = fx_aligned.loc[prev_session_dates].iloc[-1] if (s_idx > 0 and len(prev_session_dates) > 0) else fx_sub.iloc[0]
+                            usd_fx_sub = ((fx_base_s / fx_sub) - 1.0) * 100.0
+                            usd_fx_sub_list.append(usd_fx_sub)
+
                     norm_df = pd.concat(norm_dfs)
+                    if usd_fx_sub_list:
+                        usd_fx_series = pd.concat(usd_fx_sub_list)
                 elif fetch_period == "1d":
                     base_dict = {}
                     for t in etf_tickers_list:
@@ -1065,16 +1110,22 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                             base_dict[t] = 1.0
                     base_s = pd.Series(base_dict)
                     norm_df = (closes - base_s) / base_s * 100.0
+                    if fx_aligned is not None and not fx_aligned.empty:
+                        fx_b = eurusd_prev or fx_aligned.iloc[0]
+                        usd_fx_series = ((fx_b / fx_aligned) - 1.0) * 100.0
                 else:
                     base_s = closes.iloc[0]
                     norm_df = (closes - base_s) / base_s * 100.0
+                    if fx_aligned is not None and not fx_aligned.empty:
+                        fx_b = fx_aligned.iloc[0]
+                        usd_fx_series = ((fx_b / fx_aligned) - 1.0) * 100.0
 
                 sim_pct = norm_df.dot(weights_series)
 
                 prev_ny_d = None
                 prev_phase = None
 
-                for idx, val in sim_pct.items():
+                for pt_idx, (idx, val) in enumerate(sim_pct.items()):
                     dt = idx.to_pydatetime()
                     dt_madrid = dt.astimezone(madrid_tz) if dt.tzinfo is not None else dt
                     dt_ny = dt.astimezone(ny_tz) if dt.tzinfo is not None else dt
@@ -1121,6 +1172,10 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                         lbl = dt_madrid.strftime("%d %b")
 
                     pct_val = round(float(val), 2)
+                    usd_pt_chg = round(float(usd_fx_series.iloc[pt_idx]), 2) if (usd_fx_series is not None and pt_idx < len(usd_fx_series)) else usd_strength_pct
+                    fx_point_contrib = round(usd_pt_chg * portfolio_usd_exposure, 2)
+                    eur_pct_val = round(pct_val + fx_point_contrib, 2)
+
                     chart_points.append({
                         "time": dt_madrid.isoformat(),
                         "time_unix": t_unix,
@@ -1131,6 +1186,9 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                         "phase": phase,
                         "simulated_pct": pct_val,
                         "simulated_amount": round(total_val * (pct_val / 100.0), 2),
+                        "simulated_eur_pct": eur_pct_val,
+                        "simulated_eur_amount": round(total_val * (eur_pct_val / 100.0), 2),
+                        "usd_strength_pct": usd_pt_chg,
                     })
     except Exception as e:
         logger.warning(f"Error fetching ETF history download: {e}")
@@ -1165,6 +1223,8 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
             "total_value": round(total_val, 2),
             "simulated_daily_pct": simulated_daily_pct,
             "simulated_daily_amount": simulated_daily_amount,
+            "simulated_eur_pct": simulated_eur_pct,
+            "simulated_eur_amount": simulated_eur_amount,
             "market_state": urth_state,
             "as_of": _now_iso(),
             "session_date": latest_date_str,
@@ -1173,6 +1233,17 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
             "timezone": "Europe/Madrid",
             "period": period,
             "has_extended_hours": True,
+            "fx_info": {
+                "eur_usd_rate": round(float(eurusd_rate), 4),
+                "eur_usd_change_pct": round(float(eurusd_chg_pct), 2),
+                "usd_strength_pct": usd_strength_pct,
+                "portfolio_usd_exposure_pct": round(portfolio_usd_exposure * 100, 1),
+                "fx_contribution_pct": fx_contribution_pct,
+                "simulated_eur_pct": simulated_eur_pct,
+                "simulated_eur_amount": simulated_eur_amount,
+                "simulated_usd_pct": simulated_daily_pct,
+                "simulated_usd_amount": simulated_daily_amount,
+            },
         },
         "holdings": sorted(holdings, key=lambda x: x["fund_value"], reverse=True),
         "etfs_summary": sorted(etfs_summary, key=lambda x: x["weight"], reverse=True),

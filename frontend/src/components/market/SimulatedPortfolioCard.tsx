@@ -98,6 +98,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   onSelectStock,
 }) => {
   const [period, setPeriod] = useState<string>('1d')
+  const [currencyMode, setCurrencyMode] = useState<'eur' | 'usd'>('eur')
   const [activeTab, setActiveTab] = useState<'funds' | 'etfs'>('funds')
   const [hoveredPoint, setHoveredPoint] = useState<SimulatedChartPoint | null>(null)
 
@@ -107,6 +108,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   const { data, isLoading, isFetching } = useSimulatedPortfolio(period)
 
   const summary = data?.summary
+  const fxInfo = summary?.fx_info
   const holdings = data?.holdings ?? []
   const etfs = data?.etfs_summary ?? []
   const chartPoints = data?.chart_points ?? []
@@ -117,7 +119,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   }, [data?.session_markers])
   const hasExtendedHours = data?.has_extended_hours ?? data?.summary?.has_extended_hours ?? false
 
-  const isPositive = (summary?.simulated_daily_pct ?? 0) >= 0
+  const isPositive = (currencyMode === 'eur'
+    ? (summary?.fx_info?.simulated_eur_pct ?? summary?.simulated_daily_pct ?? 0)
+    : (summary?.simulated_daily_pct ?? 0)) >= 0
 
   // Chart refs and state
   const chartContainerRef = useRef<HTMLDivElement>(null)
@@ -168,14 +172,20 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   // Min and max percentages
   const { minPct, maxPct } = useMemo(() => {
     if (!chartPoints || !chartPoints.length) return { minPct: 0, maxPct: 0 }
-    const vals = chartPoints.map((p) => p.simulated_pct)
+    const vals = chartPoints.map((p) =>
+      currencyMode === 'eur' ? (p.simulated_eur_pct ?? p.simulated_pct) : p.simulated_pct
+    )
     return { minPct: Math.min(...vals), maxPct: Math.max(...vals) }
-  }, [chartPoints])
+  }, [chartPoints, currencyMode])
 
   // Active point for KPI display
   const activePoint = hoveredPoint || (chartPoints.length > 0 ? chartPoints[chartPoints.length - 1] : null)
-  const currentPct = activePoint ? activePoint.simulated_pct : (summary?.simulated_daily_pct ?? 0)
-  const currentAmount = activePoint ? activePoint.simulated_amount : (summary?.simulated_daily_amount ?? 0)
+  const currentPct = activePoint
+    ? (currencyMode === 'eur' ? (activePoint.simulated_eur_pct ?? activePoint.simulated_pct) : activePoint.simulated_pct)
+    : (currencyMode === 'eur' ? (summary?.fx_info?.simulated_eur_pct ?? summary?.simulated_daily_pct ?? 0) : (summary?.simulated_daily_pct ?? 0))
+  const currentAmount = activePoint
+    ? (currencyMode === 'eur' ? (activePoint.simulated_eur_amount ?? activePoint.simulated_amount) : activePoint.simulated_amount)
+    : (currencyMode === 'eur' ? (summary?.fx_info?.simulated_eur_amount ?? summary?.simulated_daily_amount ?? 0) : (summary?.simulated_daily_amount ?? 0))
 
   // Initialize and maintain TradingView Lightweight Charts instance
   useEffect(() => {
@@ -317,15 +327,16 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
     }
   }, [isDark, isPositive])
 
-  // Update series data whenever chartPoints change
+  // Update series data whenever chartPoints or currencyMode change
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current || !chartPoints || !chartPoints.length) return
 
     try {
       const map = new Map<number, number>()
       for (const p of chartPoints) {
-        if (p.time_unix && typeof p.simulated_pct === 'number' && !isNaN(p.simulated_pct)) {
-          map.set(p.time_unix, p.simulated_pct)
+        const val = currencyMode === 'eur' ? (p.simulated_eur_pct ?? p.simulated_pct) : p.simulated_pct
+        if (p.time_unix && typeof val === 'number' && !isNaN(val)) {
+          map.set(p.time_unix, val)
         }
       }
 
@@ -348,7 +359,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
     } catch (err) {
       console.warn('Error setting simulated chart data:', err)
     }
-  }, [chartPoints, sessionMarkers])
+  }, [chartPoints, sessionMarkers, currencyMode])
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 p-4 sm:p-5 transition-all">
@@ -381,7 +392,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           </div>
         </div>
 
-        {/* Status Badge & Period Toggle */}
+        {/* Status Badge, EUR/USD & Toggles */}
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {/* Market status badge */}
           <span
@@ -415,6 +426,54 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               : 'MERCADO CERRADO'}
           </span>
 
+          {/* Live EUR/USD Currency Pill */}
+          {fxInfo && (
+            <div
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/25 select-none"
+              title={`Tipo de cambio EUR/USD: ${fxInfo.eur_usd_rate.toFixed(4)}. El Dólar varía ${fxInfo.usd_strength_pct >= 0 ? '+' : ''}${fxInfo.usd_strength_pct}% frente al Euro.`}
+            >
+              <span className="font-mono">EUR/USD: {fxInfo.eur_usd_rate.toFixed(4)}</span>
+              <span
+                className={cn(
+                  'text-[10px] font-mono px-1 py-0.2 rounded font-extrabold',
+                  fxInfo.eur_usd_change_pct >= 0
+                    ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
+                )}
+              >
+                {fxInfo.eur_usd_change_pct >= 0 ? '+' : ''}{fxInfo.eur_usd_change_pct.toFixed(2)}%
+              </span>
+            </div>
+          )}
+
+          {/* Currency display toggle: EUR (Neto) vs USD (Réplicas) */}
+          <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+            <button
+              onClick={() => setCurrencyMode('eur')}
+              className={cn(
+                'px-2 py-1 text-xs font-semibold rounded-md transition-colors flex items-center gap-1',
+                currencyMode === 'eur'
+                  ? 'bg-white dark:bg-[#333333] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              )}
+              title="Estimación neta en Euros (incluye el efecto divisa EUR/USD sobre activos internacionales)"
+            >
+              <span>EUR (€)</span>
+            </button>
+            <button
+              onClick={() => setCurrencyMode('usd')}
+              className={cn(
+                'px-2 py-1 text-xs font-semibold rounded-md transition-colors flex items-center gap-1',
+                currencyMode === 'usd'
+                  ? 'bg-white dark:bg-[#333333] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              )}
+              title="Rendimiento nominal en Dólares de los ETFs réplica de Wall Street"
+            >
+              <span>USD ($)</span>
+            </button>
+          </div>
+
           {/* Period selector */}
           <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             {[
@@ -445,7 +504,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         {/* Left Column (lg:col-span-5): Official TradingView Chart (Zero Distortion, 100% Adaptive) */}
         <div className="lg:col-span-5 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-4">
           {/* KPI Summary Header */}
-          <div className="flex items-start justify-between gap-2 mb-4 pb-3 border-b border-slate-200/60 dark:border-white/[0.06]">
+          <div className="flex items-start justify-between gap-2 mb-3 pb-3 border-b border-slate-200/60 dark:border-white/[0.06]">
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
                 <span>
@@ -486,7 +545,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 )}
               </div>
 
-              <div className="flex items-baseline gap-2.5 mt-1">
+              <div className="flex items-baseline gap-2 mt-1 flex-wrap">
                 <span
                   className={cn(
                     'text-2xl sm:text-3xl font-extrabold font-mono tracking-tight',
@@ -509,6 +568,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 >
                   {currentAmount >= 0 ? '+' : ''}
                   {fmt.currency(currentAmount)}
+                </span>
+
+                <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 border border-slate-300/50 dark:border-white/[0.08]">
+                  {currencyMode === 'eur' ? 'EUR (€) Neto' : 'USD ($) ETFs'}
                 </span>
               </div>
             </div>
@@ -534,6 +597,50 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               )}
             </div>
           </div>
+
+          {/* FX Impact Analysis Callout Card */}
+          {fxInfo && (
+            <div className="mb-3 p-2.5 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] text-xs">
+              <div className="flex items-center justify-between gap-1 flex-wrap text-[11px]">
+                <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  <span>Efecto Divisa (EUR/USD)</span>
+                  <span className="font-mono text-slate-500 text-[10px] font-normal">({fxInfo.eur_usd_rate.toFixed(4)})</span>
+                </div>
+                <span
+                  className={cn(
+                    'text-[10px] font-bold font-mono px-1.5 py-0.2 rounded border',
+                    fxInfo.fx_contribution_pct >= 0
+                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
+                      : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
+                  )}
+                >
+                  {fxInfo.fx_contribution_pct >= 0 ? '+' : ''}{fxInfo.fx_contribution_pct.toFixed(2)}% en Cartera ({fxInfo.fx_contribution_pct >= 0 ? '+' : ''}{fmt.currency((summary?.total_value ?? 0) * (fxInfo.fx_contribution_pct / 100))})
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-200/60 dark:border-white/[0.05] text-[10px]">
+                <div>
+                  <div className="text-slate-400 font-medium truncate">Wall St. (USD)</div>
+                  <div className={cn('font-bold font-mono text-[11px]', fxInfo.simulated_usd_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                    {fxInfo.simulated_usd_pct >= 0 ? '+' : ''}{fxInfo.simulated_usd_pct.toFixed(2)}%
+                  </div>
+                </div>
+                <div>
+                  <div className="text-slate-400 font-medium truncate">Aportación USD ({fxInfo.portfolio_usd_exposure_pct}%)</div>
+                  <div className={cn('font-bold font-mono text-[11px]', fxInfo.fx_contribution_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                    {fxInfo.fx_contribution_pct >= 0 ? '+' : ''}{fxInfo.fx_contribution_pct.toFixed(2)}%
+                  </div>
+                </div>
+                <div>
+                  <div className="text-slate-400 font-medium truncate">Estimación en EUR</div>
+                  <div className={cn('font-bold font-mono text-[11px]', fxInfo.simulated_eur_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                    {fxInfo.simulated_eur_pct >= 0 ? '+' : ''}{fxInfo.simulated_eur_pct.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
           <div className="relative w-full h-[295px] sm:h-[315px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">

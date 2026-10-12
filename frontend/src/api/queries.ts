@@ -455,6 +455,18 @@ export interface SessionMarker {
   phase?: string
 }
 
+export interface SimulatedFxInfo {
+  eur_usd_rate: number
+  eur_usd_change_pct: number
+  usd_strength_pct: number
+  portfolio_usd_exposure_pct: number
+  fx_contribution_pct: number
+  simulated_eur_pct: number
+  simulated_eur_amount: number
+  simulated_usd_pct: number
+  simulated_usd_amount: number
+}
+
 export interface SimulatedChartPoint {
   time: string
   time_unix: number
@@ -465,6 +477,9 @@ export interface SimulatedChartPoint {
   phase?: 'PRE' | 'REGULAR' | 'POST'
   simulated_pct: number
   simulated_amount: number
+  simulated_eur_pct?: number
+  simulated_eur_amount?: number
+  usd_strength_pct?: number
 }
 
 export interface SimulatedPortfolioResponse {
@@ -480,6 +495,7 @@ export interface SimulatedPortfolioResponse {
     timezone?: string
     period: string
     has_extended_hours?: boolean
+    fx_info?: SimulatedFxInfo
   }
   holdings: SimulatedHolding[]
   etfs_summary: SimulatedEtfSummary[]
