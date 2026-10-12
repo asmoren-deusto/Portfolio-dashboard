@@ -400,28 +400,28 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         {/* Top line: Name, Flag, Weights & Status */}
                         <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                           <div className="flex items-center gap-2.5">
-                            <span className="text-lg select-none leading-none">{item.region.flag}</span>
-                            <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                            <span className="text-xl select-none leading-none">{item.region.flag}</span>
+                            <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                               {item.region.name}
                             </span>
-                            <span className="text-xs text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
+                            <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
                               ({fmt.currency(item.portfolioValue)})
                             </span>
                           </div>
 
                           <div className="flex items-center gap-2.5 font-mono">
                             <div className="text-right">
-                              <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">
+                              <span className="text-sm sm:text-base font-extrabold text-blue-600 dark:text-blue-400">
                                 {item.portfolioWeight.toFixed(1)}%
                               </span>
-                              <span className="text-xs text-slate-400 ml-1">
+                              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium ml-1.5">
                                 (Mundo: {item.worldWeight.toFixed(1)}%)
                               </span>
                             </div>
 
                             <span
                               className={cn(
-                                'text-[11px] font-bold px-2.5 py-0.5 rounded-md whitespace-nowrap border',
+                                'text-xs font-bold px-3 py-1 rounded-md whitespace-nowrap border shadow-2xs',
                                 item.status === 'aligned'
                                   ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
                                   : item.status === 'overweight'
@@ -675,7 +675,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                     <span className="text-xl sm:text-2xl font-extrabold font-mono text-slate-950 dark:text-white">
                       {ss.portfolioWeight.toFixed(1)}%
                     </span>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
                       vs {ss.worldWeight.toFixed(1)}% mundo
                     </span>
                   </div>
@@ -825,15 +825,15 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         >
                           <Icon size={16} />
                         </div>
-                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                        <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
                           {item.sector.name}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 font-mono shrink-0">
-                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
                           {item.portfolioWeight.toFixed(1)}%
                         </span>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium ml-1">
                           (Mundo: {item.worldWeight.toFixed(1)}%)
                         </span>
                       </div>
@@ -854,11 +854,11 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                       />
                     </div>
 
-                    <div className="flex items-center justify-between mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                       <span>Capital asignado: <strong className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{fmt.currency(item.portfolioValue)}</strong></span>
                       <span
                         className={cn(
-                          'font-bold font-mono text-[11px] px-2 py-0.5 rounded-md border',
+                          'font-bold font-mono text-xs px-2.5 py-1 rounded-md border shadow-2xs',
                           item.delta >= 0
                             ? 'text-blue-700 dark:text-blue-300 bg-blue-500/10 border-blue-500/20'
                             : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.05] border-slate-200/70 dark:border-white/10'
