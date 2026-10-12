@@ -316,8 +316,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
       </Card>
 
       {/* ── 2. Tab Navigation for Analytical Deep-Dives ──────────────────────── */}
-      <div className="flex items-center justify-between gap-3 flex-wrap border-b border-slate-200/80 dark:border-white/[0.08] pb-1">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
           {[
             { id: 'geo', label: 'Geografía vs Mundo', icon: Globe },
             { id: 'sectors', label: 'Sectores vs MSCI World', icon: Factory },
