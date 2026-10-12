@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 20:07:51
+- **Fecha de exportación:** 2026-10-12 20:10:26
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 204
+- **Total de interacciones registradas:** 206
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -3051,5 +3051,23 @@ Se ha comprobado visualmente en el navegador y publicado la versión **`v2.7.111
 ### 👤 Usuario (2026-10-12 17:55:18)
 
 los badges amplialos un peliiin
+
+---
+
+### 🤖 Asistente (2026-10-12 18:07:54)
+
+He ampliado ligeramente los 4 badges de los KPIs ejecutivos en [DiversificationDashboard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx):
+
+- **Tipografía**: aumentada a `text-xs` (12px) en lugar de `text-[11px]`.
+- **Relleno y espaciado**: ajustado a `px-2.5 py-1` con un margen superior de `mt-1.5`.
+- Los 4 badges (*Norteamérica*, *Sesgo Europeo*, *Mercados Emergentes* y *Riesgo Divisa*) ganan presencia y legibilidad manteniendo el equilibrio visual con las cifras numéricas.
+
+Se ha verificado en el navegador y publicado la versión **`v2.7.112`**.
+
+---
+
+### 👤 Usuario (2026-10-12 17:56:07)
+
+amplia un pelo los textos
 
 ---
