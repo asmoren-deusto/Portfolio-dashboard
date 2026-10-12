@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:26:09
+- **Fecha de exportación:** 2026-10-12 18:26:56
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 141
+- **Total de interacciones registradas:** 143
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2272,5 +2272,27 @@ Se ha ampliado el tamaño y mejorado la legibilidad del bloque **Base** y la pí
 ### 👤 Usuario (2026-10-12 16:22:28)
 
 devuelve el selector eur/dolar y su conversion actual, pero que se vea
+
+---
+
+### 🤖 Asistente (2026-10-12 16:26:11)
+
+Se ha reintegrado el selector **EUR / USD** junto con la **conversión en directo**, con diseño espacioso y alta legibilidad en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+1. **Selector de Divisa:**
+   - Botones independientes `EUR (€)` vs `USD ($)` con estado activo claro.
+
+2. **Conversión actual EUR/USD:**
+   - **Tipo de cambio visible:** Etiqueta `EUR/USD:` con cotización en tipografía mono bold (ej. `1.1162`).
+   - **Variación diaria clara:** Píldora con espaciado amplio (`+0.35%` / `-0.39%`), con el símbolo `%` 100% visible, sin recortes ni compresiones.
+   - **Integración visual:** Fondo neutral armonizado con la tarjeta (`bg-white/90 dark:bg-[#252526]`), bordes sutiles y sombra suave.
+
+🚀 **Release actualizada:** `v2.7.80` sincronizada y desplegada en Git.
+
+---
+
+### 👤 Usuario (2026-10-12 16:23:11)
+
+aumenta la letra mas pequeña
 
 ---
