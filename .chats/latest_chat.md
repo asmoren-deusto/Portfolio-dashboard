@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 19:30:09
+- **Fecha de exportación:** 2026-10-12 19:32:19
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 177
+- **Total de interacciones registradas:** 179
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2756,5 +2756,25 @@ A continuación se detalla el análisis riguroso de la cartera, destacando forta
 ### 👤 Usuario (2026-10-12 17:04:48)
 
 aumenta un pelo los textos
+
+---
+
+### 🤖 Asistente (2026-10-12 17:30:11)
+
+He aumentado el tamaño de los textos en las filas de desglose y comparativa para darles mayor legibilidad y presencia visual, publicado en la versión **v2.7.99**:
+
+1. **Porcentajes de cartera**: Incrementados de `text-xs sm:text-sm` a `text-sm sm:text-base font-extrabold` con color acentuado de alto contraste.
+2. **Comparativa mundial (`(Mundo: XX.X%)`)**: Pasado de `text-xs text-slate-400` a `text-xs sm:text-sm text-slate-500 font-medium` con mayor separación y nitidez.
+3. **Badges de estado (`Infraponderado`, `Sobreponderado`, `Alineado`)**: Aumentados de `text-[11px] py-0.5` a `text-xs py-1` con mayor cuerpo y borde definido.
+4. **Títulos y valores**: Los nombres de región/sector y los importes monetarios ahora son más legibles (`text-sm sm:text-base font-bold`) sin saturar los contenedores.
+5. Aplicado tanto en el desglose **Geográfico** como en el de **Sectores** para mantener una estética consistente.
+
+Verificado en navegador y sincronizado en [DiversificationDashboard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx).
+
+---
+
+### 👤 Usuario (2026-10-12 17:05:21)
+
+dos columnas y aprovecha para ampliar el donut y que las cifras quepan dentro y no se pisen
 
 ---

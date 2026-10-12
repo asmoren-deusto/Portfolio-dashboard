@@ -475,8 +475,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </p>
                 </div>
 
-                <div className="h-[300px] sm:h-[320px] w-full relative flex items-center justify-center min-w-0">
-                  <ResponsiveContainer width="100%" height={310}>
+                <div className="h-[320px] sm:h-[340px] w-full relative flex items-center justify-center min-w-0">
+                  <ResponsiveContainer width="100%" height={330}>
                     <PieChart>
                       <Pie
                         data={geoDonutData}
@@ -484,8 +484,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         cy="50%"
                         dataKey="value"
                         nameKey="shortName"
-                        innerRadius={72}
-                        outerRadius={108}
+                        innerRadius={92}
+                        outerRadius={132}
                         paddingAngle={1.5}
                         minAngle={4}
                         animationDuration={350}
@@ -529,29 +529,29 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </ResponsiveContainer>
 
                   {/* Centered Total / Interactive Hover Detail */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-2 text-center transition-all duration-200">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-3 text-center transition-all duration-200">
                     {activeGeoItem ? (
-                      <div className="flex flex-col items-center animate-in fade-in duration-150">
-                        <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-1.5">
-                          <span className="text-lg select-none leading-none">{activeGeoItem.flag}</span>
-                          <span className="truncate max-w-[145px]">{activeGeoItem.shortName}</span>
+                      <div className="flex flex-col items-center animate-in fade-in duration-150 max-w-[170px]">
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5 leading-tight">
+                          <span className="text-base select-none leading-none">{activeGeoItem.flag}</span>
+                          <span className="truncate max-w-[125px]">{activeGeoItem.shortName}</span>
                         </span>
-                        <span className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-950 dark:text-white leading-tight mt-1.5">
+                        <span className="text-xl sm:text-2xl font-black font-mono text-slate-950 dark:text-white leading-tight mt-1 tracking-tight">
                           {fmt.currency(activeGeoItem.value)}
                         </span>
-                        <span className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-1">
+                        <span className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-1 leading-none">
                           {activeGeoItem.pct.toFixed(1)}% de cartera
                         </span>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center">
-                        <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                      <div className="flex flex-col items-center max-w-[170px]">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider leading-none">
                           Total Cartera
                         </span>
-                        <span className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-950 dark:text-white leading-tight mt-1.5">
+                        <span className="text-xl sm:text-2xl font-black font-mono text-slate-950 dark:text-white leading-tight mt-1 tracking-tight">
                           {fmt.currency(totalPortfolioValue)}
                         </span>
-                        <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-1">
+                        <span className="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1 leading-none">
                           {positions.length} activos evaluados
                         </span>
                       </div>
@@ -559,8 +559,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </div>
                 </div>
 
-                {/* Mini Legend List with amounts, percentages and bidirectional hover */}
-                <div className="flex flex-col gap-2 mt-4 pt-3.5 border-t border-slate-100 dark:border-white/[0.06]">
+                {/* Mini Legend Grid (2 Columnas) with amounts, percentages and bidirectional hover */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 mt-4 pt-3.5 border-t border-slate-100 dark:border-white/[0.06]">
                   {geoDonutData.map((d) => {
                     const isRowHovered = hoveredGeoId === d.id
                     const isRowDimmed = hoveredGeoId !== null && !isRowHovered
@@ -570,7 +570,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         onMouseEnter={() => setHoveredGeoId(d.id)}
                         onMouseLeave={() => setHoveredGeoId(null)}
                         className={cn(
-                          'flex items-center justify-between text-xs sm:text-sm font-medium py-2 px-2.5 rounded-xl transition-all cursor-pointer',
+                          'flex items-center justify-between text-xs font-medium py-1.5 px-2 rounded-lg transition-all cursor-pointer',
                           isRowHovered
                             ? 'bg-blue-500/10 dark:bg-blue-500/15 shadow-2xs font-semibold'
                             : isRowDimmed
@@ -578,21 +578,24 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                             : 'hover:bg-slate-50 dark:hover:bg-white/[0.03]'
                         )}
                       >
-                        <span className="flex items-center gap-2 text-slate-800 dark:text-slate-200 min-w-0">
+                        <span className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 min-w-0">
                           <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform"
+                            className="w-2 h-2 rounded-full shrink-0 transition-transform"
                             style={{
                               backgroundColor: d.color,
                               transform: isRowHovered ? 'scale(1.25)' : 'scale(1)',
                             }}
                           />
-                          <span className="truncate font-medium">{d.flag} {d.shortName}</span>
+                          <span className="text-xs select-none leading-none">{d.flag}</span>
+                          <span className="truncate font-medium text-xs text-slate-800 dark:text-slate-200">
+                            {d.shortName}
+                          </span>
                         </span>
-                        <div className="flex items-center gap-2.5 shrink-0 font-mono">
-                          <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                        <div className="flex items-center gap-1.5 shrink-0 font-mono text-right ml-1">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                             {fmt.currency(d.value)}
                           </span>
-                          <span className="font-bold text-slate-950 dark:text-white w-12 text-right text-xs sm:text-sm">
+                          <span className="font-extrabold text-slate-950 dark:text-white text-xs">
                             {d.pct.toFixed(1)}%
                           </span>
                         </div>
