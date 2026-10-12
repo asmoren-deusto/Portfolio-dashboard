@@ -105,31 +105,31 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
     <div className="flex flex-col gap-4">
       {/* ── 1. Hero Card: Global Health Score & Executive Summary ─────────────── */}
       <Card delay={0.1} className="overflow-hidden border-indigo-500/20 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-blue-500/[0.02]">
-        <div className="p-4 sm:p-5">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-4 border-b border-slate-100 dark:border-white/[0.06]">
+        <div className="p-3.5 sm:p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/[0.06]">
             {/* Left: Title & Purpose */}
-            <div className="flex items-start gap-3">
-              <div className="p-2.5 rounded-2xl bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-blue-500/5 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
-                <Globe className="w-6 h-6 animate-pulse" />
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-blue-500/5 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+                <Globe className="w-5 h-5 animate-pulse" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                     Diagnóstico de Diversificación vs Mercado Mundial
                   </h2>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
                     MSCI ACWI Benchmark
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
                   Evaluación cuantitativa de tus activos frente a la capitalización bursátil global del planeta.
                 </p>
               </div>
             </div>
 
             {/* Right: Circular Score Gauge */}
-            <div className="flex items-center gap-4 bg-slate-50/90 dark:bg-white/[0.03] p-3 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] shrink-0 shadow-2xs self-start lg:self-auto">
-              <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3 bg-slate-50/90 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] shrink-0 shadow-2xs self-start lg:self-auto">
+              <div className="relative w-11 h-11 flex items-center justify-center shrink-0">
                 {/* SVG Radial Meter */}
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <path
@@ -150,19 +150,19 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="font-mono font-extrabold text-sm text-slate-900 dark:text-white leading-none">
+                  <span className="font-mono font-extrabold text-xs text-slate-900 dark:text-white leading-none">
                     {score}
                   </span>
-                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">/ 100</span>
+                  <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter">/ 100</span>
                 </div>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Salud de Cartera</span>
-                <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block" style={{ color: scoreColor }}>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block leading-none">Salud de Cartera</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block mt-0.5" style={{ color: scoreColor }}>
                   {scoreLabel}
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-none mt-0.5">
                   {score >= 80 ? 'Nivel institucional' : score >= 65 ? 'Adecuada y equilibrada' : 'Concentrada'}
                 </span>
               </div>
@@ -170,21 +170,21 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
           </div>
 
           {/* 4 Executive KPI Badges */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 pt-3.5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 pt-2.5">
             {/* KPI 1: Exposición a EE.UU. */}
-            <div className="p-3 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+            <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
               <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Norteamérica (EE.UU.)</span>
                 <span>🇺🇸</span>
               </div>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-lg font-extrabold font-mono text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-base sm:text-lg font-extrabold font-mono text-slate-900 dark:text-white">
                   {usExposurePct.toFixed(1)}%
                 </span>
-                <span className="text-[11px] font-semibold text-slate-400">vs 63.8% mundial</span>
+                <span className="text-[10px] font-semibold text-slate-400">vs 63.8% mundial</span>
               </div>
               <span className={cn(
-                'text-[10px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-1',
+                'text-[9px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-0.5',
                 Math.abs(usExposurePct - 63.8) <= 4
                   ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
                   : usExposurePct > 63.8
@@ -196,19 +196,19 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </div>
 
             {/* KPI 2: Sesgo Local (Home Bias) */}
-            <div className="p-3 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+            <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
               <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Sesgo Europeo (Local)</span>
                 <span>🇪🇺</span>
               </div>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-lg font-extrabold font-mono text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-base sm:text-lg font-extrabold font-mono text-slate-900 dark:text-white">
                   {(geographicBreakdown.find((g) => g.region.id === 'europe')?.portfolioWeight ?? 0).toFixed(1)}%
                 </span>
-                <span className="text-[11px] font-semibold text-slate-400">vs 15.4% mundial</span>
+                <span className="text-[10px] font-semibold text-slate-400">vs 15.4% mundial</span>
               </div>
               <span className={cn(
-                'text-[10px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-1',
+                'text-[9px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-0.5',
                 homeBiasPct > 4
                   ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400'
                   : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
@@ -218,19 +218,19 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </div>
 
             {/* KPI 3: Brecha en Emergentes */}
-            <div className="p-3 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+            <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
               <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Mercados Emergentes</span>
                 <span>🌏</span>
               </div>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-lg font-extrabold font-mono text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-base sm:text-lg font-extrabold font-mono text-slate-900 dark:text-white">
                   {(geographicBreakdown.find((g) => g.region.id === 'emerging')?.portfolioWeight ?? 0).toFixed(1)}%
                 </span>
-                <span className="text-[11px] font-semibold text-slate-400">vs 10.2% mundial</span>
+                <span className="text-[10px] font-semibold text-slate-400">vs 10.2% mundial</span>
               </div>
               <span className={cn(
-                'text-[10px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-1',
+                'text-[9px] font-bold font-mono px-1.5 py-0.2 rounded inline-block mt-0.5',
                 emergingGapPct <= 2
                   ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
                   : 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
@@ -240,18 +240,18 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </div>
 
             {/* KPI 4: Exposición a Divisa */}
-            <div className="p-3 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+            <div className="px-3 py-2 rounded-xl bg-white/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
               <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Riesgo Divisa (USD)</span>
                 <span>💵</span>
               </div>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-lg font-extrabold font-mono text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-base sm:text-lg font-extrabold font-mono text-slate-900 dark:text-white">
                   {(currencyBreakdown.find((c) => c.code === 'USD')?.weight ?? 0).toFixed(1)}%
                 </span>
-                <span className="text-[11px] font-semibold text-slate-400">en Dólares</span>
+                <span className="text-[10px] font-semibold text-slate-400">en Dólares</span>
               </div>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 block">
+              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 mt-0.5 block">
                 {(currencyBreakdown.find((c) => c.code === 'EUR')?.weight ?? 0).toFixed(1)}% en Euro (sin riesgo)
               </span>
             </div>
@@ -263,11 +263,11 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
       <div className="flex items-center justify-between gap-3 flex-wrap border-b border-slate-200/80 dark:border-white/[0.08] pb-1">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {[
-            { id: 'geo', label: '🌍 Geografía vs Mundo', icon: Globe },
-            { id: 'sectors', label: '🏭 Sectores vs MSCI World', icon: Factory },
-            { id: 'currency', label: '💱 Divisas & Riesgo FX', icon: Coins },
-            { id: 'assets', label: '📊 Clases de Activo', icon: Layers },
-            { id: 'rebalance', label: '💡 Consejos de Rebalanceo', icon: Sparkles },
+            { id: 'geo', label: 'Geografía vs Mundo', icon: Globe },
+            { id: 'sectors', label: 'Sectores vs MSCI World', icon: Factory },
+            { id: 'currency', label: 'Divisas & Riesgo FX', icon: Coins },
+            { id: 'assets', label: 'Clases de Activo', icon: Layers },
+            { id: 'rebalance', label: 'Consejos de Rebalanceo', icon: Sparkles },
           ].map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
@@ -416,15 +416,15 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </p>
                 </div>
 
-                <div className="h-[210px] w-full relative flex items-center justify-center">
+                <div className="h-[270px] sm:h-[290px] w-full relative flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={geoDonutData}
                         dataKey="value"
                         nameKey="shortName"
-                        innerRadius={55}
-                        outerRadius={85}
+                        innerRadius={68}
+                        outerRadius={105}
                         paddingAngle={3}
                         animationDuration={800}
                       >
@@ -451,25 +451,33 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </ResponsiveContainer>
 
                   {/* Centered Total */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total</span>
-                    <span className="text-sm font-extrabold font-mono text-slate-900 dark:text-white">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-2 text-center">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Cartera</span>
+                    <span className="text-xl sm:text-2xl font-extrabold font-mono text-slate-900 dark:text-white leading-tight mt-0.5">
                       {fmt.currency(totalPortfolioValue)}
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
+                      {positions.length} activos
                     </span>
                   </div>
                 </div>
 
-                {/* Mini Legend List */}
-                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
+                {/* Mini Legend List with amounts and percentages */}
+                <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
                   {geoDonutData.map((d) => (
-                    <div key={`legend-${d.id}`} className="flex items-center justify-between text-xs font-medium">
-                      <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                    <div key={`legend-${d.id}`} className="flex items-center justify-between text-xs font-medium py-0.5">
+                      <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 min-w-0">
                         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-                        <span>{d.flag} {d.shortName}</span>
+                        <span className="truncate">{d.flag} {d.shortName}</span>
                       </span>
-                      <span className="font-mono font-bold text-slate-900 dark:text-white">
-                        {d.pct.toFixed(1)}%
-                      </span>
+                      <div className="flex items-center gap-2.5 shrink-0 font-mono">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                          {fmt.currency(d.value)}
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white w-12 text-right">
+                          {d.pct.toFixed(1)}%
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
