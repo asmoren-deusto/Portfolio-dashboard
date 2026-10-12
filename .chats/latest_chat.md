@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:11:36
+- **Fecha de exportación:** 2026-10-12 18:14:39
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 127
+- **Total de interacciones registradas:** 129
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2115,5 +2115,27 @@ Publicado y desplegado en la versión **`v2.7.72`**.
 ### 👤 Usuario (2026-10-12 16:10:09)
 
 el% no se ve, y reduce el alto de toda la tarjeta un 20%
+
+---
+
+### 🤖 Asistente (2026-10-12 16:11:39)
+
+Se han aplicado ambos ajustes en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+1. **Visibilidad del símbolo `%` en EUR/USD**:
+   - Se ha ampliado el espaciado interior (`px-2 py-0.5 whitespace-nowrap`) y centrado la etiqueta para que el carácter `%` ya no se corte ni quede pegado al borde. Ahora es 100% visible y nítido.
+2. **Reducción del 20% en la altura de toda la tarjeta**:
+   - Altura de la gráfica reducida de `335px` a **`268px`** (un 20% menos).
+   - Altura máxima de las tablas de fondos y réplicas reducida de `620px` a **`495px`** (un 20% menos).
+3. **Cierre limpio en `start.py`**:
+   - Se ha suprimido la advertencia de salida al detener con `Ctrl+C`.
+
+Sincronizado y publicado en la versión **`v2.7.73`**.
+
+---
+
+### 👤 Usuario (2026-10-12 16:13:37)
+
+
 
 ---
