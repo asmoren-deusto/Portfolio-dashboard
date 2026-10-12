@@ -200,26 +200,26 @@ export function AnalyticsPage() {
 
       {/* Benchmark Comparison Card */}
       <Card delay={0.18} loading={analyticsFetching || benchmarkFetching}>
-        <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/[0.05]">
+        <div className="px-4 py-2.5 sm:px-5 sm:py-3 flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-100 dark:border-white/[0.05]">
           <div>
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-              <CardTitle className="text-base font-semibold">Comparativa de Rentabilidad vs Benchmarks</CardTitle>
+              <CardTitle className="text-sm sm:text-base font-semibold">Comparativa de Rentabilidad vs Benchmarks</CardTitle>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
               Rendimiento ponderado en el tiempo (TWR) neutralizando aportaciones periódicas frente a índices globales de referencia.
             </p>
           </div>
         </div>
 
-        <div className={cn("grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 p-5 transition-opacity duration-300", (analyticsFetching || benchmarkFetching) ? "opacity-65" : "opacity-100")}>
-          <div data-private className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
+        <div className={cn("grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 p-3 sm:p-3.5 transition-opacity duration-300", (analyticsFetching || benchmarkFetching) ? "opacity-65" : "opacity-100")}>
+          <div data-private className="px-3.5 py-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
             <div className="flex items-center justify-between">
               <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Tu Cartera (TWR)</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
             <span className={cn(
-              "text-2xl font-bold font-mono mt-1 block",
+              "text-xl sm:text-2xl font-bold font-mono mt-0.5 block leading-tight",
               (benchmarkData?.summary?.portfolio_twr ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
             )}>
               {benchmarkData?.summary
@@ -228,62 +228,62 @@ export function AnalyticsPage() {
                 ? fmt.pct(analytics.twr)
                 : '—'}
             </span>
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Flujos neutralizados</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Flujos neutralizados</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+          <div className="px-3.5 py-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
             <div className="flex items-center justify-between">
               <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold block">S&P 500 (^GSPC)</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
-            <span className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1 block">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-0.5 block leading-tight">
               {benchmarkData?.summary
                 ? `${benchmarkData.summary.sp500 >= 0 ? '+' : ''}${benchmarkData.summary.sp500.toFixed(2)}%`
                 : '+14.58%'}
             </span>
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Índice EE.UU.</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Índice EE.UU.</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+          <div className="px-3.5 py-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
             <div className="flex items-center justify-between">
               <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block">Tasa BCE / Depósito</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
-            <span className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1 block">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-0.5 block leading-tight">
               {benchmarkData?.summary?.bce_rate !== undefined
                 ? `${benchmarkData.summary.bce_rate >= 0 ? '+' : ''}${benchmarkData.summary.bce_rate.toFixed(2)}%`
                 : '+3.45%'}
             </span>
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Tipo libre de riesgo</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Tipo libre de riesgo</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+          <div className="px-3.5 py-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
             <div className="flex items-center justify-between">
               <span className="text-xs text-purple-700 dark:text-purple-400 font-semibold block">MSCI World (URTH)</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
-            <span className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1 block">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-0.5 block leading-tight">
               {benchmarkData?.summary
                 ? `${benchmarkData.summary.msci_world >= 0 ? '+' : ''}${benchmarkData.summary.msci_world.toFixed(2)}%`
                 : '+14.70%'}
             </span>
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Mercados Desarrollados</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Mercados Desarrollados</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+          <div className="px-3.5 py-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
             <div className="flex items-center justify-between">
               <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold block">Alfa vs S&P 500</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
             <span className={cn(
-              "text-2xl font-bold font-mono mt-1 block",
+              "text-xl sm:text-2xl font-bold font-mono mt-0.5 block leading-tight",
               (benchmarkData?.summary?.alpha_sp500 ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
             )}>
               {benchmarkData?.summary
                 ? `${benchmarkData.summary.alpha_sp500 >= 0 ? '+' : ''}${benchmarkData.summary.alpha_sp500.toFixed(2)}%`
                 : '+7.87%'}
             </span>
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Exceso de rentabilidad</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Exceso de rentabilidad</span>
           </div>
         </div>
       </Card>
