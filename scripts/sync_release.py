@@ -144,7 +144,7 @@ def bump_version(bump_type="patch"):
     with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
         pkg_data = json.load(f)
 
-    current_ver = pkg_data.get("version", "2.7.0")
+    current_ver = pkg_data.get("version", "3.0.0")
     parts = current_ver.split(".")
     while len(parts) < 3:
         parts.append("0")
@@ -152,7 +152,7 @@ def bump_version(bump_type="patch"):
     try:
         major, minor, patch = int(parts[0]), int(parts[1]), int(parts[2])
     except ValueError:
-        major, minor, patch = 2, 7, 0
+        major, minor, patch = 3, 0, 0
 
     if bump_type == "major":
         major += 1
