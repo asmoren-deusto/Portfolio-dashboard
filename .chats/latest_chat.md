@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:25:18
+- **Fecha de exportación:** 2026-10-12 18:26:09
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 139
+- **Total de interacciones registradas:** 141
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2253,5 +2253,24 @@ Se ha mejorado la legibilidad y añadido la descripción a las etiquetas de los 
 ### 👤 Usuario (2026-10-12 16:21:04)
 
 amplia un poco
+
+---
+
+### 🤖 Asistente (2026-10-12 16:25:20)
+
+Se ha ampliado el tamaño y mejorado la legibilidad del bloque **Base** y la píldora de **rango mín/máx** en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+- **Importe Base:** Aumentado de `text-[11px]` a `text-xs sm:text-sm font-bold`.
+- **Píldora de Rango `[-0.24% ↔ +0.36%]`:**
+  - Tipografía ampliada de `text-[10px]` a `text-xs sm:text-[13px] font-mono font-bold`.
+  - Padding incrementado a `px-2.5 py-1` con bordes redondeados `rounded-lg` y fondo con mayor contraste y sombra suave (`shadow-2xs`).
+
+🚀 **Release actualizada:** `v2.7.79` sincronizada y desplegada en Git.
+
+---
+
+### 👤 Usuario (2026-10-12 16:22:28)
+
+devuelve el selector eur/dolar y su conversion actual, pero que se vea
 
 ---

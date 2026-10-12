@@ -452,6 +452,31 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             </button>
           </div>
 
+          {/* Conversión actual EUR/USD */}
+          {fxInfo && (
+            <div
+              className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs border border-slate-200/90 dark:border-white/[0.08] bg-white/90 dark:bg-[#252526] shadow-2xs select-none"
+              title={`Tipo de cambio EUR/USD: 1 € = ${fxInfo.eur_usd_rate.toFixed(4)} $. Variación de hoy frente al cierre anterior.`}
+            >
+              <div className="flex items-center gap-1 font-mono">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">EUR/USD:</span>
+                <span className="font-bold text-xs text-slate-900 dark:text-white">
+                  {fxInfo.eur_usd_rate.toFixed(4)}
+                </span>
+              </div>
+              <span
+                className={cn(
+                  'text-[11px] font-bold font-mono px-1.5 py-0.2 rounded-md whitespace-nowrap inline-flex items-center',
+                  fxInfo.eur_usd_change_pct >= 0
+                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
+                    : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25'
+                )}
+              >
+                {fxInfo.eur_usd_change_pct >= 0 ? '+' : ''}{fxInfo.eur_usd_change_pct.toFixed(2)}%
+              </span>
+            </div>
+          )}
+
           {/* Period selector */}
           <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             {[
