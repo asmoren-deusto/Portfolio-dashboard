@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-12 18:33:01
+- **Fecha de exportación:** 2026-10-12 18:33:48
 - **ID de Conversación:** `44e678e1-610f-43d6-91b0-6bd891ae8e1c`
-- **Total de interacciones registradas:** 151
+- **Total de interacciones registradas:** 153
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2377,5 +2377,22 @@ Se han aplicado los ajustes visuales en [SimulatedPortfolioCard.tsx](file:///c:/
 ### 👤 Usuario (2026-10-12 16:28:27)
 
 +altura 5%
+
+---
+
+### 🤖 Asistente (2026-10-12 16:33:04)
+
+Se ha incrementado la altura general un **5%** de manera proporcionada en [SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+- **Gráfica TradingView:** Aumentada de `270px` a `285px` (`h-[265px] sm:h-[285px]`, +5%).
+- **Tabla de Fondos y Réplicas:** Altura máxima ampliada de `365px` a `385px` (`max-h-[370px] sm:max-h-[385px]`, +5%), permitiendo ver más filas con mayor amplitud y holgura.
+
+🚀 **Release actualizada:** `v2.7.85` sincronizada y desplegada en Git.
+
+---
+
+### 👤 Usuario (2026-10-12 16:32:21)
+
+este badge redondeado, como el resto, no cuadrado
 
 ---

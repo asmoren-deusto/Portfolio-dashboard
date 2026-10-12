@@ -395,7 +395,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           {/* Market status badge */}
           <span
             className={cn(
-              'inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg text-[11px] font-bold border shrink-0',
+              'inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-[11px] font-bold border shrink-0',
               summary?.market_state === 'REGULAR'
                 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                 : summary?.market_state === 'PRE' || summary?.market_state === 'POST'
