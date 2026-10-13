@@ -277,27 +277,29 @@ export function HeaderActions({
       </button>
 
       {/* NAV Updates History / Bell */}
-      {lastNavAlertHistory && (
-        <button
-          onClick={openNavAlertHistory}
-          aria-label="Ver informe de actualizaciones de NAVs"
-          className={cn(
-            'relative flex items-center justify-center border transition-all active:scale-95',
-            btnSize,
-            (lastNavAlertHistory.updatedCount ?? 0) > 0
-              ? 'border-emerald-300 bg-emerald-50/60 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400'
-              : 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300'
-          )}
-          title={`Ver informe de NAVs (${lastNavAlertHistory.updatedCount} actualizados a las ${lastNavAlertHistory.timestamp})`}
-        >
-          <Bell className="w-4 h-4" />
-          {(lastNavAlertHistory.updatedCount ?? 0) > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-white shadow-xs">
-              {lastNavAlertHistory.updatedCount}
-            </span>
-          )}
-        </button>
-      )}
+      <button
+        onClick={openNavAlertHistory}
+        aria-label="Ver informe de actualizaciones de NAVs"
+        className={cn(
+          'relative flex items-center justify-center border transition-all active:scale-95',
+          btnSize,
+          (lastNavAlertHistory?.updatedCount ?? 0) > 0
+            ? 'border-emerald-300 bg-emerald-50/60 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400'
+            : 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300'
+        )}
+        title={
+          lastNavAlertHistory
+            ? `Ver informe de NAVs (${lastNavAlertHistory.updatedCount} actualizados a las ${lastNavAlertHistory.timestamp})`
+            : 'Ver informe de actualizaciones de NAVs'
+        }
+      >
+        <Bell className="w-4 h-4" />
+        {(lastNavAlertHistory?.updatedCount ?? 0) > 0 && (
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-white shadow-xs">
+            {lastNavAlertHistory?.updatedCount}
+          </span>
+        )}
+      </button>
 
       {/* Refresh button */}
       {!hideRefresh && (

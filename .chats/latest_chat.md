@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 14:35:31
+- **Fecha de exportación:** 2026-10-13 14:49:13
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 65
+- **Total de interacciones registradas:** 67
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1435,5 +1435,21 @@ Se ha actualizado el componente [`MarketTicker`](file:///c:/Users/AsierM/Documen
 ### 👤 Usuario (2026-10-13 12:30:17)
 
 nativo: baja un poco el menu de abajo (unos 5px)
+
+---
+
+### 🤖 Asistente (2026-10-13 12:35:35)
+
+Se ha ajustado la posición de la barra inferior de navegación en [`MobileTabBar.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/MobileTabBar.tsx):
+
+- **Ajuste de 5px**: Se redujo el espaciado inferior a `pb-[max(calc(env(safe-area-inset-bottom,0px)-5px),8px)]` y el relleno superior a `pt-1.5`, situando los iconos y títulos exactamente **5 píxeles más abajo**.
+- **Alineación del contenedor principal**: Se ajustó proporcionalmente el padding inferior de las páginas en [`RootLayout.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx).
+- **Release y despliegue**: Se ha ejecutado el protocolo de release generando la versión **`v3.0.23`** y subiendo los cambios a Git.
+
+---
+
+### 👤 Usuario (2026-10-13 12:44:54)
+
+nativa: quita el selector de entidades de arriba y muevelo al popup que se abre cuando se pulsa el logo. añade el icono de la campana. baja el menu inferior un poco para que ocupe menos alto. deja el menu superior con el logo y los iconos fijo
 
 ---

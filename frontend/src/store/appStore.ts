@@ -270,10 +270,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   clearNavAlertNotification: () => set({ navAlertNotification: null }),
   openNavAlertHistory: () => {
-    const history = get().lastNavAlertHistory
-    if (history) {
-      set({ navAlertNotification: history })
+    let history = get().lastNavAlertHistory
+    if (!history) {
+      history = {
+        id: 'latest',
+        timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+        updatedCount: 0,
+        totalCount: 0,
+        items: [],
+        allCheckedItems: [],
+      }
     }
+    set({ navAlertNotification: history })
   },
 
   // Auth State

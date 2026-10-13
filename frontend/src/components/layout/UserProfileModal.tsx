@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff } from 'lucide-react'
+import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
+import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -19,8 +20,12 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
     toggleTheme,
     privacyMode,
     togglePrivacyMode,
+    selectedBroker,
+    setSelectedBroker,
+    useMock,
   } = useAppStore()
   const navigate = useNavigate()
+  const brokers = useMock ? DEMO_BROKERS : BROKERS
 
   if (!currentUser) return null
 
@@ -126,6 +131,46 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
                 {theme === 'dark' ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-slate-700" />}
                 <span>{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
               </button>
+            </div>
+
+            {/* Entity / Broker Selector */}
+            <div className="mt-4">
+              <div className="flex items-center justify-between px-1 mb-1.5">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  <Landmark size={12} />
+                  <span>Entidad / Broker</span>
+                </div>
+                <span className="text-[10.5px] font-semibold text-blue-600 dark:text-blue-400">
+                  {brokers.find((b) => b.value === selectedBroker)?.label || 'Consolidado'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {brokers.map((b) => {
+                  const isSelected = selectedBroker === b.value
+                  const dot = BROKER_CONFIG[b.value]?.dot
+                  return (
+                    <button
+                      key={b.value}
+                      onClick={() => setSelectedBroker(b.value)}
+                      className={cn(
+                        'flex items-center gap-2 py-2 px-2.5 rounded-xl text-xs font-semibold transition-all border text-left active:scale-95',
+                        isSelected
+                          ? 'border-blue-500/50 bg-blue-50/90 text-blue-900 dark:bg-white/[0.1] dark:text-white dark:border-white/20 shadow-2xs font-bold'
+                          : 'border-slate-200/80 bg-slate-50/60 hover:bg-slate-100/80 text-slate-700 dark:border-white/[0.06] dark:bg-white/[0.03] dark:hover:bg-white/[0.06] dark:text-slate-300'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'w-2 h-2 rounded-full shrink-0',
+                          dot || 'bg-slate-400 dark:bg-slate-500'
+                        )}
+                      />
+                      <span className="truncate flex-1">{b.label}</span>
+                      {isSelected && <Check size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             {/* Switch Profile Section */}

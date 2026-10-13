@@ -146,7 +146,7 @@ export function RootLayout() {
 
   return (
     <HeaderProvider>
-      <div className={`relative flex min-h-screen bg-[#f6f8fb] text-slate-800 dark:bg-[#1c1c1c] dark:text-slate-100 overflow-x-hidden selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-[#264f78] dark:selection:text-white transition-colors duration-200${privacyMode ? ' privacy-mode' : ''}`}>
+      <div className={`relative flex min-h-screen bg-[#f6f8fb] text-slate-800 dark:bg-[#1c1c1c] dark:text-slate-100 overflow-x-clip selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-[#264f78] dark:selection:text-white transition-colors duration-200${privacyMode ? ' privacy-mode' : ''}`}>
         {/* Refined ambient background lighting — subtle graphite and neutral cool haze */}
         <div className="pointer-events-none fixed top-0 left-1/4 w-[750px] h-[350px] bg-gradient-to-br from-blue-500/[0.05] via-indigo-500/[0.03] to-transparent blur-[140px] rounded-full -z-10 dark:from-slate-600/[0.04] dark:via-zinc-600/[0.02]" />
         <div className="pointer-events-none fixed top-1/3 right-4 w-[500px] h-[300px] bg-gradient-to-bl from-violet-500/[0.04] to-transparent blur-[130px] rounded-full -z-10 dark:from-slate-500/[0.03]" />
@@ -181,8 +181,8 @@ export function RootLayout() {
         <Sidebar />
 
         <div className={`flex flex-1 flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
-          {/* Mobile / Collapsed Desktop Header Bar */}
-          <header className={`sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 pt-[max(0.625rem,env(safe-area-inset-top,0px))] pb-2.5 bg-white/95 dark:bg-[#191919]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+          {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop) */}
+          <header className={`fixed top-0 left-0 right-0 md:sticky z-30 flex items-center justify-between px-3 sm:px-4 pt-[max(0.625rem,env(safe-area-inset-top,0px))] pb-2.5 bg-white/95 dark:bg-[#191919]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
             <div className="flex items-center gap-1.5 shrink-0">
               {/* Only show hamburger button when NOT native (native uses bottom MobileTabBar) */}
               {!isNativePlatform() && (
@@ -221,17 +221,20 @@ export function RootLayout() {
               </button>
             </div>
 
-            {/* Controls on Mobile in top sticky header (Entity selector + Year selector + Actions) */}
+            {/* Controls on Mobile in top header (Period selector + Actions; Broker moved to logo popup on native) */}
             <div className="flex md:hidden items-center ml-auto">
               <HeaderActions
                 compact
                 showPeriod
-                showBroker
+                showBroker={!isNativePlatform()}
                 hideUser={isNativePlatform()}
                 hideRefresh={isNativePlatform()}
               />
             </div>
           </header>
+
+          {/* Spacer to prevent content overlap with fixed mobile header */}
+          <div className="h-[calc(max(0.625rem,env(safe-area-inset-top,0px))+2.75rem)] md:hidden shrink-0" aria-hidden="true" />
 
           {/* Persistent Top Header (Desktop only: shows titles, subtitles, and horizontal pills) */}
           <div className="hidden md:block px-4 pt-3 sm:px-6 sm:pt-4 md:px-7 md:pt-4">
