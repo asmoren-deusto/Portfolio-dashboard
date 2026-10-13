@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 12:20:40
+- **Fecha de exportación:** 2026-10-13 12:26:34
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 39
+- **Total de interacciones registradas:** 41
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1086,5 +1086,48 @@ Tienes dos vías:
 ### 👤 Usuario (2026-10-13 10:18:44)
 
 el fondo del icono sale negro, mira si puede ser transparente y dale un pelin más de estilo
+
+---
+
+### 🤖 Asistente (2026-10-13 10:20:43)
+
+El motivo exacto por el que salía el fondo negro es una regla estricta de Apple:
+
+> ⚠️ **Normativa de Apple en iOS:**
+> iOS **no permite transparencias** en los iconos de las apps. Si un icono tiene píxeles transparentes o esquinas recortadas con canal alfa, el sistema operativo de Apple **los rellena automáticamente de negro sólido (`#000000`)**.
+> 
+> En iOS, los iconos deben ser **completamente opacos (Full-Bleed)** llenando todo el cuadrado: es el propio iPhone el que se encarga de recortar las esquinas redondeadas (*squircle*) de forma perfecta.
+
+---
+
+### 🎨 Nuevo diseño premium aplicado:
+
+Hemos rediseñado por completo el icono con una estética de aplicación financiera de alta gama:
+
+1. **Fondo 100% Full-Bleed (Adiós al fondo negro):**
+   * El fondo llena el 100% del marco sin ninguna zona transparente, de forma que el iPhone aplica su curva continua nativa sin bordes negros.
+2. **Atmósfera Dark Luxury:**
+   * Fondo azul obsidiana metálico profundo (`#0b1322` a `#060910`) con un resplandor ambiental (*spotlight*) de luz cian en la parte superior.
+3. **Tarjeta de cristal (Glassmorphic Sheen):**
+   * Superficie central con efecto de cristal esmerilado y un bisel superior iluminado con reflejo especular.
+4. **Trayectoria alcista en gradiente Neón:**
+   * Curva de rendimiento financiero en gradiente dinámico desde **Cian Eléctrico (`#38bdf8`) hasta Verde Esmeralda (`#34d399`)**, con halo de luz (*bloom*) y sombreado degradado bajo la curva.
+5. **Faro de cumbre (*Beacon Dot*):**
+   * Punto de luz brillante en el pico de la flecha con doble anillo de resplandor.
+
+---
+
+### 📦 Dónde está aplicado:
+* **En Safari (PWA):** Regenerado `apple-touch-icon.png` (180x180), `icon-192.png` e `icon-512.png`.
+* **En la App Nativa (`.ipa`):** Regenerado [`AppIcon-512@2x.png`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png) (1024x1024 en el catálogo de assets de Xcode).
+* **Sincronizado y subido a Git** en la versión **`v3.0.11`**.
+
+Ahora, tanto si lo añades desde Safari (*Añadir a pantalla de inicio*) como si generas el `.ipa` en GitHub Actions, el icono se verá nítido, moderno y perfectamente integrado con la curvatura de iOS.
+
+---
+
+### 👤 Usuario (2026-10-13 10:22:12)
+
+en safari no cortes la web arriba y abajo
 
 ---

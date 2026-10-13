@@ -41,7 +41,6 @@
     scroll-behavior: smooth;
     background-color: var(--bg-app);
     -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: none;
   }
 
   /* Variables de Safe Area de iOS (Notch, Dynamic Island y Barra inferior de inicio) */
@@ -60,9 +59,7 @@
     transition: background-color 0.2s ease, color 0.2s ease;
     min-height: 100vh;
     min-height: 100dvh;
-    padding-top: var(--sat);
-    padding-left: var(--sal);
-    padding-right: var(--sar);
+    margin: 0;
   }
 
   /* Evitar zoom automático forzado en iOS Safari al pulsar en campos de texto */

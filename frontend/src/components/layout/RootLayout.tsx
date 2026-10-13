@@ -142,7 +142,7 @@ export function RootLayout() {
 
         <div className={`flex flex-1 flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
           {/* Mobile / Collapsed Desktop Header Bar */}
-          <header className={`sticky top-0 z-30 flex items-center justify-between px-4 py-2.5 bg-white/90 dark:bg-[#191919]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+          <header className={`sticky top-0 z-30 flex items-center justify-between px-4 pt-[max(0.625rem,env(safe-area-inset-top,0px))] pb-2.5 bg-white/95 dark:bg-[#191919]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
             <div className="flex items-center gap-2.5">
               <button
                 onClick={toggleMobileSidebar}
@@ -187,7 +187,7 @@ export function RootLayout() {
           </div>
 
           {/* Page Content Animation (KPIs, Charts, Tables fade in quickly without header flickering) */}
-          <main key={location.pathname} className="animate-in-quick flex flex-1 flex-col gap-4 px-4 pt-4 pb-24 sm:px-6 sm:pt-4 sm:pb-24 md:px-7 md:pt-4 md:pb-4.5">
+          <main key={location.pathname} className="animate-in-quick flex flex-1 flex-col gap-4 px-4 pt-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:pt-4 sm:pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:px-7 md:pt-4 md:pb-6">
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>
