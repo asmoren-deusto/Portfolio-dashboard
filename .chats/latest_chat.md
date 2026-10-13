@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 12:42:44
+- **Fecha de exportación:** 2026-10-13 12:49:56
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 47
+- **Total de interacciones registradas:** 49
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1202,5 +1202,30 @@ He eliminado el badge de porcentaje de la pestaña de **Mercado** en el menú in
 ### 👤 Usuario (2026-10-13 10:40:54)
 
 el icono esta mejor pero no ocupa todo el espacio asi que queda un cuadrado redondeado sobre un fondo azul lo que hace que quede mal
+
+---
+
+### 🤖 Asistente (2026-10-13 10:42:49)
+
+Tenías toda la razón: la versión anterior renderizaba una tarjeta o recuadro interior con bordes redondeados y márgenes (`card_margin`), lo que provocaba que al aplicar iOS su propia máscara de icono (*squircle*), pareciese una "tarjeta dentro de un cuadrado con bordes azules".
+
+### 🎨 Corrección realizada en [generate_icons.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/scripts/generate_icons.py):
+1. **Lienzo a sangre completa (*Full-Bleed Edge-to-Edge*)**:
+   - Se eliminaron por completo las tarjetas, marcos y márgenes interiores.
+   - El fondo es un degradado continuo que va desde **zafiro real profundo** en la esquina superior izquierda hasta **azul noche obsidiana** en la inferior derecha, extendiéndose al 100% de los 1024x1024 píxeles.
+2. **Símbolo perfectamente integrado**:
+   - La gráfica alcista y el destello esmeralda (*beacon dot*) ahora flotan directamente sobre el fondo iluminado, ocupando el espacio seguro recomendado por Apple (~65% del área central).
+   - El área bajo la curva se difumina de forma orgánica hacia el fondo sin ninguna línea de corte ni caja.
+3. **Mascara nativa de iOS**:
+   - Ahora, cuando iOS recorta el icono con su curvatura continua en la pantalla de inicio, el fondo ocupa todo el icono de extremo a extremo, luciendo como una aplicación nativa de primer nivel (estilo Apple Stocks / Revolut).
+
+---
+🚀 Los iconos han sido regenerados, sincronizados con el proyecto de Xcode y subidos a GitHub en la versión **v3.0.15**. Cuando compile la GitHub Action el nuevo `.ipa`, ya vendrá con el icono a pantalla completa.
+
+---
+
+### 👤 Usuario (2026-10-13 10:48:22)
+
+mismo fondo pero la flecha blanca como el icono de la web
 
 ---
