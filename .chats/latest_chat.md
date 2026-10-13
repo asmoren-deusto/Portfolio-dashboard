@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:46:32
+- **Fecha de exportación:** 2026-10-13 15:54:00
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 92
+- **Total de interacciones registradas:** 94
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1741,5 +1741,29 @@ Se han aplicado las modificaciones para la visualización nativa de **Posiciones
 ### 👤 Usuario (2026-10-13 13:37:22)
 
 la leyenda del eje Y a la izquierda y dentro del grafico
+
+---
+
+### 🤖 Asistente (2026-10-13 13:46:35)
+
+La escala del eje Y ha sido reubicada **a la izquierda y dentro del gráfico** en la versión **v3.0.36**:
+
+### Cambios realizados:
+1. **Gráfico de Sesión en Directo ([SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx))**:
+   * Se ha desactivado el panel lateral externo del eje Y en la app nativa para aprovechar el **100% del ancho**.
+   * Los valores de referencia de la sesión (*Máximo, Base 0.00% y Mínimo*) ahora flotan de forma limpia **a la izquierda y dentro del propio lienzo del gráfico** con fondo translúcido y tipografía compacta.
+   * Al deslizar el dedo por la curva, la etiqueta de inspección interactiva con la cotización y la hora se ubica discretamente en la esquina superior derecha sin colisionar con la escala.
+
+2. **Gráfico de Evolución de Cartera ([PerformanceChart.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx))**:
+   * Se ha actualizado la escala flotante interna para situarse de manera coherente **a la izquierda** dentro del gráfico.
+
+---
+> Para cargar la actualización en tu teléfono, pulsa en el logo de **PortfolioPro** y toca en **"Recargar app"** (o reinicia la app desde la multitarea de iOS). La versión actualizada es **v3.0.36**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:50:34)
+
+nativo: evolucion patrimonial, la leyenda (los datos, pej 78831) encima del grafico pero a la derecha
 
 ---

@@ -848,6 +848,38 @@ export function PerformanceChart({
         </div>
       )}
 
+      {/* Native: Leyenda con los datos (ej: 78.831 €) encima del gráfico pero a la derecha */}
+      {isNativePlatform() && activeSelectedMetrics && (
+        <div className="flex flex-wrap items-center justify-end gap-2 px-1 py-0.5 text-xs select-none">
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+            <span data-private className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm">
+              {chartMode === 'currency'
+                ? fmt.currency(activeSelectedMetrics.val)
+                : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
+            </span>
+          </div>
+
+          <span
+            data-private
+            className={cn(
+              'font-mono font-bold px-1.5 py-0.5 rounded text-[10.5px]',
+              activeSelectedMetrics.diff >= 0
+                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
+                : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
+            )}
+          >
+            {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
+          </span>
+
+          {activePoint?.date && (
+            <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 shrink-0">
+              {formatDateSpanish(activePoint.date)}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Canvas Container */}
       <div data-private ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
         {/* Floating Small In-Chart Legend */}
@@ -886,18 +918,6 @@ export function PerformanceChart({
                 ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(metrics.minPoint.value)
                 : `${(metrics.periodReturnPct || 0) < 0 ? (metrics.periodReturnPct || 0).toFixed(1) : '0.0'}%`}
             </span>
-          </div>
-        )}
-
-        {/* Floating touch scrub detail badge on native (top-right) */}
-        {isNativePlatform() && hoveredPoint && (
-          <div className="absolute top-2 right-2 z-20 pointer-events-none flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-900/90 dark:bg-black/90 text-white text-[11px] font-mono shadow-md backdrop-blur-xs border border-white/10">
-            <span className="font-bold text-blue-400">
-              {chartMode === 'currency'
-                ? fmt.currency(hoveredPoint.value)
-                : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
-            </span>
-            <span className="text-slate-400 text-[10px]">{formatDateSpanish(hoveredPoint.date)}</span>
           </div>
         )}
       </div>
