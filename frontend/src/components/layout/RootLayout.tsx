@@ -246,7 +246,7 @@ export function RootLayout() {
             key={location.pathname}
             className={`animate-in-quick flex flex-1 flex-col gap-4 px-4 pt-4 md:px-7 md:pt-4 md:pb-6 ${
               isNativePlatform()
-                ? 'pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(7rem+env(safe-area-inset-bottom,0px))]'
+                ? 'pb-[calc(6.6rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(6.6rem+env(safe-area-inset-bottom,0px))]'
                 : 'pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] sm:pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))]'
             }`}
           >

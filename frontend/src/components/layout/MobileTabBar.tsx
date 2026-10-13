@@ -42,7 +42,7 @@ export const MobileTabBar: React.FC = () => {
   return (
     <nav
       aria-label="Navegación móvil inferior"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-[#161616]/96 backdrop-blur-xl border-t border-slate-200/85 dark:border-white/[0.08] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4)] px-2 pt-2 pb-[max(env(safe-area-inset-bottom,0px),14px)] select-none transition-all"
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-[#161616]/96 backdrop-blur-xl border-t border-slate-200/85 dark:border-white/[0.08] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4)] px-2 pt-1.5 pb-[max(calc(env(safe-area-inset-bottom,0px)-5px),8px)] select-none transition-all"
     >
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {TABS.map(({ to, icon: Icon, label }) => (

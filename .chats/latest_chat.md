@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 14:34:27
+- **Fecha de exportación:** 2026-10-13 14:35:31
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 63
+- **Total de interacciones registradas:** 65
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1413,5 +1413,27 @@ Se han implementado todas las modificaciones solicitadas:
 ### 👤 Usuario (2026-10-13 12:28:17)
 
 nativo: en el ticker quita la hora y el premercado/regular/etc. deja solo el circulo pulsante para que quepan mas tickers
+
+---
+
+### 🤖 Asistente (2026-10-13 12:34:30)
+
+Se ha actualizado el componente [`MarketTicker`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx) para la versión nativa:
+
+1. **Indicador simplificado**:
+   - En la versión nativa se han eliminado los textos de estado (`Pre-mercado`, `Regular`, `Cerrado`, etc.) y la hora/reloj, dejando exclusivamente el **círculo pulsante** (o punto estático cuando el mercado está cerrado).
+   - Se mantiene accesible el detalle del estado y la hora de última actualización mediante el atributo `title` del indicador.
+
+2. **Mayor espacio para tickers**:
+   - Al reducir este bloque fijo de la izquierda, se ganan más de 80 píxeles de ancho útil en la pantalla del móvil, permitiendo ver más tickers simultáneamente en el carrusel continuo.
+
+3. **Release y sincronización**:
+   - Se ha ejecutado el protocolo de release incrementando la versión a **`v3.0.22`** y subiendo los cambios a Git.
+
+---
+
+### 👤 Usuario (2026-10-13 12:30:17)
+
+nativo: baja un poco el menu de abajo (unos 5px)
 
 ---
