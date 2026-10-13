@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 13:05:45
+- **Fecha de exportación:** 2026-10-13 14:10:26
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 51
+- **Total de interacciones registradas:** 55
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1247,5 +1247,75 @@ Hecho. He actualizado el generador de iconos en [generate_icons.py](file:///c:/U
 ### 👤 Usuario (2026-10-13 11:00:07)
 
 en la version movil nativa elimina el menu lateral, teniendo el de abajo no hace falta. oculta tb los titulos y subtitulos de las secciones y el selector de entidades subelo al lado del selector de año, mira como puedes hacer para que quepa
+
+---
+
+### 🤖 Asistente (2026-10-13 11:05:48)
+
+Todo implementado y sincronizado:
+
+### 📱 Optimizaciones para la versión móvil nativa y web:
+
+1. **Eliminación del menú lateral en la app nativa**:
+   - En la app nativa de iOS ([Sidebar.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/Sidebar.tsx) y [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx)), se ocultó por completo el botón hamburguesa (`☰`) y se desactivó el drawer lateral. Toda la navegación se realiza de manera nativa mediante la barra inferior (`MobileTabBar`).
+   - El cambio de usuario y el cierre de sesión están integrados en el botón de perfil/avatar del encabezado.
+   - *(En Safari / navegador web móvil se conserva el botón de menú para poder navegar).*
+
+2. **Ocultación de títulos y subtítulos en móvil**:
+   - Se ocultó el bloque superior del encabezado ([Header.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/Header.tsx)) en dispositivos móviles (`hidden md:block`).
+   - Esto recupera más de 80 píxeles de altura vertical, permitiendo que las tarjetas principales, KPIs y gráficos aparezcan directamente en pantalla sin scrolls innecesarios. En escritorio se mantienen los títulos y subtítulos completos.
+
+3. **Selector de entidades integrado junto al selector de periodo/año**:
+   - Se subió el selector de entidades a la barra superior fija ([HeaderActions.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx)), situándolo justo a la izquierda del selector de periodo (`1M`, `3M`, `6M`, `1A`, `2A`, `Max`).
+   - **Diseño compacto**:
+     - Muestra un punto con el color identificativo de la entidad activa (azul para MyInvestor, verde para BBVA, naranja para Indexa, gris para Consolidado).
+     - Ambos selectores comparten la misma altura (`h-8`), tipografía y bordes redondeados, ocupando conjuntamente solo ~135 píxeles.
+     - Cabe holgadamente en cualquier iPhone (desde un Mini de 375px hasta un Pro Max) junto con los accesos rápidos a modo discreto, tema, actualización y perfil.
+
+---
+🚀 Cambios compilados y desplegados a GitHub en la versión **v3.0.17**. En unos minutos el workflow de GitHub Actions generará la nueva compilación para tu dispositivo.
+
+---
+
+### 👤 Usuario (2026-10-13 12:07:53)
+
+si actualizo algo en la web se vé tb en la nativa o tengo que generar siempre el ipa?
+
+---
+
+### 🤖 Asistente (2026-10-13 12:08:02)
+
+Ahora mismo funciona de la siguiente manera:
+
+### 1. ¿Qué se actualiza ya en tiempo real sin tocar el `.ipa`?
+- **Tus datos financieros**: Precios de mercado, valor de cartera, cálculo de rentabilidades, actualizaciones de NAVs oficiales, transacciones, etc. Todo esto se consulta en directo contra `https://portfolio.asiermoreno.es/api`, por lo que **siempre está al día**.
+
+### 2. ¿Qué requiere reinstalar el `.ipa` actualmente?
+- **Los cambios de diseño o interfaz (código React / HTML / CSS)**: Actualmente Capacitor está configurado en modo empaquetado (`webDir: "dist"`), lo que significa que el código de la web va "congelado" dentro de la propia aplicación instalada en el iPhone.
+
+---
+
+### 💡 ¿Quieres que se actualice la app nativa automáticamente al tocar la web?
+Podemos activar en [capacitor.config.ts](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/capacitor.config.ts) el **modo Live Server**:
+
+```ts
+server: {
+  url: 'https://portfolio.asiermoreno.es',
+  cleartext: false,
+}
+```
+
+**Ventajas de este modo:**
+- **Zero re-instalaciones:** Cualquier cambio visual, botón o mejora que subamos al servidor se reflejará **al segundo en tu app nativa** en el iPhone al abrirla, sin tener que generar ni firmar nunca más un nuevo `.ipa` por Sideloadly.
+- **Sigue siendo 100% nativa:** La app conserva su icono, pantalla de carga completa (*splash*), barra de navegación inferior nativa (`MobileTabBar`), haptics táctiles y sin barras de Safari.
+- **¿Cuándo haría falta compilar IPA?**: Únicamente si cambias el icono de la app en la pantalla de inicio o permisos nativos del sistema.
+
+¿Te gustaría que configuremos este modo para que no tengas que reinstalar la IPA cada vez que hagamos mejoras en la interfaz?
+
+---
+
+### 👤 Usuario (2026-10-13 12:09:38)
+
+hazlo
 
 ---

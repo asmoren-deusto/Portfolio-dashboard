@@ -5,6 +5,8 @@ const config: CapacitorConfig = {
   appName: 'PortfolioPro',
   webDir: 'dist',
   server: {
+    url: 'https://portfolio.asiermoreno.es',
+    cleartext: false,
     androidScheme: 'https',
     iosScheme: 'https',
     allowNavigation: ['portfolio.asiermoreno.es', '*.asiermoreno.es'],
