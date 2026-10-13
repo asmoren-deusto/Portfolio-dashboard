@@ -21,6 +21,7 @@ import { Card } from '@/components/ui/Card'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { fmt, cn } from '@/lib/utils'
+import { isNativePlatform } from '@/api/config'
 import { usePositions, usePortfolioSummary } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
@@ -340,7 +341,7 @@ export function PositionsPage() {
                   <th className="border-b border-slate-200/90 dark:border-white/[0.05] px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Precio NAV
                   </th>
-                  <SortHeader field="current_value" label="Valor Actual" right />
+                  <SortHeader field="current_value" label={isNativePlatform() ? 'Valor' : 'Valor Actual'} right />
                   <th className="border-b border-slate-200/90 dark:border-white/[0.05] px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Invertido
                   </th>

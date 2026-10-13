@@ -1386,9 +1386,9 @@ export function OverviewPage() {
                   <th className="py-2 px-2.5">Activo / Fondo</th>
                   <th className="py-2 px-2 text-right">NAV</th>
                   <th className="py-2 px-2 text-right">Rend. Día</th>
-                  <th className="py-2 px-2 text-right">Valor Actual</th>
-                  <th className="py-2 px-2 text-right">Ganancia (P&L)</th>
-                  <th className="py-2 px-2 text-center">Banco</th>
+                  <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
+                  <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
+                  {!isNativePlatform() && <th className="py-2 px-2 text-center">Banco</th>}
                   <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
                 </tr>
               </thead>
@@ -1447,7 +1447,7 @@ export function OverviewPage() {
                             </div>
                             <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
                               <span>{p.isin}</span>
-                              <AssetBadge type={p.asset_type} />
+                              {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
                             </div>
                           </div>
                         </div>
@@ -1503,9 +1503,11 @@ export function OverviewPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-2.5 px-2 text-center">
-                        <BrokerBadge broker={p.broker} />
-                      </td>
+                      {!isNativePlatform() && (
+                        <td className="py-2.5 px-2 text-center">
+                          <BrokerBadge broker={p.broker} />
+                        </td>
+                      )}
                       <td className="py-2.5 pr-3 pl-1.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
@@ -1535,9 +1537,9 @@ export function OverviewPage() {
                   <th className="py-2 px-2.5">Activo / Fondo</th>
                   <th className="py-2 px-2 text-right">NAV</th>
                   <th className="py-2 px-2 text-right">Rend. Día</th>
-                  <th className="py-2 px-2 text-right">Valor Actual</th>
-                  <th className="py-2 px-2 text-right">Ganancia (P&L)</th>
-                  <th className="py-2 px-2 text-center">Banco</th>
+                  <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
+                  <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
+                  {!isNativePlatform() && <th className="py-2 px-2 text-center">Banco</th>}
                   <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
                 </tr>
               </thead>
@@ -1596,7 +1598,7 @@ export function OverviewPage() {
                             </div>
                             <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
                               <span>{p.isin}</span>
-                              <AssetBadge type={p.asset_type} />
+                              {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
                             </div>
                           </div>
                         </div>
@@ -1652,9 +1654,11 @@ export function OverviewPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-2.5 px-2 text-center">
-                        <BrokerBadge broker={p.broker} />
-                      </td>
+                      {!isNativePlatform() && (
+                        <td className="py-2.5 px-2 text-center">
+                          <BrokerBadge broker={p.broker} />
+                        </td>
+                      )}
                       <td className="py-2.5 pr-3 pl-1.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />

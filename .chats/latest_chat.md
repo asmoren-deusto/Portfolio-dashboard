@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:39:39
+- **Fecha de exportación:** 2026-10-13 15:42:35
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 88
+- **Total de interacciones registradas:** 90
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1696,5 +1696,26 @@ Los cambios solicitados han sido implementados y publicados en la versión **v3.
 ### 👤 Usuario (2026-10-13 13:32:13)
 
 nativo: los badges de Hoy, Live, 7D pelin más pequeños
+
+---
+
+### 🤖 Asistente (2026-10-13 13:39:42)
+
+Se han ajustado los badges en la aplicación nativa y se ha publicado la versión **v3.0.34**:
+
+* **Badges de Hoy, Live y 7D más compactos**:
+  * Reducido el tamaño de fuente a `text-[10.5px]`.
+  * Padding ajustado a `px-1.5 py-0.5` con esquinas `rounded-md` y espaciado `gap-0.5`.
+  * Iconos (`Zap`, `Activity`, `Calendar`) reducidos proporcionalmente a `w-2.5 h-2.5 stroke-[2.2]`.
+  * Ahora los 3 indicadores encajan de forma armónica en una sola fila en la tarjeta principal en resoluciones móviles.
+
+---
+> Para cargar los cambios en tu dispositivo móvil, pulsa sobre el logo de **PortfolioPro** y toca en **"Recargar app"** (o cierra la app desde la multitarea de iOS). La versión actualizada es **v3.0.34**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:34:10)
+
+nativo: posiciones en cartera -> oculta el badge de fondo o epsv, oculta la columna de banco. valor actual -> valor y ganancia solo ganancia sin p&L
 
 ---
