@@ -21,14 +21,12 @@ export const MobileTabBar: React.FC = () => {
   const { data: simData } = useSimulatedPortfolio('1d')
   const sessionPct = simData?.summary?.fx_info?.simulated_eur_pct ?? simData?.summary?.simulated_daily_pct
 
-  const triggerHaptic = async () => {
-    try {
-      const { Haptics, ImpactStyle } = await import('@capacitor/haptics')
-      await Haptics.impact({ style: ImpactStyle.Light })
-    } catch {
-      // Fallback: standard web vibration API if available
-      if ('vibrate' in navigator) {
+  const triggerHaptic = () => {
+    if ('vibrate' in navigator) {
+      try {
         navigator.vibrate(10)
+      } catch {
+        // ignore if not supported
       }
     }
   }

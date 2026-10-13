@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 11:24:28
+- **Fecha de exportación:** 2026-10-13 11:32:48
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 19
+- **Total de interacciones registradas:** 21
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -334,5 +334,368 @@ Ya puedes volver a GitHub Actions y hacer clic en **"Re-run all jobs"** (o lanza
 ### 👤 Usuario (2026-10-13 09:23:40)
 
 mismo error, no parece haberse actualizado
+
+---
+
+### 🤖 Asistente (2026-10-13 09:24:31)
+
+El motivo por el que te ha vuelto a dar el mismo error es por cómo funciona GitHub Actions al pulsar **"Re-run all jobs"**:
+
+> ⚠️ **En GitHub Actions:**
+> Si pulsas el botón **"Re-run all jobs"** dentro de una ejecución que ha fallado, GitHub **vuelve a ejecutar el commit antiguo** (el que aún tenía Node 20 configurado). **No toma los commits nuevos de `main`**.
+
+---
+
+### Cómo lanzar la compilación con la versión corregida:
+
+1. Ve a la pestaña principal de **Actions**:
+   👉 `https://github.com/asmoren-deusto/Portfolio-dashboard/actions`
+2. En la columna izquierda, pulsa sobre **"Build iOS App (IPA)"**.
+3. A la derecha verás el desplegable azul/gris que dice **"Run workflow"**:
+   * Asegúrate de que la rama sea **`Branch: main`**.
+   * Pulsa el botón verde **"Run workflow"**.
+
+Esto creará una **ejecución completamente nueva** basada en el último commit de `main` (`v3.0.6`), que ya incluye Node.js 22 y el paso de verificación en consola.
+
+---
+
+### 👤 Usuario (2026-10-13 09:28:56)
+
+Current runner version: '2.337.0'
+Runner Image Provisioner
+Operating System
+Runner Image
+GITHUB_TOKEN Permissions
+Secret source: Actions
+Cache mode: write
+Prepare workflow directory
+Prepare all required actions
+Getting action download info
+Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Complete job name: Build iOS IPA via Xcode
+2s
+/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.[https://github.com/.extraheader](https://github.com/.extraheader)' || :"
+/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+/opt/homebrew/bin/git config --local http.[https://github.com/.extraheader](https://github.com/.extraheader) AUTHORIZATION: basic ***
+Fetching the repository
+/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +be63d8dbd2f656bd41c3d700b62476edc9fb27b1:refs/remotes/origin/main
+From [https://github.com/asmoren-deusto/Portfolio-dashboard](https://github.com/asmoren-deusto/Portfolio-dashboard)
+* [new ref] be63d8dbd2f656bd41c3d700b62476edc9fb27b1 -> origin/main
+Determining the checkout info
+/opt/homebrew/bin/git sparse-checkout disable
+/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+Checking out the ref
+/opt/homebrew/bin/git log -1 --format=%H
+be63d8dbd2f656bd41c3d700b62476edc9fb27b1
+1s
+Run actions/setup-node@v4
+(node:3311) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Found in cache @ /Users/runner/hostedtoolcache/node/22.23.2/arm64
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Environment details
+/Users/runner/hostedtoolcache/node/22.23.2/arm64/bin/npm config get cache
+/Users/runner/.npm
+npm cache is not found
+0s
+Run echo "Node version:"
+Node version:
+v22.23.2
+NPM version:
+10.9.8
+10s
+Run npm ci
+npm warn deprecated uuid@7.0.3: uuid@10 and below is no longer supported. For ESM codebases, update to uuid@latest. For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+added 208 packages, and audited 209 packages in 9s
+36 packages are looking for funding
+run `npm fund` for details
+4 vulnerabilities (3 moderate, 1 high)
+To address issues that do not require attention, run:
+npm audit fix
+To address all issues (including breaking changes), run:
+npm audit fix --force
+Run `npm audit` for details.
+9s
+Run npm run build
+> frontend@3.0.6 build
+> tsc && vite build
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 3275 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html 1.71 kB │ gzip: 0.69 kB
+dist/assets/index-Ba1jFx88.css 176.69 kB │ gzip: 22.22 kB
+dist/assets/web-B8R7QDWZ.js 0.91 kB │ gzip: 0.46 kB
+dist/assets/esm-BIb04kgz.js 8.08 kB │ gzip: 3.28 kB
+dist/assets/index-BM5Bi_z0.js 1,599.03 kB │ gzip: 443.68 kB
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: [https://rolldown.rs/reference/OutputOptions.codeSplitting](https://rolldown.rs/reference/OutputOptions.codeSplitting)
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.16s
+1s
+Run npx cap sync ios
+✔ Copying web assets from dist to ios/App/App/public in 6.67ms
+✔ Creating capacitor.config.json in ios/App/App in 1.18ms
+✔ copy ios in 41.94ms
+✔ Updating iOS plugins in 5.06ms
+[info] All Capacitor plugins have a Package.swift file and will be included in Package.swift
+[info] Writing Package.swift
+[info] Found 3 Capacitor plugins for ios:
+@capacitor/haptics@8.0.2
+@capacitor/splash-screen@8.0.2
+@capacitor/status-bar@8.0.4
+✔ update ios in 34.01ms
+[info] Sync finished in 0.113s
+0s
+Run sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app || true
+xcode-select: error: invalid developer directory '/Applications/Xcode_16.0.app'
+45s
+Run echo "Compilando para dispositivos iOS..."
+Compilando para dispositivos iOS...
+Command line invocation:
+/Applications/Xcode_15.4.app/Contents/Developer/usr/bin/xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination generic/platform=iOS -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO clean build
+User defaults from command line:
+IDEDerivedDataPathOverride = /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build
+IDEPackageSupportUseBuiltinSCM = YES
+Build settings from command line:
+CODE_SIGN_IDENTITY =
+CODE_SIGNING_ALLOWED = NO
+CODE_SIGNING_REQUIRED = NO
+Resolve Package Graph
+Fetching from [https://github.com/ionic-team/capacitor-swift-pm.git](https://github.com/ionic-team/capacitor-swift-pm.git)
+Creating working copy of package ‘capacitor-swift-pm’
+Checking out 8.5.3 of package ‘capacitor-swift-pm’
+Resolved source packages:
+CapacitorHaptics: /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics @ local
+capacitor-swift-pm: [https://github.com/ionic-team/capacitor-swift-pm.git](https://github.com/ionic-team/capacitor-swift-pm.git) @ 8.5.3
+CapApp-SPM: /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/CapApp-SPM @ local
+CapacitorSplashScreen: /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen @ local
+CapacitorStatusBar: /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar @ local
+note: Using codesigning identity override:
+** CLEAN SUCCEEDED **
+Prepare packages
+note: Using codesigning identity override:
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (11 targets)
+Target 'App' in project 'App'
+➜ Explicit dependency on target 'CapApp-SPM' in project 'CapApp-SPM'
+Target 'CapApp-SPM' in project 'CapApp-SPM'
+➜ Explicit dependency on target 'CapApp-SPM' in project 'CapApp-SPM'
+➜ Explicit dependency on target 'Capacitor' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'Cordova' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'CapacitorHaptics' in project 'CapacitorHaptics'
+➜ Explicit dependency on target 'CapacitorSplashScreen' in project 'CapacitorSplashScreen'
+➜ Explicit dependency on target 'CapacitorStatusBar' in project 'CapacitorStatusBar'
+Target 'CapApp-SPM' in project 'CapApp-SPM'
+➜ Explicit dependency on target 'Capacitor' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'Cordova' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'CapacitorHaptics' in project 'CapacitorHaptics'
+➜ Explicit dependency on target 'CapacitorSplashScreen' in project 'CapacitorSplashScreen'
+➜ Explicit dependency on target 'CapacitorStatusBar' in project 'CapacitorStatusBar'
+Target 'CapacitorStatusBar' in project 'CapacitorStatusBar'
+➜ Explicit dependency on target 'StatusBarPlugin' in project 'CapacitorStatusBar'
+➜ Explicit dependency on target 'Capacitor' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'Cordova' in project 'capacitor-swift-pm'
+Target 'StatusBarPlugin' in project 'CapacitorStatusBar'
+➜ Explicit dependency on target 'Capacitor' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'Cordova' in project 'capacitor-swift-pm'
+Target 'CapacitorSplashScreen' in project 'CapacitorSplashScreen'
+➜ Explicit dependency on target 'SplashScreenPlugin' in project 'CapacitorSplashScreen'
+➜ Explicit dependency on target 'Capacitor' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'Cordova' in project 'capacitor-swift-pm'
+Target 'SplashScreenPlugin' in project 'CapacitorSplashScreen'
+➜ Explicit dependency on target 'Capacitor' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'Cordova' in project 'capacitor-swift-pm'
+Target 'CapacitorHaptics' in project 'CapacitorHaptics'
+➜ Explicit dependency on target 'HapticsPlugin' in project 'CapacitorHaptics'
+➜ Explicit dependency on target 'Capacitor' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'Cordova' in project 'capacitor-swift-pm'
+Target 'HapticsPlugin' in project 'CapacitorHaptics'
+➜ Explicit dependency on target 'Capacitor' in project 'capacitor-swift-pm'
+➜ Explicit dependency on target 'Cordova' in project 'capacitor-swift-pm'
+Target 'Cordova' in project 'capacitor-swift-pm' (no dependencies)
+Target 'Capacitor' in project 'capacitor-swift-pm' (no dependencies)
+GatherProvisioningInputs
+CreateBuildDescription
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -v
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App/Assets.xcassets
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk -x c -c /dev/null
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/usr/bin/ibtool --version --output-format xml1
+ExecuteExternalTool /Applications/Xcode_15.4.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+Build description signature: 0d3de04b50c83437fed87c4f9a4c5cad
+Build description path: /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/XCBuildData/0d3de04b50c83437fed87c4f9a4c5cad.xcbuilddata
+CreateBuildDirectory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App.xcodeproj
+builtin-create-build-directory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products
+CreateBuildDirectory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App.xcodeproj
+builtin-create-build-directory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex
+ClangStatCache /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/SDKStatCaches.noindex/iphoneos17.5-21F77-f0fa7969d082b13145125136a829df3a.sdkstatcache
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App.xcodeproj
+/Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk -o /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/SDKStatCaches.noindex/iphoneos17.5-21F77-f0fa7969d082b13145125136a829df3a.sdkstatcache
+CreateBuildDirectory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App.xcodeproj
+builtin-create-build-directory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos
+CreateBuildDirectory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphoneos
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App.xcodeproj
+builtin-create-build-directory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphoneos
+ProcessXCFramework /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/SourcePackages/artifacts/capacitor-swift-pm/Cordova/Cordova.xcframework /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos/Cordova.framework ios
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App.xcodeproj
+builtin-process-xcframework --xcframework /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/SourcePackages/artifacts/capacitor-swift-pm/Cordova/Cordova.xcframework --platform ios --target-path /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/SourcePackages/artifacts/capacitor-swift-pm/Cordova/Cordova.xcframework:1:1: note: The identity of “Cordova.xcframework” is not recorded in your project.
+ProcessXCFramework /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/SourcePackages/artifacts/capacitor-swift-pm/Capacitor/Capacitor.xcframework /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos/Capacitor.framework ios
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App.xcodeproj
+builtin-process-xcframework --xcframework /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/SourcePackages/artifacts/capacitor-swift-pm/Capacitor/Capacitor.xcframework --platform ios --target-path /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/SourcePackages/artifacts/capacitor-swift-pm/Capacitor/Capacitor.xcframework:1:1: note: The identity of “Capacitor.xcframework” is not recorded in your project.
+CreateBuildDirectory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos/PackageFrameworks
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/App.xcodeproj
+builtin-create-build-directory /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos/PackageFrameworks
+MkDir /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos/App.app/Frameworks (in target 'App' from project 'App')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App
+/bin/mkdir -p /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos/App.app/Frameworks
+MkDir /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos/App.app (in target 'App' from project 'App')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App
+/bin/mkdir -p /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos/App.app
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/StatusBarPlugin.modulemap (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/StatusBarPlugin.modulemap
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/SplashScreenPlugin.modulemap (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/SplashScreenPlugin.modulemap
+Copy /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos/StatusBarPlugin.modulemap /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/StatusBarPlugin.modulemap (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar
+builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/StatusBarPlugin.modulemap /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/HapticsPlugin.modulemap (in target 'HapticsPlugin' from project 'CapacitorHaptics')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/HapticsPlugin.modulemap
+Copy /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos/SplashScreenPlugin.modulemap /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/SplashScreenPlugin.modulemap (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/SplashScreenPlugin.modulemap /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos
+Copy /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos/HapticsPlugin.modulemap /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/HapticsPlugin.modulemap (in target 'HapticsPlugin' from project 'CapacitorHaptics')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics
+builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/HapticsPlugin.modulemap /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin.LinkFileList (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin.LinkFileList
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin_const_extract_protocols.json (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin_const_extract_protocols.json
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin.SwiftFileList (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin.SwiftFileList
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin-OutputFileMap.json (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin-OutputFileMap.json
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin.LinkFileList (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin.LinkFileList
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin_const_extract_protocols.json (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin_const_extract_protocols.json
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin.SwiftFileList (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin.SwiftFileList
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin-OutputFileMap.json (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin-OutputFileMap.json
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin.LinkFileList (in target 'HapticsPlugin' from project 'CapacitorHaptics')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin.LinkFileList
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin_const_extract_protocols.json (in target 'HapticsPlugin' from project 'CapacitorHaptics')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin_const_extract_protocols.json
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin.SwiftFileList (in target 'HapticsPlugin' from project 'CapacitorHaptics')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin.SwiftFileList
+WriteAuxiliaryFile /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin-OutputFileMap.json (in target 'HapticsPlugin' from project 'CapacitorHaptics')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics
+write-file /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin-OutputFileMap.json
+SwiftDriver StatusBarPlugin normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar
+builtin-SwiftDriver -- /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name StatusBarPlugin -O -whole-module-optimization -enforce-exclusivity\=checked @/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorStatusBar.build/Release-iphoneos/StatusBarPlugin.build/Objects-normal/arm64/StatusBarPlugin.SwiftFileList -DSWIFT_PACKAGE -DXcode -sdk /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk -target arm64-apple-ios15.0 -g -module-cache-path /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -suppress-warnings -swift-version 5 -I /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos -I /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F /
+SwiftDriver SplashScreenPlugin normal arm64 com.apple.xcode.tools.swift.compiler (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+builtin-SwiftDriver -- /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name SplashScreenPlugin -O -whole-module-optimization -enforce-exclusivity\=checked @/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin.SwiftFileList -DSWIFT_PACKAGE -DXcode -sdk /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk -target arm64-apple-ios15.0 -g -module-cache-path /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -suppress-warnings -swift-version 5 -I /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos -I /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/
+SwiftDriver HapticsPlugin normal arm64 com.apple.xcode.tools.swift.compiler (in target 'HapticsPlugin' from project 'CapacitorHaptics')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics
+builtin-SwiftDriver -- /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name HapticsPlugin -O -whole-module-optimization -enforce-exclusivity\=checked @/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorHaptics.build/Release-iphoneos/HapticsPlugin.build/Objects-normal/arm64/HapticsPlugin.SwiftFileList -DSWIFT_PACKAGE -DXcode -sdk /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk -target arm64-apple-ios15.0 -g -module-cache-path /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -suppress-warnings -swift-version 5 -I /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos -I /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F /Users/ru
+SwiftDriver\ Compilation SplashScreenPlugin normal arm64 com.apple.xcode.tools.swift.compiler (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+builtin-Swift-Compilation -- /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name SplashScreenPlugin -O -whole-module-optimization -enforce-exclusivity\=checked @/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/SplashScreenPlugin.SwiftFileList -DSWIFT_PACKAGE -DXcode -sdk /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.5.sdk -target arm64-apple-ios15.0 -g -module-cache-path /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -suppress-warnings -swift-version 5 -I /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Products/Release-iphoneos -I /Applications/Xcode_15.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Deve
+SwiftCompile normal arm64 Compiling\ SplashScreen.swift,\ SplashScreenConfig.swift,\ SplashScreenPlugin.swift,\ SplashScreenSettings.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreen.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenConfig.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenSettings.swift (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+builtin-swiftTaskExecution -- /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreen.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenConfig.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenSettings.swift -supplementary-output-file-map /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/
+CompileSwift normal arm64 (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+cd /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen
+/Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -c /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreen.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenConfig.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenSettings.swift -supplementary-output-file-map /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/ios/App/build/Build/Intermediates.noindex/CapacitorSplashScreen.build/Release-iphoneos/SplashScreenPlugin.build/Objects-normal/arm64/supplementaryOutputs-2 -target arm
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:15:31: error: value of type 'any CAPBridgeProtocol' has no member 'viewController'
+if let view = bridge?.viewController?.view {
+~~~~~~~ ^~~~~~~~~~~~~~
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:30:18: error: value of type 'CAPPluginCall' has no member 'reject'
+call.reject("Unable to show Splash Screen")
+~~~~ ^~~~~~
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:42:18: error: value of type 'CAPPluginCall' has no member 'reject'
+call.reject("Unable to hide Splash Screen")
+~~~~ ^~~~~~
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:49:57: error: missing argument for parameter #2 in call
+if let showDuration = call.getInt("showDuration") {
+^
+, <#Int#>
+Capacitor.JSIntContainer:2:17: note: 'getInt' declared here
+public func getInt(_ key: String, _ defaultValue: Int) -> Int
+^
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:52:61: error: missing argument for parameter #2 in call
+if let fadeInDuration = call.getInt("fadeInDuration") {
+^
+, <#Int#>
+Capacitor.JSIntContainer:2:17: note: 'getInt' declared here
+public func getInt(_ key: String, _ defaultValue: Int) -> Int
+^
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:55:63: error: missing argument for parameter #2 in call
+if let fadeOutDuration = call.getInt("fadeOutDuration") {
+^
+, <#Int#>
+Capacitor.JSIntContainer:2:17: note: 'getInt' declared here
+public func getInt(_ key: String, _ defaultValue: Int) -> Int
+^
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:58:50: error: missing argument for parameter #2 in call
+if let autoHide = call.getBool("autoHide") {
+^
+, <#Bool#>
+Capacitor.JSBoolContainer:2:17: note: 'getBool' declared here
+public func getBool(_ key: String, _ defaultValue: Bool) -> Bool
+^
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:67:46: error: value of type 'PluginConfig' has no member 'getString'
+if let backgroundColor = getConfig().getString("backgroundColor") {
+~~~~~~~~~~~ ^~~~~~~~~
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:68:61: error: incorrect argument label in call (have 'fromHex:', expected 'argb:')
+config.backgroundColor = UIColor.capacitor.color(fromHex: backgroundColor)
+^~~~~~~~
+argb
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:70:43: error: value of type 'PluginConfig' has no member 'getString'
+if let spinnerStyle = getConfig().getString("iosSpinnerStyle") {
+~~~~~~~~~~~ ^~~~~~~~~
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:78:43: error: value of type 'PluginConfig' has no member 'getString'
+if let spinnerColor = getConfig().getString("spinnerColor") {
+~~~~~~~~~~~ ^~~~~~~~~
+/Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift:79:58: error: incorrect argument label in call (have 'fromHex:', expected 'argb:')
+Command SwiftCompile failed with a nonzero exit code
+** BUILD FAILED **
+The following build commands failed:
+CompileSwift normal arm64 (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+SwiftCompile normal arm64 Compiling\ SplashScreen.swift,\ SplashScreenConfig.swift,\ SplashScreenPlugin.swift,\ SplashScreenSettings.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreen.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenConfig.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenPlugin.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/splash-screen/ios/Sources/SplashScreenPlugin/SplashScreenSettings.swift (in target 'SplashScreenPlugin' from project 'CapacitorSplashScreen')
+SwiftCompile normal arm64 Compiling\ StatusBar.swift,\ StatusBarConfig.swift,\ StatusBarInfo.swift,\ StatusBarPlugin.swift,\ UIColor.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar/ios/Sources/StatusBarPlugin/StatusBar.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar/ios/Sources/StatusBarPlugin/StatusBarConfig.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar/ios/Sources/StatusBarPlugin/StatusBarInfo.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar/ios/Sources/StatusBarPlugin/StatusBarPlugin.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/status-bar/ios/Sources/StatusBarPlugin/UIColor.swift (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+CompileSwift normal arm64 (in target 'StatusBarPlugin' from project 'CapacitorStatusBar')
+SwiftCompile normal arm64 Compiling\ Haptics.swift,\ HapticsPlugin.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics/ios/Sources/HapticsPlugin/Haptics.swift /Users/runner/work/Portfolio-dashboard/Portfolio-dashboard/frontend/node_modules/@capacitor/haptics/ios/Sources/HapticsPlugin/HapticsPlugin.swift (in target 'HapticsPlugin' from project 'CapacitorHaptics')
+(5 failures)
+Error: Process completed with exit code 65.
 
 ---

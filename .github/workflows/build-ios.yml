@@ -48,8 +48,11 @@ jobs:
         working-directory: frontend
         run: npx cap sync ios
 
-      - name: Select Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app || true
+      - name: Show Xcode Version
+        run: |
+          echo "Active Xcode Developer Directory:"
+          xcode-select -p
+          xcodebuild -version
 
       - name: Build for iOS Device (Unsigned IPA)
         if: ${{ github.event.inputs.target == 'device' || github.event.inputs.target == '' }}
