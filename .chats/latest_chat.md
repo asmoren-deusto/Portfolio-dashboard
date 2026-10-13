@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 12:12:46
+- **Fecha de exportación:** 2026-10-13 12:20:40
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 37
+- **Total de interacciones registradas:** 39
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1035,5 +1035,56 @@ Puedo añadir una opción en la pantalla de inicio / ajustes de la app para que 
 ### 👤 Usuario (2026-10-13 10:09:47)
 
 está en https://portfolio.asiermoreno.es/
+
+---
+
+### 🤖 Asistente (2026-10-13 10:12:48)
+
+¡Tener el dominio con HTTPS en **`https://portfolio.asiermoreno.es/`** lo soluciona todo de raíz! 🎯
+
+### 🔍 El motivo del problema:
+1. **La app nativa buscaba el backend en el propio iPhone:**
+   El código tenía puestas las rutas relativas (`/api/...`). En el navegador web eso funciona porque se conecta al servidor que sirve la página, pero en la app instalada (`.ipa`) el teléfono intentaba buscar el servidor en `capacitor://localhost/api/` (es decir, dentro del propio chip del iPhone).
+2. **CORS restringido en el servidor:**
+   FastAPI solo tenía permitidos los orígenes locales de desarrollo (`http://localhost:5173`), por lo que cualquier petición procedente de la app nativa de iOS era rechazada.
+
+---
+
+### 🛠️ Lo que acabamos de implementar y desplegar:
+
+1. **Detección inteligente de entorno en [`frontend/src/api/config.ts`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/api/config.ts):**
+   * **En la web normal o PWA:** Sigue usando `/api` relativo sin alterar nada.
+   * **En la app nativa de iOS:** Detecta automáticamente el entorno de Capacitor y redirige todas las consultas a tu servidor oficial:
+     👉 **`https://portfolio.asiermoreno.es/api`**
+2. **CORS habilitado para iOS en [`backend/app/main.py`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/main.py):**
+   * Añadidos los orígenes móviles (`capacitor://localhost`, `https://localhost`) y tu dominio `*.asiermoreno.es`.
+3. **Permisos de red en [`frontend/capacitor.config.ts`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/capacitor.config.ts):**
+   * Concedido permiso a la app nativa para conectarse y navegar hacia `portfolio.asiermoreno.es`.
+4. Todos los cambios han sido subidos a `main` en la versión **`v3.0.10`**.
+
+---
+
+### 📲 Cómo tener ya tu cartera real en el iPhone:
+
+Tienes dos vías:
+
+* **Opción 1: Acceso instantáneo en Safari (10 segundos, sin instalar nada nuevo):**
+  1. En tu iPhone, abre **Safari** y entra en:
+     👉 **`https://portfolio.asiermoreno.es/`**
+  2. Inicia sesión con tu usuario **Asier Moreno** y tu contraseña.
+  3. Pulsa el botón **Compartir** de Safari (icono de cuadrado con flecha hacia arriba) y selecciona:
+     📲 **"Añadir a la pantalla de inicio"** (*Add to Home Screen*).
+  4. ¡Listo! Ya tienes la app con icono oficial Retina, pantalla completa, barra táctil inferior y **todos los datos de tu cartera real en directo**.
+
+* **Opción 2: Regenerar el `.ipa` nativo con la nueva configuración:**
+  1. Ve a **GitHub Actions** ➡️ **"Build iOS App (IPA)"** ➡️ **"Run workflow"** (`Branch: main`).
+  2. Descarga el nuevo `PortfolioPro.ipa` generado (que ya lleva tanto el icono oficial como la conexión automática a `https://portfolio.asiermoreno.es/api`).
+  3. Instálalo con Sideloadly y tu app nativa cargará directamente tu cartera real.
+
+---
+
+### 👤 Usuario (2026-10-13 10:18:44)
+
+el fondo del icono sale negro, mira si puede ser transparente y dale un pelin más de estilo
 
 ---
