@@ -118,5 +118,13 @@ def main():
         out_path.write_bytes(png_bytes)
         print(f"[+] Saved {out_path} ({len(png_bytes)} bytes)")
 
+    # Generate iOS Native Xcode AppIcon (1024x1024)
+    ios_icon_dir = Path(__file__).resolve().parent.parent / "frontend" / "ios" / "App" / "App" / "Assets.xcassets" / "AppIcon.appiconset"
+    if ios_icon_dir.exists():
+        print("[*] Rendering iOS native AppIcon-512@2x.png (1024x1024)...")
+        ios_png = render_logo(1024)
+        (ios_icon_dir / "AppIcon-512@2x.png").write_bytes(ios_png)
+        print(f"[+] Saved iOS icon {ios_icon_dir / 'AppIcon-512@2x.png'} ({len(ios_png)} bytes)")
+
 if __name__ == "__main__":
     main()
