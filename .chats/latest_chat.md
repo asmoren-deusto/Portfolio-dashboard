@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 11:03:32
+- **Fecha de exportación:** 2026-10-13 11:14:17
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 9
+- **Total de interacciones registradas:** 13
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -120,5 +120,67 @@ Los instrumentos asignados para cada uno de los 9 fondos de tu cartera son los m
 ### 👤 Usuario (2026-10-13 09:00:22)
 
 como estas actualizando? la pagina de mercado marca -0.22 y en general -0.31
+
+---
+
+### 🤖 Asistente (2026-10-13 09:03:35)
+
+La discrepancia entre **Mercado** (`-0.22%`) y **Visión General** (`-0.31%`) se debía a cómo se calculaba el valor en la cabecera de la gráfica frente al resumen en vivo:
+
+---
+
+### 🔍 ¿Por qué ocurría esto?
+
+1. **El badge de Visión General (`-0.31%`)**:
+   - Leía directamente el campo en vivo `summary.simulated_eur_pct`, que combina las cotizaciones al segundo de los ETFs con la cotización en vivo del par de divisas EUR/USD (`EURUSD=X`).
+
+2. **La cabecera de Mercado (`-0.22%`)**:
+   - En [SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx), el KPI de la cabecera cuando no estabas pasando el ratón por encima hacía:
+     ```tsx
+     const activePoint = hoveredPoint || (chartPoints.length > 0 ? chartPoints[chartPoints.length - 1] : null)
+     ```
+   - Es decir: en lugar de mostrar el dato en vivo de `summary`, leía el **último punto de la serie histórica de velas de 5 minutos descargada** (`chartPoints[-1]`).
+   - Como la última vela cerrada de 5 minutos tenía unos minutos de antigüedad respecto al tick en directo del par EUR/USD, su efecto divisa acumulado marcaba `-0.06%` en lugar de la cotización en vivo (`-0.13%`), arrojando `-0.22%` en lugar de `-0.31%`.
+
+---
+
+### 🛠️ Correcciones aplicadas
+
+1. **Sincronización en el componente de Mercado ([SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx))**:
+   - Se ha ajustado para que, en estado de reposo (sin pasar el cursor por encima), **tome de forma prioritaria el resumen en tiempo real** `summary.fx_info.simulated_eur_pct`. Solo al posar el cursor sobre la gráfica cambia para mostrar la vela histórica que estés inspeccionando.
+2. **Alineación del último punto en el backend ([market.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py))**:
+   - Se ha añadido una instrucción que sincroniza automáticamente el último punto de la curva intradía con el dato en vivo del `summary`.
+
+---
+
+### ✅ Resultado verificado
+
+Ahora ambas pantallas y la barra lateral leen exactamente el mismo dato en vivo al céntimo y a la centésima:
+
+| Ubicación | Valor Antes | Valor Ahora (Sincronizado) |
+| :--- | :---: | :---: |
+| **Visión General (Badge "Sesión")** | `-0.31%` | **`-0.33%`** |
+| **Mercado (Cabecera Gráfica)** | `-0.22%` | **`-0.33%`** |
+| **Menú Lateral (Sidebar)** | — | **`-0.3%`** |
+
+Cambios validados y publicados en la versión **`v3.0.2`**.
+
+---
+
+### 👤 Usuario (2026-10-13 09:07:18)
+
+me interesa generar una version movil de la app en especifico para iOS
+
+---
+
+### 🤖 Asistente (2026-10-13 09:09:42)
+
+Instalando Capacitor y las librerías nativas para iOS...
+
+---
+
+### 🤖 Asistente (2026-10-13 09:10:35)
+
+Generando el proyecto nativo iOS con Capacitor...
 
 ---

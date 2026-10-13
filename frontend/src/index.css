@@ -40,6 +40,16 @@
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
     background-color: var(--bg-app);
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+
+  /* Variables de Safe Area de iOS (Notch, Dynamic Island y Barra inferior de inicio) */
+  :root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
   }
 
   body {
@@ -50,6 +60,18 @@
     transition: background-color 0.2s ease, color 0.2s ease;
     min-height: 100vh;
     min-height: 100dvh;
+    padding-top: var(--sat);
+    padding-left: var(--sal);
+    padding-right: var(--sar);
+  }
+
+  /* Evitar zoom automático forzado en iOS Safari al pulsar en campos de texto */
+  @media screen and (max-width: 768px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 
   /* Refined, discreet scrollbars */

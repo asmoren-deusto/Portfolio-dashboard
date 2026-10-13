@@ -10,6 +10,7 @@ import { Header } from '@/components/layout/Header'
 import { HeaderProvider } from '@/context/HeaderContext'
 import { NavUpdateAlertModal } from '@/components/common/NavUpdateAlertModal'
 import { AppLogo } from '@/components/ui/AppLogo'
+import { MobileTabBar } from '@/components/layout/MobileTabBar'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { fetchLatestNavAlert } from '@/api/queries'
@@ -186,7 +187,7 @@ export function RootLayout() {
           </div>
 
           {/* Page Content Animation (KPIs, Charts, Tables fade in quickly without header flickering) */}
-          <main key={location.pathname} className="animate-in-quick flex flex-1 flex-col gap-4 px-4 pt-4 pb-3 sm:px-6 sm:pt-4 sm:pb-4 md:px-7 md:pt-4 md:pb-4.5">
+          <main key={location.pathname} className="animate-in-quick flex flex-1 flex-col gap-4 px-4 pt-4 pb-24 sm:px-6 sm:pt-4 sm:pb-24 md:px-7 md:pt-4 md:pb-4.5">
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>
@@ -195,6 +196,9 @@ export function RootLayout() {
 
         {/* Global Floating NAV Update Alert Window */}
         <NavUpdateAlertModal />
+
+        {/* Native iOS / Mobile Bottom Tab Bar */}
+        <MobileTabBar />
       </div>
     </HeaderProvider>
   )
