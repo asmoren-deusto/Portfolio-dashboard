@@ -42,7 +42,7 @@ export const MobileTabBar: React.FC = () => {
   return (
     <nav
       aria-label="Navegación móvil inferior"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-[#161616]/96 backdrop-blur-xl border-t border-slate-200/85 dark:border-white/[0.08] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4)] px-2 pt-1 pb-[max(calc(env(safe-area-inset-bottom,0px)-10px),5px)] select-none transition-all"
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-[#161616]/96 backdrop-blur-xl border-t border-slate-200/85 dark:border-white/[0.08] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4)] px-2 pt-2.5 pb-[max(calc(env(safe-area-inset-bottom,0px)-10px),4px)] select-none transition-all"
     >
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {TABS.map(({ to, icon: Icon, label }) => (
@@ -62,9 +62,9 @@ export const MobileTabBar: React.FC = () => {
           >
             {({ isActive }) => (
               <>
-                <div className="relative">
+                <div className="relative translate-y-[2px]">
                   <Icon
-                    size={18}
+                    size={20}
                     strokeWidth={isActive ? 2.4 : 1.8}
                     className={cn(
                       'transition-transform duration-150',
@@ -72,7 +72,7 @@ export const MobileTabBar: React.FC = () => {
                     )}
                   />
                 </div>
-                <span className="text-[9.5px] leading-tight tracking-tight mt-0.5 line-clamp-1">
+                <span className="text-[9.5px] leading-tight tracking-tight mt-1 line-clamp-1">
                   {label}
                 </span>
                 {isActive && (

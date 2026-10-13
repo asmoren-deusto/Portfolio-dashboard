@@ -182,7 +182,7 @@ export function RootLayout() {
 
         <div className={`flex flex-1 flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
           {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop) */}
-          <header className={`fixed top-0 left-0 right-0 md:sticky z-30 flex items-center justify-between px-3 sm:px-4 pt-[max(0.625rem,env(safe-area-inset-top,0px))] pb-2.5 bg-white/95 dark:bg-[#191919]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+          <header className={`fixed top-0 left-0 right-0 md:sticky z-30 flex items-center justify-between px-3 sm:px-4 pt-[max(0.45rem,calc(env(safe-area-inset-top,0px)-2px))] pb-1.5 bg-white/95 dark:bg-[#191919]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
             <div className="flex items-center gap-1.5 shrink-0">
               {/* Only show hamburger button when NOT native (native uses bottom MobileTabBar) */}
               {!isNativePlatform() && (
@@ -234,7 +234,7 @@ export function RootLayout() {
           </header>
 
           {/* Spacer to prevent content overlap with fixed mobile header */}
-          <div className="h-[calc(max(0.625rem,env(safe-area-inset-top,0px))+2.75rem)] md:hidden shrink-0" aria-hidden="true" />
+          <div className="h-[calc(max(0.45rem,calc(env(safe-area-inset-top,0px)-2px))+2.4rem)] md:hidden shrink-0" aria-hidden="true" />
 
           {/* Persistent Top Header (Desktop only: shows titles, subtitles, and horizontal pills) */}
           <div className="hidden md:block px-4 pt-3 sm:px-6 sm:pt-4 md:px-7 md:pt-4">

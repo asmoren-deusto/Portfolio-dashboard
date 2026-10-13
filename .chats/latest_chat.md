@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:02:06
+- **Fecha de exportación:** 2026-10-13 15:04:25
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 73
+- **Total de interacciones registradas:** 75
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1517,5 +1517,27 @@ Se ha ajustado el posicionamiento vertical de las tarjetas de los tickers en [`M
 ### 👤 Usuario (2026-10-13 13:00:41)
 
 amplia 1px en altura la tarjeta completa de cada ticker (te paso captura). no amplies el contenedor (la lista). al pinchar en la campana y ver las novedades, el icono verde y el punto deberian no aparecer
+
+---
+
+### 🤖 Asistente (2026-10-13 13:02:09)
+
+Se han implementado ambos ajustes:
+
+1. **Altura de las tarjetas de los tickers (+1px)**:
+   - En [`MarketTicker.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx), se aumentó el padding vertical individual de cada tarjeta a `py-[3px]`, otorgando ese pixel extra de holgura vertical a la tarjeta de forma aislada sin modificar el contenedor de la lista.
+
+2. **Limpieza del icono verde y el punto al consultar novedades**:
+   - En [`appStore.ts`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/store/appStore.ts), al pulsar sobre la campana (`openNavAlertHistory`) o cerrar el modal de novedades (`clearNavAlertNotification`), se marca la alerta como vista reseteando `updatedCount` a 0.
+   - De este modo, tan pronto como el usuario pulsa en la campana para ver las novedades, el icono de la campana vuelve a su color neutro habitual y el globo/punto verde desaparece.
+
+3. **Release y sincronización**:
+   - Sincronizado a Git con la versión **`v3.0.27`**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:03:03)
+
+nativo: sube un pelo la barra de titulo y baja un pelo el margen blanco abajo. añade margen blanco en la inferior por arriba y amplia un pelo los iconos; si puedes, baja los iconos un poco
 
 ---
