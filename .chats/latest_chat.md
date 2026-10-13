@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 14:49:13
+- **Fecha de exportación:** 2026-10-13 14:50:43
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 67
+- **Total de interacciones registradas:** 69
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1451,5 +1451,34 @@ Se ha ajustado la posición de la barra inferior de navegación en [`MobileTabBa
 ### 👤 Usuario (2026-10-13 12:44:54)
 
 nativa: quita el selector de entidades de arriba y muevelo al popup que se abre cuando se pulsa el logo. añade el icono de la campana. baja el menu inferior un poco para que ocupe menos alto. deja el menu superior con el logo y los iconos fijo
+
+---
+
+### 🤖 Asistente (2026-10-13 12:49:16)
+
+Se han implementado todas las mejoras solicitadas para la versión nativa/móvil:
+
+1. **Selector de entidades reubicado en el popup del logo**:
+   - Se ha quitado el desplegable de bancos/brokers de la cabecera superior en nativo (`showBroker={!isNativePlatform()}`).
+   - En [`UserProfileModal`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/UserProfileModal.tsx) (el modal que se abre al pulsar el logo o el texto **PortfolioPro**) se ha integrado un selector de **Entidad / Broker** en cuadrícula con sus colores distintivos y estado activo. Al pulsar cualquiera de ellos (ej. Consolidado, MyInvestor, Indexa, BBVA), se filtra la cartera al instante.
+
+2. **Icono de la campana añadido en la cabecera**:
+   - En [`HeaderActions`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx), el botón de la campana ahora permanece siempre accesible en la cabecera (junto al periodo y los controles rápidos).
+   - Muestra el globo con el número de NAVs actualizados cuando corresponda y permite abrir en cualquier momento el historial e informe de liquidativos.
+
+3. **Menú inferior más bajo y compacto**:
+   - En [`MobileTabBar`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/MobileTabBar.tsx) se redujo el tamaño de los iconos (a 18px), se compactaron los márgenes y tipografías (`text-[9.5px]`, `py-0.5`), y se bajó el padding inferior a `calc(env(safe-area-inset-bottom,0px)-10px)`, logrando una barra mucho más discreta y estilizada.
+
+4. **Cabecera superior fija en pantalla**:
+   - En [`RootLayout`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx), la cabecera móvil ahora utiliza `fixed top-0 left-0 right-0 z-30` con un espaciador dedicado y `overflow-x-clip`. De esta forma permanece permanentemente anclada en la parte superior sin desplazarse al hacer scroll.
+
+5. **Release sincronizada**:
+   - Sincronizado a Git con la versión **`v3.0.24`**.
+
+---
+
+### 👤 Usuario (2026-10-13 12:45:26)
+
+reduce el espaciado vertical del ticker un poco en general (nativa y web)
 
 ---

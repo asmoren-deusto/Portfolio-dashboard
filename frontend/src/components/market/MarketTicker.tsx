@@ -410,15 +410,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   return (
     <>
       <div className={cn(
-        "relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover backdrop-blur-md py-1.5 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200",
-        isNative ? "px-2.5" : "px-3.5"
+        "relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover backdrop-blur-md py-1 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200",
+        isNative ? "px-2.5" : "px-3 sm:px-3.5"
       )}>
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
           <div
             className={cn(
               "flex items-center border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#1e1e1e]/96",
-              isNative ? "pl-0.5 pr-2 gap-0" : "pl-0.5 pr-3 gap-2"
+              isNative ? "pl-0.5 pr-2 gap-0" : "pl-0.5 pr-2.5 gap-1.5"
             )}
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
           >
@@ -448,12 +448,12 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
               </span>
             )}
             {!isNative && (
-              <div className="flex flex-col leading-none">
-                <span className="text-[11px] font-semibold tracking-wider text-slate-800 dark:text-slate-100 uppercase">
+              <div className="flex flex-col leading-tight">
+                <span className="text-[10.5px] font-semibold tracking-wider text-slate-800 dark:text-slate-100 uppercase">
                   {mainStatusLabel}
                 </span>
                 {lastUpdated && (
-                  <span className="flex items-center gap-0.5 text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5">
+                  <span className="flex items-center gap-0.5 text-[9px] text-slate-400 dark:text-slate-500 mt-[1px]">
                     <Clock className="w-2.5 h-2.5" />
                     {fmtUpdated(lastUpdated)}
                   </span>
@@ -463,7 +463,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           </div>
 
           {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
-          <div className={cn("relative flex-1 overflow-hidden py-1 group", isNative ? "ml-1.5" : "ml-2")}>
+          <div className={cn("relative flex-1 overflow-hidden py-0.5 group", isNative ? "ml-1.5" : "ml-2")}>
             {/* Subtle fade edges for smooth transition */}
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
@@ -490,7 +490,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
               )}
               style={{ touchAction: 'pan-x' }}
             >
-              <div className="flex items-center gap-2 pt-1 pb-0.5 w-max">
+              <div className="flex items-center gap-1.5 sm:gap-2 py-0.5 w-max">
                 {[...rawIndices, ...rawIndices, ...rawIndices].map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
@@ -506,7 +506,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     tabIndex={0}
                     key={`${idx.name}-${index}`}
                     onClick={() => handleCardClick(idx)}
-                    className="relative flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-xs hover:shadow-md transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-white/20 cursor-pointer active:scale-[0.98]"
+                    className="relative flex items-center gap-2 px-2 sm:px-2.5 py-0.5 rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-2xs hover:shadow-xs transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-white/20 cursor-pointer active:scale-[0.98]"
                   >
                     {/* Floating Overlaid State Badge (Upper-right corner) */}
                     {state !== 'REGULAR' && (
@@ -522,17 +522,17 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     />
                     {/* Name + price — always exactly 2 lines, no extra rows */}
                     <div className="flex flex-col justify-center min-w-0">
-                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap leading-none">
+                      <span className="text-[10.5px] font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap leading-none">
                         {idx.name}
                       </span>
-                      <span className="text-[11.5px] font-bold text-slate-900 tracking-tight dark:text-white mt-[3px] tabular-nums leading-none whitespace-nowrap">
+                      <span className="text-[11px] font-bold text-slate-900 tracking-tight dark:text-white mt-[1.5px] tabular-nums leading-none whitespace-nowrap">
                         {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
                       </span>
                     </div>
 
                     {/* Change % badge — fixed height, no extra lines */}
                     <div
-                      className={`flex items-center gap-0.5 text-[11px] font-semibold tabular-nums px-1.5 py-0.5 rounded-md border shrink-0 ${
+                      className={`flex items-center gap-0.5 text-[10.5px] font-semibold tabular-nums px-1.5 py-[1px] rounded-md border shrink-0 ${
                         isPos
                           ? 'text-emerald-800 bg-emerald-50/90 border-emerald-300/80 dark:text-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/20'
                           : 'text-rose-800 bg-rose-50/90 border-rose-300/80 dark:text-rose-300 dark:bg-rose-500/10 dark:border-rose-500/20'
