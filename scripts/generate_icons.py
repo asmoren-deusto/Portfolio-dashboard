@@ -40,11 +40,11 @@ def create_png(width: int, height: int, pixels_rgb: list[tuple[int, int, int]]) 
 
 def render_logo(size: int) -> bytes:
     """
-    Renders a stunning, luxury full-bleed financial icon:
-    - 100% full-bleed canvas: the background extends edge-to-edge (no inner cards or rounded borders).
-    - Deep royal navy & sapphire gradient backdrop with subtle central ambient lighting.
-    - Pure brilliant white trending up arrow, exactly matching the web AppLogo geometry.
-    - Crisp rounded stroke caps and subtle ambient luminous bloom.
+    Renders a stunning, premium full-bleed financial icon with a crisp white background:
+    - 100% full-bleed canvas: pristine, luminous white background extending edge-to-edge.
+    - Electric royal blue trending up arrow, exactly matching the web AppLogo geometry.
+    - Subtle elegant depth shadow beneath the arrow to lift it off the white canvas.
+    - Crisp rounded stroke caps and high-precision anti-aliasing.
     """
     pixels = []
 
@@ -71,7 +71,11 @@ def render_logo(size: int) -> bytes:
 
     # Stroke radius: 2.8 * 1.5 / 64 / 2 = ~0.0328 (full thickness ~0.0656)
     stroke_radius = size * (4.2 / 64.0 / 2.0)
-    glow_radius = stroke_radius * 2.8
+
+    # Ambient drop shadow under the arrow
+    shadow_off_x = size * 0.004
+    shadow_off_y = size * 0.015
+    shadow_radius = stroke_radius * 1.9
 
     def dist_to_segment(px, py, p1, p2):
         x1, y1 = p1[0] * size, p1[1] * size
@@ -88,44 +92,39 @@ def render_logo(size: int) -> bytes:
         for x in range(size):
             nx = x / size
 
-            # 1. Full-bleed backdrop: Luxury Royal Sapphire to Deep Obsidian Navy
-            # Diagonal gradient from top-left (0,0) to bottom-right (1,1)
+            # 1. Full-bleed pristine white background with ultra-faint cool pearl nuance
             diag_t = (nx * 0.4 + ny * 0.6)
-            # Top-left: vibrant royal sapphire (22, 60, 142) -> Bottom-right: deep midnight obsidian (7, 14, 32)
-            bg_r = 22.0 + (7.0 - 22.0) * diag_t
-            bg_g = 60.0 + (14.0 - 60.0) * diag_t
-            bg_b = 142.0 + (32.0 - 142.0) * diag_t
-
-            # Central ambient radial spotlight behind the arrow to create rich depth
-            spot_dx = (nx - 0.50)
-            spot_dy = (ny - 0.48)
-            spot_dist = math.hypot(spot_dx, spot_dy) / 0.65
-            if spot_dist < 1.0:
-                spot_factor = (1.0 - spot_dist * spot_dist) ** 1.8
-                bg_r += 32.0 * spot_factor
-                bg_g += 78.0 * spot_factor
-                bg_b += 140.0 * spot_factor
+            bg_r = 255.0 - 5.0 * diag_t
+            bg_g = 255.0 - 4.0 * diag_t
+            bg_b = 255.0 - 2.0 * diag_t
 
             cur_r = bg_r
             cur_g = bg_g
             cur_b = bg_b
 
-            # 2. Pure White Trending Up Arrow (matching web icon)
+            # 2. Soft depth shadow under the blue arrow
+            shadow_d = min(dist_to_segment(x - shadow_off_x, y - shadow_off_y, s[0], s[1]) for s in chart_segments)
+            if shadow_d <= shadow_radius:
+                shadow_factor = ((1.0 - (shadow_d / shadow_radius)) ** 2) * 0.18
+                cur_r = cur_r * (1.0 - shadow_factor) + 25.0 * shadow_factor
+                cur_g = cur_g * (1.0 - shadow_factor) + 60.0 * shadow_factor
+                cur_b = cur_b * (1.0 - shadow_factor) + 140.0 * shadow_factor
+
+            # 3. Electric Royal Blue Trending Up Arrow
             min_d = min(dist_to_segment(x, y, s[0], s[1]) for s in chart_segments)
 
-            # Soft bloom around white stroke
-            if min_d <= glow_radius:
-                bloom = ((1.0 - (min_d / glow_radius)) ** 2) * 0.38
-                cur_r += 255.0 * bloom
-                cur_g += 255.0 * bloom
-                cur_b += 255.0 * bloom
+            # Gradient along the arrow: Vibrant Electric Blue (37, 99, 235) -> Deep Royal Blue (29, 78, 216)
+            trend_t = max(0.0, min(1.0, (nx - 0.26) / (0.74 - 0.26)))
+            line_r = 37.0 + (29.0 - 37.0) * trend_t
+            line_g = 99.0 + (78.0 - 99.0) * trend_t
+            line_b = 235.0 + (216.0 - 235.0) * trend_t
 
             # Crisp stroke with anti-aliasing
             if min_d <= stroke_radius:
                 stroke_aa = 1.0 if min_d <= stroke_radius - 1.0 else max(0.0, (stroke_radius - min_d) / 1.0)
-                cur_r = cur_r * (1.0 - stroke_aa) + 255.0 * stroke_aa
-                cur_g = cur_g * (1.0 - stroke_aa) + 255.0 * stroke_aa
-                cur_b = cur_b * (1.0 - stroke_aa) + 255.0 * stroke_aa
+                cur_r = cur_r * (1.0 - stroke_aa) + line_r * stroke_aa
+                cur_g = cur_g * (1.0 - stroke_aa) + line_g * stroke_aa
+                cur_b = cur_b * (1.0 - stroke_aa) + line_b * stroke_aa
 
             pixels.append((
                 int(max(0, min(255, cur_r))),

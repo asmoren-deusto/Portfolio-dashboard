@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 14:15:04
+- **Fecha de exportación:** 2026-10-13 14:16:42
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 57
+- **Total de interacciones registradas:** 59
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1340,5 +1340,30 @@ hazlo
 ### 👤 Usuario (2026-10-13 12:10:07)
 
 en la vista oculta la grafica de evolucion en vision general no se difumina
+
+---
+
+### 🤖 Asistente (2026-10-13 12:15:07)
+
+Corregido. El gráfico de evolución no se estaba difuminando porque el contenedor del lienzo (`canvas`) y las métricas de la barra superior (*HUD*) carecían del atributo `data-private`.
+
+### 🛡️ Cambios aplicados:
+1. **Contenedor del gráfico ([OverviewPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx))**:
+   - Se añadió `data-private` al contenedor principal de la gráfica de evolución y a la vista alternativa de matriz mensual.
+2. **Componente de la gráfica ([PerformanceChart.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx))**:
+   - Se aplicó `data-private` a la barra superior de métricas (*Patrimonio, Aportado, Beneficio*), al contenedor del lienzo (*canvas*) y a la tira inferior de hitos (*Máximo, Mínimo, Pico, Neto*).
+3. **Soporte completo en Safari e iOS ([index.css](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css))**:
+   - Se añadió el prefijo `-webkit-filter: blur(7px);` para garantizar que la GPU y el motor WebKit de iOS difuminen de forma instantánea el canvas 2D.
+4. **Gráfico de Analítica ([AnalyticsPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/AnalyticsPage.tsx))**:
+   - Se protegió también el gráfico de retornos en la pestaña de analítica.
+
+---
+🚀 Sincronizado y subido a GitHub en la versión **v3.0.19**. Con la configuración en vivo que activamos, al recargar la web o abrir la app con el modo discreto activado (`👁`), verás la gráfica de evolución completamente difuminada.
+
+---
+
+### 👤 Usuario (2026-10-13 12:14:53)
+
+hazme una version con el icono de fondo blanco
 
 ---
