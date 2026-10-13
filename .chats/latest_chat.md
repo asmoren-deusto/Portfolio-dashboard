@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 11:22:00
+- **Fecha de exportación:** 2026-10-13 11:24:28
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 17
+- **Total de interacciones registradas:** 19
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -307,5 +307,32 @@ Tienes la guía paso a paso detallada guardada en [`docs/ios_mobile_guide.md`](f
 ### 👤 Usuario (2026-10-13 09:21:16)
 
 
+
+---
+
+### 🤖 Asistente (2026-10-13 09:22:03)
+
+El error se debía a que **Capacitor 7 CLI** requiere específicamente **Node.js >= 22.0.0** (y el workflow estaba configurado inicialmente con Node 20):
+
+```text
+[fatal] The Capacitor CLI requires NodeJS >=22.0.0
+        Please install the latest LTS version.
+```
+
+### 🛠️ Solución aplicada:
+1. **Actualizado a Node.js 22** en [`.github/workflows/build-ios.yml`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/.github/workflows/build-ios.yml).
+2. **Mejorada la resiliencia en la selección de Xcode** para enlazar automáticamente con la versión disponible en el runner de GitHub (`Xcode 16 / 15.4`).
+3. Cambios subidos a `main` en la versión **`v3.0.5`**.
+
+---
+
+### 👉 Siguiente paso:
+Ya puedes volver a GitHub Actions y hacer clic en **"Re-run all jobs"** (o lanzar de nuevo el workflow con el botón **Run workflow**). Ahora avanzará sin ese bloqueo y generará el `.ipa`.
+
+---
+
+### 👤 Usuario (2026-10-13 09:23:40)
+
+mismo error, no parece haberse actualizado
 
 ---
