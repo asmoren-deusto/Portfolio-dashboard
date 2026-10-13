@@ -1,19 +1,40 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle2, TrendingUp, TrendingDown, X, Sparkles, Calendar, Layers, ShieldCheck } from 'lucide-react'
+import { CheckCircle2, TrendingUp, TrendingDown, X, Sparkles, Calendar, Layers, ShieldCheck, Pin, PinOff } from 'lucide-react'
 import { useAppStore, type NavAlertItem } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
 
 export function NavUpdateAlertModal() {
   const { navAlertNotification, clearNavAlertNotification } = useAppStore()
   const [isPaused, setIsPaused] = useState(false)
+  const [isPinned, setIsPinned] = useState(false)
   const [progress, setProgress] = useState(100)
 
   const notif = navAlertNotification
-  const AUTO_DISMISS_MS = 10000
+  const AUTO_DISMISS_MS = 30000
+
+  // Native Web notification when app is backgrounded or tab unfocused
+  useEffect(() => {
+    if (!notif || (notif.updatedCount ?? 0) === 0) return
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {})
+      } else if (Notification.permission === 'granted' && document.hidden) {
+        try {
+          new Notification('PortfolioPro - NAVs Actualizados', {
+            body: `${notif.updatedCount} fondo${notif.updatedCount > 1 ? 's' : ''} con nuevo valor liquidativo oficial.`,
+            icon: '/icon-192.png',
+          })
+        } catch {}
+      }
+    }
+  }, [notif])
 
   useEffect(() => {
-    if (!notif) return
+    if (!notif || isPinned) {
+      setProgress(100)
+      return
+    }
 
     setProgress(100)
     const startTime = Date.now()
@@ -29,7 +50,7 @@ export function NavUpdateAlertModal() {
     }, 100)
 
     return () => clearInterval(interval)
-  }, [notif, isPaused, clearNavAlertNotification])
+  }, [notif, isPaused, isPinned, clearNavAlertNotification])
 
   const hasUpdates = (notif?.updatedCount ?? 0) > 0
 
@@ -45,6 +66,7 @@ export function NavUpdateAlertModal() {
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
             className="pointer-events-auto w-[92vw] sm:w-[440px] max-w-full rounded-2xl overflow-hidden shadow-2xl border backdrop-blur-2xl transition-colors bg-white/95 dark:bg-[#1e1e1e]/98 border-slate-200/90 dark:border-white/10"
           >
           {/* Top subtle shine / accent gradient */}
@@ -89,13 +111,27 @@ export function NavUpdateAlertModal() {
               </div>
             </div>
 
-            <button
-              onClick={() => clearNavAlertNotification()}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors shrink-0"
-              title="Cerrar aviso"
-            >
-              <X size={16} />
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setIsPinned(!isPinned)}
+                className={cn(
+                  'p-1.5 rounded-lg transition-colors',
+                  isPinned
+                    ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/10 dark:text-blue-400'
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]'
+                )}
+                title={isPinned ? 'Desfijar auto-cierre' : 'Fijar ventana (no cerrar automáticamente)'}
+              >
+                {isPinned ? <PinOff size={15} /> : <Pin size={15} />}
+              </button>
+              <button
+                onClick={() => clearNavAlertNotification()}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
+                title="Cerrar aviso"
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {/* Modal Content: List of Updated Funds */}
@@ -134,7 +170,11 @@ export function NavUpdateAlertModal() {
           {/* Modal Footer with Actions and Countdown progress bar */}
           <div className="px-4 py-2.5 bg-slate-50/70 dark:bg-white/[0.02] border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between text-xs">
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              {hasUpdates
+              {isPinned
+                ? '📌 Fijado (no se cerrará automáticamente)'
+                : isPaused
+                ? '⏸️ Pausado'
+                : hasUpdates
                 ? 'Valores reflejados en tus gráficas y saldos'
                 : 'Siguiente comprobación disponible en cualquier momento'}
             </span>
@@ -146,13 +186,15 @@ export function NavUpdateAlertModal() {
             </button>
           </div>
 
-          {/* Auto-dismiss progress bar */}
-          <div className="h-0.5 w-full bg-slate-100 dark:bg-white/[0.04]">
-            <div
-              className="h-full bg-blue-500/70 transition-all duration-100 ease-linear"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          {/* Auto-dismiss progress bar (hidden if pinned) */}
+          {!isPinned && (
+            <div className="h-0.5 w-full bg-slate-100 dark:bg-white/[0.04]">
+              <div
+                className="h-full bg-blue-500/70 transition-all duration-100 ease-linear"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          )}
         </motion.div>
         </div>
       )}

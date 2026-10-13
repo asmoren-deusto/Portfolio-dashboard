@@ -64,8 +64,10 @@ interface AppState {
 
   // NAV Update Alert Windows State
   navAlertNotification: NavAlertNotification | null
+  lastNavAlertHistory: NavAlertNotification | null
   setNavAlertNotification: (notif: NavAlertNotification | null) => void
   clearNavAlertNotification: () => void
+  openNavAlertHistory: () => void
 
   // User & Authentication
   currentUser: UserProfile | null
@@ -247,8 +249,31 @@ export const useAppStore = create<AppState>((set, get) => ({
   triggerRefreshAnimation: () => set((s) => ({ refreshAnimKey: s.refreshAnimKey + 1 })),
 
   navAlertNotification: null,
-  setNavAlertNotification: (navAlertNotification) => set({ navAlertNotification }),
+  lastNavAlertHistory: (() => {
+    try {
+      const stored = localStorage.getItem('portfolio_last_nav_alert')
+      return stored ? JSON.parse(stored) : null
+    } catch {
+      return null
+    }
+  })(),
+  setNavAlertNotification: (navAlertNotification) => {
+    if (navAlertNotification) {
+      try {
+        localStorage.setItem('portfolio_last_nav_alert', JSON.stringify(navAlertNotification))
+      } catch {}
+      set({ navAlertNotification, lastNavAlertHistory: navAlertNotification })
+    } else {
+      set({ navAlertNotification: null })
+    }
+  },
   clearNavAlertNotification: () => set({ navAlertNotification: null }),
+  openNavAlertHistory: () => {
+    const history = get().lastNavAlertHistory
+    if (history) {
+      set({ navAlertNotification: history })
+    }
+  },
 
   // Auth State
   currentUser: initialUser,

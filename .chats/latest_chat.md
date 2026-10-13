@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 11:54:27
+- **Fecha de exportación:** 2026-10-13 12:03:23
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 31
+- **Total de interacciones registradas:** 33
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -900,5 +900,45 @@ La solución estándar y más cómoda para tu dashboard es:
 ### 👤 Usuario (2026-10-13 09:53:44)
 
 instalado aunque el icono de la app es uno generico y no el bueno, me dice Desarrollador no fiable, donde tengo que tocar eso
+
+---
+
+### 🤖 Asistente (2026-10-13 09:54:29)
+
+¡Buenas noticias, ya la tienes instalada en tu iPhone! 📱🎉
+
+Para resolver los dos puntos:
+
+---
+
+### 1. Dónde quitar el aviso de "Desarrollador no fiable":
+
+En iOS, cualquier app instalada fuera de la App Store requiere que autorices tu cuenta personal de desarrollo:
+
+1. En tu iPhone, abre **Ajustes**.
+2. Entra en **General** ➡️ **Gestión de dispositivos y VPN** (en algunas versiones de iOS aparece como *VPN y gestión de dispositivos*).
+3. En la sección **App de desarrollador**, verás tu correo (`asiermoreno@gmail.com`). Pulsa sobre él.
+4. Toca en el botón azul **"Confiar en asiermoreno@gmail.com"**.
+5. Pulsa en **Confiar** en la ventana emergente de confirmación.
+
+*(Nota: En iOS 16, 17 o 18, si al abrirla te pidiera activar el modo desarrollador: ve a **Ajustes > Privacidad y seguridad > Modo de desarrollador**, actívalo y reinicia el iPhone).*
+
+¡Listo! Ya podrás abrir la app normalmente desde la pantalla de inicio.
+
+---
+
+### 2. Sobre el icono de la app:
+
+El primer build tenía el icono genérico azul por defecto de Capacitor.
+
+Ya he actualizado y generado el **icono oficial PortfolioPro en alta resolución (1024x1024 Retina)** dentro del catálogo de assets nativo de Xcode ([`AppIcon.appiconset`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png)) y lo he subido al repositorio en la versión **`v3.0.8`**.
+
+La próxima vez que compiles el workflow en GitHub Actions para actualizar la app, el archivo `.ipa` se generará automáticamente con el icono oficial.
+
+---
+
+### 👤 Usuario (2026-10-13 09:58:34)
+
+se han actualizado NAVs en la app y no me ha notificado o se ha cerrado el popup
 
 ---

@@ -395,6 +395,25 @@ async def update_price(req: UpdatePriceRequest, user_id: str = Depends(get_curre
 
     _price_cache[req.isin] = {"price": req.price, "date": target_date, "ts": datetime.now()}
     _perf_cache.clear()
+
+    global _latest_nav_alert
+    asset = _get_asset(db, req.isin)
+    import time
+    _latest_nav_alert = {
+        "id": f"nav_{int(time.time()*1000)}",
+        "timestamp": datetime.now().strftime("%H:%M"),
+        "updatedCount": 1,
+        "totalCount": 1,
+        "items": [{
+            "isin": req.isin,
+            "name": asset.name if asset else req.isin,
+            "price": req.price,
+            "price_date": target_date,
+            "is_updated": True,
+        }],
+        "allCheckedItems": [],
+    }
+
     return {"ok": True, "isin": req.isin, "price": req.price, "date": target_date}
 
 
