@@ -1266,6 +1266,35 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
     except Exception as e:
         logger.warning(f"Error fetching ETF history download: {e}")
 
+    # Sincronizar el último punto de la serie intradía con la cotización en vivo de summary
+    if chart_points and fetch_period == "1d":
+        from zoneinfo import ZoneInfo
+        last_pt = chart_points[-1]
+        now_madrid = datetime.now(ZoneInfo("Europe/Madrid"))
+        now_unix = int(now_madrid.timestamp())
+
+        if now_unix - last_pt["time_unix"] >= 180:
+            chart_points.append({
+                "time": now_madrid.isoformat(),
+                "time_unix": now_unix,
+                "label": now_madrid.strftime("%H:%M"),
+                "time_ny": datetime.now(ZoneInfo("America/New_York")).strftime("%H:%M"),
+                "date": now_madrid.strftime("%Y-%m-%d"),
+                "session_date": datetime.now(ZoneInfo("America/New_York")).date().isoformat(),
+                "phase": chart_points[-1].get("phase", "REGULAR"),
+                "simulated_pct": simulated_daily_pct,
+                "simulated_amount": simulated_daily_amount,
+                "simulated_eur_pct": simulated_eur_pct,
+                "simulated_eur_amount": simulated_eur_amount,
+                "usd_strength_pct": usd_strength_pct,
+            })
+        else:
+            last_pt["simulated_pct"] = simulated_daily_pct
+            last_pt["simulated_amount"] = simulated_daily_amount
+            last_pt["simulated_eur_pct"] = simulated_eur_pct
+            last_pt["simulated_eur_amount"] = simulated_eur_amount
+            last_pt["usd_strength_pct"] = usd_strength_pct
+
     # ETFs summary list
     etfs_summary = []
     for t in etf_tickers_list:

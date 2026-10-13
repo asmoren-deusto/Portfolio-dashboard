@@ -177,13 +177,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
     return { minPct: Math.min(...vals), maxPct: Math.max(...vals) }
   }, [chartPoints, currencyMode])
 
-  // Active point for KPI display
-  const activePoint = hoveredPoint || (chartPoints.length > 0 ? chartPoints[chartPoints.length - 1] : null)
-  const currentPct = activePoint
-    ? (currencyMode === 'eur' ? (activePoint.simulated_eur_pct ?? activePoint.simulated_pct) : activePoint.simulated_pct)
+  // Active point for KPI display: when hovered, show the inspected historical point; when not hovered, show the live summary
+  const currentPct = hoveredPoint
+    ? (currencyMode === 'eur' ? (hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct) : hoveredPoint.simulated_pct)
     : (currencyMode === 'eur' ? (summary?.fx_info?.simulated_eur_pct ?? summary?.simulated_daily_pct ?? 0) : (summary?.simulated_daily_pct ?? 0))
-  const currentAmount = activePoint
-    ? (currencyMode === 'eur' ? (activePoint.simulated_eur_amount ?? activePoint.simulated_amount) : activePoint.simulated_amount)
+  const currentAmount = hoveredPoint
+    ? (currencyMode === 'eur' ? (hoveredPoint.simulated_eur_amount ?? hoveredPoint.simulated_amount) : hoveredPoint.simulated_amount)
     : (currencyMode === 'eur' ? (summary?.fx_info?.simulated_eur_amount ?? summary?.simulated_daily_amount ?? 0) : (summary?.simulated_daily_amount ?? 0))
 
   // Initialize and maintain TradingView Lightweight Charts instance
