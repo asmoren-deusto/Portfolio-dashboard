@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:29:58
+- **Fecha de exportación:** 2026-10-13 15:37:53
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 84
+- **Total de interacciones registradas:** 86
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1630,5 +1630,45 @@ Se han aplicado los ajustes solicitados:
 ### 👤 Usuario (2026-10-13 13:22:34)
 
 no veo los cambios del ultimo cambio
+
+---
+
+### 🤖 Asistente (2026-10-13 13:30:01)
+
+### ¿Por qué no se veían los cambios?
+
+1. **La app en segundo plano en iOS**: En la app nativa (o en Safari/Chrome móvil), el visor interno de iOS (*WKWebView*) mantiene en memoria RAM el código JavaScript y la página que cargó al inicio. Al salir y volver a entrar a la app, iOS simplemente despausa el proceso; no vuelve a descargar el nuevo paquete de código.
+2. **Pull-to-refresh**: El gesto de deslizar hacia abajo actualiza los datos y cotizaciones de la API en segundo plano, pero no recarga los ficheros estáticos de la aplicación.
+3. **El despliegue en servidor ya estaba activo**: Comprobamos el servidor en `https://portfolio.asiermoreno.es` y ya tenía desplegada la versión `3.0.31`.
+
+---
+
+### Cómo ver los cambios de inmediato
+
+* **En el móvil (App nativa iOS)**: Desliza la app hacia arriba en el selector de multitarea de iOS para cerrarla por completo y vuelve a abrirla.
+* **En el navegador web**: Haz un refresco forzado con `Cmd + Shift + R` (Mac) o `Ctrl + F5` (Windows).
+
+---
+
+### Mejoras añadidas en la nueva versión `v3.0.32`
+
+1. **Indicador de versión y botón de recarga rápida en el móvil**:
+   * Al pulsar sobre el logotipo de **PortfolioPro** en la cabecera (donde está el selector de entidad e inversor), ahora verás al pie:
+     * La versión exacta cargada en tu dispositivo (`v3.0.32`).
+     * Un botón **"Recargar app"**: al tocarlo, fuerza una recarga instantánea del visor para recibir cualquier cambio sin tener que matar la app.
+2. **Selector temporal optimizado ("Max")**:
+   * Se amplió el ancho útil a `w-[54px]` y se recalibró el padding interno para garantizar que **"Max"** no sufra ningún recorte tipográfico en iOS.
+3. **Menú inferior más compacto**:
+   * Margen superior reducido a `pt-1.5`.
+4. **Directivas anti-caché en [index.html](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/index.html)**:
+   * Se han agregado directivas `no-cache, no-store, must-revalidate` para forzar a los navegadores móviles a solicitar siempre el archivo HTML más reciente.
+
+*(Compilado, verificado y sincronizado automáticamente a GitHub bajo la versión **v3.0.32**).*
+
+---
+
+### 👤 Usuario (2026-10-13 13:30:24)
+
+nativo: coculta ese detalle y la leyenda del eje Y metela dentro del propio grafico. haz más pequeña la letra del selector 1A
 
 ---

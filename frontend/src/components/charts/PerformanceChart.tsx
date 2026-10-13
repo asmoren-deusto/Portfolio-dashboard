@@ -12,6 +12,7 @@ import {
 import type { PricePoint } from '@/lib/mockData'
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
+import { isNativePlatform } from '@/api/config'
 import {
   TrendingUp,
   TrendingDown,
@@ -313,6 +314,7 @@ export function PerformanceChart({
           },
         },
         rightPriceScale: {
+          visible: !isNativePlatform(),
           borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
           scaleMargins: { top: 0.12, bottom: 0.08 },
         },
@@ -789,62 +791,62 @@ export function PerformanceChart({
 
   return (
     <div data-private className="w-full flex flex-col justify-between select-none space-y-2">
-      {/* Dynamic HUD Bar with Inlined Entity Selectors (Matches exact mockup from user) */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
-        {/* Left: Patrimonio & Aportado */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
-            <span className="text-slate-500 dark:text-slate-400 font-medium">Patrimonio:</span>
-            <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
-              {chartMode === 'currency'
-                ? fmt.currency(activeSelectedMetrics?.val)
-                : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
-            </span>
+      {/* Dynamic HUD Bar with Inlined Entity Selectors (Hidden on native) */}
+      {!isNativePlatform() && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
+          {/* Left: Patrimonio & Aportado */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Patrimonio:</span>
+              <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
+                {chartMode === 'currency'
+                  ? fmt.currency(activeSelectedMetrics?.val)
+                  : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
+              </span>
+            </div>
+
+            {showInvested && chartMode === 'currency' && activeSelectedMetrics?.inv !== undefined && (
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-0.5 border-t-2 border-dashed border-purple-500 shrink-0" />
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
+                <span data-private className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                  {fmt.currency(activeSelectedMetrics.inv)}
+                </span>
+              </div>
+            )}
           </div>
 
-          {showInvested && chartMode === 'currency' && activeSelectedMetrics?.inv !== undefined && (
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-0.5 border-t-2 border-dashed border-purple-500 shrink-0" />
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
-              <span data-private className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
-                {fmt.currency(activeSelectedMetrics.inv)}
-              </span>
-            </div>
-          )}
+          {/* Right: Beneficio & Fecha */}
+          <div className="flex items-center justify-between sm:justify-end gap-2">
+            {activeSelectedMetrics && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Beneficio:</span>
+                <span
+                  data-private
+                  className={cn(
+                    'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
+                    activeSelectedMetrics.diff >= 0
+                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
+                      : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
+                  )}
+                >
+                  {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
+                </span>
+              </div>
+            )}
+
+            {activePoint?.date && (
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-[#252526] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.08] shrink-0">
+                <Calendar size={11} className={hoveredPoint ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'} />
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  {formatDateSpanish(activePoint.date)}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-
-
-
-        {/* Right: Beneficio & Fecha */}
-        <div className="flex items-center justify-between sm:justify-end gap-2">
-          {activeSelectedMetrics && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Beneficio:</span>
-              <span
-                data-private
-                className={cn(
-                  'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
-                  activeSelectedMetrics.diff >= 0
-                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
-                    : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
-                )}
-              >
-                {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
-              </span>
-            </div>
-          )}
-
-          {activePoint?.date && (
-            <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-[#252526] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.08] shrink-0">
-              <Calendar size={11} className={hoveredPoint ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'} />
-              <span className="font-semibold text-slate-800 dark:text-slate-200">
-                {formatDateSpanish(activePoint.date)}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Canvas Container */}
       <div data-private ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
@@ -863,6 +865,39 @@ export function PerformanceChart({
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {/* Floating In-Chart Y-Axis Scale (Native app: Inside the chart canvas) */}
+        {isNativePlatform() && metrics && (
+          <div className="absolute right-2 top-2.5 bottom-7 pointer-events-none flex flex-col justify-between items-end z-10 text-[9.5px] font-mono select-none">
+            <span className="px-1.5 py-0.5 rounded bg-white/75 dark:bg-[#181818]/80 border border-slate-200/70 dark:border-white/10 backdrop-blur-xs text-slate-700 dark:text-slate-300 font-bold shadow-2xs leading-none">
+              {chartMode === 'currency'
+                ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(metrics.maxPoint.value)
+                : `${(metrics.periodReturnPct || 0) >= 0 ? '+' : ''}${(metrics.periodReturnPct || 0).toFixed(1)}%`}
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-white/60 dark:bg-[#181818]/60 border border-slate-200/40 dark:border-white/5 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-medium leading-none">
+              {chartMode === 'currency'
+                ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((metrics.maxPoint.value + metrics.minPoint.value) / 2)
+                : '0.0%'}
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-white/75 dark:bg-[#181818]/80 border border-slate-200/70 dark:border-white/10 backdrop-blur-xs text-slate-700 dark:text-slate-300 font-bold shadow-2xs leading-none">
+              {chartMode === 'currency'
+                ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(metrics.minPoint.value)
+                : `${(metrics.periodReturnPct || 0) < 0 ? (metrics.periodReturnPct || 0).toFixed(1) : '0.0'}%`}
+            </span>
+          </div>
+        )}
+
+        {/* Floating touch scrub detail badge on native */}
+        {isNativePlatform() && hoveredPoint && (
+          <div className="absolute top-2 left-2 z-20 pointer-events-none flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-900/90 dark:bg-black/90 text-white text-[11px] font-mono shadow-md backdrop-blur-xs border border-white/10">
+            <span className="font-bold text-blue-400">
+              {chartMode === 'currency'
+                ? fmt.currency(hoveredPoint.value)
+                : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
+            </span>
+            <span className="text-slate-400 text-[10px]">{formatDateSpanish(hoveredPoint.date)}</span>
           </div>
         )}
       </div>
