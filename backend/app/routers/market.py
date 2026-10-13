@@ -454,6 +454,12 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             ref = regular_price
             chg = round(display_price - ref, 4)
             chg_pct = post_chg_pct if post_chg_pct is not None else round((display_price - ref) / ref * 100, 2)
+        elif market_state == "PRE":
+            # Si el mercado estadounidense está en pre-market y este ETF no ha cruzado operaciones hoy,
+            # su variación hoy respecto al cierre anterior es 0.00% (no arrastrar la variación de ayer)
+            ref = regular_price or display_price
+            chg = 0.0
+            chg_pct = 0.0
         else:
             # REGULAR or CLOSED: change vs previous close
             ref = prev_close or regular_price or display_price
@@ -1034,6 +1040,30 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
 
     # Extended quotes for all ETF proxies
     quotes = _fetch_quotes_extended(etf_tickers_list)
+
+    # Underlying session live proxies when ETF is in US PRE-market with zero trades
+    # (e.g. Euro Stoxx 50 trades in Europe between 09:00 - 17:30 CET, Nikkei 225 in Tokyo)
+    ETF_PREMARKET_LIVE_PROXIES = {
+        "FEZ": "^STOXX50E",  # Euro Stoxx 50 cash index (sesión europea 09:00 - 17:30 CET)
+        "EFV": "^STOXX50E",  # RV Internacional EAFE Value (sesión europea)
+        "EWJ": "^N225",      # Nikkei 225 (sesión de Tokio)
+    }
+
+    untraded_in_pre = [
+        t for t in etf_tickers_list
+        if quotes.get(t, {}).get("market_state") == "PRE"
+        and quotes.get(t, {}).get("pre_market_price") is None
+        and t in ETF_PREMARKET_LIVE_PROXIES
+    ]
+    if untraded_in_pre:
+        needed_proxies = list(set(ETF_PREMARKET_LIVE_PROXIES[t] for t in untraded_in_pre))
+        proxy_quotes = {p_tick: _fetch_yahoo_chart_quote(p_tick) for p_tick in needed_proxies}
+        for t in untraded_in_pre:
+            p_tick = ETF_PREMARKET_LIVE_PROXIES[t]
+            pq = proxy_quotes.get(p_tick, {})
+            if pq and pq.get("change_pct") is not None:
+                quotes[t]["change_pct"] = pq["change_pct"]
+                quotes[t]["proxy_used"] = p_tick
 
     # Attach live ETF quote info & simulated gain to each holding
     for h in holdings:

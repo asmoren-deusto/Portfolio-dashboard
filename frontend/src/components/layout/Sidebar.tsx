@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/store/appStore'
-import { useMarketIndices } from '@/api/queries'
+import { useMarketIndices, useSimulatedPortfolio } from '@/api/queries'
 import { APP_VERSION } from '@/version'
 import { AppLogo } from '@/components/ui/AppLogo'
 
@@ -43,6 +43,8 @@ export function Sidebar({ }: SidebarProps) {
     logout,
   } = useAppStore()
   const { data: indicesData, dataUpdatedAt } = useMarketIndices()
+  const { data: simData } = useSimulatedPortfolio('1d')
+  const sessionPct = simData?.summary?.fx_info?.simulated_eur_pct ?? simData?.summary?.simulated_daily_pct
 
   // Live timestamp: prefer server's cache_timestamp, fall back to React Query's dataUpdatedAt
   const syncTime = (() => {
@@ -156,7 +158,20 @@ export function Sidebar({ }: SidebarProps) {
                       />
                     )}
                     <Icon size={16.5} strokeWidth={isActive ? 2.3 : 1.8} className={isActive ? 'text-blue-600 dark:text-blue-400' : ''} />
-                    <span>{label}</span>
+                    <span className="flex-1">{label}</span>
+                    {to === '/market' && !sidebarCollapsed && sessionPct !== undefined && !isNaN(sessionPct) && (
+                      <span
+                        data-private
+                        className={cn(
+                          'text-[10.5px] font-mono font-bold px-1.5 py-0.5 rounded-md border shrink-0',
+                          sessionPct >= 0
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                        )}
+                      >
+                        {sessionPct >= 0 ? '+' : ''}{sessionPct.toFixed(1)}%
+                      </span>
+                    )}
                   </>
                 )}
               </NavLink>

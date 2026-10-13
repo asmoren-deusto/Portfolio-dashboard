@@ -45,6 +45,7 @@ import {
   useAnalytics,
   useTransactions,
   useMarketQuotes,
+  useSimulatedPortfolio,
   type MarketStock,
   type Position,
 } from '@/api/queries'
@@ -107,8 +108,14 @@ export function OverviewPage() {
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: transactions = [] } = useTransactions()
   const { data: marketData } = useMarketQuotes('Todos')
+  const { data: simPortfolioData, isFetching: simPortfolioFetching } = useSimulatedPortfolio('1d')
 
-  const isGlobalUpdating = summaryFetching || positionsFetching || isRefreshingPrices
+  const simSummary = simPortfolioData?.summary
+  const sessionPct = simSummary?.fx_info?.simulated_eur_pct ?? simSummary?.simulated_daily_pct
+  const sessionAmount = simSummary?.fx_info?.simulated_eur_amount ?? simSummary?.simulated_daily_amount
+  const sessionMarketState = simSummary?.market_state
+
+  const isGlobalUpdating = summaryFetching || positionsFetching || isRefreshingPrices || simPortfolioFetching
   const isPeriodUpdating = perfFetching || analyticsFetching || isRefreshingPrices
   const isAnyUpdating = isGlobalUpdating || isPeriodUpdating
 
@@ -583,12 +590,12 @@ export function OverviewPage() {
             label="Valor Total de la Cartera"
             value={fmt.currency(displaySummary?.total_value)}
             extra={
-              shortTermMetrics && (shortTermMetrics.dayPct !== undefined || shortTermMetrics.weekPct !== undefined) && (
+              ((shortTermMetrics && (shortTermMetrics.dayPct !== undefined || shortTermMetrics.weekPct !== undefined)) || (sessionPct !== undefined && !isNaN(sessionPct))) && (
                 <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
-                  {shortTermMetrics.dayPct !== undefined && (
+                  {shortTermMetrics?.dayPct !== undefined && (
                     <span
                       data-private
-                      title={shortTermMetrics.dayAmount !== undefined ? `Rendimiento Hoy (1D): ${shortTermMetrics.dayAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.dayAmount)} (${fmt.pct(shortTermMetrics.dayPct)})` : `Rendimiento Hoy (1D): ${fmt.pct(shortTermMetrics.dayPct)}`}
+                      title={shortTermMetrics.dayAmount !== undefined ? `Rendimiento Hoy (1D - NAV oficial): ${shortTermMetrics.dayAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.dayAmount)} (${fmt.pct(shortTermMetrics.dayPct)})` : `Rendimiento Hoy (1D - NAV oficial): ${fmt.pct(shortTermMetrics.dayPct)}`}
                       className={cn(
                         'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-default',
                         shortTermMetrics.dayPct >= 0
@@ -602,7 +609,25 @@ export function OverviewPage() {
                     </span>
                   )}
 
-                  {shortTermMetrics.weekPct !== undefined && (
+                  {sessionPct !== undefined && !isNaN(sessionPct) && (
+                    <Link
+                      to="/market"
+                      data-private
+                      title={`Rendimiento Sesión Hoy (Mercado en directo): ${sessionPct >= 0 ? '+' : ''}${fmt.pct(sessionPct)}${sessionAmount !== undefined && !isNaN(sessionAmount) ? ` (${sessionAmount >= 0 ? '+' : ''}${fmt.currency(sessionAmount)})` : ''} • Estimación en EUR con réplica de ETFs líquidos (${sessionMarketState || 'LIVE'}). Clic para abrir Mercado.`}
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all hover:opacity-85 active:scale-95 cursor-pointer',
+                        sessionPct >= 0
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
+                      )}
+                    >
+                      <Activity className="w-3 h-3 stroke-[2.5]" />
+                      <span>Sesión:</span>
+                      <span className="font-bold">{fmt.pct(sessionPct)}</span>
+                    </Link>
+                  )}
+
+                  {shortTermMetrics?.weekPct !== undefined && (
                     <span
                       data-private
                       title={shortTermMetrics.weekAmount !== undefined ? `Rendimiento 7 Días: ${shortTermMetrics.weekAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.weekAmount)} (${fmt.pct(shortTermMetrics.weekPct)})` : `Rendimiento 7 Días: ${fmt.pct(shortTermMetrics.weekPct)}`}
