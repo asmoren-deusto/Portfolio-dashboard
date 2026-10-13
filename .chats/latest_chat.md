@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 11:14:17
+- **Fecha de exportación:** 2026-10-13 11:16:26
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 13
+- **Total de interacciones registradas:** 15
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -182,5 +182,76 @@ Instalando Capacitor y las librerías nativas para iOS...
 ### 🤖 Asistente (2026-10-13 09:10:35)
 
 Generando el proyecto nativo iOS con Capacitor...
+
+---
+
+### 🤖 Asistente (2026-10-13 09:14:20)
+
+Se ha generado e integrado la versión para **iOS** combinando la experiencia instantánea **PWA Standalone** con el proyecto nativo completo de **Capacitor / Xcode**:
+
+---
+
+### 📱 1. ¿Cómo instalar la PWA de inmediato en tu iPhone? (Sin Mac ni cables)
+
+Puedes tener la aplicación funcionando en tu iPhone como si fuera nativa en **30 segundos**:
+
+1. Entra a tu dashboard desde **Safari** en el iPhone (ej. tu dominio o IP donde tengas desplegado Portainer).
+2. Pulsa en el botón central de **Compartir** de Safari (icono de la caja con flecha hacia arriba ⎋).
+3. Desliza hacia abajo y selecciona **"Añadir a pantalla de inicio"** (o *"Add to Home Screen"*).
+4. Pulsa **Añadir**.
+
+> [!TIP]
+> **Resultado en iPhone:**
+> - Se creará el icono de **PortfolioPro** en tu pantalla de inicio con el squircle azul de alta resolución.
+> - Se abrirá en modo **Standalone (pantalla completa)**: sin barra de URLs de Safari, sin botones de navegación del navegador, respetando el Notch/Dynamic Island y con la **barra de navegación inferior nativa** estilo iOS.
+
+---
+
+### 🛠️ 2. Proyecto Nativo de iOS con Capacitor (Xcode / Mac / TestFlight)
+
+Se ha creado y configurado el proyecto nativo completo en la carpeta:
+📁 [`frontend/ios/App/App.xcodeproj`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/ios/App/App.xcodeproj)
+
+#### ⚙️ Configuración nativa ([`capacitor.config.ts`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/capacitor.config.ts))
+- **Bundle ID:** `com.asier.portfoliodashboard`
+- **Nombre:** `PortfolioPro`
+- **Plugins integrados:**
+  - `@capacitor/status-bar`: control automático del color y visibilidad de la barra superior de batería/hora.
+  - `@capacitor/splash-screen`: pantalla de carga nativa en fondo oscuro con el emblema.
+  - `@capacitor/haptics`: vibración táctil nativa (*Haptic Feedback*) sutil al cambiar de pestaña.
+
+#### 💻 Comandos para compilar en un Mac con Xcode
+Si deseas compilar la app nativa o subirla a TestFlight/App Store, en tu terminal simplemente haz:
+```bash
+cd frontend
+npm run cap:open
+```
+Esto abrirá directamente **Xcode** con el proyecto `App.xcworkspace`, listo para seleccionar tu iPhone físico y pulsar **Play / Run**. Cada vez que hagas cambios en el frontend, puedes sincronizar con:
+```bash
+npm run cap:build
+```
+
+---
+
+### ✨ Mejoras visuales y táctiles integradas para iOS
+
+1. **Barra de Navegación Inferior Nativa ([`MobileTabBar.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/MobileTabBar.tsx))**:
+   - En móviles (`< 768px`), se activa una barra de 5 pestañas fija en la parte inferior (*Resumen*, *Mercado*, *Cartera*, *Analítica*, *Órdenes*) con *glassmorphism*, badge en vivo de sesión y respuesta táctil háptica.
+   - En escritorio y tablets permanece oculta para usar el sidebar tradicional.
+2. **Safe Areas de Apple ([`index.css`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css))**:
+   - Adaptado a `env(safe-area-inset-top)` y `env(safe-area-inset-bottom)` para que ningún contenido choque con el Dynamic Island ni con la barra de inicio de gestos inferior.
+3. **Optimización de Safari**:
+   - Desactivado el zoom invasivo automático de iOS al hacer foco en inputs (`font-size: 16px`).
+   - Eliminados rebotes grises y resaltados de toque con `-webkit-tap-highlight-color: transparent`.
+4. **Iconos Apple Touch y PWA Manifest**:
+   - Generados los iconos de 180x180, 192x192 y 512x512 en [`frontend/public/`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/public) y vinculado [`manifest.webmanifest`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/public/manifest.webmanifest).
+
+Cambios publicados en el repositorio bajo la versión **`v3.0.3`**.
+
+---
+
+### 👤 Usuario (2026-10-13 09:09:13)
+
+puedo compliar y generar la app iOS via la nube? ahora mismo no tengo un mac aqui
 
 ---

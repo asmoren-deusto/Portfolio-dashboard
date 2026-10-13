@@ -1,0 +1,103 @@
+name: Build iOS App (IPA)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Tipo de compilación'
+        required: true
+        default: 'device'
+        type: choice
+        options:
+          - device
+          - simulator
+
+jobs:
+  build-ios:
+    name: Build iOS IPA via Xcode
+    runs-on: macos-14
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Web Application
+        working-directory: frontend
+        run: npm run build
+
+      - name: Sync Capacitor iOS Platform
+        working-directory: frontend
+        run: npx cap sync ios
+
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build for iOS Device (Unsigned IPA)
+        if: ${{ github.event.inputs.target == 'device' || github.event.inputs.target == '' }}
+        working-directory: frontend/ios/App
+        run: |
+          echo "Compilando para dispositivos iOS..."
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            clean build
+
+          echo "Creando estructura Payload para IPA..."
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -r PortfolioPro.ipa Payload/
+          echo "IPA generado correctamente."
+
+      - name: Build for iOS Simulator (Debug .app)
+        if: ${{ github.event.inputs.target == 'simulator' }}
+        working-directory: frontend/ios/App
+        run: |
+          echo "Compilando para simulador iOS..."
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            clean build
+
+          cd build/Build/Products/Debug-iphonesimulator
+          zip -r PortfolioPro-Simulator.app.zip App.app
+          mv PortfolioPro-Simulator.app.zip ../../../../
+
+      - name: Upload IPA Artifact (Device)
+        if: ${{ github.event.inputs.target == 'device' || github.event.inputs.target == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: PortfolioPro-iOS-Device-IPA
+          path: frontend/ios/App/PortfolioPro.ipa
+          retention-days: 14
+
+      - name: Upload Simulator Artifact
+        if: ${{ github.event.inputs.target == 'simulator' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: PortfolioPro-iOS-Simulator-App
+          path: frontend/PortfolioPro-Simulator.app.zip
+          retention-days: 14
