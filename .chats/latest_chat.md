@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 12:29:57
+- **Fecha de exportación:** 2026-10-13 12:42:44
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 45
+- **Total de interacciones registradas:** 47
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1186,5 +1186,21 @@ Listo. He modificado el comportamiento para que el menú inferior flotante quede
 ### 👤 Usuario (2026-10-13 10:23:42)
 
 y en el menu de abajo en mercado no muestres el badge
+
+---
+
+### 🤖 Asistente (2026-10-13 10:30:00)
+
+He eliminado el badge de porcentaje de la pestaña de **Mercado** en el menú inferior de la app nativa:
+
+- Se ha simplificado [MobileTabBar.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/MobileTabBar.tsx) eliminando la etiqueta flotante de rendimiento sobre el icono de Mercado.
+- Además, se eliminó la consulta innecesaria de simulación en segundo plano que calculaba dicho porcentaje para el tab bar, haciendo la barra inferior más ligera y limpia.
+- Sincronizado y publicado en GitHub en la versión **v3.0.14**.
+
+---
+
+### 👤 Usuario (2026-10-13 10:40:54)
+
+el icono esta mejor pero no ocupa todo el espacio asi que queda un cuadrado redondeado sobre un fondo azul lo que hace que quede mal
 
 ---

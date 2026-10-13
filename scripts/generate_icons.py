@@ -40,46 +40,40 @@ def create_png(width: int, height: int, pixels_rgb: list[tuple[int, int, int]]) 
 
 def render_logo(size: int) -> bytes:
     """
-    Renders a stunning, luxury dark-tech financial icon:
-    - 100% full-bleed canvas (no transparent pixels, avoiding iOS black borders).
-    - Deep metallic midnight blue backdrop with cyan ambient glow.
-    - Floating frosted glassmorphic card with specular top rim highlight.
-    - Electric cyan-to-emerald surging bull-market trajectory.
-    - Glowing pinnacle beacon dot and sharp arrowhead.
+    Renders a stunning, luxury full-bleed financial icon:
+    - 100% full-bleed canvas: the background extends edge-to-edge (no inner cards or rounded borders).
+      When iOS applies its squircle mask, the icon seamlessly fills the entire app icon shape.
+    - Deep royal navy & sapphire gradient backdrop with subtle central ambient lighting.
+    - Ethereal glowing gradient fill under the bullish market curve.
+    - Electric cyan-to-emerald surging trendline with rounded caps and sharp arrowhead.
+    - Luminous glowing pinnacle beacon dot.
     """
     pixels = []
 
-    # Inner glass card parameters
-    card_margin = size * 0.08
-    card_radius = size * 0.22
-    card_min_x = card_margin
-    card_max_x = size - card_margin
-    card_min_y = card_margin
-    card_max_y = size - card_margin
-
     # Chart polyline segments (normalized 0..1)
+    # Perfectly centered in iOS icon safe zone (spans 0.20 to 0.80)
     pts = [
-        (0.24, 0.69),
-        (0.42, 0.51),
-        (0.55, 0.61),
-        (0.76, 0.32)
+        (0.20, 0.68),
+        (0.40, 0.48),
+        (0.53, 0.58),
+        (0.80, 0.28),
     ]
-    arrow_h = ((0.63, 0.32), (0.76, 0.32))
-    arrow_v = ((0.76, 0.32), (0.76, 0.45))
+    arrow_h = ((0.66, 0.28), (0.80, 0.28))
+    arrow_v = ((0.80, 0.28), (0.80, 0.42))
     chart_segments = [
         (pts[0], pts[1]),
         (pts[1], pts[2]),
         (pts[2], pts[3]),
         arrow_h,
-        arrow_v
+        arrow_v,
     ]
 
-    stroke_width = size * 0.048
-    glow_radius = stroke_width * 2.8
+    stroke_width = size * 0.052
+    glow_radius = stroke_width * 2.6
 
-    peak_x = 0.76 * size
-    peak_y = 0.32 * size
-    beacon_radius = size * 0.042
+    peak_x = 0.80 * size
+    peak_y = 0.28 * size
+    beacon_radius = size * 0.044
 
     def dist_to_segment(px, py, p1, p2):
         x1, y1 = p1[0] * size, p1[1] * size
@@ -105,87 +99,58 @@ def render_logo(size: int) -> bytes:
             return pts[2][1] + t * (pts[3][1] - pts[2][1])
         return pts[3][1]
 
+    # Precalculate segment distances for each line
     for y in range(size):
         ny = y / size
-        # Diagonal dark luxury gradient
-        t_diag = (ny + 0.5) / 2.0
-        # Deep obsidian backdrop: (13, 19, 34) -> (6, 9, 16)
-        bg_r = 13 + (6 - 13) * t_diag
-        bg_g = 19 + (9 - 19) * t_diag
-        bg_b = 34 + (16 - 34) * t_diag
-
-        # Ambient radial spotlight in upper center
-        spot_dx = (0.50 * size - 0.5 * size) # centered
-        spot_dy = (y - 0.38 * size)
 
         for x in range(size):
             nx = x / size
-            dx_spot = (x - 0.48 * size)
-            spot_dist = math.hypot(dx_spot, spot_dy) / (size * 0.70)
-            spot_factor = max(0.0, 1.0 - spot_dist * spot_dist)
 
-            # Base pixel with ambient cyan/blue backlight
-            cur_r = bg_r + 20 * spot_factor
-            cur_g = bg_g + 55 * spot_factor
-            cur_b = bg_b + 130 * spot_factor
+            # 1. Full-bleed backdrop: Luxury Royal Sapphire to Deep Obsidian Navy
+            # Diagonal gradient from top-left (0,0) to bottom-right (1,1)
+            diag_t = (nx * 0.4 + ny * 0.6)
+            # Top-left: vibrant royal sapphire (22, 60, 142) -> Bottom-right: deep midnight obsidian (7, 14, 32)
+            bg_r = 22.0 + (7.0 - 22.0) * diag_t
+            bg_g = 60.0 + (14.0 - 60.0) * diag_t
+            bg_b = 142.0 + (32.0 - 142.0) * diag_t
 
-            # Check inside frosted glass card
-            dx_c = max(0.0, max(card_min_x + card_radius - x, x - (card_max_x - card_radius)))
-            dy_c = max(0.0, max(card_min_y + card_radius - y, y - (card_max_y - card_radius)))
-            dist_sq_c = dx_c * dx_c + dy_c * dy_c
+            # Central ambient radial spotlight behind the chart to create depth
+            spot_dx = (nx - 0.50)
+            spot_dy = (ny - 0.46)
+            spot_dist = math.hypot(spot_dx, spot_dy) / 0.65
+            if spot_dist < 1.0:
+                spot_factor = (1.0 - spot_dist * spot_dist) ** 1.8
+                bg_r += 32.0 * spot_factor
+                bg_g += 78.0 * spot_factor
+                bg_b += 140.0 * spot_factor
 
-            if dist_sq_c <= card_radius * card_radius:
-                card_dist = math.sqrt(dist_sq_c)
-                edge_factor = max(0.0, min(1.0, (card_radius - card_dist)))
+            cur_r = bg_r
+            cur_g = bg_g
+            cur_b = bg_b
 
-                # Card interior gradient: deep sapphire glass
-                card_t = ny
-                card_r = 20 + (10 - 20) * card_t
-                card_g = 32 + (16 - 32) * card_t
-                card_b = 60 + (32 - 60) * card_t
+            # 2. Area gradient fill under chart curve (soft blue/cyan aurora blending smoothly)
+            if pts[0][0] <= nx <= pts[3][0]:
+                curve_y = get_chart_y_at(nx) * size
+                baseline_y = 0.76 * size
+                if curve_y <= y <= baseline_y:
+                    area_t = max(0.0, 1.0 - (y - curve_y) / (baseline_y - curve_y))
+                    # Luminous ambient fill
+                    cur_r += 24.0 * (area_t ** 1.4)
+                    cur_g += 80.0 * (area_t ** 1.4)
+                    cur_b += 165.0 * (area_t ** 1.4)
 
-                # Top specular highlight (glass sheen on top border)
-                if y < card_min_y + card_radius * 0.8:
-                    sheen_t = 1.0 - (y - card_min_y) / (card_radius * 0.8)
-                    card_r += 60 * sheen_t * edge_factor
-                    card_g += 120 * sheen_t * edge_factor
-                    card_b += 200 * sheen_t * edge_factor
-
-                # Subtle glass border ring
-                if card_radius - 2.0 <= card_dist <= card_radius:
-                    border_glow = 1.0 - abs(card_dist - (card_radius - 1.0))
-                    card_r += 40 * border_glow
-                    card_g += 90 * border_glow
-                    card_b += 160 * border_glow
-
-                # Alpha blend card over background
-                card_opacity = 0.94 * edge_factor
-                cur_r = cur_r * (1.0 - card_opacity) + card_r * card_opacity
-                cur_g = cur_g * (1.0 - card_opacity) + card_g * card_opacity
-                cur_b = cur_b * (1.0 - card_opacity) + card_b * card_opacity
-
-                # Area gradient fill under chart curve
-                if pts[0][0] <= nx <= pts[3][0]:
-                    curve_y = get_chart_y_at(nx) * size
-                    baseline_y = 0.74 * size
-                    if curve_y <= y <= baseline_y:
-                        area_t = 1.0 - (y - curve_y) / (baseline_y - curve_y)
-                        cur_r += 12 * area_t
-                        cur_g += 48 * area_t
-                        cur_b += 85 * area_t
-
-            # Chart line & arrowhead distance
+            # 3. Chart line & arrowhead distance
             min_d = min(dist_to_segment(x, y, s[0], s[1]) for s in chart_segments)
 
-            # Trend line color gradient: Electric Cyan (56, 189, 248) -> Emerald (52, 211, 153)
-            trend_t = max(0.0, min(1.0, (nx - 0.24) / (0.76 - 0.24)))
-            line_r = int(56 + (52 - 56) * trend_t)
-            line_g = int(189 + (211 - 189) * trend_t)
-            line_b = int(248 + (153 - 248) * trend_t)
+            # Trend line color gradient: Electric Cyan (56, 189, 248) -> Neon Emerald (52, 211, 153)
+            trend_t = max(0.0, min(1.0, (nx - 0.20) / (0.80 - 0.20)))
+            line_r = 56.0 + (52.0 - 56.0) * trend_t
+            line_g = 189.0 + (211.0 - 189.0) * trend_t
+            line_b = 248.0 + (153.0 - 248.0) * trend_t
 
             # Soft bloom glow around stroke
             if min_d <= glow_radius:
-                bloom_factor = max(0.0, 1.0 - (min_d / glow_radius)) ** 2 * 0.42
+                bloom_factor = ((1.0 - (min_d / glow_radius)) ** 2) * 0.48
                 cur_r += line_r * bloom_factor
                 cur_g += line_g * bloom_factor
                 cur_b += line_b * bloom_factor
@@ -193,33 +158,45 @@ def render_logo(size: int) -> bytes:
             # Crisp stroke with anti-aliasing
             if min_d <= stroke_width:
                 stroke_aa = 1.0 if min_d <= stroke_width - 1.2 else max(0.0, (stroke_width - min_d) / 1.2)
-                cur_r = cur_r * (1.0 - stroke_aa) + line_r * stroke_aa
-                cur_g = cur_g * (1.0 - stroke_aa) + line_g * stroke_aa
-                cur_b = cur_b * (1.0 - stroke_aa) + line_b * stroke_aa
+                # Highlight core along line center
+                if min_d <= stroke_width * 0.45:
+                    core_factor = 1.0 - (min_d / (stroke_width * 0.45))
+                    target_line_r = line_r + (255.0 - line_r) * core_factor * 0.55
+                    target_line_g = line_g + (255.0 - line_g) * core_factor * 0.55
+                    target_line_b = line_b + (255.0 - line_b) * core_factor * 0.55
+                else:
+                    target_line_r = line_r
+                    target_line_g = line_g
+                    target_line_b = line_b
 
-            # Glowing Pinnacle Beacon Dot at (peak_x, peak_y)
+                cur_r = cur_r * (1.0 - stroke_aa) + target_line_r * stroke_aa
+                cur_g = cur_g * (1.0 - stroke_aa) + target_line_g * stroke_aa
+                cur_b = cur_b * (1.0 - stroke_aa) + target_line_b * stroke_aa
+
+            # 4. Glowing Pinnacle Beacon Dot at (peak_x, peak_y)
             dot_dist = math.hypot(x - peak_x, y - peak_y)
-            if dot_dist <= beacon_radius * 2.2:
-                # Outer beacon aura
-                aura_factor = max(0.0, 1.0 - (dot_dist / (beacon_radius * 2.2))) ** 2 * 0.55
-                cur_r += 52 * aura_factor
-                cur_g += 211 * aura_factor
-                cur_b += 153 * aura_factor
+            if dot_dist <= beacon_radius * 2.4:
+                aura_factor = ((1.0 - (dot_dist / (beacon_radius * 2.4))) ** 2) * 0.65
+                cur_r += 52.0 * aura_factor
+                cur_g += 211.0 * aura_factor
+                cur_b += 153.0 * aura_factor
 
             if dot_dist <= beacon_radius:
-                # Crisp bright dot
                 dot_aa = 1.0 if dot_dist <= beacon_radius - 1.0 else max(0.0, beacon_radius - dot_dist)
-                # Pure white core fading to neon emerald
                 core_t = max(0.0, 1.0 - (dot_dist / beacon_radius))
-                target_r = 255 * core_t + 52 * (1.0 - core_t)
-                target_g = 255 * core_t + 211 * (1.0 - core_t)
-                target_b = 255 * core_t + 153 * (1.0 - core_t)
+                target_r = 255.0 * core_t + 52.0 * (1.0 - core_t)
+                target_g = 255.0 * core_t + 211.0 * (1.0 - core_t)
+                target_b = 255.0 * core_t + 153.0 * (1.0 - core_t)
 
                 cur_r = cur_r * (1.0 - dot_aa) + target_r * dot_aa
                 cur_g = cur_g * (1.0 - dot_aa) + target_g * dot_aa
                 cur_b = cur_b * (1.0 - dot_aa) + target_b * dot_aa
 
-            pixels.append((int(cur_r), int(cur_g), int(cur_b)))
+            pixels.append((
+                int(max(0, min(255, cur_r))),
+                int(max(0, min(255, cur_g))),
+                int(max(0, min(255, cur_b)))
+            ))
 
     return create_png(size, size, pixels)
 
