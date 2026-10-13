@@ -2,8 +2,8 @@ import { Outlet, useLocation, Navigate } from 'react-router-dom'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/store/appStore'
-import { useEffect } from 'react'
-import { Menu, PanelLeftOpen } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Menu, PanelLeftOpen, RefreshCw } from 'lucide-react'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { HeaderActions } from '@/components/layout/HeaderActions'
 import { Header } from '@/components/layout/Header'
@@ -11,6 +11,10 @@ import { HeaderProvider } from '@/context/HeaderContext'
 import { NavUpdateAlertModal } from '@/components/common/NavUpdateAlertModal'
 import { AppLogo } from '@/components/ui/AppLogo'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
+import { UserProfileModal } from '@/components/layout/UserProfileModal'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { useRefreshPortfolio } from '@/hooks/useRefreshPortfolio'
+import { cn } from '@/lib/utils'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { fetchLatestNavAlert } from '@/api/queries'
@@ -19,6 +23,14 @@ import { isNativePlatform } from '@/api/config'
 export function RootLayout() {
   const location = useLocation()
   const queryClient = useQueryClient()
+  const [userProfileOpen, setUserProfileOpen] = useState(false)
+  const { handleRefresh, isRefreshingPrices } = useRefreshPortfolio()
+  const { pullDistance } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    disabled: false,
+    threshold: 60,
+  })
+
   const {
     theme,
     privacyMode,
@@ -139,6 +151,33 @@ export function RootLayout() {
         <div className="pointer-events-none fixed top-0 left-1/4 w-[750px] h-[350px] bg-gradient-to-br from-blue-500/[0.05] via-indigo-500/[0.03] to-transparent blur-[140px] rounded-full -z-10 dark:from-slate-600/[0.04] dark:via-zinc-600/[0.02]" />
         <div className="pointer-events-none fixed top-1/3 right-4 w-[500px] h-[300px] bg-gradient-to-bl from-violet-500/[0.04] to-transparent blur-[130px] rounded-full -z-10 dark:from-slate-500/[0.03]" />
 
+        {/* Floating Pull-to-Refresh Indicator */}
+        <AnimatePresence>
+          {(pullDistance > 10 || isRefreshingPrices) && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: -20 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: isRefreshingPrices ? 28 : Math.min(pullDistance * 0.75, 52),
+              }}
+              exit={{ opacity: 0, scale: 0.8, y: -20 }}
+              transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+              className="fixed top-[max(0.75rem,env(safe-area-inset-top,0px))] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+            >
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-[#252526] border border-slate-200/90 dark:border-white/10 shadow-lg text-blue-600 dark:text-blue-400">
+                <RefreshCw
+                  size={16}
+                  className={cn(isRefreshingPrices && "animate-spin")}
+                  style={{
+                    transform: !isRefreshingPrices ? `rotate(${pullDistance * 5}deg)` : undefined,
+                  }}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <Sidebar />
 
         <div className={`flex flex-1 flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
@@ -156,12 +195,18 @@ export function RootLayout() {
                   <Menu size={20} />
                 </button>
               )}
-              <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setUserProfileOpen(true)}
+                className="flex items-center gap-1.5 py-1 px-1.5 -ml-1 rounded-xl hover:bg-slate-100/80 dark:hover:bg-white/[0.06] active:scale-95 transition-all text-left cursor-pointer"
+                title="Ver cuenta de inversor y perfil"
+                aria-label="Cuenta de inversor"
+              >
                 <AppLogo size={26} />
-                <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white hidden min-[410px]:inline">
+                <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white">
                   Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
                 </span>
-              </div>
+              </button>
             </div>
 
             {/* Quick pin back button on desktop */}
@@ -178,7 +223,13 @@ export function RootLayout() {
 
             {/* Controls on Mobile in top sticky header (Entity selector + Year selector + Actions) */}
             <div className="flex md:hidden items-center ml-auto">
-              <HeaderActions compact showPeriod showBroker hideUser={false} />
+              <HeaderActions
+                compact
+                showPeriod
+                showBroker
+                hideUser={isNativePlatform()}
+                hideRefresh={isNativePlatform()}
+              />
             </div>
           </header>
 
@@ -207,6 +258,12 @@ export function RootLayout() {
 
         {/* Global Floating NAV Update Alert Window */}
         <NavUpdateAlertModal />
+
+        {/* User Account / Profile Sheet Modal */}
+        <UserProfileModal
+          isOpen={userProfileOpen}
+          onClose={() => setUserProfileOpen(false)}
+        />
 
         {/* Native iOS / Mobile Bottom Tab Bar (shown exclusively inside native Capacitor app) */}
         {isNativePlatform() && <MobileTabBar />}

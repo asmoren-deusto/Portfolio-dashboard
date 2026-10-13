@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { RefreshCw, Sun, Moon, Eye, EyeOff, ChevronDown, Check, LogOut, Bell } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
-import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { refreshPortfolioPrices } from '@/api/queries'
 import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
+import { useRefreshPortfolio } from '@/hooks/useRefreshPortfolio'
 
 const PERIODS = [
   { label: '1M', value: '1mo' },
@@ -23,6 +22,7 @@ interface HeaderActionsProps {
   showPeriod?: boolean
   showBroker?: boolean
   hideUser?: boolean
+  hideRefresh?: boolean
 }
 
 export function HeaderActions({
@@ -31,91 +31,17 @@ export function HeaderActions({
   showPeriod = false,
   showBroker = false,
   hideUser = false,
+  hideRefresh = false,
 }: HeaderActionsProps) {
   const {
     theme, toggleTheme, privacyMode, togglePrivacyMode, currentUser, users, login, logout, period, setPeriod,
     selectedBroker, setSelectedBroker, useMock,
-    isRefreshingPrices, setIsRefreshingPrices, triggerRefreshAnimation, setNavAlertNotification,
     lastNavAlertHistory, openNavAlertHistory
   } = useAppStore()
   const brokers = useMock ? DEMO_BROKERS : BROKERS
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const [refreshSuccess, setRefreshSuccess] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-
-  const handleRefresh = async () => {
-    if (isRefreshingPrices) return
-    setIsRefreshingPrices(true)
-    setRefreshSuccess(false)
-    try {
-      const userId = currentUser?.id || 'asier'
-      let refreshResult: any = null
-      if (!currentUser?.isDemo) {
-        refreshResult = await refreshPortfolioPrices(userId)
-      } else {
-        // Demo mode simulated response with realistic updated NAVs
-        refreshResult = {
-          status: 'ok',
-          count: 5,
-          updated_count: 2,
-          updated_items: [
-            {
-              isin: '0192#0011',
-              name: 'Indexa Más Rentabilidad Acciones EPSV',
-              broker: 'indexa',
-              price: 18.4523,
-              price_date: new Date().toISOString().split('T')[0],
-              previous_price: 18.3880,
-              previous_date: '2026-10-06',
-              diff: 0.0643,
-              diff_pct: 0.35,
-              is_updated: true,
-            },
-            {
-              isin: 'IE00BYX5NX33',
-              name: 'Fidelity MSCI World Index Fund EUR P Acc',
-              broker: 'myinvestor',
-              price: 42.152,
-              price_date: new Date().toISOString().split('T')[0],
-              previous_price: 42.203,
-              previous_date: '2026-10-06',
-              diff: -0.051,
-              diff_pct: -0.12,
-              is_updated: true,
-            }
-          ],
-          all_items: []
-        }
-      }
-
-      await queryClient.invalidateQueries()
-      triggerRefreshAnimation()
-      setRefreshSuccess(true)
-      setTimeout(() => setRefreshSuccess(false), 3000)
-
-      if (refreshResult) {
-        const updatedItems = refreshResult.updated_items || []
-        const allItems = refreshResult.all_items || []
-        const totalCount = refreshResult.count || allItems.length || updatedItems.length
-
-        setNavAlertNotification({
-          id: String(Date.now()),
-          timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-          updatedCount: updatedItems.length,
-          totalCount,
-          items: updatedItems.length > 0 ? updatedItems : allItems.slice(0, 4),
-          allCheckedItems: allItems,
-        })
-      }
-    } catch (err) {
-      console.warn('Error fetching live NAVs:', err)
-      await queryClient.invalidateQueries()
-      triggerRefreshAnimation()
-    } finally {
-      setIsRefreshingPrices(false)
-    }
-  }
+  const { handleRefresh, isRefreshingPrices, refreshSuccess } = useRefreshPortfolio()
 
   const btnSize = compact ? 'w-8 h-8 rounded-lg' : 'w-9 h-9 rounded-xl'
 
@@ -374,29 +300,31 @@ export function HeaderActions({
       )}
 
       {/* Refresh button */}
-      <button
-        onClick={handleRefresh}
-        disabled={isRefreshingPrices}
-        className={cn(
-          'flex items-center justify-center border border-slate-200/90 transition-all active:scale-95 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
-          btnSize,
-          'bg-white hover:bg-slate-50 text-slate-700',
-          isRefreshingPrices && 'opacity-85 cursor-wait bg-blue-50/60 text-blue-700 border-blue-300 dark:bg-white/[0.08] dark:text-white dark:border-white/20',
-          refreshSuccess && 'border-emerald-300 text-emerald-600 bg-emerald-50/40 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-500/10'
-        )}
-        title={isRefreshingPrices ? 'Buscando y actualizando NAVs oficiales en directo...' : 'Buscar y actualizar los NAVs oficiales en tiempo real desde las gestoras'}
-      >
-        {refreshSuccess ? (
-          <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-        ) : (
-          <motion.div
-            animate={{ rotate: isRefreshingPrices ? 360 : 0 }}
-            transition={{ duration: 0.8, repeat: isRefreshingPrices ? Infinity : 0, ease: 'linear' }}
-          >
-            <RefreshCw className={cn('w-3.5 h-3.5', isRefreshingPrices ? 'text-blue-500' : 'text-slate-500 dark:text-slate-400')} />
-          </motion.div>
-        )}
-      </button>
+      {!hideRefresh && (
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshingPrices}
+          className={cn(
+            'flex items-center justify-center border border-slate-200/90 transition-all active:scale-95 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
+            btnSize,
+            'bg-white hover:bg-slate-50 text-slate-700',
+            isRefreshingPrices && 'opacity-85 cursor-wait bg-blue-50/60 text-blue-700 border-blue-300 dark:bg-white/[0.08] dark:text-white dark:border-white/20',
+            refreshSuccess && 'border-emerald-300 text-emerald-600 bg-emerald-50/40 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-500/10'
+          )}
+          title={isRefreshingPrices ? 'Buscando y actualizando NAVs oficiales en directo...' : 'Buscar y actualizar los NAVs oficiales en tiempo real desde las gestoras'}
+        >
+          {refreshSuccess ? (
+            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          ) : (
+            <motion.div
+              animate={{ rotate: isRefreshingPrices ? 360 : 0 }}
+              transition={{ duration: 0.8, repeat: isRefreshingPrices ? Infinity : 0, ease: 'linear' }}
+            >
+              <RefreshCw className={cn('w-3.5 h-3.5', isRefreshingPrices ? 'text-blue-500' : 'text-slate-500 dark:text-slate-400')} />
+            </motion.div>
+          )}
+        </button>
+      )}
     </div>
   )
 }
