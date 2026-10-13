@@ -90,7 +90,7 @@ export function HeaderActions({
             onChange={(e) => setPeriod(e.target.value as typeof period)}
             className={cn(
               "appearance-none rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 transition-all active:scale-95",
-              compact ? "pl-2 pr-4 py-1 text-[11px] rounded-lg h-8 leading-none w-[50px] sm:w-[54px]" : "h-9 pl-3 pr-7 text-xs flex items-center"
+              compact ? "pl-2 pr-3.5 py-1 text-[11px] rounded-lg h-8 leading-none w-[54px] sm:w-[58px]" : "h-9 pl-3 pr-7 text-xs flex items-center"
             )}
             title="Seleccionar horizonte temporal"
           >

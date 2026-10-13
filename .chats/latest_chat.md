@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:14:18
+- **Fecha de exportación:** 2026-10-13 15:29:58
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 82
+- **Total de interacciones registradas:** 84
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1608,5 +1608,27 @@ donde ponga myinvestor en las tablas cambialo por myinves
 ### 👤 Usuario (2026-10-13 13:13:09)
 
 reduce 2pixel el margen superior del menu de abajo. reduce un pelo el texto 1A en el selector temporal, y si pone Max que quepa y no se corte
+
+---
+
+### 🤖 Asistente (2026-10-13 13:14:20)
+
+Se han aplicado los ajustes solicitados:
+
+1. **Margen superior del menú inferior (-2px)**:
+   - En [`MobileTabBar.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/MobileTabBar.tsx), se redujo el padding superior de `pt-2.5` (10px) a `pt-2` (8px), reduciendo exactamente 2 píxeles ese margen blanco por arriba.
+
+2. **Selector temporal compacto**:
+   - En [`HeaderActions.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx), se redujo la tipografía del selector a `text-[11px]`, haciendo que etiquetas como **1A**, **1M**, etc., se vean más estilizadas.
+   - Se amplió el ancho a `w-[50px]`, se ajustó el padding derecho a `pr-4` y se miniaturizó la flecha (`w-2.5 h-2.5` en `right-1`). De este modo, la opción **Max** cabe holgadamente sin cortarse ni solapar el desplegable.
+
+3. **Release y sincronización**:
+   - Publicado y sincronizado en Git bajo la versión **`v3.0.31`**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:22:34)
+
+no veo los cambios del ultimo cambio
 
 ---

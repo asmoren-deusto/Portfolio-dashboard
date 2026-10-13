@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark } from 'lucide-react'
+import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark, RefreshCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store/appStore'
+import { APP_VERSION } from '@/version'
 import { cn } from '@/lib/utils'
 import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
 
@@ -241,6 +242,22 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
               >
                 <LogOut size={14} />
                 <span>Cerrar sesión / Salir</span>
+              </button>
+            </div>
+
+            {/* Version Badge & Quick Reload */}
+            <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/[0.04] flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 px-1">
+              <span className="font-mono">v{APP_VERSION}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.reload()
+                }}
+                className="flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] text-blue-600 dark:text-blue-400 font-semibold active:scale-95 transition-all cursor-pointer"
+                title="Recargar la aplicación para obtener la última versión"
+              >
+                <RefreshCw size={12} />
+                <span>Recargar app</span>
               </button>
             </div>
           </motion.div>
