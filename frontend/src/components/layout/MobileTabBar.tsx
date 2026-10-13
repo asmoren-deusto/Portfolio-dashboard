@@ -7,7 +7,6 @@ import {
   TrendingUp,
   List,
 } from 'lucide-react'
-import { useSimulatedPortfolio } from '@/api/queries'
 import { isNativePlatform } from '@/api/config'
 import { cn } from '@/lib/utils'
 
@@ -15,16 +14,12 @@ interface TabItem {
   to: string
   icon: React.ElementType
   label: string
-  badge?: string
 }
 
 export const MobileTabBar: React.FC = () => {
   if (!isNativePlatform()) {
     return null
   }
-
-  const { data: simData } = useSimulatedPortfolio('1d')
-  const sessionPct = simData?.summary?.fx_info?.simulated_eur_pct ?? simData?.summary?.simulated_daily_pct
 
   const triggerHaptic = () => {
     if ('vibrate' in navigator) {
@@ -38,12 +33,7 @@ export const MobileTabBar: React.FC = () => {
 
   const TABS: TabItem[] = [
     { to: '/', icon: LayoutDashboard, label: 'Resumen' },
-    {
-      to: '/market',
-      icon: Globe,
-      label: 'Mercado',
-      badge: sessionPct !== undefined && !isNaN(sessionPct) ? `${sessionPct >= 0 ? '+' : ''}${sessionPct.toFixed(1)}%` : undefined,
-    },
+    { to: '/market', icon: Globe, label: 'Mercado' },
     { to: '/positions', icon: Layers, label: 'Cartera' },
     { to: '/analytics', icon: TrendingUp, label: 'Analítica' },
     { to: '/transactions', icon: List, label: 'Órdenes' },
@@ -55,7 +45,7 @@ export const MobileTabBar: React.FC = () => {
       className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-[#161616]/96 backdrop-blur-xl border-t border-slate-200/85 dark:border-white/[0.08] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.4)] px-2 pt-2 pb-[max(env(safe-area-inset-bottom,0px),14px)] select-none transition-all"
     >
       <div className="flex items-center justify-around max-w-lg mx-auto">
-        {TABS.map(({ to, icon: Icon, label, badge }) => (
+        {TABS.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -81,19 +71,6 @@ export const MobileTabBar: React.FC = () => {
                       isActive ? 'scale-108 text-blue-600 dark:text-blue-400' : 'group-hover:scale-105'
                     )}
                   />
-                  {badge && (
-                    <span
-                      data-private
-                      className={cn(
-                        'absolute -top-1.5 -right-3.5 text-[8.5px] font-mono font-extrabold px-1 py-0.2 rounded-full border shadow-2xs leading-none',
-                        sessionPct && sessionPct >= 0
-                          ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25'
-                          : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/25'
-                      )}
-                    >
-                      {badge}
-                    </span>
-                  )}
                 </div>
                 <span className="text-[10px] tracking-tight mt-1 line-clamp-1">
                   {label}

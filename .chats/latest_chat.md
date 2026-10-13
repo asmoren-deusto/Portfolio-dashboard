@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 12:28:52
+- **Fecha de exportación:** 2026-10-13 12:29:57
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 43
+- **Total de interacciones registradas:** 45
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1158,5 +1158,33 @@ He ajustado los estilos y el manejo de áreas seguras (`safe-area-insets`) para 
 ### 👤 Usuario (2026-10-13 10:22:47)
 
 y quita el menu de abajo, dejalo solo en la app nativa
+
+---
+
+### 🤖 Asistente (2026-10-13 10:28:55)
+
+Listo. He modificado el comportamiento para que el menú inferior flotante quede **oculto en la web / Safari** y se reserve **exclusivamente para la app nativa (iOS / Android)**:
+
+### 🛠️ Cambios Realizados:
+
+1. **Detección de plataforma nativa ([config.ts](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/api/config.ts))**:
+   - Se añadió la función `isNativePlatform()`, que detecta con precisión si la app se ejecuta empaquetada con Capacitor (IPA de iOS / APK) o si se está accediendo desde un navegador web (Safari, Chrome, escritorio).
+
+2. **Renderizado condicional del Tab Bar ([MobileTabBar.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/MobileTabBar.tsx) y [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx))**:
+   - `MobileTabBar` solo se renderiza si `isNativePlatform()` es verdadero.
+   - En Safari y navegadores web móviles, la navegación se realiza limpiamente a través del botón de menú hamburguesa superior (`☰`), el cual abre el panel lateral completo con todas las secciones, modo oscuro/claro y cierre de sesión.
+
+3. **Ajuste dinámico del espacio inferior**:
+   - En la app nativa se mantiene el padding inferior para librar el `MobileTabBar` y el Home Indicator.
+   - En Safari web se reduce el padding inferior al estándar con `safe-area-inset-bottom`, dejando el 100% de la pantalla útil sin barras redundantes que colisionen con la barra de navegación de Safari.
+
+---
+🚀 Publicado y sincronizado en la versión **v3.0.13** en GitHub. Ya puedes recargar Safari para ver la interfaz limpia.
+
+---
+
+### 👤 Usuario (2026-10-13 10:23:42)
+
+y en el menu de abajo en mercado no muestres el badge
 
 ---
