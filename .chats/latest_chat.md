@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:07:45
+- **Fecha de exportación:** 2026-10-13 15:14:18
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 79
+- **Total de interacciones registradas:** 82
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1586,5 +1586,27 @@ Se han separado claramente ambos bloques de métricas en [`OverviewPage.tsx`](fi
 ### 👤 Usuario (2026-10-13 13:05:50)
 
 Cambia Sesion por Live
+
+---
+
+### 🤖 Asistente (2026-10-13 13:07:50)
+
+Se ha cambiado la etiqueta **Sesión** por **Live** en la tarjeta principal de patrimonio en [`OverviewPage.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx):
+
+- La píldora de rendimiento intradiario en tiempo real ahora muestra **`Live: ±X.XX%`** (junto a `Hoy:` y `7D:`).
+- Mantiene el enlace directo interactivo a la vista de Mercado Global.
+- Sincronizado y publicado en Git bajo la versión **`v3.0.30`**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:09:26)
+
+donde ponga myinvestor en las tablas cambialo por myinves
+
+---
+
+### 👤 Usuario (2026-10-13 13:13:09)
+
+reduce 2pixel el margen superior del menu de abajo. reduce un pelo el texto 1A en el selector temporal, y si pone Max que quepa y no se corte
 
 ---
