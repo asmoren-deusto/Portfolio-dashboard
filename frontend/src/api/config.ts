@@ -13,11 +13,16 @@ export const DEFAULT_PRODUCTION_URL = 'https://portfolio.asiermoreno.es'
 export function isNativePlatform(): boolean {
   if (typeof window === 'undefined') return false
 
+  const isStandalone =
+    (window.navigator as any).standalone === true ||
+    (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches)
+
   return (
     Capacitor.isNativePlatform() ||
     Boolean((window as any).Capacitor?.isNativePlatform?.()) ||
     window.location.protocol === 'capacitor:' ||
-    (window.location.hostname === 'localhost' && window.location.port === '')
+    (window.location.hostname === 'localhost' && window.location.port === '') ||
+    Boolean(isStandalone)
   )
 }
 

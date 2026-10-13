@@ -791,9 +791,9 @@ export function PerformanceChart({
 
   return (
     <div data-private className="w-full flex flex-col justify-between select-none space-y-2">
-      {/* Dynamic HUD Bar with Inlined Entity Selectors (Hidden on native) */}
+      {/* Dynamic HUD Bar with Inlined Entity Selectors (Desktop only) */}
       {!isNativePlatform() && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
+        <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
           {/* Left: Patrimonio & Aportado */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <div className="flex items-center gap-1.5">
@@ -848,9 +848,15 @@ export function PerformanceChart({
         </div>
       )}
 
-      {/* Native: Leyenda con los datos (ej: 78.831 €) encima del gráfico pero a la derecha */}
-      {isNativePlatform() && activeSelectedMetrics && (
-        <div className="flex flex-wrap items-center justify-end gap-2 px-1 py-0.5 text-xs select-none">
+      {/* Native / Mobile: Leyenda con los datos (ej: 78.831 €) encima del gráfico pero a la derecha */}
+      {activeSelectedMetrics && (
+        <div
+          data-private
+          className={cn(
+            "w-full items-center justify-end gap-2 px-1 py-1 text-xs select-none",
+            isNativePlatform() ? "flex" : "flex sm:hidden"
+          )}
+        >
           <div className="flex items-center gap-1.5 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
             <span data-private className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm">

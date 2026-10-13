@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:56:31
+- **Fecha de exportación:** 2026-10-13 16:22:37
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 96
+- **Total de interacciones registradas:** 98
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1783,5 +1783,36 @@ He reubicado la leyenda de datos en la versión nativa de la app:
 ### 👤 Usuario (2026-10-13 13:51:53)
 
 nativo: el texto de 1A no lo reduces nunca sigue igual de grande quiero reducir el tamaño de texto
+
+---
+
+### 🤖 Asistente (2026-10-13 13:56:33)
+
+He localizado el motivo exacto por el que no se reducía el texto y lo he solucionado:
+
+### Causa identificada
+En [`index.css`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css), había una regla global para pantallas móviles:
+```css
+@media screen and (max-width: 768px) {
+  select {
+    font-size: 16px !important;
+  }
+}
+```
+Ese `16px !important;` (que se usaba para evitar el auto-zoom de iOS Safari) **anulaba por completo cualquier clase de reducción de texto** que se aplicara en el selector (`text-xs`, `text-[9.5px]`, etc.), manteniéndolo siempre en 16px.
+
+---
+
+### Solución aplicada ([`v3.0.38`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx))
+1. **Eliminación del bloqueo forzado**: Se eliminó el `!important` y se añadieron excepciones `:not(.no-forced-size):not([data-small])` en [`index.css`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css).
+2. **Prevención de auto-zoom limpia**: Se ajustó el viewport en [`index.html`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/index.html) (`maximum-scale=1.0, user-scalable=no`) para que iOS/Android no hagan zoom al tocar selects ni formularios.
+3. **Tamaño reducido efectivo**: En [`HeaderActions.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx), el selector en móvil ahora aplica un tamaño de **10px** directo con estilo inline y padding optimizado. Opciones como `1A`, `1M` o `Max` caben perfectamente sin cortarse y con un tamaño visiblemente más compacto y equilibrado.
+4. **Sincronización Git**: Cambios compilados y subidos a `main` bajo la versión **`v3.0.38`**.
+
+---
+
+### 👤 Usuario (2026-10-13 14:14:47)
+
+esto no lo has hecho: nativo: evolucion patrimonial, la leyenda (los datos, pej 78831) encima del grafico pero a la derecha
 
 ---

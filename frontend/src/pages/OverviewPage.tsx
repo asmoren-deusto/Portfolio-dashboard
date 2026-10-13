@@ -948,7 +948,7 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className="px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
-            <div data-private className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
+            <div data-private className="flex-1 flex flex-col justify-start min-h-0">
               {isPeriodUpdating && chartView === 'evolution' ? (
                 <PerformanceChartSkeleton height={260} />
               ) : chartView === 'evolution' ? (
