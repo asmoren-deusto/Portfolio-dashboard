@@ -576,11 +576,11 @@ export function OverviewPage() {
         <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <Wallet size={13.5} className="text-blue-500" />
-            <span>Métricas Globales y del Periodo ({periodLabel})</span>
-            {isAnyUpdating && <LoadingDot />}
+            <span>Métricas Globales</span>
+            {isGlobalUpdating && <LoadingDot />}
           </div>
           <span data-private className="hidden sm:inline text-[11px] font-mono text-slate-500 dark:text-slate-400">
-            {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
+            Total Cartera
           </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5">
@@ -732,7 +732,17 @@ export function OverviewPage() {
       </div>
 
       {/* 2. Métricas del Periodo Seleccionado */}
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 pt-0.5">
+        <div className="flex items-center justify-between px-0.5">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <Calendar size={13.5} className="text-indigo-500" />
+            <span>Métricas del Periodo ({periodLabel})</span>
+            {isPeriodUpdating && <LoadingDot />}
+          </div>
+          <span data-private className="hidden sm:inline text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            {perfStats ? `Rango: ${fmt.currency(perfStats.min)} - ${fmt.currency(perfStats.max)}` : `Filtro: ${periodLabel}`}
+          </span>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5">
           <KpiCard
             hoverGlow

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:04:25
+- **Fecha de exportación:** 2026-10-13 15:06:32
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 75
+- **Total de interacciones registradas:** 77
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1539,5 +1539,29 @@ Se han implementado ambos ajustes:
 ### 👤 Usuario (2026-10-13 13:03:03)
 
 nativo: sube un pelo la barra de titulo y baja un pelo el margen blanco abajo. añade margen blanco en la inferior por arriba y amplia un pelo los iconos; si puedes, baja los iconos un poco
+
+---
+
+### 🤖 Asistente (2026-10-13 13:04:27)
+
+Se han aplicado todos los ajustes de espaciado y proporciones para la versión nativa:
+
+1. **Cabecera superior (Barra de título)**:
+   - Se subió ligeramente reduciendo el padding superior a `pt-[max(0.45rem,calc(env(safe-area-inset-top,0px)-2px))]`.
+   - Se redujo el margen blanco inferior a `pb-1.5` (ajustando también el espaciador a `2.4rem`), dejando la cabecera más compacta y ceñida.
+
+2. **Barra de navegación inferior ([`MobileTabBar`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/MobileTabBar.tsx))**:
+   - **Margen blanco superior añadido**: Se aumentó el padding superior a `pt-2.5`, dejando un espacio claro y limpio por encima de los botones.
+   - **Iconos ampliados**: Se aumentó el tamaño de los iconos a `20px` (strokeWidth `2.4` / `1.8`).
+   - **Iconos desplazados hacia abajo**: Se aplicó un desplazamiento vertical suave (`translate-y-[2px]`) para que reposen más cerca de las etiquetas de texto.
+
+3. **Release y sincronización**:
+   - Sincronizado y desplegado en Git bajo la versión **`v3.0.28`**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:04:25)
+
+nativo: separa entre metricas globales y abajo otro tirulo con metricas del periodo (X año)
 
 ---
