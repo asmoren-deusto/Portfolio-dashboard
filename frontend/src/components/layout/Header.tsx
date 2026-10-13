@@ -15,21 +15,21 @@ const PERIODS = [
   { label: 'Max', value: '5y' },
 ] as const
 
-const BROKERS = [
+export const BROKERS = [
   { label: 'Consolidado', value: 'all' },
   { label: 'MyInvestor', value: 'myinvestor' },
   { label: 'BBVA', value: 'bbva' },
   { label: 'Indexa', value: 'indexa' },
 ]
 
-const DEMO_BROKERS = [
+export const DEMO_BROKERS = [
   { label: 'Consolidado', value: 'all' },
   { label: 'Kutxabank', value: 'kutxabank' },
   { label: 'Scalable', value: 'scalable' },
   { label: 'Trade Rep.', value: 'traderepublic' },
 ]
 
-const BROKER_CONFIG: Record<string, { dot: string; activeBg: string }> = {
+export const BROKER_CONFIG: Record<string, { dot: string; activeBg: string }> = {
   all: {
     dot: '',
     activeBg: 'bg-slate-800 dark:bg-slate-700',

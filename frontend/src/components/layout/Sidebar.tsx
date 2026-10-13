@@ -19,6 +19,7 @@ import { useAppStore } from '@/store/appStore'
 import { useMarketIndices, useSimulatedPortfolio } from '@/api/queries'
 import { APP_VERSION } from '@/version'
 import { AppLogo } from '@/components/ui/AppLogo'
+import { isNativePlatform } from '@/api/config'
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Visión General' },
@@ -31,6 +32,11 @@ const NAV = [
 interface SidebarProps { }
 
 export function Sidebar({ }: SidebarProps) {
+  // In native mobile app (Capacitor iOS), navigation is handled exclusively by MobileTabBar
+  if (isNativePlatform()) {
+    return null
+  }
+
   const {
     theme,
     setTheme,

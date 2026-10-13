@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { refreshPortfolioPrices } from '@/api/queries'
+import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
 
 const PERIODS = [
   { label: '1M', value: '1mo' },
@@ -20,6 +21,7 @@ interface HeaderActionsProps {
   className?: string
   compact?: boolean
   showPeriod?: boolean
+  showBroker?: boolean
   hideUser?: boolean
 }
 
@@ -27,13 +29,16 @@ export function HeaderActions({
   className,
   compact = false,
   showPeriod = false,
+  showBroker = false,
   hideUser = false,
 }: HeaderActionsProps) {
   const {
     theme, toggleTheme, privacyMode, togglePrivacyMode, currentUser, users, login, logout, period, setPeriod,
+    selectedBroker, setSelectedBroker, useMock,
     isRefreshingPrices, setIsRefreshingPrices, triggerRefreshAnimation, setNavAlertNotification,
     lastNavAlertHistory, openNavAlertHistory
   } = useAppStore()
+  const brokers = useMock ? DEMO_BROKERS : BROKERS
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [refreshSuccess, setRefreshSuccess] = useState(false)
@@ -116,6 +121,41 @@ export function HeaderActions({
 
   return (
     <div className={cn('flex items-center gap-1 sm:gap-2', className)}>
+      {/* Broker / Entity selector if enabled */}
+      {showBroker && (
+        <div className="relative shrink-0">
+          <div className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 flex items-center z-10">
+            <span
+              className={cn(
+                'w-1.5 h-1.5 rounded-full shrink-0 transition-colors',
+                BROKER_CONFIG[selectedBroker]?.dot || 'bg-slate-400'
+              )}
+            />
+          </div>
+          <select
+            value={selectedBroker}
+            onChange={(e) => setSelectedBroker(e.target.value)}
+            className={cn(
+              "appearance-none rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 transition-all active:scale-95",
+              compact ? "pl-4.5 pr-5 py-1 text-xs rounded-lg h-8 leading-none max-w-[92px] sm:max-w-[110px] truncate" : "h-9 pl-5 pr-7 text-xs flex items-center"
+            )}
+            title="Filtrar por entidad bancaria / broker"
+          >
+            {brokers.map((b) => (
+              <option key={b.value} value={b.value}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none",
+              compact ? "right-1.5 w-3 h-3" : "right-2.5 w-3 h-3"
+            )}
+          />
+        </div>
+      )}
+
       {/* Period selector if enabled */}
       {showPeriod && (
         <div className="relative shrink-0">
@@ -124,8 +164,9 @@ export function HeaderActions({
             onChange={(e) => setPeriod(e.target.value as typeof period)}
             className={cn(
               "appearance-none rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 transition-all active:scale-95",
-              compact ? "pl-2 pr-5 py-1 text-xs rounded-lg h-8 leading-none" : "h-9 pl-3 pr-7 text-xs flex items-center"
+              compact ? "pl-2 pr-5 py-1 text-xs rounded-lg h-8 leading-none w-[48px] sm:w-[52px]" : "h-9 pl-3 pr-7 text-xs flex items-center"
             )}
+            title="Seleccionar horizonte temporal"
           >
             {PERIODS.map((p) => (
               <option key={p.value} value={p.value}>

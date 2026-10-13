@@ -143,19 +143,22 @@ export function RootLayout() {
 
         <div className={`flex flex-1 flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
           {/* Mobile / Collapsed Desktop Header Bar */}
-          <header className={`sticky top-0 z-30 flex items-center justify-between px-4 pt-[max(0.625rem,env(safe-area-inset-top,0px))] pb-2.5 bg-white/95 dark:bg-[#191919]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
-            <div className="flex items-center gap-2.5">
-              <button
-                onClick={toggleMobileSidebar}
-                className="p-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] active:scale-95 transition-all"
-                aria-label="Abrir menú"
-                title="Abrir menú lateral"
-              >
-                <Menu size={20} />
-              </button>
-              <div className="flex items-center gap-2">
-                <AppLogo size={28} />
-                <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white">
+          <header className={`sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 pt-[max(0.625rem,env(safe-area-inset-top,0px))] pb-2.5 bg-white/95 dark:bg-[#191919]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Only show hamburger button when NOT native (native uses bottom MobileTabBar) */}
+              {!isNativePlatform() && (
+                <button
+                  onClick={toggleMobileSidebar}
+                  className="p-1.5 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] active:scale-95 transition-all"
+                  aria-label="Abrir menú"
+                  title="Abrir menú lateral"
+                >
+                  <Menu size={20} />
+                </button>
+              )}
+              <div className="flex items-center gap-1.5">
+                <AppLogo size={26} />
+                <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white hidden min-[410px]:inline">
                   Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
                 </span>
               </div>
@@ -173,14 +176,14 @@ export function RootLayout() {
               </button>
             </div>
 
-            {/* Controls on Mobile in top sticky header */}
-            <div className="flex md:hidden items-center">
-              <HeaderActions compact showPeriod hideUser />
+            {/* Controls on Mobile in top sticky header (Entity selector + Year selector + Actions) */}
+            <div className="flex md:hidden items-center ml-auto">
+              <HeaderActions compact showPeriod showBroker hideUser={false} />
             </div>
           </header>
 
-          {/* Persistent Top Header (Never unmounts, never flickers during route animations) */}
-          <div className="px-4 pt-3 sm:px-6 sm:pt-4 md:px-7 md:pt-4">
+          {/* Persistent Top Header (Desktop only: shows titles, subtitles, and horizontal pills) */}
+          <div className="hidden md:block px-4 pt-3 sm:px-6 sm:pt-4 md:px-7 md:pt-4">
             <Header
               title={pageMeta.title}
               subtitle={pageMeta.subtitle}
