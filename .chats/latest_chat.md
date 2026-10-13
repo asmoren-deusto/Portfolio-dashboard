@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:06:32
+- **Fecha de exportación:** 2026-10-13 15:07:45
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 77
+- **Total de interacciones registradas:** 79
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1563,5 +1563,28 @@ Se han aplicado todos los ajustes de espaciado y proporciones para la versión n
 ### 👤 Usuario (2026-10-13 13:04:25)
 
 nativo: separa entre metricas globales y abajo otro tirulo con metricas del periodo (X año)
+
+---
+
+### 🤖 Asistente (2026-10-13 13:06:34)
+
+Se han separado claramente ambos bloques de métricas en [`OverviewPage.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx):
+
+1. **Bloque 1 – Métricas Globales**:
+   - Cabecera: **`MÉTRICAS GLOBALES`** con icono de cartera y etiqueta `Total Cartera`.
+   - Contiene los KPIs acumulados de toda la historia de la cartera: *Valor Total de la Cartera* (con desglose Hoy / Sesión / 7D), *Rendimiento Anualizado (TIR)*, *Plusvalía Acumulada* y *Total Invertido*.
+
+2. **Bloque 2 – Métricas del Periodo**:
+   - Cabecera independiente añadida: **`MÉTRICAS DEL PERIODO ({periodLabel})`** (por ejemplo `MÉTRICAS DEL PERIODO (2026)` o `1A`, etc.) con icono de calendario e indicador de rango de fechas.
+   - Contiene los KPIs filtrados temporalmente: *Rentabilidad del periodo*, *Plusvalía del periodo*, *Aportaciones del periodo*, *Mínimo del periodo* y *Máximo del periodo*.
+
+3. **Release y sincronización**:
+   - Publicado y sincronizado en Git bajo la versión **`v3.0.29`**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:05:50)
+
+Cambia Sesion por Live
 
 ---

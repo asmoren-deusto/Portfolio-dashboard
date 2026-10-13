@@ -622,7 +622,7 @@ export function OverviewPage() {
                       )}
                     >
                       <Activity className="w-3 h-3 stroke-[2.5]" />
-                      <span>Sesión:</span>
+                      <span>Live:</span>
                       <span className="font-bold">{fmt.pct(sessionPct)}</span>
                     </Link>
                   )}
