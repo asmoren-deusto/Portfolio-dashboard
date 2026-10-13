@@ -188,7 +188,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   return (
     <span
       title={tooltips[effectiveState] || effectiveState}
-      className={`absolute -top-1.5 right-1 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1.5px] rounded-full border shadow-2xs leading-none backdrop-blur-xs select-none ${cls}`}
+      className={`absolute -top-1 right-1 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1px] rounded-full border shadow-2xs leading-none backdrop-blur-xs select-none ${cls}`}
     >
       {labels[effectiveState] || effectiveState}
     </span>
@@ -463,7 +463,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           </div>
 
           {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
-          <div className={cn("relative flex-1 overflow-hidden py-0.5 group", isNative ? "ml-1.5" : "ml-2")}>
+          <div className={cn("relative flex-1 overflow-hidden py-0 group", isNative ? "ml-1.5" : "ml-2")}>
             {/* Subtle fade edges for smooth transition */}
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
@@ -490,7 +490,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
               )}
               style={{ touchAction: 'pan-x' }}
             >
-              <div className="flex items-center gap-1.5 sm:gap-2 py-0.5 w-max">
+              <div className="flex items-center gap-1.5 sm:gap-2 pt-1.5 pb-0.5 w-max">
                 {[...rawIndices, ...rawIndices, ...rawIndices].map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
