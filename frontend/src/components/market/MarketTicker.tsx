@@ -4,6 +4,7 @@ import { useMarketIndices, type MarketStock } from '@/api/queries'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { cn } from '@/lib/utils'
+import { isNativePlatform } from '@/api/config'
 
 interface MarketTickerProps {
   onSelectStock?: (stock: MarketStock) => void
@@ -404,13 +405,23 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   }
 
   const isMarketClosed = mainStatusLabel === 'Cerrado'
+  const isNative = isNativePlatform()
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover backdrop-blur-md px-3.5 py-1.5 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200">
+      <div className={cn(
+        "relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover backdrop-blur-md py-1.5 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200",
+        isNative ? "px-2.5" : "px-3.5"
+      )}>
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
-          <div className="flex items-center gap-2 pl-0.5 pr-3 border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#1e1e1e]/96">
+          <div
+            className={cn(
+              "flex items-center border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#1e1e1e]/96",
+              isNative ? "pl-0.5 pr-2 gap-0" : "pl-0.5 pr-3 gap-2"
+            )}
+            title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
+          >
             {mainStatusLabel === 'Cerrado' ? (
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="inline-flex rounded-full h-2 w-2 bg-slate-400 dark:bg-slate-500" />
@@ -436,21 +447,23 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
               </span>
             )}
-            <div className="flex flex-col leading-none">
-              <span className="text-[11px] font-semibold tracking-wider text-slate-800 dark:text-slate-100 uppercase">
-                {mainStatusLabel}
-              </span>
-              {lastUpdated && (
-                <span className="flex items-center gap-0.5 text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5">
-                  <Clock className="w-2.5 h-2.5" />
-                  {fmtUpdated(lastUpdated)}
+            {!isNative && (
+              <div className="flex flex-col leading-none">
+                <span className="text-[11px] font-semibold tracking-wider text-slate-800 dark:text-slate-100 uppercase">
+                  {mainStatusLabel}
                 </span>
-              )}
-            </div>
+                {lastUpdated && (
+                  <span className="flex items-center gap-0.5 text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5">
+                    <Clock className="w-2.5 h-2.5" />
+                    {fmtUpdated(lastUpdated)}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
-          <div className="relative flex-1 overflow-hidden ml-2 py-1 group">
+          <div className={cn("relative flex-1 overflow-hidden py-1 group", isNative ? "ml-1.5" : "ml-2")}>
             {/* Subtle fade edges for smooth transition */}
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />

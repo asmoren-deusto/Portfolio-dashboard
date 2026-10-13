@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 14:32:38
+- **Fecha de exportación:** 2026-10-13 14:34:27
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 61
+- **Total de interacciones registradas:** 63
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1386,5 +1386,32 @@ Listo. He creado y aplicado la versión del icono con **fondo blanco**:
 ### 👤 Usuario (2026-10-13 12:27:15)
 
 en la version nativa, el popup de login quitalo y que aparezca al pulsar sobre el logo. el refresco si se puede sustituir por hacer lo mismo cuando se refresque la app de forma nativa (tirando hacia abajo) lo podemos quitar tb, la idea es poder poner el nombre de la web al lado del logo
+
+---
+
+### 🤖 Asistente (2026-10-13 12:32:41)
+
+Se han implementado todas las modificaciones solicitadas:
+
+1. **Acceso al perfil y cambio de usuario desde el Logo**:
+   - En la versión nativa/móvil se ha quitado el botón independiente del avatar de usuario de la cabecera, ahorrando espacio.
+   - Ahora, al pulsar sobre el logo (o sobre **PortfolioPro**), se abre el nuevo modal inferior interactivo [`UserProfileModal`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/UserProfileModal.tsx) con la información del inversor activo, alternador de modo discreto/tema, cambio rápido entre inversores y opción de cerrar sesión.
+
+2. **Pull-to-refresh nativo (tirando hacia abajo) y eliminación del botón de refresco**:
+   - Se ha creado el hook [`usePullToRefresh`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/hooks/usePullToRefresh.ts) con soporte táctil, amortiguación física, detección de tope y respuesta háptica (`navigator.vibrate`).
+   - Se ha añadido un indicador flotante superior circular con animación de giro al arrastrar y al actualizar los NAVs oficiales.
+   - En la cabecera móvil/nativa se ha ocultado el botón redundante de refresco gracias a `hideRefresh`.
+
+3. **Nombre de la web siempre visible junto al logo**:
+   - Con el espacio ahorrado al reubicar el perfil en el logo y delegar el refresco al pull-to-refresh, el título **PortfolioPro** se muestra de forma permanente en todas las resoluciones móviles sin ocultarse.
+
+4. **Release sincronizada**:
+   - Se ejecutó `python scripts/sync_release.py` incrementando la versión a **`v3.0.21`** y sincronizando los cambios con Git. Al estar configurada la URL remota en Capacitor, la app nativa cargará estas mejoras inmediatamente.
+
+---
+
+### 👤 Usuario (2026-10-13 12:28:17)
+
+nativo: en el ticker quita la hora y el premercado/regular/etc. deja solo el circulo pulsante para que quepan mas tickers
 
 ---
