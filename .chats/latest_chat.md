@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:42:35
+- **Fecha de exportación:** 2026-10-13 15:46:32
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 90
+- **Total de interacciones registradas:** 92
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1717,5 +1717,29 @@ Se han ajustado los badges en la aplicación nativa y se ha publicado la versió
 ### 👤 Usuario (2026-10-13 13:34:10)
 
 nativo: posiciones en cartera -> oculta el badge de fondo o epsv, oculta la columna de banco. valor actual -> valor y ganancia solo ganancia sin p&L
+
+---
+
+### 🤖 Asistente (2026-10-13 13:42:37)
+
+Se han aplicado las modificaciones para la visualización nativa de **Posiciones en Cartera** en la versión **v3.0.35**:
+
+### Cambios realizados en la tabla de Posiciones:
+1. **Ocultado el badge de activo (*Fondo*, *EPSV*, etc.)**:
+   * En la app nativa ya no se muestra la etiqueta de tipo junto al ISIN, dejando la celda del activo mucho más limpia y espaciosa.
+2. **Ocultada la columna de Banco**:
+   * Se ha retirado la columna entera (*cabecera y celdas de Banco*) en la versión nativa, optimizando el ancho total de la tabla en pantallas móviles.
+3. **Cabeceras simplificadas**:
+   * **Valor Actual** $\rightarrow$ **Valor**
+   * **Ganancia (P&L)** $\rightarrow$ **Ganancia**
+
+---
+> Para cargar la actualización al instante en tu dispositivo móvil, pulsa en el logo de **PortfolioPro** y toca en **"Recargar app"** (o reinicia la app desde la multitarea de iOS). La versión activa es **v3.0.35**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:37:22)
+
+la leyenda del eje Y a la izquierda y dentro del grafico
 
 ---

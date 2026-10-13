@@ -25,6 +25,7 @@ import {
   type SessionMarker,
 } from '@/api/queries'
 import { fmt, cn } from '@/lib/utils'
+import { isNativePlatform } from '@/api/config'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
 
@@ -223,6 +224,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           },
         },
         rightPriceScale: {
+          visible: !isNativePlatform(),
           borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
           scaleMargins: { top: 0.18, bottom: 0.10 },
           autoScale: true,
@@ -653,6 +655,37 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               className="w-full h-full"
               onMouseLeave={() => setHoveredPoint(null)}
             />
+
+            {/* Floating In-Chart Y-Axis Scale on the LEFT (Native) */}
+            {isNativePlatform() && (minPct !== undefined && maxPct !== undefined) && (
+              <div className="absolute left-2 top-2.5 bottom-7 pointer-events-none flex flex-col justify-between items-start z-10 text-[9.5px] font-mono select-none">
+                <span className={cn(
+                  "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 backdrop-blur-xs font-bold shadow-2xs leading-none",
+                  maxPct >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
+                )}>
+                  {maxPct >= 0 ? '+' : ''}{maxPct.toFixed(2)}%
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-white/60 dark:bg-[#181818]/65 border border-slate-200/40 dark:border-white/5 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-medium leading-none">
+                  0.00%
+                </span>
+                <span className={cn(
+                  "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 backdrop-blur-xs font-bold shadow-2xs leading-none",
+                  minPct >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
+                )}>
+                  {minPct >= 0 ? '+' : ''}{minPct.toFixed(2)}%
+                </span>
+              </div>
+            )}
+
+            {/* Floating touch scrub detail badge on native (top-right) */}
+            {isNativePlatform() && hoveredPoint && (
+              <div className="absolute top-2 right-2 z-20 pointer-events-none flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-900/90 dark:bg-black/90 text-white text-[11px] font-mono shadow-md backdrop-blur-xs border border-white/10">
+                <span className={cn("font-bold", (hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct) >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                  {((hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct) >= 0 ? '+' : '')}{((hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct)).toFixed(2)}%
+                </span>
+                <span className="text-slate-400 text-[10px]">{hoveredPoint.label}</span>
+              </div>
+            )}
           </div>
 
           {/* Market Overview Highlights (Moved UP under chart) */}

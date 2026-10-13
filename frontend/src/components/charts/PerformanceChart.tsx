@@ -868,9 +868,9 @@ export function PerformanceChart({
           </div>
         )}
 
-        {/* Floating In-Chart Y-Axis Scale (Native app: Inside the chart canvas) */}
+        {/* Floating In-Chart Y-Axis Scale on the LEFT (Native app) */}
         {isNativePlatform() && metrics && (
-          <div className="absolute right-2 top-2.5 bottom-7 pointer-events-none flex flex-col justify-between items-end z-10 text-[9.5px] font-mono select-none">
+          <div className="absolute left-2 top-2.5 bottom-7 pointer-events-none flex flex-col justify-between items-start z-10 text-[9.5px] font-mono select-none">
             <span className="px-1.5 py-0.5 rounded bg-white/75 dark:bg-[#181818]/80 border border-slate-200/70 dark:border-white/10 backdrop-blur-xs text-slate-700 dark:text-slate-300 font-bold shadow-2xs leading-none">
               {chartMode === 'currency'
                 ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(metrics.maxPoint.value)
@@ -889,9 +889,9 @@ export function PerformanceChart({
           </div>
         )}
 
-        {/* Floating touch scrub detail badge on native */}
+        {/* Floating touch scrub detail badge on native (top-right) */}
         {isNativePlatform() && hoveredPoint && (
-          <div className="absolute top-2 left-2 z-20 pointer-events-none flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-900/90 dark:bg-black/90 text-white text-[11px] font-mono shadow-md backdrop-blur-xs border border-white/10">
+          <div className="absolute top-2 right-2 z-20 pointer-events-none flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-900/90 dark:bg-black/90 text-white text-[11px] font-mono shadow-md backdrop-blur-xs border border-white/10">
             <span className="font-bold text-blue-400">
               {chartMode === 'currency'
                 ? fmt.currency(hoveredPoint.value)
