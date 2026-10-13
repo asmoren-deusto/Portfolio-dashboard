@@ -62,12 +62,12 @@
     margin: 0;
   }
 
-  /* Evitar zoom automático forzado en iOS Safari al pulsar en campos de texto */
+  /* Evitar zoom automático forzado en iOS Safari al pulsar en campos de texto, permitiendo elementos compactos */
   @media screen and (max-width: 768px) {
-    input:not([type="checkbox"]):not([type="radio"]),
-    select,
-    textarea {
-      font-size: 16px !important;
+    input:not([type="checkbox"]):not([type="radio"]):not(.no-forced-size):not([data-small]),
+    select:not(.no-forced-size):not([data-small]),
+    textarea:not(.no-forced-size) {
+      font-size: 16px;
     }
   }
 

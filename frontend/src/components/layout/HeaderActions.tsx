@@ -86,16 +86,18 @@ export function HeaderActions({
       {showPeriod && (
         <div className="relative shrink-0">
           <select
+            data-small="true"
             value={period}
             onChange={(e) => setPeriod(e.target.value as typeof period)}
+            style={compact ? { fontSize: '10px' } : undefined}
             className={cn(
-              "appearance-none rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none font-bold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 transition-all active:scale-95",
-              compact ? "pl-2 pr-3 py-1 text-[9.5px] rounded-lg h-8 leading-none w-[48px] sm:w-[52px]" : "h-9 pl-3 pr-7 text-xs flex items-center"
+              "appearance-none rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none font-bold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 transition-all active:scale-95 no-forced-size",
+              compact ? "pl-2 pr-3.5 py-0.5 text-[10px] rounded-lg h-7.5 leading-none w-[46px] sm:w-[50px]" : "h-9 pl-3 pr-7 text-xs flex items-center"
             )}
             title="Seleccionar horizonte temporal"
           >
             {PERIODS.map((p) => (
-              <option key={p.value} value={p.value}>
+              <option key={p.value} value={p.value} style={{ fontSize: '13px' }}>
                 {p.label}
               </option>
             ))}

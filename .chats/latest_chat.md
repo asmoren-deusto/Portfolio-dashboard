@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:54:00
+- **Fecha de exportación:** 2026-10-13 15:56:31
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 94
+- **Total de interacciones registradas:** 96
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1765,5 +1765,23 @@ La escala del eje Y ha sido reubicada **a la izquierda y dentro del gráfico** e
 ### 👤 Usuario (2026-10-13 13:50:34)
 
 nativo: evolucion patrimonial, la leyenda (los datos, pej 78831) encima del grafico pero a la derecha
+
+---
+
+### 🤖 Asistente (2026-10-13 13:54:03)
+
+He reubicado la leyenda de datos en la versión nativa de la app:
+
+### Cambios realizados:
+1. **Posición**: Los datos del gráfico de Evolución Patrimonial (`PerformanceChart.tsx`, valor del patrimonio ej: `78.831 €`, badge de beneficio/rentabilidad y fecha) se muestran ahora **justo encima del gráfico y alineados a la derecha**.
+2. **Interactividad dinámica**: Al tocar y deslizar el dedo (scrubbing) por el gráfico, estos valores se actualizan en tiempo real con el punto seleccionado sin ser tapados por el dedo.
+3. **Limpieza visual**: Se eliminó la etiqueta flotante superpuesta dentro del canvas para mantener el lienzo despejado con la escala del eje Y a la izquierda.
+4. **Release y Sincronización**: Desplegado y sincronizado con versión **`v3.0.37`** en Git.
+
+---
+
+### 👤 Usuario (2026-10-13 13:51:53)
+
+nativo: el texto de 1A no lo reduces nunca sigue igual de grande quiero reducir el tamaño de texto
 
 ---
