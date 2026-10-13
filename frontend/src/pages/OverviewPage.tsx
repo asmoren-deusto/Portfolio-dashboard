@@ -36,6 +36,7 @@ import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK } from '@/lib/utils'
+import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
 
 import {
@@ -597,13 +598,14 @@ export function OverviewPage() {
                       data-private
                       title={shortTermMetrics.dayAmount !== undefined ? `Rendimiento Hoy (1D - NAV oficial): ${shortTermMetrics.dayAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.dayAmount)} (${fmt.pct(shortTermMetrics.dayPct)})` : `Rendimiento Hoy (1D - NAV oficial): ${fmt.pct(shortTermMetrics.dayPct)}`}
                       className={cn(
-                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-default',
+                        'inline-flex items-center font-mono font-semibold border transition-all cursor-default',
+                        isNativePlatform() ? 'px-1.5 py-0.5 text-[10.5px] rounded-md gap-0.5' : 'px-2 py-0.5 text-xs rounded-lg gap-1',
                         shortTermMetrics.dayPct >= 0
                           ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
                           : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
                       )}
                     >
-                      <Zap className="w-3 h-3 stroke-[2.5]" />
+                      <Zap className={isNativePlatform() ? "w-2.5 h-2.5 stroke-[2.2]" : "w-3 h-3 stroke-[2.5]"} />
                       <span>Hoy:</span>
                       <span className="font-bold">{fmt.pct(shortTermMetrics.dayPct)}</span>
                     </span>
@@ -615,13 +617,14 @@ export function OverviewPage() {
                       data-private
                       title={`Rendimiento Sesión Hoy (Mercado en directo): ${sessionPct >= 0 ? '+' : ''}${fmt.pct(sessionPct)}${sessionAmount !== undefined && !isNaN(sessionAmount) ? ` (${sessionAmount >= 0 ? '+' : ''}${fmt.currency(sessionAmount)})` : ''} • Estimación en EUR con réplica de ETFs líquidos (${sessionMarketState || 'LIVE'}). Clic para abrir Mercado.`}
                       className={cn(
-                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all hover:opacity-85 active:scale-95 cursor-pointer',
+                        'inline-flex items-center font-mono font-semibold border transition-all hover:opacity-85 active:scale-95 cursor-pointer',
+                        isNativePlatform() ? 'px-1.5 py-0.5 text-[10.5px] rounded-md gap-0.5' : 'px-2 py-0.5 text-xs rounded-lg gap-1',
                         sessionPct >= 0
                           ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
                           : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
                       )}
                     >
-                      <Activity className="w-3 h-3 stroke-[2.5]" />
+                      <Activity className={isNativePlatform() ? "w-2.5 h-2.5 stroke-[2.2]" : "w-3 h-3 stroke-[2.5]"} />
                       <span>Live:</span>
                       <span className="font-bold">{fmt.pct(sessionPct)}</span>
                     </Link>
@@ -632,13 +635,14 @@ export function OverviewPage() {
                       data-private
                       title={shortTermMetrics.weekAmount !== undefined ? `Rendimiento 7 Días: ${shortTermMetrics.weekAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.weekAmount)} (${fmt.pct(shortTermMetrics.weekPct)})` : `Rendimiento 7 Días: ${fmt.pct(shortTermMetrics.weekPct)}`}
                       className={cn(
-                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-semibold border transition-all cursor-default',
+                        'inline-flex items-center font-mono font-semibold border transition-all cursor-default',
+                        isNativePlatform() ? 'px-1.5 py-0.5 text-[10.5px] rounded-md gap-0.5' : 'px-2 py-0.5 text-xs rounded-lg gap-1',
                         shortTermMetrics.weekPct >= 0
                           ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20'
                           : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
                       )}
                     >
-                      <Calendar className="w-3 h-3 stroke-[2.5]" />
+                      <Calendar className={isNativePlatform() ? "w-2.5 h-2.5 stroke-[2.2]" : "w-3 h-3 stroke-[2.5]"} />
                       <span>7D:</span>
                       <span className="font-bold">{fmt.pct(shortTermMetrics.weekPct)}</span>
                     </span>

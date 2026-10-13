@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 15:37:53
+- **Fecha de exportación:** 2026-10-13 15:39:39
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 86
+- **Total de interacciones registradas:** 88
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1670,5 +1670,31 @@ no veo los cambios del ultimo cambio
 ### 👤 Usuario (2026-10-13 13:30:24)
 
 nativo: coculta ese detalle y la leyenda del eje Y metela dentro del propio grafico. haz más pequeña la letra del selector 1A
+
+---
+
+### 🤖 Asistente (2026-10-13 13:37:55)
+
+Los cambios solicitados han sido implementados y publicados en la versión **v3.0.33**:
+
+### 1. Detalle / Tira superior oculta en nativo
+* Se ha ocultado por completo la barra superior del gráfico (*Patrimonio, Aportado, Beneficio y Fecha*) en la aplicación nativa ([PerformanceChart.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx)), liberando un espacio vertical considerable para que la tarjeta quede limpia y despejada.
+* *Detalle al interactuar*: Si deslizas el dedo por la curva del gráfico, aparece una pequeña burbuja flotante translúcida en la esquina superior con el valor y fecha exactos del punto tocado.
+
+### 2. Escala del eje Y integrada dentro del propio gráfico
+* En la app nativa, el panel lateral derecho del eje Y se ha desactivado (`rightPriceScale: { visible: false }`), lo que permite que el gráfico ocupe el **100% del ancho de la pantalla** sin márgenes desaprovechados a los lados.
+* Los niveles de referencia del eje Y (Máximo, Nivel medio y Mínimo) ahora flotan de forma limpia **dentro del propio lienzo** en el margen derecho, con fondo sutil translúcido y tipografía monoespaciada compacta.
+
+### 3. Tipografía más pequeña en el selector temporal (1A)
+* En [HeaderActions.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx), se redujo el tamaño de fuente a `text-[9.5px]` y se ajustó el contenedor a `w-[48px]`, logrando un selector mucho más estilizado y compacto donde tanto **"1A"** como **"Max"** caben holgadamente.
+
+---
+> Para ver los cambios de inmediato en tu dispositivo, pulsa en el logo de **PortfolioPro** y toca en **"Recargar app"** (o cierra la app desde la multitarea de iOS y vuelve a abrirla). La versión activa pasa a ser **v3.0.33**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:32:13)
+
+nativo: los badges de Hoy, Live, 7D pelin más pequeños
 
 ---
