@@ -7,6 +7,7 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https',
     iosScheme: 'https',
+    allowNavigation: ['portfolio.asiermoreno.es', '*.asiermoreno.es'],
   },
   plugins: {
     SplashScreen: {

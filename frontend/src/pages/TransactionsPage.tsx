@@ -24,6 +24,7 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { BrokerBadge } from '@/components/ui/Badge'
 import { fmt, cn } from '@/lib/utils'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
+import { apiUrl } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import type { Transaction } from '@/lib/mockData'
@@ -116,7 +117,7 @@ export function TransactionsPage() {
   // Handle manual addition
   const handleAddTransaction = async (newTx: any) => {
     try {
-      const res = await fetch('/api/transactions', {
+      const res = await fetch(apiUrl('/transactions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...newTx, user_id: userId }),
@@ -140,7 +141,7 @@ export function TransactionsPage() {
     if (!window.confirm('¿Deseas eliminar esta transacción de tu cartera?')) return
     setIsDeleting(txId)
     try {
-      const res = await fetch(`/api/transactions/${txId}`, { method: 'DELETE' })
+      const res = await fetch(apiUrl(`/transactions/${txId}`), { method: 'DELETE' })
       if (res.ok) {
         notify('Operación eliminada.')
         invalidateAll()
@@ -731,7 +732,7 @@ function ImportExtractoModal({
 
     setIsProcessing(true)
     try {
-      const res = await fetch('/api/transactions/import-text', {
+      const res = await fetch(apiUrl('/transactions/import-text'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: pastedText, user_id: userId }),
@@ -758,7 +759,7 @@ function ImportExtractoModal({
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const res = await fetch(`/api/transactions/import-csv?user_id=${userId}`, {
+      const res = await fetch(apiUrl(`/transactions/import-csv?user_id=${userId}`), {
         method: 'POST',
         body: formData,
       })

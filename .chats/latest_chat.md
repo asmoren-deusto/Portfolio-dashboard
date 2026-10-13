@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 12:03:23
+- **Fecha de exportación:** 2026-10-13 12:12:46
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 33
+- **Total de interacciones registradas:** 37
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -940,5 +940,100 @@ La próxima vez que compiles el workflow en GitHub Actions para actualizar la ap
 ### 👤 Usuario (2026-10-13 09:58:34)
 
 se han actualizado NAVs en la app y no me ha notificado o se ha cerrado el popup
+
+---
+
+### 🤖 Asistente (2026-10-13 10:03:26)
+
+El motivo exacto por el que parecía que no te notificaba o que se cerraba era este:
+
+### 🔍 ¿Qué estaba ocurriendo?
+1. **Auto-cierre demasiado rápido (10 segundos):**
+   El modal [NavUpdateAlertModal.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/common/NavUpdateAlertModal.tsx) tenía un temporizador de auto-descarte de tan solo **10 segundos** (`AUTO_DISMISS_MS = 10000`). Si estabas leyendo otra pantalla, en otra pestaña o en otra app, el aviso se cerraba solo en un parpadeo.
+2. **Sin persistencia ni historial:**
+   Al cerrarse el popup, el aviso desaparecía del estado y no existía ninguna campana o botón para volver a consultar qué fondos habían variado ni cuánto.
+3. **En móviles y pantallas táctiles:**
+   La pausa solo se activaba al pasar el ratón (`onMouseEnter`). En el móvil (iPhone/iPad), al no haber cursor de ratón, el temporizador seguía corriendo aunque estuvieras mirando o tocando la pantalla.
+4. **Actualizaciones manuales de precio:**
+   El endpoint `/update-price` actualizaba la base de datos pero no emitía el evento en `_latest_nav_alert`.
+
+---
+
+### 🚀 Mejoras implementadas:
+
+1. **⏱️ Tiempo ampliado a 30 segundos + pausa táctil:**
+   * El auto-cierre ahora dura **30 segundos**.
+   * Si tocas la pantalla del móvil o pasas el ratón, **el contador se pausa automáticamente** para que puedas leer con calma.
+2. **📌 Botón para fijar la ventana (Pin):**
+   * Se ha añadido un botón de chincheta (**📌**) junto a la **X** de cierre.
+   * Si lo pulsas, la ventana se queda **fijada permanentemente** en pantalla y no se cerrará sola hasta que tú pulses "Entendido" o la "X".
+3. **🔔 Nueva Campana de Notificaciones de NAVs en la cabecera:**
+   * Ahora tienes un botón de campana (🔔) en la barra superior junto al botón de refresco y modo noche.
+   * Si hay NAVs actualizados, muestra un **badge verde** con el número de fondos.
+   * **Pulsando la campana puedes volver a abrir el informe completo** en cualquier momento, aunque el popup ya se hubiera cerrado.
+   * La información se guarda en `localStorage` para que nunca se pierda al recargar la página.
+4. **📲 Notificaciones nativas del navegador / sistema:**
+   * Si la app está en segundo plano o tienes otra pestaña activa, el sistema emitirá una notificación nativa del navegador avisándote de cuántos fondos se han actualizado.
+5. **Registro de cambios manuales:**
+   * Al modificar o forzar un precio en `/update-price`, el backend ahora genera la alerta correspondiente de forma instantánea.
+
+---
+
+Todos los cambios están compilados, verificados y desplegados en `main` en la versión **`v3.0.9`**.
+
+---
+
+### 👤 Usuario (2026-10-13 10:06:29)
+
+en ios no me muestra los datos de mi cartera, solo la cuenta demo
+
+---
+
+### 🤖 Asistente (2026-10-13 10:08:25)
+
+Esto ocurre por una razón muy concreta de arquitectura:
+
+### 🔍 ¿Por qué solo sale la cuenta Demo en la app `.ipa`?
+
+1. **El backend no está dentro del iPhone:**
+   El archivo `.ipa` empaqueta únicamente la interfaz visual (el frontend). Tu base de datos con tus fondos reales, transacciones y el servidor Python (FastAPI + SQLite) están corriendo en tu ordenador o servidor Docker (`localhost:8050` o `localhost:8000`).
+2. **La app busca el servidor dentro del teléfono:**
+   Al abrir la app instalada en el iPhone, esta intenta hacer las peticiones a `/api` (es decir, a su propio `localhost` del iPhone). Al no haber ningún servidor corriendo dentro del teléfono, la petición de red falla.
+3. **Por qué la Demo sí funciona:**
+   La cuenta Demo no necesita servidor porque tiene datos de ejemplo simulados guardados en la memoria del código JavaScript.
+
+---
+
+### ⚡ Cómo ver tu cartera real en el iPhone AHORA MISMO (en 10 segundos):
+
+La forma directa y oficial de usar tu cartera real en el móvil es a través de Safari (PWA):
+
+1. Asegúrate de que el iPhone esté conectado a la **misma red Wi-Fi** que tu ordenador.
+2. Abre **Safari** en el iPhone y entra en la IP de tu ordenador y puerto. Por ejemplo:
+   ```text
+   http://192.168.1.XX:8050   (o el puerto que uses, ej. :8000)
+   ```
+   *(Para saber tu IP local en Windows, puedes abrir la terminal y escribir `ipconfig`, mirando la "Dirección IPv4")*.
+3. Verás la pantalla de login con tu perfil **Asier Moreno**. Entra con tu contraseña.
+4. Toca el botón **Compartir** de Safari (icono de cuadrado con flecha hacia arriba) y pulsa:
+   📲 **"Añadir a la pantalla de inicio"**.
+
+> Se añadirá el icono de PortfolioPro a tu pantalla de inicio y, al abrirlo, se conectará a tu servidor mostrando **todos tus datos, gráficas, fondos y transacciones reales**.
+
+---
+
+### 🛠️ Si prefieres usar la app nativa instalada (`.ipa`):
+
+Para que el `.ipa` sepa a qué máquina conectarse, la app necesita saber la dirección de tu servidor. 
+
+Puedo añadir una opción en la pantalla de inicio / ajustes de la app para que puedas escribir la IP o URL de tu servidor (ej: `http://192.168.1.35:8050` o tu dominio / Cloudflare Tunnel / Tailscale si estás fuera de casa).
+
+¿Tienes el backend corriendo en tu PC en la red local o lo tienes subido a algún servidor / dominio público? Dime qué IP o URL usas y lo dejamos configurado.
+
+---
+
+### 👤 Usuario (2026-10-13 10:09:47)
+
+está en https://portfolio.asiermoreno.es/
 
 ---

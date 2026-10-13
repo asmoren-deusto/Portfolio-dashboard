@@ -18,10 +18,19 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — allow frontend dev server
+# CORS — allow frontend dev server, mobile apps and production domain
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://localhost:8080"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost:8080",
+        "https://localhost",
+        "capacitor://localhost",
+        "ionic://localhost",
+        "https://portfolio.asiermoreno.es",
+    ],
+    allow_origin_regex=r"^(https?://.*asiermoreno\.es|capacitor://localhost|https://localhost)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

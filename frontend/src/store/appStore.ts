@@ -6,6 +6,7 @@ import {
   generateRealisticPerformanceSeries,
 } from '@/lib/mockData'
 import { hashPassword, verifyPassword } from '@/lib/security'
+import { apiUrl } from '@/api/config'
 
 export type Period = '1mo' | '3mo' | '6mo' | '1y' | '2y' | '5y'
 export type Theme = 'light' | 'dark'
@@ -281,7 +282,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   fetchUsersFromBackend: async () => {
     try {
-      const res = await fetch('/api/auth/users')
+      const res = await fetch(apiUrl('/auth/users'))
       if (res.ok) {
         const backendUsers: Array<{
           id: string
@@ -378,7 +379,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           const target = get().users.find((u) => u.id === userId) || getUserProfileById(userId)
           localStorage.setItem('portfolio_active_user_id', userId)
           set({ currentUser: target, useMock: target.isDemo })
-          fetch('/api/auth/me', { headers: { Authorization: `Bearer ${storedToken}` } })
+          fetch(apiUrl('/auth/me'), { headers: { Authorization: `Bearer ${storedToken}` } })
             .then((res) => {
               if (res.status === 401 || res.status === 404) get().logout()
             })
@@ -386,7 +387,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           return true
         }
         try {
-          const res = await fetch('/api/auth/me', {
+          const res = await fetch(apiUrl('/auth/me'), {
             headers: { Authorization: `Bearer ${storedToken}` },
           })
           if (res.ok) {
@@ -412,7 +413,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     // Attempt backend authentication
     let backendOffline = false
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(apiUrl('/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, password }),
@@ -643,7 +644,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   changePassword: async (userId: string, oldPassword: string, newPassword: string) => {
     // 1. Attempt backend update
     try {
-      const res = await fetch('/api/auth/change-password', {
+      const res = await fetch(apiUrl('/auth/change-password'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -706,7 +707,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUserPassword: async (userId: string, newPassword: string) => {
     // 1. Attempt backend set-password
     try {
-      const res = await fetch('/api/auth/set-password', {
+      const res = await fetch(apiUrl('/auth/set-password'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, new_password: newPassword }),

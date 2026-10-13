@@ -13,8 +13,7 @@ import {
 } from '@/lib/mockData'
 export type { Position, PortfolioSummary, Analytics, Transaction, PricePoint }
 import { useAppStore, type Period } from '@/store/appStore'
-
-const API = '/api'
+import { apiUrl } from './config'
 
 // Demo data has no per-broker series: derive them from the broker's share of the positions.
 function brokerShare(positions: Position[], broker: string): number {
@@ -65,7 +64,8 @@ async function get<T>(path: string): Promise<T> {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  const res = await fetch(`${API}${path}`, {
+  const url = apiUrl(path)
+  const res = await fetch(url, {
     headers,
     cache: 'no-store',
   })
@@ -79,7 +79,8 @@ export async function refreshPortfolioPrices(userId = 'asier') {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  const res = await fetch(`${API}/portfolio/refresh-prices?user_id=${userId}`, {
+  const url = apiUrl(`/portfolio/refresh-prices?user_id=${userId}`)
+  const res = await fetch(url, {
     method: 'POST',
     headers,
   })
