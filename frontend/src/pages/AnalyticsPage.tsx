@@ -461,7 +461,7 @@ export function AnalyticsPage() {
             </div>
           ) : (
             <div className={cn("px-4 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
-              <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
+              <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
                 {analyticsFetching && !analytics ? (
                   <ReturnsChartSkeleton compact={false} height={260} />
                 ) : analytics ? (

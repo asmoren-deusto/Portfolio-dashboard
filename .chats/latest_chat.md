@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 14:10:26
+- **Fecha de exportación:** 2026-10-13 14:15:04
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 55
+- **Total de interacciones registradas:** 57
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1317,5 +1317,28 @@ server: {
 ### 👤 Usuario (2026-10-13 12:09:38)
 
 hazlo
+
+---
+
+### 🤖 Asistente (2026-10-13 12:10:28)
+
+¡Hecho! Acabo de configurar el modo **Live Over-The-Air (OTA)** en [capacitor.config.ts](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/capacitor.config.ts).
+
+### 🚀 ¿Cómo funcionará a partir de ahora?
+
+1. **Esta será la última IPA que necesitas instalar:**
+   - En unos minutos GitHub Actions terminará de compilar la versión **v3.0.18**.
+   - Instalas este nuevo `.ipa` por Sideloadly en tu iPhone **por última vez**.
+
+2. **Actualizaciones 100% automáticas e instantáneas:**
+   - A partir de este momento, **cualquier cambio que hagamos en el código web o diseño se verá inmediatamente en tu app nativa** nada más abrirla.
+   - Ya no tendrás que volver a conectar el cable, ni abrir Sideloadly, ni esperar compilaciones de IPA para ver mejoras visuales, botones, nuevas secciones o correcciones.
+   - Mantiene todas las capacidades nativas: icono a pantalla completa, ausencia de barras de Safari, barra inferior `MobileTabBar`, haptics y rendimiento óptimo.
+
+---
+
+### 👤 Usuario (2026-10-13 12:10:07)
+
+en la vista oculta la grafica de evolucion en vision general no se difumina
 
 ---

@@ -788,7 +788,7 @@ export function PerformanceChart({
   }, [data, chartMode, showInvested, showMilestones, activeStackList, isDark, metrics])
 
   return (
-    <div className="w-full flex flex-col justify-between select-none space-y-2">
+    <div data-private className="w-full flex flex-col justify-between select-none space-y-2">
       {/* Dynamic HUD Bar with Inlined Entity Selectors (Matches exact mockup from user) */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
         {/* Left: Patrimonio & Aportado */}
@@ -796,7 +796,7 @@ export function PerformanceChart({
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
             <span className="text-slate-500 dark:text-slate-400 font-medium">Patrimonio:</span>
-            <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+            <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
               {chartMode === 'currency'
                 ? fmt.currency(activeSelectedMetrics?.val)
                 : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
@@ -807,7 +807,7 @@ export function PerformanceChart({
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-0.5 border-t-2 border-dashed border-purple-500 shrink-0" />
               <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+              <span data-private className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
                 {fmt.currency(activeSelectedMetrics.inv)}
               </span>
             </div>
@@ -822,6 +822,7 @@ export function PerformanceChart({
             <div className="flex items-center gap-1.5">
               <span className="text-slate-500 dark:text-slate-400 font-medium">Beneficio:</span>
               <span
+                data-private
                 className={cn(
                   'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
                   activeSelectedMetrics.diff >= 0
@@ -846,7 +847,7 @@ export function PerformanceChart({
       </div>
 
       {/* Canvas Container */}
-      <div ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
+      <div data-private ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
         {/* Floating Small In-Chart Legend */}
         {availableBrokers.length > 1 && (
           <div className="absolute top-2 left-2.5 z-10 pointer-events-none flex items-center gap-2.5 px-2 py-0.5 rounded-md bg-white/80 dark:bg-[#181818]/80 border border-slate-200/60 dark:border-white/[0.08] backdrop-blur-xs text-[10px] text-slate-600 dark:text-slate-300 font-medium shadow-2xs">
@@ -879,7 +880,7 @@ export function PerformanceChart({
             </div>
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Máx:</span>
-              <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+              <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
                 {fmt.currency(metrics.maxPoint.value)}
               </span>
             </div>
@@ -895,7 +896,7 @@ export function PerformanceChart({
             </div>
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Mín:</span>
-              <span className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
+              <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
                 {fmt.currency(metrics.minPoint.value)}
               </span>
             </div>
@@ -912,6 +913,7 @@ export function PerformanceChart({
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Pico:</span>
               <span
+                data-private
                 className={cn(
                   'font-mono font-extrabold text-xs truncate',
                   metrics.drawdownPct >= -0.05
@@ -940,6 +942,7 @@ export function PerformanceChart({
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Neto:</span>
               <span
+                data-private
                 className={cn(
                   'font-mono font-extrabold text-xs truncate',
                   metrics.periodProfit >= 0
