@@ -14,6 +14,7 @@ import { MobileTabBar } from '@/components/layout/MobileTabBar'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { fetchLatestNavAlert } from '@/api/queries'
+import { isNativePlatform } from '@/api/config'
 
 export function RootLayout() {
   const location = useLocation()
@@ -187,7 +188,14 @@ export function RootLayout() {
           </div>
 
           {/* Page Content Animation (KPIs, Charts, Tables fade in quickly without header flickering) */}
-          <main key={location.pathname} className="animate-in-quick flex flex-1 flex-col gap-4 px-4 pt-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:pt-4 sm:pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:px-7 md:pt-4 md:pb-6">
+          <main
+            key={location.pathname}
+            className={`animate-in-quick flex flex-1 flex-col gap-4 px-4 pt-4 md:px-7 md:pt-4 md:pb-6 ${
+              isNativePlatform()
+                ? 'pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(7rem+env(safe-area-inset-bottom,0px))]'
+                : 'pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] sm:pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))]'
+            }`}
+          >
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>
@@ -197,8 +205,8 @@ export function RootLayout() {
         {/* Global Floating NAV Update Alert Window */}
         <NavUpdateAlertModal />
 
-        {/* Native iOS / Mobile Bottom Tab Bar */}
-        <MobileTabBar />
+        {/* Native iOS / Mobile Bottom Tab Bar (shown exclusively inside native Capacitor app) */}
+        {isNativePlatform() && <MobileTabBar />}
       </div>
     </HeaderProvider>
   )

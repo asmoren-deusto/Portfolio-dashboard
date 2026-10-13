@@ -3,7 +3,23 @@
  * Centralized API endpoint resolver with automatic detection for native Capacitor iOS app.
  */
 
+import { Capacitor } from '@capacitor/core'
+
 export const DEFAULT_PRODUCTION_URL = 'https://portfolio.asiermoreno.es'
+
+/**
+ * Detects if currently executing inside the native iOS / Android Capacitor wrapper.
+ */
+export function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false
+
+  return (
+    Capacitor.isNativePlatform() ||
+    Boolean((window as any).Capacitor?.isNativePlatform?.()) ||
+    window.location.protocol === 'capacitor:' ||
+    (window.location.hostname === 'localhost' && window.location.port === '')
+  )
+}
 
 export function getApiBaseUrl(): string {
   if (typeof window === 'undefined') return '/api'
@@ -25,12 +41,7 @@ export function getApiBaseUrl(): string {
   }
 
   // 3. Detect if running inside native Capacitor environment (iOS / Android)
-  const isCapacitor =
-    Boolean((window as any).Capacitor?.isNativePlatform?.()) ||
-    window.location.protocol === 'capacitor:' ||
-    (window.location.hostname === 'localhost' && window.location.port === '')
-
-  if (isCapacitor) {
+  if (isNativePlatform()) {
     return `${DEFAULT_PRODUCTION_URL}/api`
   }
 

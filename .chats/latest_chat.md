@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 12:26:34
+- **Fecha de exportación:** 2026-10-13 12:28:52
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 41
+- **Total de interacciones registradas:** 43
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1129,5 +1129,34 @@ Ahora, tanto si lo añades desde Safari (*Añadir a pantalla de inicio*) como si
 ### 👤 Usuario (2026-10-13 10:22:12)
 
 en safari no cortes la web arriba y abajo
+
+---
+
+### 🤖 Asistente (2026-10-13 10:26:37)
+
+He ajustado los estilos y el manejo de áreas seguras (`safe-area-insets`) para evitar que Safari en iOS corte la web arriba y abajo:
+
+### 🛠️ Cambios Realizados:
+
+1. **Evitar corte superior (Notch / Dynamic Island / Status Bar)**:
+   - **`apple-mobile-web-app-status-bar-style`**: Cambiado de `black-translucent` a `default` en [index.html](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/index.html). El modo translúcido forzaba a Safari a solapar el encabezado debajo de la barra de estado y el notch sin considerar el área segura.
+   - **Header móvil**: Se actualizó el espaciado en [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx) a `pt-[max(0.625rem,env(safe-area-inset-top,0px))]`, asegurando que el contenido del encabezado siempre respete el notch mientras el fondo difuminado (`backdrop-blur`) cubre la pantalla completa.
+   - **Pantalla de Login**: Padding superior adaptativo en [LoginPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/LoginPage.tsx) con `calc(env(safe-area-inset-top,0px) + 1.5rem)`.
+
+2. **Evitar corte inferior (Home Indicator y barra de navegación de Safari)**:
+   - **Espaciado del contenedor principal (`main`)**: Ampliado de `pb-24` fijo a `pb-[calc(7rem+env(safe-area-inset-bottom,0px))]` en [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx). Ahora las tablas, tarjetas y botones finales tienen espacio de sobra y nunca quedan ocultos tras la barra flotante de Safari ni el tab bar.
+   - **Barra de pestañas inferior (`MobileTabBar`)**: Se añadió `pb-[max(env(safe-area-inset-bottom,0px),14px)]` en [MobileTabBar.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/MobileTabBar.tsx) para separar los iconos de la barra de inicio de iOS.
+
+3. **Fluidez de scroll y rebote**:
+   - Se retiró la restricción `overscroll-behavior-y: none` en [index.css](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css), eliminando bloqueos de scroll y saltos visuales en Safari.
+
+---
+🚀 Los cambios han sido compilados y sincronizados en la versión **v3.0.12** en GitHub. Ya puedes recargar Safari o actualizar tu despliegue web para comprobarlo.
+
+---
+
+### 👤 Usuario (2026-10-13 10:22:47)
+
+y quita el menu de abajo, dejalo solo en la app nativa
 
 ---

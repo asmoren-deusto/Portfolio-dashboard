@@ -8,6 +8,7 @@ import {
   List,
 } from 'lucide-react'
 import { useSimulatedPortfolio } from '@/api/queries'
+import { isNativePlatform } from '@/api/config'
 import { cn } from '@/lib/utils'
 
 interface TabItem {
@@ -18,6 +19,10 @@ interface TabItem {
 }
 
 export const MobileTabBar: React.FC = () => {
+  if (!isNativePlatform()) {
+    return null
+  }
+
   const { data: simData } = useSimulatedPortfolio('1d')
   const sessionPct = simData?.summary?.fx_info?.simulated_eur_pct ?? simData?.summary?.simulated_daily_pct
 
