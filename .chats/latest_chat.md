@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 11:16:26
+- **Fecha de exportación:** 2026-10-13 11:22:00
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 15
+- **Total de interacciones registradas:** 17
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -253,5 +253,59 @@ Cambios publicados en el repositorio bajo la versión **`v3.0.3`**.
 ### 👤 Usuario (2026-10-13 09:09:13)
 
 puedo compliar y generar la app iOS via la nube? ahora mismo no tengo un mac aqui
+
+---
+
+### 🤖 Asistente (2026-10-13 09:16:29)
+
+**Sí, es totalmente posible compilar y generar la app iOS (`.ipa`) en la nube sin tener un Mac físico**, y además puedes instalarla directamente en tu iPhone.
+
+Ya he dejado configurado en el repositorio todo lo necesario para que puedas hacerlo en cualquier momento:
+
+---
+
+### ¿Cómo funciona la compilación en la nube?
+
+1. **GitHub Actions con servidores Mac oficiales (Gratis)**:
+   * GitHub incluye entornos de ejecución en macOS con procesadores **Apple Silicon (M1/M2)** y **Xcode preinstalado**.
+   * He creado el workflow en [`.github/workflows/build-ios.yml`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/.github/workflows/build-ios.yml).
+   * Cuando quieras compilar, vas a la pestaña **Actions** en tu GitHub, seleccionas **"Build iOS App (IPA)"** y pulsas **"Run workflow"**.
+   * En 3-5 minutos, Xcode compila el proyecto y genera el archivo **`PortfolioPro.ipa`**, dejándolo listo para descargar en la sección de **Artifacts** de la ejecución.
+
+---
+
+### ¿Cómo instalar el `.ipa` en tu iPhone desde Windows?
+
+Una vez descargado el `.ipa` en tu PC Windows:
+
+* **Con [Sideloadly](https://sideloadly.io/) (Recomendado y gratuito en Windows):**
+  1. Conectas tu iPhone por cable USB a tu PC (o por Wi-Fi si tienes iTunes activado con sincronización local).
+  2. Arrastras el archivo `PortfolioPro.ipa` a la ventana de Sideloadly.
+  3. Pones tu cuenta de Apple ID (cuenta gratuita estándar de usuario, no hace falta cuenta de desarrollador de pago).
+  4. Pulsas **Start**. Sideloadly firma la app con tu ID y la transfiere directamente al iPhone.
+  5. En el iPhone, vas a **Ajustes > General > Gestión de dispositivos y VPN** y pulsas **"Confiar"** en tu certificado. ¡La app ya se abrirá como app nativa!
+
+* **Con AltStore / AltServer (Windows):** Si ya usas el ecosistema AltStore en tu PC, el proceso es análogo.
+
+---
+
+### Alternativa inmediata (0 cables, 0 descargas): **Modo PWA Standalone**
+
+Si prefieres usarla en tu iPhone **ahora mismo sin necesidad de conectar cables**:
+
+1. Abre **Safari** en tu iPhone y entra en la URL de tu aplicación (por ejemplo tu dominio o la IP de tu PC si estás en la misma Wi-Fi).
+2. Toca el botón **Compartir** (icono de cuadrado con flecha hacia arriba en la barra inferior de Safari).
+3. Selecciona **"Añadir a pantalla de inicio"** (*Add to Home Screen*).
+4. La app se abrirá en **pantalla completa** (sin interfaz de navegador ni barra de URL), con su icono Retina de alta resolución, la barra de pestañas táctil inferior y respetando los márgenes del notch / Dynamic Island.
+
+---
+
+Tienes la guía paso a paso detallada guardada en [`docs/ios_mobile_guide.md`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/docs/ios_mobile_guide.md). Todo el código y el workflow ya han sido subidos a la rama `main` en la versión **`v3.0.4`**.
+
+---
+
+### 👤 Usuario (2026-10-13 09:21:16)
+
+
 
 ---
