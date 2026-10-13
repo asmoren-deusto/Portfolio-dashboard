@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-13 14:56:37
+- **Fecha de exportación:** 2026-10-13 15:02:06
 - **ID de Conversación:** `ce720d6c-fb99-4e2d-869b-9cd161b28030`
-- **Total de interacciones registradas:** 71
+- **Total de interacciones registradas:** 73
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1497,5 +1497,25 @@ Se ha reducido el espaciado vertical de [`MarketTicker`](file:///c:/Users/AsierM
 ### 👤 Usuario (2026-10-13 12:55:29)
 
 baja un pelo el posicionamiento de los tickers, el cartel de PRE aparece cortado
+
+---
+
+### 🤖 Asistente (2026-10-13 12:56:40)
+
+Se ha ajustado el posicionamiento vertical de las tarjetas de los tickers en [`MarketTicker.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx):
+
+1. **Corrección del corte superior del cartel `PRE`**:
+   - Se añadió espacio vertical superior en la pista de tickers (`pt-1.5 pb-0.5`), desplazando las tarjetas ligeramente hacia abajo.
+   - Se ajustó la posición del badge flotante [`MarketStateBadge`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx) de `-top-1.5` a `-top-1` con padding de `py-[1px]`.
+   - Ahora el cartel de estado (`PRE`, `Post`, etc.) queda completamente a la vista con sus bordes redondeados intactos, sin sufrir recortes por el `overflow: hidden` del contenedor.
+
+2. **Release y despliegue**:
+   - Sincronizado a Git con la versión **`v3.0.26`**.
+
+---
+
+### 👤 Usuario (2026-10-13 13:00:41)
+
+amplia 1px en altura la tarjeta completa de cada ticker (te paso captura). no amplies el contenedor (la lista). al pinchar en la campana y ver las novedades, el icono verde y el punto deberian no aparecer
 
 ---
