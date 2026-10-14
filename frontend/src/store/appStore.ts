@@ -262,6 +262,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (navAlertNotification) {
       try {
         localStorage.setItem('portfolio_last_nav_alert', JSON.stringify(navAlertNotification))
+        if (navAlertNotification.id) {
+          localStorage.setItem('portfolio_last_seen_nav_alert_id', navAlertNotification.id)
+        }
       } catch {}
       set({ navAlertNotification, lastNavAlertHistory: navAlertNotification })
     } else {
@@ -269,8 +272,17 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
   clearNavAlertNotification: () => {
-    const history = get().lastNavAlertHistory
-    if (history && history.updatedCount > 0) {
+    const current = get().navAlertNotification
+    const history = get().lastNavAlertHistory || current
+    const alertId = current?.id || history?.id
+
+    if (alertId) {
+      try {
+        localStorage.setItem('portfolio_last_seen_nav_alert_id', alertId)
+      } catch {}
+    }
+
+    if (history) {
       const readHistory = { ...history, updatedCount: 0 }
       try {
         localStorage.setItem('portfolio_last_nav_alert', JSON.stringify(readHistory))
@@ -292,17 +304,21 @@ export const useAppStore = create<AppState>((set, get) => ({
         allCheckedItems: [],
       }
     }
-    // Show modal with the details
-    set({ navAlertNotification: history })
 
-    // Mark as read so the green icon and dot on the bell disappear
-    if (history.updatedCount > 0) {
-      const readHistory = { ...history, updatedCount: 0 }
+    // Persist as seen so background scanner and page reloads never pop it up again
+    if (history.id) {
       try {
-        localStorage.setItem('portfolio_last_nav_alert', JSON.stringify(readHistory))
+        localStorage.setItem('portfolio_last_seen_nav_alert_id', history.id)
       } catch {}
-      set({ lastNavAlertHistory: readHistory })
     }
+
+    const readHistory = { ...history, updatedCount: 0 }
+    try {
+      localStorage.setItem('portfolio_last_nav_alert', JSON.stringify(readHistory))
+    } catch {}
+
+    // Show modal with the details and clear the badge counter
+    set({ navAlertNotification: history, lastNavAlertHistory: readHistory })
   },
 
   // Auth State

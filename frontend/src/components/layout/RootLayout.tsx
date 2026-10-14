@@ -66,13 +66,13 @@ export function RootLayout() {
     let isMounted = true
     const checkNavAlerts = async () => {
       try {
-        const lastSeen = sessionStorage.getItem('last_seen_nav_alert_id')
+        const lastSeen = localStorage.getItem('portfolio_last_seen_nav_alert_id')
         const res = await fetchLatestNavAlert(lastSeen)
         if (isMounted && res.has_update && res.alert) {
           const alert = res.alert
           const updatedCount = alert.updatedCount ?? alert.updated_count ?? 0
           if (alert.id && alert.id !== lastSeen && updatedCount > 0) {
-            sessionStorage.setItem('last_seen_nav_alert_id', alert.id)
+            localStorage.setItem('portfolio_last_seen_nav_alert_id', alert.id)
             // Trigger automatic UI refresh across all tabs
             await queryClient.invalidateQueries()
             // Show pop-up notification

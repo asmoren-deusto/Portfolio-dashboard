@@ -350,8 +350,10 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
 
     if len(updated_items) > 0:
         import time
+        now_ts = time.time()
         _latest_nav_alert = {
-            "id": f"nav_{int(time.time()*1000)}",
+            "id": f"nav_{int(now_ts*1000)}",
+            "created_at_ts": now_ts,
             "timestamp": datetime.now().strftime("%H:%M"),
             "updatedCount": len(updated_items),
             "totalCount": len(all_items),
@@ -359,6 +361,7 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
             "allCheckedItems": all_items,
         }
 
+    res_payload["alert"] = _latest_nav_alert if len(updated_items) > 0 else None
     return res_payload
 
 
@@ -373,12 +376,27 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
 
 @router.get("/latest-nav-alert")
 def get_latest_nav_alert(since: str | None = None):
-    """Return latest detected NAV update notification if newer than 'since'."""
+    """
+    Return latest detected NAV update notification if newer than 'since' and fresh.
+    Prevents popping up stale alerts when opening the app hours after a background scan.
+    """
     global _latest_nav_alert
     if not _latest_nav_alert:
         return {"has_update": False, "alert": None}
+
+    # Already seen by this client
     if since and _latest_nav_alert.get("id") == since:
         return {"has_update": False, "alert": None}
+
+    # Freshness check: alerts older than 30 minutes (1800s) are historical/stale
+    # and must NOT trigger automatic invasive popups upon opening the app.
+    import time
+    created_at = _latest_nav_alert.get("created_at_ts")
+    if created_at:
+        age_seconds = time.time() - created_at
+        if age_seconds > 1800:
+            return {"has_update": False, "alert": _latest_nav_alert, "is_stale": True}
+
     return {"has_update": True, "alert": _latest_nav_alert}
 
 
@@ -399,8 +417,10 @@ async def update_price(req: UpdatePriceRequest, user_id: str = Depends(get_curre
     global _latest_nav_alert
     asset = _get_asset(db, req.isin)
     import time
+    now_ts = time.time()
     _latest_nav_alert = {
-        "id": f"nav_{int(time.time()*1000)}",
+        "id": f"nav_{int(now_ts*1000)}",
+        "created_at_ts": now_ts,
         "timestamp": datetime.now().strftime("%H:%M"),
         "updatedCount": 1,
         "totalCount": 1,

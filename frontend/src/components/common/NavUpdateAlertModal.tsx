@@ -52,7 +52,9 @@ export function NavUpdateAlertModal() {
     return () => clearInterval(interval)
   }, [notif, isPaused, isPinned, clearNavAlertNotification])
 
-  const hasUpdates = (notif?.updatedCount ?? 0) > 0
+  const itemsCount = notif?.items?.length ?? 0
+  const hasUpdates = itemsCount > 0 || (notif?.updatedCount ?? 0) > 0
+  const displayCount = notif?.updatedCount && notif.updatedCount > 0 ? notif.updatedCount : itemsCount
 
   return (
     <AnimatePresence>
@@ -96,7 +98,7 @@ export function NavUpdateAlertModal() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="font-bold text-sm sm:text-[15px] text-slate-900 dark:text-white tracking-tight">
                     {hasUpdates
-                      ? `${notif.updatedCount} NAV${notif.updatedCount > 1 ? 's' : ''} Actualizado${notif.updatedCount > 1 ? 's' : ''}`
+                      ? `${displayCount} NAV${displayCount > 1 ? 's' : ''} Actualizado${displayCount > 1 ? 's' : ''}`
                       : 'NAVs Verificados al Día'}
                   </h3>
                   <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.08]">
