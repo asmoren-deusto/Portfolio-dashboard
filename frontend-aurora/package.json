@@ -1,0 +1,35 @@
+{
+  "name": "frontend-aurora",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Interfaz alternativa 'Aurora' para Portfolio Dashboard. Reutiliza la capa de datos de ../frontend (solo lectura).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "typecheck": "tsc",
+    "preview": "vite preview --port 4174"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.3",
+    "@tanstack/react-query": "^5.103.2",
+    "clsx": "^2.1.1",
+    "framer-motion": "^13.4.3",
+    "lucide-react": "^1.48.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4",
+    "recharts": "^3.10.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  }
+}

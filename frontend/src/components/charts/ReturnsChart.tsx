@@ -139,29 +139,6 @@ export function ReturnsChart({
         ]
   }
 
-  const renderCustomBarLabel = (props: any) => {
-    const { x, y, width, height, value } = props
-    if (value == null || isNaN(value)) return null
-    const num = Number(value)
-    const isPos = num >= 0
-    const formatted = `${isPos ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
-    const labelY = isPos ? Math.max(12, y - 6) : y + height + 13
-
-    return (
-      <text
-        x={x + width / 2}
-        y={labelY}
-        textAnchor="middle"
-        className="fill-slate-500 dark:fill-slate-400 font-mono font-bold"
-        style={{
-          fontSize: compact ? '9.5px' : '10.5px',
-        }}
-      >
-        {formatted}
-      </text>
-    )
-  }
-
   return (
     <motion.div
       key={`${mode}-${refreshAnimKey}`}
@@ -215,7 +192,18 @@ export function ReturnsChart({
           >
             <LabelList
               dataKey="value"
-              content={renderCustomBarLabel}
+              position="top"
+              formatter={(val: any) => {
+                if (val == null || isNaN(val)) return ''
+                const num = Number(val)
+                return `${num >= 0 ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
+              }}
+              style={{
+                fill: '#94a3b8',
+                fontSize: compact ? '9.5px' : '10.5px',
+                fontFamily: 'monospace',
+                fontWeight: 700,
+              }}
             />
             {data.map((d, i) => (
               <Cell

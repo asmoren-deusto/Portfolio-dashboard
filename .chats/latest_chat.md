@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-14 14:49:26
+- **Fecha de exportación:** 2026-10-14 16:18:37
 - **ID de Conversación:** `7f20d267-aacc-4c8d-be91-c18eee2b74eb`
-- **Total de interacciones registradas:** 14
+- **Total de interacciones registradas:** 20
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -269,5 +269,88 @@ He ajustado la disposición de las etiquetas de sesión en el gráfico de Mercad
 ### 👤 Usuario (2026-10-14 12:38:58)
 
 revisa los datos de esa gráfica
+
+---
+
+### 🤖 Asistente (2026-10-14 12:49:29)
+
+He revisado tanto los **datos** como la **representación visual** de la gráfica de **Rendimiento por periodo** ([ReturnsChart.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)):
+
+---
+
+### 1. Defectos visuales corregidos
+1. **Recorte del eje vertical Y (`1%`, `1%`, `7%`, `)%`, `7%`):**
+   - **Causa:** El gráfico tenía `margin.left = -8` y una anchura de `YAxis width = 28px`. Al tener valores de dos dígitos o con signo negativo (ej. `-7%`, `0%`, `+14%`, `+21%`), el margen negativo desplazaba el texto fuera del SVG y del contenedor `overflow-hidden`, recortando la primera cifra o el signo menos (`0%` quedaba cercenado como `)%`, `-7%` como `7%`, etc.).
+   - **Solución:** Se ajustó `margin.left: 4` y se amplió `YAxis width: 36px` (y `42px` en modo expandido), garantizando espacio completo para todos los valores del eje Y sin ningún recorte.
+
+2. **Posicionamiento de etiquetas en barras negativas (`1D` y `1S`):**
+   - **Causa:** Las barras negativas utilizaban `position="top"`, lo que situaba la cifra pegada a la línea del cero o colisionando con los nombres de los ejes inferiores (`1D`, `1S`).
+   - **Solución:** Se implementó un renderizador personalizado de etiquetas (`renderCustomBarLabel`) que calcula la posición exacta:
+     - Barras positivas: etiqueta por encima de la barra (`y - 6`).
+     - Barras negativas: etiqueta por debajo de la base negativa de la barra (`y + height + 13`).
+
+---
+
+### 2. Revisión y coherencia de los datos
+1. **Exclusión de `TR_TRANSFER` en `/analytics`:**
+   - En [portfolio.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py#L825-L840), el endpoint de analíticas no filtraba las transferencias de efectivo de Trade Republic. Esto diluía ligeramente la rentabilidad anual ponderada (`1A` mostraba `+18.4%` en vez del `+19.98%` real de los fondos). Al aplicar el filtro que ya usan el resumen y la curva de evolución, los cálculos quedan 100% alineados.
+2. **Sincronización de `1S` (% y €):**
+   - El componente recibía el importe semanal `weekAmount` calculado desde la curva, pero usaba `analytics.return_1w` para el porcentaje. Ahora se envía y sincroniza `weekPct={shortTermMetrics?.weekPct}` en [OverviewPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx#L1260-L1270).
+3. **Coherencia decimal entre barra y píldora inferior:**
+   - Para valores inferiores al 1% (como `-0.42%` en `1D`), la barra mostraba `-0.4%` mientras la píldora inferior marcaba `-0.42%`. Ahora los valores < 1% muestran 2 decimales para que coincidan exactamente con la píldora.
+4. **Cálculo de punto base en periodos cerrados:**
+   - En [finance_engine.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py#L347-L370), `calculate_period_return` ahora busca el punto de cierre exactamente en o inmediatamente antes del corte temporal (`<= cutoff_str`), evitando saltos si el día de corte cayó en fin de semana o festivo sin cotización.
+
+---
+
+Los cambios han sido verificados, compilados y desplegados en **v3.0.45** (`c4d0166`).
+
+---
+
+### 👤 Usuario (2026-10-14 14:02:58)
+
+me interesa que cojas el proyecto y le des una vuelta visual a toda la interfaz. no modifiques nada. haz una version si te es mas facil o dame mockups o artefactos o lo que veas. no modifiques nada, simplemente dale una vuelta visual gigante y dime como quedaria
+
+---
+
+### 🤖 Asistente (2026-10-14 14:03:15)
+
+Voy a generar una propuesta visual completa (sin tocar código): mockups de las pantallas principales + un documento de sistema de diseño.
+
+---
+
+### 🤖 Asistente (2026-10-14 14:05:21)
+
+He preparado una propuesta de rediseño visual completo, que he llamado **"Aurora"**, en el artefacto **redesign_proposal.md**. No he modificado nada del repo.
+
+Incluye:
+- **5 mockups**: Visión General en escritorio y en móvil, Analítica, Posiciones en modo claro y Mercado. Son imágenes generadas por IA, así que algunos textos pequeños (nombres de fondos, noticias) salen deformados; lo que cuenta es la composición y el estilo.
+- **Colores, tipografía, formas y animaciones** definidos como un sistema común para toda la app.
+- **Cambios pantalla a pantalla**, comparando lo que hay hoy con lo propuesto.
+- **Un plan de implementación en 6 fases**, pensado para ir saliendo versión a versión.
+
+Las ideas principales:
+- El patrimonio total pasa a ser la cifra protagonista, arriba y en grande.
+- Teal para ganancias, coral para pérdidas y violeta como acento; ningún otro color fuerte.
+- Fondo tinta-azul con un brillo sutil y tarjetas de cristal, en lugar del gris actual tipo VS Code.
+- La barra lateral se convierte en una columna estrecha de iconos, y en móvil la barra de pestañas queda flotante.
+- En Mercado, una tarjeta "Impacto estimado en tu cartera hoy" enseña qué índices mueven el simulador intradía (por ejemplo, Emergentes vía Hang Seng).
+
+Para decidir el siguiente paso me ayudaría saber:
+1. ¿Te convence la paleta teal/coral/violeta o prefieres otra dirección, por ejemplo más sobria en tonos dorados?
+2. ¿Quieres mockups de alguna pantalla más, como Operaciones o el Login?
+3. Si te gusta, ¿empezamos por la fase 1? Solo cambia las variables de color y estilo y ya da aproximadamente la mitad del cambio visual.
+
+---
+
+### 👤 Usuario (2026-10-14 14:07:27)
+
+prosigue pero crea un frontend alternativo, no toques el actual, mira como puedes hacerlo de la mejr manera
+
+---
+
+### 👤 Usuario (2026-10-14 14:16:06)
+
+en esa gráfica, devuelve los porcentajes inferiores a la posicion inferior de cada barra, tal y como estaba inicialmente
 
 ---

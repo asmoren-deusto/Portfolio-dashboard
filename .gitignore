@@ -26,8 +26,10 @@ wheels/
 
 # Node / Frontend
 frontend/node_modules/
+frontend-aurora/node_modules/
 node_modules/
 frontend/dist/
+frontend-aurora/dist/
 dist/
 frontend/dist-ssr/
 *.local
