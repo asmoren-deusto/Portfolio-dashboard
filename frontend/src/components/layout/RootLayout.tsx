@@ -59,11 +59,13 @@ export function RootLayout() {
     }
   }, [theme])
 
-  // Periodic Watcher for New NAVs detected by backend (checks every 45s, background scanner in backend runs every 10 min)
+  // Periodic Watcher for New NAVs & Instant Refresh on Tab/App Resume
   useEffect(() => {
     if (!currentUser || currentUser.isDemo) return
 
     let isMounted = true
+    let lastResumeRefetch = Date.now()
+
     const checkNavAlerts = async () => {
       try {
         const lastSeen = localStorage.getItem('portfolio_last_seen_nav_alert_id')
@@ -86,16 +88,47 @@ export function RootLayout() {
             })
           }
         }
-      } catch (err) {
+      } catch {
         // Silently catch network errors
       }
     }
 
+    // Immediate re-validation when returning to the tab or unlocking mobile app
+    const handleAppResume = () => {
+      const now = Date.now()
+      // Debounce slightly to prevent double-firing on window focus + visibilitychange
+      if (now - lastResumeRefetch > 8000) {
+        lastResumeRefetch = now
+        queryClient.invalidateQueries()
+        checkNavAlerts()
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleAppResume()
+      }
+    }
+
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted || document.visibilityState === 'visible') {
+        handleAppResume()
+      }
+    }
+
     checkNavAlerts()
-    const timer = setInterval(checkNavAlerts, 45000)
+    const timer = setInterval(checkNavAlerts, 30000)
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pageshow', handlePageShow)
+    window.addEventListener('focus', handleAppResume)
+
     return () => {
       isMounted = false
       clearInterval(timer)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pageshow', handlePageShow)
+      window.removeEventListener('focus', handleAppResume)
     }
   }, [currentUser, queryClient, setNavAlertNotification])
 

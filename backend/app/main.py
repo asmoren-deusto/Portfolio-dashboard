@@ -90,13 +90,13 @@ async def startup():
                 from app.database import SessionLocal
                 from app.routers.portfolio import check_portfolio_navs
                 db = SessionLocal()
-                logger.info("Executing periodic NAV scanner (10 min interval)...")
+                logger.info("Executing periodic NAV scanner (4 min interval)...")
                 await check_portfolio_navs(user_id="asier", db=db)
                 db.close()
             except Exception as e:
                 logger.warning(f"Error in periodic NAV scanner: {e}")
-            # Wait 10 minutes (600 seconds)
-            await asyncio.sleep(600)
+            # Wait 4 minutes (240 seconds) for faster fresh NAV detection
+            await asyncio.sleep(240)
 
     import asyncio
     asyncio.create_task(_warm_cache())

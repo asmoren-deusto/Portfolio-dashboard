@@ -110,7 +110,8 @@ export function usePortfolioSummary() {
     placeholderData: keepSameUser(currentUser?.id),
     staleTime: isDemo ? 1000 * 60 * 5 : 0,
     refetchOnMount: true,
-    refetchInterval: 1000 * 60 * 5, // Keep fresh every 5 min
+    refetchInterval: 1000 * 60, // Keep fresh every 60s
+    refetchIntervalInBackground: true,
   })
 }
 
@@ -133,7 +134,8 @@ export function usePositions() {
     placeholderData: keepSameUser(currentUser?.id),
     staleTime: isDemo ? 1000 * 60 * 5 : 0,
     refetchOnMount: true,
-    refetchInterval: 1000 * 60 * 5, // Keep fresh every 5 min
+    refetchInterval: 1000 * 60, // Keep fresh every 60s
+    refetchIntervalInBackground: true,
   })
 }
 
@@ -165,8 +167,10 @@ export function usePerformance(
         : get<PricePoint[]>(`/portfolio/performance?period=${period}${startQuery}${brokerQuery}`),
     initialData: isDemo ? userPoints : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: isDemo ? 1000 * 60 * 5 : 1000 * 60 * 2,
+    staleTime: isDemo ? 1000 * 60 * 5 : 1000 * 60,
     refetchOnMount: true,
+    refetchInterval: 1000 * 60 * 2,
+    refetchIntervalInBackground: true,
   })
 }
 
