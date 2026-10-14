@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-14 14:36:38
+- **Fecha de exportación:** 2026-10-14 14:38:06
 - **ID de Conversación:** `7f20d267-aacc-4c8d-be91-c18eee2b74eb`
-- **Total de interacciones registradas:** 10
+- **Total de interacciones registradas:** 12
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -200,5 +200,48 @@ Al ejecutar el simulador ahora:
 ### 👤 Usuario (2026-10-14 12:30:32)
 
 revisa los datos de la grafica de rendimiento global
+
+---
+
+### 🤖 Asistente (2026-10-14 12:36:41)
+
+He revisado a fondo los datos y el motor de reconstrucción histórica de la **gráfica de Rendimiento Global / Evolución Patrimonial** ([PerformanceChart.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) y [finance_engine.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py)).
+
+Se han detectado y corregido **dos descuadres críticos**:
+
+---
+
+### 🔍 ¿Qué estaba ocurriendo?
+
+1. **Inclusión indebida de `TR_TRANSFER` (+2.000 € en Aportado y Patrimonio):**
+   - Mientras que la tarjeta principal de **Visión General** y la tabla de **Posiciones** excluían correctamente las cuentas no patrimoniales de efectivo (como `TR_TRANSFER` de Trade Republic), la función de reconstrucción de la serie histórica ([calculate_portfolio_value_series](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py#L48)) sumaba esa transferencia como si fuera una posición más de fondos de inversión.
+   - **Consecuencia:** En la gráfica, el capital aportado marcaba **`67.613,19 €`** en lugar de tus **`65.613,20 €`** reales (exactamente 2.000 € inflados).
+2. **Desincronización en el último punto (Día de Hoy):**
+   - El último punto de la curva histórica dependía de la fecha del último cierre descargado por el histórico diario de Yahoo/Morningstar (algunos parados en el día 12 o 13), en lugar de consolidar con el cálculo oficial en tiempo real de tu cartera.
+   - **Consecuencia:** Al posar el cursor sobre el último punto de la gráfica, la cifra de patrimonio arrojaba `78.407,76 €` mientras que la tarjeta superior mostraba `78.201,79 €` (+205,97 € de desfase).
+
+---
+
+### 🛠️ Correcciones implementadas ([v3.0.43](https://github.com/asmoren-deusto/Portfolio-dashboard/commit/6c157a3))
+
+1. **Aislamiento de Cuentas y Transferencias Externas ([finance_engine.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py) y [portfolio.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py)):**
+   - Se filtraron de forma exhaustiva los registros de tipo `TR_` y transferencias externas en `get_performance` y `calculate_portfolio_value_series`.
+   - El capital aportado histórico ahora coincide **al céntimo** con la inversión real en fondos: **`65.613,20 €`**.
+2. **Sincronización Exacta del Último Punto con el Resumen Oficial ([portfolio.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py)):**
+   - El punto del día actual (`today`) en la serie temporal se enlaza directamente con los valores oficiales de [get_portfolio_summary](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py#L58).
+   - Ahora, tanto en la tarjeta superior como en la leyenda sobre el gráfico y en el tooltip del último punto, verás **exactamente las mismas cifras al céntimo**:
+     - **Patrimonio Total:** **`78.201,79 €`**
+     - **Capital Aportado:** **`65.613,20 €`**
+     - **Beneficio Acumulado:** **`+12.588,59 € (+19,19%)`**
+
+---
+
+> Los cambios ya están desplegados en la versión **`v3.0.43`**. Si estás en el móvil, pulsa en el logo de **PortfolioPro** y selecciona **"Recargar app"** para ver la gráfica 100% alineada con las métricas de tu cartera.
+
+---
+
+### 👤 Usuario (2026-10-14 12:35:41)
+
+pon estos labels del grafico uno arriba y otro abajo alternativamente para que no se choquen
 
 ---

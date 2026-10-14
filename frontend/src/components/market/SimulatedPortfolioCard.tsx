@@ -609,7 +609,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
             {/* Dotted Vertical Session & Phase Markers */}
             <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-              {markerPositions.map(({ marker, x }) => {
+              {markerPositions.map(({ marker, x }, index) => {
                 const isApertura = marker.label.includes('15:30') || marker.type === 'regular_open'
                 const isAfterHours = marker.label.includes('22:00') || marker.type === 'post_market'
                 const labelText = isApertura
@@ -618,33 +618,39 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   ? '22:00 • After-Hours'
                   : marker.label
 
+                // Alternar altura: par arriba (top-1 = 4px), impar abajo (top-7.5 = 30px) para que no choquen
+                const isOdd = index % 2 === 1
+                const badgeTopStyle = isOdd ? 'top-[30px]' : 'top-[5px]'
+
                 return (
                   <div
                     key={`${marker.time_unix}-${marker.label}`}
-                    className="absolute top-1 bottom-6 flex flex-col items-center"
+                    className="absolute inset-y-0 bottom-6 pointer-events-none"
                     style={{ left: `${Math.round(x)}px` }}
                   >
-                    {/* Softened, readable session tag with description */}
+                    {/* Vertical dotted line from top to bottom axis */}
+                    <div
+                      className="absolute inset-y-0 w-0 -translate-x-1/2 border-l-2 border-dotted"
+                      style={{
+                        borderColor: marker.color,
+                        opacity: 0.85,
+                      }}
+                    />
+
+                    {/* Staggered session tag with description positioned alternatively */}
                     <div
                       className={cn(
-                        'px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-2xs z-20 backdrop-blur-xs',
+                        'absolute px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-xs z-20 backdrop-blur-md transition-all',
+                        badgeTopStyle,
                         isApertura
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-400/40 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-500/40'
+                          ? 'bg-emerald-50/95 text-emerald-800 border-emerald-400/50 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-500/50'
                           : isAfterHours
-                          ? 'bg-amber-50 text-amber-800 border-amber-400/40 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-500/40'
-                          : 'bg-indigo-50 text-indigo-800 border-indigo-400/40 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-500/40'
+                          ? 'bg-amber-50/95 text-amber-800 border-amber-400/50 dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-500/50'
+                          : 'bg-indigo-50/95 text-indigo-800 border-indigo-400/50 dark:bg-indigo-950/90 dark:text-indigo-300 dark:border-indigo-500/50'
                       )}
                     >
                       {labelText}
                     </div>
-                    {/* Vertical dotted line from badge to bottom axis */}
-                    <div
-                      className="w-0 flex-1 border-l-2 border-dotted mt-0.5"
-                      style={{
-                        borderColor: marker.color,
-                        opacity: 0.9,
-                      }}
-                    />
                   </div>
                 )
               })}
