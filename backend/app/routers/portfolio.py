@@ -482,9 +482,18 @@ async def get_performance(
         if (datetime.now() - ts).total_seconds() < 600:
             return [PerformancePoint(**v) for v in cached]
 
-    transactions = _get_all_transactions(db, user_id, broker=broker)
-    if not transactions:
+    raw_transactions = _get_all_transactions(db, user_id, broker=broker)
+    if not raw_transactions:
         return []
+
+    # Filter out external non-portfolio cash transfer records (e.g. TR_TRANSFER)
+    transactions = [
+        t for t in raw_transactions
+        if not (t.get("isin") or "").startswith("TR_")
+        and (t.get("broker") or "").lower() not in ("trade_republic", "traderepublic")
+    ]
+    if not transactions:
+        transactions = raw_transactions
 
     positions = calculate_positions(transactions)
 
@@ -501,7 +510,7 @@ async def get_performance(
         curr_p, curr_p_date = price_res if isinstance(price_res, tuple) else (None, None)
         return isin, history, curr_p, curr_p_date
 
-    all_isins = set(t["isin"] for t in transactions)
+    all_isins = set(t["isin"] for t in transactions if not (t.get("isin") or "").startswith("TR_"))
     bundles = await asyncio.gather(*[_fetch_perf_bundle(isin) for isin in all_isins], return_exceptions=True)
 
     price_history = {}
@@ -521,6 +530,24 @@ async def get_performance(
             price_history[isin] = [{"date": curr_p_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
     value_series = calculate_portfolio_value_series(transactions, price_history, start_date=effective_start)
+
+    # Sync latest point exactly with current portfolio summary to prevent UI discrepancies
+    try:
+        summary = await get_portfolio_summary(user_id=user_id, broker=broker, db=db)
+        if value_series and summary:
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            if value_series[-1]["date"] == today_str:
+                value_series[-1]["value"] = summary.total_value
+                value_series[-1]["invested"] = summary.total_invested
+            elif value_series[-1]["date"] < today_str:
+                value_series.append({
+                    "date": today_str,
+                    "value": summary.total_value,
+                    "invested": summary.total_invested,
+                })
+    except Exception as e:
+        logger.warning(f"Error syncing latest performance point with summary: {e}")
+
     _perf_cache[cache_key] = (datetime.now(), value_series)
     return [PerformancePoint(**v) for v in value_series]
 
@@ -579,9 +606,17 @@ async def get_benchmark_comparison(
         if (datetime.now() - ts).total_seconds() < 600:
             return cached
 
-    transactions = _get_all_transactions(db, user_id, broker=broker)
-    if not transactions:
+    raw_transactions = _get_all_transactions(db, user_id, broker=broker)
+    if not raw_transactions:
         return {"period": period, "points": [], "summary": None}
+
+    transactions = [
+        t for t in raw_transactions
+        if not (t.get("isin") or "").startswith("TR_")
+        and (t.get("broker") or "").lower() not in ("trade_republic", "traderepublic")
+    ]
+    if not transactions:
+        transactions = raw_transactions
 
     now = datetime.now()
     effective_start = None

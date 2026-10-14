@@ -102,6 +102,8 @@ def calculate_portfolio_value_series(
         total = 0.0
 
         for isin, pos in positions.items():
+            if isin == "TR_TRANSFER" or isin.startswith("TR_"):
+                continue
             price = None
             if isin in price_frames:
                 series = price_frames[isin]
@@ -110,7 +112,7 @@ def calculate_portfolio_value_series(
                     price = float(available.iloc[-1])
                 elif not series.empty:
                     price = float(series.iloc[0])
-            if price is None or (price <= 0 and isin != "TR_TRANSFER"):
+            if price is None or price <= 0:
                 price = pos.get("avg_cost", 0)
             total += pos["shares"] * price
 
@@ -120,8 +122,11 @@ def calculate_portfolio_value_series(
         cash_in_transit = max(0.0, traspaso_sells - traspaso_buys)
         total += cash_in_transit
 
-        # Exact active invested capital as of this date
-        active_invested = sum(pos["invested_amount"] for pos in positions.values() if pos["shares"] > 0.0001) + cash_in_transit
+        # Exact active invested capital as of this date (excluding non-fund transfer accounts)
+        active_invested = sum(
+            pos["invested_amount"] for isin, pos in positions.items()
+            if pos["shares"] > 0.0001 and isin != "TR_TRANSFER" and not isin.startswith("TR_")
+        ) + cash_in_transit
 
         # Entity / Broker breakdown
         distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in active_tx)

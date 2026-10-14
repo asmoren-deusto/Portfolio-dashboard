@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-14 14:27:50
+- **Fecha de exportación:** 2026-10-14 14:36:38
 - **ID de Conversación:** `7f20d267-aacc-4c8d-be91-c18eee2b74eb`
-- **Total de interacciones registradas:** 8
+- **Total de interacciones registradas:** 10
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -133,5 +133,72 @@ He implementado el sistema de refresco en segundo plano y revalidación instant�
 ### 👤 Usuario (2026-10-14 12:23:25)
 
 quiero que revises la funcionalidad del simulador de rendimiento de la sesion de hoy. Ayer me dió valores neutros para hoy y hoy sin embargo la valoracion real es bastante negativa lastrada por los datos de los fondos de emergentes
+
+---
+
+### 🤖 Asistente (2026-10-14 12:27:52)
+
+He auditado en profundidad la discrepancia entre la **valoración contable oficial de tus fondos** y el **simulador de mercado en tiempo real**. Se han identificado dos motivos fundamentales y se ha corregido el motor de réplica:
+
+---
+
+### 🔍 1. ¿Por qué la valoración oficial de hoy es bastante negativa? (El desfase de los fondos de inversión)
+
+Al consultar el historial de precios en la base de datos y los scrapers de las gestoras (*BlackRock / iShares* y *Fidelity*), encontramos la causa exacta:
+
+1. **Retraso de liquidación acumulado (T-1 / festivos)**:
+   - Tus dos fondos de emergentes (**`iShares Emerging Markets`** y **`Fidelity MSCI Emerging Markets`**) tenían como último valor liquidativo registrado el del **7 de octubre** (hace una semana).
+   - Las gestoras han publicado **hoy** el nuevo NAV oficial, pero con fecha de liquidación del **13 de octubre (ayer)**:
+     - `iShares Emerging Markets`: pasa de `14.555 €` a **`14.00 €`** (**`-3.81%`**).
+     - `Fidelity MSCI Emerging Markets`: pasa de `9.359 €` a **`9.02 €`** (**`-3.62%`**).
+2. **Caída concentrada en un solo día contable**:
+   - Entre el 7 y el 13 de octubre, los mercados asiáticos y emergentes (China, Hong Kong, Taiwán) sufrieron correcciones.
+   - Como las gestoras no publicaron NAVs intermedios durante esos días, **toda la caída acumulada de la semana se ha imputado de golpe hoy**, generando una fuerte bajada contable en tu cartera.
+
+---
+
+### 🔍 2. ¿Por qué el simulador de ayer daba valores casi neutros? (Los fallos detectados en el simulador)
+
+Al revisar el cálculo intradía en [market.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py), se detectaron dos limitaciones clave:
+
+1. **Bloqueo a `0.00%` en Pre-Market estadounidense**:
+   - En horario europeo (de 09:00 a 15:30 CET), Wall Street se encuentra en fase **PRE-MARKET**.
+   - Si un ETF institucional no había registrado operaciones minoristas en el pre-market temprano de Nueva York (habitual en ETFs como `URTH` o `EEM`), el código forzaba su variación a **`0.00%`**.
+   - Como **`URTH`** (MSCI World, ~26% de tu cartera) marcaba `0.00%` y **`EEM`** (~17% de tu cartera) marcaba `0.00%`, **más del 42% de tu cartera permanecía artificialmente inmóvil al 0.00%** durante toda la mañana, arrojando una simulación casi plana (neutra).
+2. **Los mercados emergentes cotizan de noche**:
+   - Los mercados emergentes (China, Taiwán, Corea del Sur, India) cotizan en horario asiático (de 02:00 a 10:00 CET).
+   - Cuando en España son las 09:00 de la mañana, **la sesión asiática ya ha finalizado**, pero el ETF estadounidense `EEM` aún está cerrado en Nueva York. Al no tener un proxy asiático activo para la mañana, el simulador no recogía los movimientos de Asia hasta que abría Wall Street por la tarde.
+
+---
+
+### 🛠️ Correcciones aplicadas ([v3.0.42](https://github.com/asmoren-deusto/Portfolio-dashboard/commit/a935667))
+
+Se ha implementado una red completa de **proxies en vivo para la sesión matinal europea** en [market.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py):
+
+| Activo en tu Cartera | ETF Proxy USA | Proxy Activo en Pre-Market (Mañana Europea) | Por qué es más preciso |
+| :--- | :---: | :---: | :--- |
+| **Emergentes (iShares & Fidelity)** | `EEM` | **`^HSI`** (*Hang Seng Index*) | Refleja la sesión asiática (China / HK / Tech emergente) cerrada por la mañana, sin esperar a las 15:30. |
+| **Fidelity MSCI World** | `URTH` | **`ES=F`** (*Futuros S&P 500 24h*) | Elimina el `0.00%` matinal en el 26% de la cartera; sigue el pulso global las 24h. |
+| **Indexa EPSV Acciones** | `ACWI` | **`ES=F`** (*Futuros Globales 24h*) | Pondera la tendencia global continua. |
+| **DNB Tecnología** | `XLK` | **`NQ=F`** (*Futuros Nasdaq 100 24h*) | Refleja el sentimiento del sector tecnológico en directo. |
+| **Fidelity Euro 50** | `FEZ` | **`^STOXX50E`** (*Euro Stoxx 50*) | Sigue la bolsa europea en directo de 09:00 a 17:30 CET. |
+| **Fidelity MSCI Japan** | `EWJ` | **`^N225`** (*Nikkei 225*) | Sigue el cierre de la bolsa de Tokio. |
+
+### ✅ Resultado verificado
+
+Al ejecutar el simulador ahora:
+- **`URTH` (MSCI World)** pasa de estar congelado en `0.00%` a reflejar **`+0.24%`** en vivo.
+- **`EEM` (Emergentes)** refleja en tiempo real las variaciones de la sesión (**`-0.37%`**).
+- El simulador de la sesión ya no muestra valores neutros engañosos por la mañana y reacciona de inmediato a los movimientos de los mercados asiáticos y europeos.
+
+---
+
+> La versión **`v3.0.42`** ya está compilada, verificada y subida al repositorio Git. Para cargar la última versión en tu dispositivo móvil, pulsa en el logo de **PortfolioPro** y toca en **"Recargar app"**.
+
+---
+
+### 👤 Usuario (2026-10-14 12:30:32)
+
+revisa los datos de la grafica de rendimiento global
 
 ---
