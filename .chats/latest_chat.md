@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-14 16:18:37
+- **Fecha de exportación:** 2026-10-14 16:37:55
 - **ID de Conversación:** `7f20d267-aacc-4c8d-be91-c18eee2b74eb`
-- **Total de interacciones registradas:** 20
+- **Total de interacciones registradas:** 22
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -352,5 +352,21 @@ prosigue pero crea un frontend alternativo, no toques el actual, mira como puede
 ### 👤 Usuario (2026-10-14 14:16:06)
 
 en esa gráfica, devuelve los porcentajes inferiores a la posicion inferior de cada barra, tal y como estaba inicialmente
+
+---
+
+### 🤖 Asistente (2026-10-14 14:18:40)
+
+He restaurado la posición de las etiquetas en la gráfica de **Rendimiento** ([ReturnsChart.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)):
+
+- **Posicionamiento natural de Recharts restaurado:** Se eliminó el cálculo manual que situaba los números negativos en la línea cero del eje (`y=0`). Al recuperar el `<LabelList position="top" />` nativo de Recharts, la librería posiciona automáticamente los valores positivos por encima de la barra y los valores negativos (**`-0.24%`**, **`-0.80%`**, **`-0.42%`**) en la base inferior de cada barra, tal y como estaba originalmente.
+- **Precisión mantenida:** Se preserva el formateo coherente con 2 decimales para magnitudes inferiores al 1% (`-0.42%`, `+0.20%`, etc.).
+- **Despliegue completado:** El cambio ha sido compilado y sincronizado en **v3.0.46** (`54681e1`). Como el servidor de desarrollo Vite (`python start.py`) está activo con Hot Reload, los cambios ya se reflejan en pantalla.
+
+---
+
+### 👤 Usuario (2026-10-14 14:22:42)
+
+retoma la actualización de UI iniciada por Claude en C:\Users\AsierM\.gemini\antigravity-ide\brain\7f20d267-aacc-4c8d-be91-c18eee2b74eb -> Coge sus mockups y sus ideas, el proyecto es frontend-aurora y no modifica lo que ya tenemos. Necesito una UI espectacular y moderna, con animaciones y toques visuales alucinantes. eso si, que siga siendo funcional, elegante y profesional
 
 ---
