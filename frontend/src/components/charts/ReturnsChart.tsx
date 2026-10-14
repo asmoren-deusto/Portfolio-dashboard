@@ -21,6 +21,7 @@ interface ReturnsChartProps {
   mode?: 'global' | 'weekly'
   day1Pct?: number
   day1Amount?: number
+  weekPct?: number
   weekAmount?: number
   totalPortfolioValue?: number
   compact?: boolean
@@ -77,6 +78,7 @@ export function ReturnsChart({
   mode = 'global',
   day1Pct,
   day1Amount,
+  weekPct,
   weekAmount,
   totalPortfolioValue,
   compact = false,
@@ -110,7 +112,7 @@ export function ReturnsChart({
     const val1d = day1Pct !== undefined ? day1Pct : (analytics?.return_1d ?? 0)
     const amt1d = day1Amount !== undefined ? day1Amount : calcAmt(val1d)
 
-    const val1w = analytics?.return_1w ?? 0
+    const val1w = weekPct !== undefined ? weekPct : (analytics?.return_1w ?? 0)
     const amt1w = weekAmount !== undefined ? weekAmount : calcAmt(val1w)
 
     const val1m = analytics?.return_1m ?? 0
@@ -137,6 +139,29 @@ export function ReturnsChart({
         ]
   }
 
+  const renderCustomBarLabel = (props: any) => {
+    const { x, y, width, height, value } = props
+    if (value == null || isNaN(value)) return null
+    const num = Number(value)
+    const isPos = num >= 0
+    const formatted = `${isPos ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
+    const labelY = isPos ? Math.max(12, y - 6) : y + height + 13
+
+    return (
+      <text
+        x={x + width / 2}
+        y={labelY}
+        textAnchor="middle"
+        className="fill-slate-500 dark:fill-slate-400 font-mono font-bold"
+        style={{
+          fontSize: compact ? '9.5px' : '10.5px',
+        }}
+      >
+        {formatted}
+      </text>
+    )
+  }
+
   return (
     <motion.div
       key={`${mode}-${refreshAnimKey}`}
@@ -150,7 +175,7 @@ export function ReturnsChart({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={compact ? { top: 18, right: 6, left: -8, bottom: 0 } : { top: 18, right: 12, left: -6, bottom: 0 }}
+          margin={compact ? { top: 20, right: 8, left: 4, bottom: 2 } : { top: 22, right: 14, left: 8, bottom: 4 }}
         >
           <defs>
             <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
@@ -169,12 +194,13 @@ export function ReturnsChart({
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#64748b', fontSize: compact ? 9.5 : 11, fontWeight: 600 }}
+            dy={2}
           />
           <YAxis
-            width={compact ? 28 : 36}
+            width={compact ? 36 : 42}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#64748b', fontSize: compact ? 9 : 11 }}
+            tick={{ fill: '#64748b', fontSize: compact ? 9.5 : 11 }}
             tickFormatter={v => `${v}%`}
           />
           <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" />
@@ -189,14 +215,7 @@ export function ReturnsChart({
           >
             <LabelList
               dataKey="value"
-              position="top"
-              formatter={(val: any) => `${Number(val) >= 0 ? '+' : ''}${Number(val).toFixed(1)}%`}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-              }}
+              content={renderCustomBarLabel}
             />
             {data.map((d, i) => (
               <Cell

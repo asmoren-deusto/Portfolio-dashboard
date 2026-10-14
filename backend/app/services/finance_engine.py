@@ -353,15 +353,21 @@ def calculate_period_return(value_series: list[dict], days: int) -> Optional[flo
         if days <= 1:
             prev = value_series[-2][key]
             curr = value_series[-1][key]
-            return round(float((curr / prev - 1) * 100), 2) if prev > 0 else 0.0
+            return round(float((curr / prev - 1) * 100), 2) if prev and prev > 0 else 0.0
 
         cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
         cutoff_str = str(cutoff.date())
-        filtered = [v for v in value_series if v["date"] >= cutoff_str]
-        if len(filtered) < 2:
-            filtered = value_series[-min(len(value_series), max(2, days + 1)):]
-        if len(filtered) >= 2 and filtered[0][key] > 0:
-            ret = (filtered[-1][key] / filtered[0][key] - 1) * 100
+        pts_before = [
+            v for v in value_series
+            if v.get("date") and v["date"] <= cutoff_str and v.get(key) is not None and v[key] > 0
+        ]
+        base_pt = pts_before[-1] if pts_before else value_series[0]
+        last_pt = value_series[-1]
+
+        base_val = base_pt.get(key)
+        last_val = last_pt.get(key)
+        if base_val and last_val and base_val > 0:
+            ret = (last_val / base_val - 1) * 100
             return round(float(ret), 2)
         return None
     except Exception as e:

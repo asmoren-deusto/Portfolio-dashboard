@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-14 14:38:06
+- **Fecha de exportación:** 2026-10-14 14:49:26
 - **ID de Conversación:** `7f20d267-aacc-4c8d-be91-c18eee2b74eb`
-- **Total de interacciones registradas:** 12
+- **Total de interacciones registradas:** 14
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -243,5 +243,31 @@ Se han detectado y corregido **dos descuadres críticos**:
 ### 👤 Usuario (2026-10-14 12:35:41)
 
 pon estos labels del grafico uno arriba y otro abajo alternativamente para que no se choquen
+
+---
+
+### 🤖 Asistente (2026-10-14 12:38:09)
+
+He ajustado la disposición de las etiquetas de sesión en el gráfico de Mercado ([SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)):
+
+---
+
+### 🛠️ Cambios aplicados ([v3.0.44](https://github.com/asmoren-deusto/Portfolio-dashboard/commit/1d39f93))
+
+- **Escalonado alterno de etiquetas:**
+  - Los marcadores pares (ej: `15:30 • Apertura`) se sitúan en la fila superior (`top: 5px`).
+  - Los marcadores contiguos o impares (ej: `22:00 • After-Hours`) se sitúan en la fila inferior (`top: 30px`).
+- **Línea guía vertical continua:** La línea de puntos se proyecta a lo largo de toda la columna del canvas sin verse interrumpida por el badge.
+- **Sin colisiones visuales:** Aunque dos hitos temporales se encuentren muy próximos horizontalmente en el eje temporal, ahora ambos se leen con total nitidez sin solaparse ni taparse entre sí.
+
+---
+
+> La versión **`v3.0.44`** ya está compilada y sincronizada en Git. En tu móvil, pulsa en el logo de **PortfolioPro** y selecciona **"Recargar app"** para ver las etiquetas perfectamente escalonadas.
+
+---
+
+### 👤 Usuario (2026-10-14 12:38:58)
+
+revisa los datos de esa gráfica
 
 ---

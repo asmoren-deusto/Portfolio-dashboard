@@ -829,6 +829,15 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     if not transactions:
         return {}
 
+    # Filter out external non-portfolio cash transfer records (e.g. TR_TRANSFER)
+    transactions = [
+        t for t in transactions
+        if not (t.get("isin") or "").startswith("TR_")
+        and t.get("broker") not in ("trade_republic", "traderepublic")
+    ]
+    if not transactions:
+        return {}
+
     positions = calculate_positions(transactions)
     price_history = {}
     all_isins = set(t["isin"] for t in transactions)

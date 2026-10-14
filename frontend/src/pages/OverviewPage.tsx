@@ -1262,6 +1262,7 @@ export function OverviewPage() {
                   weeklyData={weeklyReturnsData}
                   day1Pct={shortTermMetrics?.dayPct}
                   day1Amount={shortTermMetrics?.dayAmount}
+                  weekPct={shortTermMetrics?.weekPct}
                   weekAmount={shortTermMetrics?.weekAmount}
                   totalPortfolioValue={displaySummary?.total_value}
                   compact
