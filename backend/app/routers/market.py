@@ -1041,18 +1041,26 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
     # Extended quotes for all ETF proxies
     quotes = _fetch_quotes_extended(etf_tickers_list)
 
-    # Underlying session live proxies when ETF is in US PRE-market with zero trades
-    # (e.g. Euro Stoxx 50 trades in Europe between 09:00 - 17:30 CET, Nikkei 225 in Tokyo)
+    # Underlying session live proxies when ETF is in US PRE-market with zero trades or flat price
+    # (e.g. Hang Seng for Emerging Markets, Euro Stoxx 50 for Europe, Nikkei for Tokyo, S&P/Nasdaq futures for US)
     ETF_PREMARKET_LIVE_PROXIES = {
         "FEZ": "^STOXX50E",  # Euro Stoxx 50 cash index (sesión europea 09:00 - 17:30 CET)
         "EFV": "^STOXX50E",  # RV Internacional EAFE Value (sesión europea)
         "EWJ": "^N225",      # Nikkei 225 (sesión de Tokio)
+        "EEM": "^HSI",       # Hang Seng Index (referencia de emergentes en la mañana europea)
+        "URTH": "ES=F",      # Futuros S&P 500 24h (guía de RV global antes de apertura de NY)
+        "ACWI": "ES=F",      # Futuros S&P 500 24h
+        "XLK": "NQ=F",       # Futuros Nasdaq 100 24h (guía del sector tecnológico)
+        "COWZ": "ES=F",      # Futuros S&P 500 24h (guía de RV EE.UU.)
     }
 
     untraded_in_pre = [
         t for t in etf_tickers_list
         if quotes.get(t, {}).get("market_state") == "PRE"
-        and quotes.get(t, {}).get("pre_market_price") is None
+        and (
+            quotes.get(t, {}).get("pre_market_price") is None
+            or abs(quotes.get(t, {}).get("change_pct", 0.0) or 0.0) < 0.001
+        )
         and t in ETF_PREMARKET_LIVE_PROXIES
     ]
     if untraded_in_pre:

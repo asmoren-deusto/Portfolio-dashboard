@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-14 13:00:23
+- **Fecha de exportación:** 2026-10-14 14:27:50
 - **ID de Conversación:** `7f20d267-aacc-4c8d-be91-c18eee2b74eb`
-- **Total de interacciones registradas:** 6
+- **Total de interacciones registradas:** 8
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -86,5 +86,52 @@ He analizado e identificado los motivos por los que las notificaciones saltaban 
 ### 👤 Usuario (2026-10-14 10:58:06)
 
 me interesa recibir los datos lo antes posible, una de las mejoras que estaria bien es que la pestaña se refrescara en segundo plano porque sino al volver tiene datos desfasados
+
+---
+
+### 🤖 Asistente (2026-10-14 11:00:26)
+
+He implementado el sistema de refresco en segundo plano y revalidación instantánea al volver a la pestaña o app ([commit `719683a`](https://github.com/asmoren-deusto/Portfolio-dashboard/commit/719683a)):
+
+---
+
+### 🔍 ¿Por qué se quedaban los datos desfasados al volver?
+
+1. **`refetchOnWindowFocus` estaba desactivado**: En [App.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/App.tsx), React Query tenía `refetchOnWindowFocus: false`. Cuando minimizabas la app, cambiabas de pestaña o bloqueabas el móvil y volvías después, el frontend **no realizaba ninguna consulta** y conservaba en pantalla las cifras congeladas.
+2. **Pausa en segundo plano por defecto**: TanStack Query congela por defecto las peticiones periódicas cuando la pestaña no está visible (`document.hidden === true`).
+3. **Escáner del backend espaciado**: El escáner automático de NAVs oficiales en el servidor corría cada 10 minutos.
+
+---
+
+### 🛠️ Mejoras aplicadas ([v3.0.41](https://github.com/asmoren-deusto/Portfolio-dashboard/commit/719683a))
+
+1. **Revalidación Inmediata al Volver a la Pestaña / App ([RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx) y [App.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/App.tsx))**:
+   - Activado `refetchOnWindowFocus: true` y `refetchOnReconnect: true`.
+   - Añadidos listeners directos a los eventos nativos del navegador y sistema móvil:
+     - **`visibilitychange`**: se dispara en el milisegundo en que la pestaña pasa a ser visible.
+     - **`pageshow`**: detecta la restauración instantánea en iOS Safari / PWA desde la suspensión (*bfcache*).
+     - **`focus`**: al hacer clic o volver a la ventana.
+   - En cuanto vuelves a la aplicación, **invalida y actualiza todas las métricas al instante** sin que tengas que pulsar F5 ni recargar manualmente.
+
+2. **Refresco Continuo en Segundo Plano ([queries.ts](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/api/queries.ts))**:
+   - Se activó **`refetchIntervalInBackground: true`** a nivel global y específico para las consultas críticas:
+     - **Resumen y Patrimonio (`usePortfolioSummary`)**: sondeo cada **60 segundos** incluso en segundo plano.
+     - **Posiciones en cartera (`usePositions`)**: sondeo cada **60 segundos** en segundo plano.
+     - **Cartera Sintética y Mercado (`useSimulatedPortfolio`)**: sondeo cada **30 segundos**.
+     - **Índices y cotizaciones**: sondeo cada **45 segundos**.
+
+3. **Detección Acelerada de NAVs en el Backend ([main.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/main.py) y [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx))**:
+   - El escáner periódico del backend ahora rastrea las gestoras cada **4 minutos** (antes 10 minutos).
+   - El vigilante de novedades en el frontend consulta cada **30 segundos** (antes 45 segundos).
+
+---
+
+> Los cambios ya están desplegados en la versión **`v3.0.41`**. Si estás en el móvil, puedes pulsar en el logotipo de **PortfolioPro** y seleccionar **"Recargar app"** para recibir esta actualización.
+
+---
+
+### 👤 Usuario (2026-10-14 12:23:25)
+
+quiero que revises la funcionalidad del simulador de rendimiento de la sesion de hoy. Ayer me dió valores neutros para hoy y hoy sin embargo la valoracion real es bastante negativa lastrada por los datos de los fondos de emergentes
 
 ---
