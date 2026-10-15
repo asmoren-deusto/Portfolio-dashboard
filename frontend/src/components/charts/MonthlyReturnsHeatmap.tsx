@@ -235,19 +235,19 @@ export function MonthlyReturnsHeatmap({
       return 'bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/35 hover:brightness-110 shadow-xs'
     }
     if (val >= 1.5) {
-      return 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-500/20 hover:brightness-105'
+      return 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/20 hover:brightness-105'
     }
     if (val > 0) {
-      return 'bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 font-medium hover:bg-emerald-500/15'
+      return 'bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-500/15'
     }
     if (val === 0) {
-      return 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 font-medium'
+      return 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 font-semibold'
     }
     if (val > -1.5) {
-      return 'bg-rose-500/8 text-rose-600 dark:text-rose-400 font-medium hover:bg-rose-500/15'
+      return 'bg-rose-500/8 text-rose-600 dark:text-rose-400 font-semibold hover:bg-rose-500/15'
     }
     if (val > -4.0) {
-      return 'bg-rose-500/15 text-rose-700 dark:text-rose-400 font-semibold border border-rose-500/20 hover:brightness-105'
+      return 'bg-rose-500/15 text-rose-700 dark:text-rose-400 font-bold border border-rose-500/20 hover:brightness-105'
     }
     return 'bg-rose-500/25 text-rose-700 dark:text-rose-300 font-bold border border-rose-500/35 hover:brightness-110 shadow-xs'
   }
@@ -367,9 +367,9 @@ export function MonthlyReturnsHeatmap({
         )}
         style={tableMaxHeight ? { maxHeight: tableMaxHeight } : undefined}
       >
-        <table className="w-full text-center border-collapse min-w-[620px]">
+        <table className="w-full text-center border-collapse min-w-[640px] sm:min-w-[680px]">
           <thead className={tableMaxHeight ? "sticky top-0 bg-white/95 dark:bg-[#1e1e1e]/95 backdrop-blur-xs z-10" : ""}>
-            <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               <th className="py-2 px-2.5 text-left font-bold text-slate-800 dark:text-slate-200 w-16">
                 Año
               </th>
@@ -386,7 +386,7 @@ export function MonthlyReturnsHeatmap({
           <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
             {rows.map(row => (
               <tr key={row.year} className="group hover:bg-slate-50/50 dark:hover:bg-white/[0.015] transition-colors">
-                <td className="py-2 px-2.5 text-left font-mono font-bold text-xs text-slate-900 dark:text-slate-100">
+                <td className="py-2 px-2.5 text-left font-mono font-bold text-xs sm:text-[13px] text-slate-900 dark:text-slate-100">
                   {row.year}
                 </td>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => {
@@ -394,21 +394,21 @@ export function MonthlyReturnsHeatmap({
                   const val = mData?.returnPct
 
                   return (
-                    <td key={m} className="p-1">
+                    <td key={m} className="p-0.5 sm:p-1">
                       <div
                         className={cn(
-                          "relative h-8 sm:h-9 rounded-lg flex items-center justify-center font-mono text-[11px] transition-all cursor-default select-none",
+                          "relative h-8.5 sm:h-9.5 rounded-lg flex items-center justify-center font-mono text-xs sm:text-[12.5px] transition-all cursor-default select-none",
                           getCellClasses(val),
                           val !== undefined && "hover:ring-2 hover:ring-blue-500/60 hover:z-10 hover:scale-105"
                         )}
                         title={val !== undefined ? `${FULL_MONTH_NAMES[m - 1]} ${row.year}: ${val >= 0 ? '+' : ''}${val.toFixed(2)}%` : undefined}
                       >
                         {val !== undefined ? (
-                          <span>
+                          <span className="tracking-tight">
                             {val >= 0 ? '+' : ''}{val.toFixed(1)}%
                           </span>
                         ) : (
-                          <span className="text-slate-300 dark:text-slate-700 text-[10px]">—</span>
+                          <span className="text-slate-300 dark:text-slate-700 text-[11px] font-normal">—</span>
                         )}
                       </div>
                     </td>
@@ -417,7 +417,7 @@ export function MonthlyReturnsHeatmap({
                 <td className="py-2 px-2.5 text-right">
                   <span
                     className={cn(
-                      "inline-flex items-center justify-end px-2.5 py-1 rounded-lg font-mono text-xs font-bold border transition-colors",
+                      "inline-flex items-center justify-end px-2.5 py-1 rounded-lg font-mono text-xs sm:text-[12.5px] font-bold border transition-colors tracking-tight",
                       row.annualReturnPct >= 0
                         ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-700 dark:text-emerald-400"
                         : "bg-rose-500/10 border-rose-500/25 text-rose-700 dark:text-rose-400"

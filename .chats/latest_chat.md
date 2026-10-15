@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 20:34:22
+- **Fecha de exportación:** 2026-10-15 20:37:13
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 11
+- **Total de interacciones registradas:** 13
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -176,5 +176,40 @@ He solucionado el comportamiento del popup:
 ### 👤 Usuario (2026-10-15 18:21:22)
 
 revisa los picos de la grafica
+
+---
+
+### 🤖 Asistente (2026-10-15 18:34:25)
+
+Se ha revisado en detalle el cálculo de la serie temporal en [backend/app/routers/market.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py) y se han solucionado las causas de los picos y saltos anómalos:
+
+### 🔍 Causas identificadas:
+1. **Concatenación de sesiones múltiples en periodo 1d:**
+   Al solicitar `period="1d"`, se descargaban 2 días de datos históricos (`download_period="2d"`) para poder comparar con el cierre previo. Sin embargo, el bucle anterior concatenaba tanto el día anterior (día 14) como el día actual (día 15) en la misma gráfica.
+2. **Salto vertical (+1.34%) en la frontera de medianoche:**
+   La sesión del día 14 cerró en `-1.32%`. Al comenzar el día 15, su rentabilidad se calculaba respecto al cierre del día 14 (empezando cerca del `0.0%`), generando un **escalón vertical instantáneo de +1.34%** entre las 05:55 y las 06:00.
+3. **Línea plana matinal y caída brusca a las 10:00 (Apertura Pre-Market NY):**
+   Las divisas (`EURUSD=X`) cotizan 24h desde las 00:00 NY (06:00 Madrid), pero los ETFs estadounidenses no comienzan el pre-market hasta las 04:00 NY (10:00 Madrid). El forward-fill rellenaba los ETFs con el precio de cierre previo (0.0% de variación) durante la madrugada europea, y al entrar la primera operación de pre-market a las 10:00 caía de golpe.
+4. **Marcadores duplicados:**
+   Al concatenar dos días, se generaban dos líneas de *Apertura Regular (15:30)* en la misma tarjeta de "Sesión Hoy".
+5. **Periodo 1mo con timestamps tz-naive:**
+   La conversión de fechas para intervalos diarios provocaba un error de zona horaria que impedía generar la curva de 1 mes.
+
+---
+
+### 🛠️ Correcciones implementadas:
+- **Aislamiento estricto de la sesión activa (`1d`):** La gráfica de sesión hoy muestra únicamente los datos de la sesión actual de mercado, iniciando desde la apertura del pre-market de EE.UU. (04:00 NY / 10:00 Madrid) sin concatenar sesiones previas ni madrugadas inactivas.
+- **Normalización homogénea respecto al cierre anterior:** Cada valor ETF toma como precio base el `prev_close` oficial del cierre anterior, garantizando continuidad perfecta sin escalones artificiales.
+- **Rendimiento acumulado continuo en `5d` y `1mo`:** Se calcula la rentabilidad acumulada continua desde el punto inicial del periodo seleccionado, evitando reinicios de curva diarios.
+- **Marcador único:** La etiqueta de *Apertura Regular (15:30)* y *Post-Market (22:00)* ahora aparece solo una vez en su hora correspondiente.
+- **Soporte de zonas horarias en periodos diarios (`1mo`):** Se localizan automáticamente los timestamps tz-naive evitando errores de descarga.
+
+Cambios sincronizados y publicados en la versión **v3.0.60**.
+
+---
+
+### 👤 Usuario (2026-10-15 18:25:29)
+
+amplia un pelo las cifras
 
 ---
