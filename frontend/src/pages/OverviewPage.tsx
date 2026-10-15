@@ -612,7 +612,7 @@ export function OverviewPage() {
   }, [performance])
 
   return (
-    <div className="flex flex-col gap-2.5 sm:gap-3 pb-8">
+    <div className="flex flex-col gap-4 pb-8">
       {/* Live Market Ticker */}
       <MarketTicker onSelectStock={setSelectedStock} />
 
@@ -780,7 +780,7 @@ export function OverviewPage() {
       </div>
 
       {/* 2. Métricas del Periodo Seleccionado */}
-      <div className="space-y-1.5 -mt-1 sm:-mt-1.5">
+      <div className="space-y-1.5 pt-0.5">
         <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <Calendar size={13.5} className="text-indigo-500" />

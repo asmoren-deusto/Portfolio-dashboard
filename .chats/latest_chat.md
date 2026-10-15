@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 21:18:38
+- **Fecha de exportación:** 2026-10-15 21:21:48
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 25
+- **Total de interacciones registradas:** 27
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -382,5 +382,33 @@ He reducido el margen vertical entre el bloque de **Métricas Globales** y la ca
 ### 👤 Usuario (2026-10-15 19:14:44)
 
 en evolucion patrimonial manten el estacado de entidades
+
+---
+
+### 🤖 Asistente (2026-10-15 19:18:40)
+
+He restablecido el **desglose apilado (stacked) de entidades por defecto** en la gráfica de **Evolución Patrimonial** ([PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx)):
+
+### 📊 Mejoras integradas
+1. **Apilado de entidades por defecto:**
+   - La gráfica se inicializa directamente con el estacado por capas de todos tus bancos/brokers (`slot0`, `slot1`, `slot2`).
+2. **Leyenda viva interactiva en el gráfico:**
+   - La leyenda superior dentro del gráfico muestra los puntos de color de cada entidad junto a su **cifra actual exacta** (y se actualiza en tiempo real al pasar el cursor por el histórico).
+3. **Indicador de desglose en el HUD:**
+   - La barra de métricas muestra un indicador multi-color apilado (`●●●`) con la etiqueta `Patrimonio (Desglose): [valor total]` y `Aportado`.
+4. **Selector flexible:**
+   - Puedes cambiar en cualquier momento entre `[ Desglose Apilado ]`, `[ Línea Cartera ]` (curva única) o inspeccionar individualmente cualquiera de tus entidades (`Indexa Capital`, `BBVA`, `MyInvestor`, etc.).
+5. **Animación y limpieza de escala:**
+   - Se mantiene la animación suave de barrido de izquierda a derecha sin etiquetas duplicadas ni solapamientos en el eje Y.
+
+---
+
+*Cambios sincronizados y desplegados en la versión `v3.0.67`.*
+
+---
+
+### 👤 Usuario (2026-10-15 19:17:33)
+
+revierte v3.0.66
 
 ---
