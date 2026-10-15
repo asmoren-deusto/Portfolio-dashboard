@@ -1056,81 +1056,44 @@ export function PerformanceChartSkeleton({
   showFooterStrip?: boolean
 }) {
   return (
-    <div style={{ height }} className="w-full flex flex-col justify-between py-1 select-none relative overflow-hidden">
+    <div style={{ height }} className="w-full flex flex-col justify-between py-1 select-none relative overflow-hidden animate-pulse">
       {/* Top HUD Skeleton */}
       <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] backdrop-blur-xs">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500/40 animate-pulse" />
-            <div className="w-16 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08] animate-pulse" />
-            <div className="w-20 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-white/20" />
+            <div className="w-16 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
+            <div className="w-20 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12]" />
           </div>
           <div className="hidden sm:flex items-center gap-1.5 border-l border-slate-200 dark:border-white/[0.08] pl-3">
-            <div className="w-14 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08] animate-pulse" />
-            <div className="w-16 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12] animate-pulse" />
+            <div className="w-14 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
+            <div className="w-16 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12]" />
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-24 h-5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 animate-pulse" />
-          <div className="w-20 h-4 rounded bg-slate-200/70 dark:bg-white/[0.08] animate-pulse" />
+          <div className="w-20 h-5 rounded-lg bg-slate-200/70 dark:bg-white/[0.08]" />
+          <div className="w-20 h-4 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
         </div>
       </div>
 
-      {/* Center SVG Financial Wave Loading Animation with Shimmer */}
-      <div className="flex-1 w-full relative my-2 rounded-xl overflow-hidden flex items-center justify-center">
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 600 200"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <linearGradient id="chartWaveFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
-              <stop offset="60%" stopColor="#10b981" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.00" />
-            </linearGradient>
-            <linearGradient id="chartWaveStroke" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="#34d399" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="1" />
-            </linearGradient>
-          </defs>
-
-          {/* Reference Grid lines */}
-          <line x1="0" y1="45" x2="600" y2="45" stroke="currentColor" strokeDasharray="3 3" className="text-slate-200/60 dark:text-white/[0.04]" />
-          <line x1="0" y1="95" x2="600" y2="95" stroke="currentColor" strokeDasharray="3 3" className="text-slate-200/60 dark:text-white/[0.04]" />
-          <line x1="0" y1="145" x2="600" y2="145" stroke="currentColor" strokeDasharray="3 3" className="text-slate-200/60 dark:text-white/[0.04]" />
-
-          {/* Area fill under curve */}
-          <path
-            d="M 0,150 Q 80,160 150,120 T 300,95 T 420,110 T 520,60 T 600,40 L 600,200 L 0,200 Z"
-            fill="url(#chartWaveFill)"
-          />
-
-          {/* Flowing curve stroke */}
-          <path
-            d="M 0,150 Q 80,160 150,120 T 300,95 T 420,110 T 520,60 T 600,40"
-            fill="none"
-            stroke="url(#chartWaveStroke)"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-
-          {/* Live pulsing beacon at the tip */}
-          <circle cx="598" cy="40" r="4.5" fill="#10b981" />
-          <circle cx="598" cy="40" r="10" fill="#10b981" opacity="0.35" className="animate-ping" style={{ transformOrigin: '598px 40px' }} />
-        </svg>
-
-        {/* Shimmer sweep bar across the wave */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.08] dark:via-white/[0.05] to-transparent animate-[pulse_2s_infinite] pointer-events-none" />
+      {/* Clean Plot Area Skeleton (Authentic loading box with dashed reference lines, NO fake curves) */}
+      <div className="flex-1 w-full relative my-2 rounded-xl overflow-hidden bg-slate-100/40 dark:bg-white/[0.015] border border-slate-200/40 dark:border-white/[0.04] flex flex-col justify-between p-4">
+        <div className="w-full border-b border-dashed border-slate-200/60 dark:border-white/[0.04]" />
+        <div className="w-full border-b border-dashed border-slate-200/60 dark:border-white/[0.04]" />
+        <div className="w-full border-b border-dashed border-slate-200/60 dark:border-white/[0.04]" />
+        <div className="w-full flex justify-between pt-1">
+          <div className="w-10 h-2 rounded bg-slate-200/50 dark:bg-white/[0.04]" />
+          <div className="w-10 h-2 rounded bg-slate-200/50 dark:bg-white/[0.04]" />
+          <div className="w-10 h-2 rounded bg-slate-200/50 dark:bg-white/[0.04]" />
+          <div className="w-10 h-2 rounded bg-slate-200/50 dark:bg-white/[0.04]" />
+        </div>
       </div>
 
-      {/* Bottom Milestones Strip Skeleton */}
+      {/* Bottom Milestones Strip Skeleton (optional) */}
       {showFooterStrip && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/70 dark:bg-white/[0.025] border border-slate-200/60 dark:border-white/[0.05] animate-pulse">
+            <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/70 dark:bg-white/[0.025] border border-slate-200/60 dark:border-white/[0.05]">
               <div className="w-5 h-5 rounded-lg bg-slate-200/80 dark:bg-white/[0.08]" />
               <div className="space-y-1 min-w-0 flex-1">
                 <div className="w-8 h-2 rounded bg-slate-200/60 dark:bg-white/[0.06]" />
