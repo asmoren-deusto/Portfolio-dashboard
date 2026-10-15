@@ -119,7 +119,9 @@ STOCK_UNIVERSE = [
 
     # ── Materias Primas, Cripto & Divisas ──────────────────────
     {"ticker": "GC=F",     "name": "Oro (Futuros)",           "domain": "gold.org",       "sector": "Materias Primas", "index": ["COMMODITIES", "Materias Primas"], "default_market_cap": None},
+    {"ticker": "SI=F",     "name": "Plata (Futuros)",         "domain": "silverinstitute.org", "sector": "Materias Primas", "index": ["COMMODITIES", "Materias Primas"], "default_market_cap": None},
     {"ticker": "BZ=F",     "name": "Petróleo Brent",          "domain": "theice.com",     "sector": "Materias Primas", "index": ["COMMODITIES", "Materias Primas"], "default_market_cap": None},
+    {"ticker": "CL=F",     "name": "Petróleo WTI",            "domain": "cmegroup.com",   "sector": "Materias Primas", "index": ["COMMODITIES", "Materias Primas"], "default_market_cap": None},
     {"ticker": "BTC-EUR",  "name": "Bitcoin (EUR)",           "domain": "bitcoin.org",    "sector": "Criptoactivo",   "index": ["CRYPTO", "Cripto"],                 "default_market_cap": 1400000000000},
     {"ticker": "EURUSD=X", "name": "EUR/USD",                 "domain": "ecb.europa.eu",  "sector": "Divisas (Forex)","index": ["FOREX", "Divisas"],                "default_market_cap": None},
     {"ticker": "EURJPY=X", "name": "EUR/JPY",                 "domain": "boj.or.jp",      "sector": "Divisas (Forex)","index": ["FOREX", "Divisas"],                "default_market_cap": None},
@@ -330,7 +332,7 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
 
         market_state = get_market_session_for_ticker(ticker)
 
-        previous_close = meta.get("previousClose") or meta.get("chartPreviousClose")
+        previous_close = meta.get("chartPreviousClose") or meta.get("previousClose")
         raw_pre = meta.get("preMarketPrice")
         raw_post = meta.get("postMarketPrice")
 
@@ -363,6 +365,11 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
                 calc_prev = regular_price / (1.0 + raw_chg_pct / 100.0)
                 previous_close = round(calc_prev, 4)
                 reference = previous_close
+                change = round(display_price - reference, 4)
+                change_pct = round(raw_chg_pct, 2)
+        elif ticker.endswith("=F") and meta.get("regularMarketChangePercent") is not None:
+            raw_chg_pct = meta.get("regularMarketChangePercent")
+            if raw_chg_pct is not None and reference and display_price:
                 change = round(display_price - reference, 4)
                 change_pct = round(raw_chg_pct, 2)
 
@@ -414,7 +421,17 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         fi = t.fast_info
 
         regular_price = getattr(fi, "last_price", None)
-        prev_close    = getattr(fi, "previous_close", None)
+        quote_type    = getattr(fi, "quote_type", "")
+        reg_prev_close = getattr(fi, "regular_market_previous_close", None)
+
+        # For futures ('GC=F', 'BZ=F', 'CL=F', etc.), fast_info.previous_close reflects
+        # the overnight electronic session pause tick rather than the official previous daily settlement.
+        # regular_market_previous_close provides the true official previous daily close.
+        if quote_type == "FUTURE" or ticker.endswith("=F"):
+            prev_close = reg_prev_close or getattr(fi, "previous_close", None)
+        else:
+            prev_close = getattr(fi, "previous_close", None) or reg_prev_close
+
         day_high      = getattr(fi, "day_high", None)
         day_low       = getattr(fi, "day_low", None)
         volume        = getattr(fi, "last_volume", None)
@@ -428,8 +445,8 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         post_chg_pct = None
         market_state = get_market_session_for_ticker(ticker)
 
-        # If regular price is missing or market is PRE/POST, use fast chart quote fallback
-        if regular_price is None or market_state in ("PRE", "POST", "POSTPOST"):
+        # If regular price is missing, market is PRE/POST, or futures lack valid prev_close, use fast chart quote fallback
+        if regular_price is None or market_state in ("PRE", "POST", "POSTPOST") or ((quote_type == "FUTURE" or ticker.endswith("=F")) and not prev_close):
             chart_q = _fetch_yahoo_chart_quote(ticker)
             if chart_q:
                 if regular_price is None:

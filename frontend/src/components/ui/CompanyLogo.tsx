@@ -44,7 +44,10 @@ function getMarketIcon(ticker?: string): React.ReactNode {
       return <Landmark className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
     case 'GC=F':
       return <Coins className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+    case 'SI=F':
+      return <Coins className="w-5 h-5 text-slate-400 dark:text-slate-300" />
     case 'BZ=F':
+    case 'CL=F':
       return <Droplets className="w-5 h-5 text-sky-600 dark:text-sky-400" />
     case 'BTC-EUR':
       return <Bitcoin className="w-5 h-5 text-orange-500" />
