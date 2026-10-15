@@ -1211,59 +1211,77 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                 madrid_tz = ZoneInfo("Europe/Madrid")
                 ny_tz = ZoneInfo("America/New_York")
 
+                if closes.index.tz is None:
+                    closes.index = closes.index.tz_localize(ny_tz)
+                if fx_aligned is not None and fx_aligned.index.tz is None:
+                    fx_aligned.index = fx_aligned.index.tz_localize(ny_tz)
+
                 session_dates = [idx.astimezone(ny_tz).date() for idx in closes.index]
                 unique_sessions = sorted(list(set(session_dates)))
 
                 usd_fx_series = None
 
-                # Calculate norm_df normalized by session
-                if fetch_period in ("1d", "5d") and len(unique_sessions) > 1:
-                    norm_dfs = []
-                    usd_fx_sub_list = []
-                    for s_idx, s in enumerate(unique_sessions):
-                        idx_s = [idx for idx, d in zip(closes.index, session_dates) if d == s]
-                        sub_closes = closes.loc[idx_s]
-                        prev_session_dates = [idx for idx, d in zip(closes.index, session_dates) if d == unique_sessions[s_idx - 1]] if s_idx > 0 else []
+                if fetch_period == "1d" and unique_sessions:
+                    # Target strictly the latest active trading session
+                    latest_session = unique_sessions[-1]
+                    target_session_idxs = [
+                        idx for idx, d in zip(closes.index, session_dates)
+                        if d == latest_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 4 * 60
+                    ]
+                    if target_session_idxs:
+                        target_session = latest_session
+                        target_idxs = target_session_idxs
+                    elif len(unique_sessions) > 1:
+                        # Before 04:00 NY (10:00 Madrid) today: show the last completed session
+                        target_session = unique_sessions[-2]
+                        target_idxs = [
+                            idx for idx, d in zip(closes.index, session_dates)
+                            if d == target_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 4 * 60
+                        ] or [idx for idx, d in zip(closes.index, session_dates) if d == target_session]
+                    else:
+                        target_session = latest_session
+                        target_idxs = [idx for idx, d in zip(closes.index, session_dates) if d == target_session]
 
-                        if s_idx == 0:
-                            base_s = sub_closes.iloc[0]
-                        else:
-                            base_s = closes.loc[prev_session_dates].iloc[-1]
-                        norm_s = (sub_closes - base_s) / base_s * 100.0
-                        norm_dfs.append(norm_s)
+                    prev_session_dates = [idx for idx, d in zip(closes.index, session_dates) if d < target_session]
 
-                        if fx_aligned is not None:
-                            fx_sub = fx_aligned.loc[idx_s]
-                            fx_base_s = fx_aligned.loc[prev_session_dates].iloc[-1] if (s_idx > 0 and len(prev_session_dates) > 0) else fx_sub.iloc[0]
-                            usd_fx_sub = ((fx_base_s / fx_sub) - 1.0) * 100.0
-                            usd_fx_sub_list.append(usd_fx_sub)
-
-                    norm_df = pd.concat(norm_dfs)
-                    if usd_fx_sub_list:
-                        usd_fx_series = pd.concat(usd_fx_sub_list)
-                elif fetch_period == "1d":
+                    # Baseline is the previous trading session's closing price
                     base_dict = {}
-                    for t in etf_tickers_list:
+                    for t in closes.columns:
                         pc = quotes.get(t, {}).get("prev_close")
                         if pc and pc > 0:
-                            base_dict[t] = pc
-                        elif t in closes.columns and not closes[t].empty:
-                            base_dict[t] = float(closes[t].iloc[0])
+                            base_dict[t] = float(pc)
+                        elif prev_session_dates:
+                            base_dict[t] = float(closes.loc[prev_session_dates, t].dropna().iloc[-1])
+                        elif target_idxs:
+                            base_dict[t] = float(closes.loc[target_idxs[0], t])
                         else:
                             base_dict[t] = 1.0
+
                     base_s = pd.Series(base_dict)
-                    norm_df = (closes - base_s) / base_s * 100.0
+                    target_closes = closes.loc[target_idxs]
+                    norm_df = (target_closes - base_s) / base_s * 100.0
+
                     if fx_aligned is not None and not fx_aligned.empty:
-                        fx_b = eurusd_prev or fx_aligned.iloc[0]
-                        usd_fx_series = ((fx_b / fx_aligned) - 1.0) * 100.0
+                        target_fx = fx_aligned.loc[target_idxs]
+                        fx_prev = eurusd_prev
+                        if not fx_prev or fx_prev <= 0:
+                            if prev_session_dates:
+                                fx_prev = float(fx_aligned.loc[prev_session_dates].dropna().iloc[-1])
+                            else:
+                                fx_prev = float(target_fx.iloc[0])
+                        usd_fx_series = ((fx_prev / target_fx) - 1.0) * 100.0
+
+                    weights_aligned = weights_series.reindex(norm_df.columns).fillna(0.0)
+                    sim_pct = norm_df.dot(weights_aligned)
                 else:
+                    # Multi-day period (5d, 1mo): continuous cumulative return from start of period
                     base_s = closes.iloc[0]
                     norm_df = (closes - base_s) / base_s * 100.0
                     if fx_aligned is not None and not fx_aligned.empty:
                         fx_b = fx_aligned.iloc[0]
                         usd_fx_series = ((fx_b / fx_aligned) - 1.0) * 100.0
-
-                sim_pct = norm_df.dot(weights_series)
+                    weights_aligned = weights_series.reindex(norm_df.columns).fillna(0.0)
+                    sim_pct = norm_df.dot(weights_aligned)
 
                 prev_ny_d = None
                 prev_phase = None
@@ -1285,8 +1303,8 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
 
                     t_unix = int(dt_madrid.timestamp())
 
-                    # Phase change markers (Apertura Regular 15:30, Post-Market 22:00)
-                    if prev_phase is not None and phase != prev_phase:
+                    # Phase change markers (Apertura Regular 15:30, Post-Market 22:00) strictly for intraday
+                    if fetch_period == "1d" and prev_phase is not None and phase != prev_phase:
                         if phase == "REGULAR":
                             session_markers.append({
                                 "time_unix": t_unix,
@@ -1342,28 +1360,30 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
         last_pt = chart_points[-1]
         now_madrid = datetime.now(ZoneInfo("Europe/Madrid"))
         now_unix = int(now_madrid.timestamp())
+        is_today = (last_pt["date"] == now_madrid.strftime("%Y-%m-%d"))
 
-        if now_unix - last_pt["time_unix"] >= 180:
-            chart_points.append({
-                "time": now_madrid.isoformat(),
-                "time_unix": now_unix,
-                "label": now_madrid.strftime("%H:%M"),
-                "time_ny": datetime.now(ZoneInfo("America/New_York")).strftime("%H:%M"),
-                "date": now_madrid.strftime("%Y-%m-%d"),
-                "session_date": datetime.now(ZoneInfo("America/New_York")).date().isoformat(),
-                "phase": chart_points[-1].get("phase", "REGULAR"),
-                "simulated_pct": simulated_daily_pct,
-                "simulated_amount": simulated_daily_amount,
-                "simulated_eur_pct": simulated_eur_pct,
-                "simulated_eur_amount": simulated_eur_amount,
-                "usd_strength_pct": usd_strength_pct,
-            })
-        else:
-            last_pt["simulated_pct"] = simulated_daily_pct
-            last_pt["simulated_amount"] = simulated_daily_amount
-            last_pt["simulated_eur_pct"] = simulated_eur_pct
-            last_pt["simulated_eur_amount"] = simulated_eur_amount
-            last_pt["usd_strength_pct"] = usd_strength_pct
+        if is_today:
+            if now_unix - last_pt["time_unix"] >= 180:
+                chart_points.append({
+                    "time": now_madrid.isoformat(),
+                    "time_unix": now_unix,
+                    "label": now_madrid.strftime("%H:%M"),
+                    "time_ny": datetime.now(ZoneInfo("America/New_York")).strftime("%H:%M"),
+                    "date": now_madrid.strftime("%Y-%m-%d"),
+                    "session_date": datetime.now(ZoneInfo("America/New_York")).date().isoformat(),
+                    "phase": chart_points[-1].get("phase", "REGULAR"),
+                    "simulated_pct": simulated_daily_pct,
+                    "simulated_amount": simulated_daily_amount,
+                    "simulated_eur_pct": simulated_eur_pct,
+                    "simulated_eur_amount": simulated_eur_amount,
+                    "usd_strength_pct": usd_strength_pct,
+                })
+            else:
+                last_pt["simulated_pct"] = simulated_daily_pct
+                last_pt["simulated_amount"] = simulated_daily_amount
+                last_pt["simulated_eur_pct"] = simulated_eur_pct
+                last_pt["simulated_eur_amount"] = simulated_eur_amount
+                last_pt["usd_strength_pct"] = usd_strength_pct
 
     # ETFs summary list
     etfs_summary = []

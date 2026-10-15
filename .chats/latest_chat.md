@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 20:23:07
+- **Fecha de exportación:** 2026-10-15 20:34:22
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 9
+- **Total de interacciones registradas:** 11
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -156,5 +156,25 @@ He eliminado por completo la pseudográfica / mockup simulado de la pantalla de 
 ### 👤 Usuario (2026-10-15 18:20:55)
 
 cada vez que actualizo me salta el popup con los navs actualizados
+
+---
+
+### 🤖 Asistente (2026-10-15 18:23:09)
+
+He solucionado el comportamiento del popup:
+
+- En [useRefreshPortfolio.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/hooks/useRefreshPortfolio.ts#L69-L78), se eliminó la llamada que forzaba la apertura de la ventana emergente (`setNavAlertNotification`) cada vez que hacías clic en el botón de actualización manual.
+- Ahora, al pulsar **Actualizar**:
+  - Se obtienen y recalculan los precios/liquidativos en tiempo real y la interfaz se refresca de forma limpia.
+  - El botón muestra su animación y el icono verde de confirmación sin interrumpir tu navegación ni tapar la pantalla con popups.
+  - El identificador de actualización queda registrado en el cliente para que el vigilante en segundo plano tampoco lance avisos redundantes.
+
+*Versión actualizada a **v3.0.59** y sincronizada en Git.*
+
+---
+
+### 👤 Usuario (2026-10-15 18:21:22)
+
+revisa los picos de la grafica
 
 ---
