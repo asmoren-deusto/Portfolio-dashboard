@@ -165,8 +165,8 @@ export function PerformanceChart({
 
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
-  // Entity selection: 'all' (default, pristine Cartera Total), 'stacked' (desglose apilado), or specific broker ID
-  const [selectedEntity, setSelectedEntity] = useState<string>('all')
+  // Entity selection: 'stacked' by default (mantiene el apilado/estacado de entidades), 'all' (Línea Cartera), o broker individual
+  const [selectedEntity, setSelectedEntity] = useState<string>('stacked')
 
   // Sweep reveal animation state
   const [sweepKey, setSweepKey] = useState(0)
@@ -849,16 +849,26 @@ export function PerformanceChart({
             {/* Left: Patrimonio & Aportado */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <div className="flex items-center gap-1.5">
-                {selectedEntity === 'all' || selectedEntity === 'stacked' ? (
+                {selectedEntity === 'stacked' && availableBrokers.length > 1 ? (
+                  <div className="flex -space-x-1 items-center shrink-0" title="Desglose apilado por entidades">
+                    {availableBrokers.map((b) => (
+                      <span
+                        key={b}
+                        className="w-2.5 h-2.5 rounded-full ring-1.5 ring-white dark:ring-[#181818] shrink-0"
+                        style={{ backgroundColor: ENTITY_CONFIGS[b]?.color || '#10b981' }}
+                      />
+                    ))}
+                  </div>
+                ) : selectedEntity === 'all' ? (
                   <span className={cn(
-                    "w-2 h-2 rounded-full ring-2 shrink-0 transition-colors",
+                    "w-2.5 h-2.5 rounded-full ring-2 shrink-0 transition-colors",
                     (activeSelectedMetrics?.diff ?? 0) >= 0
                       ? "bg-emerald-500 ring-emerald-500/25"
                       : "bg-rose-500 ring-rose-500/25"
                   )} />
                 ) : (
                   <span
-                    className="w-2 h-2 rounded-full shrink-0 ring-2"
+                    className="w-2.5 h-2.5 rounded-full shrink-0 ring-2"
                     style={{
                       backgroundColor: ENTITY_CONFIGS[selectedEntity]?.color || '#10b981',
                       boxShadow: `0 0 0 2px ${(ENTITY_CONFIGS[selectedEntity]?.color || '#10b981')}40`,
@@ -866,9 +876,9 @@ export function PerformanceChart({
                   />
                 )}
                 <span className="text-slate-500 dark:text-slate-400 font-medium">
-                  {selectedEntity === 'all'
-                    ? 'Patrimonio:'
-                    : selectedEntity === 'stacked'
+                  {selectedEntity === 'stacked'
+                    ? 'Patrimonio (Desglose):'
+                    : selectedEntity === 'all'
                     ? 'Patrimonio Total:'
                     : `${ENTITY_CONFIGS[selectedEntity]?.label || selectedEntity}:`}
                 </span>
@@ -928,6 +938,27 @@ export function PerformanceChart({
                 <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-200/60 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.06]">
                   <button
                     type="button"
+                    onClick={() => setSelectedEntity('stacked')}
+                    className={cn(
+                      "flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
+                      selectedEntity === 'stacked'
+                        ? "bg-white dark:bg-[#252526] text-slate-900 dark:text-white shadow-2xs font-bold"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                    )}
+                  >
+                    <div className="flex -space-x-1 items-center shrink-0">
+                      {availableBrokers.map((b) => (
+                        <span
+                          key={b}
+                          className="w-1.5 h-1.5 rounded-full ring-1 ring-white dark:ring-[#252526] shrink-0"
+                          style={{ backgroundColor: ENTITY_CONFIGS[b]?.color || '#10b981' }}
+                        />
+                      ))}
+                    </div>
+                    <span>Desglose Apilado</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setSelectedEntity('all')}
                     className={cn(
                       "px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
@@ -936,7 +967,7 @@ export function PerformanceChart({
                         : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                     )}
                   >
-                    Cartera Total
+                    Línea Cartera
                   </button>
                   {availableBrokers.map((b) => {
                     const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
@@ -959,18 +990,6 @@ export function PerformanceChart({
                       </button>
                     )
                   })}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedEntity('stacked')}
-                    className={cn(
-                      "px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
-                      selectedEntity === 'stacked'
-                        ? "bg-white dark:bg-[#252526] text-slate-900 dark:text-white shadow-2xs font-bold"
-                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                    )}
-                  >
-                    Desglose
-                  </button>
                 </div>
               </div>
             </div>
@@ -990,6 +1009,18 @@ export function PerformanceChart({
           {/* Quick broker switch on mobile */}
           {availableBrokers.length > 1 && (
             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+              <button
+                type="button"
+                onClick={() => setSelectedEntity('stacked')}
+                className={cn(
+                  "px-2 py-0.5 rounded text-[10px] font-bold shrink-0 transition-colors",
+                  selectedEntity === 'stacked'
+                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                    : "bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-slate-300"
+                )}
+              >
+                Apilado
+              </button>
               <button
                 type="button"
                 onClick={() => setSelectedEntity('all')}
@@ -1077,16 +1108,22 @@ export function PerformanceChart({
 
         {/* Floating Small In-Chart Legend (Only shown in Desglose/Stacked mode) */}
         {availableBrokers.length > 1 && selectedEntity === 'stacked' && (
-          <div className="absolute top-2 left-2.5 z-10 pointer-events-none flex items-center gap-2.5 px-2 py-0.5 rounded-md bg-white/80 dark:bg-[#181818]/80 border border-slate-200/60 dark:border-white/[0.08] backdrop-blur-xs text-[10px] text-slate-600 dark:text-slate-300 font-medium shadow-2xs">
+          <div className="absolute top-2 left-2.5 z-10 pointer-events-none flex items-center gap-2.5 px-2.5 py-1 rounded-md bg-white/85 dark:bg-[#181818]/85 border border-slate-200/80 dark:border-white/[0.10] backdrop-blur-md text-[10px] text-slate-700 dark:text-slate-200 font-medium shadow-2xs">
             {availableBrokers.map((b) => {
               const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
+              const bVal = activePoint ? getBrokerData(activePoint, b).value : 0
               return (
-                <div key={b} className="flex items-center gap-1">
+                <div key={b} className="flex items-center gap-1.5">
                   <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    className="w-1.5 h-1.5 rounded-full shrink-0 shadow-xs"
                     style={{ backgroundColor: cfg.color }}
                   />
                   <span className="font-semibold">{cfg.label}</span>
+                  {bVal > 0 && chartMode === 'currency' && (
+                    <span className="font-mono text-[9.5px] text-slate-500 dark:text-slate-400 font-bold">
+                      {fmt.currency(bVal)}
+                    </span>
+                  )}
                 </div>
               )
             })}
