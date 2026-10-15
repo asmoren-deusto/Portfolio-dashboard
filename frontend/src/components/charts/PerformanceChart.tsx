@@ -979,13 +979,13 @@ export function PerformanceChart({
             key={`sweep-${sweepKey}`}
             initial={{ left: '0%' }}
             animate={{ left: '100%' }}
-            transition={{ duration: 1.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.1, ease: [0.25, 1, 0.5, 1] }}
             onAnimationComplete={() => setIsSweepAnimating(false)}
             className="absolute inset-y-0 right-0 z-20 pointer-events-none bg-white dark:bg-[#1e1e1e]"
             style={{ right: isNativePlatform() ? 0 : 58 }}
           >
-            {/* Luminous vertical sweep scan cursor */}
-            <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-gradient-to-b from-transparent via-emerald-400 dark:via-emerald-400 to-transparent shadow-[0_0_12px_rgba(16,185,129,0.9)]" />
+            {/* Subtle vertical sweep scan cursor */}
+            <div className="absolute top-0 bottom-0 left-0 w-px bg-gradient-to-b from-transparent via-emerald-500/35 dark:via-emerald-400/30 to-transparent shadow-[0_0_5px_rgba(16,185,129,0.2)]" />
           </motion.div>
         )}
 

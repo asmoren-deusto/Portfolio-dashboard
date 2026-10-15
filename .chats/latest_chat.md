@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 21:33:48
+- **Fecha de exportación:** 2026-10-15 21:35:39
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 31
+- **Total de interacciones registradas:** 33
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -449,5 +449,23 @@ Los cambios han sido compilados y publicados en la versión **`v3.0.69`**.
 ### 👤 Usuario (2026-10-15 19:30:55)
 
 baja un poco la leyenda con los dias para que no choque
+
+---
+
+### 🤖 Asistente (2026-10-15 19:33:50)
+
+He ajustado la separación en la gráfica de **Rendimiento (Últimos 7 días)** en [ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx):
+
+1. **Bajada de las etiquetas de los días:** Se incrementó el desplazamiento vertical (`dy={12}`) en el `<XAxis />` para situar los días de la semana con suficiente holgura por debajo de las barras.
+2. **Margen inferior ampliado:** Se aumentó el `margin.bottom` del gráfico a `18px` para evitar que las etiquetas queden apretadas contra el borde inferior.
+3. **Margen dinámico para barras negativas:** Se añadió un factor de escala del 35% en el dominio del eje Y (`min * 1.35`) para que las barras negativas (como la de `-0.80%`) dejen espacio suficiente a su etiqueta numérica y no choquen con el nombre del día.
+
+Los cambios han sido compilados y sincronizados en la versión **`v3.0.70`**.
+
+---
+
+### 👤 Usuario (2026-10-15 19:32:04)
+
+en evolucion patrimonial que la barra que sale animada de izq a derecha sea más sutil
 
 ---
