@@ -995,7 +995,7 @@ export function OverviewPage() {
 
           <div className="px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
             <div data-private className="flex-1 flex flex-col justify-start min-h-0">
-              {isPeriodUpdating && performance.length === 0 && chartView === 'evolution' ? (
+              {isPeriodUpdating && chartView === 'evolution' ? (
                 <PerformanceChartSkeleton height={260} />
               ) : chartView === 'evolution' ? (
                 performance.length > 0 ? (

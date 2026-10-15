@@ -3,8 +3,6 @@
  * Centralized API endpoint resolver with automatic detection for native Capacitor iOS app.
  */
 
-import { Capacitor } from '@capacitor/core'
-
 export const DEFAULT_PRODUCTION_URL = 'https://portfolio.asiermoreno.es'
 
 /**
@@ -18,7 +16,6 @@ export function isNativePlatform(): boolean {
     (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches)
 
   return (
-    Capacitor.isNativePlatform() ||
     Boolean((window as any).Capacitor?.isNativePlatform?.()) ||
     window.location.protocol === 'capacitor:' ||
     (window.location.hostname === 'localhost' && window.location.port === '') ||

@@ -1048,7 +1048,13 @@ export function PerformanceChart({
   )
 }
 
-export function PerformanceChartSkeleton({ height = 260 }: { height?: number }) {
+export function PerformanceChartSkeleton({
+  height = 260,
+  showFooterStrip = false,
+}: {
+  height?: number
+  showFooterStrip?: boolean
+}) {
   return (
     <div style={{ height }} className="w-full flex flex-col justify-between py-1 select-none relative overflow-hidden">
       {/* Top HUD Skeleton */}
@@ -1121,17 +1127,19 @@ export function PerformanceChartSkeleton({ height = 260 }: { height?: number }) 
       </div>
 
       {/* Bottom Milestones Strip Skeleton */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/70 dark:bg-white/[0.025] border border-slate-200/60 dark:border-white/[0.05] animate-pulse">
-            <div className="w-5 h-5 rounded-lg bg-slate-200/80 dark:bg-white/[0.08]" />
-            <div className="space-y-1 min-w-0 flex-1">
-              <div className="w-8 h-2 rounded bg-slate-200/60 dark:bg-white/[0.06]" />
-              <div className="w-14 h-3 rounded bg-slate-200/80 dark:bg-white/[0.08]" />
+      {showFooterStrip && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/70 dark:bg-white/[0.025] border border-slate-200/60 dark:border-white/[0.05] animate-pulse">
+              <div className="w-5 h-5 rounded-lg bg-slate-200/80 dark:bg-white/[0.08]" />
+              <div className="space-y-1 min-w-0 flex-1">
+                <div className="w-8 h-2 rounded bg-slate-200/60 dark:bg-white/[0.06]" />
+                <div className="w-14 h-3 rounded bg-slate-200/80 dark:bg-white/[0.08]" />
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
