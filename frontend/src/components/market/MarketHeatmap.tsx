@@ -33,6 +33,7 @@ interface MarketHeatmapProps {
   onSectorChange?: (sector: string) => void
   showViewAllLink?: boolean
   isIndices?: boolean
+  defaultExpanded?: boolean
 }
 
 const HEADER_HEIGHT = 24
@@ -228,10 +229,13 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
   onSectorChange,
   showViewAllLink = false,
   isIndices: propIsIndices,
+  defaultExpanded = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [dimensions, setDimensions] = useState({ width: 0, height: 680 })
-  const [heightMode, setHeightMode] = useState<'standard' | 'expanded'>('standard')
+  const [dimensions, setDimensions] = useState({ width: 0, height: 760 })
+  const [heightMode, setHeightMode] = useState<'standard' | 'expanded'>(
+    defaultExpanded ? 'expanded' : 'standard'
+  )
   const [hoveredStock, setHoveredStock] = useState<{
     stock: MarketStock
     x: number
