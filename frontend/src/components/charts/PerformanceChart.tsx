@@ -802,7 +802,7 @@ export function PerformanceChart({
       }
 
       chart.timeScale().fitContent()
-      triggerChartAnimation(containerRef.current, 750)
+      triggerChartAnimation(containerRef.current, 1400)
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }

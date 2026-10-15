@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 20:42:12
+- **Fecha de exportación:** 2026-10-15 20:44:44
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 15
+- **Total de interacciones registradas:** 17
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -230,5 +230,34 @@ Cambios sincronizados y publicados en la versión **v3.0.61**.
 ### 👤 Usuario (2026-10-15 18:27:29)
 
 al actualizar, tras unos segundos se produce un nuevo refresco de las graficas indeseado y se lanza el popup
+
+---
+
+### 🤖 Asistente (2026-10-15 18:42:14)
+
+Se ha solucionado el problema del segundo refresco indeseado y la aparición del popup tras actualizar:
+
+### 🔍 Causa del problema:
+1. **Condición de carrera entre el refresco manual y el vigilante en segundo plano:**
+   Al hacer clic en *Actualizar*, `useRefreshPortfolio` iniciaba la petición y luego ejecutaba `await queryClient.invalidateQueries()`. Durante los segundos que tardaban en resolverse las consultas de la interfaz, el vigilante periódico de [RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx) (`checkNavAlerts`) se ejecutaba (por temporizador de 30s o evento `focus`/visibilidad).
+2. **Comparación inexacta de alerta en el backend:**
+   Al consultar `/latest-nav-alert`, el backend únicamente comparaba cadenas de ID idénticas. Si se había refrescado sin nuevos NAVs o con un ID de cliente temporal, el backend consideraba una alerta previa como "nueva", devolviendo `has_update: true`.
+3. **Doble ejecución e invasión de popup:**
+   [RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx) recibía `has_update: true` y ejecutaba de nuevo `await queryClient.invalidateQueries()` (el segundo refresco indeseado de todas las gráficas) y abría el modal emergente `NavUpdateAlertModal`.
+
+---
+
+### 🛠️ Correcciones implementadas:
+- **Registro inmediato del timestamp de refresco manual:** En [useRefreshPortfolio.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/hooks/useRefreshPortfolio.ts), tan pronto como responde la petición de precios, se almacena de inmediato el identificador y el timestamp exacto del refresco antes de invalidar las consultas, cerrando la ventana de concurrencia.
+- **Protección y bloqueo en el vigilante:** En [RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx), `checkNavAlerts` verifica si el usuario está actualizando o si ha actualizado recientemente (< 45s); en tales casos aborta la comprobación sin emitir ninguna invalidación de consultas adicional ni lanzar el popup.
+- **Comparación temporal precisa en el backend:** En [backend/app/routers/portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py), el endpoint `/latest-nav-alert` ahora compara las marcas temporales (`created_at_ts <= since_ts`), evitando considerar alertas antiguas como nuevas.
+
+Cambios sincronizados y publicados en la versión **v3.0.62**.
+
+---
+
+### 👤 Usuario (2026-10-15 18:27:57)
+
+mete una animación más lenta de izquierda a derechaal cargar los datos de la grafica de la evolucion
 
 ---
