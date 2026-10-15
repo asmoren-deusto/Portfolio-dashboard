@@ -68,6 +68,12 @@ export function RootLayout() {
 
     const checkNavAlerts = async () => {
       try {
+        // If a manual refresh is actively in progress or finished recently, abort to prevent double-refreshes and unwanted popups
+        const store = useAppStore.getState()
+        if (store.isRefreshingPrices) return
+        const lastManual = parseInt(localStorage.getItem('portfolio_last_manual_refresh') || '0', 10)
+        if (Date.now() - lastManual < 45000) return
+
         const lastSeen = localStorage.getItem('portfolio_last_seen_nav_alert_id')
         const res = await fetchLatestNavAlert(lastSeen)
         if (isMounted && res.has_update && res.alert) {
@@ -75,9 +81,16 @@ export function RootLayout() {
           const updatedCount = alert.updatedCount ?? alert.updated_count ?? 0
           if (alert.id && alert.id !== lastSeen && updatedCount > 0) {
             localStorage.setItem('portfolio_last_seen_nav_alert_id', alert.id)
+
+            // Re-check manual refresh timestamp right before acting
+            const currentLastManual = parseInt(localStorage.getItem('portfolio_last_manual_refresh') || '0', 10)
+            if (Date.now() - currentLastManual < 45000 || useAppStore.getState().isRefreshingPrices) {
+              return
+            }
+
             // Trigger automatic UI refresh across all tabs
             await queryClient.invalidateQueries()
-            // Show pop-up notification
+            // Show pop-up notification only for background updates
             setNavAlertNotification({
               id: alert.id,
               timestamp: alert.timestamp || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),

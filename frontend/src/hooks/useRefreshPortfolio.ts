@@ -60,17 +60,18 @@ export function useRefreshPortfolio() {
         }
       }
 
+      // Record alert seen and manual refresh timestamp immediately to prevent race conditions with background polling
+      const nowTs = Date.now()
+      const alertId = refreshResult?.alert?.id || refreshResult?.alert_id || `nav_${nowTs}`
+      try {
+        localStorage.setItem('portfolio_last_seen_nav_alert_id', alertId)
+        localStorage.setItem('portfolio_last_manual_refresh', String(nowTs))
+      } catch {}
+
       await queryClient.invalidateQueries()
       triggerRefreshAnimation()
       setRefreshSuccess(true)
       setTimeout(() => setRefreshSuccess(false), 3000)
-
-      if (refreshResult) {
-        const alertId = refreshResult.alert?.id || `nav_${Date.now()}`
-        try {
-          localStorage.setItem('portfolio_last_seen_nav_alert_id', alertId)
-        } catch {}
-      }
     } catch (err) {
       console.warn('Error fetching live NAVs:', err)
       await queryClient.invalidateQueries()

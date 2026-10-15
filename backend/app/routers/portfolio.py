@@ -362,6 +362,7 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
         }
 
     res_payload["alert"] = _latest_nav_alert if len(updated_items) > 0 else None
+    res_payload["alert_id"] = _latest_nav_alert.get("id") if _latest_nav_alert else None
     return res_payload
 
 
@@ -384,9 +385,19 @@ def get_latest_nav_alert(since: str | None = None):
     if not _latest_nav_alert:
         return {"has_update": False, "alert": None}
 
-    # Already seen by this client
-    if since and _latest_nav_alert.get("id") == since:
-        return {"has_update": False, "alert": None}
+    # Already seen by this client (exact ID match or client timestamp is newer)
+    if since:
+        if _latest_nav_alert.get("id") == since:
+            return {"has_update": False, "alert": None}
+        created_at = _latest_nav_alert.get("created_at_ts")
+        if created_at:
+            try:
+                clean_since = since.replace("nav_", "").replace("ts_", "")
+                since_ts = float(clean_since) / 1000.0 if len(clean_since) >= 13 else float(clean_since)
+                if created_at <= since_ts:
+                    return {"has_update": False, "alert": None}
+            except Exception:
+                pass
 
     # Freshness check: alerts older than 30 minutes (1800s) are historical/stale
     # and must NOT trigger automatic invasive popups upon opening the app.

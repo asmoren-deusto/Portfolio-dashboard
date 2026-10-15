@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 20:37:13
+- **Fecha de exportación:** 2026-10-15 20:42:12
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 13
+- **Total de interacciones registradas:** 15
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -211,5 +211,24 @@ Cambios sincronizados y publicados en la versión **v3.0.60**.
 ### 👤 Usuario (2026-10-15 18:25:29)
 
 amplia un pelo las cifras
+
+---
+
+### 🤖 Asistente (2026-10-15 18:37:15)
+
+Se han ampliado las cifras de la matriz de rentabilidades mensuales en [MonthlyReturnsHeatmap.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/MonthlyReturnsHeatmap.tsx):
+
+- **Mayor tamaño de fuente:** Se incrementó de `11px` a `12.5px` (y `13px` en pantallas de escritorio), con tracking optimizado para que las cifras no se compriman.
+- **Mayor grosor y contraste (`font-semibold` / `font-bold`):** Se aumentó el peso tipográfico de los porcentajes tanto positivos como negativos para facilitar la lectura inmediata.
+- **Altura y espaciado de celda ajustados:** Altura de las pastillas ampliada (`h-8.5 sm:h-9.5`) y padding lateral refinado para un encaje limpio y holgado.
+- **Columna de Total Año:** Cifras anuales también ampliadas y alineadas en escala proporcional.
+
+Cambios sincronizados y publicados en la versión **v3.0.61**.
+
+---
+
+### 👤 Usuario (2026-10-15 18:27:29)
+
+al actualizar, tras unos segundos se produce un nuevo refresco de las graficas indeseado y se lanza el popup
 
 ---
