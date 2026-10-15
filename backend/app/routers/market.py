@@ -114,8 +114,15 @@ STOCK_UNIVERSE = [
     {"ticker": "COWZ",   "name": "Pacer US Cash Cows 100 ETF",        "domain": "paceretfs.com", "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 24000000000},
     {"ticker": "EEM",    "name": "iShares MSCI Emerging Markets ETF", "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "Emergentes"], "default_market_cap": 20000000000},
     {"ticker": "EWJ",    "name": "iShares MSCI Japan ETF",            "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 14000000000},
-    {"ticker": "FEZ",    "name": "SPDR EURO STOXX 50 ETF",            "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs", "Euro 50"],    "default_market_cap": 4000000000},
+    {"ticker": "FEZ",    "name": "SPDR EURO STOXX 50 ETF",            "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs", "EUROSTOXX", "Euro 50"], "default_market_cap": 4000000000},
     {"ticker": "EFV",    "name": "iShares MSCI EAFE Value ETF",       "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 17000000000},
+
+    # ── Materias Primas, Cripto & Divisas ──────────────────────
+    {"ticker": "GC=F",     "name": "Oro (Futuros)",           "domain": "gold.org",       "sector": "Materias Primas", "index": ["COMMODITIES", "Materias Primas"], "default_market_cap": None},
+    {"ticker": "BZ=F",     "name": "Petróleo Brent",          "domain": "theice.com",     "sector": "Materias Primas", "index": ["COMMODITIES", "Materias Primas"], "default_market_cap": None},
+    {"ticker": "BTC-EUR",  "name": "Bitcoin (EUR)",           "domain": "bitcoin.org",    "sector": "Criptoactivo",   "index": ["CRYPTO", "Cripto"],                 "default_market_cap": 1400000000000},
+    {"ticker": "EURUSD=X", "name": "EUR/USD",                 "domain": "ecb.europa.eu",  "sector": "Divisas (Forex)","index": ["FOREX", "Divisas"],                "default_market_cap": None},
+    {"ticker": "EURJPY=X", "name": "EUR/JPY",                 "domain": "boj.or.jp",      "sector": "Divisas (Forex)","index": ["FOREX", "Divisas"],                "default_market_cap": None},
 ]
 
 # Index quotes for ticker bar
@@ -144,6 +151,18 @@ INDEX_PROXY_MAP = {
 # In-memory cache (shorter TTL for real-time feel)
 _quote_cache: dict = {}
 CACHE_TTL = 60  # 1 minute — refresh more aggressively
+
+
+def _get_cached_ticker(ticker: str) -> dict | None:
+    cache_key = f"tick_{ticker}"
+    if cache_key in _quote_cache and time.time() - _quote_cache[cache_key]["ts"] < CACHE_TTL:
+        return _quote_cache[cache_key]["data"]
+    return None
+
+
+def _set_cached_ticker(ticker: str, data: dict):
+    if data and "error" not in data:
+        _quote_cache[f"tick_{ticker}"] = {"data": data, "ts": time.time()}
 
 
 def _is_fresh(key: str) -> bool:
@@ -338,6 +357,15 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
         change = display_price - reference if reference else 0.0
         change_pct = change / reference * 100 if reference else 0.0
 
+        if ticker == "EURUSD=X" and meta.get("regularMarketChangePercent") is not None:
+            raw_chg_pct = meta.get("regularMarketChangePercent")
+            if raw_chg_pct is not None and regular_price:
+                calc_prev = regular_price / (1.0 + raw_chg_pct / 100.0)
+                previous_close = round(calc_prev, 4)
+                reference = previous_close
+                change = round(display_price - reference, 4)
+                change_pct = round(raw_chg_pct, 2)
+
         def latest_value(key: str):
             values = quote_data.get(key) or []
             return next((value for value in reversed(values) if value is not None), None)
@@ -376,6 +404,10 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
 
 def _fetch_ticker_extended(ticker: str) -> dict:
     """Fetch a single ticker with pre/post market and market state via yfinance."""
+    cached = _get_cached_ticker(ticker)
+    if cached:
+        return cached
+
     import yfinance as yf
     try:
         t = yf.Ticker(ticker)
@@ -454,7 +486,16 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             ref = regular_price
             chg = round(display_price - ref, 4)
             chg_pct = post_chg_pct if post_chg_pct is not None else round((display_price - ref) / ref * 100, 2)
-        elif market_state == "PRE":
+        price_precision = 4 if ticker == "EURUSD=X" else None
+        if price_precision is not None:
+            if display_price is not None:
+                display_price = round(display_price, price_precision)
+            if regular_price is not None:
+                regular_price = round(regular_price, price_precision)
+            if prev_close is not None:
+                prev_close = round(prev_close, price_precision)
+
+        if market_state == "PRE":
             # Si el mercado estadounidense está en pre-market y este ETF no ha cruzado operaciones hoy,
             # su variación hoy respecto al cierre anterior es 0.00% (no arrastrar la variación de ayer)
             ref = regular_price or display_price
@@ -474,9 +515,7 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             decimals = 2 if abs(v) >= 1 else 6
             return round(v, decimals)
 
-        price_precision = 4 if ticker == "EURUSD=X" else None
-
-        return {
+        res = {
             "ticker":              ticker,
             "price":               _r(display_price, price_precision),
             "regular_price":       _r(regular_price, price_precision),
@@ -495,18 +534,23 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             "currency":            currency or "USD",
             "last_updated":        _now_iso(),
         }
+        _set_cached_ticker(ticker, res)
+        return res
     except Exception as e:
         logger.debug(f"Error fetching {ticker}: {e}")
         fallback = _fetch_yahoo_chart_quote(ticker)
         if fallback:
+            _set_cached_ticker(ticker, fallback)
             return fallback
         return {"ticker": ticker, "error": str(e)}
 
 
 def _fetch_quotes_extended(tickers: list[str]) -> dict:
     """Fetch all tickers in parallel using extended info (pre/post market)."""
+    if not tickers:
+        return {}
     result = {}
-    max_workers = min(20, len(tickers))
+    max_workers = max(1, min(20, len(tickers)))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(_fetch_ticker_extended, t): t for t in tickers}
         for future in as_completed(futures, timeout=25):
@@ -1037,9 +1081,10 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
         })
 
     etf_tickers_list = sorted(list(unique_etfs))
+    fetch_tickers = sorted(list(unique_etfs | {"EURUSD=X"}))
 
-    # Extended quotes for all ETF proxies
-    quotes = _fetch_quotes_extended(etf_tickers_list)
+    # Extended quotes for all ETF proxies and EURUSD currency
+    quotes = _fetch_quotes_extended(fetch_tickers)
 
     # Underlying session live proxies when ETF is in US PRE-market with zero trades or flat price
     # (e.g. Hang Seng for Emerging Markets, Euro Stoxx 50 for Europe, Nikkei for Tokyo, S&P/Nasdaq futures for US)
@@ -1095,9 +1140,9 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
     }
     portfolio_usd_exposure = sum(etf_weights.get(t, 0.0) * USD_EXPOSURE_WEIGHTS.get(t, 0.70) for t in etf_tickers_list)
 
-    eurusd_q = _fetch_yahoo_chart_quote("EURUSD=X")
-    eurusd_rate = eurusd_q.get("price") or 1.1168
-    eurusd_prev = eurusd_q.get("prev_close") or 1.1206
+    eurusd_q = quotes.get("EURUSD=X") or _fetch_ticker_extended("EURUSD=X") or {}
+    eurusd_rate = eurusd_q.get("price") or 1.1210
+    eurusd_prev = eurusd_q.get("prev_close") or 1.1177
     eurusd_chg_pct = eurusd_q.get("change_pct", 0.0) or 0.0
 
     # When EUR/USD falls, USD strengthens against EUR (boosting EUR value of USD assets):

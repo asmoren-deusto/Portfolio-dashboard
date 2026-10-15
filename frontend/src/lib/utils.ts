@@ -57,10 +57,11 @@ export const fmt = {
     }).format(val)
   },
 
-  price(val: number | null | undefined, currency = 'USD'): string {
+  price(val: number | null | undefined, currency = 'USD', decimals?: number): string {
     if (val === null || val === undefined || isNaN(val)) return '—'
     const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency
-    return `${val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${symbol}`
+    const d = decimals !== undefined ? decimals : (val > 0 && val < 5 ? 4 : 2)
+    return `${val.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d })} ${symbol}`
   },
 
   pct(val: number | null | undefined, showPlus = true, decimals = 2): string {

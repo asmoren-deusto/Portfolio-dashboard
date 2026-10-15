@@ -136,7 +136,7 @@ function normalizeStock(idx: any): MarketStock {
 }
 
 function fmtPrice(price: number, ticker?: string): string {
-  if (ticker === 'EURUSD=X') {
+  if (ticker === 'EURUSD=X' || (price > 0 && price < 5)) {
     return price.toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
   }
   return price >= 1000
@@ -210,7 +210,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
     { name: 'Oro', ticker: 'GC=F', price: 4331.20, change_pct: 0.77, market_state: 'CLOSED' },
     { name: 'Petróleo', ticker: 'BZ=F', price: 98.43, change_pct: -1.79, market_state: 'CLOSED' },
     { name: 'BTC/EUR', ticker: 'BTC-EUR', price: 74066.85, change_pct: -0.16, market_state: 'REGULAR' },
-    { name: 'EUR/USD', ticker: 'EURUSD=X', price: 1.1406, change_pct: 0.23, market_state: 'CLOSED' },
+    { name: 'EUR/USD', ticker: 'EURUSD=X', price: 1.1210, change_pct: 0.29, market_state: 'CLOSED' },
     { name: 'EUR/JPY', ticker: 'EURJPY=X', price: 179.05, change_pct: -0.87, market_state: 'CLOSED' },
   ]
 

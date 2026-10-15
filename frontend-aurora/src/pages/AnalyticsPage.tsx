@@ -1,392 +1,279 @@
-import React, { useMemo, useState } from 'react'
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  ReferenceLine,
-  Cell,
-} from 'recharts'
-import {
-  TrendingUp,
-  ShieldAlert,
-  Percent,
-  Activity,
-  Layers,
-  Award,
-  CheckCircle2,
-  Calendar,
-} from 'lucide-react'
-import {
-  useAnalytics,
-  useBenchmarkComparison,
-  usePositions,
-  usePortfolioSummary,
-} from '@/api/queries'
-import { fmt, cn } from '@/lib/utils'
-import { AuroraCard } from '~/components/ui/AuroraCard'
-import { AuroraBadge } from '~/components/ui/AuroraBadge'
+import { useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Area, AreaChart, CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { useAnalytics, useBenchmarkComparison, usePerformance, usePositions } from '@/api/queries'
+import { cn } from '@/lib/utils'
+import { CardHeader, Glass, PageHeader, Skeleton, ease, pct, stagger } from '~/ui'
+import { ChartTooltip } from './OverviewPage'
+
+const SERIES = [
+  { key: 'portfolio_twr', label: 'Mi cartera', color: 'var(--gain)', fixed: true },
+  { key: 'msci_world', label: 'MSCI World', color: '#a78bfa' },
+  { key: 'sp500', label: 'S&P 500', color: '#38bdf8' },
+  { key: 'nasdaq100', label: 'Nasdaq 100', color: '#f472b6' },
+  { key: 'eurostoxx50', label: 'Euro Stoxx 50', color: '#fbbf24' },
+  { key: 'bce_rate', label: 'Tipo BCE', color: '#94a3b8' },
+] as const
+
+const MONTHS = ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
 
 export function AnalyticsPage() {
-  const { data: analytics, isLoading } = useAnalytics()
-  const { data: benchmarks } = useBenchmarkComparison()
-  const { data: positions } = usePositions()
-  const { data: summary } = usePortfolioSummary()
+  const { data: analytics } = useAnalytics()
+  const { data: bench, isLoading } = useBenchmarkComparison()
+  const { data: longPerf = [] } = usePerformance('5y')
+  const { data: positions = [] } = usePositions()
+  const [on, setOn] = useState<Record<string, boolean>>({ portfolio_twr: true, msci_world: true, sp500: true })
 
-  // State for toggling benchmark lines
-  const [showSp500, setShowSp500] = useState(true)
-  const [showMsci, setShowMsci] = useState(true)
-  const [showEuroStoxx, setShowEuroStoxx] = useState(true)
+  const s = bench?.summary
+  const points = bench?.points ?? []
 
-  // Relative Asset Return (Diverging bars)
-  const assetReturns = useMemo(() => {
-    if (!positions) return []
-    return positions
-      .map((p) => ({
-        name: p.name.replace('Index Fund', '').replace('EUR Acc', '').trim(),
-        pnlPct: p.unrealized_pnl_pct || 0,
-        isin: p.isin,
-      }))
-      .sort((a, b) => b.pnlPct - a.pnlPct)
-  }, [positions])
+  // Monthly TWR matrix (cash-flow neutral) from daily value/invested
+  const matrix = useMemo(() => {
+    const byMonth = new Map<string, number>()
+    for (let i = 1; i < longPerf.length; i++) {
+      const a = longPerf[i - 1], b = longPerf[i]
+      const flow = (b.invested ?? b.value) - (a.invested ?? a.value)
+      const r = a.value > 0 ? (b.value - a.value - flow) / a.value : 0
+      const k = b.date.slice(0, 7)
+      byMonth.set(k, (1 + (byMonth.get(k) ?? 0)) * (1 + r) - 1)
+    }
+    const years = [...new Set([...byMonth.keys()].map((k) => k.slice(0, 4)))].sort().reverse()
+    return years.map((y) => {
+      const months = MONTHS.map((_, m) => {
+        const v = byMonth.get(`${y}-${String(m + 1).padStart(2, '0')}`)
+        return v == null ? null : v * 100
+      })
+      const total = months.reduce<number>((acc, v) => (v == null ? acc : (1 + acc) * (1 + v / 100) - 1), 0) * 100
+      return { y, months, total }
+    })
+  }, [longPerf])
 
-  // Heatmap Mock Data (Monthly Returns Matrix)
-  const monthlyMatrix = [
-    {
-      year: 2024,
-      months: [-2.8, -3.1, 1.2, 2.5, 1.3, 1.3, 2.7, 2.3, 1.3, 2.3, 3.1, 1.8],
-    },
-    {
-      year: 2025,
-      months: [-3.3, -2.1, -3.2, 0.3, 3.3, 1.2, 2.3, 3.6, -3.3, -2.3, 2.8, 2.1],
-    },
-    {
-      year: 2026,
-      months: [2.4, -1.2, 1.6, -0.8, 1.9, 0.7, 1.4, -0.4, 2.3, 0.8, null, null],
-    },
-  ]
+  const underwater = useMemo(() => {
+    let nav = 100, peak = 100
+    return longPerf.map((b, i) => {
+      if (i > 0) {
+        const a = longPerf[i - 1]
+        const flow = (b.invested ?? b.value) - (a.invested ?? a.value)
+        nav *= 1 + (a.value > 0 ? (b.value - a.value - flow) / a.value : 0)
+      }
+      peak = Math.max(peak, nav)
+      return { date: b.date, dd: (nav / peak - 1) * 100 }
+    })
+  }, [longPerf])
 
-  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+  const assets = useMemo(() => [...positions].sort((a, b) => b.unrealized_pnl_pct - a.unrealized_pnl_pct), [positions])
+  const maxAbs = Math.max(1, ...assets.map((a) => Math.abs(a.unrealized_pnl_pct)))
+
+  // Risk score 0..100 from volatility
+  const vol = analytics?.volatility ?? 0
+  const risk = Math.max(0, Math.min(100, (vol / 25) * 100))
+  const riskLabel = vol < 6 ? 'Conservador' : vol < 12 ? 'Moderado' : vol < 18 ? 'Dinámico' : 'Agresivo'
 
   return (
-    <div className="flex flex-col gap-6 au-rise">
-      {/* ─────────────────────────────────────────────────────────────
-          1. TOP BENCHMARK COMPARISON & RISK DIAGNOSIS
-          ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Evolución vs Índices Multi-Line Chart */}
-        <AuroraCard
-          className="lg:col-span-8 p-6"
-          title="Evolución vs Índices"
-          subtitle="Rentabilidad TWR de la cartera ponderada frente a los principales benchmarks"
-          action={
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => setShowMsci((v) => !v)}
-                className={cn(
-                  'au-chip text-[11px] font-bold transition-all',
-                  showMsci ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'opacity-40'
-                )}
-              >
-                MSCI World {benchmarks?.summary?.alpha_msci !== undefined && `(${benchmarks.summary.alpha_msci >= 0 ? '+' : ''}${benchmarks.summary.alpha_msci}%)`}
-              </button>
-              <button
-                onClick={() => setShowSp500((v) => !v)}
-                className={cn(
-                  'au-chip text-[11px] font-bold transition-all',
-                  showSp500 ? 'bg-violet-500/15 text-violet-400 border border-violet-500/30' : 'opacity-40'
-                )}
-              >
-                S&P 500 {benchmarks?.summary?.alpha_sp500 !== undefined && `(${benchmarks.summary.alpha_sp500 >= 0 ? '+' : ''}${benchmarks.summary.alpha_sp500}%)`}
-              </button>
-              <button
-                onClick={() => setShowEuroStoxx((v) => !v)}
-                className={cn(
-                  'au-chip text-[11px] font-bold transition-all',
-                  showEuroStoxx ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30' : 'opacity-40'
-                )}
-              >
-                Euro Stoxx 50
-              </button>
-            </div>
+    <motion.div variants={stagger} initial="hidden" animate="show" className="grid grid-cols-12 gap-4 md:gap-5">
+      <div className="col-span-12">
+        <PageHeader eyebrow="Rentabilidad y riesgo" title="Analítica" subtitle="Rentabilidad ponderada por tiempo frente a los grandes índices, perfil de riesgo y estacionalidad." />
+      </div>
+
+      {/* ── Benchmarks ─────────────────────────────────────── */}
+      <Glass className="col-span-12 xl:col-span-8 p-5">
+        <CardHeader
+          eyebrow="TWR comparado"
+          title="Cartera vs. índices"
+          right={
+            s && (
+              <div className="flex gap-2">
+                <span className={cn('chip', s.alpha_msci >= 0 ? 'chip-gain' : 'chip-loss')}>α MSCI {pct(s.alpha_msci)}</span>
+                <span className={cn('chip hidden sm:inline-flex', s.alpha_sp500 >= 0 ? 'chip-gain' : 'chip-loss')}>α S&P {pct(s.alpha_sp500)}</span>
+              </div>
+            )
           }
-        >
-          <div className="h-[280px] w-full" data-private>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={benchmarks?.points || []}
-                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+        />
+        <div className="flex flex-wrap gap-2 mb-4">
+          {SERIES.map((x) => {
+            const active = on[x.key]
+            const v = s?.[x.key as keyof typeof s] as number | undefined
+            return (
+              <button
+                key={x.key}
+                disabled={'fixed' in x}
+                onClick={() => setOn((o) => ({ ...o, [x.key]: !o[x.key] }))}
+                className={cn('flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[12px] transition', active ? 'border-[var(--line-strong)] bg-[var(--surface-2)] text-[var(--text)]' : 'border-[var(--line)] text-[var(--muted)] opacity-60 hover:opacity-100')}
               >
-                <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
-                <XAxis
-                  dataKey="date"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#64748b', fontSize: 10 }}
-                  minTickGap={40}
-                  tickFormatter={(v) => v ? v.slice(5) : ''}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#64748b', fontSize: 10 }}
-                  tickFormatter={(v) => `${v > 0 ? '+' : ''}${v}%`}
-                />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null
-                    const p = payload[0].payload
-                    return (
-                      <div className="au-tooltip font-mono text-xs">
-                        <p className="text-[var(--au-muted)] mb-1 font-bold">{p.date}</p>
-                        <p className="text-teal-400 font-bold">Cartera: +{p.portfolio_twr?.toFixed(2)}%</p>
-                        {showMsci && <p className="text-amber-400">MSCI World: +{p.msci_world?.toFixed(2)}%</p>}
-                        {showSp500 && <p className="text-violet-400">S&P 500: +{p.sp500?.toFixed(2)}%</p>}
-                        {showEuroStoxx && <p className="text-sky-400">Euro Stoxx: +{p.eurostoxx50?.toFixed(2)}%</p>}
-                      </div>
-                    )
-                  }}
-                />
-                <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" />
-
-                {/* Benchmark Lines */}
-                {showEuroStoxx && (
-                  <Line
-                    type="monotone"
-                    dataKey="eurostoxx50"
-                    stroke="#38bdf8"
-                    strokeWidth={1.5}
-                    dot={false}
-                    isAnimationActive={false}
-                  />
-                )}
-                {showMsci && (
-                  <Line
-                    type="monotone"
-                    dataKey="msci_world"
-                    stroke="#fbbf24"
-                    strokeWidth={1.5}
-                    dot={false}
-                    isAnimationActive={false}
-                  />
-                )}
-                {showSp500 && (
-                  <Line
-                    type="monotone"
-                    dataKey="sp500"
-                    stroke="#a78bfa"
-                    strokeWidth={1.5}
-                    dot={false}
-                    isAnimationActive={false}
-                  />
-                )}
-
-                {/* Portfolio Line (Hero) */}
-                <Line
-                  type="monotone"
-                  dataKey="portfolio_twr"
-                  stroke="#2dd4bf"
-                  strokeWidth={3}
-                  dot={false}
-                  isAnimationActive={true}
-                />
+                <span className="w-2 h-2 rounded-full" style={{ background: x.color, boxShadow: active ? `0 0 10px ${x.color}` : undefined }} />
+                {x.label}
+                {v != null && <span className="num font-semibold">{pct(v, 1)}</span>}
+              </button>
+            )
+          })}
+        </div>
+        <div className="h-[300px]">
+          {isLoading ? (
+            <Skeleton className="h-full w-full" />
+          ) : (
+            <ResponsiveContainer>
+              <LineChart data={points} margin={{ top: 5, right: 8, left: -12, bottom: 0 }}>
+                <CartesianGrid stroke="var(--grid)" vertical={false} />
+                <XAxis dataKey="date" tickFormatter={(d) => new Date(d).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })} axisLine={false} tickLine={false} tick={{ fill: 'var(--faint)', fontSize: 10 }} minTickGap={40} />
+                <YAxis tickFormatter={(v) => `${v}%`} axisLine={false} tickLine={false} tick={{ fill: 'var(--faint)', fontSize: 10 }} width={46} />
+                <ReferenceLine y={0} stroke="var(--line-strong)" />
+                <Tooltip content={<ChartTooltip fmt={{ label: (d: string) => new Date(d).toLocaleDateString('es-ES', { dateStyle: 'medium' }), value: (v: number) => pct(v) }} />} cursor={{ stroke: 'var(--line-strong)' }} />
+                {SERIES.filter((x) => on[x.key]).map((x) => (
+                  <Line key={x.key} type="monotone" dataKey={x.key} name={x.label} stroke={x.color} strokeWidth={x.key === 'portfolio_twr' ? 2.6 : 1.4} strokeOpacity={x.key === 'portfolio_twr' ? 1 : 0.85} dot={false} animationDuration={1200} />
+                ))}
               </LineChart>
             </ResponsiveContainer>
+          )}
+        </div>
+      </Glass>
+
+      {/* ── Risk gauge ─────────────────────────────────────── */}
+      <Glass className="col-span-12 md:col-span-6 xl:col-span-4 p-5">
+        <CardHeader eyebrow="Diagnóstico" title="Perfil de riesgo" />
+        <Gauge value={risk} />
+        <div className="text-center -mt-10">
+          <div className="display text-2xl font-bold">{riskLabel}</div>
+          <div className="text-[12px] text-[var(--muted)]">Volatilidad anual {pct(vol, 1, false)}</div>
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 mt-6">
+          {[
+            ['Sharpe', analytics?.sharpe_ratio?.toFixed(2) ?? '—', (analytics?.sharpe_ratio ?? 0) >= 1 ? 'gain' : undefined],
+            ['CAGR', pct(analytics?.cagr, 1), (analytics?.cagr ?? 0) >= 0 ? 'gain' : 'loss'],
+            ['Máx. drawdown', pct(analytics?.max_drawdown, 1), 'loss'],
+            ['TWR total', pct(analytics?.twr, 1), (analytics?.twr ?? 0) >= 0 ? 'gain' : 'loss'],
+          ].map(([k, v, t]) => (
+            <div key={k} className="rounded-2xl border border-[var(--line)] bg-[var(--surface-2)] p-3">
+              <div className="text-[11px] text-[var(--muted)]">{k}</div>
+              <div className={cn('num text-lg font-semibold', t === 'gain' && 'text-[var(--gain)]', t === 'loss' && 'text-[var(--loss)]')}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </Glass>
+
+      {/* ── Monthly heatmap ────────────────────────────────── */}
+      <Glass className="col-span-12 md:col-span-6 xl:col-span-7 p-5 overflow-x-auto">
+        <CardHeader eyebrow="Estacionalidad" title="Rentabilidad mensual" />
+        <div className="min-w-[560px]">
+          <div className="grid grid-cols-[48px_repeat(12,1fr)_64px] gap-1.5 mb-1.5 text-[10.5px] text-[var(--muted)] text-center">
+            <span />
+            {MONTHS.map((m, i) => <span key={i}>{m}</span>)}
+            <span className="text-right pr-1">Año</span>
           </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-4 mt-4 pt-4 border-t border-[var(--au-border)] text-xs">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-teal-400" />
-              <span className="font-bold text-[var(--au-text)]">Cartera Inversora</span>
-              <span className="au-chip text-[11px] text-teal-400 font-bold">
-                TWR +{analytics?.twr?.toFixed(2) || '16.50'}%
-              </span>
+          {matrix.map((row, ri) => (
+            <div key={row.y} className="grid grid-cols-[48px_repeat(12,1fr)_64px] gap-1.5 mb-1.5 items-center">
+              <span className="num text-[12px] text-[var(--text-2)]">{row.y}</span>
+              {row.months.map((v, mi) => (
+                <motion.div
+                  key={mi}
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: ri * 0.08 + mi * 0.025, duration: 0.4, ease }}
+                  title={v == null ? '' : pct(v)}
+                  className="h-9 rounded-lg grid place-items-center num text-[10.5px] font-semibold hover:scale-110 hover:z-10 transition-transform cursor-default"
+                  style={heat(v)}
+                >
+                  {v == null ? '' : v.toFixed(1)}
+                </motion.div>
+              ))}
+              <span className={cn('num text-[12px] font-bold text-right pr-1', row.total >= 0 ? 'text-[var(--gain)]' : 'text-[var(--loss)]')}>{pct(row.total, 1)}</span>
             </div>
+          ))}
+          {!matrix.length && <Skeleton className="h-40 w-full" />}
+        </div>
+      </Glass>
 
-            <div className="flex items-center gap-2 text-[var(--au-muted)] font-mono">
-              <span>Alfa vs Mercado:</span>
-              <span className="text-teal-400 font-bold">
-                +{benchmarks?.summary?.alpha_msci?.toFixed(2) || '3.20'}%
-              </span>
-            </div>
-          </div>
-        </AuroraCard>
+      {/* ── Underwater ─────────────────────────────────────── */}
+      <Glass className="col-span-12 xl:col-span-5 p-5">
+        <CardHeader eyebrow="Caídas desde máximos" title="Drawdown" right={<span className="chip chip-loss">{pct(Math.min(0, ...underwater.map((u) => u.dd)), 1)}</span>} />
+        <div className="h-[230px]">
+          <ResponsiveContainer>
+            <AreaChart data={underwater} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+              <defs>
+                <linearGradient id="ddFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--loss)" stopOpacity={0.05} />
+                  <stop offset="100%" stopColor="var(--loss)" stopOpacity={0.5} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="date" tickFormatter={(d) => new Date(d).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })} axisLine={false} tickLine={false} tick={{ fill: 'var(--faint)', fontSize: 10 }} minTickGap={40} />
+              <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} axisLine={false} tickLine={false} tick={{ fill: 'var(--faint)', fontSize: 10 }} width={42} />
+              <Tooltip content={<ChartTooltip fmt={{ label: (d: string) => new Date(d).toLocaleDateString('es-ES', { dateStyle: 'medium' }), value: (v: number) => pct(v) }} />} />
+              <Area type="monotone" dataKey="dd" name="Drawdown" stroke="var(--loss)" strokeWidth={1.5} fill="url(#ddFill)" animationDuration={1200} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Glass>
 
-        {/* Right: Diagnóstico de Riesgo y Resiliencia */}
-        <AuroraCard
-          className="lg:col-span-4 p-6 flex flex-col justify-between"
-          title="Diagnóstico de Riesgo"
-          subtitle="Métricas avanzadas de preservación de capital"
-        >
-          {/* Semicircular Gauge Mockup */}
-          <div className="flex flex-col items-center justify-center my-3 relative">
-            <div className="w-40 h-20 overflow-hidden relative">
-              <div className="w-40 h-40 rounded-full border-[12px] border-[var(--au-chip)] border-t-teal-400 border-r-teal-400 rotate-[-45deg] transition-transform" />
-            </div>
-            <div className="text-center mt-2">
-              <p className="text-xs font-bold text-[var(--au-muted)] uppercase tracking-wider">
-                Perfil de Riesgo
-              </p>
-              <p className="text-xl font-extrabold text-[var(--au-text)] font-mono">
-                Moderado 6/10
-              </p>
-            </div>
-          </div>
+      {/* ── Asset diverging bars ───────────────────────────── */}
+      <Glass className="col-span-12 p-5">
+        <CardHeader eyebrow="Plusvalía latente" title="Rentabilidad por activo" />
+        <div className="space-y-2">
+          {assets.map((a, i) => {
+            const w = (Math.abs(a.unrealized_pnl_pct) / maxAbs) * 50
+            const pos = a.unrealized_pnl_pct >= 0
+            return (
+              <div key={a.isin} className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)_70px] items-center gap-3 group">
+                <span className="text-[12px] text-[var(--text-2)] truncate group-hover:text-[var(--text)] transition">{a.name}</span>
+                <div className="relative h-6">
+                  <div className="absolute left-1/2 top-0 bottom-0 w-px bg-[var(--line-strong)]" />
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${w}%` }}
+                    transition={{ duration: 0.9, delay: i * 0.04, ease }}
+                    className={cn('absolute top-1 bottom-1 rounded-md', pos ? 'left-1/2' : 'right-1/2')}
+                    style={{
+                      background: pos ? 'linear-gradient(90deg, color-mix(in oklab, var(--gain) 35%, transparent), var(--gain))' : 'linear-gradient(270deg, color-mix(in oklab, var(--loss) 35%, transparent), var(--loss))',
+                    }}
+                  />
+                </div>
+                <span className={cn('num text-[12px] font-semibold text-right', pos ? 'text-[var(--gain)]' : 'text-[var(--loss)]')}>{pct(a.unrealized_pnl_pct, 1)}</span>
+              </div>
+            )
+          })}
+        </div>
+      </Glass>
+    </motion.div>
+  )
+}
 
-          {/* Metric Rows */}
-          <div className="space-y-3 font-mono text-xs">
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--au-chip)]">
-              <span className="text-[var(--au-muted)]">Ratio Sharpe</span>
-              <span className="font-bold text-[var(--au-text)]">
-                {analytics?.sharpe_ratio?.toFixed(2) || '1.12'}
-              </span>
-            </div>
+function heat(v: number | null): React.CSSProperties {
+  if (v == null) return { background: 'var(--surface-2)', color: 'transparent' }
+  const k = Math.min(Math.abs(v) / 5, 1)
+  const c = v >= 0 ? 'var(--gain)' : 'var(--loss)'
+  return {
+    background: `color-mix(in oklab, ${c} ${Math.round(12 + k * 70)}%, transparent)`,
+    color: k > 0.55 ? '#04111a' : 'var(--text)',
+  }
+}
 
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--au-chip)]">
-              <span className="text-[var(--au-muted)]">Ratio Sortino</span>
-              <span className="font-bold text-teal-400">1.58</span>
-            </div>
-
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--au-chip)]">
-              <span className="text-[var(--au-muted)]">Volatilidad Anual</span>
-              <span className="font-bold text-[var(--au-text)]">
-                {analytics?.volatility?.toFixed(1) || '9.4'}%
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--au-chip)]">
-              <span className="text-[var(--au-muted)]">Máximo Drawdown</span>
-              <span className="font-bold text-rose-400">
-                {analytics?.max_drawdown?.toFixed(1) || '−7.2'}%
-              </span>
-            </div>
-          </div>
-        </AuroraCard>
-      </div>
-
-      {/* ─────────────────────────────────────────────────────────────
-          2. MONTHLY RETURNS MATRIX & RELATIVE ASSET RETURNS
-          ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Heatmap Matrix: Matriz de Rendimientos Mensuales */}
-        <AuroraCard
-          className="lg:col-span-7 p-6"
-          title="Matriz de Rendimientos Mensuales"
-          subtitle="Mapa térmico de rendimiento por año y mes"
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse font-mono text-xs">
-              <thead>
-                <tr>
-                  <th className="text-left py-2 px-2 text-[var(--au-muted)] font-bold">Año</th>
-                  {monthNames.map((m) => (
-                    <th key={m} className="py-2 px-1 text-center text-[var(--au-muted)] font-semibold text-[11px]">
-                      {m}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyMatrix.map((row) => (
-                  <tr key={row.year} className="border-t border-[var(--au-border)]">
-                    <td className="py-2.5 px-2 font-bold text-[var(--au-text)]">
-                      {row.year}
-                    </td>
-                    {row.months.map((val, idx) => {
-                      if (val === null) {
-                        return (
-                          <td key={idx} className="py-2.5 px-1 text-center text-[var(--au-faint)]">
-                            —
-                          </td>
-                        )
-                      }
-                      const isGain = val >= 0
-                      const bgIntensity = Math.min(Math.abs(val) / 4, 1)
-
-                      return (
-                        <td
-                          key={idx}
-                          className="py-2.5 px-1 text-center rounded-md font-bold text-[10px]"
-                          style={{
-                            backgroundColor: isGain
-                              ? `rgba(45, 212, 191, ${0.12 + bgIntensity * 0.3})`
-                              : `rgba(251, 113, 133, ${0.12 + bgIntensity * 0.3})`,
-                            color: isGain ? '#2dd4bf' : '#fb7185',
-                          }}
-                        >
-                          {isGain ? '+' : ''}{val.toFixed(1)}%
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </AuroraCard>
-
-        {/* Diverging Bar Chart: Rendimiento Relativo por Activo */}
-        <AuroraCard
-          className="lg:col-span-5 p-6"
-          title="Rendimiento Relativo por Activo"
-          subtitle="Ganancia acumulada generada por cada fondo"
-        >
-          <div className="h-[210px] w-full" data-private>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                layout="vertical"
-                data={assetReturns.slice(0, 6)}
-                margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
-              >
-                <CartesianGrid horizontal={false} stroke="rgba(255,255,255,0.04)" />
-                <XAxis
-                  type="number"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#64748b', fontSize: 10 }}
-                  tickFormatter={(v) => `${v}%`}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 10 }}
-                  width={110}
-                />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null
-                    const d = payload[0].payload
-                    return (
-                      <div className="au-tooltip font-mono text-xs">
-                        <p className="font-bold text-[var(--au-text)]">{d.name}</p>
-                        <p className={d.pnlPct >= 0 ? 'text-teal-400 font-bold' : 'text-rose-400 font-bold'}>
-                          Rentabilidad: {d.pnlPct >= 0 ? '+' : ''}{d.pnlPct.toFixed(2)}%
-                        </p>
-                      </div>
-                    )
-                  }}
-                />
-                <ReferenceLine x={0} stroke="rgba(255,255,255,0.15)" />
-                <Bar dataKey="pnlPct" radius={[0, 4, 4, 0]}>
-                  {assetReturns.slice(0, 6).map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.pnlPct >= 0 ? '#2dd4bf' : '#fb7185'}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </AuroraCard>
-      </div>
-    </div>
+function Gauge({ value }: { value: number }) {
+  const r = 90
+  const c = Math.PI * r
+  return (
+    <svg viewBox="0 0 220 130" className="w-full max-w-[280px] mx-auto block">
+      <defs>
+        <linearGradient id="gaugeG" x1="0" x2="1">
+          <stop offset="0%" stopColor="#2dd4bf" />
+          <stop offset="50%" stopColor="#a78bfa" />
+          <stop offset="100%" stopColor="#fb7185" />
+        </linearGradient>
+      </defs>
+      <path d="M20 115 A90 90 0 0 1 200 115" fill="none" stroke="var(--surface-2)" strokeWidth="14" strokeLinecap="round" />
+      <motion.path
+        d="M20 115 A90 90 0 0 1 200 115"
+        fill="none"
+        stroke="url(#gaugeG)"
+        strokeWidth="14"
+        strokeLinecap="round"
+        strokeDasharray={c}
+        initial={{ strokeDashoffset: c }}
+        animate={{ strokeDashoffset: c * (1 - value / 100) }}
+        transition={{ duration: 1.6, ease }}
+        style={{ filter: 'drop-shadow(0 0 8px rgba(167,139,250,.5))' }}
+      />
+      {[0, 25, 50, 75, 100].map((t) => {
+        const a = Math.PI * (1 - t / 100)
+        return <circle key={t} cx={110 + Math.cos(a) * 72} cy={115 - Math.sin(a) * 72} r="1.6" fill="var(--faint)" />
+      })}
+    </svg>
   )
 }

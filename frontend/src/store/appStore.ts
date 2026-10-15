@@ -5,6 +5,7 @@ import {
   getUserProfileById,
   generateRealisticPerformanceSeries,
 } from '@/lib/mockData'
+export type { UserProfile }
 import { hashPassword, verifyPassword } from '@/lib/security'
 import { apiUrl } from '@/api/config'
 

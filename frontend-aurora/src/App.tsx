@@ -1,12 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
-import { Shell } from '~/components/layout/Shell'
-import { OverviewPage } from '~/pages/OverviewPage'
-import { PositionsPage } from '~/pages/PositionsPage'
-import { AnalyticsPage } from '~/pages/AnalyticsPage'
-import { MarketPage } from '~/pages/MarketPage'
-import { TransactionsPage } from '~/pages/TransactionsPage'
-import { LoginPage } from '~/pages/LoginPage'
+import { Shell } from './Shell'
+import { OverviewPage } from './pages/OverviewPage'
+import { PositionsPage } from './pages/PositionsPage'
+import { AnalyticsPage } from './pages/AnalyticsPage'
+import { MarketPage } from './pages/MarketPage'
+import { TransactionsPage } from './pages/TransactionsPage'
+import { LoginPage } from './pages/LoginPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
