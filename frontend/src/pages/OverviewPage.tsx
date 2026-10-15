@@ -576,41 +576,6 @@ export function OverviewPage() {
     }
   }, [returnsPeriodMode, shortTermMetrics, analytics])
 
-  const perfMetrics = useMemo(() => {
-    if (!performance || performance.length === 0) return null
-    const valid = performance
-      .filter((p) => p && p.date && typeof p.value === 'number' && !isNaN(p.value))
-      .sort((a, b) => a.date.localeCompare(b.date))
-    if (valid.length === 0) return null
-
-    const first = valid[0]
-    const last = valid[valid.length - 1]
-    let maxPoint = valid[0]
-    let minPoint = valid[0]
-    for (const p of valid) {
-      if (p.value > maxPoint.value) maxPoint = p
-      if (p.value < minPoint.value) minPoint = p
-    }
-
-    const currentVal = last.value
-    const maxVal = maxPoint.value
-    const drawdownPct = maxVal > 0 ? ((currentVal - maxVal) / maxVal) * 100 : 0
-
-    const periodInflow = (last.invested ?? 0) - (first.invested ?? 0)
-    const periodProfit = (last.value - first.value) - periodInflow
-    const periodReturnPct = first.value > 0 ? (periodProfit / first.value) * 100 : 0
-
-    return {
-      first,
-      last,
-      maxPoint,
-      minPoint,
-      drawdownPct,
-      periodProfit,
-      periodReturnPct,
-    }
-  }, [performance])
-
   return (
     <div className="flex flex-col gap-4 pb-8">
       {/* Live Market Ticker */}
@@ -994,134 +959,28 @@ export function OverviewPage() {
           <div className="px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
             <div data-private className="flex-1 flex flex-col justify-start min-h-0">
               {isPeriodUpdating && chartView === 'evolution' ? (
-                <PerformanceChartSkeleton height={260} />
+                <PerformanceChartSkeleton height={310} />
               ) : chartView === 'evolution' ? (
                 performance.length > 0 ? (
                   <PerformanceChart
                     data={performance}
-                    height={260}
+                    height={310}
                     chartMode={perfChartMode}
                     showInvested={perfShowInvested}
                     showMilestones={false}
                     showFooterStrip={false}
                   />
                 ) : (
-                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  <div className="flex h-[310px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                     Sin datos de evolución
                   </div>
                 )
               ) : (
                 <div className="py-0.5 flex-1 flex flex-col justify-center min-h-0">
-                  <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="260px" />
+                  <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="310px" />
                 </div>
               )}
             </div>
-
-            {/* Milestone Strip: sólo para vista Curva de evolución */}
-            {chartView === 'evolution' && (
-              isPeriodUpdating ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0 animate-pulse">
-                  <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
-                  <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
-                  <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
-                  <div className="h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
-                </div>
-              ) : perfMetrics ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
-                {/* Max Peak */}
-                <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-                  title={`Máximo del periodo (ATH): ${fmt.currency(perfMetrics.maxPoint.value)}`}
-                >
-                  <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                    <TrendingUp size={14} />
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Máx:</span>
-                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
-                      {fmt.currency(perfMetrics.maxPoint.value)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Period Low */}
-                <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-                  title={`Mínimo del periodo: ${fmt.currency(perfMetrics.minPoint.value)}`}
-                >
-                  <div className="p-1 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
-                    <TrendingDown size={14} />
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Mín:</span>
-                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-xs truncate">
-                      {fmt.currency(perfMetrics.minPoint.value)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Current Drawdown */}
-                <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-                  title={perfMetrics.drawdownPct >= -0.05 ? 'La cartera está en máximos del periodo' : `Distancia actual al pico: ${perfMetrics.drawdownPct.toFixed(2)}%`}
-                >
-                  <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-                    <Flame size={14} />
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Pico:</span>
-                    <span
-                      data-private
-                      className={cn(
-                        'font-mono font-extrabold text-xs truncate',
-                        perfMetrics.drawdownPct >= -0.05
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-amber-600 dark:text-amber-400'
-                      )}
-                    >
-                      {perfMetrics.drawdownPct >= -0.05 ? (
-                        <>
-                          <span className="sm:hidden">Máximos</span>
-                          <span className="hidden sm:inline">En Máximos (ATH)</span>
-                        </>
-                      ) : (
-                        `${perfMetrics.drawdownPct.toFixed(2)}%`
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Net Return */}
-                <div
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors"
-                  title={`Ganancia neta del periodo: ${fmt.currency(perfMetrics.periodProfit)} (${fmt.pct(perfMetrics.periodReturnPct)})`}
-                >
-                  <div className={cn(
-                    "p-1 rounded-lg shrink-0",
-                    perfMetrics.periodProfit >= 0
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                  )}>
-                    <ArrowUpRight size={14} />
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">Neto:</span>
-                    <span
-                      data-private
-                      className={cn(
-                        'font-mono font-extrabold text-xs truncate',
-                        perfMetrics.periodProfit >= 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      )}
-                    >
-                      {perfMetrics.periodProfit >= 0 ? '+' : ''}{fmt.currency(perfMetrics.periodProfit)}
-                      <span className="hidden sm:inline"> ({fmt.pct(perfMetrics.periodReturnPct)})</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : null)}
           </div>
         </Card>
 
