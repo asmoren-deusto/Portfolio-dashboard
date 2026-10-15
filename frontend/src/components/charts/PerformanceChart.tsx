@@ -138,7 +138,7 @@ function formatDateSpanish(dateStr: string): string {
 
 export function PerformanceChart({
   data,
-  height = 310,
+  height = 260,
   chartMode = 'currency',
   showInvested = true,
   showMilestones = false,
@@ -841,7 +841,7 @@ export function PerformanceChart({
   }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics])
 
   return (
-    <div data-private className="w-full flex flex-col justify-between select-none space-y-2">
+    <div data-private className="w-full flex flex-col justify-between flex-1 min-h-0 select-none">
       {/* Canvas Container */}
       <div data-private ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
         {/* Sweep Reveal Curtain Animation: reveals chart smoothly from left to right */}
@@ -906,134 +906,136 @@ export function PerformanceChart({
         )}
       </div>
 
-      {/* Bottom HUD Bar: Always Visible Metrics Strip (Desktop only) */}
-      {!isNativePlatform() && (
-        <div className="hidden sm:flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] text-xs h-[34px] shadow-2xs">
-          {/* Left: Patrimonio & Aportado */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <div className="flex items-center gap-1.5">
-              {selectedEntity === 'stacked' && availableBrokers.length > 1 ? (
-                <div className="flex -space-x-1 items-center shrink-0" title="Desglose apilado por entidades">
-                  {availableBrokers.map((b) => (
-                    <span
-                      key={b}
-                      className="w-2.5 h-2.5 rounded-full ring-1.5 ring-white dark:ring-[#252526] shrink-0"
-                      style={{ backgroundColor: ENTITY_CONFIGS[b]?.color || '#10b981' }}
-                    />
-                  ))}
+      {/* Bottom HUD Bar: Always Visible Metrics Strip with Matching Separator Line */}
+      <div className="pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+        {!isNativePlatform() && (
+          <div className="hidden sm:flex items-center justify-between gap-2 px-3 py-1 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] text-xs h-[32px] sm:h-[34px] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors">
+            {/* Left: Patrimonio & Aportado */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <div className="flex items-center gap-1.5">
+                {selectedEntity === 'stacked' && availableBrokers.length > 1 ? (
+                  <div className="flex -space-x-1 items-center shrink-0" title="Desglose apilado por entidades">
+                    {availableBrokers.map((b) => (
+                      <span
+                        key={b}
+                        className="w-2.5 h-2.5 rounded-full ring-1.5 ring-white dark:ring-[#252526] shrink-0"
+                        style={{ backgroundColor: ENTITY_CONFIGS[b]?.color || '#10b981' }}
+                      />
+                    ))}
+                  </div>
+                ) : selectedEntity === 'all' ? (
+                  <span className={cn(
+                    "w-2.5 h-2.5 rounded-full ring-2 shrink-0 transition-colors",
+                    (activeSelectedMetrics?.diff ?? 0) >= 0
+                      ? "bg-emerald-500 ring-emerald-500/25"
+                      : "bg-rose-500 ring-rose-500/25"
+                  )} />
+                ) : (
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 ring-2"
+                    style={{
+                      backgroundColor: ENTITY_CONFIGS[selectedEntity]?.color || '#10b981',
+                      boxShadow: `0 0 0 2px ${(ENTITY_CONFIGS[selectedEntity]?.color || '#10b981')}40`,
+                    }}
+                  />
+                )}
+                <span className="text-slate-500 dark:text-slate-400 font-medium">
+                  {selectedEntity === 'stacked'
+                    ? 'Patrimonio (Desglose):'
+                    : selectedEntity === 'all'
+                    ? 'Patrimonio Total:'
+                    : `${ENTITY_CONFIGS[selectedEntity]?.label || selectedEntity}:`}
+                </span>
+                <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
+                  {chartMode === 'currency'
+                    ? fmt.currency(activeSelectedMetrics?.val)
+                    : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
+                </span>
+              </div>
+
+              {showInvested && chartMode === 'currency' && activeSelectedMetrics?.inv !== undefined && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-0.5 border-t-2 border-dashed border-indigo-500 dark:border-indigo-400 shrink-0" />
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
+                  <span data-private className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                    {fmt.currency(activeSelectedMetrics.inv)}
+                  </span>
                 </div>
-              ) : selectedEntity === 'all' ? (
-                <span className={cn(
-                  "w-2.5 h-2.5 rounded-full ring-2 shrink-0 transition-colors",
-                  (activeSelectedMetrics?.diff ?? 0) >= 0
-                    ? "bg-emerald-500 ring-emerald-500/25"
-                    : "bg-rose-500 ring-rose-500/25"
-                )} />
-              ) : (
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0 ring-2"
-                  style={{
-                    backgroundColor: ENTITY_CONFIGS[selectedEntity]?.color || '#10b981',
-                    boxShadow: `0 0 0 2px ${(ENTITY_CONFIGS[selectedEntity]?.color || '#10b981')}40`,
-                  }}
-                />
               )}
-              <span className="text-slate-500 dark:text-slate-400 font-medium">
-                {selectedEntity === 'stacked'
-                  ? 'Patrimonio (Desglose):'
-                  : selectedEntity === 'all'
-                  ? 'Patrimonio Total:'
-                  : `${ENTITY_CONFIGS[selectedEntity]?.label || selectedEntity}:`}
-              </span>
-              <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
+            </div>
+
+            {/* Right: Beneficio & Fecha */}
+            <div className="flex items-center justify-end gap-2">
+              {activeSelectedMetrics && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Beneficio:</span>
+                  <span
+                    data-private
+                    className={cn(
+                      'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
+                      activeSelectedMetrics.diff >= 0
+                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
+                        : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
+                    )}
+                  >
+                    {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
+                  </span>
+                </div>
+              )}
+
+              {activePoint?.date && (
+                <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-[#1e1e1e] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.08] shrink-0">
+                  <Calendar size={11} className={hoveredPoint ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'} />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {formatDateSpanish(activePoint.date)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Native / Mobile: Leyenda con los datos debajo del gráfico */}
+        {activeSelectedMetrics && (
+          <div
+            data-private
+            className={cn(
+              "w-full items-center justify-between gap-2 px-1 py-1 text-xs select-none",
+              isNativePlatform() ? "flex" : "flex sm:hidden"
+            )}
+          >
+            <div className="flex items-center gap-1.5 font-mono">
+              <span className={cn(
+                "w-1.5 h-1.5 rounded-full shrink-0 transition-colors",
+                (activeSelectedMetrics?.diff ?? 0) >= 0 ? "bg-emerald-500" : "bg-rose-500"
+              )} />
+              <span data-private className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm">
                 {chartMode === 'currency'
-                  ? fmt.currency(activeSelectedMetrics?.val)
+                  ? fmt.currency(activeSelectedMetrics.val)
                   : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
               </span>
             </div>
 
-            {showInvested && chartMode === 'currency' && activeSelectedMetrics?.inv !== undefined && (
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-0.5 border-t-2 border-dashed border-indigo-500 dark:border-indigo-400 shrink-0" />
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
-                <span data-private className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
-                  {fmt.currency(activeSelectedMetrics.inv)}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Right: Beneficio & Fecha */}
-          <div className="flex items-center justify-end gap-2">
-            {activeSelectedMetrics && (
-              <div className="flex items-center gap-1.5">
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Beneficio:</span>
-                <span
-                  data-private
-                  className={cn(
-                    'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
-                    activeSelectedMetrics.diff >= 0
-                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
-                      : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
-                  )}
-                >
-                  {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
-                </span>
-              </div>
-            )}
+            <span
+              data-private
+              className={cn(
+                'font-mono font-bold px-1.5 py-0.5 rounded text-[10.5px]',
+                activeSelectedMetrics.diff >= 0
+                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
+                  : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
+              )}
+            >
+              {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
+            </span>
 
             {activePoint?.date && (
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-[#1e1e1e] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.08] shrink-0">
-                <Calendar size={11} className={hoveredPoint ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'} />
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
-                  {formatDateSpanish(activePoint.date)}
-                </span>
-              </div>
+              <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 shrink-0">
+                {formatDateSpanish(activePoint.date)}
+              </span>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Native / Mobile: Leyenda con los datos debajo del gráfico */}
-      {activeSelectedMetrics && (
-        <div
-          data-private
-          className={cn(
-            "w-full items-center justify-between gap-2 px-1 py-1 text-xs select-none",
-            isNativePlatform() ? "flex" : "flex sm:hidden"
-          )}
-        >
-          <div className="flex items-center gap-1.5 font-mono">
-            <span className={cn(
-              "w-1.5 h-1.5 rounded-full shrink-0 transition-colors",
-              (activeSelectedMetrics?.diff ?? 0) >= 0 ? "bg-emerald-500" : "bg-rose-500"
-            )} />
-            <span data-private className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm">
-              {chartMode === 'currency'
-                ? fmt.currency(activeSelectedMetrics.val)
-                : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
-            </span>
-          </div>
-
-          <span
-            data-private
-            className={cn(
-              'font-mono font-bold px-1.5 py-0.5 rounded text-[10.5px]',
-              activeSelectedMetrics.diff >= 0
-                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
-                : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
-            )}
-          >
-            {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
-          </span>
-
-          {activePoint?.date && (
-            <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 shrink-0">
-              {formatDateSpanish(activePoint.date)}
-            </span>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Useful Milestones Strip */}
       {metrics && showFooterStrip && (
@@ -1129,15 +1131,15 @@ export function PerformanceChart({
 }
 
 export function PerformanceChartSkeleton({
-  height = 310,
+  height = 260,
 }: {
   height?: number
   showFooterStrip?: boolean
 }) {
   return (
-    <div style={{ height }} className="w-full flex flex-col justify-between py-1 select-none relative overflow-hidden animate-pulse">
+    <div className="w-full flex flex-col justify-between flex-1 select-none relative overflow-hidden animate-pulse">
       {/* Clean Plot Area Skeleton (Authentic loading box with dashed reference lines, NO fake curves) */}
-      <div className="flex-1 w-full relative mb-2 rounded-xl overflow-hidden bg-slate-100/40 dark:bg-white/[0.015] border border-slate-200/40 dark:border-white/[0.04] flex flex-col justify-between p-4">
+      <div style={{ height }} className="w-full relative mb-0 rounded-xl overflow-hidden bg-slate-100/40 dark:bg-white/[0.015] border border-slate-200/40 dark:border-white/[0.04] flex flex-col justify-between p-4">
         <div className="w-full border-b border-dashed border-slate-200/60 dark:border-white/[0.04]" />
         <div className="w-full border-b border-dashed border-slate-200/60 dark:border-white/[0.04]" />
         <div className="w-full border-b border-dashed border-slate-200/60 dark:border-white/[0.04]" />
@@ -1149,22 +1151,24 @@ export function PerformanceChartSkeleton({
         </div>
       </div>
 
-      {/* Bottom HUD Skeleton */}
-      <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] backdrop-blur-xs h-[34px]">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-white/20" />
-            <div className="w-16 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
-            <div className="w-20 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12]" />
+      {/* Bottom HUD Skeleton with Matching Separator Line */}
+      <div className="pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+        <div className="flex items-center justify-between gap-2 px-3 py-1 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] backdrop-blur-xs h-[32px] sm:h-[34px]">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-white/20" />
+              <div className="w-16 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
+              <div className="w-20 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12]" />
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 border-l border-slate-200 dark:border-white/[0.08] pl-3">
+              <div className="w-14 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
+              <div className="w-16 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12]" />
+            </div>
           </div>
-          <div className="hidden sm:flex items-center gap-1.5 border-l border-slate-200 dark:border-white/[0.08] pl-3">
-            <div className="w-14 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
-            <div className="w-16 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12]" />
+          <div className="flex items-center gap-2">
+            <div className="w-20 h-5 rounded-lg bg-slate-200/70 dark:bg-white/[0.08]" />
+            <div className="w-20 h-4 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-20 h-5 rounded-lg bg-slate-200/70 dark:bg-white/[0.08]" />
-          <div className="w-20 h-4 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
         </div>
       </div>
     </div>

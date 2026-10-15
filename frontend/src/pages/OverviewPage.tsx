@@ -956,28 +956,28 @@ export function OverviewPage() {
             </div>
           </CardHeader>
 
-          <div className="px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
-            <div data-private className="flex-1 flex flex-col justify-start min-h-0">
+          <div className="px-3 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
+            <div data-private className="flex-1 flex flex-col justify-center min-h-0">
               {isPeriodUpdating && chartView === 'evolution' ? (
-                <PerformanceChartSkeleton height={310} />
+                <PerformanceChartSkeleton height={260} />
               ) : chartView === 'evolution' ? (
                 performance.length > 0 ? (
                   <PerformanceChart
                     data={performance}
-                    height={310}
+                    height={260}
                     chartMode={perfChartMode}
                     showInvested={perfShowInvested}
                     showMilestones={false}
                     showFooterStrip={false}
                   />
                 ) : (
-                  <div className="flex h-[310px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                     Sin datos de evolución
                   </div>
                 )
               ) : (
                 <div className="py-0.5 flex-1 flex flex-col justify-center min-h-0">
-                  <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="310px" />
+                  <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="260px" />
                 </div>
               )}
             </div>
