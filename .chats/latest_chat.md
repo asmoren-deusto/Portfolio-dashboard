@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 21:21:48
+- **Fecha de exportación:** 2026-10-15 21:29:35
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 27
+- **Total de interacciones registradas:** 29
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -410,5 +410,24 @@ He restablecido el **desglose apilado (stacked) de entidades por defecto** en la
 ### 👤 Usuario (2026-10-15 19:17:33)
 
 revierte v3.0.66
+
+---
+
+### 🤖 Asistente (2026-10-15 19:21:50)
+
+He revertido los cambios introducidos en la versión **`v3.0.66`**:
+
+- En [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx):
+  - Se ha restablecido el espaciado global de la página a `gap-4` (en lugar de `gap-2.5 sm:gap-3`).
+  - Se ha restablecido la separación superior de *Métricas del Periodo* a `pt-0.5` (eliminando el margen negativo `-mt-1 sm:-mt-1.5`).
+- Se mantienen intactos los ajustes de apilado y leyenda de la versión `v3.0.67` en [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx).
+
+Los cambios han sido compilados y sincronizados con Git en la versión **`v3.0.68`**.
+
+---
+
+### 👤 Usuario (2026-10-15 19:19:34)
+
+elimina esos filtros de ahi, se puede filtrar usando los selectores de entidad de la parte superior de la web
 
 ---

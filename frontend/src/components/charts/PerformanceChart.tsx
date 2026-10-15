@@ -165,8 +165,9 @@ export function PerformanceChart({
 
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
-  // Entity selection: 'stacked' by default (mantiene el apilado/estacado de entidades), 'all' (Línea Cartera), o broker individual
-  const [selectedEntity, setSelectedEntity] = useState<string>('stacked')
+  const { selectedBroker } = useAppStore()
+  // Entity selection: 'stacked' by default when 'all' brokers selected (mantiene el estacado de entidades), o broker individual
+  const selectedEntity = selectedBroker === 'all' ? 'stacked' : selectedBroker.toLowerCase()
 
   // Sweep reveal animation state
   const [sweepKey, setSweepKey] = useState(0)
@@ -843,10 +844,8 @@ export function PerformanceChart({
     <div data-private className="w-full flex flex-col justify-between select-none space-y-2">
       {/* Dynamic HUD Bar with Inlined Entity Selectors (Desktop only) */}
       {!isNativePlatform() && (
-        <div className="hidden sm:flex flex-col gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
-          {/* Row 1: Metrics (Patrimonio, Aportado, Beneficio, Fecha) */}
-          <div className="flex items-center justify-between gap-2">
-            {/* Left: Patrimonio & Aportado */}
+        <div className="hidden sm:flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
+          {/* Left: Patrimonio & Aportado */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <div className="flex items-center gap-1.5">
                 {selectedEntity === 'stacked' && availableBrokers.length > 1 ? (
@@ -928,72 +927,6 @@ export function PerformanceChart({
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Row 2: Broker Selector Pills (if multiple brokers detected) */}
-          {availableBrokers.length > 1 && (
-            <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-white/[0.06]">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10.5px] font-medium text-slate-400 dark:text-slate-500">Filtrar:</span>
-                <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-200/60 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.06]">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedEntity('stacked')}
-                    className={cn(
-                      "flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
-                      selectedEntity === 'stacked'
-                        ? "bg-white dark:bg-[#252526] text-slate-900 dark:text-white shadow-2xs font-bold"
-                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                    )}
-                  >
-                    <div className="flex -space-x-1 items-center shrink-0">
-                      {availableBrokers.map((b) => (
-                        <span
-                          key={b}
-                          className="w-1.5 h-1.5 rounded-full ring-1 ring-white dark:ring-[#252526] shrink-0"
-                          style={{ backgroundColor: ENTITY_CONFIGS[b]?.color || '#10b981' }}
-                        />
-                      ))}
-                    </div>
-                    <span>Desglose Apilado</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedEntity('all')}
-                    className={cn(
-                      "px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
-                      selectedEntity === 'all'
-                        ? "bg-white dark:bg-[#252526] text-emerald-600 dark:text-emerald-400 shadow-2xs font-bold"
-                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                    )}
-                  >
-                    Línea Cartera
-                  </button>
-                  {availableBrokers.map((b) => {
-                    const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
-                    const isSelected = selectedEntity === b
-                    return (
-                      <button
-                        key={b}
-                        type="button"
-                        onClick={() => setSelectedEntity(b)}
-                        className={cn(
-                          "flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
-                          isSelected
-                            ? "bg-white dark:bg-[#252526] shadow-2xs font-bold"
-                            : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                        )}
-                        style={isSelected ? { color: cfg.color } : undefined}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
-                        <span>{cfg.label}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -1006,57 +939,7 @@ export function PerformanceChart({
             isNativePlatform() ? "flex" : "flex sm:hidden"
           )}
         >
-          {/* Quick broker switch on mobile */}
-          {availableBrokers.length > 1 && (
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
-              <button
-                type="button"
-                onClick={() => setSelectedEntity('stacked')}
-                className={cn(
-                  "px-2 py-0.5 rounded text-[10px] font-bold shrink-0 transition-colors",
-                  selectedEntity === 'stacked'
-                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                    : "bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-slate-300"
-                )}
-              >
-                Apilado
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedEntity('all')}
-                className={cn(
-                  "px-2 py-0.5 rounded text-[10px] font-bold shrink-0 transition-colors",
-                  selectedEntity === 'all'
-                    ? "bg-emerald-500 text-white"
-                    : "bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-slate-300"
-                )}
-              >
-                Total
-              </button>
-              {availableBrokers.map((b) => {
-                const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
-                const isSelected = selectedEntity === b
-                return (
-                  <button
-                    key={b}
-                    type="button"
-                    onClick={() => setSelectedEntity(b)}
-                    className={cn(
-                      "px-2 py-0.5 rounded text-[10px] font-bold shrink-0 transition-colors",
-                      isSelected
-                        ? "text-white"
-                        : "bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-slate-300"
-                    )}
-                    style={isSelected ? { backgroundColor: cfg.color } : undefined}
-                  >
-                    {cfg.label}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          <div className="flex items-center gap-1.5 font-mono ml-auto">
+          <div className="flex items-center gap-1.5 font-mono">
             <span className={cn(
               "w-1.5 h-1.5 rounded-full shrink-0 transition-colors",
               (activeSelectedMetrics?.diff ?? 0) >= 0 ? "bg-emerald-500" : "bg-rose-500"
