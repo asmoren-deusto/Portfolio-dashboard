@@ -9,7 +9,6 @@ export function useRefreshPortfolio() {
     isRefreshingPrices,
     setIsRefreshingPrices,
     triggerRefreshAnimation,
-    setNavAlertNotification,
   } = useAppStore()
   const queryClient = useQueryClient()
   const [refreshSuccess, setRefreshSuccess] = useState(false)
@@ -67,23 +66,10 @@ export function useRefreshPortfolio() {
       setTimeout(() => setRefreshSuccess(false), 3000)
 
       if (refreshResult) {
-        const updatedItems = refreshResult.updated_items || []
-        const allItems = refreshResult.all_items || []
-        const totalCount = refreshResult.count || allItems.length || updatedItems.length
         const alertId = refreshResult.alert?.id || `nav_${Date.now()}`
-
         try {
           localStorage.setItem('portfolio_last_seen_nav_alert_id', alertId)
         } catch {}
-
-        setNavAlertNotification({
-          id: alertId,
-          timestamp: refreshResult.alert?.timestamp || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-          updatedCount: updatedItems.length,
-          totalCount,
-          items: updatedItems.length > 0 ? updatedItems : allItems.slice(0, 4),
-          allCheckedItems: allItems,
-        })
       }
     } catch (err) {
       console.warn('Error fetching live NAVs:', err)
@@ -92,7 +78,7 @@ export function useRefreshPortfolio() {
     } finally {
       setIsRefreshingPrices(false)
     }
-  }, [currentUser, isRefreshingPrices, queryClient, setIsRefreshingPrices, setNavAlertNotification, triggerRefreshAnimation])
+  }, [currentUser, isRefreshingPrices, queryClient, setIsRefreshingPrices, triggerRefreshAnimation])
 
   return { handleRefresh, isRefreshingPrices, refreshSuccess }
 }

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 20:18:18
+- **Fecha de exportación:** 2026-10-15 20:23:07
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 7
+- **Total de interacciones registradas:** 9
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -135,5 +135,26 @@ Los movimientos tienen una **lógica estratégica sólida**:
 ### 👤 Usuario (2026-10-15 18:14:26)
 
 elimina ese mockup de pseudografica al cargar la evolucion patrimonial
+
+---
+
+### 🤖 Asistente (2026-10-15 18:18:20)
+
+He eliminado por completo la pseudográfica / mockup simulado de la pantalla de carga.
+
+### Cambios realizados:
+- En [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx#L1051-L1110), se eliminó toda la curva SVG verde artificial y el punto pulsante simulado.
+- Ahora el estado de carga muestra un **esqueleto limpio y minimalista**:
+  - Panel superior atenuado con placeholders neutros.
+  - Lienzo de carga neutro con líneas sutiles de referencia discontinuas y timestamps en la base, sin curvas ficticias ni trazos inventados.
+  - La curva real de tu cartera entra directamente y de forma limpia una vez resueltos los datos.
+
+*Versión actualizada a **v3.0.58** y sincronizada en Git.*
+
+---
+
+### 👤 Usuario (2026-10-15 18:20:55)
+
+cada vez que actualizo me salta el popup con los navs actualizados
 
 ---
