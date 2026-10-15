@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
   Flame,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { triggerChartAnimation } from '@/lib/chartAnimation'
 
 export type ChartMode = 'currency' | 'percent'
@@ -164,6 +165,31 @@ export function PerformanceChart({
 
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
+  // Entity selection: 'all' (default, pristine Cartera Total), 'stacked' (desglose apilado), or specific broker ID
+  const [selectedEntity, setSelectedEntity] = useState<string>('all')
+
+  // Sweep reveal animation state
+  const [sweepKey, setSweepKey] = useState(0)
+  const [isSweepAnimating, setIsSweepAnimating] = useState(true)
+
+  // Trigger sweep curtain animation on data, period, or entity change
+  useEffect(() => {
+    setIsSweepAnimating(true)
+    setSweepKey(prev => prev + 1)
+  }, [data, selectedEntity, chartMode])
+
+  // Helper to safely extract broker value and invested
+  const getBrokerData = (p: PricePoint | null | undefined, brokerKey: string) => {
+    if (!p || !p.brokers) return { value: 0, invested: 0 }
+    const normKey = brokerKey.toLowerCase().replace(/[^a-z0-9]/g, '')
+    const entry = p.brokers[brokerKey] ||
+      Object.entries(p.brokers).find(([k]) => k.toLowerCase().replace(/[^a-z0-9]/g, '') === normKey)?.[1]
+    return {
+      value: entry?.value ?? 0,
+      invested: entry?.invested ?? 0,
+    }
+  }
+
   // Dynamically detect available brokers
   const availableBrokers = useMemo(() => {
     if (!data || !data.length) return []
@@ -171,7 +197,11 @@ export function PerformanceChart({
     for (const p of data) {
       if (p.brokers) {
         for (const [k, v] of Object.entries(p.brokers)) {
-          if (v && v.value > 0) found.add(k)
+          if (v && v.value > 0) {
+            const lower = k.toLowerCase().replace(/[^a-z0-9]/g, '')
+            const canonical = CANONICAL_ORDER.find(c => c === lower || c.includes(lower) || lower.includes(c)) || k.toLowerCase()
+            found.add(canonical)
+          }
         }
       }
     }
@@ -182,10 +212,7 @@ export function PerformanceChart({
   const dataRef = useRef<PricePoint[]>(data)
   dataRef.current = data
 
-  // All detected entities are always stacked automatically
-  const activeStackList = availableBrokers
-
-  // Metrics computation for selected sum
+  // Metrics computation for selected sum or single entity
   const metrics = useMemo(() => {
     if (!data || data.length === 0) return null
 
@@ -200,15 +227,30 @@ export function PerformanceChart({
         seen.add(p.date)
         let val = 0
         let inv = 0
-        if (p.brokers && activeStackList.length > 0) {
-          for (const b of activeStackList) {
-            val += p.brokers[b]?.value ?? 0
-            inv += p.brokers[b]?.invested ?? 0
-          }
-        } else {
+
+        if (selectedEntity === 'all') {
+          // Total Portfolio (Single clean curve)
           val = p.value
           inv = p.invested ?? 0
+        } else if (selectedEntity === 'stacked') {
+          // Total sum of all brokers
+          if (p.brokers && availableBrokers.length > 0) {
+            for (const b of availableBrokers) {
+              const bd = getBrokerData(p, b)
+              val += bd.value
+              inv += bd.invested
+            }
+          } else {
+            val = p.value
+            inv = p.invested ?? 0
+          }
+        } else {
+          // Individual Broker
+          const bd = getBrokerData(p, selectedEntity)
+          val = bd.value
+          inv = bd.invested
         }
+
         sumPoints.push({ date: p.date, value: Math.max(0, val), invested: Math.max(0, inv) })
       }
     }
@@ -245,7 +287,7 @@ export function PerformanceChart({
       periodInflow,
       sumPoints,
     }
-  }, [data, activeStackList])
+  }, [data, selectedEntity, availableBrokers])
 
   // Active point (crosshair hover or latest)
   const activePoint = hoveredPoint || (data.length ? data[data.length - 1] : null)
@@ -256,14 +298,24 @@ export function PerformanceChart({
     let val = 0
     let inv = 0
 
-    if (activePoint.brokers && activeStackList.length > 0) {
-      for (const b of activeStackList) {
-        val += activePoint.brokers[b]?.value ?? 0
-        inv += activePoint.brokers[b]?.invested ?? 0
-      }
-    } else {
+    if (selectedEntity === 'all') {
       val = activePoint.value
       inv = activePoint.invested ?? 0
+    } else if (selectedEntity === 'stacked') {
+      if (activePoint.brokers && availableBrokers.length > 0) {
+        for (const b of availableBrokers) {
+          const bd = getBrokerData(activePoint, b)
+          val += bd.value
+          inv += bd.invested
+        }
+      } else {
+        val = activePoint.value
+        inv = activePoint.invested ?? 0
+      }
+    } else {
+      const bd = getBrokerData(activePoint, selectedEntity)
+      val = bd.value
+      inv = bd.invested
     }
 
     const diff = inv > 0 ? val - inv : (metrics?.first ? val - metrics.first.value : 0)
@@ -277,7 +329,8 @@ export function PerformanceChart({
     }
 
     return { val, inv, diff, pct, periodPct }
-  }, [activePoint, activeStackList, metrics])
+  }, [activePoint, selectedEntity, availableBrokers, metrics])
+
 
   // Initialize Lightweight Charts
   useEffect(() => {
@@ -476,7 +529,6 @@ export function PerformanceChart({
       const inv = investedSeriesRef.current
 
       const validDates = metrics.sumPoints.map(p => p.date)
-      const n = activeStackList.length
 
       if (chartMode === 'currency') {
         // Clean up zero line if was in percent mode
@@ -497,120 +549,130 @@ export function PerformanceChart({
           entityPriceLinesRef.current = []
         }
 
-        if (n === 3) {
-          // Bottom layer: activeStackList[0] (Indexa, amber)
-          const b0 = activeStackList[0]
-          const cfg0 = ENTITY_CONFIGS[b0]
-          const pts0 = validDates.map(d => {
-            const orig = data.find(p => p.date === d)
-            return { time: d, value: orig?.brokers?.[b0]?.value ?? 0 }
-          })
-          slot0.setData(pts0)
-          slot0.applyOptions({
-            visible: true,
-            lineColor: cfg0.color,
-            topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
-            bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
-            lastValueVisible: false,
-          })
+        if (selectedEntity === 'stacked' && availableBrokers.length > 1) {
+          const n = availableBrokers.length
+          if (n >= 3) {
+            // Bottom layer: availableBrokers[0] (Indexa, amber)
+            const b0 = availableBrokers[0]
+            const cfg0 = ENTITY_CONFIGS[b0] || { color: '#f59e0b', topColorDark: 'rgba(245, 158, 11, 0.32)', topColorLight: 'rgba(245, 158, 11, 0.22)', bottomColorDark: 'rgba(245, 158, 11, 0.00)', bottomColorLight: 'rgba(245, 158, 11, 0.00)' }
+            const pts0 = validDates.map(d => {
+              const orig = data.find(p => p.date === d)
+              return { time: d, value: getBrokerData(orig, b0).value }
+            })
+            slot0.setData(pts0)
+            slot0.applyOptions({
+              visible: true,
+              lineColor: cfg0.color,
+              topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
+              bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
+              lastValueVisible: false,
+            })
 
-          // Middle layer: activeStackList[0] + activeStackList[1] (BBVA, emerald)
-          const b1 = activeStackList[1]
-          const cfg1 = ENTITY_CONFIGS[b1]
-          const pts1 = validDates.map(d => {
-            const orig = data.find(p => p.date === d)
-            const v0 = orig?.brokers?.[b0]?.value ?? 0
-            const v1 = orig?.brokers?.[b1]?.value ?? 0
-            return { time: d, value: v0 + v1 }
-          })
-          slot1.setData(pts1)
-          slot1.applyOptions({
-            visible: true,
-            lineColor: cfg1.color,
-            topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
-            bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
-            lastValueVisible: false,
-          })
+            // Middle layer: b0 + b1
+            const b1 = availableBrokers[1]
+            const cfg1 = ENTITY_CONFIGS[b1] || { color: '#10b981', topColorDark: 'rgba(16, 185, 129, 0.32)', topColorLight: 'rgba(16, 185, 129, 0.22)', bottomColorDark: 'rgba(16, 185, 129, 0.00)', bottomColorLight: 'rgba(16, 185, 129, 0.00)' }
+            const pts1 = validDates.map(d => {
+              const orig = data.find(p => p.date === d)
+              const v0 = getBrokerData(orig, b0).value
+              const v1 = getBrokerData(orig, b1).value
+              return { time: d, value: v0 + v1 }
+            })
+            slot1.setData(pts1)
+            slot1.applyOptions({
+              visible: true,
+              lineColor: cfg1.color,
+              topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
+              bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
+              lastValueVisible: false,
+            })
 
-          // Top layer: Total sum of all 3 (MyInvestor, blue)
-          const b2 = activeStackList[2]
-          const cfg2 = ENTITY_CONFIGS[b2]
-          const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
-          slot2.setData(pts2)
-          slot2.applyOptions({
-            visible: true,
-            lineColor: cfg2.color,
-            topColor: isDark ? cfg2.topColorDark : cfg2.topColorLight,
-            bottomColor: isDark ? cfg2.bottomColorDark : cfg2.bottomColorLight,
-            lastValueVisible: true, // ONLY the total shows on right axis
-            autoscaleInfoProvider: (original: any) => {
-              const res = original()
-              if (!res) return null
-              return {
-                priceRange: {
-                  minValue: 0,
-                  maxValue: res.priceRange.maxValue,
-                },
-                margins: res.margins,
-              }
-            },
-          })
-        } else if (n === 2) {
-          // Bottom layer: activeStackList[0]
-          const b0 = activeStackList[0]
-          const cfg0 = ENTITY_CONFIGS[b0]
-          const pts0 = validDates.map(d => {
-            const orig = data.find(p => p.date === d)
-            return { time: d, value: orig?.brokers?.[b0]?.value ?? 0 }
-          })
-          slot0.setData(pts0)
-          slot0.applyOptions({
-            visible: true,
-            lineColor: cfg0.color,
-            topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
-            bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
-            lastValueVisible: false,
-          })
+            // Top layer: Total sum of all 3
+            const b2 = availableBrokers[2]
+            const cfg2 = ENTITY_CONFIGS[b2] || { color: '#3b82f6', topColorDark: 'rgba(59, 130, 246, 0.32)', topColorLight: 'rgba(59, 130, 246, 0.22)', bottomColorDark: 'rgba(59, 130, 246, 0.00)', bottomColorLight: 'rgba(59, 130, 246, 0.00)' }
+            const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+            slot2.setData(pts2)
+            slot2.applyOptions({
+              visible: true,
+              lineColor: cfg2.color,
+              topColor: isDark ? cfg2.topColorDark : cfg2.topColorLight,
+              bottomColor: isDark ? cfg2.bottomColorDark : cfg2.bottomColorLight,
+              lastValueVisible: true,
+              autoscaleInfoProvider: (original: any) => {
+                const res = original()
+                if (!res) return null
+                return {
+                  priceRange: {
+                    minValue: 0,
+                    maxValue: res.priceRange.maxValue,
+                  },
+                  margins: res.margins,
+                }
+              },
+            })
+          } else if (n === 2) {
+            const b0 = availableBrokers[0]
+            const cfg0 = ENTITY_CONFIGS[b0]
+            const pts0 = validDates.map(d => {
+              const orig = data.find(p => p.date === d)
+              return { time: d, value: getBrokerData(orig, b0).value }
+            })
+            slot0.setData(pts0)
+            slot0.applyOptions({
+              visible: true,
+              lineColor: cfg0.color,
+              topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
+              bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
+              lastValueVisible: false,
+            })
 
-          slot1.applyOptions({ visible: false })
+            slot1.applyOptions({ visible: false })
 
-          // Top layer: sum of the 2 active
-          const b1 = activeStackList[1]
-          const cfg1 = ENTITY_CONFIGS[b1]
-          const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
-          slot2.setData(pts2)
-          slot2.applyOptions({
-            visible: true,
-            lineColor: cfg1.color,
-            topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
-            bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
-            lastValueVisible: true,
-            autoscaleInfoProvider: (original: any) => {
-              const res = original()
-              if (!res) return null
-              return {
-                priceRange: {
-                  minValue: 0,
-                  maxValue: res.priceRange.maxValue,
-                },
-                margins: res.margins,
-              }
-            },
-          })
-        } else if (n === 1) {
+            const b1 = availableBrokers[1]
+            const cfg1 = ENTITY_CONFIGS[b1]
+            const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+            slot2.setData(pts2)
+            slot2.applyOptions({
+              visible: true,
+              lineColor: cfg1.color,
+              topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
+              bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
+              lastValueVisible: true,
+              autoscaleInfoProvider: (original: any) => {
+                const res = original()
+                if (!res) return null
+                return {
+                  priceRange: {
+                    minValue: 0,
+                    maxValue: res.priceRange.maxValue,
+                  },
+                  margins: res.margins,
+                }
+              },
+            })
+          }
+        } else if (selectedEntity !== 'all' && selectedEntity !== 'stacked') {
+          // Single Selected Broker
           slot0.applyOptions({ visible: false })
           slot1.applyOptions({ visible: false })
 
-          // Only 1 entity: slot2 shows that entity
-          const b0 = activeStackList[0]
-          const cfg0 = ENTITY_CONFIGS[b0]
+          const cfg = ENTITY_CONFIGS[selectedEntity] || {
+            label: selectedEntity,
+            color: '#10b981',
+            topColorDark: 'rgba(16, 185, 129, 0.32)',
+            topColorLight: 'rgba(16, 185, 129, 0.22)',
+            bottomColorDark: 'rgba(16, 185, 129, 0.00)',
+            bottomColorLight: 'rgba(16, 185, 129, 0.00)',
+          }
+
           const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
           slot2.setData(pts2)
           slot2.applyOptions({
             visible: true,
-            lineColor: cfg0.color,
-            topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
-            bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
+            lineColor: cfg.color,
+            topColor: isDark ? cfg.topColorDark : cfg.topColorLight,
+            bottomColor: isDark ? cfg.bottomColorDark : cfg.bottomColorLight,
+            lineWidth: 2,
+            crosshairMarkerBackgroundColor: cfg.color,
             lastValueVisible: true,
             autoscaleInfoProvider: (original: any) => {
               const res = original()
@@ -625,6 +687,7 @@ export function PerformanceChart({
             },
           })
         } else {
+          // Cartera Total (Clean Single Area Curve matching HUD Dot)
           slot0.applyOptions({ visible: false })
           slot1.applyOptions({ visible: false })
 
@@ -700,38 +763,6 @@ export function PerformanceChart({
             markersRef.current.setMarkers([])
           }
         }
-
-        // Colored Entity Partial Value Badges on Y-Axis
-        const latestPoint = data && data.length > 0 ? data[data.length - 1] : null
-        if (latestPoint?.brokers && slot2 && n > 1) {
-          const newPriceLines: IPriceLine[] = []
-          activeStackList.forEach(b => {
-            const bVal = latestPoint.brokers?.[b]?.value ?? 0
-            if (bVal > 0) {
-              const cfg = ENTITY_CONFIGS[b] || {
-                color: '#64748b',
-                label: b,
-              }
-              try {
-                const pl = slot2.createPriceLine({
-                  price: bVal,
-                  color: cfg.color,
-                  lineWidth: 1,
-                  lineStyle: LineStyle.Dotted,
-                  lineVisible: false,
-                  axisLabelVisible: true,
-                  axisLabelColor: cfg.color,
-                  axisLabelTextColor: '#ffffff',
-                  title: '',
-                })
-                newPriceLines.push(pl)
-              } catch (e) {
-                console.warn('Error creating entity price line', e)
-              }
-            }
-          })
-          entityPriceLinesRef.current = newPriceLines
-        }
       } else {
         // Percent Mode
         slot0.applyOptions({ visible: false })
@@ -802,86 +833,199 @@ export function PerformanceChart({
       }
 
       chart.timeScale().fitContent()
-      triggerChartAnimation(containerRef.current, 1400)
+      triggerChartAnimation(containerRef.current, 1200)
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
-  }, [data, chartMode, showInvested, showMilestones, activeStackList, isDark, metrics])
+  }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics])
 
   return (
     <div data-private className="w-full flex flex-col justify-between select-none space-y-2">
       {/* Dynamic HUD Bar with Inlined Entity Selectors (Desktop only) */}
       {!isNativePlatform() && (
-        <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
-          {/* Left: Patrimonio & Aportado */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <div className="flex items-center gap-1.5">
-              <span className={cn(
-                "w-2 h-2 rounded-full ring-2 shrink-0 transition-colors",
-                (activeSelectedMetrics?.diff ?? 0) >= 0
-                  ? "bg-emerald-500 ring-emerald-500/25"
-                  : "bg-rose-500 ring-rose-500/25"
-              )} />
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Patrimonio:</span>
-              <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
-                {chartMode === 'currency'
-                  ? fmt.currency(activeSelectedMetrics?.val)
-                  : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
-              </span>
+        <div className="hidden sm:flex flex-col gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-[#181818] border border-slate-200/80 dark:border-white/[0.08] text-xs">
+          {/* Row 1: Metrics (Patrimonio, Aportado, Beneficio, Fecha) */}
+          <div className="flex items-center justify-between gap-2">
+            {/* Left: Patrimonio & Aportado */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <div className="flex items-center gap-1.5">
+                {selectedEntity === 'all' || selectedEntity === 'stacked' ? (
+                  <span className={cn(
+                    "w-2 h-2 rounded-full ring-2 shrink-0 transition-colors",
+                    (activeSelectedMetrics?.diff ?? 0) >= 0
+                      ? "bg-emerald-500 ring-emerald-500/25"
+                      : "bg-rose-500 ring-rose-500/25"
+                  )} />
+                ) : (
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0 ring-2"
+                    style={{
+                      backgroundColor: ENTITY_CONFIGS[selectedEntity]?.color || '#10b981',
+                      boxShadow: `0 0 0 2px ${(ENTITY_CONFIGS[selectedEntity]?.color || '#10b981')}40`,
+                    }}
+                  />
+                )}
+                <span className="text-slate-500 dark:text-slate-400 font-medium">
+                  {selectedEntity === 'all'
+                    ? 'Patrimonio:'
+                    : selectedEntity === 'stacked'
+                    ? 'Patrimonio Total:'
+                    : `${ENTITY_CONFIGS[selectedEntity]?.label || selectedEntity}:`}
+                </span>
+                <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
+                  {chartMode === 'currency'
+                    ? fmt.currency(activeSelectedMetrics?.val)
+                    : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
+                </span>
+              </div>
+
+              {showInvested && chartMode === 'currency' && activeSelectedMetrics?.inv !== undefined && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-0.5 border-t-2 border-dashed border-indigo-500 dark:border-indigo-400 shrink-0" />
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
+                  <span data-private className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                    {fmt.currency(activeSelectedMetrics.inv)}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {showInvested && chartMode === 'currency' && activeSelectedMetrics?.inv !== undefined && (
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-0.5 border-t-2 border-dashed border-indigo-500 dark:border-indigo-400 shrink-0" />
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
-                <span data-private className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
-                  {fmt.currency(activeSelectedMetrics.inv)}
-                </span>
-              </div>
-            )}
+            {/* Right: Beneficio & Fecha */}
+            <div className="flex items-center justify-end gap-2">
+              {activeSelectedMetrics && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Beneficio:</span>
+                  <span
+                    data-private
+                    className={cn(
+                      'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
+                      activeSelectedMetrics.diff >= 0
+                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
+                        : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
+                    )}
+                  >
+                    {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
+                  </span>
+                </div>
+              )}
+
+              {activePoint?.date && (
+                <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-[#252526] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.08] shrink-0">
+                  <Calendar size={11} className={hoveredPoint ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'} />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {formatDateSpanish(activePoint.date)}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Right: Beneficio & Fecha */}
-          <div className="flex items-center justify-between sm:justify-end gap-2">
-            {activeSelectedMetrics && (
+          {/* Row 2: Broker Selector Pills (if multiple brokers detected) */}
+          {availableBrokers.length > 1 && (
+            <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-white/[0.06]">
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Beneficio:</span>
-                <span
-                  data-private
-                  className={cn(
-                    'font-mono font-bold px-1.5 py-0.5 rounded text-[11px]',
-                    activeSelectedMetrics.diff >= 0
-                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
-                      : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/20'
-                  )}
-                >
-                  {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
-                </span>
+                <span className="text-[10.5px] font-medium text-slate-400 dark:text-slate-500">Filtrar:</span>
+                <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-200/60 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.06]">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedEntity('all')}
+                    className={cn(
+                      "px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
+                      selectedEntity === 'all'
+                        ? "bg-white dark:bg-[#252526] text-emerald-600 dark:text-emerald-400 shadow-2xs font-bold"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                    )}
+                  >
+                    Cartera Total
+                  </button>
+                  {availableBrokers.map((b) => {
+                    const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
+                    const isSelected = selectedEntity === b
+                    return (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => setSelectedEntity(b)}
+                        className={cn(
+                          "flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
+                          isSelected
+                            ? "bg-white dark:bg-[#252526] shadow-2xs font-bold"
+                            : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                        )}
+                        style={isSelected ? { color: cfg.color } : undefined}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
+                        <span>{cfg.label}</span>
+                      </button>
+                    )
+                  })}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedEntity('stacked')}
+                    className={cn(
+                      "px-2 py-0.5 rounded-md text-[10.5px] font-semibold transition-all cursor-pointer",
+                      selectedEntity === 'stacked'
+                        ? "bg-white dark:bg-[#252526] text-slate-900 dark:text-white shadow-2xs font-bold"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                    )}
+                  >
+                    Desglose
+                  </button>
+                </div>
               </div>
-            )}
-
-            {activePoint?.date && (
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-[#252526] px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.08] shrink-0">
-                <Calendar size={11} className={hoveredPoint ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'} />
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
-                  {formatDateSpanish(activePoint.date)}
-                </span>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Native / Mobile: Leyenda con los datos (ej: 78.831 €) encima del gráfico pero a la derecha */}
+      {/* Native / Mobile: Leyenda con los datos encima del gráfico */}
       {activeSelectedMetrics && (
         <div
           data-private
           className={cn(
-            "w-full items-center justify-end gap-2 px-1 py-1 text-xs select-none",
+            "w-full items-center justify-between gap-2 px-1 py-1 text-xs select-none",
             isNativePlatform() ? "flex" : "flex sm:hidden"
           )}
         >
-          <div className="flex items-center gap-1.5 font-mono">
+          {/* Quick broker switch on mobile */}
+          {availableBrokers.length > 1 && (
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+              <button
+                type="button"
+                onClick={() => setSelectedEntity('all')}
+                className={cn(
+                  "px-2 py-0.5 rounded text-[10px] font-bold shrink-0 transition-colors",
+                  selectedEntity === 'all'
+                    ? "bg-emerald-500 text-white"
+                    : "bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-slate-300"
+                )}
+              >
+                Total
+              </button>
+              {availableBrokers.map((b) => {
+                const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
+                const isSelected = selectedEntity === b
+                return (
+                  <button
+                    key={b}
+                    type="button"
+                    onClick={() => setSelectedEntity(b)}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-bold shrink-0 transition-colors",
+                      isSelected
+                        ? "text-white"
+                        : "bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-slate-300"
+                    )}
+                    style={isSelected ? { backgroundColor: cfg.color } : undefined}
+                  >
+                    {cfg.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          <div className="flex items-center gap-1.5 font-mono ml-auto">
             <span className={cn(
               "w-1.5 h-1.5 rounded-full shrink-0 transition-colors",
               (activeSelectedMetrics?.diff ?? 0) >= 0 ? "bg-emerald-500" : "bg-rose-500"
@@ -915,8 +1059,24 @@ export function PerformanceChart({
 
       {/* Canvas Container */}
       <div data-private ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
-        {/* Floating Small In-Chart Legend */}
-        {availableBrokers.length > 1 && (
+        {/* Sweep Reveal Curtain Animation: reveals chart smoothly from left to right */}
+        {isSweepAnimating && (
+          <motion.div
+            key={`sweep-${sweepKey}`}
+            initial={{ left: '0%' }}
+            animate={{ left: '100%' }}
+            transition={{ duration: 1.25, ease: [0.16, 1, 0.3, 1] }}
+            onAnimationComplete={() => setIsSweepAnimating(false)}
+            className="absolute inset-y-0 right-0 z-20 pointer-events-none bg-white dark:bg-[#1e1e1e]"
+            style={{ right: isNativePlatform() ? 0 : 58 }}
+          >
+            {/* Luminous vertical sweep scan cursor */}
+            <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-gradient-to-b from-transparent via-emerald-400 dark:via-emerald-400 to-transparent shadow-[0_0_12px_rgba(16,185,129,0.9)]" />
+          </motion.div>
+        )}
+
+        {/* Floating Small In-Chart Legend (Only shown in Desglose/Stacked mode) */}
+        {availableBrokers.length > 1 && selectedEntity === 'stacked' && (
           <div className="absolute top-2 left-2.5 z-10 pointer-events-none flex items-center gap-2.5 px-2 py-0.5 rounded-md bg-white/80 dark:bg-[#181818]/80 border border-slate-200/60 dark:border-white/[0.08] backdrop-blur-xs text-[10px] text-slate-600 dark:text-slate-300 font-medium shadow-2xs">
             {availableBrokers.map((b) => {
               const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }

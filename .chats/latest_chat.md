@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 20:50:10
+- **Fecha de exportación:** 2026-10-15 21:09:31
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 19
+- **Total de interacciones registradas:** 21
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -283,5 +283,40 @@ Cambios sincronizados y publicados en la versión **v3.0.63**.
 ### 👤 Usuario (2026-10-15 18:47:23)
 
 cuando arranco el dev con python start.py se me cae la web a cada rato
+
+---
+
+### 🤖 Asistente (2026-10-15 18:50:12)
+
+Se ha detectado el origen de las caídas de la web al ejecutar `python start.py` y se ha implementado una solución integral:
+
+### 🔍 Causas de las caídas:
+1. **Excepción no capturada en el proxy de Vite:**
+   En [vite.config.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/vite.config.ts), las peticiones a `/api` se redirigen a FastAPI (puerto 8000). Cuando el backend de Python recargaba código (`--reload`), si el frontend hacía una petición mientras el puerto 8000 reconectaba, Node.js lanzaba un error `ECONNREFUSED` no capturado que **provocaba el crash inmediato del proceso de Vite**.
+2. **Falta de supervisor en `start.py`:**
+   En [start.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/start.py), Vite se ejecutaba en un hilo con `subprocess.run` sin bucle de monitorización. Al caerse Vite, el hilo moría y el puerto 5173 quedaba cerrado para siempre, dejando la web inaccesible mientras el backend seguía corriendo.
+3. **Polling I/O innecesario en Windows:**
+   Tener `usePolling: true, interval: 400` en Windows forzaba lecturas de disco cada 400ms sobre todo el proyecto (incluidos `.git`, `.chats`, etc.), generando bloqueos de archivo (`EBUSY` / `EPERM`).
+4. **Procesos huérfanos:**
+   Al cerrar con Ctrl+C, `node.exe` a veces se quedaba zombi en segundo plano ocupando el puerto.
+
+---
+
+### 🛠️ Correcciones aplicadas:
+1. **Manejador de errores en el Proxy ([vite.config.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/vite.config.ts)):**
+   - Se añadió `proxy.on('error', ...)` para interceptar `ECONNREFUSED` / `ECONNRESET`. Si FastAPI se reinicia, el proxy devuelve un aviso temporal en lugar de tumbar el servidor Vite.
+   - Se eliminó el polling forzado de 400ms y se configuró `watch.ignored` para excluir `.git`, `.chats`, `dist`, `backend` y `data`.
+2. **Supervisor de auto-resurrección en [start.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/start.py):**
+   - Ahora `start.py` monitoriza activamente el proceso de Vite. Si por cualquier motivo Vite se detiene o falla, **lo detecta y lo reinicia automáticamente en 1 segundo**, manteniendo la web siempre en pie.
+   - Se añadió limpieza en árbol (`kill_process_tree` con `taskkill /F /T` en Windows) para que al pulsar Ctrl+C se liberen completamente tanto el puerto 5173 como el 8000 sin dejar procesos zombi.
+   - En Uvicorn se añadió `--reload-include "*.py"` para evitar reinicios espurios provocados por ficheros de logs o temporales.
+
+Cambios sincronizados y publicados en la versión **v3.0.64**. Puedes reiniciar `python start.py` en la terminal para disfrutar de la nueva estabilidad continua.
+
+---
+
+### 👤 Usuario (2026-10-15 18:51:35)
+
+la grafica no se anima y los colores/leyenda no parecen estar bien
 
 ---
