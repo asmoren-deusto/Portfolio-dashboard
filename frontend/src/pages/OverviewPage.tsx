@@ -1754,7 +1754,7 @@ export function OverviewPage() {
             {alphaSp !== null && (
               <div
                 className={cn(
-                  "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-all shadow-xs",
+                  "inline-flex items-center gap-2 px-3 h-8 rounded-xl border text-xs transition-all shadow-xs shrink-0",
                   alphaSp >= 0
                     ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25"
                     : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25"
@@ -1769,7 +1769,7 @@ export function OverviewPage() {
                   )}
                   <span>Alfa vs S&P 500:</span>
                 </div>
-                <span className="font-mono font-bold text-xs sm:text-[13px]">
+                <span className="font-mono font-bold text-xs">
                   {alphaSp >= 0 ? '+' : ''}
                   {alphaSp.toFixed(2)}%
                 </span>
@@ -1778,7 +1778,7 @@ export function OverviewPage() {
 
             <Link
               to="/analytics"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 h-8 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
             >
               <span>Ver analítica completa</span>
               <ArrowRight className="w-3.5 h-3.5" />

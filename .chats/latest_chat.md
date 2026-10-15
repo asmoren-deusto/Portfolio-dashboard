@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 16:58:18
+- **Fecha de exportación:** 2026-10-15 17:00:29
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 9
+- **Total de interacciones registradas:** 11
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -197,5 +197,25 @@ Se ha reorganizado la pantalla de **Visión General** ([OverviewPage.tsx](file:/
 ### 👤 Usuario (2026-10-15 14:55:57)
 
 añade a la izquierda un elemento con el alfa vs sp500
+
+---
+
+### 🤖 Asistente (2026-10-15 14:58:20)
+
+Se ha añadido el indicador de **Alfa vs S&P 500** justo a la izquierda del botón *"Ver analítica completa"* en la cabecera de la tarjeta:
+
+- **Indicador dinámico**:
+  - Muestra el valor de **Alfa vs S&P 500** (`+X.XX%` o `-X.XX%`) calculado a partir de la rentabilidad ponderada en el tiempo (TWR) de la cartera frente al índice de referencia para el periodo seleccionado.
+  - Icono dinámico (`TrendingUp` en verde esmeralda si es positivo, `TrendingDown` en carmesí si es negativo).
+  - Estilos sutiles y armónicos con el tema claro/oscuro del dashboard y tooltip explicativo al pasar el cursor.
+
+- **Sincronización & Release**:
+  - Versión actualizada a `v3.0.52` y cambios subidos a Git mediante el protocolo automatizado.
+
+---
+
+### 👤 Usuario (2026-10-15 14:59:26)
+
+az que el alto sea el mismo con el boton de ver analitica, creo que es distinto por poco
 
 ---
