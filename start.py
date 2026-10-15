@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Portfolio Dashboard — Startup Script.
-Starts the FastAPI backend and the Vite frontend dev server,
+Starts the FastAPI backend and the Vite frontend dev server with auto-resurrection,
 and opens the dashboard in your default browser.
 """
 import subprocess
@@ -18,21 +18,31 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-def open_browser():
-    """Open dashboard after servers start."""
-    time.sleep(3.0)
+def kill_process_tree(proc):
+    """Termina limpiamente un proceso y todos sus subprocesos hijos."""
+    if not proc:
+        return
     try:
-        # Si usas Vite en desarrollo, suele abrirse en el puerto 5173
-        webbrowser.open("http://localhost:5173")
+        if sys.platform == "win32":
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        else:
+            proc.terminate()
+            proc.wait(timeout=3)
     except Exception:
-        pass
+        try:
+            proc.kill()
+        except Exception:
+            pass
 
-def run_frontend(frontend_dir):
-    """Inicia el servidor de desarrollo de Vite (npm run dev)."""
-    # En Windows usamos 'npm.cmd', en Linux/Mac 'npm'
-    npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
+def open_browser():
+    """Abrir dashboard una vez que los servidores hayan arrancado."""
+    time.sleep(2.5)
     try:
-        subprocess.run([npm_cmd, "run", "dev"], cwd=frontend_dir)
+        webbrowser.open("http://localhost:5173")
     except Exception:
         pass
 
@@ -41,7 +51,6 @@ if __name__ == "__main__":
     backend_dir = os.path.join(root_dir, "backend")
     frontend_dir = os.path.join(root_dir, "frontend")
 
-    # Asegurar directorios de datos y .env (tu lógica anterior)...
     os.makedirs(os.path.join(root_dir, "data"), exist_ok=True)
     os.makedirs(os.path.join(backend_dir, "data"), exist_ok=True)
 
@@ -50,7 +59,7 @@ if __name__ == "__main__":
     if not os.path.exists(env_file) and os.path.exists(env_example):
         import shutil
         shutil.copy(env_example, env_file)
-        print("[INFO] Created .env from .env.example")
+        print("[INFO] Creado .env desde .env.example")
 
     # Seleccionar Python del venv
     venv_py_win = os.path.join(backend_dir, "venv", "Scripts", "python.exe")
@@ -72,20 +81,46 @@ if __name__ == "__main__":
     print("==================================================")
     print(" Presione Ctrl+C para detener todo.\n")
 
-    # 1. Lanzar el frontend de Vite en un hilo independiente en segundo plano
-    if os.path.exists(os.path.join(frontend_dir, "package.json")):
-        threading.Thread(target=run_frontend, args=(frontend_dir,), daemon=True).start()
-    else:
-        print("[WARN] No se encontró la carpeta frontend o package.json")
+    npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
 
-    # 2. Abrir el navegador apuntando a Vite (puerto 5173 para cambios en vivo)
-    threading.Thread(target=open_browser, daemon=True).start()
+    frontend_proc = None
+    backend_proc = None
 
-    # 3. Ejecutar Uvicorn en el hilo principal
     try:
-        subprocess.run(
-            [python, "-m", "uvicorn", "app.main:app", "--reload", "--reload-dir", "app", "--host", "0.0.0.0", "--port", "8000"],
-            cwd=backend_dir,
-        )
+        # 1. Iniciar Vite frontend
+        if os.path.exists(os.path.join(frontend_dir, "package.json")):
+            frontend_proc = subprocess.Popen([npm_cmd, "run", "dev"], cwd=frontend_dir)
+        else:
+            print("[WARN] No se encontró la carpeta frontend o package.json")
+
+        # 2. Iniciar Uvicorn backend
+        backend_cmd = [
+            python, "-m", "uvicorn", "app.main:app",
+            "--reload", "--reload-dir", "app", "--reload-include", "*.py",
+            "--host", "0.0.0.0", "--port", "8000"
+        ]
+        backend_proc = subprocess.Popen(backend_cmd, cwd=backend_dir)
+
+        # 3. Abrir navegador en segundo plano
+        threading.Thread(target=open_browser, daemon=True).start()
+
+        # 4. Supervisor continuo: resucitar Vite si se detiene
+        while True:
+            time.sleep(1.0)
+            if frontend_proc and frontend_proc.poll() is not None:
+                print("\n[WARN] El servidor frontend de Vite se detuvo. Reiniciando...")
+                time.sleep(1.0)
+                frontend_proc = subprocess.Popen([npm_cmd, "run", "dev"], cwd=frontend_dir)
+
+            if backend_proc and backend_proc.poll() is not None:
+                print("\n[WARN] El servidor backend de Uvicorn se detuvo. Código:", backend_proc.returncode)
+                break
+
     except KeyboardInterrupt:
-        print("\n[INFO] Servidor detenido por el usuario.")
+        print("\n[INFO] Deteniendo servicios...")
+    finally:
+        if frontend_proc:
+            kill_process_tree(frontend_proc)
+        if backend_proc:
+            kill_process_tree(backend_proc)
+        print("[INFO] Servidores detenidos correctamente.")

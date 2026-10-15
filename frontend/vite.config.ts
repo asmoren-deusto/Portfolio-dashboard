@@ -16,15 +16,31 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    strictPort: true,
     watch: {
-      usePolling: true,
-      interval: 400,
+      ignored: [
+        '**/dist/**',
+        '**/.git/**',
+        '**/.chats/**',
+        '**/node_modules/**',
+        '**/backend/**',
+        '**/data/**',
+      ],
     },
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
         timeout: 30000,
+        configure: (proxy) => {
+          proxy.on('error', (err, _req, res) => {
+            console.warn('[Vite Proxy] Backend reconectando o no disponible:', err.message)
+            if (res && 'writeHead' in res && !res.headersSent) {
+              res.writeHead(503, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ detail: 'Backend reconectando...' }))
+            }
+          })
+        },
       },
     },
   },

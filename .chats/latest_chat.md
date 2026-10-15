@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 20:44:44
+- **Fecha de exportación:** 2026-10-15 20:50:10
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 17
+- **Total de interacciones registradas:** 19
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -259,5 +259,29 @@ Cambios sincronizados y publicados en la versión **v3.0.62**.
 ### 👤 Usuario (2026-10-15 18:27:57)
 
 mete una animación más lenta de izquierda a derechaal cargar los datos de la grafica de la evolucion
+
+---
+
+### 🤖 Asistente (2026-10-15 18:44:46)
+
+Se ha implementado una animación más pausada, elegante y progresiva de izquierda a derecha al cargar los datos en la gráfica de evolución patrimonial:
+
+### 🎬 Mejoras en la animación:
+1. **Dirección precisa sobre la curva (Izquierda a Derecha):**
+   - En [chartAnimation.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), se corrigió el selector del lienzo para aplicar el barrido `clip-path: inset(0 100% 0 0)` a `inset(0 0% 0 0)` directamente sobre el panel de las series temporales (el área donde se dibujan las curvas y áreas sombreadas), manteniendo estables los ejes de precios y fechas.
+2. **Ritmo más pausado y cinematográfico (`1400ms`):**
+   - Se aumentó la duración del trazado a **1.4 segundos** (frente a los ~750ms anteriores que pasaban casi desapercibidos).
+3. **Curva de aceleración orgánica:**
+   - Easing `cubic-bezier(0.22, 1, 0.36, 1)`: arranca con ritmo constante desplegando el histórico desde el origen en la izquierda y desacelera suavemente al llegar al valor actual en la derecha.
+4. **Sincronización con `requestAnimationFrame`:**
+   - Asegura que el canvas haya renderizado los datos antes de iniciar el barrido, evitando parpadeos y cancelando animaciones previas si se cambia rápido de filtro.
+
+Cambios sincronizados y publicados en la versión **v3.0.63**.
+
+---
+
+### 👤 Usuario (2026-10-15 18:47:23)
+
+cuando arranco el dev con python start.py se me cae la web a cada rato
 
 ---
