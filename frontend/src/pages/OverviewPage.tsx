@@ -1754,29 +1754,22 @@ export function OverviewPage() {
             {alphaSp !== null && (
               <div
                 className={cn(
-                  "inline-flex items-center gap-2 px-2.5 h-8 rounded-xl border text-xs transition-all shadow-xs shrink-0",
+                  "inline-flex items-center gap-2 px-3 h-8 rounded-xl border text-xs transition-all shrink-0",
                   alphaSp >= 0
-                    ? "bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/30 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-500/15"
-                    : "bg-rose-500/10 dark:bg-rose-500/15 border-rose-500/30 text-rose-800 dark:text-rose-300 ring-1 ring-rose-500/15"
+                    ? "bg-emerald-500/15 dark:bg-emerald-500/20 border-emerald-500/40 text-emerald-800 dark:text-emerald-300"
+                    : "bg-rose-500/15 dark:bg-rose-500/20 border-rose-500/40 text-rose-800 dark:text-rose-300"
                 )}
                 title="Alfa generado frente al índice S&P 500 (rentabilidad de tu cartera menos rentabilidad del S&P 500 para el periodo seleccionado)"
               >
-                <div className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-slate-100">
+                <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-200">
                   {alphaSp >= 0 ? (
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.5] shrink-0" />
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   ) : (
-                    <TrendingDown className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 stroke-[2.5] shrink-0" />
+                    <TrendingDown className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
                   )}
                   <span>Alfa vs S&P 500:</span>
                 </div>
-                <span
-                  className={cn(
-                    "px-1.5 py-0.5 rounded-md font-mono font-bold text-xs tracking-tight",
-                    alphaSp >= 0
-                      ? "bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 border border-emerald-500/30"
-                      : "bg-rose-500/20 text-rose-900 dark:text-rose-200 border border-rose-500/30"
-                  )}
-                >
+                <span className="font-mono font-bold text-xs">
                   {alphaSp >= 0 ? '+' : ''}
                   {alphaSp.toFixed(2)}%
                 </span>

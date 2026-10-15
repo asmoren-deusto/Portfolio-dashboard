@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 17:01:19
+- **Fecha de exportación:** 2026-10-15 17:03:15
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 13
+- **Total de interacciones registradas:** 15
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -236,5 +236,26 @@ Se ha igualado la altura de ambos elementos en [OverviewPage.tsx](file:///c:/Use
 ### 👤 Usuario (2026-10-15 14:59:54)
 
 y destacalo un pelin más
+
+---
+
+### 🤖 Asistente (2026-10-15 15:01:21)
+
+Se ha potenciado el destaque visual del elemento de **Alfa vs S&P 500** en [OverviewPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx):
+
+- **Mayor protagonismo y contraste**:
+  - **Etiqueta más nítida**: Se ha aumentado el peso tipográfico a seminegrita (`font-semibold text-slate-800 dark:text-slate-100`) con un trazo más definido en el icono de tendencia (`stroke-[2.5]`).
+  - **Mini-badge para el valor**: El porcentaje ahora reside en una pastilla interna con borde y fondo contrastado (`bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 border border-emerald-500/30`), logrando que el dato resalte de forma inmediata.
+  - **Aura sutil de profundidad**: Se ha añadido un anillo exterior muy fino (`ring-1 ring-emerald-500/15`) y borde con mayor definición.
+  - **Altura rigurosamente idéntica**: Mantiene intactos los `32px` (`h-8`), conservando la alineación exacta con el botón *Ver analítica completa*.
+
+- **Sincronización & Release**:
+  - Actualizado a `v3.0.54` y sincronizado en el repositorio Git.
+
+---
+
+### 👤 Usuario (2026-10-15 15:02:38)
+
+no metas ese doble borde
 
 ---
