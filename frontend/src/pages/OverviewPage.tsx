@@ -33,6 +33,7 @@ import { PerformanceChart, PerformanceChartSkeleton } from '@/components/charts/
 import { AllocationChart, AllocationChartSkeleton } from '@/components/charts/AllocationChart'
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
+import { BenchmarkEvolutionChart, type BenchmarkChartMode } from '@/components/charts/BenchmarkEvolutionChart'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { MiniDonut } from '@/components/ui/MiniDonut'
@@ -89,6 +90,7 @@ export function OverviewPage() {
   const [returnsPeriodMode, setReturnsPeriodMode] = useState<'global' | 'weekly'>(() => {
     return (localStorage.getItem('returns_period_mode') as 'global' | 'weekly') || 'weekly'
   })
+  const [benchmarkMode, setBenchmarkMode] = useState<BenchmarkChartMode>('percent')
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
   const { data: positions = [], isFetching: positionsFetching } = usePositions()
@@ -1383,155 +1385,6 @@ export function OverviewPage() {
         </Card>
       </div>
 
-      {/* ── Analítica de Rendimiento & Benchmarks ────────────────────────────────── */}
-      <Card className="w-full" delay={0.28} loading={analyticsFetching || benchmarkFetching}>
-        <div className="px-4 py-3 sm:px-6 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 dark:border-white/[0.05]">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-500/20">
-              <Award className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-sm sm:text-[15px]">Analítica de Rendimiento & Riesgo</CardTitle>
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-500/20">
-                  TWR Neutralizado
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                Métricas avanzadas de eficiencia y comparación frente a índices globales
-              </p>
-            </div>
-          </div>
-
-          <Link
-            to="/analytics"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors px-3 py-1.5 rounded-xl bg-indigo-50/70 hover:bg-indigo-100/70 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/15 border border-indigo-200/70 dark:border-indigo-500/20 shrink-0 self-start sm:self-auto"
-          >
-            <span>Analítica completa</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {/* 5 Luxury Risk & Health Metric Tiles */}
-        <div className="p-3.5 sm:p-5">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
-            {/* Sharpe Ratio */}
-            <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] hover:border-slate-300 dark:hover:border-white/10 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Sharpe Ratio</span>
-                <ShieldCheck className={cn("w-4 h-4", (analytics?.sharpe_ratio ?? 0) >= 1.0 ? "text-emerald-500" : "text-indigo-500")} />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white mt-1 leading-tight">
-                {analytics?.sharpe_ratio !== undefined ? fmt.ratio(analytics.sharpe_ratio) : '—'}
-              </div>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className={cn(
-                  "text-[10.5px] font-semibold px-1.5 py-0.5 rounded",
-                  (analytics?.sharpe_ratio ?? 0) >= 1.0
-                    ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                    : "bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400"
-                )}>
-                  {(analytics?.sharpe_ratio ?? 0) >= 1.0 ? 'Excelente (> 1.0)' : 'Aceptable'}
-                </span>
-              </div>
-            </div>
-
-            {/* Volatilidad Anual */}
-            <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] hover:border-slate-300 dark:hover:border-white/10 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Volatilidad Anual</span>
-                <Activity className="w-4 h-4 text-amber-500" />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white mt-1 leading-tight">
-                {analytics?.volatility !== undefined ? fmt.pct(analytics.volatility, false) : '—'}
-              </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">
-                Desviación típica (σ)
-              </span>
-            </div>
-
-            {/* Máximo Drawdown */}
-            <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] hover:border-slate-300 dark:hover:border-white/10 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Max Drawdown</span>
-                <TrendingDown className="w-4 h-4 text-rose-500" />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-1 leading-tight">
-                {analytics?.max_drawdown !== undefined ? fmt.pct(analytics.max_drawdown) : '—'}
-              </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">
-                Caída máxima histórica
-              </span>
-            </div>
-
-            {/* CAGR Anualizado */}
-            <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] hover:border-slate-300 dark:hover:border-white/10 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">CAGR Anual</span>
-                <BarChart3 className="w-4 h-4 text-blue-500" />
-              </div>
-              <div className={cn(
-                "text-xl sm:text-2xl font-bold font-mono mt-1 leading-tight",
-                (analytics?.cagr ?? analytics?.annualized_return ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
-              )}>
-                {analytics?.cagr !== undefined
-                  ? fmt.pct(analytics.cagr)
-                  : analytics?.annualized_return !== undefined
-                  ? fmt.pct(analytics.annualized_return)
-                  : '—'}
-              </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">
-                Crecimiento compuesto
-              </span>
-            </div>
-
-            {/* Alpha vs S&P 500 */}
-            <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] hover:border-slate-300 dark:hover:border-white/10 transition-colors col-span-2 sm:col-span-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Alpha vs S&P 500</span>
-                <Award className="w-4 h-4 text-purple-500" />
-              </div>
-              <div className={cn(
-                "text-xl sm:text-2xl font-bold font-mono mt-1 leading-tight",
-                (benchmarkData?.summary?.alpha_sp500 ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
-              )}>
-                {benchmarkData?.summary?.alpha_sp500 !== undefined
-                  ? `${benchmarkData.summary.alpha_sp500 >= 0 ? '+' : ''}${benchmarkData.summary.alpha_sp500.toFixed(2)}%`
-                  : '—'}
-              </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">
-                Exceso sobre el índice
-              </span>
-            </div>
-          </div>
-
-          {/* Benchmark Comparison Bar */}
-          <div className="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/[0.05] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-              <span className="font-semibold text-slate-900 dark:text-white">Comparativa frente al Mercado:</span>
-              <span className="hidden sm:inline">Rendimiento en el periodo ({periodLabel})</span>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 font-mono font-bold">
-                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                <span>Tu Cartera: {benchmarkData?.summary ? `${benchmarkData.summary.portfolio_twr >= 0 ? '+' : ''}${benchmarkData.summary.portfolio_twr.toFixed(2)}%` : (analytics?.twr !== undefined ? fmt.pct(analytics.twr) : '—')}</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] text-slate-700 dark:text-slate-300 font-mono font-semibold">
-                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                <span>S&P 500: {benchmarkData?.summary ? `${benchmarkData.summary.sp500 >= 0 ? '+' : ''}${benchmarkData.summary.sp500.toFixed(2)}%` : '—'}</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] text-slate-700 dark:text-slate-300 font-mono font-semibold">
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>MSCI World: {benchmarkData?.summary ? `${benchmarkData.summary.msci_world >= 0 ? '+' : ''}${benchmarkData.summary.msci_world.toFixed(2)}%` : '—'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
       {/* Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
       <Card className="w-full" delay={0.3} loading={isGlobalUpdating}>
         <CardHeader>
@@ -1862,209 +1715,244 @@ export function OverviewPage() {
         </div>
       </Card>
 
-      {/* ── Live Market Heatmap (Full Width & Default Expanded) ──────────────── */}
-      <div className="w-full">
-        {marketData?.stocks && marketData.stocks.length > 0 ? (
-          <MarketHeatmap
-            stocks={marketData.stocks}
-            onSelectStock={(s) => setSelectedStock(s)}
-            showViewAllLink
-            defaultExpanded={true}
-          />
-        ) : (
-          <div className="h-64 rounded-2xl bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
-            Cargando mapa de calor del mercado...
-          </div>
-        )}
-      </div>
-
-      {/* ── Tabla de Últimos Movimientos ─────────────────────────────────────── */}
-      <Card className="w-full" delay={0.35}>
+      {/* ── Comparativa de Rendimiento vs Benchmarks (Analítica) ─────────────── */}
+      <Card className="w-full" delay={0.32} loading={benchmarkFetching}>
         <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
-              <Calendar className="w-4 h-4" />
+            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
+              <BarChart3 className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
-                  Últimos Movimientos de Cartera
+                  Comparativa de Rendimiento vs Benchmarks
                 </CardTitle>
-                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-white/[0.08]">
-                  {filteredTransactions.length} {filteredTransactions.length === 1 ? 'operación' : 'operaciones'}
+                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/20">
+                  Time-Weighted
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                Historial reciente de compras, ventas y cobro de dividendos
+                Evolución comparativa neutralizando aportaciones frente a S&P 500, MSCI World, NASDAQ y tipo libre de riesgo
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.06]">
-              {(['all', 'buy', 'dividend', 'sell'] as const).map((type) => {
-                const label = type === 'all' ? 'Todos' : type === 'buy' ? 'Compras' : type === 'dividend' ? 'Dividendos' : 'Ventas'
-                const count = type === 'all' ? transactions.length : type === 'buy' ? txStats.buysCount : type === 'dividend' ? txStats.divsCount : txStats.sellsCount
-                const active = txFilterType === type
-                return (
-                  <button
-                    key={type}
-                    onClick={() => setTxFilterType(type)}
-                    className={cn(
-                      "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
-                      active
-                        ? "bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                    )}
-                  >
-                    {label} <span className="opacity-60 text-[10.5px]">({count})</span>
-                  </button>
-                )
-              })}
+          <Link
+            to="/analytics"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
+          >
+            <span>Ver analítica completa</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </CardHeader>
+
+        <div className="p-4 sm:p-5 pt-1">
+          <BenchmarkEvolutionChart
+            data={benchmarkData}
+            height={300}
+            mode={benchmarkMode}
+            onModeChange={setBenchmarkMode}
+            showModeSelector={true}
+          />
+        </div>
+      </Card>
+
+      {/* ── Últimos Movimientos y Mapa de Calor del Mercado (Uno a cada lado) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        {/* Columna Izquierda: Tabla de Últimos Movimientos */}
+        <Card className="w-full flex flex-col h-full" delay={0.35}>
+          <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
+                    Últimos Movimientos
+                  </CardTitle>
+                  <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-white/[0.08]">
+                    {filteredTransactions.length} {filteredTransactions.length === 1 ? 'operación' : 'operaciones'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  Historial reciente de operaciones
+                </p>
+              </div>
             </div>
 
+            <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.06]">
+                {(['all', 'buy', 'dividend', 'sell'] as const).map((type) => {
+                  const label = type === 'all' ? 'Todos' : type === 'buy' ? 'Compras' : type === 'dividend' ? 'Div.' : 'Ventas'
+                  const count = type === 'all' ? transactions.length : type === 'buy' ? txStats.buysCount : type === 'dividend' ? txStats.divsCount : txStats.sellsCount
+                  const active = txFilterType === type
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => setTxFilterType(type)}
+                      className={cn(
+                        "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
+                        active
+                          ? "bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      )}
+                    >
+                      {label} <span className="opacity-60 text-[10.5px]">({count})</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <Link
+                to="/transactions"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
+              >
+                <span>Ver todas</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </CardHeader>
+
+          {/* Quick summary strip */}
+          <div className="px-4 py-2 bg-slate-50/50 dark:bg-white/[0.01] border-b border-slate-100 dark:border-white/[0.04] flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">
+                Compras: <strong className="text-slate-900 dark:text-white font-mono">{fmt.currency(txStats.totalBought)}</strong>
+              </span>
+              <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">
+                Dividendos: <strong className="text-emerald-600 dark:text-emerald-400 font-mono">+{fmt.currency(txStats.totalDivs)}</strong>
+              </span>
+            </div>
+          </div>
+
+          {/* Transactions Table */}
+          <div data-private className="overflow-x-auto flex-1">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider bg-slate-50/50 dark:bg-white/[0.01]">
+                  <th className="py-2.5 px-3 font-semibold">Fecha</th>
+                  <th className="py-2.5 px-3 font-semibold">Activo</th>
+                  <th className="py-2.5 px-2 font-semibold text-center">Tipo</th>
+                  <th className="py-2.5 px-2 font-semibold text-center hidden xl:table-cell">Entidad</th>
+                  <th className="py-2.5 px-2 font-semibold text-right hidden 2xl:table-cell">Títulos</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">Importe</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
+                {filteredTransactions.slice(0, 10).map((t) => {
+                  const isBuy = t.type === 'buy'
+                  const isDiv = t.type === 'dividend'
+                  const isSell = t.type === 'sell'
+                  const pos = positions.find((p) => p.isin === t.isin)
+
+                  return (
+                    <tr
+                      key={t.id}
+                      onClick={() => {
+                        if (pos) setSelectedPosition(pos)
+                      }}
+                      className="hover:bg-slate-50/90 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                    >
+                      {/* Fecha */}
+                      <td className="py-2.5 px-3 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                        {fmt.date(t.date)}
+                      </td>
+
+                      {/* Activo con logo */}
+                      <td className="py-2.5 px-3">
+                        <div className="flex items-center gap-2 min-w-[130px]">
+                          <div className="w-6 h-6 rounded-md overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/[0.08]">
+                            <CompanyLogo ticker={pos?.ticker || t.isin} name={t.name || ''} domain={pos?.domain} size="sm" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[170px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              {t.name || t.isin}
+                            </div>
+                            <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 truncate">
+                              {pos?.ticker || t.isin}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Tipo badge */}
+                      <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                        <span className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold",
+                          isBuy && "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20",
+                          isDiv && "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20",
+                          isSell && "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20"
+                        )}>
+                          {isBuy ? 'Compra' : isDiv ? 'Dividendo' : isSell ? 'Venta' : 'Traspaso'}
+                        </span>
+                      </td>
+
+                      {/* Broker badge */}
+                      <td className="py-2.5 px-2 text-center whitespace-nowrap hidden xl:table-cell">
+                        <BrokerBadge broker={t.broker} />
+                      </td>
+
+                      {/* Títulos / participaciones */}
+                      <td className="py-2.5 px-2 text-right font-mono text-slate-700 dark:text-slate-300 whitespace-nowrap hidden 2xl:table-cell">
+                        {t.shares > 0 ? `${fmt.num(t.shares)} part.` : '—'}
+                      </td>
+
+                      {/* Importe Total */}
+                      <td className="py-2.5 px-3 text-right font-mono font-bold whitespace-nowrap">
+                        <span className={cn(
+                          "text-[12.5px]",
+                          isDiv ? "text-emerald-600 dark:text-emerald-400" : isSell ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"
+                        )}>
+                          {isDiv ? `+${fmt.currency(t.amount)}` : fmt.currency(t.amount)}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+
+                {!filteredTransactions.length && (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+                      No se han encontrado movimientos con los filtros seleccionados.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Footer link */}
+          <div className="p-3 border-t border-slate-100 dark:border-white/[0.04] bg-slate-50/30 dark:bg-white/[0.01] flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>{Math.min(10, filteredTransactions.length)} de {filteredTransactions.length} movs</span>
             <Link
               to="/transactions"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
+              className="inline-flex items-center gap-1.5 font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
             >
-              <span>Ver todas</span>
+              <span>Historial completo</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-        </CardHeader>
+        </Card>
 
-        {/* Quick summary strip */}
-        <div className="px-4 py-2.5 sm:px-6 bg-slate-50/50 dark:bg-white/[0.01] border-b border-slate-100 dark:border-white/[0.04] flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-4 flex-wrap">
-            <span className="text-slate-500 dark:text-slate-400 font-medium">
-              Invertido en compras: <strong className="text-slate-900 dark:text-white font-mono">{fmt.currency(txStats.totalBought)}</strong>
-            </span>
-            <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
-            <span className="text-slate-500 dark:text-slate-400 font-medium">
-              Dividendos cobrados: <strong className="text-emerald-600 dark:text-emerald-400 font-mono">+{fmt.currency(txStats.totalDivs)}</strong>
-            </span>
-          </div>
-
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 hidden md:block">
-            Haz clic en cualquier fila para consultar el activo en detalle
-          </div>
+        {/* Columna Derecha: Mapa de Calor del Mercado */}
+        <div className="w-full h-full">
+          {marketData?.stocks && marketData.stocks.length > 0 ? (
+            <MarketHeatmap
+              stocks={marketData.stocks}
+              onSelectStock={(s) => setSelectedStock(s)}
+              showViewAllLink
+              defaultExpanded={true}
+            />
+          ) : (
+            <div className="h-64 rounded-2xl bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
+              Cargando mapa de calor del mercado...
+            </div>
+          )}
         </div>
-
-        {/* Transactions Table */}
-        <div data-private className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider bg-slate-50/50 dark:bg-white/[0.01]">
-                <th className="py-2.5 px-4 font-semibold">Fecha</th>
-                <th className="py-2.5 px-4 font-semibold">Activo</th>
-                <th className="py-2.5 px-3 font-semibold text-center">Tipo</th>
-                <th className="py-2.5 px-3 font-semibold text-center hidden md:table-cell">Entidad</th>
-                <th className="py-2.5 px-3 font-semibold text-right hidden sm:table-cell">Títulos</th>
-                <th className="py-2.5 px-3 font-semibold text-right hidden lg:table-cell">Precio Unit.</th>
-                <th className="py-2.5 px-4 font-semibold text-right">Importe Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-              {filteredTransactions.slice(0, 10).map((t) => {
-                const isBuy = t.type === 'buy'
-                const isDiv = t.type === 'dividend'
-                const isSell = t.type === 'sell'
-                const pos = positions.find((p) => p.isin === t.isin)
-
-                return (
-                  <tr
-                    key={t.id}
-                    onClick={() => {
-                      if (pos) setSelectedPosition(pos)
-                    }}
-                    className="hover:bg-slate-50/90 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
-                  >
-                    {/* Fecha */}
-                    <td className="py-3 px-4 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                      {fmt.date(t.date)}
-                    </td>
-
-                    {/* Activo con logo */}
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5 min-w-[160px]">
-                        <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/[0.08]">
-                          <CompanyLogo ticker={pos?.ticker || t.isin} name={t.name || ''} domain={pos?.domain} size="sm" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-[260px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {t.name || t.isin}
-                          </div>
-                          <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate">
-                            {t.isin}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Tipo badge */}
-                    <td className="py-3 px-3 text-center whitespace-nowrap">
-                      <span className={cn(
-                        "inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold",
-                        isBuy && "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20",
-                        isDiv && "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20",
-                        isSell && "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20"
-                      )}>
-                        {isBuy ? 'Compra' : isDiv ? 'Dividendo' : isSell ? 'Venta' : 'Traspaso'}
-                      </span>
-                    </td>
-
-                    {/* Broker badge */}
-                    <td className="py-3 px-3 text-center whitespace-nowrap hidden md:table-cell">
-                      <BrokerBadge broker={t.broker} />
-                    </td>
-
-                    {/* Títulos / participaciones */}
-                    <td className="py-3 px-3 text-right font-mono text-slate-700 dark:text-slate-300 whitespace-nowrap hidden sm:table-cell">
-                      {t.shares > 0 ? `${fmt.num(t.shares)} part.` : '—'}
-                    </td>
-
-                    {/* Precio unitario */}
-                    <td className="py-3 px-3 text-right font-mono text-slate-600 dark:text-slate-400 whitespace-nowrap hidden lg:table-cell">
-                      {t.price > 0 ? fmt.price(t.price, 'EUR') : '—'}
-                    </td>
-
-                    {/* Importe Total */}
-                    <td className="py-3 px-4 text-right font-mono font-bold whitespace-nowrap">
-                      <span className={cn(
-                        "text-[13px]",
-                        isDiv ? "text-emerald-600 dark:text-emerald-400" : isSell ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"
-                      )}>
-                        {isDiv ? `+${fmt.currency(t.amount)}` : fmt.currency(t.amount)}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })}
-
-              {!filteredTransactions.length && (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
-                    No se han encontrado movimientos con los filtros seleccionados.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Footer link */}
-        <div className="p-3 sm:p-4 border-t border-slate-100 dark:border-white/[0.04] bg-slate-50/30 dark:bg-white/[0.01] flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-          <span>Mostrando los 10 movimientos más recientes de {filteredTransactions.length}</span>
-          <Link
-            to="/transactions"
-            className="inline-flex items-center gap-1.5 font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-          >
-            <span>Ver historial completo de operaciones</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </Card>
+      </div>
 
       {/* Stock Detail Modal */}
       <StockDetailModal

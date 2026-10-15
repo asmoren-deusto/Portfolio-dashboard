@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 16:25:46
+- **Fecha de exportación:** 2026-10-15 16:37:37
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 5
+- **Total de interacciones registradas:** 7
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -121,5 +121,56 @@ He revisado en detalle los datos de **Oro** (`GC=F`) y **Petróleo** (`BZ=F`) y 
 ### 👤 Usuario (2026-10-15 14:16:44)
 
 en vision general expande por defecto el Mapa de Calor del Mercado, currate un poco más la tabla de ultimos movimientos y mete algo de la sección de analítica
+
+---
+
+### 🤖 Asistente (2026-10-15 14:25:48)
+
+He aplicado las tres mejoras solicitadas en la **Visión General** del dashboard:
+
+---
+
+### 1. 🗺️ Mapa de Calor del Mercado Expandido por Defecto
+- **Estado expandido por defecto:** En [MarketHeatmap.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketHeatmap.tsx), `defaultExpanded` ahora inicia en `true` y el modo de altura `heightMode` se establece directamente en `'expanded'`.
+- **Ancho completo:** En [OverviewPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx), el mapa de calor ocupa ahora el ancho completo (`w-full`), permitiendo que todos los sectores (Tecnología, Financiero, Consumo, Salud, etc.) y empresas se desplieguen con máxima claridad, tamaño proporcional a su capitalización y sin solapamientos.
+
+---
+
+### 2. 📊 Incorporación de la Sección de Analítica y Benchmarks
+Añadido un nuevo bloque de analítica avanzada justo antes de la tabla de posiciones:
+- **5 KPIs clave de eficiencia y riesgo:**
+  - **Ratio de Sharpe:** Retorno ajustado a riesgo con badge de evaluación (`Excelente > 1.0` / `Aceptable`).
+  - **Volatilidad Anual ($\sigma$):** Medida de dispersión del riesgo anualizada.
+  - **Max Drawdown:** Caída máxima histórica registrada y nivel de resistencia.
+  - **CAGR Anualizado:** Tasa compuesta de crecimiento anual.
+  - **Alpha vs S&P 500:** Exceso de rentabilidad generado sobre el índice de referencia.
+- **Barra de Comparativa frente al Mercado:** Comparación en vivo de **Tu Cartera (TWR)** neutralizando aportaciones periódicas frente a **S&P 500 (`^GSPC`)** y **MSCI World (`URTH`)**.
+- **Acceso directo:** Botón hacia la sección completa de analítica (`/analytics`).
+
+---
+
+### 3. 📝 Tabla de Últimos Movimientos
+Transformada la lista compacta previa en una **tabla de movimientos de cartera completa e interactiva**:
+- **Pestañas de filtrado:** Selector rápido entre `Todos`, `Compras`, `Dividendos` y `Ventas` con contador dinámico de operaciones.
+- **Resumen financiero superior:** Totales agregados de *Invertido en compras* y *Dividendos cobrados* en el periodo.
+- **Columnas detalladas:**
+  - `Fecha`: Formateada en mono con precisión.
+  - `Activo`: Con logo oficial ([CompanyLogo](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx)), nombre y ticker/ISIN.
+  - `Tipo`: Badges con colores semánticos (Azul para Compra, Esmeralda para Dividendo, Rosa para Venta).
+  - `Entidad`: [BrokerBadge](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Badge.tsx) con el estilo de la entidad correspondiente.
+  - `Títulos`: Número de participaciones formateadas (`part.`).
+  - `Precio Unitario`: Precio de ejecución por título.
+  - `Importe Total`: En tipografía mono destacada y con color según el tipo de flujo.
+- **Interactividad:** Al hacer clic en cualquier fila se abre el modal de detalle de la posición ([PositionDetailModal](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/positions/PositionDetailModal.tsx)). Enlace directo al historial completo en `/transactions`.
+
+---
+
+Ambos frontends han sido verificados (`npm run build`) y los cambios han quedado versionados y sincronizados en **`v3.0.50`**.
+
+---
+
+### 👤 Usuario (2026-10-15 14:31:48)
+
+ultimos movimientos y mapa uno a cada lado, la analitica debajo de las posiciones pero mete la grafica comparativa y no los cuadros con los datos
 
 ---
