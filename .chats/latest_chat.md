@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 21:09:31
+- **Fecha de exportación:** 2026-10-15 21:14:12
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 21
+- **Total de interacciones registradas:** 23
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -318,5 +318,48 @@ Cambios sincronizados y publicados en la versión **v3.0.64**. Puedes reiniciar 
 ### 👤 Usuario (2026-10-15 18:51:35)
 
 la grafica no se anima y los colores/leyenda no parecen estar bien
+
+---
+
+### 🤖 Asistente (2026-10-15 19:09:33)
+
+He corregido tanto la animación como la incoherencia de colores y leyenda en la gráfica de **Evolución Patrimonial**:
+
+### 🔍 Diagnóstico de los problemas
+1. **Incoherencia de colores y leyenda:**
+   - La gráfica estaba forzando un apilado automático por broker (`slot0`, `slot1`, `slot2`). Al ser el último broker **MyInvestor** (azul), la curva del **Patrimonio Total** se coloreaba de azul y recibía una etiqueta azul en el eje Y, mientras que en la barra superior (HUD) el punto de Patrimonio figuraba en verde esmeralda.
+   - La curva verde intermedia representaba la suma acumulada (`Indexa + BBVA`), por lo que su altura no coincidía con el badge de BBVA en el eje Y.
+   - En el eje Y aparecían múltiples etiquetas duplicadas de color azul y una leyenda flotante dentro del gráfico que creaba confusión sobre qué línea era cuál.
+
+2. **Fallo en la animación:**
+   - Se utilizaba la API de animaciones web (`clipPath` sobre contenedores internos generados por `lightweight-charts`), lo cual en Chromium sobre Windows no invalidaba correctamente el renderizado de capas rasterizadas en `<canvas>`.
+
+---
+
+### 🛠️ Solución Implementada ([PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) y [chartAnimation.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts))
+
+1. **Armonía 100% en Colores y Métricas (Modo Cartera Total por defecto):**
+   - **Patrimonio Total:** Curva única y nítida en **Verde Esmeralda** (`#10b981`), idéntico al punto verde del HUD y a su etiqueta en el eje Y derecho.
+   - **Aportado:** Línea punteada en **Índigo** (`#6366f1`), coincidente con el indicador punteado del HUD y su etiqueta en el eje Y.
+   - Eje Y limpio: únicamente muestra el valor de Patrimonio y Aportado, sin etiquetas duplicadas ni contradictorias.
+
+2. **Selector de Entidades / Brokers en 2 filas:**
+   - Se añadió un selector interactivo en la barra superior:
+     `[ Cartera Total ]` `[ MyInvestor ]` `[ BBVA ]` `[ Indexa Capital ]` `[ Desglose ]`
+   - Si pulsas en un broker individual, la curva, los datos del HUD y la etiqueta del eje Y cambian dinámicamente a ese broker y su color corporativo.
+   - La leyenda flotante interior solo se muestra si activas el modo **Desglose** (apilado).
+
+3. **Animación de barrido de izquierda a derecha fluida:**
+   - Se implementó una cortina de revelado suave (`Framer Motion`) con haz luminoso vertical esmeralda que barre de izquierda a derecha en **1,25s**, garantizando compatibilidad total en cualquier navegador y plataforma.
+
+---
+
+*Cambios sincronizados y desplegados en la versión `v3.0.65`.*
+
+---
+
+### 👤 Usuario (2026-10-15 18:53:26)
+
+reduce un poco ese margen
 
 ---
