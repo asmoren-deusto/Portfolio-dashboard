@@ -152,7 +152,7 @@ export function ReturnsChart({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={compact ? { top: 20, right: 8, left: 4, bottom: 2 } : { top: 22, right: 14, left: 8, bottom: 4 }}
+          margin={compact ? { top: 22, right: 8, left: 4, bottom: 18 } : { top: 24, right: 14, left: 8, bottom: 20 }}
         >
           <defs>
             <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
@@ -171,14 +171,24 @@ export function ReturnsChart({
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#64748b', fontSize: compact ? 9.5 : 11, fontWeight: 600 }}
-            dy={2}
+            dy={12}
           />
           <YAxis
             width={compact ? 36 : 42}
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#64748b', fontSize: compact ? 9.5 : 11 }}
-            tickFormatter={v => `${v}%`}
+            domain={[
+              (dataMin: number) => {
+                const min = Number.isFinite(dataMin) ? dataMin : 0
+                return min < 0 ? min * 1.35 : 0
+              },
+              (dataMax: number) => {
+                const max = Number.isFinite(dataMax) ? dataMax : 0
+                return max > 0 ? max * 1.35 : 0
+              }
+            ]}
+            tickFormatter={v => `${Number(Number(v).toFixed(1))}%`}
           />
           <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />

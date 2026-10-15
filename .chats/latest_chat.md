@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 21:29:35
+- **Fecha de exportación:** 2026-10-15 21:33:48
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 29
+- **Total de interacciones registradas:** 31
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -429,5 +429,25 @@ Los cambios han sido compilados y sincronizados con Git en la versión **`v3.0.6
 ### 👤 Usuario (2026-10-15 19:19:34)
 
 elimina esos filtros de ahi, se puede filtrar usando los selectores de entidad de la parte superior de la web
+
+---
+
+### 🤖 Asistente (2026-10-15 19:29:38)
+
+He eliminado los selectores de filtro que estaban dentro de la gráfica de **Evolución Patrimonial**:
+
+1. **Eliminación de la barra redundante:** Se quitó por completo la fila `Filtrar: [Desglose Apilado] [Línea Cartera] [Entidades...]` tanto en la versión desktop como en la versión móvil de [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx).
+2. **Sincronización con el selector superior:** La gráfica ahora responde directamente al selector global de entidades de la cabecera superior de la web (`Consolidado`, `Kutxabank`, `Scalable`, etc.):
+   - Al estar en **Consolidado**: Mantiene el apilado/estacado de entidades con la leyenda flotante interior y sus valores individuales.
+   - Al seleccionar una entidad concreta en la barra superior: La gráfica se ajusta dinámicamente a la curva y colores de esa entidad.
+3. **HUD optimizado:** La barra de métricas superior de la gráfica ahora queda limpia en una sola fila compacta y elegante (Patrimonio, Aportado, Beneficio y Fecha).
+
+Los cambios han sido compilados y publicados en la versión **`v3.0.69`**.
+
+---
+
+### 👤 Usuario (2026-10-15 19:30:55)
+
+baja un poco la leyenda con los dias para que no choque
 
 ---
