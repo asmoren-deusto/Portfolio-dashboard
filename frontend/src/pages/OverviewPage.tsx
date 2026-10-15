@@ -122,6 +122,19 @@ export function OverviewPage() {
 
   const [txFilterType, setTxFilterType] = useState<'all' | 'buy' | 'dividend' | 'sell'>('all')
 
+  const alphaSp = useMemo(() => {
+    if (benchmarkData?.summary?.alpha_sp500 !== undefined && benchmarkData?.summary?.alpha_sp500 !== null) {
+      return benchmarkData.summary.alpha_sp500
+    }
+    if (benchmarkData?.points && benchmarkData.points.length > 0) {
+      const last = benchmarkData.points[benchmarkData.points.length - 1]
+      if (last.portfolio_twr !== undefined && last.sp500 !== undefined) {
+        return Number((last.portfolio_twr - last.sp500).toFixed(2))
+      }
+    }
+    return null
+  }, [benchmarkData])
+
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
       if (txFilterType !== 'all' && t.type !== txFilterType) return false
@@ -1737,13 +1750,40 @@ export function OverviewPage() {
             </div>
           </div>
 
-          <Link
-            to="/analytics"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
-          >
-            <span>Ver analítica completa</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {alphaSp !== null && (
+              <div
+                className={cn(
+                  "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-all shadow-xs",
+                  alphaSp >= 0
+                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25"
+                    : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25"
+                )}
+                title="Alfa generado frente al índice S&P 500 (rentabilidad de tu cartera menos rentabilidad del S&P 500 para el periodo seleccionado)"
+              >
+                <div className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-300">
+                  {alphaSp >= 0 ? (
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  ) : (
+                    <TrendingDown className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                  )}
+                  <span>Alfa vs S&P 500:</span>
+                </div>
+                <span className="font-mono font-bold text-xs sm:text-[13px]">
+                  {alphaSp >= 0 ? '+' : ''}
+                  {alphaSp.toFixed(2)}%
+                </span>
+              </div>
+            )}
+
+            <Link
+              to="/analytics"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
+            >
+              <span>Ver analítica completa</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </CardHeader>
 
         <div className="p-4 sm:p-5 pt-1">

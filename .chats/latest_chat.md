@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 16:37:37
+- **Fecha de exportación:** 2026-10-15 16:58:18
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 7
+- **Total de interacciones registradas:** 9
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -172,5 +172,30 @@ Ambos frontends han sido verificados (`npm run build`) y los cambios han quedado
 ### 👤 Usuario (2026-10-15 14:31:48)
 
 ultimos movimientos y mapa uno a cada lado, la analitica debajo de las posiciones pero mete la grafica comparativa y no los cuadros con los datos
+
+---
+
+### 🤖 Asistente (2026-10-15 14:37:40)
+
+Se ha reorganizado la pantalla de **Visión General** ([OverviewPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx)) según tus indicaciones exactas:
+
+1. **Analítica debajo de las posiciones (solo la gráfica comparativa)**:
+   - Se ha ubicado la tarjeta de **Comparativa de Rendimiento vs Benchmarks** directamente debajo de la tabla de *Posiciones en Cartera*.
+   - Se incluye la gráfica interactiva `BenchmarkEvolutionChart` con selector de modo (`% TWR` vs `€ Total`) y conmutadores para alternar Tu Cartera, S&P 500, Tasa BCE, MSCI World, NASDAQ 100, Euro Stoxx 50 y Nikkei 225, omitiendo los cuadros de datos/KPIs para mantener una interfaz limpia y centrada en la evolución temporal.
+   - Enlace directo a la sección completa de analítica.
+
+2. **Últimos movimientos y mapa de calor uno a cada lado**:
+   - Se ha configurado una cuadrícula de 2 columnas (`grid grid-cols-1 lg:grid-cols-2 gap-4 items-start`):
+     - **Columna izquierda:** **Últimos Movimientos**, con filtros de operaciones (*Todos, Compras, Div., Ventas*), resumen rápido de importes, logos de activos, badges de tipo y enlace al historial completo.
+     - **Columna derecha:** **Mapa de Calor del Mercado** (`MarketHeatmap`), desplegado por defecto con sectores, cotizaciones y selector de detalle interactivo.
+
+3. **Release y sincronización:**
+   - Se ha ejecutado el protocolo de release subiendo la versión a `v3.0.51` y sincronizando el repositorio con Git.
+
+---
+
+### 👤 Usuario (2026-10-15 14:55:57)
+
+añade a la izquierda un elemento con el alfa vs sp500
 
 ---
