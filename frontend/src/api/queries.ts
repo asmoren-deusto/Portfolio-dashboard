@@ -108,10 +108,10 @@ export function usePortfolioSummary() {
         : get<PortfolioSummary>(`/portfolio/summary${brokerQuery}`),
     initialData: isDemo ? userSummary : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: isDemo ? 1000 * 60 * 5 : 0,
-    refetchOnMount: true,
-    refetchInterval: 1000 * 60, // Keep fresh every 60s
-    refetchIntervalInBackground: true,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
+    refetchInterval: 1000 * 60 * 3, // Keep fresh every 3 mins
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -132,10 +132,10 @@ export function usePositions() {
         : get<Position[]>(`/portfolio/positions${brokerQuery}`),
     initialData: isDemo ? userPositions : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: isDemo ? 1000 * 60 * 5 : 0,
-    refetchOnMount: true,
-    refetchInterval: 1000 * 60, // Keep fresh every 60s
-    refetchIntervalInBackground: true,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
+    refetchInterval: 1000 * 60 * 3, // Keep fresh every 3 mins
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -167,10 +167,10 @@ export function usePerformance(
         : get<PricePoint[]>(`/portfolio/performance?period=${period}${startQuery}${brokerQuery}`),
     initialData: isDemo ? userPoints : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: isDemo ? 1000 * 60 * 5 : 1000 * 60,
-    refetchOnMount: true,
-    refetchInterval: 1000 * 60 * 2,
-    refetchIntervalInBackground: true,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
+    refetchInterval: 1000 * 60 * 3,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -189,8 +189,8 @@ export function useAnalytics() {
         : get<Analytics>(`/portfolio/analytics?period=2y${brokerQuery}`),
     initialData: isDemo ? userAnalytics : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: isDemo ? 1000 * 60 * 5 : 1000 * 60 * 2,
-    refetchOnMount: true,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
   })
 }
 
@@ -321,8 +321,8 @@ export function useBenchmarkComparison() {
       }
       return get<BenchmarkComparisonData>(`/portfolio/benchmark-comparison?period=${period}${brokerQuery}`)
     },
-    staleTime: 1000 * 60 * 3,
-    refetchOnMount: true,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
   })
 }
 
@@ -343,8 +343,8 @@ export function useTransactions() {
         : get<Transaction[]>(`/transactions${brokerQuery}`),
     initialData: isDemo ? userTx : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: isDemo ? 1000 * 60 : 0,
-    refetchOnMount: true,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
   })
 }
 

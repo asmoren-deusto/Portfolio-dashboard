@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
   Flame,
 } from 'lucide-react'
+import { triggerChartAnimation } from '@/lib/chartAnimation'
 
 export type ChartMode = 'currency' | 'percent'
 
@@ -41,10 +42,10 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'myinvestor',
     label: 'MyInvestor',
     color: '#3b82f6', // blue
-    topColorDark: 'rgba(59, 130, 246, 0.42)',
-    topColorLight: 'rgba(37, 99, 235, 0.28)',
-    bottomColorDark: 'rgba(59, 130, 246, 0.20)',
-    bottomColorLight: 'rgba(37, 99, 235, 0.12)',
+    topColorDark: 'rgba(59, 130, 246, 0.32)',
+    topColorLight: 'rgba(37, 99, 235, 0.22)',
+    bottomColorDark: 'rgba(59, 130, 246, 0.00)',
+    bottomColorLight: 'rgba(37, 99, 235, 0.00)',
     textColor: 'text-blue-600 dark:text-blue-400',
     badgeBg: 'bg-blue-500/10 dark:bg-blue-500/20',
     badgeBorder: 'border-blue-500/30',
@@ -53,10 +54,10 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'bbva',
     label: 'BBVA',
     color: '#10b981', // emerald
-    topColorDark: 'rgba(16, 185, 129, 0.52)',
-    topColorLight: 'rgba(16, 185, 129, 0.38)',
-    bottomColorDark: 'rgba(16, 185, 129, 0.28)',
-    bottomColorLight: 'rgba(16, 185, 129, 0.18)',
+    topColorDark: 'rgba(16, 185, 129, 0.32)',
+    topColorLight: 'rgba(16, 185, 129, 0.22)',
+    bottomColorDark: 'rgba(16, 185, 129, 0.00)',
+    bottomColorLight: 'rgba(16, 185, 129, 0.00)',
     textColor: 'text-emerald-600 dark:text-emerald-400',
     badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
     badgeBorder: 'border-emerald-500/30',
@@ -65,10 +66,10 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'indexa',
     label: 'Indexa Capital',
     color: '#f59e0b', // amber
-    topColorDark: 'rgba(245, 158, 11, 0.62)',
-    topColorLight: 'rgba(245, 158, 11, 0.48)',
-    bottomColorDark: 'rgba(245, 158, 11, 0.35)',
-    bottomColorLight: 'rgba(245, 158, 11, 0.25)',
+    topColorDark: 'rgba(245, 158, 11, 0.32)',
+    topColorLight: 'rgba(245, 158, 11, 0.22)',
+    bottomColorDark: 'rgba(245, 158, 11, 0.00)',
+    bottomColorLight: 'rgba(245, 158, 11, 0.00)',
     textColor: 'text-amber-600 dark:text-amber-400',
     badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
     badgeBorder: 'border-amber-500/30',
@@ -77,10 +78,10 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'kutxabank',
     label: 'Kutxabank',
     color: '#f43f5e', // rose
-    topColorDark: 'rgba(244, 63, 94, 0.52)',
-    topColorLight: 'rgba(244, 63, 94, 0.38)',
-    bottomColorDark: 'rgba(244, 63, 94, 0.28)',
-    bottomColorLight: 'rgba(244, 63, 94, 0.18)',
+    topColorDark: 'rgba(244, 63, 94, 0.32)',
+    topColorLight: 'rgba(244, 63, 94, 0.22)',
+    bottomColorDark: 'rgba(244, 63, 94, 0.00)',
+    bottomColorLight: 'rgba(244, 63, 94, 0.00)',
     textColor: 'text-rose-600 dark:text-rose-400',
     badgeBg: 'bg-rose-500/10 dark:bg-rose-500/20',
     badgeBorder: 'border-rose-500/30',
@@ -89,10 +90,10 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'traderepublic',
     label: 'Trade Republic',
     color: '#8b5cf6', // violet
-    topColorDark: 'rgba(139, 92, 246, 0.52)',
-    topColorLight: 'rgba(139, 92, 246, 0.38)',
-    bottomColorDark: 'rgba(139, 92, 246, 0.28)',
-    bottomColorLight: 'rgba(139, 92, 246, 0.18)',
+    topColorDark: 'rgba(139, 92, 246, 0.32)',
+    topColorLight: 'rgba(139, 92, 246, 0.22)',
+    bottomColorDark: 'rgba(139, 92, 246, 0.00)',
+    bottomColorLight: 'rgba(139, 92, 246, 0.00)',
     textColor: 'text-violet-600 dark:text-violet-400',
     badgeBg: 'bg-violet-500/10 dark:bg-violet-500/20',
     badgeBorder: 'border-violet-500/30',
@@ -101,10 +102,10 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
     id: 'scalable',
     label: 'Scalable Capital',
     color: '#06b6d4', // cyan
-    topColorDark: 'rgba(6, 182, 212, 0.52)',
-    topColorLight: 'rgba(6, 182, 212, 0.38)',
-    bottomColorDark: 'rgba(6, 182, 212, 0.28)',
-    bottomColorLight: 'rgba(6, 182, 212, 0.18)',
+    topColorDark: 'rgba(6, 182, 212, 0.32)',
+    topColorLight: 'rgba(6, 182, 212, 0.22)',
+    bottomColorDark: 'rgba(6, 182, 212, 0.00)',
+    bottomColorLight: 'rgba(6, 182, 212, 0.00)',
     textColor: 'text-cyan-600 dark:text-cyan-400',
     badgeBg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
     badgeBorder: 'border-cyan-500/30',
@@ -297,29 +298,30 @@ export function PerformanceChart({
           fontSize: 11,
         },
         grid: {
-          vertLines: { color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)' },
-          horzLines: { color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)' },
+          vertLines: { color: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.025)', style: LineStyle.Dotted },
+          horzLines: { color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.035)', style: LineStyle.Dotted },
         },
         crosshair: {
           vertLine: {
-            color: isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.20)',
-            labelBackgroundColor: isDark ? '#2d2d2d' : '#1e293b',
+            color: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.22)',
+            labelBackgroundColor: isDark ? '#1e293b' : '#0f172a',
             width: 1,
-            style: LineStyle.Dotted,
+            style: LineStyle.Dashed,
           },
           horzLine: {
-            color: isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.20)',
-            labelBackgroundColor: isDark ? '#2d2d2d' : '#1e293b',
-            style: LineStyle.Dotted,
+            color: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.22)',
+            labelBackgroundColor: isDark ? '#1e293b' : '#0f172a',
+            width: 1,
+            style: LineStyle.Dashed,
           },
         },
         rightPriceScale: {
           visible: !isNativePlatform(),
-          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+          borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
           scaleMargins: { top: 0.12, bottom: 0.08 },
         },
         timeScale: {
-          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+          borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
           fixLeftEdge: true,
           fixRightEdge: true,
         },
@@ -329,14 +331,14 @@ export function PerformanceChart({
 
       // 1. Slot 2: Top Layer AreaSeries (Added FIRST, drawn in background)
       const slot2 = chart.addSeries(AreaSeries, {
-        lineColor: '#3b82f6',
-        topColor: isDark ? 'rgba(59, 130, 246, 0.42)' : 'rgba(37, 99, 235, 0.28)',
-        bottomColor: isDark ? 'rgba(59, 130, 246, 0.20)' : 'rgba(37, 99, 235, 0.12)',
+        lineColor: '#10b981',
+        topColor: isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)',
+        bottomColor: 'rgba(16, 185, 129, 0.00)',
         lineWidth: 2,
         priceLineVisible: false,
         lastValueVisible: true, // Only Top layer shows badge on right axis
         crosshairMarkerRadius: 5,
-        crosshairMarkerBackgroundColor: '#3b82f6',
+        crosshairMarkerBackgroundColor: '#10b981',
         crosshairMarkerBorderColor: '#ffffff',
         crosshairMarkerBorderWidth: 2,
         priceFormat: {
@@ -348,8 +350,8 @@ export function PerformanceChart({
       // 2. Slot 1: Middle Layer AreaSeries (Added SECOND, drawn above slot 2)
       const slot1 = chart.addSeries(AreaSeries, {
         lineColor: '#10b981',
-        topColor: isDark ? 'rgba(16, 185, 129, 0.52)' : 'rgba(16, 185, 129, 0.38)',
-        bottomColor: isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)',
+        topColor: isDark ? 'rgba(16, 185, 129, 0.32)' : 'rgba(16, 185, 129, 0.22)',
+        bottomColor: 'rgba(16, 185, 129, 0.00)',
         lineWidth: 2,
         priceLineVisible: false,
         lastValueVisible: false, // Hidden on right axis
@@ -366,8 +368,8 @@ export function PerformanceChart({
       // 3. Slot 0: Bottom Layer AreaSeries (Added THIRD, drawn in front of slot 1)
       const slot0 = chart.addSeries(AreaSeries, {
         lineColor: '#f59e0b',
-        topColor: isDark ? 'rgba(245, 158, 11, 0.62)' : 'rgba(245, 158, 11, 0.48)',
-        bottomColor: isDark ? 'rgba(245, 158, 11, 0.35)' : 'rgba(245, 158, 11, 0.25)',
+        topColor: isDark ? 'rgba(245, 158, 11, 0.32)' : 'rgba(245, 158, 11, 0.22)',
+        bottomColor: 'rgba(245, 158, 11, 0.00)',
         lineWidth: 2,
         priceLineVisible: false,
         lastValueVisible: false, // Hidden on right axis
@@ -383,13 +385,13 @@ export function PerformanceChart({
 
       // 4. Invested Series (Dashed Line) (Added FOURTH, drawn on top of all area fills)
       const investedSeries = chart.addSeries(LineSeries, {
-        color: isDark ? '#c084fc' : '#9333ea',
-        lineWidth: 2,
+        color: isDark ? '#818cf8' : '#6366f1',
+        lineWidth: 1,
         lineStyle: LineStyle.Dashed,
         priceLineVisible: false,
         lastValueVisible: true, // Visible on right axis
-        crosshairMarkerRadius: 4,
-        crosshairMarkerBackgroundColor: isDark ? '#c084fc' : '#9333ea',
+        crosshairMarkerRadius: 3.5,
+        crosshairMarkerBackgroundColor: isDark ? '#818cf8' : '#6366f1',
         crosshairMarkerBorderColor: '#ffffff',
         crosshairMarkerBorderWidth: 1.5,
         priceFormat: {
@@ -626,13 +628,26 @@ export function PerformanceChart({
           slot0.applyOptions({ visible: false })
           slot1.applyOptions({ visible: false })
 
+          const isProfitable = (metrics.periodProfit ?? 0) >= 0
+          const mainLineColor = isProfitable
+            ? (isDark ? '#10b981' : '#059669')
+            : (isDark ? '#f43f5e' : '#e11d48')
+          const mainTopColor = isProfitable
+            ? (isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)')
+            : (isDark ? 'rgba(244, 63, 94, 0.28)' : 'rgba(244, 63, 94, 0.18)')
+          const mainBottomColor = isProfitable
+            ? 'rgba(16, 185, 129, 0.00)'
+            : 'rgba(244, 63, 94, 0.00)'
+
           const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
           slot2.setData(pts2)
           slot2.applyOptions({
             visible: true,
-            lineColor: '#2563eb',
-            topColor: isDark ? 'rgba(37, 99, 235, 0.42)' : 'rgba(37, 99, 235, 0.28)',
-            bottomColor: isDark ? 'rgba(37, 99, 235, 0.20)' : 'rgba(37, 99, 235, 0.12)',
+            lineColor: mainLineColor,
+            topColor: mainTopColor,
+            bottomColor: mainBottomColor,
+            lineWidth: 2,
+            crosshairMarkerBackgroundColor: mainLineColor,
             lastValueVisible: true,
             autoscaleInfoProvider: (original: any) => {
               const res = original()
@@ -743,17 +758,20 @@ export function PerformanceChart({
         })
 
         const isPositive = (metrics.periodReturnPct ?? 0) >= 0
-        const mainColor = isPositive ? '#10b981' : '#f43f5e'
+        const mainColor = isPositive ? (isDark ? '#10b981' : '#059669') : (isDark ? '#f43f5e' : '#e11d48')
         const topGrad = isPositive
-          ? (isDark ? 'rgba(16, 185, 129, 0.32)' : 'rgba(16, 185, 129, 0.22)')
-          : (isDark ? 'rgba(244, 63, 94, 0.32)' : 'rgba(244, 63, 94, 0.22)')
+          ? (isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)')
+          : (isDark ? 'rgba(244, 63, 94, 0.28)' : 'rgba(244, 63, 94, 0.18)')
+        const bottomGrad = isPositive ? 'rgba(16, 185, 129, 0.00)' : 'rgba(244, 63, 94, 0.00)'
 
         slot2.setData(pctPoints)
         slot2.applyOptions({
           visible: true,
           lineColor: mainColor,
           topColor: topGrad,
-          bottomColor: isPositive ? 'rgba(16, 185, 129, 0.01)' : 'rgba(244, 63, 94, 0.01)',
+          bottomColor: bottomGrad,
+          lineWidth: 2,
+          crosshairMarkerBackgroundColor: mainColor,
           lastValueVisible: true,
           autoscaleInfoProvider: undefined,
           priceFormat: {
@@ -784,6 +802,7 @@ export function PerformanceChart({
       }
 
       chart.timeScale().fitContent()
+      triggerChartAnimation(containerRef.current, 750)
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
@@ -797,7 +816,12 @@ export function PerformanceChart({
           {/* Left: Patrimonio & Aportado */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20 shrink-0" />
+              <span className={cn(
+                "w-2 h-2 rounded-full ring-2 shrink-0 transition-colors",
+                (activeSelectedMetrics?.diff ?? 0) >= 0
+                  ? "bg-emerald-500 ring-emerald-500/25"
+                  : "bg-rose-500 ring-rose-500/25"
+              )} />
               <span className="text-slate-500 dark:text-slate-400 font-medium">Patrimonio:</span>
               <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
                 {chartMode === 'currency'
@@ -808,7 +832,7 @@ export function PerformanceChart({
 
             {showInvested && chartMode === 'currency' && activeSelectedMetrics?.inv !== undefined && (
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-0.5 border-t-2 border-dashed border-purple-500 shrink-0" />
+                <span className="w-2.5 h-0.5 border-t-2 border-dashed border-indigo-500 dark:border-indigo-400 shrink-0" />
                 <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
                 <span data-private className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
                   {fmt.currency(activeSelectedMetrics.inv)}
@@ -858,7 +882,10 @@ export function PerformanceChart({
           )}
         >
           <div className="flex items-center gap-1.5 font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+            <span className={cn(
+              "w-1.5 h-1.5 rounded-full shrink-0 transition-colors",
+              (activeSelectedMetrics?.diff ?? 0) >= 0 ? "bg-emerald-500" : "bg-rose-500"
+            )} />
             <span data-private className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm">
               {chartMode === 'currency'
                 ? fmt.currency(activeSelectedMetrics.val)
@@ -1023,18 +1050,87 @@ export function PerformanceChart({
 
 export function PerformanceChartSkeleton({ height = 260 }: { height?: number }) {
   return (
-    <div style={{ height }} className="w-full flex flex-col justify-between p-4 animate-pulse">
-      <div className="flex-1 w-full flex items-end gap-1.5 pb-3 border-b border-slate-200/50 dark:border-white/[0.05]">
-        <div className="w-full h-full rounded-xl bg-slate-200/50 dark:bg-white/[0.04] relative overflow-hidden flex items-end">
-          <div className="w-full h-1/2 bg-gradient-to-t from-slate-200/80 dark:from-white/[0.08] to-transparent rounded-b-xl" />
+    <div style={{ height }} className="w-full flex flex-col justify-between py-1 select-none relative overflow-hidden">
+      {/* Top HUD Skeleton */}
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] backdrop-blur-xs">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500/40 animate-pulse" />
+            <div className="w-16 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08] animate-pulse" />
+            <div className="w-20 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12] animate-pulse" />
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 border-l border-slate-200 dark:border-white/[0.08] pl-3">
+            <div className="w-14 h-3 rounded bg-slate-200/70 dark:bg-white/[0.08] animate-pulse" />
+            <div className="w-16 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12] animate-pulse" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-24 h-5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 animate-pulse" />
+          <div className="w-20 h-4 rounded bg-slate-200/70 dark:bg-white/[0.08] animate-pulse" />
         </div>
       </div>
-      <div className="flex justify-between items-center pt-2 px-1">
-        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
-        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
-        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
-        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
-        <div className="w-12 h-2.5 bg-slate-200/60 dark:bg-white/[0.04] rounded" />
+
+      {/* Center SVG Financial Wave Loading Animation with Shimmer */}
+      <div className="flex-1 w-full relative my-2 rounded-xl overflow-hidden flex items-center justify-center">
+        <svg
+          className="w-full h-full"
+          viewBox="0 0 600 200"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient id="chartWaveFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
+              <stop offset="60%" stopColor="#10b981" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#10b981" stopOpacity="0.00" />
+            </linearGradient>
+            <linearGradient id="chartWaveStroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+              <stop offset="50%" stopColor="#34d399" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#10b981" stopOpacity="1" />
+            </linearGradient>
+          </defs>
+
+          {/* Reference Grid lines */}
+          <line x1="0" y1="45" x2="600" y2="45" stroke="currentColor" strokeDasharray="3 3" className="text-slate-200/60 dark:text-white/[0.04]" />
+          <line x1="0" y1="95" x2="600" y2="95" stroke="currentColor" strokeDasharray="3 3" className="text-slate-200/60 dark:text-white/[0.04]" />
+          <line x1="0" y1="145" x2="600" y2="145" stroke="currentColor" strokeDasharray="3 3" className="text-slate-200/60 dark:text-white/[0.04]" />
+
+          {/* Area fill under curve */}
+          <path
+            d="M 0,150 Q 80,160 150,120 T 300,95 T 420,110 T 520,60 T 600,40 L 600,200 L 0,200 Z"
+            fill="url(#chartWaveFill)"
+          />
+
+          {/* Flowing curve stroke */}
+          <path
+            d="M 0,150 Q 80,160 150,120 T 300,95 T 420,110 T 520,60 T 600,40"
+            fill="none"
+            stroke="url(#chartWaveStroke)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+
+          {/* Live pulsing beacon at the tip */}
+          <circle cx="598" cy="40" r="4.5" fill="#10b981" />
+          <circle cx="598" cy="40" r="10" fill="#10b981" opacity="0.35" className="animate-ping" style={{ transformOrigin: '598px 40px' }} />
+        </svg>
+
+        {/* Shimmer sweep bar across the wave */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.08] dark:via-white/[0.05] to-transparent animate-[pulse_2s_infinite] pointer-events-none" />
+      </div>
+
+      {/* Bottom Milestones Strip Skeleton */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/70 dark:bg-white/[0.025] border border-slate-200/60 dark:border-white/[0.05] animate-pulse">
+            <div className="w-5 h-5 rounded-lg bg-slate-200/80 dark:bg-white/[0.08]" />
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="w-8 h-2 rounded bg-slate-200/60 dark:bg-white/[0.06]" />
+              <div className="w-14 h-3 rounded bg-slate-200/80 dark:bg-white/[0.08]" />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

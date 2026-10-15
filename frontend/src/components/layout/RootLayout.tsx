@@ -99,7 +99,6 @@ export function RootLayout() {
       // Debounce slightly to prevent double-firing on window focus + visibilitychange
       if (now - lastResumeRefetch > 8000) {
         lastResumeRefetch = now
-        queryClient.invalidateQueries()
         checkNavAlerts()
       }
     }
