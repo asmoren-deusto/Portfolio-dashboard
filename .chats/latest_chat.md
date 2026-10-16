@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 19:51:58
+- **Fecha de exportación:** 2026-10-16 19:56:47
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 15
+- **Total de interacciones registradas:** 17
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -239,5 +239,34 @@ Todos los cambios se compilaron con éxito (`npm run build`) y fueron sincroniza
 ### 👤 Usuario (2026-10-16 17:34:14)
 
 que las 3 graficas de overview se animen y terminen ala vez
+
+---
+
+### 🤖 Asistente (2026-10-16 17:52:01)
+
+Se han sincronizado las 3 gráficas principales de la página de Overview para que inicien y finalicen su animación al mismo tiempo:
+
+### ⏱️ Ajustes de sincronización realizados
+
+1. **Unificación del retardo de entrada de las tarjetas en [OverviewPage.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx):**
+   - Anteriormente las tarjetas tenían retardos escalonados (`0.20s`, `0.23s`, `0.26s`), lo que hacía que la segunda y tercera tarjeta comenzaran más tarde.
+   - Ahora las 3 tarjetas (**Evolución Patrimonial**, **Distribución** y **Rendimiento**) comparten el mismo `delay={0.2}`.
+
+2. **Sincronización exacta de la duración de animación a 750 ms:**
+   - **Evolución Patrimonial ([PerformanceChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) & [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts)):**
+     - Se eliminó el `setTimeout` de 40 ms para arrancar con `requestAnimationFrame` sin desfase.
+     - Duración ajustada a **750 ms**.
+   - **Distribución de Cartera ([AllocationChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/AllocationChart.tsx)):**
+     - Se ajustó `animationBegin={0}` y `animationDuration={750}` (antes terminaba a los 550 ms).
+   - **Rendimiento ([ReturnsChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)):**
+     - Se eliminó el `animationBegin={30}` y se sincronizó con `animationBegin={0}` y `animationDuration={750}` (antes terminaba a los 680 ms).
+
+Las 3 gráficas ahora comienzan en `0 ms` y culminan de forma armónica exactamente a los **750 ms**. Los cambios se verificaron con `npm run build` y se subieron a Git con la versión **v3.0.113**.
+
+---
+
+### 👤 Usuario (2026-10-16 17:36:37)
+
+sigue sin animarse y muchas veces no se ve, solo se mueve la barra vertical
 
 ---

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import {
   createChart,
   AreaSeries,
@@ -328,15 +328,19 @@ export function PerformanceChart({
 
 
   // Initialize Lightweight Charts
-  useEffect(() => {
-    if (!containerRef.current) return
+  const initChart = useCallback(() => {
+    if (!containerRef.current) return null
 
-    let disposed = false
+    if (chartRef.current) {
+      try {
+        chartRef.current.remove()
+      } catch {}
+    }
+
     const containerWidth = Math.max(10, containerRef.current.clientWidth || 300)
 
-    let chart: IChartApi | null = null
     try {
-      chart = createChart(containerRef.current, {
+      const chart = createChart(containerRef.current, {
         width: containerWidth,
         height,
         layout: {
@@ -487,12 +491,19 @@ export function PerformanceChart({
           setTooltipPos(null)
         }
       })
+
+      return chart
     } catch (err) {
       console.warn('Failed to initialize performance chart:', err)
+      return null
     }
+  }, [height, isDark])
+
+  useEffect(() => {
+    initChart()
 
     const ro = new ResizeObserver(entries => {
-      if (disposed || !entries[0] || !chartRef.current) return
+      if (!entries[0] || !chartRef.current) return
       try {
         const w = Math.max(10, entries[0].contentRect.width)
         chartRef.current.applyOptions({ width: w })
@@ -505,11 +516,10 @@ export function PerformanceChart({
     }
 
     return () => {
-      disposed = true
       ro.disconnect()
-      if (chart) {
+      if (chartRef.current) {
         try {
-          chart.remove()
+          chartRef.current.remove()
         } catch {}
       }
       chartRef.current = null
@@ -521,11 +531,16 @@ export function PerformanceChart({
       zeroPriceLineRef.current = null
       entityPriceLinesRef.current = []
     }
-  }, [height, isDark])
+  }, [initChart])
 
   // Update Stacked Series Data on Changes
   useEffect(() => {
-    if (!slot2Ref.current || !chartRef.current || !data || !metrics) return
+    if (!containerRef.current || !data || !metrics) return
+
+    if (!chartRef.current || !slot2Ref.current) {
+      initChart()
+    }
+    if (!slot2Ref.current || !chartRef.current) return
 
     try {
       const chart = chartRef.current
@@ -859,13 +874,9 @@ export function PerformanceChart({
   }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics, period, refreshAnimKey])
 
   return (
-    <motion.div
-      key={`perf-chart-wrap-${selectedEntity}-${period}-${refreshAnimKey}-${chartMode}`}
-      initial={{ opacity: 0.88, y: 1 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+    <div
       data-private
-      className="w-full flex flex-col justify-between flex-1 min-h-0 select-none"
+      className="w-full flex flex-col justify-between flex-1 min-h-0 select-none relative"
     >
       {/* Canvas Container */}
       <div
@@ -1265,7 +1276,7 @@ export function PerformanceChart({
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   )
 }
 

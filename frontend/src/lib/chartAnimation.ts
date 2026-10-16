@@ -34,7 +34,7 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
       {
         duration,
         easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards',
+        fill: 'none',
       }
     )
 
@@ -45,5 +45,6 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
     }
 
     anim.onfinish = cleanup
+    anim.oncancel = cleanup
   }
 }
