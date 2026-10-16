@@ -14,6 +14,25 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    target: 'esnext',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('lightweight-charts')) return 'vendor-lw-charts'
+            if (id.includes('recharts')) return 'vendor-recharts'
+            if (id.includes('framer-motion')) return 'vendor-framer-motion'
+            if (id.includes('lucide-react')) return 'vendor-lucide'
+            if (id.includes('@tanstack')) return 'vendor-tanstack'
+            if (id.includes('react') || id.includes('scheduler')) return 'vendor-react'
+          }
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     strictPort: true,

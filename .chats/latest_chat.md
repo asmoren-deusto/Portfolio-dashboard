@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 14:36:44
+- **Fecha de exportación:** 2026-10-16 14:42:45
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 69
+- **Total de interacciones registradas:** 71
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -998,5 +998,43 @@ He realizado una **revisión a conciencia de todas las animaciones y micro-inter
 ### 👤 Usuario (2026-10-16 12:13:04)
 
 los % en rendimiento a veces no aparecen, asegura que aparezcan siempre
+
+---
+
+### 🤖 Asistente (2026-10-16 12:36:46)
+
+He corregido el problema por el cual los porcentajes en la gráfica de **Rendimiento** desaparecían o no se mostraban en ciertas situaciones.
+
+---
+
+### 🔍 Causa Raíz Identificada
+
+1. **Colisión de ciclo de vida en Recharts 3:**
+   - La librería Recharts 3 oculta internamente las etiquetas durante su animación SVG (`showLabels: !isAnimating`). Al usar transiciones de estado combinadas con temporizadores, el callback de fin de animación no se disparaba de forma determinista, dejando las etiquetas invisibles de forma intermitente.
+2. **Supresión automática en valores nulos, negativos o límite:**
+   - La directiva por defecto `position="top"` de Recharts omite o recorta las etiquetas cuando una barra tiene valor `0.00%` (altura 0), cuando es negativa (al calcular la parte superior como la línea base $y=0$), o cuando roza el borde superior/inferior del SVG.
+
+---
+
+### 🛠️ Solución Aplicada ([ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx))
+
+1. **Renderizado SVG Directo (`renderCustomBarLabel`):**
+   - Se sustituyó la directiva interna de Recharts por un componente de renderizado SVG directo mediante `LabelList content={renderCustomBarLabel}`. Este método se invoca siempre para cada una de las barras sin depender de los cálculos internos de visibilidad de Recharts.
+2. **Posicionamiento Dinámico Inteligente:**
+   - **Barras positivas o en cero ($v \ge 0$):** la etiqueta se posiciona encima de la barra (`y - 6` con cota mínima para no recortarse con el marco superior).
+   - **Barras negativas ($v < 0$):** la etiqueta se coloca debajo de la barra (`y + height + 12`), quedando perfectamente legible y sin solaparse con las etiquetas de los días del eje X.
+3. **Estilo uniforme y profesional:**
+   - Se mantiene el color gris original neutro (`#94a3b8` / `slate-400`), tipografía monoespaciada en negrita (`font-mono font-bold`) y formato exacto (`+X.XX%` / `-X.XX%`).
+4. **Validación visual en ambos modos y pantallas:**
+   - Verificado tanto en la vista **Global** (1D, 1S, 1M, 3M, 6M, 1A) como en la vista **Semanal** (últimos 7 días con barras positivas y negativas), así como en la página de **Analítica y Riesgo**.
+
+---
+🚀 Desplegado y sincronizado con Git en la versión **`v3.0.89`**.
+
+---
+
+### 👤 Usuario (2026-10-16 12:13:14)
+
+mejora el rendimiento de la web
 
 ---

@@ -17,6 +17,8 @@ import {
   Trash2,
   Loader2,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/Card'
@@ -101,6 +103,21 @@ export function TransactionsPage() {
       return true
     })
   }, [transactions, activeType, searchQuery, positionMap])
+
+  // Pagination for high DOM performance
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState<number>(30)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeType, searchQuery])
+
+  const totalPages = pageSize === -1 ? 1 : Math.max(1, Math.ceil(filtered.length / pageSize))
+  const paginatedTransactions = useMemo(() => {
+    if (pageSize === -1) return filtered
+    const start = (currentPage - 1) * pageSize
+    return filtered.slice(start, start + pageSize)
+  }, [filtered, currentPage, pageSize])
 
   const notify = (text: string, error = false) => {
     setNotification({ text, error })
@@ -316,7 +333,7 @@ export function TransactionsPage() {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((t, i) => {
+                  paginatedTransactions.map((t, i) => {
                     const conf = TYPE_CONFIG[t.type] ?? TYPE_CONFIG.buy
                     const assetInfo = positionMap.get(t.isin)
                     const displayName = (t as any).name || assetInfo?.name || t.isin
@@ -327,7 +344,7 @@ export function TransactionsPage() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.2) }}
+                        transition={{ duration: 0.15, delay: Math.min(i * 0.012, 0.15) }}
                         onClick={() => {
                           if (assetInfo) setSelectedPosition(assetInfo)
                         }}
@@ -411,6 +428,68 @@ export function TransactionsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Toolbar */}
+        {filtered.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3 border-t border-slate-100 dark:border-white/[0.05] bg-slate-50/50 dark:bg-white/[0.015] text-xs">
+            <div className="text-slate-500 dark:text-slate-400 font-medium">
+              {pageSize === -1 ? (
+                <span>Mostrando las <strong>{filtered.length}</strong> operaciones</span>
+              ) : (
+                <span>
+                  Mostrando <strong>{(currentPage - 1) * pageSize + 1}</strong> – <strong>{Math.min(currentPage * pageSize, filtered.length)}</strong> de <strong>{filtered.length}</strong> operaciones
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 mr-2 text-slate-500 dark:text-slate-400">
+                <span className="hidden sm:inline">Por página:</span>
+                {[25, 50, 100, -1].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => {
+                      setPageSize(size)
+                      setCurrentPage(1)
+                    }}
+                    className={cn(
+                      "px-2 py-1 rounded-lg text-xs font-semibold transition-all",
+                      pageSize === size
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-white/[0.06]"
+                    )}
+                  >
+                    {size === -1 ? 'Todas' : size}
+                  </button>
+                ))}
+              </div>
+
+              {pageSize !== -1 && totalPages > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="p-1.5 rounded-lg border border-slate-200/80 dark:border-white/[0.08] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-all"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+
+                  <span className="px-2 font-mono font-bold text-slate-700 dark:text-slate-300">
+                    {currentPage} / {totalPages}
+                  </span>
+
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-1.5 rounded-lg border border-slate-200/80 dark:border-white/[0.08] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-all"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Nueva Operación Modal */}
