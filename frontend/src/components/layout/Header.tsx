@@ -1,7 +1,7 @@
 import React from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
-import { cn } from '@/lib/utils'
+import { cn, fmt, getConsensusNavDate } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { HeaderActions } from '@/components/layout/HeaderActions'
 import { useHeaderContext } from '@/context/HeaderContext'
@@ -85,28 +85,25 @@ export function Header({
   const { data: positions = [] } = usePositions()
   const { data: analytics } = useAnalytics()
 
+  const consensusNavDate = React.useMemo(() => {
+    return getConsensusNavDate(positions, analytics?.latest_nav_date)
+  }, [positions, analytics?.latest_nav_date])
+
   const total = analytics?.total_positions_count ?? positions.length
-  const updated = analytics?.updated_positions_count ?? positions.filter((p) => {
-    const d = p.price_date || p.last_updated
-    if (!d) return false
-    const days = Math.floor((Date.now() - new Date(d).getTime()) / 86400000)
-    return days <= 3
-  }).length
+  const updated = analytics?.updated_positions_count ?? (
+    consensusNavDate
+      ? positions.filter((p) => {
+          const d = (p.price_date || p.last_updated)?.slice(0, 10)
+          return d && d >= consensusNavDate
+        }).length
+      : positions.length
+  )
 
   const navFresh = updated != null && total != null && total > 0 ? updated >= total : true
 
   const navDate = React.useMemo(() => {
-    if (analytics?.latest_nav_date) {
-      return new Date(analytics.latest_nav_date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
-    }
-    const dates = positions
-      .map((p) => p.price_date || p.last_updated)
-      .filter(Boolean) as string[]
-    if (!dates.length) return null
-    dates.sort()
-    const latest = dates[dates.length - 1]
-    return latest ? new Date(latest).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : null
-  }, [analytics?.latest_nav_date, positions])
+    return consensusNavDate ? fmt.dateShort(consensusNavDate) : null
+  }, [consensusNavDate])
 
   // Reset the filter when it doesn't exist for the active profile (e.g. after switching user)
   React.useEffect(() => {

@@ -43,7 +43,7 @@ import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
-import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK } from '@/lib/utils'
+import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
 
@@ -376,30 +376,17 @@ export function OverviewPage() {
   }, [positions, allocMode])
 
   // Latest reporting NAV date across active positions (ignoring weekend dates)
-  // Uses the date where majority (or mode) of positions have reported
+  // Uses consensus date (majority or mode, prioritizing analytics if available)
   const latestNavDate = useMemo(() => {
-    if (!positions.length) return ''
-    const counts: Record<string, number> = {}
-    for (const p of positions) {
-      const d = p.price_date || p.last_updated
-      if (!d) continue
-      const dayOfWeek = new Date(d + 'T12:00:00Z').getUTCDay()
-      if (dayOfWeek === 0 || dayOfWeek === 6) continue
-      counts[d] = (counts[d] || 0) + 1
-    }
-    const dates = Object.keys(counts).sort()
-    if (!dates.length) return ''
-    const latest = dates[dates.length - 1]
-    if (counts[latest] >= Math.ceil(positions.length / 2)) {
-      return latest
-    }
-    const sortedByCount = Object.entries(counts).sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]))
-    return sortedByCount[0][0]
-  }, [positions])
+    return getConsensusNavDate(positions, analytics?.latest_nav_date)
+  }, [positions, analytics?.latest_nav_date])
 
   const updatedPositionsCount = useMemo(() => {
     if (!positions.length || !latestNavDate) return 0
-    return positions.filter((p) => (p.price_date || p.last_updated) === latestNavDate).length
+    return positions.filter((p) => {
+      const d = p.price_date || p.last_updated
+      return d && d >= latestNavDate
+    }).length
   }, [positions, latestNavDate])
 
   const shortTermMetrics = useMemo(() => {
@@ -416,7 +403,7 @@ export function OverviewPage() {
     if (positions.length > 0) {
       for (const p of positions) {
         const pDate = p.price_date || p.last_updated
-        if (pDate && latestNavDate && pDate === latestNavDate) {
+        if (pDate && latestNavDate && pDate >= latestNavDate) {
           if (typeof p.daily_change === 'number' && !isNaN(p.daily_change) && p.daily_change !== 0) {
             hasPositionChanges = true
             positionsDailyChange += p.daily_change * (p.shares || 1)
@@ -1466,7 +1453,8 @@ export function OverviewPage() {
                       col1Positions.map((p) => {
                         const isRowHovered = hoveredIsin === p.isin
                         const assetColor = assetColorMap[p.isin]
-                        const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                        const pDate = p.price_date || p.last_updated
+                        const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
 
                         return (
                           <motion.tr
@@ -1622,7 +1610,8 @@ export function OverviewPage() {
                         col2Positions.map((p) => {
                           const isRowHovered = hoveredIsin === p.isin
                           const assetColor = assetColorMap[p.isin]
-                          const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                          const pDate = p.price_date || p.last_updated
+                          const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
 
                           return (
                             <motion.tr

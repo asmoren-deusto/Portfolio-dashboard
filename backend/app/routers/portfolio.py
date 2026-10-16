@@ -218,6 +218,10 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             daily_change = round(effective_price - p_prev, 4)
             daily_change_pct = round((effective_price - p_prev) / p_prev * 100, 2)
 
+        now_d = datetime.now().date()
+        offset_d = 3 if now_d.weekday() == 0 else (2 if now_d.weekday() == 6 else (1 if now_d.weekday() == 5 else 1))
+        fallback_date = p_prev_date or (now_d - timedelta(days=offset_d)).strftime("%Y-%m-%d")
+
         return {
             "isin": isin,
             "name": name,
@@ -236,8 +240,8 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             "daily_change_pct": daily_change_pct,
             "broker": pos_broker,
             "ter": getattr(asset, "ter", None) if asset else None,
-            "last_updated": price_date or datetime.now().strftime("%Y-%m-%d"),
-            "price_date": price_date or datetime.now().strftime("%Y-%m-%d"),
+            "last_updated": price_date or fallback_date,
+            "price_date": price_date or fallback_date,
         }
 
     tasks = [_fetch_position_bundle(isin, pos) for isin, pos in active_positions.items()]
@@ -900,14 +904,46 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     series_for_returns = nav_series if nav_series and len(nav_series) >= 2 else value_series
     days_ytd = max(1, (datetime.now() - datetime(datetime.now().year, 1, 1)).days)
 
-    # Compute weighted daily return directly from active positions for exact 1D consistency.
-    # Funds that have NOT yet updated to the latest reporting NAV date compute with 0.00% daily change
-    # to avoid falsely attributing past days' returns to today's session.
-    latest_nav_date_res = db.query(func.max(PriceCache.date)).filter(
-        PriceCache.isin.in_(list(positions.keys())),
-        ~func.strftime("%w", PriceCache.date).in_(["0", "6"])
-    ).scalar() if db is not None else None
-    latest_nav_date = latest_nav_date_res or datetime.now().strftime("%Y-%m-%d")
+    # Determine consensus reporting NAV date across active positions (majority or mode, excluding weekends)
+    # Mutual funds report with a 1-day lag (T+1). An isolated asset with today's date or an intraday quote
+    # must not prematurely advance the portfolio's NAV session to today before funds actually report.
+    active_isins = [
+        isin for isin, pos in positions.items()
+        if not (isin == "TR_TRANSFER" or isin.startswith("TR_") or pos.get("shares", 0) <= 0.0001)
+    ]
+    fund_dates = []
+    for isin in active_isins:
+        p = price_history.get(isin, [])
+        f_date = p[-1]["date"] if p and p[-1].get("date") else None
+        if not f_date and db is not None:
+            f_date = db.query(PriceCache.date).filter(
+                PriceCache.isin == isin,
+                PriceCache.price > 0,
+                ~func.strftime("%w", PriceCache.date).in_(["0", "6"])
+            ).order_by(PriceCache.date.desc()).scalar()
+        if f_date:
+            try:
+                if datetime.strptime(f_date, "%Y-%m-%d").weekday() not in (5, 6):
+                    fund_dates.append(f_date)
+            except Exception:
+                fund_dates.append(f_date)
+
+    latest_nav_date = None
+    if fund_dates:
+        from collections import Counter
+        counts = Counter(fund_dates)
+        sorted_dates = sorted(counts.keys())
+        latest = sorted_dates[-1]
+        # Only adopt latest date if at least 50% of the active funds have reported it
+        if counts[latest] >= len(active_isins) / 2:
+            latest_nav_date = latest
+        else:
+            latest_nav_date = counts.most_common(1)[0][0]
+
+    if not latest_nav_date:
+        now_d = datetime.now().date()
+        offset = 3 if now_d.weekday() == 0 else (2 if now_d.weekday() == 6 else (1 if now_d.weekday() == 5 else 1))
+        latest_nav_date = (now_d - timedelta(days=offset)).strftime("%Y-%m-%d")
 
     weighted_1d = 0.0
     active_val = 0.0
@@ -954,10 +990,10 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
                 if len(all_cps) >= 2:
                     p_prev = all_cps[1].price
 
-        # Only compute non-zero daily return if this fund has updated to the latest NAV date
+        # Count position as updated if its latest NAV date is on or after the consensus NAV date
         asset_daily_pct = 0.0
         fund_latest_date = p[-1]["date"] if p else None
-        if fund_latest_date == latest_nav_date:
+        if fund_latest_date and fund_latest_date >= latest_nav_date:
             updated_positions_count += 1
             if p_prev and p_prev > 0 and eff_p > 0:
                 asset_daily_pct = (eff_p - p_prev) / p_prev * 100

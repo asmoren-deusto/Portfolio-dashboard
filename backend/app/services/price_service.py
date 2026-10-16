@@ -89,6 +89,13 @@ KNOWN_TICKERS: dict[str, str] = {
 }
 
 
+def get_previous_business_date() -> str:
+    """Return the most recent completed business date (Monday-Friday, skipping weekends)."""
+    now_d = datetime.now().date()
+    offset = 3 if now_d.weekday() == 0 else (2 if now_d.weekday() == 6 else (1 if now_d.weekday() == 5 else 1))
+    return (now_d - timedelta(days=offset)).strftime("%Y-%m-%d")
+
+
 def _normalize_business_date(d_str: str) -> str:
     """Normalize any weekend date to the preceding Friday (funds do not liquidate on weekends)."""
     try:
@@ -220,7 +227,12 @@ async def get_price_with_date(
     # If successfully fetched from live provider, persist to DB PriceCache & in-memory cache
     if price is not None and db is not None and PriceCache is not None:
         try:
-            target_date = _normalize_business_date(price_date or datetime.now().strftime("%Y-%m-%d"))
+            fallback_dt = get_previous_business_date() if is_standard_isin else datetime.now().strftime("%Y-%m-%d")
+            eff_dt = price_date or fallback_dt
+            # Mutual funds never publish official closed NAVs for today before 22:00
+            if is_standard_isin and eff_dt == datetime.now().strftime("%Y-%m-%d") and datetime.now().hour < 22:
+                eff_dt = get_previous_business_date()
+            target_date = _normalize_business_date(eff_dt)
             price_date = target_date
             existing = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == target_date).first()
             if existing:
@@ -254,7 +266,7 @@ async def get_price_with_date(
     if price is None:
         price = await _fetch_morningstar_price(isin)
         if price:
-            price_date = datetime.now().strftime("%Y-%m-%d")
+            price_date = get_previous_business_date()
 
     if price is not None:
         _price_cache[isin] = {"price": price, "date": price_date, "ts": datetime.now()}
@@ -752,7 +764,7 @@ def _fetch_investing_sync(isin: str) -> tuple[Optional[float], Optional[str]]:
                                 elif len(parts) == 3:
                                     date_str = f"{parts[2]}-{int(parts[1]):02d}-{int(parts[0]):02d}"
                             elif ":" in t_str:
-                                date_str = datetime.now().strftime("%Y-%m-%d")
+                                date_str = get_previous_business_date()
                         return price, date_str
         except Exception:
             pass
@@ -809,7 +821,7 @@ async def _fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str
         info = t.fast_info
         price = getattr(info, "last_price", None) or getattr(info, "regular_market_price", None)
         if price:
-            return float(price), datetime.now().strftime("%Y-%m-%d")
+            return float(price), get_previous_business_date()
     except Exception as e:
         logger.warning(f"Yahoo Finance error for {ticker}: {e}")
     return None, None

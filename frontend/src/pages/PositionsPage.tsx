@@ -21,9 +21,9 @@ import { Card } from '@/components/ui/Card'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
-import { fmt, cn } from '@/lib/utils'
+import { fmt, cn, getConsensusNavDate } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
-import { usePositions, usePortfolioSummary } from '@/api/queries'
+import { usePositions, usePortfolioSummary, useAnalytics } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
 type AssetFilter = 'all' | 'fund' | 'epsv' | 'etf' | 'stock'
@@ -41,6 +41,7 @@ const FILTER_TABS: { id: AssetFilter; label: string }[] = [
 export function PositionsPage() {
   const { data: positions = [], isLoading, isFetching } = usePositions()
   const { data: summary } = usePortfolioSummary()
+  const { data: analytics } = useAnalytics()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<AssetFilter>('all')
@@ -50,11 +51,8 @@ export function PositionsPage() {
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
 
   const latestNavDate = useMemo(() => {
-    return positions.reduce((max, p) => {
-      const d = p.price_date || p.last_updated
-      return d && d > max ? d : max
-    }, '')
-  }, [positions])
+    return getConsensusNavDate(positions, analytics?.latest_nav_date)
+  }, [positions, analytics?.latest_nav_date])
 
   // Summary Metrics
   const stats = useMemo(() => {
@@ -390,7 +388,8 @@ export function PositionsPage() {
                   </tr>
                 ) : (
                   filteredPositions.map((p) => {
-                    const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                    const pDate = p.price_date || p.last_updated
+                    const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
                     return (
                       <motion.tr
                         key={p.isin}
@@ -543,7 +542,8 @@ export function PositionsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence>
               {filteredPositions.map((p, i) => {
-                const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                const pDate = p.price_date || p.last_updated
+                const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
                 return (
                   <motion.div
                     key={p.isin}

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 19:56:47
+- **Fecha de exportación:** 2026-10-16 20:14:42
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 17
+- **Total de interacciones registradas:** 19
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -268,5 +268,43 @@ Las 3 gráficas ahora comienzan en `0 ms` y culminan de forma armónica exactame
 ### 👤 Usuario (2026-10-16 17:36:37)
 
 sigue sin animarse y muchas veces no se ve, solo se mueve la barra vertical
+
+---
+
+### 🤖 Asistente (2026-10-16 17:56:49)
+
+Se ha resuelto el problema de raíz:
+
+### 🔍 Causa exacta identificada
+
+1. **Destrucción del contenedor Canvas por React:**
+   - El componente contenedor de [PerformanceChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) tenía asignada una `key` dinámica en el `<motion.div>`:
+     `key={'perf-chart-wrap-${selectedEntity}-${period}-${refreshAnimKey}-${chartMode}'}`.
+   - Cada vez que se cambiaba de entidad, modo o se actualizaba `refreshAnimKey`, React **desmontaba y destruía el elemento DOM** del canvas.
+   - Sin embargo, el `useEffect` que creaba la instancia de Lightweight Charts solo dependía de `[height, isDark]`. Al no cambiar estas dos variables, el nuevo div quedaba **100% vacío** (`chartRef.current = null`), sin canvas ni ejes.
+   - Lo único que React volvía a pintar era la línea verde vertical (la scanline), que se desplazaba sobre un lienzo en blanco.
+
+2. **Bloqueo persistente de `clipPath`:**
+   - En [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), la animación usaba `fill: 'forwards'`. Si la animación se interrumpía o cancelaba antes de disparar `onfinish`, el recorte `clipPath: inset(0 100% 0 0)` quedaba bloqueado en el estilo del elemento, ocultando la gráfica de forma permanente.
+
+---
+
+### 🛠️ Correcciones aplicadas
+
+1. **Contenedor DOM persistente y estable:**
+   - Se eliminó la `key` dinámica del contenedor en [PerformanceChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx). El nodo del canvas ya nunca es destruido ni recreado arbitrariamente.
+2. **Inicialización autorreparable (`initChart`):**
+   - Se extrajo la creación del gráfico a un `initChart` memoizado.
+   - En el `useEffect` de datos, si por cualquier motivo `chartRef.current` no existe, se ejecuta `initChart()` inmediatamente en caliente, asegurando que la gráfica siempre esté montada y visible.
+3. **Animación segura sin bloqueos:**
+   - En [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), se configuró `fill: 'none'` y se añadió un manejador `oncancel` para que el `clipPath` se limpie inmediatamente tanto al terminar como al cancelarse.
+
+Los cambios han sido compilados con éxito y subidos a Git con la versión **v3.0.114**.
+
+---
+
+### 👤 Usuario (2026-10-16 17:40:16)
+
+no tiene sentido, estamos a 16, no puede haber navs de hoy, debe marcar 15
 
 ---
