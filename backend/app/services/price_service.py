@@ -90,10 +90,9 @@ KNOWN_TICKERS: dict[str, str] = {
 
 
 def get_previous_business_date() -> str:
-    """Return the most recent completed business date (Monday-Friday, skipping weekends)."""
-    now_d = datetime.now().date()
-    offset = 3 if now_d.weekday() == 0 else (2 if now_d.weekday() == 6 else (1 if now_d.weekday() == 5 else 1))
-    return (now_d - timedelta(days=offset)).strftime("%Y-%m-%d")
+    """Return the most recent completed market business date (skipping weekends and TARGET2 holidays)."""
+    from app.services.market_calendar import get_expected_nav_date
+    return get_expected_nav_date()
 
 
 def _normalize_business_date(d_str: str) -> str:

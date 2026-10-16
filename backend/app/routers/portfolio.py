@@ -218,9 +218,8 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             daily_change = round(effective_price - p_prev, 4)
             daily_change_pct = round((effective_price - p_prev) / p_prev * 100, 2)
 
-        now_d = datetime.now().date()
-        offset_d = 3 if now_d.weekday() == 0 else (2 if now_d.weekday() == 6 else (1 if now_d.weekday() == 5 else 1))
-        fallback_date = p_prev_date or (now_d - timedelta(days=offset_d)).strftime("%Y-%m-%d")
+        from app.services.market_calendar import get_expected_nav_date
+        fallback_date = p_prev_date or get_expected_nav_date()
 
         return {
             "isin": isin,
@@ -928,22 +927,11 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
             except Exception:
                 fund_dates.append(f_date)
 
-    latest_nav_date = None
-    if fund_dates:
-        from collections import Counter
-        counts = Counter(fund_dates)
-        sorted_dates = sorted(counts.keys())
-        latest = sorted_dates[-1]
-        # Only adopt latest date if at least 50% of the active funds have reported it
-        if counts[latest] >= len(active_isins) / 2:
-            latest_nav_date = latest
-        else:
-            latest_nav_date = counts.most_common(1)[0][0]
-
-    if not latest_nav_date:
-        now_d = datetime.now().date()
-        offset = 3 if now_d.weekday() == 0 else (2 if now_d.weekday() == 6 else (1 if now_d.weekday() == 5 else 1))
-        latest_nav_date = (now_d - timedelta(days=offset)).strftime("%Y-%m-%d")
+    from app.services.market_calendar import get_effective_portfolio_nav_date
+    latest_nav_date, _ = get_effective_portfolio_nav_date(
+        fund_dates,
+        total_active_positions=len(active_isins)
+    )
 
     weighted_1d = 0.0
     active_val = 0.0

@@ -141,31 +141,12 @@ export const fmt = {
   },
 }
 
-/**
- * Compute the consensus NAV reporting date across active positions (majority or mode, excluding weekends).
- * Mutual funds publish NAVs on T+1; an isolated asset or live intraday quote must not drag the date forward.
- */
-export function getConsensusNavDate(
-  positions: Array<{ price_date?: string | null; last_updated?: string | null }>,
-  analyticsDate?: string | null
-): string {
-  if (analyticsDate) return analyticsDate
-  if (!positions || !positions.length) return ''
-  const counts: Record<string, number> = {}
-  for (const p of positions) {
-    const d = (p.price_date || p.last_updated)?.slice(0, 10)
-    if (!d) continue
-    const dayOfWeek = new Date(d + 'T12:00:00Z').getUTCDay()
-    if (dayOfWeek === 0 || dayOfWeek === 6) continue
-    counts[d] = (counts[d] || 0) + 1
-  }
-  const dates = Object.keys(counts).sort()
-  if (!dates.length) return ''
-  const latest = dates[dates.length - 1]
-  if (counts[latest] >= Math.ceil(positions.length / 2)) {
-    return latest
-  }
-  const sortedByCount = Object.entries(counts).sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]))
-  return sortedByCount[0][0]
-}
+export {
+  getEasterSunday,
+  getTarget2Holidays,
+  isMarketBusinessDay,
+  getExpectedNavDate,
+  getEffectivePortfolioNavDate,
+  getEffectivePortfolioNavDate as getConsensusNavDate,
+} from './marketCalendar'
 
