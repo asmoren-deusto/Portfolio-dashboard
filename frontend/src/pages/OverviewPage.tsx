@@ -122,6 +122,13 @@ export function OverviewPage() {
   const { data: marketData } = useMarketQuotes('Todos')
   const { data: simPortfolioData, isFetching: simPortfolioFetching } = useSimulatedPortfolio('1d')
 
+  // Synchronized initial loading state for the 3 Overview charts
+  // Ensures PerformanceChart, AllocationChart and ReturnsChart mount and trigger entrance animations on the EXACT same frame
+  const isChartsInitialLoading =
+    (performance.length === 0 && perfFetching) ||
+    (positions.length === 0 && positionsFetching) ||
+    (!analytics && analyticsFetching)
+
   const [txFilterType, setTxFilterType] = useState<'all' | 'buy' | 'dividend' | 'sell'>('all')
 
   const alphaSp = useMemo(() => {
@@ -1018,7 +1025,7 @@ export function OverviewPage() {
                     transition={{ duration: 0.18, ease: 'easeOut' }}
                     className="flex-1 flex flex-col justify-center min-h-0 w-full"
                   >
-                    {performance.length === 0 && perfFetching ? (
+                    {isChartsInitialLoading ? (
                       <PerformanceChartSkeleton height={260} />
                     ) : performance.length > 0 ? (
                       <PerformanceChart
@@ -1098,7 +1105,7 @@ export function OverviewPage() {
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
             <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-              {positions.length === 0 && positionsFetching ? (
+              {isChartsInitialLoading ? (
                 <AllocationChartSkeleton height={260} />
               ) : positions.length > 0 ? (
                 <AllocationChart
@@ -1256,40 +1263,21 @@ export function OverviewPage() {
                   transition={{ duration: 0.18, ease: 'easeOut' }}
                   className="flex flex-col justify-center flex-1 min-h-0 w-full"
                 >
-                  {returnsPeriodMode === 'global' ? (
-                    !analytics && analyticsFetching ? (
-                      <ReturnsChartSkeleton compact height={260} />
-                    ) : (
-                      <ReturnsChart
-                        analytics={analytics}
-                        mode={returnsPeriodMode}
-                        weeklyData={weeklyReturnsData}
-                        day1Pct={shortTermMetrics?.dayPct}
-                        day1Amount={shortTermMetrics?.dayAmount}
-                        weekPct={shortTermMetrics?.weekPct}
-                        weekAmount={shortTermMetrics?.weekAmount}
-                        totalPortfolioValue={displaySummary?.total_value}
-                        compact
-                        height={260}
-                      />
-                    )
+                  {isChartsInitialLoading ? (
+                    <ReturnsChartSkeleton compact height={260} />
                   ) : (
-                    (!weeklyReturnsData || weeklyReturnsData.length === 0) && perfFetching ? (
-                      <ReturnsChartSkeleton compact height={260} />
-                    ) : (
-                      <ReturnsChart
-                        analytics={analytics}
-                        mode={returnsPeriodMode}
-                        weeklyData={weeklyReturnsData}
-                        day1Pct={shortTermMetrics?.dayPct}
-                        day1Amount={shortTermMetrics?.dayAmount}
-                        weekPct={shortTermMetrics?.weekPct}
-                        weekAmount={shortTermMetrics?.weekAmount}
-                        totalPortfolioValue={displaySummary?.total_value}
-                        compact
-                        height={260}
-                      />
-                    )
+                    <ReturnsChart
+                      analytics={analytics}
+                      mode={returnsPeriodMode}
+                      weeklyData={weeklyReturnsData}
+                      day1Pct={shortTermMetrics?.dayPct}
+                      day1Amount={shortTermMetrics?.dayAmount}
+                      weekPct={shortTermMetrics?.weekPct}
+                      weekAmount={shortTermMetrics?.weekAmount}
+                      totalPortfolioValue={displaySummary?.total_value}
+                      compact
+                      height={260}
+                    />
                   )}
                 </motion.div>
               </AnimatePresence>

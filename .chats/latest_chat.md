@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 21:30:42
+- **Fecha de exportación:** 2026-10-16 21:36:20
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 34
+- **Total de interacciones registradas:** 36
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -537,5 +537,29 @@ Las tres gráficas del panel de Visión General (Evolución Patrimonial, Distrib
 ### 👤 Usuario (2026-10-16 19:25:39)
 
 la grafica de evolucion no se anima
+
+---
+
+### 🤖 Asistente (2026-10-16 19:30:46)
+
+### Causa y Solución de la Animación en la Gráfica de Evolución Patrimonial
+
+1. **¿Por qué no se apreciaba la animación de la curva?**
+   - **Renderizado asíncrono de Lightweight Charts:** Al asignar los puntos con `setData()`, la librería Lightweight Charts no pinta inmediatamente los píxeles en el canvas, sino que programa su dibujado para el siguiente ciclo de pintado (`requestAnimationFrame`). 
+   - Anteriormente, la función de animación de barrido (`clipPath`) y la barra vertical se disparaban de forma síncrona en el mismo instante en que se pasaban los datos, antes de que el canvas hubiese terminado de plasmar las curvas. Por ello, la barra vertical se desplazaba sobre un lienzo aún en blanco, y cuando aparecía la gráfica la animación ya había concluido.
+   - **Elemento objetivo en el DOM:** Lightweight Charts organiza su estructura dentro de una `<table>` que contiene el pane principal de la curva, la escala de precios y la escala de tiempo. Al apuntar únicamente al contenedor interno de un canvas parcial, la animación no abarcaba de forma uniforme toda el área.
+
+2. **Ajustes implementados:**
+   - **Sincronización con Doble `requestAnimationFrame`:** En [PerformanceChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx), el disparo de la animación de barrido y de la barra vertical ahora se ejecuta tras dos ciclos de frame (`requestAnimationFrame` anidado). Esto garantiza que el motor de Lightweight Charts ya tiene los píxeles dibujados en el canvas exactamente en el frame 0 del barrido.
+   - **Animación integral del contenedor de la tabla:** En [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), se pasa a animar la `<table>` completa de Lightweight Charts (`clipPath: inset(...)`), logrando una revelación de izquierda a derecha fluida, coordinada y alineada con la barra vertical luminosa.
+   - **Verificación en el navegador:** Se probó en tiempo real tanto en la carga inicial como al conmutar entre plazos (1A, YTD, 1M, etc.), confirmando que las curvas, los degradados y las áreas se revelan suavemente a lo largo de los 750 ms.
+
+Los cambios han sido compilados y publicados en **v3.0.118**.
+
+---
+
+### 👤 Usuario (2026-10-16 19:30:11)
+
+sincroniza las animaciones de los 3 graficos que terminen a la vez
 
 ---

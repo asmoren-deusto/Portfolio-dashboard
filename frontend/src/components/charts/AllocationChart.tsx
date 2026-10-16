@@ -154,7 +154,7 @@ export function AllocationChart({
               dataKey="value"
               strokeWidth={0}
               isAnimationActive={true}
-              animationBegin={0}
+              animationBegin={30}
               animationDuration={750}
               animationEasing="ease-out"
               onMouseEnter={(_, index) => {
