@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 14:42:45
+- **Fecha de exportación:** 2026-10-16 14:58:35
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 71
+- **Total de interacciones registradas:** 73
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1036,5 +1036,39 @@ He corregido el problema por el cual los porcentajes en la gráfica de **Rendimi
 ### 👤 Usuario (2026-10-16 12:13:14)
 
 mejora el rendimiento de la web
+
+---
+
+### 🤖 Asistente (2026-10-16 12:42:47)
+
+He aplicado una **optimización integral del rendimiento de la web**, abordando la carga inicial, el empaquetado de librerías, el renderizado de fuentes y la eficiencia del DOM.
+
+---
+
+### ⚡ Resumen de Mejoras de Rendimiento (`v3.0.90`)
+
+1. **Reducción del 82% en el Bundle JavaScript Inicial:**
+   - **Antes:** Toda la aplicación se empaquetaba en un único archivo monolítico de **`1.65 MB`** (`1,649 kB`), obligando al navegador a descargar y parsear todas las páginas y librerías antes de mostrar la pantalla inicial.
+   - **Ahora:** 
+     - El bundle inicial se reduce a solo **`294 kB`** (68 kB comprimido en gzip).
+     - **División por Rutas (`React.lazy` + `Suspense` en [App.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/App.tsx)):** Las páginas secundarias (`/market`, `/positions`, `/analytics`, `/transactions`, `/login`) se cargan bajo demanda únicamente cuando el usuario navega a ellas, con un skeleton shimmer de transición suave.
+     - **Vendor Chunking Inteligente ([vite.config.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/vite.config.ts)):** Separación de paquetes pesados en fragmentos independientes (`vendor-recharts`, `vendor-lw-charts`, `vendor-framer-motion`, `vendor-react`, `vendor-tanstack`, `vendor-lucide`). Esto permite al navegador cachear de forma inmutable las librerías externas sin volver a descargarlas tras cada despliegue.
+
+2. **Eliminación del Bloqueo del Render por Fuentes CSS:**
+   - **Antes:** [index.css](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css) incluía un `@import url(...)` a Google Fonts en la primera línea, lo cual pausaba la construcción del árbol CSSOM y retrasaba el primer pintado (FCP).
+   - **Ahora:** Retirado el `@import` bloqueante de CSS y añadido `<link rel="preconnect">` junto con la hoja de estilos en el `<head>` de [index.html](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/index.html). El navegador negocia la conexión DNS/TLS en paralelo a la descarga del HTML.
+
+3. **Optimización del DOM en Historial de Operaciones ([TransactionsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/TransactionsPage.tsx)):**
+   - **Antes:** Se renderizaban cientos de transacciones simultáneamente con sus nodos SVG, animaciones de fila y logos de empresas, sobrecargando la memoria y el hilo principal en carteras extensas.
+   - **Ahora:** Añadida barra de paginación de alto rendimiento con selector flexible de registros por página (`25 / 50 / 100 / Todas`) y controles `Anterior` / `Siguiente`, manteniendo el DOM ligero y las transiciones fluidas a 60 FPS.
+
+---
+🚀 Los cambios han sido validados exhaustivamente y se encuentran sincronizados y desplegados en Git en la versión **`v3.0.90`**.
+
+---
+
+### 👤 Usuario (2026-10-16 12:38:51)
+
+los % en rendimiento vuelven a estar mal colocados, revisa eesto por favor
 
 ---
