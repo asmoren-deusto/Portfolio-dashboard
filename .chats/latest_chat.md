@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 17:11:07
+- **Fecha de exportación:** 2026-10-16 17:14:24
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 100
+- **Total de interacciones registradas:** 102
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1499,5 +1499,24 @@ Desplegado y sincronizado en el repositorio bajo la versión **`v3.0.102`**.
 ### 👤 Usuario (2026-10-16 14:30:01)
 
 separa un pelo el circulo del texto
+
+---
+
+### 🤖 Asistente (2026-10-16 15:11:09)
+
+Se ha ajustado el espaciado y la animación del círculo indicador en vivo:
+
+1. **Separación y Contenedor:**
+   - En [MarketTicker.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx), se ha encapsulado el punto en un contenedor dedicado de tamaño fijo (`w-4 h-4`) con margen y `gap-2` respecto al bloque de texto (`EN VIVO` / reloj), más un padding lateral `pl-0.5`.
+   - Se ha ajustado el radio de expansión máxima del halo de pulso en [index.css](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css) (`scale(1.8)` en lugar de `scale(2.2)`), evitando que la onda expansiva alcance la tipografía.
+
+2. **Versión y Release:**
+   - Sincronizado y publicado en Git bajo la versión **`v3.0.103`**.
+
+---
+
+### 👤 Usuario (2026-10-16 14:46:55)
+
+en rendimiento al hacer over y en algunas ocasiones/recargas los % desaparecen
 
 ---

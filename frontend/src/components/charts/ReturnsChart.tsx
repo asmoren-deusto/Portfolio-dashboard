@@ -127,7 +127,6 @@ export function ReturnsChart({
 }: ReturnsChartProps) {
   const refreshAnimKey = useAppStore(s => s.refreshAnimKey)
   const selectedBroker = useAppStore(s => s.selectedBroker)
-  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null)
 
   if (mode === 'global' && !analytics) {
     return <ReturnsChartSkeleton compact={compact} height={height} />
@@ -188,8 +187,6 @@ export function ReturnsChart({
     return {
       ...d,
       plotVal,
-      posVal: d.value >= 0 ? (isZero ? 0.0001 : d.value) : undefined,
-      negVal: d.value < 0 ? d.value : undefined,
     }
   })
 
@@ -255,60 +252,47 @@ export function ReturnsChart({
             dataKey="plotVal"
             radius={[6, 6, 0, 0]}
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
-            isAnimationActive={true}
-            animationBegin={30}
-            animationDuration={650}
-            animationEasing="ease-out"
+            isAnimationActive={false}
           >
             <LabelList
-              dataKey="posVal"
-              position="top"
-              offset={5}
-              formatter={(val: any) => {
-                if (val == null || isNaN(val)) return ''
-                const num = Number(val)
-                if (Math.abs(num) < 0.0001) return '+0.00%'
-                return `${num >= 0 ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
-              }}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                transition: 'all 0.3s ease',
-              }}
-            />
-            <LabelList
-              dataKey="negVal"
-              position="bottom"
-              offset={5}
-              formatter={(val: any) => {
-                if (val == null || isNaN(val)) return ''
-                const num = Number(val)
-                return `-${Math.abs(num) < 1 ? Math.abs(num).toFixed(2) : Math.abs(num).toFixed(1)}%`
-              }}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                transition: 'all 0.3s ease',
+              dataKey="value"
+              content={(props: any) => {
+                const { x = 0, y = 0, width = 0, height = 0, value, index } = props
+                const raw = typeof value === 'number' ? value : (data[index]?.value ?? 0)
+                if (raw == null || isNaN(raw)) return null
+
+                const isZero = Math.abs(raw) < 0.0001
+                const isPos = raw >= 0
+                const formatted = isZero
+                  ? '+0.00%'
+                  : `${isPos ? '+' : ''}${Math.abs(raw) < 1 ? raw.toFixed(2) : raw.toFixed(1)}%`
+
+                // For positive values, y is the top of the bar; label sits above (y - 6)
+                // For negative values, y is the baseline (0 line), height extends down; label sits below
+                const posX = x + width / 2
+                const posY = isPos ? y - 6 : y + height + 13
+
+                return (
+                  <text
+                    x={posX}
+                    y={posY}
+                    textAnchor="middle"
+                    fill="#94a3b8"
+                    fontSize={compact ? 9.5 : 10.5}
+                    fontFamily="monospace"
+                    fontWeight={700}
+                    className="select-none pointer-events-none fill-slate-500 dark:fill-slate-400"
+                  >
+                    {formatted}
+                  </text>
+                )
               }}
             />
             {data.map((d, i) => (
               <Cell
                 key={`cell-${mode}-${selectedBroker}-${d.name}-${i}`}
                 fill={d.value >= 0 ? 'url(#barGreen)' : 'url(#barRed)'}
-                opacity={1}
-                style={{
-                  cursor: 'pointer',
-                  transition: 'filter 0.18s ease',
-                  filter: hoveredBarIndex === i
-                    ? (d.value >= 0 ? 'drop-shadow(0 2px 8px rgba(16,185,129,0.4))' : 'drop-shadow(0 2px 8px rgba(244,63,94,0.4))')
-                    : 'none',
-                }}
-                onMouseEnter={() => setHoveredBarIndex(i)}
-                onMouseLeave={() => setHoveredBarIndex(null)}
+                className="transition-all duration-150 hover:brightness-125 cursor-pointer"
               />
             ))}
           </Bar>
