@@ -867,9 +867,13 @@ export function PerformanceChart({
       }
 
       chart.timeScale().fitContent()
-      setIsSweepAnimating(true)
-      setSweepKey(prev => prev + 1)
-      triggerChartAnimation(containerRef.current, 750)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsSweepAnimating(true)
+          setSweepKey(prev => prev + 1)
+          triggerChartAnimation(containerRef.current, 750)
+        })
+      })
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }

@@ -11,15 +11,12 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
     return
   }
 
-  // Find the primary plot pane in lightweight-charts.
-  // Note: Lightweight Charts wraps pane canvases in a <div> inside a <td>.
-  // CSS clip-path does NOT work on <td> (display: table-cell), so we MUST target the inner <div>!
+  // Find the primary chart element in lightweight-charts.
+  // The <table> wraps all panes and canvases cleanly, allowing a unified sweep animation.
+  const table = container.querySelector('table')
   const canvas = container.querySelector('canvas')
-  if (!canvas) return
-
-  // In lightweight-charts, canvas is inside a div, which may be inside a td
-  const paneDiv = (canvas.closest('td')?.firstElementChild || canvas.parentElement) as HTMLElement
-  const target = (paneDiv && paneDiv.tagName === 'DIV' ? paneDiv : (canvas.parentElement || container)) as HTMLElement
+  const paneDiv = (canvas?.closest('td')?.firstElementChild || canvas?.parentElement) as HTMLElement
+  const target = (table || (paneDiv && paneDiv.tagName === 'DIV' ? paneDiv : container)) as HTMLElement
 
   if (target && typeof target.animate === 'function') {
     try {
