@@ -20,17 +20,27 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
       target.getAnimations?.().forEach(a => a.cancel())
     } catch {}
 
-    target.animate(
+    const anim = target.animate(
       [
         { clipPath: 'inset(0 100% 0 0)' },
-        { clipPath: 'inset(0 0% 0 0)' },
+        { clipPath: 'inset(0 -6px 0 0)' },
       ],
       {
         duration,
         easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'both',
+        fill: 'forwards',
       }
     )
+
+    const cleanup = () => {
+      try {
+        target.style.clipPath = ''
+        anim.cancel()
+      } catch {}
+    }
+
+    anim.onfinish = cleanup
+    anim.oncancel = cleanup
   }
 }
 

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 14:13:23
+- **Fecha de exportación:** 2026-10-16 14:17:26
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 63
+- **Total de interacciones registradas:** 65
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -908,5 +908,29 @@ Verificado en navegador y sincronizado en la versión **v3.0.85**.
 ### 👤 Usuario (2026-10-16 11:58:20)
 
 en distribucion que la animacion sea más rapida, la mitad -----> revierte este cambio de la 3.0.80, no me referia a la animacion de carga inicial sino a la aparicion de los datos (fade) cuando cambias (haces hover) sobre el grafico, esa SI, a la mitad
+
+---
+
+### 🤖 Asistente (2026-10-16 12:13:25)
+
+Se ha revertido la duración del dibujo inicial y acelerado al doble la aparición (*fade*) de los datos al hacer hover:
+
+1. **Reversión del dibujo inicial:**
+   - **[AllocationChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/AllocationChart.tsx)**: Restaurada la duración original del dibujo en `500 ms` con timer de `600 ms`.
+   - **[DiversificationDashboard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx)**: Restaurada la animación inicial en `400 ms`.
+
+2. **Aparición de datos al hacer hover (reducida a la mitad):**
+   - **Transición central (Fade de datos de la posición/tipo):** Reducida de `0.14 s` a **`0.07 s`** (`transition: { duration: 0.07, ease: 'easeOut' }`), respondiendo de forma inmediata al posar o mover el cursor.
+   - **Atenuación de porciones:** Reducida de `0.2 s` a **`0.1 s`** (`transition: opacity 0.1s ease`).
+   - **Leyenda:** Reducida a **`0.08 s`**.
+   - **Detalle central en Diversificación:** Reducida a **`75 ms`**.
+
+Publicado y sincronizado en la versión **v3.0.86**.
+
+---
+
+### 👤 Usuario (2026-10-16 12:07:46)
+
+evolucion patrimonial aparece una linea recta (de la animacion) siempre encima del eje Y derecho
 
 ---

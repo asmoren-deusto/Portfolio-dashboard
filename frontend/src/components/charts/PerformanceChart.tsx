@@ -849,13 +849,20 @@ export function PerformanceChart({
     <div data-private className="w-full flex flex-col justify-between flex-1 min-h-0 select-none">
       {/* Canvas Container */}
       <div data-private ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
-        {/* Glowing Scanline Animation: sweeps from left to right as the curve reveals */}
+        {/* Glowing Scanline Animation: sweeps from left to right as the curve reveals and fades before reaching axis */}
         {isSweepAnimating && (
           <motion.div
             key={`scanline-${sweepKey}`}
-            initial={{ left: '0%' }}
-            animate={{ left: isNativePlatform() ? '100%' : 'calc(100% - 58px)' }}
-            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ left: '0%', opacity: 0.9 }}
+            animate={{
+              left: isNativePlatform() ? '100%' : 'calc(100% - 58px)',
+              opacity: [0.9, 0.9, 0],
+            }}
+            transition={{
+              duration: 0.85,
+              ease: [0.16, 1, 0.3, 1],
+              opacity: { duration: 0.85, times: [0, 0.75, 1], ease: 'easeOut' },
+            }}
             onAnimationComplete={() => setIsSweepAnimating(false)}
             className="absolute inset-y-0 w-0.5 pointer-events-none z-20 bg-gradient-to-b from-transparent via-emerald-500/50 dark:via-emerald-400/60 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.45)]"
           />
