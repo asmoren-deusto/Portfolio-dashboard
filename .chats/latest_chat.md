@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 13:27:30
+- **Fecha de exportación:** 2026-10-16 13:31:06
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 45
+- **Total de interacciones registradas:** 47
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -661,5 +661,44 @@ Se ha completado una renovación integral del sistema de animaciones e interacci
 ### 👤 Usuario (2026-10-16 11:17:25)
 
 en rendimiento mete un pelo de transparencia al bocadillo que aparece. la grafica de evolucion patrimonial quiero que se anime de izq a derecha. al cambiar entre entidad, año, etc. ademas de los datod tb las graficas deben animarse y actualizarse. en rendimiento quiero tb los % en las barras (esto ya estaba antes). al recargar toda la info, precarga la informacion de cada entidad para que al cambiar no haya que traer los datos en ese momento y perder fluidez
+
+---
+
+### 🤖 Asistente (2026-10-16 11:27:32)
+
+Se han implementado todas las mejoras solicitadas con acabado profesional:
+
+---
+
+### 1. Transparencia en el bocadillo de Rendimiento
+- En [[ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)], el tooltip flotante ha pasado de una opacidad plana del 95% a un vidrio translúcido con desenfoque de fondo (`bg-white/80 dark:bg-[#1e1e1e]/80 backdrop-blur-md border border-slate-200/80 dark:border-white/10`).
+
+### 2. Porcentajes (`%`) claros en las barras de Rendimiento
+- Se incorporó un renderizador dinámico en `LabelList` para posicionar los porcentajes calculando el offset real de cada barra:
+  - Las barras positivas sitúan su etiqueta encima en verde esmeralda (`#10b981` / `#34d399`).
+  - Las barras negativas sitúan su etiqueta debajo en carmesí (`#f43f5e` / `#fb7185`).
+  - Se ampliaron los márgenes superior e inferior del gráfico para evitar que ningún porcentaje quede cortado o solapado con el eje base.
+
+### 3. Gráfica de Evolución Patrimonial animada de izquierda a derecha
+- En [[chartAnimation.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts)] y [[PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx)], la gráfica se revela dinámicamente de izquierda a derecha usando `clipPath: ['inset(0 100% 0 0)', 'inset(0 0% 0 0)']` sobre el área de dibujo de la curva, acompañada de una línea de barrido resplandeciente (`scanline`).
+- Esta animación se dispara fluidamente al cambiar de entidad (Consolidado, BBVA, Indexa, etc.), al cambiar de horizonte temporal (1M, 3M, 1A, etc.) y al alternar entre `€` y `%`.
+
+### 4. Precarga proactiva en memoria de todas las entidades
+- En [[queries.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/api/queries.ts)], [[useRefreshPortfolio.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/hooks/useRefreshPortfolio.ts)] y [[RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx)]:
+  - Creada la función `prefetchAllBrokers(...)`, que precarga en segundo plano los datos de cada entidad bancaria/broker (`summary`, `positions`, `performance`, `analytics`) en la caché de React Query.
+  - Al pulsar entre los selectores de entidad en el encabezado, la información ya está disponible en memoria: el cambio es instantáneo (latencia de 0 ms), sin pantallas de carga intermedias y permitiendo que la curva se dibuje de inmediato.
+
+---
+
+### 🚀 Release y Verificación
+- **Versión:** `v3.0.77` subida a Git.
+- **Compilación:** `npm run build` verificado exitosamente en 761ms sin errores.
+- **Grabación de validación en navegador:** [verify_chart_enhancements_1792149809011.webp](file:///c:/Users/comos/.gemini/antigravity-ide/brain/66dd6993-1b90-41d9-87ac-989579a1269b/verify_chart_enhancements_1792149809011.webp).
+
+---
+
+### 👤 Usuario (2026-10-16 11:18:50)
+
+no veo ninguna transicion entre paginas
 
 ---

@@ -1,4 +1,4 @@
-import { Outlet, useLocation, Navigate } from 'react-router-dom'
+import { useOutlet, useLocation, Navigate } from 'react-router-dom'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/store/appStore'
@@ -22,6 +22,7 @@ import { isNativePlatform } from '@/api/config'
 
 export function RootLayout() {
   const location = useLocation()
+  const outlet = useOutlet()
   const queryClient = useQueryClient()
   const [userProfileOpen, setUserProfileOpen] = useState(false)
   const { handleRefresh, isRefreshingPrices } = useRefreshPortfolio()
@@ -316,14 +317,14 @@ export function RootLayout() {
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={location.pathname}
-                initial={{ opacity: 0, filter: 'blur(3px)' }}
-                animate={{ opacity: 1, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, filter: 'blur(3px)' }}
-                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -10, filter: 'blur(6px)' }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-1 flex-col gap-4 w-full"
               >
                 <ErrorBoundary>
-                  <Outlet />
+                  {outlet}
                 </ErrorBoundary>
               </motion.div>
             </AnimatePresence>
