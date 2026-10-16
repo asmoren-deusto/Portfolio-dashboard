@@ -269,8 +269,7 @@ _latest_nav_alert: dict | None = None
 
 async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> dict:
     global _latest_nav_alert
-    _price_cache.clear()
-    _perf_cache.clear()
+    clear_portfolio_caches()
     transactions = _get_all_transactions(db, user_id)
     positions = calculate_positions(transactions)
     active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001 and not isin.startswith("TR_")}
@@ -341,6 +340,7 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
                 updated_items.append(data)
 
     logger.info(f"Refreshed prices for {len(results)} assets: {len(updated_items)} updated")
+    clear_portfolio_caches()
     res_payload = {
         "status": "ok",
         "updated_at": datetime.now().isoformat(),

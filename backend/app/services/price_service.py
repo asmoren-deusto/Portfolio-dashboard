@@ -979,6 +979,22 @@ async def get_price_history(
     if isin.startswith("ES011261"):
         az_hist = await _fetch_azvalor_history(isin, period=period)
         if az_hist:
+            try:
+                from app.database import SessionLocal
+                from app.models import PriceCache
+                db_s = SessionLocal()
+                recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                existing_dates = {h["date"]: idx for idx, h in enumerate(az_hist)}
+                for rp in recent_prices:
+                    if rp.price is not None and rp.price > 0:
+                        if rp.date in existing_dates:
+                            az_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                        else:
+                            az_hist.append({"date": rp.date, "price": round(rp.price, 4)})
+                az_hist.sort(key=lambda x: x["date"])
+                db_s.close()
+            except Exception:
+                pass
             _history_cache[cache_key] = (datetime.now(), az_hist)
             return az_hist
 
@@ -995,6 +1011,23 @@ async def get_price_history(
                     if float(row["Close"]) > 0
                 ]
                 if res:
+                    # Merge any newer or authoritative points from DB PriceCache
+                    try:
+                        from app.database import SessionLocal
+                        from app.models import PriceCache
+                        db_s = SessionLocal()
+                        recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                        existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
+                        for rp in recent_prices:
+                            if rp.price is not None and rp.price > 0:
+                                if rp.date in existing_dates:
+                                    res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                                else:
+                                    res.append({"date": rp.date, "price": round(rp.price, 4)})
+                        res.sort(key=lambda x: x["date"])
+                        db_s.close()
+                    except Exception:
+                        pass
                     _history_cache[cache_key] = (datetime.now(), res)
                     return res
         except Exception as e:

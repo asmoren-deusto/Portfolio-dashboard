@@ -26,6 +26,9 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
       target.getAnimations?.().forEach(a => a.cancel())
     } catch {}
 
+    // Immediately clip to avoid 1-frame flash of fully-rendered chart
+    target.style.clipPath = 'inset(0 100% 0 0)'
+
     const anim = target.animate(
       [
         { clipPath: 'inset(0 100% 0 0)', opacity: 0.35 },
@@ -33,12 +36,15 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
       ],
       {
         duration,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'none',
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        fill: 'forwards',
       }
     )
 
+    let cleaned = false
     const cleanup = () => {
+      if (cleaned) return
+      cleaned = true
       try {
         target.style.clipPath = ''
       } catch {}
@@ -46,5 +52,8 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
 
     anim.onfinish = cleanup
     anim.oncancel = cleanup
+
+    // Safety fallback: ensure clipPath is always cleared even if frame dropped
+    setTimeout(cleanup, duration + 60)
   }
 }

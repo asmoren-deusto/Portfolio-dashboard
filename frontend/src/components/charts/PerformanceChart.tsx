@@ -171,7 +171,7 @@ export function PerformanceChart({
 
   // Sweep reveal animation state
   const [sweepKey, setSweepKey] = useState(0)
-  const [isSweepAnimating, setIsSweepAnimating] = useState(true)
+  const [isSweepAnimating, setIsSweepAnimating] = useState(false)
 
   // Helper to safely extract broker value and invested
   const getBrokerData = (p: PricePoint | null | undefined, brokerKey: string) => {
@@ -535,12 +535,16 @@ export function PerformanceChart({
 
   // Update Stacked Series Data on Changes
   useEffect(() => {
-    if (!containerRef.current || !data || !metrics) return
+    if (!containerRef.current || !data || !metrics) {
+      return
+    }
 
     if (!chartRef.current || !slot2Ref.current) {
       initChart()
     }
-    if (!slot2Ref.current || !chartRef.current) return
+    if (!slot2Ref.current || !chartRef.current) {
+      return
+    }
 
     try {
       const chart = chartRef.current
@@ -865,9 +869,7 @@ export function PerformanceChart({
       chart.timeScale().fitContent()
       setIsSweepAnimating(true)
       setSweepKey(prev => prev + 1)
-      requestAnimationFrame(() => {
-        triggerChartAnimation(containerRef.current, 750)
-      })
+      triggerChartAnimation(containerRef.current, 750)
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
@@ -1002,8 +1004,8 @@ export function PerformanceChart({
             }}
             transition={{
               duration: 0.75,
-              ease: [0.16, 1, 0.3, 1],
-              opacity: { duration: 0.75, times: [0, 0.75, 1], ease: 'easeOut' },
+              ease: [0.25, 1, 0.5, 1],
+              opacity: { duration: 0.75, times: [0, 0.8, 1], ease: 'easeOut' },
             }}
             onAnimationComplete={() => setIsSweepAnimating(false)}
             className="absolute inset-y-0 w-0.5 pointer-events-none z-20 bg-gradient-to-b from-transparent via-emerald-500/50 dark:via-emerald-400/60 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.45)]"

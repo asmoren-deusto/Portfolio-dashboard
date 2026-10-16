@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 20:30:45
+- **Fecha de exportación:** 2026-10-16 21:18:44
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 24
+- **Total de interacciones registradas:** 28
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -385,6 +385,76 @@ para los navs, no estoy seguro que el consenso sea la mejor opcion, igual mejor 
 ---
 
 ### 👤 Usuario (2026-10-16 18:28:27)
+
+continua
+
+---
+
+### 🤖 Asistente (2026-10-16 18:31:02)
+
+Se ha implementado el **Motor Híbrido de Calendario Bursátil Oficial (TARGET2) con Avance por Mayoría** en la versión **v3.0.116**.
+
+---
+
+### ⚙️ ¿Cómo funciona ahora la fecha objetivo de los NAVs?
+
+1. **Fecha Base Exigible (Calendario Bursátil Oficial TARGET2):**
+   - El sistema calcula la fecha mínima requerida a partir de la fecha actual del sistema.
+   - Aplica el desfase inherente a los fondos de inversión (**T+1**, liquidación al cierre y publicación al día siguiente).
+   - Descarta automáticamente fines de semana y los **festivos bancarios oficiales europeos (TARGET2 / BME)**:
+     - Año Nuevo (1 de enero)
+     - Viernes Santo (*cálculo de Pascua astronómico dinámico*)
+     - Lunes de Pascua (*cálculo de Pascua dinámico*)
+     - Fiesta del Trabajo (1 de mayo)
+     - Navidad (25 de diciembre)
+     - San Esteban / Boxing Day (26 de diciembre)
+   - *Ejemplo práctico:*
+     - Si hoy es viernes 16 de octubre, la fecha exigible es **15 de octubre**.
+     - Si fuera lunes 19 de octubre, la fecha exigible retrocede al viernes **16 de octubre**.
+     - Si el lunes fuera Lunes de Pascua, retrocede al Jueves Santo.
+   - **Beneficio clave:** Si el sistema pasa 4 días sin sincronizarse, ya no se engaña con el consenso: detectará que los fondos tienen una fecha inferior a la fecha bursátil esperada y marcará correctamente `NAVs 0/9` pendientes.
+
+2. **Avance por Mayoría Nocturna:**
+   - Si hoy es un día hábil y es última hora de la tarde o noche, y **estrictamente más del 50% de las gestoras** de la cartera ya han publicado el nuevo valor liquidativo de hoy (`date >= hoy`), el sistema avanza automáticamente la sesión a hoy.
+   - Si solo 1 o 2 fondos publican o devuelven una cotización intradía aislada, la cartera permanece firmemente anclada en el día hábil completado (**15 oct**), evitando falsos positivos de "NAVs desactualizados".
+
+---
+
+### 📁 Módulos creados y actualizados
+
+- **Backend:**
+  - [backend/app/services/market_calendar.py](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/backend/app/services/market_calendar.py): Servicio con algoritmo gregoriano de Pascua, festivos TARGET2 y resolución de fecha híbrida.
+  - [backend/app/routers/portfolio.py](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py): `get_analytics` y `get_positions` ahora utilizan `get_effective_portfolio_nav_date`.
+  - [backend/app/services/price_service.py](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py): Fallback de fecha conectado con el calendario de días hábiles.
+
+- **Frontend:**
+  - [frontend/src/lib/marketCalendar.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/marketCalendar.ts): Réplica idéntica en TypeScript para renderizado instantáneo en cliente.
+  - [frontend/src/lib/utils.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/utils.ts): Exportación y vinculación transparente con el resto de la interfaz.
+
+---
+
+### 🖥️ Estado actual en terminal
+
+La aplicación está arrancada y funcionando:
+- **Backend:** [http://localhost:8000](http://localhost:8000) (200 OK en todas las rutas)
+- **Frontend:** [http://localhost:5173](http://localhost:5173) (Vite dev server listo en 511 ms)
+- **Badge de Cabecera:** **`🟢 NAVs al día · 15 oct`** (9/9 fondos confirmados al día).
+
+---
+
+### 👤 Usuario (2026-10-16 18:28:48)
+
+la grafica de evolucion patrimonial no se anima, revisalo bien
+
+---
+
+### 👤 Usuario (2026-10-16 18:33:16)
+
+los datos estan mal
+
+---
+
+### 👤 Usuario (2026-10-16 19:16:20)
 
 continua
 
