@@ -1044,7 +1044,7 @@ _sim_portfolio_cache: dict[str, dict] = {}
 SIM_PORTFOLIO_CACHE_TTL = 45  # 45 seconds for responsive live feel
 
 
-def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> dict:
+def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, broker: Optional[str] = None) -> dict:
     import yfinance as yf
     import pandas as pd
 
@@ -1052,6 +1052,9 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
     txs = _get_all_transactions(db, user_id=target_user)
     if not txs:
         txs = _get_all_transactions(db, user_id="asier")
+    if broker and broker != "all":
+        b_clean = broker.lower().replace("-", "").replace("_", "")
+        txs = [t for t in txs if t.get("broker", "").lower().replace("-", "").replace("_", "") == b_clean]
     positions = calculate_positions(txs)
     active = {k: v for k, v in positions.items() if v.get("shares", 0) > 0.0001 and not k.startswith("TR_")}
     if not active:
@@ -1508,20 +1511,21 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
 async def get_simulated_portfolio(
     period: str = "1d",
     user_id: Optional[str] = "asier",
+    broker: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     """
     Simulated real-time fund portfolio performance based on liquid ETF equivalents
     (URTH, ACWI, XLK, COWZ, EEM, EWJ, FEZ, EFV) with intraday historical trajectory.
     """
-    cache_key = f"{user_id}:{period}"
+    cache_key = f"{user_id}:{period}:{broker or 'all'}"
     now = time.time()
     if cache_key in _sim_portfolio_cache:
         entry = _sim_portfolio_cache[cache_key]
         if now - entry["ts"] < SIM_PORTFOLIO_CACHE_TTL:
             return entry["data"]
 
-    data = await asyncio.to_thread(_fetch_simulated_portfolio_sync, period, user_id or "asier", db)
+    data = await asyncio.to_thread(_fetch_simulated_portfolio_sync, period, user_id or "asier", db, broker)
     _sim_portfolio_cache[cache_key] = {"data": data, "ts": now}
     return data
 

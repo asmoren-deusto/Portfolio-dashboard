@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 16:46:51
+- **Fecha de exportación:** 2026-10-16 16:52:04
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 92
+- **Total de interacciones registradas:** 94
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1367,5 +1367,39 @@ Queda implementada la **gráfica de sesión 100% continuada sin cortes antes ni 
 ### 👤 Usuario (2026-10-16 13:58:19)
 
 esto sigue sin animarse al cambiar de entidad o cambiar valores
+
+---
+
+### 🤖 Asistente (2026-10-16 14:46:54)
+
+Quedan solucionadas las animaciones de la tarjeta **Rendimiento (Últimos 7 días / Global)** al cambiar de entidad o actualizarse los valores:
+
+### 🔍 Causa del problema
+1. **Animación desactivada en Recharts:** En [ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx#L216) el componente `<Bar>` tenía fijado explícitamente `isAnimationActive={false}`, lo que forzaba a la gráfica a pintar las barras instantáneamente al 100% sin transición de altura ni interpolación.
+2. **Re-montajes bruscos por key no estable:** El contenedor exterior usaba `data.map(d => d.value).join('_')` en la `key` de Framer Motion, destruyendo el DOM en cada actualización en lugar de permitir que Recharts animara el cambio de datos.
+3. **Métricas inferiores estáticas:** Los valores de las píldoras inferiores (`7D: -1.39%` y `7D €: -1092,45 €`) en [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx#L1300-L1350) no contaban con transición de entrada/salida (`AnimatePresence`).
+
+---
+
+### 🚀 Solución implementada
+
+1. **Animación fluida de barras ([ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)):**
+   - Activado `isAnimationActive={true}` con duración de `650ms` y curva `ease-out`.
+   - Claves reactivas sobre `<BarChart>` y `<Cell>` vinculadas a `selectedBroker`, `mode` y `refreshAnimKey` para que las barras crezcan desde la base con efecto elástico al cambiar de entidad.
+   - Interpolación suave de altura de barras cuando cambian los valores sin destruir el gráfico.
+   - Suavizado en las etiquetas de porcentaje (`<LabelList>`).
+
+2. **Transición numérica en píldoras inferiores ([OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx)):**
+   - Envueltas las cajas de métricas (`box1Val` y `box2Val` de Rendimiento, así como las de Distribución) en `<AnimatePresence mode="wait">` con `<motion.span>` (`y: 3 -> 0`, fade suave de 200ms) para que los importes se deslicen de forma limpia al alternar entre entidades.
+   - Vinculado `selectedBroker` a la `key` del contenedor en `OverviewPage` para activar la transición al cambiar de broker en la cabecera.
+
+3. **Versión y Release:**
+   - Compilación verificada sin errores y sincronizado a `v3.0.99` mediante `sync_release.py`.
+
+---
+
+### 👤 Usuario (2026-10-16 13:58:32)
+
+tampoco la grafica de simulacion de mercado
 
 ---

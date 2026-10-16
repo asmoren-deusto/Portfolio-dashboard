@@ -30,6 +30,7 @@ import { isNativePlatform } from '@/api/config'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
 import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
+import { triggerChartAnimation } from '@/lib/chartAnimation'
 
 export interface EtfInfo {
   name: string
@@ -104,7 +105,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   const [activeTab, setActiveTab] = useState<'funds' | 'etfs'>('funds')
   const [hoveredPoint, setHoveredPoint] = useState<SimulatedChartPoint | null>(null)
 
-  const { theme } = useAppStore()
+  const { theme, selectedBroker, refreshAnimKey } = useAppStore()
   const isDark = theme === 'dark'
 
   const { data, isLoading, isFetching } = useSimulatedPortfolio(period)
@@ -133,6 +134,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   chartPointsRef.current = chartPoints
   const sessionMarkersRef = useRef<SessionMarker[]>(sessionMarkers)
   sessionMarkersRef.current = sessionMarkers
+  const lastSweepKeyRef = useRef<string>('')
 
   // Dynamic vertical dotted line markers
   const [markerPositions, setMarkerPositions] = useState<
@@ -328,7 +330,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
     }
   }, [isDark, isPositive])
 
-  // Update series data whenever chartPoints or currencyMode change
+  // Update series data whenever chartPoints, currencyMode, selectedBroker or period change
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current || !chartPoints || !chartPoints.length) return
 
@@ -352,6 +354,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         seriesRef.current.setData(formatted)
         chartRef.current.timeScale().fitContent()
 
+        // Trigger timeline sweep animation on load & when entity, currency, period or values change
+        const sweepKey = `${selectedBroker}_${period}_${currencyMode}_${refreshAnimKey}_${formatted.length}_${formatted[0]?.value}_${formatted[formatted.length - 1]?.value}`
+        if (sweepKey !== lastSweepKeyRef.current) {
+          lastSweepKeyRef.current = sweepKey
+          requestAnimationFrame(() => {
+            triggerChartAnimation(chartContainerRef.current, 750)
+          })
+        }
+
         // Update markers coordinate mapping after paint
         requestAnimationFrame(() => {
           updateMarkerPositions()
@@ -360,7 +371,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
     } catch (err) {
       console.warn('Error setting simulated chart data:', err)
     }
-  }, [chartPoints, sessionMarkers, currencyMode])
+  }, [chartPoints, sessionMarkers, currencyMode, selectedBroker, period, refreshAnimKey])
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 p-3.5 sm:p-4 transition-all">
@@ -556,29 +567,43 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               </div>
 
               <div className="flex items-center gap-3 mt-1 flex-wrap">
-                <span
-                  className={cn(
-                    'text-xl sm:text-2xl font-extrabold font-mono tracking-tight',
-                    currentPct >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-rose-600 dark:text-rose-400'
-                  )}
-                >
-                  {currentPct >= 0 ? '+' : ''}
-                  {currentPct.toFixed(2)}%
-                </span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={`sim-pct-${selectedBroker}-${currencyMode}-${currentPct}`}
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.2 }}
+                    className={cn(
+                      'text-xl sm:text-2xl font-extrabold font-mono tracking-tight',
+                      currentPct >= 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    {currentPct >= 0 ? '+' : ''}
+                    {currentPct.toFixed(2)}%
+                  </motion.span>
+                </AnimatePresence>
 
-                <span
-                  className={cn(
-                    'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs',
-                    currentAmount >= 0
-                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
-                      : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
-                  )}
-                >
-                  {currentAmount >= 0 ? '+' : ''}
-                  {fmt.currency(currentAmount)}
-                </span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={`sim-amt-${selectedBroker}-${currencyMode}-${currentAmount}`}
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.2 }}
+                    className={cn(
+                      'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs',
+                      currentAmount >= 0
+                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
+                        : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
+                    )}
+                  >
+                    {currentAmount >= 0 ? '+' : ''}
+                    {fmt.currency(currentAmount)}
+                  </motion.span>
+                </AnimatePresence>
               </div>
             </div>
 
@@ -586,9 +611,18 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             <div className="flex flex-col items-end gap-1.5">
               <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                 <span className="font-medium">Base:</span>
-                <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                  {fmt.currency(summary?.total_value ?? 0)}
-                </span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={`sim-base-${selectedBroker}-${summary?.total_value}`}
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.2 }}
+                    className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white"
+                  >
+                    {fmt.currency(summary?.total_value ?? 0)}
+                  </motion.span>
+                </AnimatePresence>
               </div>
               {chartPoints.length > 0 && (
                 <div className="flex items-center gap-2 text-xs sm:text-[13px] font-mono text-slate-600 dark:text-slate-400 bg-white/90 dark:bg-white/[0.06] px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-white/[0.08] shadow-2xs">

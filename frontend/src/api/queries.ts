@@ -600,10 +600,11 @@ export interface SimulatedPortfolioResponse {
 }
 
 export function useSimulatedPortfolio(period: string = '1d') {
-  const { currentUser } = useAppStore()
+  const { currentUser, selectedBroker } = useAppStore()
+  const brokerQuery = selectedBroker && selectedBroker !== 'all' ? `&broker=${selectedBroker}` : ''
   return useQuery<SimulatedPortfolioResponse>({
-    queryKey: ['simulated-portfolio', currentUser?.id, period],
-    queryFn: () => get<SimulatedPortfolioResponse>(`/market/simulated-portfolio?period=${period}&user_id=${currentUser?.id || 'asier'}`),
+    queryKey: ['simulated-portfolio', currentUser?.id, period, selectedBroker],
+    queryFn: () => get<SimulatedPortfolioResponse>(`/market/simulated-portfolio?period=${period}&user_id=${currentUser?.id || 'asier'}${brokerQuery}`),
     placeholderData: keepSameUser(currentUser?.id),
     staleTime: 1000 * 30, // 30s
     refetchInterval: 1000 * 45, // poll every 45s
