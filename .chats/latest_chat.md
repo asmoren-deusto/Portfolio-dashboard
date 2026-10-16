@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 19:33:55
+- **Fecha de exportación:** 2026-10-16 19:34:50
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 9
+- **Total de interacciones registradas:** 11
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -127,5 +127,40 @@ Se ha realizado una **reestructuración y rediseño completo** de la gráfica de
 ### 👤 Usuario (2026-10-16 17:23:24)
 
 la grafica de evolcion patrimonial no se anima
+
+---
+
+### 🤖 Asistente (2026-10-16 17:33:58)
+
+Se ha corregido la animación en la gráfica de **Evolución Patrimonial** ([PerformanceChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) y [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts)):
+
+### 🔍 Causa identificada
+1. **Incompatibilidad de `clip-path` en elementos `<td>`:**
+   En [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), el selector buscaba `canvas.closest('td')`. En la especificación CSS, los navegadores (Chromium / WebKit) ignoran la propiedad `clip-path` sobre elementos de tabla (`display: table-cell`), por lo que la animación de revelado de izquierda a derecha fallaba de manera silenciosa y la curva se pintaba estática desde el primer frame.
+2. **Timing de pintado del canvas:**
+   Al llamar a `requestAnimationFrame` inmediatamente tras actualizar la serie, el motor interno de Lightweight Charts aún no había completado el rasterizado en el buffer del canvas.
+3. **Contenedor estático:**
+   El componente principal se renderizaba en un `<div>` estático sin reaccionar a cambios de entidad (`selectedEntity`), período o actualización manual (`refreshAnimKey`).
+
+---
+
+### 🛠️ Solución aplicada
+1. **Target correcto en [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts):**
+   - Ahora selecciona el contenedor `<div>` interno que envuelve los lienzos de la serie (`canvas.closest('td')?.firstElementChild || canvas.parentElement`), donde la propiedad `clipPath: ['inset(0 100% 0 0)', 'inset(0 0% 0 0)']` se ejecuta con aceleración por hardware.
+   - Añadida transición de opacidad (`opacity: [0.35, 1]`) complementaria para una entrada suave.
+2. **Sincronización de pintado en [PerformanceChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx):**
+   - Se ajustó el disparo a `setTimeout(..., 40)` para garantizar que los píxeles de la curva estén dibujados antes de iniciar el barrido visual.
+3. **Contenedor reactivo con Framer Motion:**
+   - Envuelto en `<motion.div key={...}>` sensible a `selectedEntity`, `period`, `refreshAnimKey` y `chartMode`, asegurando transiciones visuales fluidas al cambiar de broker, período o al pulsar en **Actualizar**.
+
+---
+
+*Versión incrementada automáticamente a **`v3.0.110`** y sincronizada en Git.*
+
+---
+
+### 👤 Usuario (2026-10-16 17:33:17)
+
+revierte los cambios a la grafica de rendimiento, dejala como en la version v3.0.106
 
 ---
