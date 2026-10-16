@@ -3,7 +3,7 @@
  * Animates the series canvas plot area with a left-to-right sweep (0% to 100% time reveal)
  * matching the visual delight of institutional financial terminal charts.
  */
-export function triggerChartAnimation(container: HTMLElement | null, duration = 800) {
+export function triggerChartAnimation(container: HTMLElement | null, duration = 750) {
   if (!container) return
 
   // Respect user preference for reduced motion

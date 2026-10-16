@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 19:48:42
+- **Fecha de exportación:** 2026-10-16 19:51:58
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 13
+- **Total de interacciones registradas:** 15
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -181,5 +181,63 @@ Se han revertido por completo los cambios de la gráfica de Rendimiento, restaur
 ### 👤 Usuario (2026-10-16 17:33:48)
 
 no me cuadran los ultimos valores, haz una revision completa
+
+---
+
+### 🤖 Asistente (2026-10-16 17:48:45)
+
+Se ha completado una revisión exhaustiva del cálculo de rendimiento tanto en backend como en frontend.
+
+### 🔍 Diagnóstico: ¿Por qué no cuadraban los valores?
+
+1. **Discrepancia entre las barras y la píldora 7D:**
+   - La suma/composición de las 7 barras diarias daba un acumulado de alrededor de `-2.85%`, mientras que la píldora inferior marcaba `7D: -1.77%` y `-1.396,73 €`.
+   - La píldora 7D calculaba su rendimiento tomando un punto de la serie con un desfase de índices desconectado (`N - 8`), mientras que las barras se calculaban por separado.
+2. **Sobrescritura inconsistente de la última barra (`isLatest`):**
+   - En `weeklyReturnsData`, la última barra del gráfico se estaba sobrescribiendo con `shortTermMetrics.dayPct` (cambio intradía de posiciones), mientras que las barras anteriores procedían de la serie histórica.
+   - Además, `shortTermMetrics.dayPct` sumaba el `daily_change` de todas las posiciones sin comprobar si su fecha correspondía a la sesión de hoy o a sesiones anteriores. Al haber fondos que aún no habían publicado su valor liquidativo de hoy, se estaba sumando la caída del día anterior una segunda vez.
+3. **Puntos fantasma / fechas duplicadas en backend:**
+   - En `backend/app/routers/portfolio.py` (`get_performance`), si la fecha de hoy no existía en la serie calculada, se añadía automáticamente un punto para hoy con el valor de ayer. Como los fondos reportan con desfase (T+1), esto creaba sesiones duplicadas artificiales con 0.00% o saltos bruscos.
+
+---
+
+### 🛠️ Soluciones implementadas
+
+1. **Cálculo 100% consistente de las 7 sesiones en [OverviewPage.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx):**
+   - Se eliminó la sobrescritura artificial de la última barra. Cada sesión ahora refleja de forma limpia su rentabilidad ponderada y su importe neto `(cur.value - netInflow) - prev.value`.
+   - Cuando la vista está en modo **Semanal**, las píldoras **`7D:`** y **`7D €:`** se calculan sumando y componiendo exactamente las mismas 7 sesiones del gráfico. Ahora el acumulado **cuadra al céntimo y a la centésima de porcentaje**.
+2. **Fijación de sesión activa por consenso/mayoría:**
+   - `latestNavDate` ahora se determina por la fecha en la que la mayoría de los activos de la cartera han reportado valor liquidativo oficial, evitando que una cotización aislada cree una sesión incompleta.
+   - En `shortTermMetrics`, el cambio intradía solo computa activos cuya fecha de cotización coincide con la sesión evaluada.
+3. **Sincronización en backend sin fechas duplicadas en [portfolio.py](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py):**
+   - Se ajustó `get_performance` para sincronizar el último punto real de la serie con los totales de `summary` sin inyectar fechas futuras vacías.
+4. **Formato uniforme de 2 decimales en [ReturnsChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx):**
+   - Las etiquetas de las barras ahora se muestran de manera consistente a 2 decimales (p. ej. `+0.60%`, `-0.16%`, `-0.97%`) en lugar de alternar entre 1 y 2 decimales (`-1.2%`).
+
+---
+
+### 📊 Verificación de los valores de las 7 sesiones
+
+| Sesión | Rentabilidad (%) | Importe Neto (€) |
+| :--- | :---: | :---: |
+| **Mié 7** | `-0.24%` | `-188,07 €` |
+| **Jue 8** | `-0.80%` | `-625,81 €` |
+| **Vie 9** | `+0.60%` | `+464,48 €` |
+| **Lun 12** | `+0.33%` | `+256,51 €` |
+| **Mar 13** | `-0.44%` | `-343,50 €` |
+| **Mié 14** | `-0.16%` | `-121,92 €` |
+| **Jue 15** | `-0.97%` | `-758,28 €` |
+| **Total 7D (Píldoras)** | **`-1.68%`** | **`-1.316,59 €`** |
+
+- Suma exacta de importes: `-188,07 - 625,81 + 464,48 + 256,51 - 343,50 - 121,92 - 758,28 = -1.316,59 €`.
+- Rentabilidad compuesta exacta: `(1 - 0.0024) * (1 - 0.0080) * (1 + 0.0060) * (1 + 0.0033) * (1 - 0.0044) * (1 - 0.0016) * (1 - 0.0097) - 1 = -1.68%`.
+
+Todos los cambios se compilaron con éxito (`npm run build`) y fueron sincronizados a Git mediante `sync_release.py` con la versión **v3.0.112**.
+
+---
+
+### 👤 Usuario (2026-10-16 17:34:14)
+
+que las 3 graficas de overview se animen y terminen ala vez
 
 ---

@@ -1066,7 +1066,7 @@ export function OverviewPage() {
         </Card>
 
         {/* 2. Asset Allocation Breakdown (20% on desktop: lg:col-span-1, md:col-span-1) */}
-        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.23} loading={isRefreshingPrices}>
+        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.2} loading={isRefreshingPrices}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20 shrink-0">
@@ -1198,7 +1198,7 @@ export function OverviewPage() {
         </Card>
 
         {/* 3. Performance by Period (Global / Semanal 7D) (20% on desktop: lg:col-span-1, md:col-span-1) */}
-        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.26} loading={isRefreshingPrices}>
+        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.2} loading={isRefreshingPrices}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 shrink-0">

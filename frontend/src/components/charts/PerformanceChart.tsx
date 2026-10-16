@@ -850,9 +850,9 @@ export function PerformanceChart({
       chart.timeScale().fitContent()
       setIsSweepAnimating(true)
       setSweepKey(prev => prev + 1)
-      setTimeout(() => {
-        triggerChartAnimation(containerRef.current, 800)
-      }, 40)
+      requestAnimationFrame(() => {
+        triggerChartAnimation(containerRef.current, 750)
+      })
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }

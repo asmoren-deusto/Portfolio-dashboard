@@ -256,8 +256,8 @@ export function ReturnsChart({
             radius={[6, 6, 0, 0]}
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
             isAnimationActive={true}
-            animationBegin={30}
-            animationDuration={650}
+            animationBegin={0}
+            animationDuration={750}
             animationEasing="ease-out"
           >
             <LabelList
