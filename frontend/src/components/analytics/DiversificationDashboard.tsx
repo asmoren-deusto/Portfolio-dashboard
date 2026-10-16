@@ -507,7 +507,8 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         paddingAngle={2}
                         minAngle={4}
                         strokeWidth={0}
-                        animationDuration={400}
+                        animationDuration={200}
+                        animationEasing="ease-out"
                         onMouseEnter={(_, index) => {
                           if (geoDonutData[index]) {
                             setHoveredGeoId(geoDonutData[index].id)

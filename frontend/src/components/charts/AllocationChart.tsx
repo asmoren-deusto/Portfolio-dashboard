@@ -37,7 +37,7 @@ export function AllocationChart({
 
   useEffect(() => {
     setIsInitialAnim(true)
-    const timer = setTimeout(() => setIsInitialAnim(false), 600)
+    const timer = setTimeout(() => setIsInitialAnim(false), 300)
     return () => clearTimeout(timer)
   }, [mode])
 
@@ -156,7 +156,8 @@ export function AllocationChart({
               strokeWidth={0}
               isAnimationActive={isInitialAnim}
               animationBegin={0}
-              animationDuration={500}
+              animationDuration={250}
+              animationEasing="ease-out"
               onMouseEnter={(_, index) => {
                 setHoveredIndex(index)
                 if (onHoverIsin && data[index]) {

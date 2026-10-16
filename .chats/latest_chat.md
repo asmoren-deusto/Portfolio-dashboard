@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 13:55:02
+- **Fecha de exportación:** 2026-10-16 13:56:34
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 49
+- **Total de interacciones registradas:** 51
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -743,5 +743,45 @@ En [RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/
 ### 👤 Usuario (2026-10-16 11:19:10)
 
 faltan animaciones en la carga de algunos datos/tablas en todas las paginas
+
+---
+
+### 🤖 Asistente (2026-10-16 11:55:05)
+
+### Mejoras Implementadas en la Carga y Animación de Tablas y Datos
+
+Se ha diseñado e integrado un sistema completo de **Skeleton Shimmer** y **micro-animaciones escalonadas (*stagger*)** para todas las tablas y listados de datos de la plataforma:
+
+---
+
+#### 1. Nuevo Sistema Unificado: `TableSkeleton`
+Se ha creado el componente reutilizable [TableSkeleton.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/TableSkeleton.tsx) y estilos en [index.css](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css):
+- **`TableSkeletonRows`**: Filas de carga con siluetas que replican la anatomía real de la tabla (avatar/logo circular, títulos y subtítulos, pastillas numéricas alineadas a la derecha y barras de ponderación) con una animación continua de brillo degradado (`skeleton-shimmer`).
+- **`CardSkeletonGrid`**: Estructura de tarjetas con efecto shimmer para vistas en cuadrícula / grid.
+- **`TableTopLoading`**: Barra de escaneo luminosa y discreta (`animate-table-scan`) situada en el borde superior de cada tarjeta durante las actualizaciones en segundo plano (*background fetching*), eliminando bloqueos de pantalla o parpadeos.
+
+---
+
+#### 2. Actualización de Tablas por Página
+
+| Página / Componente | Elemento Actualizado | Mejora de Animación y Carga |
+| :--- | :--- | :--- |
+| **Cartera** ([PositionsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/PositionsPage.tsx)) | **Tabla de Posiciones** & **Vista Grid** | - Sustituido el spinner básico por `TableSkeletonRows` en tabla y `CardSkeletonGrid` en tarjetas.<br>- Entrada y salida escalonada (`opacity: 0, y: 6 ➔ y: 0`) al filtrar por tipo de activo (Fondos, EPSV, ETFs, Acciones).<br>- Barra superior `TableTopLoading` al conmutar entidad. |
+| **Movimientos** ([TransactionsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/TransactionsPage.tsx)) | **Historial de Operaciones** | - Eliminado el flash en blanco ("No hay operaciones") durante la carga inicial mediante `TableSkeletonRows`.<br>- Transición fluida de filas al cambiar entre pestañas (*Todas, Compras, Ventas, Dividendos, Traspasos*). |
+| **Visión General** ([OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx)) | **Posiciones en Cartera** (Top 5 + Sig. 5) & **Últimos Movimientos** | - Esqueletos shimmer automáticos en ambas columnas mientras se obtienen las posiciones.<br>- Entrada animada con micro-elevación en filas individuales.<br>- Indicadores de carga `TableTopLoading` en ambas tarjetas. |
+| **Mercado** ([MarketPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/MarketPage.tsx)) | **Listado de Cotizadas** | - `TableSkeletonRows` de 10 filas al cargar mercados o índices.<br>- Filas con `motion.tr` escalonado al filtrar por sector o buscar tickers. |
+| **Analítica** ([AnalyticsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/AnalyticsPage.tsx)) | **Rendimiento Relativo por Activo** | - Reemplazo de carga estática por `TableSkeletonRows` y animación de entrada en cada fila según plusvalía. |
+| **Diversificación** ([DiversificationDashboard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx)) | **Bandas de Rebalanceo Geográfico** | - Filas con `motion.tr` suave al alternar entre clases de activos y auditorías. |
+| **Cartera Simulada** ([SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)) | **Fondos en Cartera** & **ETFs Réplica** | - Skeletons dedicados y barra de escaneo en ambas pestañas con transiciones fluidas de filas. |
+
+---
+
+🚀 **Release sincronizada:** `v3.0.79` compilada con éxito y subida a Git origin.
+
+---
+
+### 👤 Usuario (2026-10-16 11:19:33)
+
+en distribucion que la animacion sea más rapida, la mitad
 
 ---
