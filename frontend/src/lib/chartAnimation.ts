@@ -3,7 +3,7 @@
  * Animates the series canvas plot area with a left-to-right sweep (0% to 100% time reveal)
  * matching the visual delight of institutional financial terminal charts.
  */
-export function triggerChartAnimation(container: HTMLElement | null, duration = 850) {
+export function triggerChartAnimation(container: HTMLElement | null, duration = 800) {
   if (!container) return
 
   // Respect user preference for reduced motion
@@ -11,9 +11,15 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
     return
   }
 
-  // Find the plot area (main series canvas wrapper) in lightweight-charts
+  // Find the primary plot pane in lightweight-charts.
+  // Note: Lightweight Charts wraps pane canvases in a <div> inside a <td>.
+  // CSS clip-path does NOT work on <td> (display: table-cell), so we MUST target the inner <div>!
   const canvas = container.querySelector('canvas')
-  const target = (canvas?.closest('td') || canvas?.parentElement || container) as HTMLElement
+  if (!canvas) return
+
+  // In lightweight-charts, canvas is inside a div, which may be inside a td
+  const paneDiv = (canvas.closest('td')?.firstElementChild || canvas.parentElement) as HTMLElement
+  const target = (paneDiv && paneDiv.tagName === 'DIV' ? paneDiv : (canvas.parentElement || container)) as HTMLElement
 
   if (target && typeof target.animate === 'function') {
     try {
@@ -22,8 +28,8 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
 
     const anim = target.animate(
       [
-        { clipPath: 'inset(0 100% 0 0)' },
-        { clipPath: 'inset(0 -6px 0 0)' },
+        { clipPath: 'inset(0 100% 0 0)', opacity: 0.35 },
+        { clipPath: 'inset(0 0% 0 0)', opacity: 1 },
       ],
       {
         duration,
@@ -35,13 +41,9 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
     const cleanup = () => {
       try {
         target.style.clipPath = ''
-        anim.cancel()
       } catch {}
     }
 
     anim.onfinish = cleanup
-    anim.oncancel = cleanup
   }
 }
-
-

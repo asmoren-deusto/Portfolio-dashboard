@@ -850,16 +850,23 @@ export function PerformanceChart({
       chart.timeScale().fitContent()
       setIsSweepAnimating(true)
       setSweepKey(prev => prev + 1)
-      requestAnimationFrame(() => {
-        triggerChartAnimation(containerRef.current, 750)
-      })
+      setTimeout(() => {
+        triggerChartAnimation(containerRef.current, 800)
+      }, 40)
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
   }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics, period, refreshAnimKey])
 
   return (
-    <div data-private className="w-full flex flex-col justify-between flex-1 min-h-0 select-none">
+    <motion.div
+      key={`perf-chart-wrap-${selectedEntity}-${period}-${refreshAnimKey}-${chartMode}`}
+      initial={{ opacity: 0.88, y: 1 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+      data-private
+      className="w-full flex flex-col justify-between flex-1 min-h-0 select-none"
+    >
       {/* Canvas Container */}
       <div
         data-private
@@ -1258,7 +1265,7 @@ export function PerformanceChart({
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

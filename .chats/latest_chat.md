@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 19:28:47
+- **Fecha de exportación:** 2026-10-16 19:33:55
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 7
+- **Total de interacciones registradas:** 9
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -89,5 +89,43 @@ He verificado el estado de los servicios y las comprobaciones de código:
 ### 👤 Usuario (2026-10-16 17:23:06)
 
 la grafica de rendimiento no tiene un buen diseño, los % se tapan, el hover no es consistente... dale una vuelta completa
+
+---
+
+### 🤖 Asistente (2026-10-16 17:28:50)
+
+Se ha realizado una **reestructuración y rediseño completo** de la gráfica de Rendimiento ([ReturnsChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)), eliminando los problemas de solapamiento de textos y la inconsistencia del hover:
+
+### 1. Eliminación total del solapamiento de porcentajes (`%`)
+- **Causa anterior:** En Recharts, los textos se renderizaban en el mismo espacio visual del SVG; al haber barras negativas, las etiquetas colisionaban directamente con los nombres del eje X (`1 Día`, `1 Semana`), o se montaban sobre la línea horizontal del 0%.
+- **Nueva solución por capas deterministas:**
+  - **Línea base `0.0%`:** Ubicada de forma proporcional calculando el rango entre valores positivos y negativos, con línea discontinua suave y marcador `0.0%` lateral.
+  - **Valores positivos:** Las etiquetas de porcentaje se sitúan de forma fija por encima del remate de la barra con margen garantizado (`bottom: canvasHeight - zeroLineY + barH + 4px`).
+  - **Valores negativos:** Las etiquetas se sitúan por debajo del remate inferior de la barra hacia abajo.
+  - **Eje de períodos independiente:** La fila inferior de períodos (`1D`, `1S`, `1M`, `3M`, `6M`, `1A` o días semanales) se sitúa en su propio contenedor flex separado, **haciendo físicamente imposible que una cifra negativa colisione con el nombre del período**.
+
+### 2. Hover 100% fluido, consistente y sin saltos
+- **HUD superior interactivo integrado:** En lugar de un tooltip flotante que tape las columnas o parpadee según el cursor, la cabecera de la gráfica muestra de forma fija y con micro-animación fluida:
+  - Nombre del período y subtítulo explicativo (`1 Semana (7D) • TWR ponderado en el tiempo`).
+  - Píldora de rentabilidad en esmeralda o rosa (`+0.78%` / `-1.20%`) con icono de tendencia.
+  - Importe neto ganado/perdido en divisa monetaria (`+979,96 €`).
+- **Enfoque cinematográfico:** Al pasar el ratón por cualquier columna:
+  - La columna activa se resalta con fondo glass translúcido, borde suave y un resplandor luminoso (`shadow-[0_0_14px_rgba(16,185,129,0.45)]`).
+  - Las demás columnas se atenúan suavemente al `40%` de opacidad, guiando la atención del usuario sin tirones.
+  - Al hacer clic en un período, queda fijado para inspección.
+
+### 3. Rediseño visual estilo Fintech Premium
+- **Barras cápsula con gradientes y brillo:** Barras verticales redondeadas con degradados vivos (`emerald-600` a `emerald-400` y `rose-600` a `rose-400`) y línea de brillo glossy en el remate superior/inferior.
+- **Tipografía monoespaciada nítida:** Porcentajes claros (`font-mono font-bold`) sin recortes ni desbordamientos del contenedor.
+
+---
+
+*Versión actualizada automáticamente a **`v3.0.109`** y sincronizada en Git.*
+
+---
+
+### 👤 Usuario (2026-10-16 17:23:24)
+
+la grafica de evolcion patrimonial no se anima
 
 ---
