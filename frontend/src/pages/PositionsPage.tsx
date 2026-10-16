@@ -20,6 +20,7 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { Card } from '@/components/ui/Card'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
+import { TableSkeletonRows, TableTopLoading, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
 import { fmt, cn } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { usePositions, usePortfolioSummary } from '@/api/queries'
@@ -38,7 +39,7 @@ const FILTER_TABS: { id: AssetFilter; label: string }[] = [
 ]
 
 export function PositionsPage() {
-  const { data: positions = [], isLoading } = usePositions()
+  const { data: positions = [], isLoading, isFetching } = usePositions()
   const { data: summary } = usePortfolioSummary()
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -323,7 +324,8 @@ export function PositionsPage() {
 
       {/* Main Content: Table or Grid */}
       {viewMode === 'table' ? (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden relative">
+          <TableTopLoading isFetching={isFetching && !isLoading} />
           <div className="overflow-x-auto">
             <table className="w-full text-[13.8px]">
               <thead>
@@ -353,12 +355,7 @@ export function PositionsPage() {
               <tbody>
                 <AnimatePresence initial={false}>
                   {isLoading ? (
-                    <tr>
-                      <td colSpan={10} className="py-20 text-center text-slate-500">
-                        <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500 dark:border-white/10" />
-                        <p className="mt-3 text-xs">Cargando posiciones...</p>
-                      </td>
-                    </tr>
+                    <TableSkeletonRows rows={7} cols={10} />
                   ) : filteredPositions.length === 0 ? (
                     <tr>
                       <td colSpan={10} className="py-20 text-center">
@@ -382,10 +379,10 @@ export function PositionsPage() {
                       return (
                         <motion.tr
                           key={p.isin}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ delay: i * 0.02 }}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.2, delay: Math.min(i * 0.018, 0.22) }}
                           onClick={() => setSelectedPosition(p)}
                           title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
                           className="group border-b border-slate-100 hover:bg-slate-50/80 dark:border-white/[0.03] dark:hover:bg-white/[0.035] cursor-pointer last:border-0 transition-colors"
@@ -499,21 +496,39 @@ export function PositionsPage() {
         </Card>
       ) : (
         /* Grid Mode */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <AnimatePresence>
-            {filteredPositions.map((p, i) => {
-              const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
-              return (
-                <motion.div
-                  key={p.isin}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18, delay: Math.min(i * 0.02, 0.2) }}
-                  onClick={() => setSelectedPosition(p)}
-                  title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                  className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/20 dark:hover:bg-[#252526] p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between overflow-hidden"
+        isLoading ? (
+          <CardSkeletonGrid count={6} />
+        ) : filteredPositions.length === 0 ? (
+          <div className="py-20 text-center">
+            <div className="max-w-xs mx-auto text-center space-y-2">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No se encontraron posiciones</p>
+              <p className="text-xs text-slate-500">Prueba a cambiar el filtro de búsqueda o categoría.</p>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline pt-2 inline-block"
                 >
+                  Limpiar búsqueda
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence>
+              {filteredPositions.map((p, i) => {
+                const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                return (
+                  <motion.div
+                    key={p.isin}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.22, delay: Math.min(i * 0.02, 0.25) }}
+                    onClick={() => setSelectedPosition(p)}
+                    title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
+                    className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/20 dark:hover:bg-[#252526] p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between overflow-hidden"
+                  >
                   {isUpdated && (
                     <span
                       aria-hidden="true"
@@ -612,10 +627,11 @@ export function PositionsPage() {
                   <span className="font-mono text-slate-900 dark:text-slate-200 font-bold">{p.weight.toFixed(1)}%</span>
                 </div>
               </motion.div>
-            )})}
-          </AnimatePresence>
-        </div>
-      )}
+            )
+          })}
+        </AnimatePresence>
+      </div>
+    ))}
 
       {/* Position Detail Modal */}
       <PositionDetailModal

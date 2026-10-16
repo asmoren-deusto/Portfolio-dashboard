@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 13:31:06
+- **Fecha de exportación:** 2026-10-16 13:55:02
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 47
+- **Total de interacciones registradas:** 49
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -700,5 +700,48 @@ Se han implementado todas las mejoras solicitadas con acabado profesional:
 ### 👤 Usuario (2026-10-16 11:18:50)
 
 no veo ninguna transicion entre paginas
+
+---
+
+### 🤖 Asistente (2026-10-16 11:31:09)
+
+### Causa del problema y Solución aplicada
+
+#### 1. ¿Por qué no se veían las transiciones entre páginas?
+En React Router v6, el componente `<Outlet />` actualiza internamente su contexto activo de ruta de forma inmediata en cuanto cambia la URL. Al estar envuelto en `<AnimatePresence mode="wait">`, el nodo hijo desaparecía en el mismo milisegundo antes de que Framer Motion pudiera capturar y ejecutar la animación de salida (`exit`), provocando un corte abrupto sin animación visible.
+
+#### 2. Corrección implementada
+En [RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx):
+- Se sustituyó `<Outlet />` por el hook `const outlet = useOutlet()`.
+- Al pasar `{outlet}` con `key={location.pathname}` dentro de `<AnimatePresence mode="wait">`, Framer Motion retiene la instancia exacta del componente de la página saliente durante toda su animación de salida:
+  - **Entrada:** `opacity: 0, y: 12, filter: 'blur(6px)'` ➔ `opacity: 1, y: 0, filter: 'blur(0px)'` (280ms con curva suave `easeInOut`).
+  - **Salida:** `opacity: 0, y: -8, filter: 'blur(4px)'` (180ms).
+- Esto genera un cambio de vista fluido estilo macOS / iOS moderno, sin desplazar las tarjetas ni alterar el layout general.
+
+---
+
+### Resumen de mejoras adicionales aplicadas en esta versión:
+
+1. **Bocadillo de Rendimiento con Transparencia:**
+   - En [ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx), el tooltip ahora cuenta con `bg-white/80 dark:bg-[#1e1e1e]/80` y `backdrop-blur-md` junto a un borde sutil translúcido.
+
+2. **Porcentajes en las barras de Rendimiento:**
+   - Se reincorporaron los porcentajes exactos (`%`) calculados dinámicamente encima de las barras positivas (verde esmeralda) y debajo de las negativas (rojo carmín), adaptando automáticamente el dominio y márgenes del eje Y para evitar cortes.
+
+3. **Animación de Evolución Patrimonial (Izquierda a Derecha):**
+   - En [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) y [chartAnimation.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), la gráfica de área se revela de izquierda a derecha con `clipPath: inset(...)` acompañado de una estela de escaneo luminosa cada vez que se cambia de entidad, año o modo de vista.
+
+4. **Precarga en memoria de todas las entidades:**
+   - Se añadió `prefetchAllBrokers` en [queries.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/api/queries.ts) e integrado en [useRefreshPortfolio.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/hooks/useRefreshPortfolio.ts) y [RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx). Al cargar la aplicación o refrescar datos, se descargan en segundo plano todas las entidades para que el selector de broker responda al instante (0ms de latencia).
+
+---
+
+🚀 **Release sincronizada:** `v3.0.78` compilada y subida a GitHub.
+
+---
+
+### 👤 Usuario (2026-10-16 11:19:10)
+
+faltan animaciones en la carga de algunos datos/tablas en todas las paginas
 
 ---

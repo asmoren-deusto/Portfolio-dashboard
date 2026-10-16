@@ -42,6 +42,7 @@ import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
+import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
 import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
@@ -94,7 +95,7 @@ export function OverviewPage() {
   const [benchmarkMode, setBenchmarkMode] = useState<BenchmarkChartMode>('percent')
 
   const { data: summary, isFetching: summaryFetching } = usePortfolioSummary()
-  const { data: positions = [], isFetching: positionsFetching } = usePositions()
+  const { data: positions = [], isLoading: positionsLoading, isFetching: positionsFetching } = usePositions()
 
   const palette = theme === 'dark' ? PALETTE_DARK : PALETTE_LIGHT
   const assetColorMap = useMemo(() => {
@@ -117,7 +118,7 @@ export function OverviewPage() {
   const { data: performance = [], isFetching: perfFetching } = usePerformance()
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: benchmarkData, isFetching: benchmarkFetching } = useBenchmarkComparison()
-  const { data: transactions = [] } = useTransactions()
+  const { data: transactions = [], isLoading: txLoading, isFetching: txFetching } = useTransactions()
   const { data: marketData } = useMarketQuotes('Todos')
   const { data: simPortfolioData, isFetching: simPortfolioFetching } = useSimulatedPortfolio('1d')
 
@@ -1334,7 +1335,8 @@ export function OverviewPage() {
       </div>
 
       {/* Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
-      <Card className="w-full" delay={0.3} loading={isRefreshingPrices}>
+      <Card className="w-full relative overflow-hidden" delay={0.3} loading={isRefreshingPrices}>
+        <TableTopLoading isFetching={positionsFetching && !positionsLoading} />
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -1375,28 +1377,33 @@ export function OverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
-                {sortedPositions.slice(0, 5).map((p, i) => {
-                  const isRowHovered = hoveredIsin === p.isin
-                  const assetColor = assetColorMap[p.isin]
-                  const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                <AnimatePresence initial={false}>
+                  {positionsLoading && positions.length === 0 ? (
+                    <TableSkeletonRows rows={5} cols={8} />
+                  ) : (
+                    sortedPositions.slice(0, 5).map((p, i) => {
+                      const isRowHovered = hoveredIsin === p.isin
+                      const assetColor = assetColorMap[p.isin]
+                      const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
 
-                  return (
-                    <motion.tr
-                      key={p.isin}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.15, delay: Math.min(i * 0.015, 0.15) }}
-                      onClick={() => setSelectedPosition(p)}
-                      onMouseEnter={() => setHoveredIsin(p.isin)}
-                      onMouseLeave={() => setHoveredIsin(null)}
-                      title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                      className={cn(
-                        'transition-colors group cursor-pointer relative',
-                        isRowHovered
-                          ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
-                          : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
-                      )}
-                    >
+                      return (
+                        <motion.tr
+                          key={p.isin}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.15) }}
+                          onClick={() => setSelectedPosition(p)}
+                          onMouseEnter={() => setHoveredIsin(p.isin)}
+                          onMouseLeave={() => setHoveredIsin(null)}
+                          title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
+                          className={cn(
+                            'transition-colors group cursor-pointer relative',
+                            isRowHovered
+                              ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
+                              : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
+                          )}
+                        >
                       <td className="py-2.5 pl-3 pr-1 text-center relative">
                         {isUpdated && (
                           <span
@@ -1505,7 +1512,8 @@ export function OverviewPage() {
                       </td>
                     </motion.tr>
                   )
-                })}
+                }))}
+                </AnimatePresence>
               </tbody>
             </table>
           </div>
@@ -1526,28 +1534,33 @@ export function OverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
-                {sortedPositions.slice(5, 10).map((p, i) => {
-                  const isRowHovered = hoveredIsin === p.isin
-                  const assetColor = assetColorMap[p.isin]
-                  const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                <AnimatePresence initial={false}>
+                  {positionsLoading && positions.length === 0 ? (
+                    <TableSkeletonRows rows={5} cols={8} />
+                  ) : (
+                    sortedPositions.slice(5, 10).map((p, i) => {
+                      const isRowHovered = hoveredIsin === p.isin
+                      const assetColor = assetColorMap[p.isin]
+                      const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
 
-                  return (
-                    <motion.tr
-                      key={p.isin}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.15, delay: Math.min(i * 0.015, 0.15) }}
-                      onClick={() => setSelectedPosition(p)}
-                      onMouseEnter={() => setHoveredIsin(p.isin)}
-                      onMouseLeave={() => setHoveredIsin(null)}
-                      title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                      className={cn(
-                        'transition-colors group cursor-pointer relative',
-                        isRowHovered
-                          ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
-                          : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
-                      )}
-                    >
+                      return (
+                        <motion.tr
+                          key={p.isin}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.15) }}
+                          onClick={() => setSelectedPosition(p)}
+                          onMouseEnter={() => setHoveredIsin(p.isin)}
+                          onMouseLeave={() => setHoveredIsin(null)}
+                          title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
+                          className={cn(
+                            'transition-colors group cursor-pointer relative',
+                            isRowHovered
+                              ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
+                              : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
+                          )}
+                        >
                       <td className="py-2.5 pl-3 pr-1 text-center relative">
                         {isUpdated && (
                           <span
@@ -1656,7 +1669,8 @@ export function OverviewPage() {
                       </td>
                     </motion.tr>
                   )
-                })}
+                }))}
+                </AnimatePresence>
               </tbody>
             </table>
           </div>
@@ -1735,7 +1749,8 @@ export function OverviewPage() {
       {/* ── Últimos Movimientos y Mapa de Calor del Mercado (Uno a cada lado) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         {/* Columna Izquierda: Tabla de Últimos Movimientos */}
-        <Card className="w-full flex flex-col h-full" delay={0.35}>
+        <Card className="w-full flex flex-col h-full relative overflow-hidden" delay={0.35}>
+          <TableTopLoading isFetching={txFetching && !txLoading} />
           <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
@@ -1817,84 +1832,92 @@ export function OverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                {filteredTransactions.slice(0, 10).map((t) => {
-                  const isBuy = t.type === 'buy'
-                  const isDiv = t.type === 'dividend'
-                  const isSell = t.type === 'sell'
-                  const pos = positions.find((p) => p.isin === t.isin)
-
-                  return (
-                    <tr
-                      key={t.id}
-                      onClick={() => {
-                        if (pos) setSelectedPosition(pos)
-                      }}
-                      className="hover:bg-slate-50/90 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
-                    >
-                      {/* Fecha */}
-                      <td className="py-2.5 px-3 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                        {fmt.date(t.date)}
-                      </td>
-
-                      {/* Activo con logo */}
-                      <td className="py-2.5 px-3">
-                        <div className="flex items-center gap-2 min-w-[130px]">
-                          <div className="w-6 h-6 rounded-md overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/[0.08]">
-                            <CompanyLogo ticker={pos?.ticker || t.isin} name={t.name || ''} domain={pos?.domain} size="sm" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-semibold text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[170px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                              {t.name || t.isin}
-                            </div>
-                            <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 truncate">
-                              {pos?.ticker || t.isin}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Tipo badge */}
-                      <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                        <span className={cn(
-                          "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold",
-                          isBuy && "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20",
-                          isDiv && "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20",
-                          isSell && "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20"
-                        )}>
-                          {isBuy ? 'Compra' : isDiv ? 'Dividendo' : isSell ? 'Venta' : 'Traspaso'}
-                        </span>
-                      </td>
-
-                      {/* Broker badge */}
-                      <td className="py-2.5 px-2 text-center whitespace-nowrap hidden xl:table-cell">
-                        <BrokerBadge broker={t.broker} />
-                      </td>
-
-                      {/* Títulos / participaciones */}
-                      <td className="py-2.5 px-2 text-right font-mono text-slate-700 dark:text-slate-300 whitespace-nowrap hidden 2xl:table-cell">
-                        {t.shares > 0 ? `${fmt.num(t.shares)} part.` : '—'}
-                      </td>
-
-                      {/* Importe Total */}
-                      <td className="py-2.5 px-3 text-right font-mono font-bold whitespace-nowrap">
-                        <span className={cn(
-                          "text-[12.5px]",
-                          isDiv ? "text-emerald-600 dark:text-emerald-400" : isSell ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"
-                        )}>
-                          {isDiv ? `+${fmt.currency(t.amount)}` : fmt.currency(t.amount)}
-                        </span>
+                <AnimatePresence initial={false}>
+                  {txLoading && transactions.length === 0 ? (
+                    <TableSkeletonRows rows={5} cols={6} />
+                  ) : !filteredTransactions.length ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+                        No se han encontrado movimientos con los filtros seleccionados.
                       </td>
                     </tr>
-                  )
-                })}
+                  ) : (
+                    filteredTransactions.slice(0, 10).map((t, i) => {
+                      const isBuy = t.type === 'buy'
+                      const isDiv = t.type === 'dividend'
+                      const isSell = t.type === 'sell'
+                      const pos = positions.find((p) => p.isin === t.isin)
 
-                {!filteredTransactions.length && (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
-                      No se han encontrado movimientos con los filtros seleccionados.
-                    </td>
-                  </tr>
-                )}
+                      return (
+                        <motion.tr
+                          key={t.id}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -3 }}
+                          transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.18) }}
+                          onClick={() => {
+                            if (pos) setSelectedPosition(pos)
+                          }}
+                          className="hover:bg-slate-50/90 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                        >
+                          {/* Fecha */}
+                          <td className="py-2.5 px-3 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                            {fmt.date(t.date)}
+                          </td>
+
+                          {/* Activo con logo */}
+                          <td className="py-2.5 px-3">
+                            <div className="flex items-center gap-2 min-w-[130px]">
+                              <div className="w-6 h-6 rounded-md overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/[0.08]">
+                                <CompanyLogo ticker={pos?.ticker || t.isin} name={t.name || ''} domain={pos?.domain} size="sm" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-semibold text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[170px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                  {t.name || t.isin}
+                                </div>
+                                <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 truncate">
+                                  {pos?.ticker || t.isin}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Tipo badge */}
+                          <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                            <span className={cn(
+                              "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold",
+                              isBuy && "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20",
+                              isDiv && "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20",
+                              isSell && "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20"
+                            )}>
+                              {isBuy ? 'Compra' : isDiv ? 'Dividendo' : isSell ? 'Venta' : 'Traspaso'}
+                            </span>
+                          </td>
+
+                          {/* Broker badge */}
+                          <td className="py-2.5 px-2 text-center whitespace-nowrap hidden xl:table-cell">
+                            <BrokerBadge broker={t.broker} />
+                          </td>
+
+                          {/* Títulos / participaciones */}
+                          <td className="py-2.5 px-2 text-right font-mono text-slate-700 dark:text-slate-300 whitespace-nowrap hidden 2xl:table-cell">
+                            {t.shares > 0 ? `${fmt.num(t.shares)} part.` : '—'}
+                          </td>
+
+                          {/* Importe Total */}
+                          <td className="py-2.5 px-3 text-right font-mono font-bold whitespace-nowrap">
+                            <span className={cn(
+                              "text-[12.5px]",
+                              isDiv ? "text-emerald-600 dark:text-emerald-400" : isSell ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"
+                            )}>
+                              {isDiv ? `+${fmt.currency(t.amount)}` : fmt.currency(t.amount)}
+                            </span>
+                          </td>
+                        </motion.tr>
+                      )
+                    })
+                  )}
+                </AnimatePresence>
               </tbody>
             </table>
           </div>

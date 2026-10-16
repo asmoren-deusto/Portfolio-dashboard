@@ -253,6 +253,52 @@
   animation-play-state: paused;
 }
 
+/* ── Premium Skeleton Shimmer ── */
+@keyframes shimmerWave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.5) 0%,
+    rgba(241, 245, 249, 0.95) 50%,
+    rgba(226, 232, 240, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerWave 1.8s ease-in-out infinite;
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerWave 1.8s ease-in-out infinite;
+}
+
+/* ── Live Table Scan Line ── */
+@keyframes tableScanLine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-table-scan {
+  animation: tableScanLine 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 /* ── Quick, professional content fade animation (Cards remain fixed in position) ── */
 @keyframes quickFadeSlide {
   from {
@@ -266,4 +312,4 @@
 
 .animate-in-quick {
   animation: quickFadeSlide 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
+}

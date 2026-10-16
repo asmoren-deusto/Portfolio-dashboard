@@ -22,6 +22,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { BrokerBadge } from '@/components/ui/Badge'
+import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
 import { fmt, cn } from '@/lib/utils'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { apiUrl } from '@/api/config'
@@ -51,7 +52,7 @@ export function TransactionsPage() {
   const { currentUser } = useAppStore()
   const userId = currentUser?.id || 'asier'
 
-  const { data: transactions = [] } = useTransactions()
+  const { data: transactions = [], isLoading, isFetching } = useTransactions()
   const { data: positions = [] } = usePositions()
 
   const [activeType, setActiveType] = useState<TxType>('all')
@@ -270,7 +271,8 @@ export function TransactionsPage() {
       </div>
 
       {/* Transactions Table Card */}
-      <Card className="overflow-hidden" delay={0.15}>
+      <Card className="overflow-hidden relative" delay={0.15}>
+        <TableTopLoading isFetching={isFetching && !isLoading} />
         <div className="overflow-x-auto">
           <table className="w-full text-[13.8px]">
             <thead>
@@ -302,32 +304,36 @@ export function TransactionsPage() {
               </tr>
             </thead>
             <tbody data-private>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-20 text-center text-slate-500">
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No hay operaciones con este criterio</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Prueba a seleccionar otra pestaña o limpiar la búsqueda.</p>
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((t, i) => {
-                  const conf = TYPE_CONFIG[t.type] ?? TYPE_CONFIG.buy
-                  const assetInfo = positionMap.get(t.isin)
-                  const displayName = (t as any).name || assetInfo?.name || t.isin
+              <AnimatePresence initial={false}>
+                {isLoading ? (
+                  <TableSkeletonRows rows={8} cols={8} />
+                ) : filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-20 text-center text-slate-500">
+                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No hay operaciones con este criterio</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Prueba a seleccionar otra pestaña o limpiar la búsqueda.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((t, i) => {
+                    const conf = TYPE_CONFIG[t.type] ?? TYPE_CONFIG.buy
+                    const assetInfo = positionMap.get(t.isin)
+                    const displayName = (t as any).name || assetInfo?.name || t.isin
 
-                  return (
-                    <motion.tr
-                      key={t.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.15, delay: Math.min(i * 0.015, 0.2) }}
-                      onClick={() => {
-                        if (assetInfo) setSelectedPosition(assetInfo)
-                      }}
-                      className={`group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] last:border-0 ${
-                        assetInfo ? 'cursor-pointer' : ''
-                      }`}
-                    >
+                    return (
+                      <motion.tr
+                        key={t.id}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.2) }}
+                        onClick={() => {
+                          if (assetInfo) setSelectedPosition(assetInfo)
+                        }}
+                        className={`group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] last:border-0 ${
+                          assetInfo ? 'cursor-pointer' : ''
+                        }`}
+                      >
                       {/* Date */}
                       <td className="px-5 py-3.5 font-mono text-slate-700 dark:text-slate-300 whitespace-nowrap font-medium">
                         {fmt.dateShort(t.date)}
@@ -400,6 +406,7 @@ export function TransactionsPage() {
                   )
                 })
               )}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>

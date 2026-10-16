@@ -24,6 +24,7 @@ import { StockTableRow } from '@/components/market/StockTableRow'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { LoadingDot } from '@/components/ui/LoadingDot'
+import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
 import { SimulatedPortfolioCard } from '@/components/market/SimulatedPortfolioCard'
 import { fmt } from '@/lib/utils'
 
@@ -384,9 +385,7 @@ export const MarketPage: React.FC = () => {
             style={{ height: `${heatmapHeight}px` }}
             className="xl:col-span-7 rounded-2xl bg-white/95 dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col relative"
           >
-            {isFetching && (
-              <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-pulse z-10" />
-            )}
+            <TableTopLoading isFetching={isFetching} />
             <div className="px-4 py-3 border-b border-slate-200/80 dark:border-white/[0.06] flex items-center justify-between bg-slate-50/70 dark:bg-white/[0.02] shrink-0">
               <div className="flex items-center gap-2">
                 <div className="p-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -425,29 +424,37 @@ export const MarketPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/80 dark:divide-white/[0.03]">
-                  {filteredStocks.map((stock, i) => {
-                    const isPositive = (stock.change_pct ?? 0) >= 0
-                    const isSelected = selectedStock?.ticker === stock.ticker
-                    const rangePct =
-                      stock.day_high != null && stock.day_low != null && stock.day_high !== stock.day_low && stock.price != null
-                        ? Math.max(0, Math.min(1, (stock.price - stock.day_low) / (stock.day_high - stock.day_low)))
-                        : null
+                  <AnimatePresence initial={false}>
+                    {isFetching && filteredStocks.length === 0 ? (
+                      <TableSkeletonRows rows={10} cols={7} />
+                    ) : (
+                      filteredStocks.map((stock, i) => {
+                        const isPositive = (stock.change_pct ?? 0) >= 0
+                        const isSelected = selectedStock?.ticker === stock.ticker
+                        const rangePct =
+                          stock.day_high != null && stock.day_low != null && stock.day_high !== stock.day_low && stock.price != null
+                            ? Math.max(0, Math.min(1, (stock.price - stock.day_low) / (stock.day_high - stock.day_low)))
+                            : null
 
-                    return (
-                      <tr
-                        key={stock.ticker}
-                        onClick={() => setSelectedStock(stock)}
-                        className={`transition-all cursor-pointer group ${
-                          isSelected
-                            ? 'bg-blue-50/90 dark:bg-[#2a2d2e]'
-                            : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
-                        }`}
-                      >
-                        {/* # */}
-                        <td className="px-3 py-2.5 text-center">
-                          <span className="font-mono font-bold text-xs text-slate-400 dark:text-slate-500">
-                            {i + 1}
-                          </span>
+                        return (
+                          <motion.tr
+                            key={stock.ticker}
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -3 }}
+                            transition={{ duration: 0.18, delay: Math.min(i * 0.012, 0.15) }}
+                            onClick={() => setSelectedStock(stock)}
+                            className={`transition-all cursor-pointer group ${
+                              isSelected
+                                ? 'bg-blue-50/90 dark:bg-[#2a2d2e]'
+                                : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
+                            }`}
+                          >
+                            {/* # */}
+                            <td className="px-3 py-2.5 text-center">
+                              <span className="font-mono font-bold text-xs text-slate-400 dark:text-slate-500">
+                                {i + 1}
+                              </span>
                         </td>
 
                         {/* Empresa */}
@@ -568,9 +575,10 @@ export const MarketPage: React.FC = () => {
                             <span className="text-[10px] text-slate-400 dark:text-slate-600">—</span>
                           )}
                         </td>
-                      </tr>
+                      </motion.tr>
                     )
-                  })}
+                  }))}
+                </AnimatePresence>
                 </tbody>
               </table>
             </div>

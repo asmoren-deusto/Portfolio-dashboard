@@ -18,6 +18,7 @@ import {
   Flame,
   TrendingDown,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   useSimulatedPortfolio,
   type SimulatedChartPoint,
@@ -28,6 +29,7 @@ import { fmt, cn } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
+import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
 
 export interface EtfInfo {
   name: string
@@ -806,7 +808,8 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
             {/* TAB 1: Desglose por Fondos en Cartera */}
             {activeTab === 'funds' && (
-              <div className="overflow-x-auto overflow-y-auto max-h-[370px] sm:max-h-[385px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+              <div className="overflow-x-auto overflow-y-auto max-h-[370px] sm:max-h-[385px] rounded-lg border border-slate-200/60 dark:border-white/[0.06] relative">
+                <TableTopLoading isFetching={isFetching && !isLoading} />
                 <table className="w-full text-left text-xs border-collapse min-w-[760px]">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
@@ -819,17 +822,25 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                    {holdings.map((h) => {
-                      const etfInfo = ETF_INFO_MAP[h.etf_ticker]
-                      const displayName = etfInfo?.name || h.etf_desc || h.etf_name || h.etf_ticker
-                      const isEtfPos = (h.etf_change_pct ?? 0) >= 0
-                      const isGainPos = (h.simulated_gain_amount ?? 0) >= 0
+                    <AnimatePresence initial={false}>
+                      {isLoading ? (
+                        <TableSkeletonRows rows={5} cols={6} />
+                      ) : (
+                        holdings.map((h, i) => {
+                          const etfInfo = ETF_INFO_MAP[h.etf_ticker]
+                          const displayName = etfInfo?.name || h.etf_desc || h.etf_name || h.etf_ticker
+                          const isEtfPos = (h.etf_change_pct ?? 0) >= 0
+                          const isGainPos = (h.simulated_gain_amount ?? 0) >= 0
 
-                      return (
-                        <tr
-                          key={h.isin}
-                          className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
-                        >
+                          return (
+                            <motion.tr
+                              key={h.isin}
+                              initial={{ opacity: 0, y: 3 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -2 }}
+                              transition={{ duration: 0.18, delay: Math.min(i * 0.015, 0.2) }}
+                              className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
+                            >
                           {/* Col 1: Fondo y Badge de Entidad */}
                           <td className="py-1.5 px-2.5 min-w-[240px]">
                             <div className="flex items-center gap-1.5 flex-wrap">
@@ -919,17 +930,19 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               {isGainPos ? '+' : ''}{fmt.currency(h.simulated_gain_amount ?? 0)}
                             </span>
                           </td>
-                        </tr>
+                        </motion.tr>
                       )
-                    })}
-                  </tbody>
+                    }))}
+                  </AnimatePresence>
+                </tbody>
                 </table>
               </div>
             )}
 
             {/* TAB 2: Resumen Ponderado por ETFs Réplica */}
             {activeTab === 'etfs' && (
-              <div className="overflow-x-auto overflow-y-auto max-h-[370px] sm:max-h-[385px] rounded-lg border border-slate-200/60 dark:border-white/[0.06]">
+              <div className="overflow-x-auto overflow-y-auto max-h-[370px] sm:max-h-[385px] rounded-lg border border-slate-200/60 dark:border-white/[0.06] relative">
+                <TableTopLoading isFetching={isFetching && !isLoading} />
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
@@ -942,26 +955,34 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                    {etfs.map((etf) => {
-                      const info = ETF_INFO_MAP[etf.ticker]
-                      const displayName = info?.name || etf.name || etf.ticker
-                      const isPos = (etf.change_pct ?? 0) >= 0
-                      const replicatedVal = (summary?.total_value ?? 0) * (etf.weight / 100)
-                      const totalImpact = replicatedVal * ((etf.change_pct ?? 0) / 100)
-                      const isImpactPos = totalImpact >= 0
+                    <AnimatePresence initial={false}>
+                      {isLoading ? (
+                        <TableSkeletonRows rows={4} cols={6} />
+                      ) : (
+                        etfs.map((etf, i) => {
+                          const info = ETF_INFO_MAP[etf.ticker]
+                          const displayName = info?.name || etf.name || etf.ticker
+                          const isPos = (etf.change_pct ?? 0) >= 0
+                          const replicatedVal = (summary?.total_value ?? 0) * (etf.weight / 100)
+                          const totalImpact = replicatedVal * ((etf.change_pct ?? 0) / 100)
+                          const isImpactPos = totalImpact >= 0
 
-                      return (
-                        <tr
-                          key={etf.ticker}
-                          className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
-                        >
-                          <td className="py-1.5 px-2.5">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span
-                                className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[220px]"
-                                title={displayName}
-                              >
-                                {displayName}
+                          return (
+                            <motion.tr
+                              key={etf.ticker}
+                              initial={{ opacity: 0, y: 3 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -2 }}
+                              transition={{ duration: 0.18, delay: Math.min(i * 0.015, 0.2) }}
+                              className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
+                            >
+                              <td className="py-1.5 px-2.5">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span
+                                    className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[220px]"
+                                    title={displayName}
+                                  >
+                                    {displayName}
                               </span>
                               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
                                 {etf.ticker}
@@ -1024,10 +1045,11 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               {isImpactPos ? '+' : ''}{fmt.currency(totalImpact)}
                             </span>
                           </td>
-                        </tr>
+                        </motion.tr>
                       )
-                    })}
-                  </tbody>
+                    }))}
+                  </AnimatePresence>
+                </tbody>
                 </table>
               </div>
             )}

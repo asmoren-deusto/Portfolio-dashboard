@@ -28,6 +28,7 @@ import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
+import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
 import { fmt, cn } from '@/lib/utils'
 import { useAnalytics, usePositions, useBenchmarkComparison } from '@/api/queries'
@@ -57,7 +58,7 @@ export function AnalyticsPage() {
   }
 
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
-  const { data: positions = [], isFetching: positionsFetching } = usePositions()
+  const { data: positions = [], isLoading: positionsLoading, isFetching: positionsFetching } = usePositions()
   const { data: benchmarkData, isFetching: benchmarkFetching } = useBenchmarkComparison()
   const [benchmarkMode, setBenchmarkMode] = useState<BenchmarkChartMode>('percent')
   const [secondaryView, setSecondaryView] = useState<'returns' | 'distribution'>('returns')
@@ -657,7 +658,8 @@ export function AnalyticsPage() {
       </Card>
 
       {/* Position Breakdown Table */}
-      <Card delay={0.35} className="overflow-hidden">
+      <Card delay={0.35} className="overflow-hidden relative">
+        <TableTopLoading isFetching={positionsFetching && !positionsLoading} />
         <CardHeader>
           <div className="flex items-center gap-2">
             <Target className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
@@ -693,18 +695,23 @@ export function AnalyticsPage() {
               </tr>
             </thead>
             <tbody>
-              {positions
-                .slice()
-                .sort((a, b) => b.unrealized_pnl_pct - a.unrealized_pnl_pct)
-                .map((p, i) => (
-                  <motion.tr data-private
-                    key={p.isin}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.15, delay: Math.min(i * 0.015, 0.2) }}
-                    onClick={() => setSelectedPosition(p)}
-                    className="group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] cursor-pointer last:border-0"
-                  >
+              <AnimatePresence initial={false}>
+                {positionsLoading && positions.length === 0 ? (
+                  <TableSkeletonRows rows={6} cols={7} />
+                ) : (
+                  positions
+                    .slice()
+                    .sort((a, b) => b.unrealized_pnl_pct - a.unrealized_pnl_pct)
+                    .map((p, i) => (
+                      <motion.tr data-private
+                        key={p.isin}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.2) }}
+                        onClick={() => setSelectedPosition(p)}
+                        className="group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] cursor-pointer last:border-0"
+                      >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <CompanyLogo
@@ -750,7 +757,8 @@ export function AnalyticsPage() {
                       </div>
                     </td>
                   </motion.tr>
-                ))}
+                )))}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
