@@ -80,7 +80,7 @@ const PERIOD_LABELS: Record<string, string> = {
 }
 
 export function OverviewPage() {
-  const { currentUser, period, theme, isRefreshingPrices } = useAppStore()
+  const { currentUser, period, theme, isRefreshingPrices, selectedBroker, refreshAnimKey } = useAppStore()
   const periodLabel = PERIOD_LABELS[period] || 'Periodo'
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
@@ -1115,9 +1115,19 @@ export function OverviewPage() {
                       {allocStats.box1Label}
                     </span>
                   </div>
-                  <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5">
-                    {allocStats.box1Val}
-                  </span>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={`alloc1-${selectedBroker}-${allocMode}-${allocStats.box1Val}`}
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -3 }}
+                      transition={{ duration: 0.2 }}
+                      data-private
+                      className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5"
+                    >
+                      {allocStats.box1Val}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
 
                 {/* Box 2 */}
@@ -1133,9 +1143,19 @@ export function OverviewPage() {
                       {allocStats.box2Label}
                     </span>
                   </div>
-                  <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5">
-                    {allocStats.box2Val}
-                  </span>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={`alloc2-${selectedBroker}-${allocMode}-${allocStats.box2Val}`}
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -3 }}
+                      transition={{ duration: 0.2 }}
+                      data-private
+                      className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5"
+                    >
+                      {allocStats.box2Val}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
               </div>
             )}
@@ -1207,7 +1227,7 @@ export function OverviewPage() {
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
-                  key={returnsPeriodMode}
+                  key={`${returnsPeriodMode}-${selectedBroker}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -1281,17 +1301,24 @@ export function OverviewPage() {
                       {secondaryStats.box1Label}
                     </span>
                   </div>
-                  <span
-                    data-private
-                    className={cn(
-                      'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
-                      secondaryStats.box1Positive
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-rose-600 dark:text-rose-400'
-                    )}
-                  >
-                    {secondaryStats.box1Val}
-                  </span>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={`box1-${selectedBroker}-${returnsPeriodMode}-${secondaryStats.box1Val}`}
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -3 }}
+                      transition={{ duration: 0.2 }}
+                      data-private
+                      className={cn(
+                        'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
+                        secondaryStats.box1Positive
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                      )}
+                    >
+                      {secondaryStats.box1Val}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
 
                 {/* Box 2 */}
@@ -1316,17 +1343,26 @@ export function OverviewPage() {
                       {secondaryStats.box2Label}
                     </span>
                   </div>
-                  <span
-                    data-private
-                    className={cn(
-                      'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
-                      secondaryStats.box2Positive
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-rose-600 dark:text-rose-400'
-                    )}
-                  >
-                    {secondaryStats.box2Val}
-                  </span>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={`box2-${selectedBroker}-${returnsPeriodMode}-${secondaryStats.box2Val}`}
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -3 }}
+                      transition={{ duration: 0.2 }}
+                      data-private
+                      className={cn(
+                        'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
+                        returnsPeriodMode === 'global'
+                          ? 'text-slate-900 dark:text-white'
+                          : secondaryStats.box2Positive
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                      )}
+                    >
+                      {secondaryStats.box2Val}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
               </div>
             )}

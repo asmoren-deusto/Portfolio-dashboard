@@ -158,16 +158,17 @@ export function ReturnsChart({
 
   return (
     <motion.div
-      key={`${mode}-${selectedBroker}-${refreshAnimKey}-${data.map(d => d.value).join('_')}`}
-      initial={{ opacity: 0, scale: 0.98, y: 3 }}
+      key={`ret-wrap-${mode}-${selectedBroker}-${refreshAnimKey}`}
+      initial={{ opacity: 0.85, scale: 0.99, y: 2 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       data-private
       style={{ height }}
       className="w-full"
     >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
+          key={`returns-bar-chart-${mode}-${selectedBroker}-${refreshAnimKey}`}
           data={chartData}
           margin={compact ? { top: 22, right: 8, left: 4, bottom: 20 } : { top: 24, right: 14, left: 8, bottom: 22 }}
         >
@@ -213,7 +214,10 @@ export function ReturnsChart({
             dataKey="plotVal"
             radius={[6, 6, 0, 0]}
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
-            isAnimationActive={false}
+            isAnimationActive={true}
+            animationBegin={30}
+            animationDuration={650}
+            animationEasing="ease-out"
           >
             <LabelList
               dataKey="posVal"
@@ -230,6 +234,7 @@ export function ReturnsChart({
                 fontSize: compact ? '9.5px' : '10.5px',
                 fontFamily: 'monospace',
                 fontWeight: 700,
+                transition: 'all 0.3s ease',
               }}
             />
             <LabelList
@@ -246,11 +251,12 @@ export function ReturnsChart({
                 fontSize: compact ? '9.5px' : '10.5px',
                 fontFamily: 'monospace',
                 fontWeight: 700,
+                transition: 'all 0.3s ease',
               }}
             />
             {data.map((d, i) => (
               <Cell
-                key={i}
+                key={`cell-${mode}-${selectedBroker}-${d.name}-${i}`}
                 fill={d.value >= 0 ? 'url(#barGreen)' : 'url(#barRed)'}
                 opacity={1}
                 style={{
