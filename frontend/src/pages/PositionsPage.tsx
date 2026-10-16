@@ -370,36 +370,34 @@ export function PositionsPage() {
                 </tr>
               </thead>
               <tbody>
-                <AnimatePresence initial={false}>
-                  {isLoading ? (
-                    <TableSkeletonRows rows={7} cols={10} />
-                  ) : filteredPositions.length === 0 ? (
-                    <tr>
-                      <td colSpan={10} className="py-20 text-center">
-                        <div className="max-w-xs mx-auto text-center space-y-2">
-                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No se encontraron posiciones</p>
-                          <p className="text-xs text-slate-500">Prueba a cambiar el filtro de búsqueda o categoría.</p>
-                          {searchQuery && (
-                            <button
-                              onClick={() => setSearchQuery('')}
-                              className="text-xs text-blue-600 dark:text-blue-400 hover:underline pt-2 inline-block"
-                            >
-                              Limpiar búsqueda
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredPositions.map((p, i) => {
-                      const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
-                      return (
-                        <motion.tr
-                          key={p.isin}
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          transition={{ duration: 0.2, delay: Math.min(i * 0.018, 0.22) }}
+                {isLoading ? (
+                  <TableSkeletonRows rows={7} cols={10} />
+                ) : filteredPositions.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="py-20 text-center">
+                      <div className="max-w-xs mx-auto text-center space-y-2">
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No se encontraron posiciones</p>
+                        <p className="text-xs text-slate-500">Prueba a cambiar el filtro de búsqueda o categoría.</p>
+                        {searchQuery && (
+                          <button
+                            onClick={() => setSearchQuery('')}
+                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline pt-2 inline-block"
+                          >
+                            Limpiar búsqueda
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredPositions.map((p) => {
+                    const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+                    return (
+                      <motion.tr
+                        key={p.isin}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.15 }}
                           onClick={() => setSelectedPosition(p)}
                           title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
                           className="group border-b border-slate-100 hover:bg-slate-50/80 dark:border-white/[0.03] dark:hover:bg-white/[0.035] cursor-pointer last:border-0 transition-colors"
@@ -506,7 +504,6 @@ export function PositionsPage() {
                       </motion.tr>
                     )})
                   )}
-                </AnimatePresence>
               </tbody>
             </table>
           </div>

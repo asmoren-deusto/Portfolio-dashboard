@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 15:43:43
+- **Fecha de exportación:** 2026-10-16 15:51:37
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 81
+- **Total de interacciones registradas:** 83
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1203,5 +1203,33 @@ npm --prefix frontend-aurora run dev
 ### 👤 Usuario (2026-10-16 13:11:36)
 
 la animacion entre paginas no me convence, refinala
+
+---
+
+### 🤖 Asistente (2026-10-16 13:43:46)
+
+He refinado la transición entre páginas para eliminar los problemas visuales que resultaban molestos y toscos:
+
+### 🛠️ Problemas corregidos:
+1. **Eliminación del salto y doble rebote vertical (`y: 6` y `y: -3`)**:
+   - Anteriormente, la página saliente saltaba hacia arriba al cerrarse y la entrante aparecía desplazada 6 píxeles abajo para volver a subir. En un dashboard con paneles densos y gráficos, esto producía una sensación de tropiezo o tirón visual.
+2. **Eliminación del parpadeo en blanco (`mode="wait"`)**:
+   - Al usar `mode="wait"`, la aplicación borraba la página anterior y esperaba a que terminase su animación de salida antes de renderizar la siguiente, dejando un flash de pantalla vacía. Ahora el montaje es directo e instantáneo con un fundido suave de opacidad (160ms con curva cúbica institucional `[0.25, 0.1, 0.25, 1]`).
+3. **Reset automático de scroll en navegación**:
+   - Si navegabas tras haber hecho scroll en una página larga (p. ej. Visión General), la nueva página mantenía esa posición desplazada en vez de empezar en la cabecera. Se ha añadido reseteo inmediato a la parte superior (`top: 0`).
+4. **Precarga en reposo (`idle prefetch`) de rutas dinámicas**:
+   - Se precargan los módulos `lazy` (`Mercado`, `Posiciones`, `Analítica`, `Operaciones`) en segundo plano sin bloquear el hilo principal, eliminando cualquier destello del skeleton fallback al pulsar una pestaña por primera vez.
+5. **Sincronización suave de título y subtítulo en Header**:
+   - El título y subtítulo de la cabecera ahora acompañan el cambio de página con un micro-fade sincronizado sin cortes bruscos.
+
+### 🚀 Publicación y Sincronización:
+- **Versión**: Actualizada a **`v3.0.94`**.
+- **Git**: Cambios sincronizados y subidos a la rama principal.
+
+---
+
+### 👤 Usuario (2026-10-16 13:15:56)
+
+la tabla de posiciones pega saltos al cambiar de entidad, revisa las animaciones
 
 ---

@@ -1359,322 +1359,335 @@ export function OverviewPage() {
           </Link>
         </CardHeader>
 
-        {/* 2 Parallel Columns Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 divide-y xl:divide-y-0 xl:divide-x divide-slate-200/80 dark:divide-white/[0.04] overflow-hidden">
-          {/* Column 1: Top 5 Positions */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
-                  <th className="py-2 px-2.5">Activo / Fondo</th>
-                  <th className="py-2 px-2 text-right">NAV</th>
-                  <th className="py-2 px-2 text-right">Rend. Día</th>
-                  <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
-                  <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
-                  {!isNativePlatform() && <th className="py-2 px-2 text-center">Banco</th>}
-                  <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
-                <AnimatePresence initial={false}>
-                  {positionsLoading && positions.length === 0 ? (
-                    <TableSkeletonRows rows={5} cols={8} />
-                  ) : (
-                    sortedPositions.slice(0, 5).map((p, i) => {
-                      const isRowHovered = hoveredIsin === p.isin
-                      const assetColor = assetColorMap[p.isin]
-                      const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+        {/* Dynamic Parallel Columns Grid (switches cleanly to full-width if <= 5 positions to avoid empty column) */}
+        {(() => {
+          const overviewPositions = sortedPositions.slice(0, 10)
+          const hasSecondColumn = overviewPositions.length > 5
+          const splitIndex = hasSecondColumn ? Math.ceil(overviewPositions.length / 2) : overviewPositions.length
+          const col1Positions = overviewPositions.slice(0, splitIndex)
+          const col2Positions = hasSecondColumn ? overviewPositions.slice(splitIndex) : []
 
-                      return (
-                        <motion.tr
-                          key={p.isin}
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.15) }}
-                          onClick={() => setSelectedPosition(p)}
-                          onMouseEnter={() => setHoveredIsin(p.isin)}
-                          onMouseLeave={() => setHoveredIsin(null)}
-                          title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                          className={cn(
-                            'transition-colors group cursor-pointer relative',
-                            isRowHovered
-                              ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
-                              : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
-                          )}
-                        >
-                      <td className="py-2.5 pl-3 pr-1 text-center relative">
-                        {isUpdated && (
-                          <span
-                            aria-hidden="true"
-                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
-                          />
-                        )}
-                        <div className="flex items-center justify-center">
-                          <div
-                            className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
-                            style={{
-                              backgroundColor: assetColor || '#3b82f6',
-                              transform: isRowHovered ? 'scale(1.4)' : 'scale(1)',
-                            }}
-                          />
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-2.5">
-                        <div className="flex items-center gap-2">
-                          <CompanyLogo
-                            isin={p.isin}
-                            ticker={p.ticker || p.isin.slice(0, 4)}
-                            name={p.name}
-                            domain={p.domain}
-                            size="sm"
-                          />
-                          <div className="min-w-0">
-                            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
-                              {p.name}
-                            </div>
-                            <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
-                              <span>{p.isin}</span>
-                              {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-2 text-right">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[13px] sm:text-[14px] leading-tight whitespace-nowrap">
-                          {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
-                        </div>
-                        <div className="text-[11.5px] font-mono font-medium text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
-                          {(() => {
-                            const raw = p.price_date || p.last_updated
-                            if (!raw) return '—'
-                            try {
-                              const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                              return format(parseISO(dateOnly), 'dd/MM/yyyy')
-                            } catch {
-                              return raw
-                            }
-                          })()}
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-2 text-right">
-                        {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
-                          <span
+          return (
+            <div className={cn(
+              "overflow-hidden transition-all duration-200",
+              hasSecondColumn
+                ? "grid grid-cols-1 xl:grid-cols-2 divide-y xl:divide-y-0 xl:divide-x divide-slate-200/80 dark:divide-white/[0.04]"
+                : "w-full"
+            )}>
+              {/* Column 1: Top Positions */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
+                      <th className="py-2 px-2.5">Activo / Fondo</th>
+                      <th className="py-2 px-2 text-right">NAV</th>
+                      <th className="py-2 px-2 text-right">Rend. Día</th>
+                      <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
+                      <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
+                      {!isNativePlatform() && <th className="py-2 px-2 text-center">Banco</th>}
+                      <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
+                    {positionsLoading && positions.length === 0 ? (
+                      <TableSkeletonRows rows={5} cols={8} />
+                    ) : (
+                      col1Positions.map((p) => {
+                        const isRowHovered = hoveredIsin === p.isin
+                        const assetColor = assetColorMap[p.isin]
+                        const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+
+                        return (
+                          <motion.tr
+                            key={p.isin}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.15 }}
+                            onClick={() => setSelectedPosition(p)}
+                            onMouseEnter={() => setHoveredIsin(p.isin)}
+                            onMouseLeave={() => setHoveredIsin(null)}
+                            title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
                             className={cn(
-                              'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
-                              p.daily_change_pct > 0
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : p.daily_change_pct < 0
-                                  ? 'text-rose-600 dark:text-rose-400'
-                                  : 'text-slate-500 dark:text-slate-400'
+                              'transition-colors group cursor-pointer relative',
+                              isRowHovered
+                                ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
+                                : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
                             )}
                           >
-                            {p.daily_change_pct > 0 ? (
-                              <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
-                            ) : p.daily_change_pct < 0 ? (
-                              <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
-                            ) : null}
-                            <span>{fmt.pct(p.daily_change_pct)}</span>
-                          </span>
-                        ) : (
-                          <span className="font-mono text-xs text-slate-400">—</span>
-                        )}
-                      </td>
-                      <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
-                        {fmt.currency(p.current_value)}
-                      </td>
-                      <td data-private className="py-2.5 px-2 text-right">
-                        <div className="flex flex-col items-end">
-                          <PnlBadge value={p.unrealized_pnl} />
-                          <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
-                            {fmt.pct(p.unrealized_pnl_pct)}
-                          </span>
-                        </div>
-                      </td>
-                      {!isNativePlatform() && (
-                        <td className="py-2.5 px-2 text-center">
-                          <BrokerBadge broker={p.broker} />
-                        </td>
+                            <td className="py-2.5 pl-3 pr-1 text-center relative">
+                              {isUpdated && (
+                                <span
+                                  aria-hidden="true"
+                                  className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
+                                />
+                              )}
+                              <div className="flex items-center justify-center">
+                                <div
+                                  className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
+                                  style={{
+                                    backgroundColor: assetColor || '#3b82f6',
+                                    transform: isRowHovered ? 'scale(1.4)' : 'scale(1)',
+                                  }}
+                                />
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-2.5">
+                              <div className="flex items-center gap-2">
+                                <CompanyLogo
+                                  isin={p.isin}
+                                  ticker={p.ticker || p.isin.slice(0, 4)}
+                                  name={p.name}
+                                  domain={p.domain}
+                                  size="sm"
+                                />
+                                <div className="min-w-0">
+                                  <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
+                                    {p.name}
+                                  </div>
+                                  <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
+                                    <span>{p.isin}</span>
+                                    {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-2 text-right">
+                              <div className="font-mono font-bold text-slate-900 dark:text-white text-[13px] sm:text-[14px] leading-tight whitespace-nowrap">
+                                {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
+                              </div>
+                              <div className="text-[11.5px] font-mono font-medium text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                                {(() => {
+                                  const raw = p.price_date || p.last_updated
+                                  if (!raw) return '—'
+                                  try {
+                                    const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                                    return format(parseISO(dateOnly), 'dd/MM/yyyy')
+                                  } catch {
+                                    return raw
+                                  }
+                                })()}
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-2 text-right">
+                              {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
+                                <span
+                                  className={cn(
+                                    'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
+                                    p.daily_change_pct > 0
+                                      ? 'text-emerald-600 dark:text-emerald-400'
+                                      : p.daily_change_pct < 0
+                                        ? 'text-rose-600 dark:text-rose-400'
+                                        : 'text-slate-500 dark:text-slate-400'
+                                  )}
+                                >
+                                  {p.daily_change_pct > 0 ? (
+                                    <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  ) : p.daily_change_pct < 0 ? (
+                                    <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  ) : null}
+                                  <span>{fmt.pct(p.daily_change_pct)}</span>
+                                </span>
+                              ) : (
+                                <span className="font-mono text-xs text-slate-400">—</span>
+                              )}
+                            </td>
+                            <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
+                              {fmt.currency(p.current_value)}
+                            </td>
+                            <td data-private className="py-2.5 px-2 text-right">
+                              <div className="flex flex-col items-end">
+                                <PnlBadge value={p.unrealized_pnl} />
+                                <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                                  {fmt.pct(p.unrealized_pnl_pct)}
+                                </span>
+                              </div>
+                            </td>
+                            {!isNativePlatform() && (
+                              <td className="py-2.5 px-2 text-center">
+                                <BrokerBadge broker={p.broker} />
+                              </td>
+                            )}
+                            <td className="py-2.5 pr-3 pl-1.5 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
+                                <span
+                                  className={cn(
+                                    'font-mono font-bold text-right text-[13px] transition-colors',
+                                    isRowHovered ? 'text-slate-950 dark:text-white font-extrabold' : 'text-slate-800 dark:text-slate-200'
+                                  )}
+                                >
+                                  {p.weight.toFixed(1)}%
+                                </span>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Column 2: Remaining Positions (rendered only when > 5 positions) */}
+              {hasSecondColumn && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead className="hidden xl:table-header-group">
+                      <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
+                        <th className="py-2 px-2.5">Activo / Fondo</th>
+                        <th className="py-2 px-2 text-right">NAV</th>
+                        <th className="py-2 px-2 text-right">Rend. Día</th>
+                        <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
+                        <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
+                        {!isNativePlatform() && <th className="py-2 px-2 text-center">Banco</th>}
+                        <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
+                      {positionsLoading && positions.length === 0 ? (
+                        <TableSkeletonRows rows={5} cols={8} />
+                      ) : (
+                        col2Positions.map((p) => {
+                          const isRowHovered = hoveredIsin === p.isin
+                          const assetColor = assetColorMap[p.isin]
+                          const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
+
+                          return (
+                            <motion.tr
+                              key={p.isin}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.15 }}
+                              onClick={() => setSelectedPosition(p)}
+                              onMouseEnter={() => setHoveredIsin(p.isin)}
+                              onMouseLeave={() => setHoveredIsin(null)}
+                              title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
+                              className={cn(
+                                'transition-colors group cursor-pointer relative',
+                                isRowHovered
+                                  ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
+                                  : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
+                              )}
+                            >
+                              <td className="py-2.5 pl-3 pr-1 text-center relative">
+                                {isUpdated && (
+                                  <span
+                                    aria-hidden="true"
+                                    className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
+                                  />
+                                )}
+                                <div className="flex items-center justify-center">
+                                  <div
+                                    className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
+                                    style={{
+                                      backgroundColor: assetColor || '#3b82f6',
+                                      transform: isRowHovered ? 'scale(1.4)' : 'scale(1)',
+                                    }}
+                                  />
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-2.5">
+                                <div className="flex items-center gap-2">
+                                  <CompanyLogo
+                                    isin={p.isin}
+                                    ticker={p.ticker || p.isin.slice(0, 4)}
+                                    name={p.name}
+                                    domain={p.domain}
+                                    size="sm"
+                                  />
+                                  <div className="min-w-0">
+                                    <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
+                                      {p.name}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
+                                      <span>{p.isin}</span>
+                                      {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-2 text-right">
+                                <div className="font-mono font-bold text-slate-900 dark:text-white text-[13px] sm:text-[14px] leading-tight whitespace-nowrap">
+                                  {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
+                                </div>
+                                <div className="text-[11.5px] font-mono font-medium text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                                  {(() => {
+                                    const raw = p.price_date || p.last_updated
+                                    if (!raw) return '—'
+                                    try {
+                                      const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
+                                      return format(parseISO(dateOnly), 'dd/MM/yyyy')
+                                    } catch {
+                                      return raw
+                                    }
+                                  })()}
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-2 text-right">
+                                {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
+                                  <span
+                                    className={cn(
+                                      'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
+                                      p.daily_change_pct > 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : p.daily_change_pct < 0
+                                          ? 'text-rose-600 dark:text-rose-400'
+                                          : 'text-slate-500 dark:text-slate-400'
+                                    )}
+                                  >
+                                    {p.daily_change_pct > 0 ? (
+                                      <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    ) : p.daily_change_pct < 0 ? (
+                                      <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    ) : null}
+                                    <span>{fmt.pct(p.daily_change_pct)}</span>
+                                  </span>
+                                ) : (
+                                  <span className="font-mono text-xs text-slate-400">—</span>
+                                )}
+                              </td>
+                              <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
+                                {fmt.currency(p.current_value)}
+                              </td>
+                              <td data-private className="py-2.5 px-2 text-right">
+                                <div className="flex flex-col items-end">
+                                  <PnlBadge value={p.unrealized_pnl} />
+                                  <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                                    {fmt.pct(p.unrealized_pnl_pct)}
+                                  </span>
+                                </div>
+                              </td>
+                              {!isNativePlatform() && (
+                                <td className="py-2.5 px-2 text-center">
+                                  <BrokerBadge broker={p.broker} />
+                                </td>
+                              )}
+                              <td className="py-2.5 pr-3 pl-1.5 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
+                                  <span
+                                    className={cn(
+                                      'font-mono font-bold text-right text-[13px] transition-colors',
+                                      isRowHovered ? 'text-slate-950 dark:text-white font-extrabold' : 'text-slate-800 dark:text-slate-200'
+                                    )}
+                                  >
+                                    {p.weight.toFixed(1)}%
+                                  </span>
+                                </div>
+                              </td>
+                            </motion.tr>
+                          )
+                        })
                       )}
-                      <td className="py-2.5 pr-3 pl-1.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
-                          <span
-                            className={cn(
-                              'font-mono font-bold text-right text-[13px] transition-colors',
-                              isRowHovered ? 'text-slate-950 dark:text-white font-extrabold' : 'text-slate-800 dark:text-slate-200'
-                            )}
-                          >
-                            {p.weight.toFixed(1)}%
-                          </span>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  )
-                }))}
-                </AnimatePresence>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Column 2: Next 5 Positions */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead className="hidden xl:table-header-group">
-                <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
-                  <th className="py-2 px-2.5">Activo / Fondo</th>
-                  <th className="py-2 px-2 text-right">NAV</th>
-                  <th className="py-2 px-2 text-right">Rend. Día</th>
-                  <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
-                  <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
-                  {!isNativePlatform() && <th className="py-2 px-2 text-center">Banco</th>}
-                  <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
-                <AnimatePresence initial={false}>
-                  {positionsLoading && positions.length === 0 ? (
-                    <TableSkeletonRows rows={5} cols={8} />
-                  ) : (
-                    sortedPositions.slice(5, 10).map((p, i) => {
-                      const isRowHovered = hoveredIsin === p.isin
-                      const assetColor = assetColorMap[p.isin]
-                      const isUpdated = Boolean(latestNavDate && (p.price_date || p.last_updated) === latestNavDate)
-
-                      return (
-                        <motion.tr
-                          key={p.isin}
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.15) }}
-                          onClick={() => setSelectedPosition(p)}
-                          onMouseEnter={() => setHoveredIsin(p.isin)}
-                          onMouseLeave={() => setHoveredIsin(null)}
-                          title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                          className={cn(
-                            'transition-colors group cursor-pointer relative',
-                            isRowHovered
-                              ? 'bg-slate-100/80 dark:bg-[#2a2d2e]'
-                              : 'hover:bg-slate-50/80 dark:hover:bg-[#2a2d2e]/60'
-                          )}
-                        >
-                      <td className="py-2.5 pl-3 pr-1 text-center relative">
-                        {isUpdated && (
-                          <span
-                            aria-hidden="true"
-                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
-                          />
-                        )}
-                        <div className="flex items-center justify-center">
-                          <div
-                            className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
-                            style={{
-                              backgroundColor: assetColor || '#3b82f6',
-                              transform: isRowHovered ? 'scale(1.4)' : 'scale(1)',
-                            }}
-                          />
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-2.5">
-                        <div className="flex items-center gap-2">
-                          <CompanyLogo
-                            isin={p.isin}
-                            ticker={p.ticker || p.isin.slice(0, 4)}
-                            name={p.name}
-                            domain={p.domain}
-                            size="sm"
-                          />
-                          <div className="min-w-0">
-                            <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
-                              {p.name}
-                            </div>
-                            <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
-                              <span>{p.isin}</span>
-                              {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-2 text-right">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white text-[13px] sm:text-[14px] leading-tight whitespace-nowrap">
-                          {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
-                        </div>
-                        <div className="text-[11.5px] font-mono font-medium text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
-                          {(() => {
-                            const raw = p.price_date || p.last_updated
-                            if (!raw) return '—'
-                            try {
-                              const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                              return format(parseISO(dateOnly), 'dd/MM/yyyy')
-                            } catch {
-                              return raw
-                            }
-                          })()}
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-2 text-right">
-                        {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
-                          <span
-                            className={cn(
-                              'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
-                              p.daily_change_pct > 0
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : p.daily_change_pct < 0
-                                  ? 'text-rose-600 dark:text-rose-400'
-                                  : 'text-slate-500 dark:text-slate-400'
-                            )}
-                          >
-                            {p.daily_change_pct > 0 ? (
-                              <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
-                            ) : p.daily_change_pct < 0 ? (
-                              <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
-                            ) : null}
-                            <span>{fmt.pct(p.daily_change_pct)}</span>
-                          </span>
-                        ) : (
-                          <span className="font-mono text-xs text-slate-400">—</span>
-                        )}
-                      </td>
-                      <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
-                        {fmt.currency(p.current_value)}
-                      </td>
-                      <td data-private className="py-2.5 px-2 text-right">
-                        <div className="flex flex-col items-end">
-                          <PnlBadge value={p.unrealized_pnl} />
-                          <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
-                            {fmt.pct(p.unrealized_pnl_pct)}
-                          </span>
-                        </div>
-                      </td>
-                      {!isNativePlatform() && (
-                        <td className="py-2.5 px-2 text-center">
-                          <BrokerBadge broker={p.broker} />
-                        </td>
-                      )}
-                      <td className="py-2.5 pr-3 pl-1.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
-                          <span
-                            className={cn(
-                              'font-mono font-bold text-right text-[13px] transition-colors',
-                              isRowHovered ? 'text-slate-950 dark:text-white font-extrabold' : 'text-slate-800 dark:text-slate-200'
-                            )}
-                          >
-                            {p.weight.toFixed(1)}%
-                          </span>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  )
-                }))}
-                </AnimatePresence>
-              </tbody>
-            </table>
-          </div>
-        </div>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )
+        })()}
       </Card>
 
       {/* ── Comparativa de Rendimiento vs Benchmarks (Analítica) ─────────────── */}
@@ -1832,29 +1845,27 @@ export function OverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                <AnimatePresence initial={false}>
-                  {txLoading && transactions.length === 0 ? (
-                    <TableSkeletonRows rows={5} cols={6} />
-                  ) : !filteredTransactions.length ? (
-                    <tr>
-                      <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
-                        No se han encontrado movimientos con los filtros seleccionados.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredTransactions.slice(0, 10).map((t, i) => {
-                      const isBuy = t.type === 'buy'
-                      const isDiv = t.type === 'dividend'
-                      const isSell = t.type === 'sell'
-                      const pos = positions.find((p) => p.isin === t.isin)
+                {txLoading && transactions.length === 0 ? (
+                  <TableSkeletonRows rows={5} cols={6} />
+                ) : !filteredTransactions.length ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+                      No se han encontrado movimientos con los filtros seleccionados.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTransactions.slice(0, 10).map((t) => {
+                    const isBuy = t.type === 'buy'
+                    const isDiv = t.type === 'dividend'
+                    const isSell = t.type === 'sell'
+                    const pos = positions.find((p) => p.isin === t.isin)
 
-                      return (
-                        <motion.tr
-                          key={t.id}
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -3 }}
-                          transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.18) }}
+                    return (
+                      <motion.tr
+                        key={t.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.15 }}
                           onClick={() => {
                             if (pos) setSelectedPosition(pos)
                           }}
@@ -1917,7 +1928,6 @@ export function OverviewPage() {
                       )
                     })
                   )}
-                </AnimatePresence>
               </tbody>
             </table>
           </div>

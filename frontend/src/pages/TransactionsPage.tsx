@@ -322,29 +322,27 @@ export function TransactionsPage() {
               </tr>
             </thead>
             <tbody data-private>
-              <AnimatePresence initial={false}>
-                {isLoading ? (
-                  <TableSkeletonRows rows={8} cols={8} />
-                ) : filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-20 text-center text-slate-500">
-                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No hay operaciones con este criterio</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Prueba a seleccionar otra pestaña o limpiar la búsqueda.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedTransactions.map((t, i) => {
-                    const conf = TYPE_CONFIG[t.type] ?? TYPE_CONFIG.buy
-                    const assetInfo = positionMap.get(t.isin)
-                    const displayName = (t as any).name || assetInfo?.name || t.isin
+              {isLoading ? (
+                <TableSkeletonRows rows={8} cols={8} />
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-20 text-center text-slate-500">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No hay operaciones con este criterio</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Prueba a seleccionar otra pestaña o limpiar la búsqueda.</p>
+                  </td>
+                </tr>
+              ) : (
+                paginatedTransactions.map((t) => {
+                  const conf = TYPE_CONFIG[t.type] ?? TYPE_CONFIG.buy
+                  const assetInfo = positionMap.get(t.isin)
+                  const displayName = (t as any).name || assetInfo?.name || t.isin
 
-                    return (
-                      <motion.tr
-                        key={t.id}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.15, delay: Math.min(i * 0.012, 0.15) }}
+                  return (
+                    <motion.tr
+                      key={t.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.15 }}
                         onClick={() => {
                           if (assetInfo) setSelectedPosition(assetInfo)
                         }}
@@ -424,7 +422,6 @@ export function TransactionsPage() {
                   )
                 })
               )}
-              </AnimatePresence>
             </tbody>
           </table>
         </div>

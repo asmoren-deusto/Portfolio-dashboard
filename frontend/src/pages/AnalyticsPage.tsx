@@ -695,20 +695,18 @@ export function AnalyticsPage() {
               </tr>
             </thead>
             <tbody>
-              <AnimatePresence initial={false}>
-                {positionsLoading && positions.length === 0 ? (
-                  <TableSkeletonRows rows={6} cols={7} />
-                ) : (
-                  positions
-                    .slice()
-                    .sort((a, b) => b.unrealized_pnl_pct - a.unrealized_pnl_pct)
-                    .map((p, i) => (
-                      <motion.tr data-private
-                        key={p.isin}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.2) }}
+              {positionsLoading && positions.length === 0 ? (
+                <TableSkeletonRows rows={6} cols={7} />
+              ) : (
+                positions
+                  .slice()
+                  .sort((a, b) => b.unrealized_pnl_pct - a.unrealized_pnl_pct)
+                  .map((p) => (
+                    <motion.tr data-private
+                      key={p.isin}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.15 }}
                         onClick={() => setSelectedPosition(p)}
                         className="group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] cursor-pointer last:border-0"
                       >
@@ -758,7 +756,6 @@ export function AnalyticsPage() {
                     </td>
                   </motion.tr>
                 )))}
-              </AnimatePresence>
             </tbody>
           </table>
         </div>
