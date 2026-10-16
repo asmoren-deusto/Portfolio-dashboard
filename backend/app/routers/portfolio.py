@@ -546,16 +546,8 @@ async def get_performance(
     try:
         summary = await get_portfolio_summary(user_id=user_id, broker=broker, db=db)
         if value_series and summary:
-            today_str = datetime.now().strftime("%Y-%m-%d")
-            if value_series[-1]["date"] == today_str:
-                value_series[-1]["value"] = summary.total_value
-                value_series[-1]["invested"] = summary.total_invested
-            elif value_series[-1]["date"] < today_str:
-                value_series.append({
-                    "date": today_str,
-                    "value": summary.total_value,
-                    "invested": summary.total_invested,
-                })
+            value_series[-1]["value"] = summary.total_value
+            value_series[-1]["invested"] = summary.total_invested
     except Exception as e:
         logger.warning(f"Error syncing latest performance point with summary: {e}")
 

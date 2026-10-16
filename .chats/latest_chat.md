@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 19:34:50
+- **Fecha de exportación:** 2026-10-16 19:48:42
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 11
+- **Total de interacciones registradas:** 13
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -162,5 +162,24 @@ Se ha corregido la animación en la gráfica de **Evolución Patrimonial** ([Per
 ### 👤 Usuario (2026-10-16 17:33:17)
 
 revierte los cambios a la grafica de rendimiento, dejala como en la version v3.0.106
+
+---
+
+### 🤖 Asistente (2026-10-16 17:34:53)
+
+Se han revertido por completo los cambios de la gráfica de Rendimiento, restaurando el archivo [ReturnsChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx) exactamente al estado de la versión **`v3.0.106`** (commit [`4845823`](https://github.com/asmoren-deusto/Portfolio-dashboard/commit/4845823)).
+
+- Se mantiene el diseño original en Recharts con sus barras, etiquetas y comportamiento previo de dicha versión.
+- El build de Vite y las comprobaciones de TypeScript han finalizado con éxito.
+
+---
+
+*Versión actualizada automáticamente a **`v3.0.111`** y sincronizada en Git.*
+
+---
+
+### 👤 Usuario (2026-10-16 17:33:48)
+
+no me cuadran los ultimos valores, haz una revision completa
 
 ---

@@ -376,14 +376,25 @@ export function OverviewPage() {
   }, [positions, allocMode])
 
   // Latest reporting NAV date across active positions (ignoring weekend dates)
+  // Uses the date where majority (or mode) of positions have reported
   const latestNavDate = useMemo(() => {
-    return positions.reduce((max, p) => {
+    if (!positions.length) return ''
+    const counts: Record<string, number> = {}
+    for (const p of positions) {
       const d = p.price_date || p.last_updated
-      if (!d) return max
+      if (!d) continue
       const dayOfWeek = new Date(d + 'T12:00:00Z').getUTCDay()
-      if (dayOfWeek === 0 || dayOfWeek === 6) return max
-      return d > max ? d : max
-    }, '')
+      if (dayOfWeek === 0 || dayOfWeek === 6) continue
+      counts[d] = (counts[d] || 0) + 1
+    }
+    const dates = Object.keys(counts).sort()
+    if (!dates.length) return ''
+    const latest = dates[dates.length - 1]
+    if (counts[latest] >= Math.ceil(positions.length / 2)) {
+      return latest
+    }
+    const sortedByCount = Object.entries(counts).sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]))
+    return sortedByCount[0][0]
   }, [positions])
 
   const updatedPositionsCount = useMemo(() => {
@@ -399,14 +410,17 @@ export function OverviewPage() {
     let hasPositionChanges = false
 
     // 1. Compute Day Metric (1D)
-    // Check if positions have active, non-zero daily changes reported today
+    // Only count position daily changes if the position's price date matches latestNavDate
     let positionsDailyChange = 0
 
     if (positions.length > 0) {
       for (const p of positions) {
-        if (typeof p.daily_change === 'number' && !isNaN(p.daily_change) && p.daily_change !== 0) {
-          hasPositionChanges = true
-          positionsDailyChange += p.daily_change * (p.shares || 1)
+        const pDate = p.price_date || p.last_updated
+        if (pDate && latestNavDate && pDate === latestNavDate) {
+          if (typeof p.daily_change === 'number' && !isNaN(p.daily_change) && p.daily_change !== 0) {
+            hasPositionChanges = true
+            positionsDailyChange += p.daily_change * (p.shares || 1)
+          }
         }
       }
     }
@@ -500,10 +514,6 @@ export function OverviewPage() {
 
     if (uniquePoints.length < 2) return []
 
-    // In mutual funds, NAVs publish with a lag (today the NAVs of yesterday are received).
-    // The bar 'Hoy' represents the performance being realized today as those NAVs are published.
-    // Therefore, truncate curve points at latestNavDate so the last session in the chart
-    // corresponds to this reporting session ('Hoy'), and previous sessions go backwards.
     const navPoints = latestNavDate
       ? uniquePoints.filter((p) => p.date <= latestNavDate)
       : uniquePoints
@@ -525,24 +535,13 @@ export function OverviewPage() {
       const curInvested = cur.invested ?? cur.value
       const netInflow = curInvested - prevInvested
 
-      let dayReturnAmount = (cur.value - netInflow) - prev.value
+      const dayReturnAmount = Math.round(((cur.value - netInflow) - prev.value) * 100) / 100
       let dayReturnPct = 0
       if (prev.value > 0) {
-        dayReturnPct = (dayReturnAmount / prev.value) * 100
+        dayReturnPct = Number((((cur.value - netInflow) - prev.value) / prev.value * 100).toFixed(2))
       }
 
       const isLatest = i === slice.length - 1
-      if (isLatest && shortTermMetrics?.hasPositionChanges) {
-        if (shortTermMetrics?.dayPct !== undefined) {
-          dayReturnPct = shortTermMetrics.dayPct
-        }
-        if (shortTermMetrics?.dayAmount !== undefined) {
-          dayReturnAmount = shortTermMetrics.dayAmount
-        }
-      }
-
-      dayReturnPct = Math.round(dayReturnPct * 100) / 100
-      dayReturnAmount = Math.round(dayReturnAmount * 100) / 100
 
       const [y, m, d] = cur.date.split('-').map(Number)
       const dateObj = new Date(y, m - 1, d)
@@ -569,7 +568,7 @@ export function OverviewPage() {
     }
 
     return result
-  }, [performance, shortTermMetrics?.dayPct, shortTermMetrics?.dayAmount, latestNavDate])
+  }, [performance, latestNavDate])
 
   const secondaryStats = useMemo(() => {
     if (returnsPeriodMode === 'global') {
@@ -586,8 +585,21 @@ export function OverviewPage() {
         box2Positive: (ytd ?? 0) >= 0,
       }
     } else {
-      const weekPct = shortTermMetrics?.weekPct ?? analytics?.return_1w
-      const weekAmt = shortTermMetrics?.weekAmount
+      // For weekly view, compute 7D and 7D € directly from the 7 sessions shown in weeklyReturnsData
+      let weekAmt = shortTermMetrics?.weekAmount
+      let weekPct = shortTermMetrics?.weekPct ?? analytics?.return_1w
+
+      if (weeklyReturnsData && weeklyReturnsData.length > 0) {
+        let sumAmt = 0
+        let compFactor = 1.0
+        for (const bar of weeklyReturnsData) {
+          sumAmt += bar.amount ?? 0
+          compFactor *= (1.0 + (bar.value || 0) / 100.0)
+        }
+        weekAmt = Math.round(sumAmt * 100) / 100
+        weekPct = Number(((compFactor - 1.0) * 100).toFixed(2))
+      }
+
       return {
         box1Label: '7D:',
         box1Val: weekPct !== undefined ? fmt.pct(weekPct) : '—',
@@ -599,7 +611,7 @@ export function OverviewPage() {
         box2Positive: (weekAmt ?? 0) >= 0,
       }
     }
-  }, [returnsPeriodMode, shortTermMetrics, analytics])
+  }, [returnsPeriodMode, weeklyReturnsData, shortTermMetrics, analytics])
 
   return (
     <div className="flex flex-col gap-4 pb-8">

@@ -268,7 +268,7 @@ export function ReturnsChart({
                 if (val == null || isNaN(val)) return ''
                 const num = Number(val)
                 if (Math.abs(num) < 0.0001) return '+0.00%'
-                return `${num >= 0 ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
+                return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`
               }}
               style={{
                 fill: '#94a3b8',
@@ -285,7 +285,7 @@ export function ReturnsChart({
               formatter={(val: any) => {
                 if (val == null || isNaN(val)) return ''
                 const num = Number(val)
-                return `-${Math.abs(num) < 1 ? Math.abs(num).toFixed(2) : Math.abs(num).toFixed(1)}%`
+                return `-${Math.abs(num).toFixed(2)}%`
               }}
               style={{
                 fill: '#94a3b8',
