@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 21:53:16
+- **Fecha de exportación:** 2026-10-16 21:55:22
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 40
+- **Total de interacciones registradas:** 42
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -616,5 +616,36 @@ El diseño visual, paleta de colores y proporciones se mantienen **exactamente i
 ### 👤 Usuario (2026-10-16 19:37:19)
 
 los tres graficos no van a la vez ni de coña, retrasa mucho el 1, y adelanta bastante el 3
+
+---
+
+### 🤖 Asistente (2026-10-16 19:53:19)
+
+He sincronizado y calibrado los tiempos de animación de los tres gráficos principales según lo solicitado:
+
+### Cambios realizados:
+
+1. **Adelantado el Gráfico 3 (Rendimiento):**
+   - **Eliminación de retardos envolventes:** Se removió el `<AnimatePresence mode="wait">` y el `<motion.div>` con retardo de opacidad/escala que envolvían a [ReturnsChart](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx) en [OverviewPage.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx#L1255-L1285).
+   - Ahora el gráfico de barras se monta en el **frame 0 inmediato**, comenzando a desplegar sus barras desde $t = 0\text{ ms}$ sin ningún rezago ni espera previa.
+
+2. **Retrasado el Gráfico 1 (Evolución Patrimonial):**
+   - **Enmascaramiento inicial con [prepareChartForAnimation](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts#L6-L23):** Se oculta mediante `clipPath` instantáneo el canvas de [PerformanceChart](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx#L868-L878) desde el momento en que se procesan los datos, evitando que se vea la curva terminada antes de tiempo.
+   - **Retardo visible calibrado:** Espera **240 ms** antes de iniciar su barrido (`sweep`), comenzando claramente después de que los gráficos 2 y 3 hayan empezado a moverse.
+   - **Duración de barrido y estela:** Se calibró a **440 ms** (tanto el `clipPath` como la línea luminosa esmeralda).
+
+3. **Sincronización de finalización simultánea:**
+   - **Gráfico 3 (Rendimiento):** Inicio a $0\text{ ms}$, duración de crecimiento $680\text{ ms}$ $\rightarrow$ Finaliza a **$680\text{ ms}$**.
+   - **Gráfico 2 (Distribución):** Inicio a $0\text{ ms}$, duración de expansión $680\text{ ms}$ $\rightarrow$ Finaliza a **$680\text{ ms}$**.
+   - **Gráfico 1 (Evolución):** Retardo de $240\text{ ms}$ + barrido de $440\text{ ms}$ $\rightarrow$ Finaliza a **$680\text{ ms}$**.
+   - Los 3 gráficos alcanzan el 100% de su animación exactamente en el mismo instante.
+
+Los cambios han sido verificados visualmente en el navegador y liberados bajo la versión **`v3.0.121`**.
+
+---
+
+### 👤 Usuario (2026-10-16 19:48:33)
+
+quiero el 1 muchisimo mas lento, el 3 más rapido
 
 ---

@@ -152,7 +152,7 @@ export function AllocationChart({
               strokeWidth={0}
               isAnimationActive={true}
               animationBegin={0}
-              animationDuration={680}
+              animationDuration={550}
               animationEasing="ease-out"
               onMouseEnter={(_, index) => {
                 setHoveredIndex(index)

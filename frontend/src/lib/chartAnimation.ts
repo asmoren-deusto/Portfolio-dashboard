@@ -21,7 +21,7 @@ export function prepareChartForAnimation(container: HTMLElement | null) {
   }
 }
 
-export function triggerChartAnimation(container: HTMLElement | null, duration = 440) {
+export function triggerChartAnimation(container: HTMLElement | null, duration = 1100) {
   if (!container) return
 
   // Respect user preference for reduced motion

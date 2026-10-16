@@ -871,8 +871,8 @@ export function PerformanceChart({
       setTimeout(() => {
         setIsSweepAnimating(true)
         setSweepKey(prev => prev + 1)
-        triggerChartAnimation(containerRef.current, 440)
-      }, 240)
+        triggerChartAnimation(containerRef.current, 1100)
+      }, 80)
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
@@ -1006,9 +1006,9 @@ export function PerformanceChart({
               opacity: [0.9, 0.9, 0],
             }}
             transition={{
-              duration: 0.44,
+              duration: 1.1,
               ease: [0.25, 1, 0.5, 1],
-              opacity: { duration: 0.44, times: [0, 0.8, 1], ease: 'easeOut' },
+              opacity: { duration: 1.1, times: [0, 0.85, 1], ease: 'easeOut' },
             }}
             onAnimationComplete={() => setIsSweepAnimating(false)}
             className="absolute inset-y-0 w-0.5 pointer-events-none z-20 bg-gradient-to-b from-transparent via-emerald-500/50 dark:via-emerald-400/60 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.45)]"

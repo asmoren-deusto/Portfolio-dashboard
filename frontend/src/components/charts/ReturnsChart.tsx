@@ -254,7 +254,7 @@ export function ReturnsChart({
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
             isAnimationActive={true}
             animationBegin={0}
-            animationDuration={680}
+            animationDuration={380}
             animationEasing="ease-out"
           >
             <LabelList
