@@ -20,7 +20,7 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { Card } from '@/components/ui/Card'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { TableSkeletonRows, TableTopLoading, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
+import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
 import { fmt, cn } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { usePositions, usePortfolioSummary } from '@/api/queries'
@@ -342,7 +342,6 @@ export function PositionsPage() {
       {/* Main Content: Table or Grid */}
       {viewMode === 'table' ? (
         <Card className="overflow-hidden relative">
-          <TableTopLoading isFetching={isFetching && !isLoading} />
           <div className="overflow-x-auto">
             <table className="w-full text-[13.8px]">
               <thead>

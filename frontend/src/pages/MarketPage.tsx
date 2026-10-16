@@ -29,7 +29,7 @@ import { StockTableRow } from '@/components/market/StockTableRow'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { LoadingDot } from '@/components/ui/LoadingDot'
-import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
+import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { SimulatedPortfolioCard } from '@/components/market/SimulatedPortfolioCard'
 import { fmt } from '@/lib/utils'
 
@@ -483,7 +483,6 @@ export const MarketPage: React.FC = () => {
             style={{ height: `${heatmapHeight}px` }}
             className="xl:col-span-7 rounded-2xl bg-white/95 dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-2xl overflow-hidden flex flex-col relative"
           >
-            <TableTopLoading isFetching={isFetching} />
             <div className="px-4 py-3 border-b border-slate-200/80 dark:border-white/[0.06] flex items-center justify-between bg-slate-50/70 dark:bg-white/[0.02] shrink-0">
               <div className="flex items-center gap-2">
                 <div className="p-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">

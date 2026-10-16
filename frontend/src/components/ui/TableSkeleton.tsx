@@ -61,23 +61,12 @@ export function TableSkeletonRows({
 }
 
 interface TableTopLoadingProps {
-  isFetching: boolean
+  isFetching?: boolean
   color?: string
 }
 
-export function TableTopLoading({ isFetching, color = 'from-blue-500 via-indigo-400 to-blue-500' }: TableTopLoadingProps) {
-  if (!isFetching) return null
-
-  return (
-    <div className="absolute top-0 left-0 right-0 h-[2px] overflow-hidden pointer-events-none z-20">
-      <div
-        className={cn(
-          'w-full h-full bg-gradient-to-r animate-table-scan',
-          color
-        )}
-      />
-    </div>
-  )
+export function TableTopLoading(_props?: TableTopLoadingProps) {
+  return null
 }
 
 interface CardSkeletonGridProps {

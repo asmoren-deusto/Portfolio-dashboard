@@ -28,7 +28,7 @@ import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
+import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
 import { fmt, cn } from '@/lib/utils'
 import { useAnalytics, usePositions, useBenchmarkComparison } from '@/api/queries'
@@ -659,7 +659,6 @@ export function AnalyticsPage() {
 
       {/* Position Breakdown Table */}
       <Card delay={0.35} className="overflow-hidden relative">
-        <TableTopLoading isFetching={positionsFetching && !positionsLoading} />
         <CardHeader>
           <div className="flex items-center gap-2">
             <Target className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 17:18:57
+- **Fecha de exportación:** 2026-10-16 17:25:48
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 104
+- **Total de interacciones registradas:** 106
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1542,5 +1542,33 @@ Desplegado y sincronizado en Git bajo la versión **`v3.0.104`**.
 ### 👤 Usuario (2026-10-16 14:49:05)
 
 revisa tambien los valores para los ultimos dias y la semana
+
+---
+
+### 🤖 Asistente (2026-10-16 15:18:59)
+
+Se ha realizado una revisión integral de los cálculos para los últimos días (`1D`) y la semana (`7D / 1S`) tanto en el motor de cálculo del backend como en el frontend:
+
+### 1. Corrección en Backend ([finance_engine.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py))
+- **Causa:** La función `calculate_period_return` calculaba la fecha de corte restando los días respecto a `pd.Timestamp.now()` (el reloj del servidor) en lugar de la fecha del último valor liquidativo registrado en la serie (`value_series[-1]["date"]`). Si la última sesión cerrada era de hace unos días (fines de semana, festivos o desfase de liquidación de fondos), el punto base coincidía con el último punto, devolviendo un retorno erróneo de `0.00%`.
+- **Solución:** Ahora la ventana de corte de N días se calcula siempre de forma retroactiva respecto a la fecha del último punto disponible en la serie histórica, garantizando que `1D`, `7D (1W)` y `30D (1M)` reflejen la rentabilidad real de los periodos.
+
+### 2. Sincronización en Frontend ([OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx))
+- **Métrica Diaria (`1D / Hoy`):**
+  - Anteriormente, si las posiciones individuales no tenían un `daily_change` intradía recibido en el momento, `totalDailyChange` se evaluaba a `0`, dejando el rendimiento de hoy fijado en `0.00%` y bloqueando el fallback hacia la curva de rentabilidad.
+  - Ahora comprueba si existen cambios de precio en vivo reportados hoy; si no los hay, calcula limpiamente el retorno diario real a partir de las dos últimas sesiones de la curva `performance`, alineándose perfectamente con `analytics.return_1d`.
+- **Métrica Semanal (`7D / 1S`):**
+  - Se corrigió el cálculo del flujo neto de capital (`inflow`) en la ventana de 7 sesiones para que reste correctamente cualquier aportación o retirada en ese tramo: `(last.value - weekInflow) - weekPoint.value`.
+  - Ahora las píldoras de métricas de la tarjeta de Rendimiento (`7D: +0.78%`, `7D €: +979,96 €`), el badge superior `7D: +0.78%` y la barra de `1S (+0.78%)` están al 100% sincronizados.
+- **Gráfica de Rendimiento Semanal:**
+  - El último día de la serie de 7 días ya no queda sobrescrito por `+0.00%`, sino que muestra el rendimiento exacto de esa sesión (`+0.28%`).
+
+Desplegado y sincronizado en el repositorio bajo la versión **`v3.0.105`**.
+
+---
+
+### 👤 Usuario (2026-10-16 14:54:07)
+
+elimina la barra de cargar azul superior en posiciones de cartera y otras tarjetas
 
 ---

@@ -42,7 +42,7 @@ import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
+import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
@@ -1395,7 +1395,6 @@ export function OverviewPage() {
 
       {/* Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
       <Card className="w-full relative overflow-hidden" delay={0.3} loading={isRefreshingPrices}>
-        <TableTopLoading isFetching={positionsFetching && !positionsLoading} />
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -1822,7 +1821,6 @@ export function OverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         {/* Columna Izquierda: Tabla de Últimos Movimientos */}
         <Card className="w-full flex flex-col h-full relative overflow-hidden" delay={0.35}>
-          <TableTopLoading isFetching={txFetching && !txLoading} />
           <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">

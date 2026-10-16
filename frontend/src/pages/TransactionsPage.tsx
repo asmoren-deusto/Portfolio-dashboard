@@ -24,7 +24,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { BrokerBadge } from '@/components/ui/Badge'
-import { TableSkeletonRows, TableTopLoading } from '@/components/ui/TableSkeleton'
+import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { fmt, cn } from '@/lib/utils'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { apiUrl } from '@/api/config'
@@ -290,7 +290,6 @@ export function TransactionsPage() {
 
       {/* Transactions Table Card */}
       <Card className="overflow-hidden relative" delay={0.15}>
-        <TableTopLoading isFetching={isFetching && !isLoading} />
         <div className="overflow-x-auto">
           <table className="w-full text-[13.8px]">
             <thead>
