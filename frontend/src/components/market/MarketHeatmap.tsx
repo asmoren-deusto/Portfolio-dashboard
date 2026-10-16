@@ -618,7 +618,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               left: `${Math.min(hoveredStock.x + 14, (dimensions.width || 800) - 260)}px`,
               top: `${Math.min(hoveredStock.y + 14, (dimensions.height || 500) - 170)}px`,
             }}
-            className="pointer-events-none z-50 w-64 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/95 border border-slate-200/90 dark:border-white/15 p-4 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
+            className="pointer-events-none z-50 w-64 rounded-2xl bg-white/75 dark:bg-[#181818]/75 border border-slate-200/60 dark:border-white/15 p-4 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
           >
             {/* Header with Logo */}
             <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-200/80 dark:border-white/[0.08]">

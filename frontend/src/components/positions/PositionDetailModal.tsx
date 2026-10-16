@@ -145,9 +145,9 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
     if (active && payload && payload.length) {
       const pData = payload[0].payload
       return (
-        <div className="rounded-xl bg-slate-900/95 backdrop-blur-md border border-white/10 px-3 py-2 shadow-2xl text-white pointer-events-none">
-          <div className="text-[10px] text-slate-400 font-medium">{pData.date || pData.time}</div>
-          <div className="text-sm font-bold font-mono text-white mt-0.5">{fmt.price(pData.price, cur)}</div>
+        <div className="rounded-xl border border-slate-200/60 dark:border-white/10 bg-white/65 dark:bg-[#181818]/65 backdrop-blur-lg px-3 py-2 shadow-2xl pointer-events-none">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{pData.date || pData.time}</div>
+          <div className="text-sm font-bold font-mono text-slate-900 dark:text-white mt-0.5">{fmt.price(pData.price, cur)}</div>
         </div>
       )
     }

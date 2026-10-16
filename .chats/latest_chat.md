@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 14:06:46
+- **Fecha de exportación:** 2026-10-16 14:09:11
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 57
+- **Total de interacciones registradas:** 59
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -840,5 +840,31 @@ Publicado y sincronizado en la versión **v3.0.82**.
 ### 👤 Usuario (2026-10-16 11:28:47)
 
 la animacion de evolucion patrimonial no funciona
+
+---
+
+### 🤖 Asistente (2026-10-16 12:06:48)
+
+Se ha corregido el fallo en la animación de la gráfica de **Evolución Patrimonial**:
+
+### Causa del problema
+En la librería *Lightweight Charts*, la primera celda `td:first-child` de la tabla interna era una celda de padding vacía de 0 píxeles (debido a que la escala de precios está a la derecha). Por ello, el selector anterior aplicaba la animación de recorte (`clipPath: inset(0 100% 0 0)`) sobre un elemento invisible de ancho cero, dejando el canvas real estático.
+
+### Solución aplicada
+1. **[chartAnimation.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts)**:
+   - Se actualizó el selector para localizar dinámicamente el `<td>` o contenedor directo que envuelve al elemento `<canvas>` real de la gráfica (`canvas?.closest('td') || canvas?.parentElement`).
+   - Se añadió cancelación de animaciones previas activas para garantizar que cada cambio de periodo o entidad reinicie limpiamente el barrido.
+
+2. **[PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx)**:
+   - Se enlazó la llamada a `triggerChartAnimation` mediante `requestAnimationFrame` tanto en el efecto de cambio de datos/filtros como en la actualización de series.
+   - Se añadió `refreshAnimKey` a las dependencias para que también se reproduzca la animación sincronizada de izquierda a derecha al pulsar el botón de recarga general.
+
+Comprobado en navegador y sincronizado en la versión **v3.0.83**.
+
+---
+
+### 👤 Usuario (2026-10-16 11:29:16)
+
+el bocadillo de rendimiento pelo más de transparencia, me gusta como queda igual se puede usar en más sitios
 
 ---

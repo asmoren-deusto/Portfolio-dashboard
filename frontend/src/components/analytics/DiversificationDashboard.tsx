@@ -535,13 +535,17 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         })}
                       </Pie>
                       <RechartsTooltip
-                        formatter={(val: any) => [fmt.currency(Number(val) || 0), 'Valor']}
-                        contentStyle={{
-                          backgroundColor: isDark ? '#1f2937' : '#ffffff',
-                          borderRadius: '8px',
-                          border: 'none',
-                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                          fontSize: '12px',
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null
+                          const entry = payload[0]
+                          return (
+                            <div className="rounded-xl border border-slate-200/60 dark:border-white/10 bg-white/65 dark:bg-[#181818]/65 backdrop-blur-lg px-3 py-2 text-xs shadow-2xl pointer-events-none">
+                              <p className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5">{entry.name}</p>
+                              <p className="font-mono font-bold text-slate-900 dark:text-white">
+                                {fmt.currency(Number(entry.value) || 0)}
+                              </p>
+                            </div>
+                          )
                         }}
                       />
                     </PieChart>
