@@ -396,18 +396,25 @@ export function MonthlyReturnsHeatmap({
         )}
         style={tableMaxHeight ? { maxHeight: tableMaxHeight } : undefined}
       >
-        <table className="w-full text-center border-collapse min-w-[640px] sm:min-w-[680px]">
+        <table className="w-full text-center border-collapse table-fixed min-w-[680px] sm:min-w-[720px]">
+          <colgroup>
+            <col className="w-14 sm:w-16" />
+            {MONTH_NAMES.map((m) => (
+              <col key={m} />
+            ))}
+            <col className="w-24 sm:w-28" />
+          </colgroup>
           <thead className={tableMaxHeight ? "sticky top-0 bg-white/95 dark:bg-[#1e1e1e]/95 backdrop-blur-xs z-10" : ""}>
             <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <th className="py-2 px-2.5 text-left font-bold text-slate-800 dark:text-slate-200 w-16">
+              <th className="py-2 px-2 text-left font-bold text-slate-800 dark:text-slate-200">
                 Año
               </th>
               {MONTH_NAMES.map((m) => (
-                <th key={m} className="py-2 px-1 text-center font-semibold">
+                <th key={m} className="py-2 px-0.5 text-center font-semibold">
                   {m}
                 </th>
               ))}
-              <th className="py-2 px-2.5 text-right font-bold text-slate-800 dark:text-slate-200 w-24">
+              <th className="py-2 px-2 text-right font-bold text-slate-800 dark:text-slate-200">
                 Total Año
               </th>
             </tr>
@@ -415,7 +422,7 @@ export function MonthlyReturnsHeatmap({
           <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
             {rows.map(row => (
               <tr key={row.year} className="group hover:bg-slate-50/50 dark:hover:bg-white/[0.015] transition-colors">
-                <td className="py-2 px-2.5 text-left font-mono font-bold text-xs sm:text-[13px] text-slate-900 dark:text-slate-100">
+                <td className="py-2 px-2 text-left font-mono font-bold text-xs sm:text-[13px] text-slate-900 dark:text-slate-100 whitespace-nowrap">
                   {row.year}
                 </td>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => {
@@ -426,14 +433,14 @@ export function MonthlyReturnsHeatmap({
                     <td key={m} className="p-0.5 sm:p-1">
                       <div
                         className={cn(
-                          "relative h-8.5 sm:h-9.5 rounded-lg flex items-center justify-center font-mono text-xs sm:text-[12.5px] transition-all cursor-default select-none",
+                          "w-full relative h-8.5 sm:h-9.5 rounded-lg flex items-center justify-center font-mono text-xs sm:text-[12.5px] transition-all cursor-default select-none",
                           getCellClasses(val),
                           val !== undefined && "hover:ring-2 hover:ring-blue-500/60 hover:z-10 hover:scale-105"
                         )}
                         title={val !== undefined ? `${FULL_MONTH_NAMES[m - 1]} ${row.year}: ${val >= 0 ? '+' : ''}${val.toFixed(2)}%` : undefined}
                       >
                         {val !== undefined ? (
-                          <span className="tracking-tight">
+                          <span className="tracking-tight whitespace-nowrap">
                             {val >= 0 ? '+' : ''}{val.toFixed(1)}%
                           </span>
                         ) : (
@@ -443,10 +450,10 @@ export function MonthlyReturnsHeatmap({
                     </td>
                   )
                 })}
-                <td className="py-2 px-2.5 text-right">
+                <td className="py-2 px-2 text-right">
                   <span
                     className={cn(
-                      "inline-flex items-center justify-end px-2.5 py-1 rounded-lg font-mono text-xs sm:text-[12.5px] font-bold border transition-colors tracking-tight",
+                      "inline-flex items-center justify-end px-2 sm:px-2.5 py-1 rounded-lg font-mono text-xs sm:text-[12.5px] font-bold border transition-colors tracking-tight whitespace-nowrap",
                       row.annualReturnPct >= 0
                         ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-700 dark:text-emerald-400"
                         : "bg-rose-500/10 border-rose-500/25 text-rose-700 dark:text-rose-400"

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 15:51:37
+- **Fecha de exportación:** 2026-10-16 15:54:02
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 83
+- **Total de interacciones registradas:** 85
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1231,5 +1231,42 @@ He refinado la transición entre páginas para eliminar los problemas visuales q
 ### 👤 Usuario (2026-10-16 13:15:56)
 
 la tabla de posiciones pega saltos al cambiar de entidad, revisa las animaciones
+
+---
+
+### 🤖 Asistente (2026-10-16 13:51:40)
+
+He revisado a fondo las animaciones de la tabla de posiciones y el comportamiento al cambiar de entidad (broker).
+
+### 🔍 Diagnóstico de los problemas que provocaban los saltos:
+1. **Conflicto de `AnimatePresence` dentro de `<tbody>`**:
+   - Al cambiar de entidad (p. ej. de Consolidado con 11 posiciones a BBVA con 3), Framer Motion mantenía vivas las filas anteriores en el DOM durante su animación de salida (`exit`), mientras ya montaba las nuevas filas.
+   - Durante 200 ms, la tabla duplicaba su número de filas (11 salientes + 3 entrantes = 14 filas), expandiendo bruscamente la altura del card hacia abajo para colapsar de golpe medio segundo después.
+2. **Deformación por `transform: translateY` en filas `<tr>`**:
+   - Los elementos `<tr>` en tablas HTML estándar no responden de forma predecible al `transform: translateY(...)`, provocando descuadre de celdas y parpadeos durante el cambio.
+3. **Columna derecha vacía y huérfana en entidades con ≤ 5 posiciones (la captura)**:
+   - En pantalla de escritorio (`xl`), la tabla siempre dividía en 2 columnas fijas. Si la entidad tenía ≤ 5 activos (como BBVA o Kutxabank con 3), la columna 2 renderizaba toda la cabecera `#  ACTIVO / FONDO  NAV...` con el cuerpo totalmente vacío.
+
+---
+
+### ✅ Soluciones aplicadas:
+1. **Transición limpia y sin acumulación de filas (`pure opacity fade`)**:
+   - Se ha retirado `AnimatePresence` de los `<tbody>` de tablas (en [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx), [PositionsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/PositionsPage.tsx), [TransactionsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/TransactionsPage.tsx) y [AnalyticsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/AnalyticsPage.tsx)).
+   - Las filas anteriores se reemplazan de inmediato y las nuevas entran con un suave fade de opacidad (`initial: { opacity: 0 }`, `animate: { opacity: 1 }` en 150 ms) sin desplazamiento vertical ni duplicidad temporal de filas.
+2. **Distribución inteligente y adaptativa en Visión General**:
+   - **Si la entidad tiene ≤ 5 posiciones** (como BBVA o Kutxabank): La tabla se expande automáticamente al 100% del ancho del card, distribuyendo holgadamente los datos y eliminando por completo la columna vacía de la derecha.
+   - **Si la entidad tiene > 5 posiciones**: Se activa la vista en dos columnas equilibradas (`splitIndex = Math.ceil(n / 2)`), mostrando de forma balanceada ambos lados.
+
+---
+
+### 🚀 Publicación y Sincronización:
+- **Versión**: Actualizada a **`v3.0.95`**.
+- **Git**: Cambios sincronizados y subidos a la rama principal (`main`).
+
+---
+
+### 👤 Usuario (2026-10-16 13:19:07)
+
+el monthly returns heatmap que cada mes tenga el mismo ancho
 
 ---
