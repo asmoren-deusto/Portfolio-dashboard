@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer, Cell, LabelList
@@ -127,7 +127,6 @@ export function ReturnsChart({
 }: ReturnsChartProps) {
   const refreshAnimKey = useAppStore(s => s.refreshAnimKey)
   const selectedBroker = useAppStore(s => s.selectedBroker)
-  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null)
 
   if (mode === 'global' && !analytics) {
     return <ReturnsChartSkeleton compact={compact} height={height} />
@@ -141,14 +140,13 @@ export function ReturnsChart({
     )
   }
 
-  let data: ReturnBarItem[] = []
-
-  if (mode === 'weekly' && weeklyData && weeklyData.length > 0) {
-    data = weeklyData.map(d => ({
-      ...d,
-      subtitle: d.subtitle || 'Rendimiento de la sesión',
-    }))
-  } else {
+  const data = useMemo<ReturnBarItem[]>(() => {
+    if (mode === 'weekly' && weeklyData && weeklyData.length > 0) {
+      return weeklyData.map(d => ({
+        ...d,
+        subtitle: d.subtitle || 'Rendimiento de la sesión',
+      }))
+    }
     const calcAmt = (pct: number) =>
       totalPortfolioValue ? Math.round(totalPortfolioValue * (pct / 100) * 100) / 100 : undefined
 
@@ -163,7 +161,7 @@ export function ReturnsChart({
     const val6m = analytics?.return_6m ?? 0
     const val1y = analytics?.return_1y ?? analytics?.return_ytd ?? 0
 
-    data = compact
+    return compact
       ? [
         { name: '1D', fullName: '1 Día', value: val1d, amount: amt1d, subtitle: 'Rendimiento diario ponderado' },
         { name: '1S', fullName: '1 Semana (7D)', value: val1w, amount: amt1w, subtitle: 'TWR ponderado en el tiempo' },
@@ -180,18 +178,48 @@ export function ReturnsChart({
         { name: '6 Meses', fullName: '6 Meses', value: val6m, amount: calcAmt(val6m), subtitle: 'TWR ponderado en el tiempo' },
         { name: '1 Año', fullName: '1 Año', value: val1y, amount: calcAmt(val1y), subtitle: 'TWR ponderado en el tiempo' },
       ]
-  }
+  }, [mode, weeklyData, totalPortfolioValue, day1Pct, day1Amount, weekPct, weekAmount, analytics, compact])
 
-  const chartData = data.map(d => {
-    const isZero = d.value === 0
-    const plotVal = isZero ? 0.0001 : d.value
-    return {
-      ...d,
-      plotVal,
-      posVal: d.value >= 0 ? (isZero ? 0.0001 : d.value) : undefined,
-      negVal: d.value < 0 ? d.value : undefined,
-    }
-  })
+  const chartData = useMemo(() => {
+    return data.map(d => {
+      const isZero = d.value === 0
+      const plotVal = isZero ? 0.0001 : d.value
+      return {
+        ...d,
+        plotVal,
+      }
+    })
+  }, [data])
+
+  const renderBarLabel = (props: any) => {
+    const { x, y, width, height, index } = props
+    if (index == null || !data[index]) return null
+    const origVal = data[index].value
+    if (origVal == null || isNaN(origVal)) return null
+    const isNeg = origVal < 0
+    const labelText = Math.abs(origVal) < 0.0001
+      ? '+0.00%'
+      : `${origVal >= 0 ? '+' : ''}${origVal.toFixed(2)}%`
+
+    const textY = isNeg ? (y + height + (compact ? 12 : 14)) : (y - 5)
+    const textX = x + width / 2
+
+    return (
+      <text
+        x={textX}
+        y={textY}
+        fill="#94a3b8"
+        textAnchor="middle"
+        fontSize={compact ? 9.5 : 10.5}
+        fontFamily="monospace"
+        fontWeight={700}
+        pointerEvents="none"
+        style={{ pointerEvents: 'none', userSelect: 'none' }}
+      >
+        {labelText}
+      </text>
+    )
+  }
 
   return (
     <div
@@ -258,56 +286,14 @@ export function ReturnsChart({
             animationEasing="ease-out"
           >
             <LabelList
-              dataKey="posVal"
-              position="top"
-              offset={5}
-              formatter={(val: any) => {
-                if (val == null || isNaN(val)) return ''
-                const num = Number(val)
-                if (Math.abs(num) < 0.0001) return '+0.00%'
-                return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`
-              }}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                pointerEvents: 'none',
-                userSelect: 'none',
-              }}
-            />
-            <LabelList
-              dataKey="negVal"
-              position="bottom"
-              offset={5}
-              formatter={(val: any) => {
-                if (val == null || isNaN(val)) return ''
-                const num = Number(val)
-                return `-${Math.abs(num).toFixed(2)}%`
-              }}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                pointerEvents: 'none',
-                userSelect: 'none',
-              }}
+              dataKey="plotVal"
+              content={renderBarLabel}
             />
             {data.map((d, i) => (
               <Cell
                 key={`cell-${mode}-${selectedBroker}-${d.name}-${i}`}
                 fill={d.value >= 0 ? 'url(#barGreen)' : 'url(#barRed)'}
-                opacity={1}
-                style={{
-                  cursor: 'pointer',
-                  transition: 'filter 0.18s ease',
-                  filter: hoveredBarIndex === i
-                    ? (d.value >= 0 ? 'drop-shadow(0 2px 8px rgba(16,185,129,0.4))' : 'drop-shadow(0 2px 8px rgba(244,63,94,0.4))')
-                    : 'none',
-                }}
-                onMouseEnter={() => setHoveredBarIndex(i)}
-                onMouseLeave={() => setHoveredBarIndex(null)}
+                className="returns-chart-bar"
               />
             ))}
           </Bar>
