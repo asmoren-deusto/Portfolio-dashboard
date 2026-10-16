@@ -372,11 +372,11 @@
 
 @keyframes live-ping {
   0% {
-    transform: scale(0.65);
-    opacity: 0.95;
+    transform: scale(0.7);
+    opacity: 0.9;
   }
   100% {
-    transform: scale(2.2);
+    transform: scale(1.8);
     opacity: 0;
   }
 }

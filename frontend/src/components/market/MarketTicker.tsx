@@ -418,23 +418,25 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           <div
             className={cn(
               "flex items-center border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#1e1e1e]/96",
-              isNative ? "pl-0.5 pr-2 gap-0" : "pl-0.5 pr-2.5 gap-1.5"
+              isNative ? "pl-1 pr-2 gap-1" : "pl-1 pr-3 gap-2"
             )}
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
           >
-            {mainStatusLabel === 'Cerrado' ? (
-              <span className="live-dot slate" />
-            ) : mainStatusLabel === 'Pre-mercado' ? (
-              <span className="live-dot warn" />
-            ) : mainStatusLabel === 'Post-mercado' ? (
-              <span className="live-dot purple" />
-            ) : mainStatusLabel === 'FUTURES' ? (
-              <span className="live-dot blue" />
-            ) : (
-              <span className="live-dot emerald" />
-            )}
+            <div className="flex items-center justify-center w-4 h-4 shrink-0">
+              {mainStatusLabel === 'Cerrado' ? (
+                <span className="live-dot slate" />
+              ) : mainStatusLabel === 'Pre-mercado' ? (
+                <span className="live-dot warn" />
+              ) : mainStatusLabel === 'Post-mercado' ? (
+                <span className="live-dot purple" />
+              ) : mainStatusLabel === 'FUTURES' ? (
+                <span className="live-dot blue" />
+              ) : (
+                <span className="live-dot emerald" />
+              )}
+            </div>
             {!isNative && (
-              <div className="flex flex-col leading-tight">
+              <div className="flex flex-col leading-tight pl-0.5">
                 <span className="text-[10.5px] font-semibold tracking-wider text-slate-800 dark:text-slate-100 uppercase">
                   {mainStatusLabel}
                 </span>
