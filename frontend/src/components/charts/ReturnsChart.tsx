@@ -201,7 +201,9 @@ export function ReturnsChart({
       ? '+0.00%'
       : `${origVal >= 0 ? '+' : ''}${origVal.toFixed(2)}%`
 
-    const textY = isNeg ? (y + height + (compact ? 12 : 14)) : (y - 5)
+    const barTop = Math.min(y, y + height)
+    const barBottom = Math.max(y, y + height)
+    const textY = isNeg ? (barBottom + (compact ? 12 : 14)) : (barTop - 5)
     const textX = x + width / 2
 
     return (
@@ -285,10 +287,6 @@ export function ReturnsChart({
             animationDuration={380}
             animationEasing="ease-out"
           >
-            <LabelList
-              dataKey="plotVal"
-              content={renderBarLabel}
-            />
             {data.map((d, i) => (
               <Cell
                 key={`cell-${mode}-${selectedBroker}-${d.name}-${i}`}
@@ -296,6 +294,10 @@ export function ReturnsChart({
                 className="returns-chart-bar"
               />
             ))}
+            <LabelList
+              dataKey="plotVal"
+              content={renderBarLabel}
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
