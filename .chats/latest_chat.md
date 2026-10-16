@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 14:09:11
+- **Fecha de exportación:** 2026-10-16 14:11:04
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 59
+- **Total de interacciones registradas:** 61
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -866,5 +866,28 @@ Comprobado en navegador y sincronizado en la versión **v3.0.83**.
 ### 👤 Usuario (2026-10-16 11:29:16)
 
 el bocadillo de rendimiento pelo más de transparencia, me gusta como queda igual se puede usar en más sitios
+
+---
+
+### 🤖 Asistente (2026-10-16 12:09:14)
+
+Se ha incrementado la transparencia del bocadillo (tooltip) de **Rendimiento** y se ha extendido ese mismo diseño *frosted glass* a los demás componentes:
+
+1. **[ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)**:
+   - Aumentada la transparencia: `bg-white/65 dark:bg-[#181818]/65` con desenfoque de fondo `backdrop-blur-lg`, borde más fino y sombra `shadow-2xl`.
+
+2. **Extensión a otros tooltips de la app**:
+   - **[PositionDetailModal.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/positions/PositionDetailModal.tsx)**: Tooltip del gráfico de evolución histórica de la posición con fondo traslúcido adaptado a modo claro/oscuro.
+   - **[StockDetailModal.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/StockDetailModal.tsx)**: Tooltip del gráfico de cotización en el modal de mercado con idéntico estilo frosted glass.
+   - **[DiversificationDashboard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx)**: Tooltip flotante del gráfico de distribución geográfica con transparencia y blur.
+   - **[MarketHeatmap.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketHeatmap.tsx)**: Tarjeta flotante interactiva del mapa de calor de mercado con `bg-white/75 dark:bg-[#181818]/75` y `backdrop-blur-xl`.
+
+Publicado y sincronizado en la versión **v3.0.84**.
+
+---
+
+### 👤 Usuario (2026-10-16 11:56:39)
+
+la animacion de cambio de pagina, mucho más rapida
 
 ---
