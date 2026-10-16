@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 16:52:04
+- **Fecha de exportación:** 2026-10-16 16:59:36
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 94
+- **Total de interacciones registradas:** 96
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1401,5 +1401,41 @@ Quedan solucionadas las animaciones de la tarjeta **Rendimiento (Últimos 7 día
 ### 👤 Usuario (2026-10-16 13:58:32)
 
 tampoco la grafica de simulacion de mercado
+
+---
+
+### 🤖 Asistente (2026-10-16 14:52:07)
+
+Queda implementada y verificada la **animación y filtrado por entidad en la gráfica de simulación de mercado** ([SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)):
+
+### 🔍 Causas identificadas
+1. **Falta de filtrado por entidad:** El endpoint `/market/simulated-portfolio` en el backend calculaba la cartera agregada de todas las entidades sin admitir el parámetro `broker`, por lo que al cambiar de entidad (p. ej. de *Todas* a *MyInvestor*, *BBVA*, etc.) la simulación no cambiaba.
+2. **Animación no conectada:** A diferencia de `PerformanceChart` o `BenchmarkEvolutionChart`, la tarjeta de simulación no utilizaba [triggerChartAnimation](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts) en su canvas TradingView Lightweight Charts al actualizar datos o cambiar de entidad/moneda/periodo.
+3. **KPIs estáticos:** Los números de rendimiento (`currentPct`, `currentAmount` y `Base`) se actualizaban bruscamente sin transición fluida.
+
+---
+
+### 🚀 Solución aplicada
+
+1. **Soporte de entidad en Backend ([market.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py)):**
+   - El endpoint `/market/simulated-portfolio` y su función de cálculo aceptan ahora el parámetro `broker` (con soporte para `myinvestor`, `bbva`, `indexa`, `traderepublic`, etc.).
+   - Al seleccionar un broker, la simulación calcula exclusivamente los fondos, proxies y pesos de esa entidad.
+   - Cache con clave segmentada por entidad (`{user_id}:{period}:{broker}`).
+
+2. **Propagación en Frontend ([queries.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/api/queries.ts)):**
+   - `useSimulatedPortfolio` incluye ahora `selectedBroker` en su `queryKey` y envía `&broker=${selectedBroker}` al backend.
+
+3. **Animación de barrido y KPIs ([SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)):**
+   - Integrado `triggerChartAnimation(chartContainerRef.current, 750)` al cambiar de entidad, alternar divisa (EUR ↔ USD), cambiar periodo (1D, 5D, 1M) o actualizarse cotizaciones.
+   - Envueltos los valores numéricos principales (`currentPct`, `currentAmount`, `Base`) en `<AnimatePresence>` con `<motion.span>` para un deslizamiento numérico limpio.
+
+4. **Sincronización:**
+   - Verificado en navegador con grabación WebP y publicado en `v3.0.100`.
+
+---
+
+### 👤 Usuario (2026-10-16 14:20:32)
+
+que el globo de rendimiento sea como el resto
 
 ---
