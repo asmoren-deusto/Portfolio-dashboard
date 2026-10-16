@@ -17,7 +17,7 @@ import { useRefreshPortfolio } from '@/hooks/useRefreshPortfolio'
 import { cn } from '@/lib/utils'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { fetchLatestNavAlert } from '@/api/queries'
+import { fetchLatestNavAlert, prefetchAllBrokers } from '@/api/queries'
 import { isNativePlatform } from '@/api/config'
 
 export function RootLayout() {
@@ -33,6 +33,7 @@ export function RootLayout() {
 
   const {
     theme,
+    period,
     privacyMode,
     toggleMobileSidebar,
     sidebarCollapsed,
@@ -40,6 +41,15 @@ export function RootLayout() {
     currentUser,
     setNavAlertNotification,
   } = useAppStore()
+
+  // Pre-load all brokers data on idle/mount so entity switches are instantaneous
+  useEffect(() => {
+    if (!currentUser) return
+    const timer = setTimeout(() => {
+      prefetchAllBrokers(queryClient, currentUser, period)
+    }, 1200)
+    return () => clearTimeout(timer)
+  }, [currentUser, period, queryClient])
 
   useEffect(() => {
     const isDark = theme === 'dark'

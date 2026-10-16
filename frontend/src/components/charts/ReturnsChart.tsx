@@ -53,7 +53,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const fullName = payload[0]?.payload?.fullName || label
   const subtitle = payload[0]?.payload?.subtitle || 'TWR ponderado en el tiempo'
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white/95 dark:bg-[#1e1e1e]/95 backdrop-blur-md px-3.5 py-2.5 text-xs shadow-xl">
+    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#1e1e1e]/80 backdrop-blur-md px-3.5 py-2.5 text-xs shadow-xl">
       <p className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5">{fullName}</p>
       <div className="flex items-center gap-1.5 font-mono">
         <span className="text-slate-500 dark:text-slate-400">Rendimiento:</span>
@@ -85,7 +85,8 @@ export function ReturnsChart({
   compact = false,
   height = 240
 }: ReturnsChartProps) {
-  const refreshAnimKey = useAppStore(s => s.refreshAnimKey)
+  const { refreshAnimKey, theme } = useAppStore()
+  const isDark = theme === 'dark'
   const [isInitialAnim, setIsInitialAnim] = useState(true)
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null)
 
@@ -161,7 +162,7 @@ export function ReturnsChart({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={compact ? { top: 22, right: 8, left: 4, bottom: 18 } : { top: 24, right: 14, left: 8, bottom: 20 }}
+          margin={compact ? { top: 25, right: 8, left: 4, bottom: 22 } : { top: 28, right: 14, left: 8, bottom: 24 }}
         >
           <defs>
             <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
@@ -190,11 +191,11 @@ export function ReturnsChart({
             domain={[
               (dataMin: number) => {
                 const min = Number.isFinite(dataMin) ? dataMin : 0
-                return min < 0 ? min * 1.35 : 0
+                return min < 0 ? min * 1.45 : 0
               },
               (dataMax: number) => {
                 const max = Number.isFinite(dataMax) ? dataMax : 0
-                return max > 0 ? max * 1.35 : 0
+                return max > 0 ? max * 1.45 : 0
               }
             ]}
             tickFormatter={v => `${Number(Number(v).toFixed(1))}%`}
@@ -211,17 +212,25 @@ export function ReturnsChart({
           >
             <LabelList
               dataKey="value"
-              position="top"
-              formatter={(val: any) => {
-                if (val == null || isNaN(val)) return ''
-                const num = Number(val)
-                return `${num >= 0 ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
-              }}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
+              content={(props: any) => {
+                const { x, y, width, height, value } = props
+                if (value == null || isNaN(value)) return null
+                const num = Number(value)
+                const isPositive = num >= 0
+                const yPos = isPositive ? y - 7 : y + height + 14
+                return (
+                  <text
+                    x={x + width / 2}
+                    y={yPos}
+                    fill={isPositive ? (isDark ? '#34d399' : '#059669') : (isDark ? '#fb7185' : '#e11d48')}
+                    textAnchor="middle"
+                    fontSize={compact ? 9.5 : 10.5}
+                    fontFamily="monospace"
+                    fontWeight={700}
+                  >
+                    {num >= 0 ? '+' : ''}{Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%
+                  </text>
+                )
               }}
             />
             {data.map((d, i) => (

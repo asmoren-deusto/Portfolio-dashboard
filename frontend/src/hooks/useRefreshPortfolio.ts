@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAppStore } from '@/store/appStore'
-import { refreshPortfolioPrices } from '@/api/queries'
+import { refreshPortfolioPrices, prefetchAllBrokers } from '@/api/queries'
 
 export function useRefreshPortfolio() {
   const {
     currentUser,
+    period,
     isRefreshingPrices,
     setIsRefreshingPrices,
     triggerRefreshAnimation,
@@ -75,6 +76,8 @@ export function useRefreshPortfolio() {
         queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'active' }),
         queryClient.invalidateQueries({ queryKey: ['benchmark-comparison'], refetchType: 'active' }),
       ])
+      // Instantly prefetch all entity data so switching between brokers has 0ms latency
+      prefetchAllBrokers(queryClient, currentUser, period)
       triggerRefreshAnimation()
       setRefreshSuccess(true)
       setTimeout(() => setRefreshSuccess(false), 3000)
@@ -87,11 +90,12 @@ export function useRefreshPortfolio() {
         queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'active' }),
         queryClient.invalidateQueries({ queryKey: ['benchmark-comparison'], refetchType: 'active' }),
       ])
+      prefetchAllBrokers(queryClient, currentUser, period)
       triggerRefreshAnimation()
     } finally {
       setIsRefreshingPrices(false)
     }
-  }, [currentUser, isRefreshingPrices, queryClient, setIsRefreshingPrices, triggerRefreshAnimation])
+  }, [currentUser, period, isRefreshingPrices, queryClient, setIsRefreshingPrices, triggerRefreshAnimation])
 
   return { handleRefresh, isRefreshingPrices, refreshSuccess }
 }

@@ -3,7 +3,7 @@
  * Animates the series canvas plot area with a left-to-right sweep (0% to 100% time reveal)
  * matching the visual delight of institutional financial terminal charts.
  */
-export function triggerChartAnimation(container: HTMLElement | null, duration = 1200) {
+export function triggerChartAnimation(container: HTMLElement | null, duration = 850) {
   if (!container) return
 
   // Respect user preference for reduced motion
@@ -11,17 +11,20 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
     return
   }
 
-  // Entrance subtle fade and lift for the chart container
-  if (typeof container.animate === 'function') {
-    container.animate(
+  // Find the plot area (main series canvas) in lightweight-charts
+  const plotCanvasWrapper = container.querySelector('table tr:first-child td:first-child') as HTMLElement | null
+  const target = plotCanvasWrapper || container
+
+  if (typeof target.animate === 'function') {
+    target.animate(
       [
-        { opacity: 0.7, transform: 'translateY(2px)' },
-        { opacity: 1, transform: 'translateY(0px)' },
+        { clipPath: 'inset(0 100% 0 0)' },
+        { clipPath: 'inset(0 0% 0 0)' },
       ],
       {
-        duration: Math.min(400, duration),
+        duration,
         easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'none',
+        fill: 'both',
       }
     )
   }

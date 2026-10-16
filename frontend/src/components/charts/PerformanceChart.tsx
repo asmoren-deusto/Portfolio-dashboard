@@ -165,7 +165,7 @@ export function PerformanceChart({
 
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
-  const { selectedBroker } = useAppStore()
+  const { selectedBroker, period } = useAppStore()
   // Entity selection: 'stacked' by default when 'all' brokers selected (mantiene el estacado de entidades), o broker individual
   const selectedEntity = selectedBroker === 'all' ? 'stacked' : selectedBroker.toLowerCase()
 
@@ -177,7 +177,7 @@ export function PerformanceChart({
   useEffect(() => {
     setIsSweepAnimating(true)
     setSweepKey(prev => prev + 1)
-  }, [data, selectedEntity, chartMode])
+  }, [data, selectedEntity, chartMode, period])
 
   // Helper to safely extract broker value and invested
   const getBrokerData = (p: PricePoint | null | undefined, brokerKey: string) => {
@@ -834,30 +834,26 @@ export function PerformanceChart({
       }
 
       chart.timeScale().fitContent()
-      triggerChartAnimation(containerRef.current, 1200)
+      triggerChartAnimation(containerRef.current, 850)
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
-  }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics])
+  }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics, period])
 
   return (
     <div data-private className="w-full flex flex-col justify-between flex-1 min-h-0 select-none">
       {/* Canvas Container */}
       <div data-private ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
-        {/* Sweep Reveal Curtain Animation: reveals chart smoothly from left to right */}
+        {/* Glowing Scanline Animation: sweeps from left to right as the curve reveals */}
         {isSweepAnimating && (
           <motion.div
-            key={`sweep-${sweepKey}`}
+            key={`scanline-${sweepKey}`}
             initial={{ left: '0%' }}
-            animate={{ left: '100%' }}
-            transition={{ duration: 1.1, ease: [0.25, 1, 0.5, 1] }}
+            animate={{ left: isNativePlatform() ? '100%' : 'calc(100% - 58px)' }}
+            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
             onAnimationComplete={() => setIsSweepAnimating(false)}
-            className="absolute inset-y-0 right-0 z-20 pointer-events-none bg-white dark:bg-[#1e1e1e]"
-            style={{ right: isNativePlatform() ? 0 : 58 }}
-          >
-            {/* Subtle vertical sweep scan cursor */}
-            <div className="absolute top-0 bottom-0 left-0 w-px bg-gradient-to-b from-transparent via-emerald-500/35 dark:via-emerald-400/30 to-transparent shadow-[0_0_5px_rgba(16,185,129,0.2)]" />
-          </motion.div>
+            className="absolute inset-y-0 w-0.5 pointer-events-none z-20 bg-gradient-to-b from-transparent via-emerald-500/50 dark:via-emerald-400/60 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.45)]"
+          />
         )}
 
         {/* Floating Small In-Chart Legend (Only shown in Desglose/Stacked mode) */}
