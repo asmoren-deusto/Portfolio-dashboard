@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { PALETTE_LIGHT, PALETTE_DARK, fmt } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
@@ -30,8 +30,15 @@ export function AllocationChart({
   height,
 }: AllocationChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [isInitialAnim, setIsInitialAnim] = useState(true)
   const theme = useAppStore((s) => s.theme)
   const palette = theme === 'dark' ? PALETTE_DARK : PALETTE_LIGHT
+
+  useEffect(() => {
+    setIsInitialAnim(true)
+    const timer = setTimeout(() => setIsInitialAnim(false), 600)
+    return () => clearTimeout(timer)
+  }, [mode])
 
   const chartHeight = height ?? (showLegend ? 235 : 295)
   const isCompact = chartHeight <= 265
@@ -146,6 +153,7 @@ export function AllocationChart({
               paddingAngle={2.5}
               dataKey="value"
               strokeWidth={0}
+              isAnimationActive={isInitialAnim}
               animationBegin={0}
               animationDuration={500}
               onMouseEnter={(_, index) => {

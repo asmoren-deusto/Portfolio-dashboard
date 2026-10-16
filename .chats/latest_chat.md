@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-15 22:07:33
+- **Fecha de exportación:** 2026-10-16 11:51:27
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 37
+- **Total de interacciones registradas:** 39
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -504,5 +504,25 @@ Los cambios han sido compilados y sincronizados en la versión **`v3.0.72`**.
 ### 👤 Usuario (2026-10-15 20:03:40)
 
 a la misma altura y con la misma linea separadora
+
+---
+
+### 🤖 Asistente (2026-10-15 20:07:35)
+
+He alineado la barra inferior de **Evolución Patrimonial** para que coincida exactamente con las tarjetas adyacentes (*Distribución* y *Rendimiento*):
+
+1. **Línea separadora continua:** Se ha añadido el mismo contenedor superior con `pt-2 border-t border-slate-100 dark:border-white/[0.06]` tanto en [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) como en su skeleton, creando una línea horizontal continua y homogénea a lo largo de las tres tarjetas.
+2. **Misma altura y nivel vertical:** 
+   - Se unificó el padding interno a `px-3 pb-3 pt-1.5` en [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx).
+   - Se fijó la altura del lienzo a `260px` y la altura del contenedor inferior a `h-[32px] sm:h-[34px]`.
+   - Con esto, tanto la línea separadora como la barra de métricas quedan niveladas al milímetro en la misma coordenada vertical que las pastillas de *Distribución* y *Rendimiento*.
+
+Los cambios han sido compilados y sincronizados en la versión **`v3.0.73`**.
+
+---
+
+### 👤 Usuario (2026-10-16 09:40:16)
+
+las graficas de distribucion y rendimiento parece que se recargan aleatoriamente
 
 ---

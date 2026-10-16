@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer, Cell, LabelList
@@ -85,6 +86,13 @@ export function ReturnsChart({
   height = 240
 }: ReturnsChartProps) {
   const refreshAnimKey = useAppStore(s => s.refreshAnimKey)
+  const [isInitialAnim, setIsInitialAnim] = useState(true)
+
+  useEffect(() => {
+    setIsInitialAnim(true)
+    const timer = setTimeout(() => setIsInitialAnim(false), 700)
+    return () => clearTimeout(timer)
+  }, [mode, refreshAnimKey])
 
   if (mode === 'global' && !analytics) {
     return <ReturnsChartSkeleton compact={compact} height={height} />
@@ -196,7 +204,7 @@ export function ReturnsChart({
             dataKey="value"
             radius={[6, 6, 0, 0]}
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
-            isAnimationActive={true}
+            isAnimationActive={isInitialAnim}
             animationDuration={650}
             animationEasing="ease-out"
           >

@@ -162,8 +162,8 @@ export function OverviewPage() {
   const sessionAmount = simSummary?.fx_info?.simulated_eur_amount ?? simSummary?.simulated_daily_amount
   const sessionMarketState = simSummary?.market_state
 
-  const isGlobalUpdating = summaryFetching || positionsFetching || isRefreshingPrices || simPortfolioFetching
-  const isPeriodUpdating = perfFetching || analyticsFetching || isRefreshingPrices
+  const isGlobalUpdating = isRefreshingPrices || (!summary && summaryFetching) || (positions.length === 0 && positionsFetching)
+  const isPeriodUpdating = isRefreshingPrices || (performance.length === 0 && perfFetching) || (!analytics && analyticsFetching)
   const isAnyUpdating = isGlobalUpdating || isPeriodUpdating
 
   // Real portfolio summary: calculate from active valid positions when available
@@ -731,7 +731,7 @@ export function OverviewPage() {
                 </span>
               </div>
 
-              <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isGlobalUpdating ? "opacity-65" : "opacity-100")}>
+              <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isRefreshingPrices ? "opacity-65" : "opacity-100")}>
                 <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
                   {fmt.currency(displaySummary?.total_invested)}
                 </div>
@@ -839,7 +839,7 @@ export function OverviewPage() {
       {/* Charts Section: 60% / 20% / 20% */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* 1. Performance Evolution (60% on desktop: lg:col-span-3, md:col-span-2) */}
-        <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between" delay={0.2} loading={isPeriodUpdating}>
+        <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between" delay={0.2} loading={isRefreshingPrices}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
               <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
@@ -958,7 +958,7 @@ export function OverviewPage() {
 
           <div className="px-3 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
             <div data-private className="flex-1 flex flex-col justify-center min-h-0">
-              {isPeriodUpdating && chartView === 'evolution' ? (
+              {performance.length === 0 && perfFetching && chartView === 'evolution' ? (
                 <PerformanceChartSkeleton height={260} />
               ) : chartView === 'evolution' ? (
                 performance.length > 0 ? (
@@ -985,7 +985,7 @@ export function OverviewPage() {
         </Card>
 
         {/* 2. Asset Allocation Breakdown (20% on desktop: lg:col-span-1, md:col-span-1) */}
-        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.23} loading={isGlobalUpdating}>
+        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.23} loading={isRefreshingPrices}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20 shrink-0">
@@ -1029,7 +1029,7 @@ export function OverviewPage() {
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
             <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-              {isGlobalUpdating ? (
+              {positions.length === 0 && positionsFetching ? (
                 <AllocationChartSkeleton height={260} />
               ) : positions.length > 0 ? (
                 <AllocationChart
@@ -1048,7 +1048,7 @@ export function OverviewPage() {
             </div>
 
             {/* Useful Stats Strip (Matching Card 1) */}
-            {isGlobalUpdating ? (
+            {!allocStats && positionsFetching ? (
               <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0 animate-pulse">
                 <div className="h-[32px] sm:h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
                 <div className="h-[32px] sm:h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
@@ -1096,7 +1096,7 @@ export function OverviewPage() {
         </Card>
 
         {/* 3. Performance by Period (Global / Semanal 7D) (20% on desktop: lg:col-span-1, md:col-span-1) */}
-        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.26} loading={isPeriodUpdating}>
+        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.26} loading={isRefreshingPrices}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
@@ -1156,26 +1156,45 @@ export function OverviewPage() {
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-              {isPeriodUpdating ? (
-                <ReturnsChartSkeleton compact height={260} />
+              {returnsPeriodMode === 'global' ? (
+                !analytics && analyticsFetching ? (
+                  <ReturnsChartSkeleton compact height={260} />
+                ) : (
+                  <ReturnsChart
+                    analytics={analytics}
+                    mode={returnsPeriodMode}
+                    weeklyData={weeklyReturnsData}
+                    day1Pct={shortTermMetrics?.dayPct}
+                    day1Amount={shortTermMetrics?.dayAmount}
+                    weekPct={shortTermMetrics?.weekPct}
+                    weekAmount={shortTermMetrics?.weekAmount}
+                    totalPortfolioValue={displaySummary?.total_value}
+                    compact
+                    height={260}
+                  />
+                )
               ) : (
-                <ReturnsChart
-                  analytics={analytics}
-                  mode={returnsPeriodMode}
-                  weeklyData={weeklyReturnsData}
-                  day1Pct={shortTermMetrics?.dayPct}
-                  day1Amount={shortTermMetrics?.dayAmount}
-                  weekPct={shortTermMetrics?.weekPct}
-                  weekAmount={shortTermMetrics?.weekAmount}
-                  totalPortfolioValue={displaySummary?.total_value}
-                  compact
-                  height={260}
-                />
+                (!weeklyReturnsData || weeklyReturnsData.length === 0) && perfFetching ? (
+                  <ReturnsChartSkeleton compact height={260} />
+                ) : (
+                  <ReturnsChart
+                    analytics={analytics}
+                    mode={returnsPeriodMode}
+                    weeklyData={weeklyReturnsData}
+                    day1Pct={shortTermMetrics?.dayPct}
+                    day1Amount={shortTermMetrics?.dayAmount}
+                    weekPct={shortTermMetrics?.weekPct}
+                    weekAmount={shortTermMetrics?.weekAmount}
+                    totalPortfolioValue={displaySummary?.total_value}
+                    compact
+                    height={260}
+                  />
+                )
               )}
             </div>
 
             {/* Useful Stats Strip (Matching Card 1) */}
-            {isPeriodUpdating ? (
+            {!secondaryStats && (perfFetching || analyticsFetching) ? (
               <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0 animate-pulse">
                 <div className="h-[32px] sm:h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
                 <div className="h-[32px] sm:h-[34px] rounded-xl bg-slate-100 dark:bg-white/[0.03]" />
@@ -1256,7 +1275,7 @@ export function OverviewPage() {
       </div>
 
       {/* Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
-      <Card className="w-full" delay={0.3} loading={isGlobalUpdating}>
+      <Card className="w-full" delay={0.3} loading={isRefreshingPrices}>
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
