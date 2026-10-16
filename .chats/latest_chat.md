@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 21:36:20
+- **Fecha de exportación:** 2026-10-16 21:42:05
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 36
+- **Total de interacciones registradas:** 38
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -561,5 +561,34 @@ Los cambios han sido compilados y publicados en **v3.0.118**.
 ### 👤 Usuario (2026-10-16 19:30:11)
 
 sincroniza las animaciones de los 3 graficos que terminen a la vez
+
+---
+
+### 🤖 Asistente (2026-10-16 19:36:23)
+
+### Sincronización Simultánea de las 3 Gráficas de Visión General
+
+Las 3 tarjetas gráficas (**Evolución Patrimonial**, **Distribución** y **Rendimiento**) ya están sincronizadas para iniciar y terminar exactamente a la vez:
+
+1. **Montaje simultáneo en el mismo frame:**
+   - En [OverviewPage.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx), se unificó la condición de carga inicial (`isChartsInitialLoading`). Antes, la gráfica de distribución montaba unos ~100 ms antes que las otras dos porque su consulta (`positions`) respondía más rápido que `performance`. Ahora las 3 muestran sus esqueletos coordinados y pasan a renderizar sus componentes en el **mismo frame exacto**.
+
+2. **Alineación del retardo de inicio (`animationBegin`):**
+   - La gráfica de Evolución Patrimonial (Lightweight Charts) necesita 2 frames (~30 ms con doble `requestAnimationFrame`) para volcar los píxeles en el canvas antes de comenzar el barrido visual.
+   - En [AllocationChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/AllocationChart.tsx) y [ReturnsChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx) se fijó `animationBegin={30}`, de modo que el despliegue del donut y el crecimiento de las barras esperan exactamente esos 30 ms y comienzan en el mismo instante que el barrido de la curva.
+
+3. **Duración y curva de finalización:**
+   - **Evolución Patrimonial:** 750 ms (`duration = 750`, barra de barrido y curva `cubic-bezier(0.25, 1, 0.5, 1)`).
+   - **Distribución:** 750 ms (`animationDuration={750}`, `animationEasing="ease-out"`).
+   - **Rendimiento:** 750 ms (`animationDuration={750}`, `animationEasing="ease-out"`).
+   - Las tres concluyen su animación en el **milisegundo 780 ms**, logrando una transición perfectamente armónica y coordinada.
+
+Verificado y publicado en Git bajo la versión **v3.0.119**.
+
+---
+
+### 👤 Usuario (2026-10-16 19:32:46)
+
+en rendimiento a veces los % parpadean, revisalo pero no toques nada del diseño, solo asegura que no parpadeen/desaparezcan
 
 ---

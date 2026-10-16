@@ -249,7 +249,7 @@ export function ReturnsChart({
             content={<CustomTooltip />}
             cursor={{ fill: 'rgba(148, 163, 184, 0.08)', radius: 6 }}
             animationDuration={150}
-            wrapperStyle={{ outline: 'none' }}
+            wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
           />
           <Bar
             dataKey="plotVal"
@@ -275,7 +275,8 @@ export function ReturnsChart({
                 fontSize: compact ? '9.5px' : '10.5px',
                 fontFamily: 'monospace',
                 fontWeight: 700,
-                transition: 'all 0.3s ease',
+                pointerEvents: 'none',
+                userSelect: 'none',
               }}
             />
             <LabelList
@@ -292,7 +293,8 @@ export function ReturnsChart({
                 fontSize: compact ? '9.5px' : '10.5px',
                 fontFamily: 'monospace',
                 fontWeight: 700,
-                transition: 'all 0.3s ease',
+                pointerEvents: 'none',
+                userSelect: 'none',
               }}
             />
             {data.map((d, i) => (

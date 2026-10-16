@@ -1311,24 +1311,17 @@ export function OverviewPage() {
                       {secondaryStats.box1Label}
                     </span>
                   </div>
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={`box1-${selectedBroker}-${returnsPeriodMode}-${secondaryStats.box1Val}`}
-                      initial={{ opacity: 0, y: 3 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -3 }}
-                      transition={{ duration: 0.2 }}
-                      data-private
-                      className={cn(
-                        'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
-                        secondaryStats.box1Positive
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      )}
-                    >
-                      {secondaryStats.box1Val}
-                    </motion.span>
-                  </AnimatePresence>
+                  <span
+                    data-private
+                    className={cn(
+                      'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5 transition-colors duration-150',
+                      secondaryStats.box1Positive
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    {secondaryStats.box1Val}
+                  </span>
                 </div>
 
                 {/* Box 2 */}
@@ -1353,26 +1346,19 @@ export function OverviewPage() {
                       {secondaryStats.box2Label}
                     </span>
                   </div>
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={`box2-${selectedBroker}-${returnsPeriodMode}-${secondaryStats.box2Val}`}
-                      initial={{ opacity: 0, y: 3 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -3 }}
-                      transition={{ duration: 0.2 }}
-                      data-private
-                      className={cn(
-                        'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
-                        returnsPeriodMode === 'global'
-                          ? 'text-slate-900 dark:text-white'
-                          : secondaryStats.box2Positive
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-rose-600 dark:text-rose-400'
-                      )}
-                    >
-                      {secondaryStats.box2Val}
-                    </motion.span>
-                  </AnimatePresence>
+                  <span
+                    data-private
+                    className={cn(
+                      'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5 transition-colors duration-150',
+                      returnsPeriodMode === 'global'
+                        ? 'text-slate-900 dark:text-white'
+                        : secondaryStats.box2Positive
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    {secondaryStats.box2Val}
+                  </span>
                 </div>
               </div>
             )}
