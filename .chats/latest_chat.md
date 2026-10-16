@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 13:56:34
+- **Fecha de exportación:** 2026-10-16 13:57:31
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 51
+- **Total de interacciones registradas:** 53
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -783,5 +783,26 @@ Se ha creado el componente reutilizable [TableSkeleton.tsx](file:///c:/Users/com
 ### 👤 Usuario (2026-10-16 11:19:33)
 
 en distribucion que la animacion sea más rapida, la mitad
+
+---
+
+### 🤖 Asistente (2026-10-16 11:56:36)
+
+Se ha reducido a la mitad la duración de las animaciones en los gráficos de distribución:
+
+1. **[AllocationChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/AllocationChart.tsx)** (Gráfica de **Distribución** en *Overview* y *Analytics*):
+   - Duración de animación reducida de **500 ms** a **250 ms** (`animationDuration={250}`) con curva `ease-out`.
+   - Timer de reinicialización de animación al alternar vistas (Activo / Tipo / Entidad) recortado de **600 ms** a **300 ms**.
+
+2. **[DiversificationDashboard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/analytics/DiversificationDashboard.tsx)** (Donut de **Distribución de Tu Cartera** en Diversificación):
+   - Duración de animación reducida de **400 ms** a **200 ms** (`animationDuration={200}`) con curva `ease-out`.
+
+Cambios sincronizados y publicados en la versión **v3.0.80**.
+
+---
+
+### 👤 Usuario (2026-10-16 11:22:48)
+
+en rendimineto no difumines el resto al hacer hover sobre uno
 
 ---

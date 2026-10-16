@@ -237,10 +237,10 @@ export function ReturnsChart({
               <Cell
                 key={i}
                 fill={d.value >= 0 ? 'url(#barGreen)' : 'url(#barRed)'}
-                opacity={hoveredBarIndex === null || hoveredBarIndex === i ? 1 : 0.42}
+                opacity={1}
                 style={{
                   cursor: 'pointer',
-                  transition: 'opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), filter 0.22s ease',
+                  transition: 'filter 0.18s ease',
                   filter: hoveredBarIndex === i
                     ? (d.value >= 0 ? 'drop-shadow(0 2px 8px rgba(16,185,129,0.4))' : 'drop-shadow(0 2px 8px rgba(244,63,94,0.4))')
                     : 'none',
