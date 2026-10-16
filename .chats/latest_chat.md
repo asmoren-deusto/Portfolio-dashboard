@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 15:36:52
+- **Fecha de exportación:** 2026-10-16 15:43:43
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 77
+- **Total de interacciones registradas:** 81
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1143,5 +1143,65 @@ Se han animado e integrado las transiciones en todas las gráficas para que resp
 ### 👤 Usuario (2026-10-16 13:08:48)
 
 revisa ese ultimo salto, y me gustaba más antes cuando no se reseteaba la grafica a las 10:00 sino que se mantenia el valor de postmarket
+
+---
+
+### 🤖 Asistente (2026-10-16 13:36:54)
+
+Se han corregido ambos comportamientos en [backend/app/routers/market.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py):
+
+### 1. Eliminación del salto / caída vertical al final de la gráfica
+- **Causa:** En la función de cotizaciones extendidas, cuando un activo estaba en pre-market (`market_state == "PRE"`), el cálculo forzaba incondicionalmente `change_pct = 0.0`. Esto provocaba que el resumen en vivo se calculara artificialmente en `+0.01%` (debido únicamente a la divisa EUR/USD), y al sincronizar el último punto de la serie intradía, se insertaba ese valor plano provocando la caída vertical repentina (desde `+0.27%` a `+0.01%`).
+- **Solución:**
+  - Se corrigió el cálculo de `change_pct` en pre y post-market para preservar la variación real de los precios extendidos cuando existen operaciones.
+  - Se blindó la sincronización entre el resumen del KPI y el último punto de la serie: ahora el KPI de cabecera y el final de la curva coinciden con un 100% de coherencia y sin discontinuidades.
+
+### 2. Mantenimiento del valor de Post-Market (sin reset a las 10:00)
+- **Causa:** La condición de selección de sesión cortaba a las `04:00 NY` (`10:00 Madrid`), forzando el reseteo de la sesión al iniciarse el pre-market estadounidense y descartando la sesión anterior completada con su cierre de post-market.
+- **Solución:**
+  - El umbral de apertura de nueva sesión regular se fijó en la apertura real del mercado estadounidense (**15:30 Madrid / 09:30 NY**).
+  - Durante toda la noche y la mañana europea (antes de las 15:30), la gráfica **mantiene la sesión anterior completa junto con su valor de cierre de post-market** (hasta las 02:00 Madrid / 20:00 NY), sin resetearse a las 10:00.
+  - A las 15:30 Madrid, al sonar la campana de Wall Street, arranca de forma limpia la nueva sesión intradía.
+
+---
+🚀 **Release publicada:** `v3.0.93` sincronizada en Git.
+
+---
+
+### 👤 Usuario (2026-10-16 13:10:48)
+
+como arranco el frontend aurora?
+
+---
+
+### 🤖 Asistente (2026-10-16 13:38:35)
+
+Para arrancar el **Frontend Aurora** tienes dos opciones sencillas (ya he dejado instaladas todas sus dependencias y verificado que compila al 100%):
+
+### Opción 1: Con el archivo directo (Doble clic)
+En la carpeta raíz del repositorio tienes un script preparado:
+- Haz doble clic en [start_aurora.bat](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/start_aurora.bat).
+
+---
+
+### Opción 2: Desde la terminal
+Abre una terminal en la raíz del proyecto y ejecuta:
+```bash
+npm --prefix frontend-aurora run dev
+```
+*(O entrando en la carpeta: `cd frontend-aurora && npm run dev`)*
+
+---
+
+### 🌐 URLs y Puertos
+- **Aurora UI:** [http://localhost:5174](http://localhost:5174)
+- **Backend API:** [http://localhost:8000](http://localhost:8000) *(debe estar corriendo con `python start.py` para la alimentación de datos)*
+- **Frontend Clásico:** [http://localhost:5173](http://localhost:5173) *(ambos frontends pueden estar activos simultáneamente sin interferir entre sí)*
+
+---
+
+### 👤 Usuario (2026-10-16 13:11:36)
+
+la animacion entre paginas no me convence, refinala
 
 ---

@@ -43,6 +43,26 @@ export function RootLayout() {
     setNavAlertNotification,
   } = useAppStore()
 
+  // Scroll to top immediately on route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [location.pathname])
+
+  // Pre-fetch lazy page chunks on idle so navigation between tabs is instantaneous without skeleton flicker
+  useEffect(() => {
+    const prefetchRoutes = () => {
+      import('@/pages/MarketPage')
+      import('@/pages/PositionsPage')
+      import('@/pages/AnalyticsPage')
+      import('@/pages/TransactionsPage')
+    }
+    if ('requestIdleCallback' in window) {
+      ;(window as any).requestIdleCallback(prefetchRoutes)
+    } else {
+      setTimeout(prefetchRoutes, 250)
+    }
+  }, [])
+
   // Pre-load all brokers data on idle/mount so entity switches are instantaneous
   useEffect(() => {
     if (!currentUser) return
@@ -306,7 +326,7 @@ export function RootLayout() {
             />
           </div>
 
-          {/* Page Content Animation (Atmospheric blur & clean fade without layout shifts) */}
+          {/* Page Content Animation: Instant mounting with silky smooth opacity transition and zero layout shifts */}
           <main
             className={`flex flex-1 flex-col gap-4 px-4 pt-4 md:px-7 md:pt-4 md:pb-6 ${
               isNativePlatform()
@@ -314,19 +334,17 @@ export function RootLayout() {
                 : 'pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] sm:pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))]'
             }`}
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0, transition: { duration: 0.14, ease: [0.16, 1, 0.3, 1] } }}
-                exit={{ opacity: 0, y: -3, transition: { duration: 0.05, ease: 'easeOut' } }}
-                className="flex flex-1 flex-col gap-4 w-full"
-              >
-                <ErrorBoundary>
-                  {outlet}
-                </ErrorBoundary>
-              </motion.div>
-            </AnimatePresence>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
+              className="flex flex-1 flex-col gap-4 w-full"
+            >
+              <ErrorBoundary>
+                {outlet}
+              </ErrorBoundary>
+            </motion.div>
           </main>
         </div>
 

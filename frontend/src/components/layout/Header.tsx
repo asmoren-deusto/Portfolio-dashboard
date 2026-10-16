@@ -102,7 +102,14 @@ export function Header({
       <div>
         <div className="h-9 flex items-center gap-2.5 flex-wrap">
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white leading-none">
-            {title}
+            <motion.span
+              key={title}
+              initial={{ opacity: 0.35 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              {title}
+            </motion.span>
           </h1>
 
           {badge && (
@@ -125,9 +132,15 @@ export function Header({
         </div>
 
         {subtitle && (
-          <p className="text-sm text-slate-600 dark:text-slate-400 font-medium mt-1">
+          <motion.p
+            key={subtitle}
+            initial={{ opacity: 0.35 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
+            className="text-sm text-slate-600 dark:text-slate-400 font-medium mt-1"
+          >
             {subtitle}
-          </p>
+          </motion.p>
         )}
       </div>
 
