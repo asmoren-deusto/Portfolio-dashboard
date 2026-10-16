@@ -318,9 +318,9 @@ export function TransactionsPage() {
                   return (
                     <motion.tr
                       key={t.id}
-                      initial={{ opacity: 0, y: 3 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i * 0.015, 0.3) }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.15, delay: Math.min(i * 0.015, 0.2) }}
                       onClick={() => {
                         if (assetInfo) setSelectedPosition(assetInfo)
                       }}

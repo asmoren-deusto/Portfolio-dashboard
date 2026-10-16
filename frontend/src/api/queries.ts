@@ -321,8 +321,10 @@ export function useBenchmarkComparison() {
       }
       return get<BenchmarkComparisonData>(`/portfolio/benchmark-comparison?period=${period}${brokerQuery}`)
     },
+    placeholderData: keepSameUser(currentUser?.id),
     staleTime: 1000 * 60 * 5,
     refetchOnMount: false,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -382,8 +384,10 @@ export function useMarketQuotes(index?: string, enabled = true) {
     queryKey: ['market-quotes', index],
     queryFn: () => get<{ stocks: MarketStock[]; count: number; cached: boolean; cache_timestamp: string }>(`/market/quotes${queryParam}`),
     enabled,
+    placeholderData: (prev) => prev,
     staleTime: 1000 * 55,        // 55 s — just under cache TTL
     refetchInterval: 1000 * 60,  // poll every 60 s
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -391,8 +395,10 @@ export function useMarketIndices() {
   return useQuery({
     queryKey: ['market-indices'],
     queryFn: () => get<{ indices: MarketIndex[]; cache_timestamp: string }>('/market/indices'),
+    placeholderData: (prev) => prev,
     staleTime: 1000 * 55,
     refetchInterval: 1000 * 60,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -515,8 +521,10 @@ export function useSimulatedPortfolio(period: string = '1d') {
   return useQuery<SimulatedPortfolioResponse>({
     queryKey: ['simulated-portfolio', currentUser?.id, period],
     queryFn: () => get<SimulatedPortfolioResponse>(`/market/simulated-portfolio?period=${period}&user_id=${currentUser?.id || 'asier'}`),
+    placeholderData: keepSameUser(currentUser?.id),
     staleTime: 1000 * 30, // 30s
     refetchInterval: 1000 * 45, // poll every 45s
+    refetchIntervalInBackground: false,
   })
 }
 

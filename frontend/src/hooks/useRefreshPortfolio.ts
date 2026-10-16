@@ -68,13 +68,25 @@ export function useRefreshPortfolio() {
         localStorage.setItem('portfolio_last_manual_refresh', String(nowTs))
       } catch {}
 
-      await queryClient.invalidateQueries()
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['summary'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['positions'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['performance'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['benchmark-comparison'], refetchType: 'active' }),
+      ])
       triggerRefreshAnimation()
       setRefreshSuccess(true)
       setTimeout(() => setRefreshSuccess(false), 3000)
     } catch (err) {
       console.warn('Error fetching live NAVs:', err)
-      await queryClient.invalidateQueries()
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['summary'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['positions'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['performance'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['benchmark-comparison'], refetchType: 'active' }),
+      ])
       triggerRefreshAnimation()
     } finally {
       setIsRefreshingPrices(false)

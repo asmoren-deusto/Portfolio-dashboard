@@ -589,9 +589,9 @@ export const MarketPage: React.FC = () => {
         </div>
       ) : viewMode === 'heatmap' ? (
         <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
         >
           <MarketHeatmap
             stocks={filteredStocks}
@@ -611,10 +611,10 @@ export const MarketPage: React.FC = () => {
               <motion.div
                 key={stock.ticker}
                 layout
-                initial={{ opacity: 0, scale: 0.96, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.94 }}
-                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
               >
                 <StockCard
                   stock={stock}

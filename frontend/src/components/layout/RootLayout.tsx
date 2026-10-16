@@ -88,8 +88,14 @@ export function RootLayout() {
               return
             }
 
-            // Trigger automatic UI refresh across all tabs
-            await queryClient.invalidateQueries()
+            // Trigger automatic UI refresh across all tabs with targeted active queries
+            await Promise.all([
+              queryClient.invalidateQueries({ queryKey: ['summary'], refetchType: 'active' }),
+              queryClient.invalidateQueries({ queryKey: ['positions'], refetchType: 'active' }),
+              queryClient.invalidateQueries({ queryKey: ['performance'], refetchType: 'active' }),
+              queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'active' }),
+              queryClient.invalidateQueries({ queryKey: ['benchmark-comparison'], refetchType: 'active' }),
+            ])
             // Show pop-up notification only for background updates
             setNavAlertNotification({
               id: alert.id,

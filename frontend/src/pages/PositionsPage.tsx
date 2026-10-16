@@ -506,10 +506,10 @@ export function PositionsPage() {
               return (
                 <motion.div
                   key={p.isin}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.03 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18, delay: Math.min(i * 0.02, 0.2) }}
                   onClick={() => setSelectedPosition(p)}
                   title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
                   className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/20 dark:hover:bg-[#252526] p-5 transition-all duration-200 cursor-pointer backdrop-blur-md flex flex-col justify-between overflow-hidden"

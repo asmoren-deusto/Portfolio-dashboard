@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { format, parseISO } from 'date-fns'
 import {
   TrendingUp,
@@ -875,7 +875,7 @@ export function OverviewPage() {
                         <motion.div
                           layoutId="perfChartModePill"
                           className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                          transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                         />
                       )}
                       <span className="relative z-10">€</span>
@@ -892,7 +892,7 @@ export function OverviewPage() {
                         <motion.div
                           layoutId="perfChartModePill"
                           className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                          transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                         />
                       )}
                       <span className="relative z-10">%</span>
@@ -929,7 +929,7 @@ export function OverviewPage() {
                     <motion.div
                       layoutId="overviewChartViewPill"
                       className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                     />
                   )}
                   <span className="relative z-10">Curva</span>
@@ -945,7 +945,7 @@ export function OverviewPage() {
                     <motion.div
                       layoutId="overviewChartViewPill"
                       className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                     />
                   )}
                   <span className="relative z-10">
@@ -958,28 +958,46 @@ export function OverviewPage() {
 
           <div className="px-3 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
             <div data-private className="flex-1 flex flex-col justify-center min-h-0">
-              {performance.length === 0 && perfFetching && chartView === 'evolution' ? (
-                <PerformanceChartSkeleton height={260} />
-              ) : chartView === 'evolution' ? (
-                performance.length > 0 ? (
-                  <PerformanceChart
-                    data={performance}
-                    height={260}
-                    chartMode={perfChartMode}
-                    showInvested={perfShowInvested}
-                    showMilestones={false}
-                    showFooterStrip={false}
-                  />
+              <AnimatePresence mode="wait" initial={false}>
+                {chartView === 'evolution' ? (
+                  <motion.div
+                    key="evolution"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    className="flex-1 flex flex-col justify-center min-h-0 w-full"
+                  >
+                    {performance.length === 0 && perfFetching ? (
+                      <PerformanceChartSkeleton height={260} />
+                    ) : performance.length > 0 ? (
+                      <PerformanceChart
+                        data={performance}
+                        height={260}
+                        chartMode={perfChartMode}
+                        showInvested={perfShowInvested}
+                        showMilestones={false}
+                        showFooterStrip={false}
+                      />
+                    ) : (
+                      <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                        Sin datos de evolución
+                      </div>
+                    )}
+                  </motion.div>
                 ) : (
-                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                    Sin datos de evolución
-                  </div>
-                )
-              ) : (
-                <div className="py-0.5 flex-1 flex flex-col justify-center min-h-0">
-                  <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="260px" />
-                </div>
-              )}
+                  <motion.div
+                    key="heatmap"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    className="py-0.5 flex-1 flex flex-col justify-center min-h-0 w-full"
+                  >
+                    <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="260px" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </Card>
@@ -1016,7 +1034,7 @@ export function OverviewPage() {
                     <motion.div
                       layoutId="overviewAllocPill"
                       className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                     />
                   )}
                   <span className="relative z-10 text-[11px]">
@@ -1127,7 +1145,7 @@ export function OverviewPage() {
                   <motion.div
                     layoutId="returnsPeriodPill"
                     className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                    transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                   />
                 )}
                 <span className="relative z-10 text-[11px]">Global</span>
@@ -1146,7 +1164,7 @@ export function OverviewPage() {
                   <motion.div
                     layoutId="returnsPeriodPill"
                     className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                    transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                   />
                 )}
                 <span className="relative z-10 text-[11px]">Semanal</span>
@@ -1324,9 +1342,9 @@ export function OverviewPage() {
                   return (
                     <motion.tr
                       key={p.isin}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 + i * 0.03 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.15, delay: Math.min(i * 0.015, 0.15) }}
                       onClick={() => setSelectedPosition(p)}
                       onMouseEnter={() => setHoveredIsin(p.isin)}
                       onMouseLeave={() => setHoveredIsin(null)}
@@ -1475,9 +1493,9 @@ export function OverviewPage() {
                   return (
                     <motion.tr
                       key={p.isin}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.15 + i * 0.03 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.15, delay: Math.min(i * 0.015, 0.15) }}
                       onClick={() => setSelectedPosition(p)}
                       onMouseEnter={() => setHoveredIsin(p.isin)}
                       onMouseLeave={() => setHoveredIsin(null)}

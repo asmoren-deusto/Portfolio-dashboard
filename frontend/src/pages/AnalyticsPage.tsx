@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSearchParams } from 'react-router-dom'
 import {
   TrendingUp,
@@ -392,7 +392,7 @@ export function AnalyticsPage() {
                     <motion.div
                       layoutId="analyticsSecondaryPill"
                       className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                     />
                   )}
                   <span className="relative z-10 text-[11px] font-bold">
@@ -403,75 +403,90 @@ export function AnalyticsPage() {
             </div>
           </CardHeader>
 
-          {secondaryView === 'distribution' ? (
-            <div className="px-4 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0">
-              <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-                {positions.length > 0 ? (
-                  <AllocationChart
-                    positions={positions}
-                    mode="type"
-                    showLegend={false}
-                    height={260}
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-500 text-sm">
-                    Sin posiciones registradas
-                  </div>
-                )}
-              </div>
-
-              {/* Allocation Stats Strip */}
-              {allocStats && (
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
-                  <div
-                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
-                    title={allocStats.box1Title}
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-                      <div className="w-5 h-5 rounded-md flex items-center justify-center bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
-                        <PieChart size={12} />
-                      </div>
-                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
-                        {allocStats.box1Label}
-                      </span>
+          <AnimatePresence mode="wait" initial={false}>
+            {secondaryView === 'distribution' ? (
+              <motion.div
+                key="distribution"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="px-4 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 w-full"
+              >
+                <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
+                  {positions.length > 0 ? (
+                    <AllocationChart
+                      positions={positions}
+                      mode="type"
+                      showLegend={false}
+                      height={260}
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-500 text-sm">
+                      Sin posiciones registradas
                     </div>
-                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-1">
-                      {allocStats.box1Val}
-                    </span>
-                  </div>
-
-                  <div
-                    className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
-                    title={allocStats.box2Title}
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-                      <div className="w-5 h-5 rounded-md flex items-center justify-center bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-                        <Layers size={12} />
-                      </div>
-                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
-                        {allocStats.box2Label}
-                      </span>
-                    </div>
-                    <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-1">
-                      {allocStats.box2Val}
-                    </span>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className={cn("px-4 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
-              <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-                {analyticsFetching && !analytics ? (
-                  <ReturnsChartSkeleton compact={false} height={260} />
-                ) : analytics ? (
-                  <ReturnsChart analytics={analytics} compact={false} height={260} />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-500 text-sm">
-                    Sin datos de rentabilidad
+
+                {/* Allocation Stats Strip */}
+                {allocStats && (
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+                    <div
+                      className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                      title={allocStats.box1Title}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                        <div className="w-5 h-5 rounded-md flex items-center justify-center bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
+                          <PieChart size={12} />
+                        </div>
+                        <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
+                          {allocStats.box1Label}
+                        </span>
+                      </div>
+                      <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-1">
+                        {allocStats.box1Val}
+                      </span>
+                    </div>
+
+                    <div
+                      className="flex items-center justify-between gap-1.5 px-3 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                      title={allocStats.box2Title}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                        <div className="w-5 h-5 rounded-md flex items-center justify-center bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                          <Layers size={12} />
+                        </div>
+                        <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
+                          {allocStats.box2Label}
+                        </span>
+                      </div>
+                      <span data-private className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-1">
+                        {allocStats.box2Val}
+                      </span>
+                    </div>
                   </div>
                 )}
-              </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="returns"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className={cn("px-4 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 w-full transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}
+              >
+                <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
+                  {analyticsFetching && !analytics ? (
+                    <ReturnsChartSkeleton compact={false} height={260} />
+                  ) : analytics ? (
+                    <ReturnsChart analytics={analytics} compact={false} height={260} />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-500 text-sm">
+                      Sin datos de rentabilidad
+                    </div>
+                  )}
+                </div>
 
               {/* Quick Stats Strip */}
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
@@ -523,9 +538,10 @@ export function AnalyticsPage() {
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
-        </Card>
+        </AnimatePresence>
+      </Card>
       </div>
 
       {/* Matriz de Rendimientos Mensuales */}
@@ -579,9 +595,9 @@ export function AnalyticsPage() {
           ].map((m, i) => (
             <motion.div
               key={m.label}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 + i * 0.06 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.18, delay: i * 0.04 }}
               className="p-6"
             >
               <div className="flex items-center justify-between">
@@ -640,9 +656,9 @@ export function AnalyticsPage() {
                 .map((p, i) => (
                   <motion.tr data-private
                     key={p.isin}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.38 + i * 0.03 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.15, delay: Math.min(i * 0.015, 0.2) }}
                     onClick={() => setSelectedPosition(p)}
                     className="group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] cursor-pointer last:border-0"
                   >

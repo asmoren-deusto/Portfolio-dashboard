@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 11:51:27
+- **Fecha de exportación:** 2026-10-16 12:51:56
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 39
+- **Total de interacciones registradas:** 41
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -524,5 +524,39 @@ Los cambios han sido compilados y sincronizados en la versión **`v3.0.73`**.
 ### 👤 Usuario (2026-10-16 09:40:16)
 
 las graficas de distribucion y rendimiento parece que se recargan aleatoriamente
+
+---
+
+### 🤖 Asistente (2026-10-16 09:51:29)
+
+Se ha diagnosticado y corregido la causa de las recargas y parpadeos aleatorios en las gráficas de **Distribución** y **Rendimiento** (así como en el resto de la fila de tarjetas):
+
+### 🔍 Causas identificadas
+1. **Sustitución por Skeletons durante refetch silencioso de fondo (`isFetching`):**
+   - En [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx), las gráficas (`AllocationChart`, `ReturnsChart`, `PerformanceChart`) y sus cajitas de estadísticas inferiores estaban condicionadas con un ternario `isGlobalUpdating ? <Skeleton /> : <Chart />`.
+   - Cada vez que React Query re-validaba datos en segundo plano (por intervalo periódico o foco de ventana), `isFetching` se ponía a `true` por unos milisegundos. Como resultado, React **desmontaba completamente la gráfica** para mostrar el skeleton gris y luego la volvía a montar, provocando que la animación de apertura (donut girando y barras subiendo desde cero) se repitiera.
+2. **Polling de 45s de cartera simulada afectando a métricas globales:**
+   - La consulta `useSimulatedPortfolio` tiene un intervalo de refresco de 45 segundos. La variable `isGlobalUpdating` incluía erróneamente `simPortfolioFetching`, haciendo que cada 45 segundos la tarjeta de Distribución y el valor total de cartera entraran en estado de carga.
+3. **Re-animación Recharts:**
+   - `<Pie>` en [AllocationChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/AllocationChart.tsx) y `<Bar>` en [ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx) no distinguían entre la animación de montaje/cambio de modo y las actualizaciones pasivas de propiedades.
+
+---
+
+### 🛠️ Soluciones aplicadas
+1. **Mantener las gráficas siempre montadas en actualizaciones de fondo:**
+   - En [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx), los skeletons solo se muestran en la carga inicial cuando no existen datos (`positions.length === 0 && positionsFetching`, `!analytics && analyticsFetching`, etc.).
+   - Una vez los datos están presentes, cualquier refresco en segundo plano se aplica de forma fluida e invisible sin desmontar los componentes ni sustituirlos por rectángulos grises.
+2. **Desacoplamiento de `simPortfolioFetching`:**
+   - Se eliminó `simPortfolioFetching` de `isGlobalUpdating`, evitando los parpadeos periódicos cada 45 segundos.
+3. **Control de `isAnimationActive`:**
+   - Se añadió un control de animación inicial tanto a [AllocationChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/AllocationChart.tsx) como a [ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx): las animaciones solo se disparan al montar la gráfica o cuando el usuario conmuta deliberadamente el modo (*Activo/Tipo*, *Global/Semanal* o refresco manual), permaneciendo estables y estáticas durante las actualizaciones silenciosas.
+
+La versión ha sido sincronizada y publicada en **`v3.0.74`**.
+
+---
+
+### 👤 Usuario (2026-10-16 10:38:22)
+
+revisa todo el codigo y haz un analisis arquitectonico y funcional, despúes refactoriza y mejora la app. la idea es poder obtener los datos de forma consistente, muy actualizada y exacta. mira como hacemos la actualización en segundo plano y usa mejores practicas y tecnicas modernas para garantiza estbilidad, rendimiento y actualización casi en tiempo real de la información sin interferir en el uso de la interfaz pero manteniendo todos los datos siempre actualizados. después de todo esto dedica tiempo a mejorar las animaciones de la web, dales consistencia y gusto y haz que las tarjetas se mantengan es su posicion mientras que lo que se anima es el contenido dando un aspecto mucho más profesional al conjunto.
 
 ---
