@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 15:23:06
+- **Fecha de exportación:** 2026-10-16 15:36:52
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 75
+- **Total de interacciones registradas:** 77
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1107,5 +1107,41 @@ He corregido definitivamente la colocación de los porcentajes en la gráfica de
 ### 👤 Usuario (2026-10-16 13:04:15)
 
 al cambiar de entidad o en general los valores, anima las graficas
+
+---
+
+### 🤖 Asistente (2026-10-16 13:23:09)
+
+Se han animado e integrado las transiciones en todas las gráficas para que respondan de forma fluida tanto al cambiar de entidad (Consolidado, Kutxabank, Scalable, Trade Republic) como al modificar valores (horizontes temporales, refresco o filtros):
+
+### Cambios implementados
+
+1. **Gestión de Estado Reactivo (`appStore.ts`):**
+   - Se actualizó tanto [setSelectedBroker](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/store/appStore.ts) como [setPeriod](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/store/appStore.ts) para incrementar automáticamente `refreshAnimKey` al detectar un cambio de entidad o de horizonte temporal, propagando la señal de re-animación a todos los componentes del dashboard.
+
+2. **Evolución Patrimonial (`PerformanceChart.tsx`):**
+   - Se sincronizó el barrido institucional (*scanline* luminosa y *clipPath wipe* de 750ms) para que se dispare exactamente tras actualizar los datos de la serie (`setData`) y ajustar la escala temporal (`fitContent`).
+   - Al alternar entre brókers o períodos, la curva y su gradiente se revelan fluidamente de izquierda a derecha.
+
+3. **Distribución (`AllocationChart.tsx`):**
+   - Se añadió un contenedor [`motion.div`](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/AllocationChart.tsx) con escalado suave (`0.97 -> 1`) y una clave dinámica en `<PieChart>`.
+   - Ahora, al cambiar de bróker o de tipo/activo, los sectores del donut se abren y animan fluidamente desde 0° hasta sus proporciones exactas.
+
+4. **Rendimiento por Períodos (`ReturnsChart.tsx`):**
+   - Se vinculó la clave de renderizado a la entidad seleccionada (`selectedBroker`) y los valores resultantes.
+   - Las barras realizan una transición con pop suave en eje Y y opacidad (`duration: 0.32s`), manteniendo la estabilidad y precisión de las etiquetas de porcentaje.
+
+5. **Comparativa vs Benchmarks y Matriz Mensual:**
+   - [BenchmarkEvolutionChart](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/BenchmarkEvolutionChart.tsx) ahora re-dispara el barrido de líneas ante cambios de entidad.
+   - [MonthlyReturnsHeatmap](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/MonthlyReturnsHeatmap.tsx) envuelve la cuadrícula y métricas con una transición suave al alternar de entidad.
+
+---
+🚀 **Release publicada:** `v3.0.92` sincronizada en Git.
+
+---
+
+### 👤 Usuario (2026-10-16 13:08:48)
+
+revisa ese ultimo salto, y me gustaba más antes cuando no se reseteaba la grafica a las 10:00 sino que se mantenia el valor de postmarket
 
 ---

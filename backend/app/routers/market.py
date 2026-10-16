@@ -495,14 +495,38 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         # ── Change calculation ──────────────────────────────────────────────────
         # For regular/closed: compare regular_price vs prev_close (yesterday)
         # For pre/post market: compare extended price vs regular_price (today's/yesterday's close)
-        if market_state == "PRE" and pre_price and regular_price:
-            ref = regular_price
-            chg = round(display_price - ref, 4)
-            chg_pct = pre_chg_pct if pre_chg_pct is not None else round((display_price - ref) / ref * 100, 2)
-        elif market_state in ("POST", "POSTPOST") and post_price and regular_price:
-            ref = regular_price
-            chg = round(display_price - ref, 4)
-            chg_pct = post_chg_pct if post_chg_pct is not None else round((display_price - ref) / ref * 100, 2)
+        if market_state == "PRE":
+            if pre_price is not None and regular_price is not None and abs(pre_price - regular_price) > 0.0001:
+                ref = regular_price
+                chg = round(display_price - ref, 4)
+                chg_pct = pre_chg_pct if pre_chg_pct is not None else round((display_price - ref) / ref * 100, 2)
+            elif pre_chg_pct is not None and abs(pre_chg_pct) > 0.001:
+                ref = regular_price or display_price
+                chg_pct = pre_chg_pct
+                chg = round((ref * chg_pct) / 100.0, 4)
+            else:
+                ref = regular_price or display_price
+                chg = 0.0
+                chg_pct = 0.0
+        elif market_state in ("POST", "POSTPOST"):
+            if post_price is not None and regular_price is not None and abs(post_price - regular_price) > 0.0001:
+                ref = regular_price
+                chg = round(display_price - ref, 4)
+                chg_pct = post_chg_pct if post_chg_pct is not None else round((display_price - ref) / ref * 100, 2)
+            elif post_chg_pct is not None and abs(post_chg_pct) > 0.001:
+                ref = regular_price or display_price
+                chg_pct = post_chg_pct
+                chg = round((ref * chg_pct) / 100.0, 4)
+            else:
+                ref = regular_price or display_price
+                chg = 0.0
+                chg_pct = 0.0
+        else:
+            # REGULAR or CLOSED: change vs previous close
+            ref = prev_close or regular_price or display_price
+            chg = round(display_price - ref, 4) if ref else 0
+            chg_pct = round((display_price - ref) / ref * 100, 2) if ref and ref > 0 else 0.0
+
         price_precision = 4 if ticker == "EURUSD=X" else None
         if price_precision is not None:
             if display_price is not None:
@@ -511,18 +535,6 @@ def _fetch_ticker_extended(ticker: str) -> dict:
                 regular_price = round(regular_price, price_precision)
             if prev_close is not None:
                 prev_close = round(prev_close, price_precision)
-
-        if market_state == "PRE":
-            # Si el mercado estadounidense está en pre-market y este ETF no ha cruzado operaciones hoy,
-            # su variación hoy respecto al cierre anterior es 0.00% (no arrastrar la variación de ayer)
-            ref = regular_price or display_price
-            chg = 0.0
-            chg_pct = 0.0
-        else:
-            # REGULAR or CLOSED: change vs previous close
-            ref = prev_close or regular_price or display_price
-            chg = round(display_price - ref, 4) if ref else 0
-            chg_pct = round((display_price - ref) / ref * 100, 2) if ref and ref > 0 else 0.0
 
         def _r(v, precision=None):
             if v is None:
@@ -1222,17 +1234,21 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                 usd_fx_series = None
 
                 if fetch_period == "1d" and unique_sessions:
-                    # Target strictly the latest active trading session
+                    # Target strictly the latest active trading session.
+                    # Only reset to a new daily session once the regular market opens (09:30 NY / 15:30 Madrid).
+                    # Before 15:30 Madrid, maintain the previous session with its post-market closing value.
                     latest_session = unique_sessions[-1]
-                    target_session_idxs = [
+                    regular_open_idxs = [
                         idx for idx, d in zip(closes.index, session_dates)
-                        if d == latest_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 4 * 60
+                        if d == latest_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 9 * 60 + 30
                     ]
-                    if target_session_idxs:
+                    if regular_open_idxs:
                         target_session = latest_session
-                        target_idxs = target_session_idxs
+                        target_idxs = [
+                            idx for idx, d in zip(closes.index, session_dates)
+                            if d == latest_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 4 * 60
+                        ] or [idx for idx, d in zip(closes.index, session_dates) if d == target_session]
                     elif len(unique_sessions) > 1:
-                        # Before 04:00 NY (10:00 Madrid) today: show the last completed session
                         target_session = unique_sessions[-2]
                         target_idxs = [
                             idx for idx, d in zip(closes.index, session_dates)
@@ -1363,6 +1379,23 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
         is_today = (last_pt["date"] == now_madrid.strftime("%Y-%m-%d"))
 
         if is_today:
+            # Sincronizar suavemente para evitar saltos o discontinuidades artificiales
+            effective_sim_pct = (
+                last_pt["simulated_pct"]
+                if (abs(simulated_daily_pct - last_pt["simulated_pct"]) > 0.08 and abs(simulated_daily_pct) <= 0.02)
+                else simulated_daily_pct
+            )
+            effective_eur_pct = (
+                last_pt["simulated_eur_pct"]
+                if (abs(simulated_eur_pct - last_pt["simulated_eur_pct"]) > 0.08 and abs(simulated_daily_pct) <= 0.02)
+                else simulated_eur_pct
+            )
+
+            simulated_daily_pct = effective_sim_pct
+            simulated_daily_amount = round(total_val * (effective_sim_pct / 100.0), 2)
+            simulated_eur_pct = effective_eur_pct
+            simulated_eur_amount = round(total_val * (effective_eur_pct / 100.0), 2)
+
             if now_unix - last_pt["time_unix"] >= 180:
                 chart_points.append({
                     "time": now_madrid.isoformat(),
@@ -1372,18 +1405,26 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                     "date": now_madrid.strftime("%Y-%m-%d"),
                     "session_date": datetime.now(ZoneInfo("America/New_York")).date().isoformat(),
                     "phase": chart_points[-1].get("phase", "REGULAR"),
-                    "simulated_pct": simulated_daily_pct,
+                    "simulated_pct": effective_sim_pct,
                     "simulated_amount": simulated_daily_amount,
-                    "simulated_eur_pct": simulated_eur_pct,
+                    "simulated_eur_pct": effective_eur_pct,
                     "simulated_eur_amount": simulated_eur_amount,
                     "usd_strength_pct": usd_strength_pct,
                 })
             else:
-                last_pt["simulated_pct"] = simulated_daily_pct
+                last_pt["simulated_pct"] = effective_sim_pct
                 last_pt["simulated_amount"] = simulated_daily_amount
-                last_pt["simulated_eur_pct"] = simulated_eur_pct
+                last_pt["simulated_eur_pct"] = effective_eur_pct
                 last_pt["simulated_eur_amount"] = simulated_eur_amount
                 last_pt["usd_strength_pct"] = usd_strength_pct
+        else:
+            # Sesión cerrada (fuera de horario regular): mantener fielmente el valor de cierre de post-market
+            simulated_daily_pct = last_pt["simulated_pct"]
+            simulated_daily_amount = last_pt["simulated_amount"]
+            simulated_eur_pct = last_pt["simulated_eur_pct"]
+            simulated_eur_amount = last_pt["simulated_eur_amount"]
+            if "usd_strength_pct" in last_pt:
+                usd_strength_pct = last_pt["usd_strength_pct"]
 
     # ETFs summary list
     etfs_summary = []
