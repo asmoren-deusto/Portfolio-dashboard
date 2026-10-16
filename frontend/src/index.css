@@ -284,19 +284,6 @@
   animation: shimmerWave 1.8s ease-in-out infinite;
 }
 
-/* ── Live Table Scan Line ── */
-@keyframes tableScanLine {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.animate-table-scan {
-  animation: tableScanLine 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
 
 /* ── Quick, professional content fade animation (Cards remain fixed in position) ── */
 @keyframes quickFadeSlide {

@@ -55,60 +55,24 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const amount: number | undefined = payload[0]?.payload?.amount
   const fullName = payload[0]?.payload?.fullName || label
   const subtitle = payload[0]?.payload?.subtitle || 'TWR ponderado en el tiempo'
-  const isPositive = v >= 0
 
   return (
-    <div className="pointer-events-none min-w-[170px] max-w-[240px] px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1a1f2b]/95 backdrop-blur-md border border-slate-200/90 dark:border-white/10 shadow-2xl text-xs select-none transition-all">
-      {/* Date / Period Header */}
-      <div className="text-[11.5px] font-medium text-slate-400 dark:text-slate-400 mb-1.5 capitalize flex items-center justify-between">
-        <span>{fullName}</span>
-      </div>
-
-      {/* Metric Rows */}
-      <div className="flex flex-col gap-1.5">
-        {/* Rendimiento */}
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
-            <span
-              className={cn(
-                'w-1.5 h-1.5 rounded-full shrink-0',
-                isPositive ? 'bg-emerald-500' : 'bg-rose-500'
-              )}
-            />
-            Rendimiento
-          </span>
-          <span
-            className={cn(
-              'font-mono font-bold text-[12.5px]',
-              isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-            )}
-          >
-            {isPositive ? '+' : ''}{v.toFixed(2)}%
-          </span>
-        </div>
-
-        {/* Ganancia / Importe Neto (si está disponible) */}
+    <div className="rounded-xl border border-slate-200/60 dark:border-white/10 bg-white/65 dark:bg-[#181818]/65 backdrop-blur-lg px-3.5 py-2.5 text-xs shadow-2xl">
+      <p className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5">{fullName}</p>
+      <div className="flex items-center gap-1.5 font-mono">
+        <span className="text-slate-500 dark:text-slate-400">Rendimiento:</span>
+        <span className={v >= 0 ? 'text-emerald-500 dark:text-emerald-400 font-bold' : 'text-rose-500 dark:text-rose-400 font-bold'}>
+          {v >= 0 ? '+' : ''}{v.toFixed(2)}%
+        </span>
         {amount !== undefined && (
-          <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-white/[0.08] text-[11px]">
-            <span className="text-slate-500 dark:text-slate-400">Ganancia neta</span>
-            <span
-              className={cn(
-                'font-mono font-bold text-[12px]',
-                amount >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-              )}
-            >
-              {amount >= 0 ? '+' : ''}{fmt.currency(amount)}
-            </span>
-          </div>
-        )}
-
-        {/* Subtitle / Context Note */}
-        {subtitle && (
-          <div className="text-[10px] text-slate-400 dark:text-slate-500 pt-1 border-t border-slate-100 dark:border-white/[0.06] mt-0.5">
-            {subtitle}
-          </div>
+          <span className={cn('font-bold ml-1', amount >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+            ({amount >= 0 ? '+' : ''}{fmt.currency(amount)})
+          </span>
         )}
       </div>
+      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+        {subtitle}
+      </p>
     </div>
   )
 }
@@ -127,7 +91,6 @@ export function ReturnsChart({
 }: ReturnsChartProps) {
   const refreshAnimKey = useAppStore(s => s.refreshAnimKey)
   const selectedBroker = useAppStore(s => s.selectedBroker)
-  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null)
 
   if (mode === 'global' && !analytics) {
     return <ReturnsChartSkeleton compact={compact} height={height} />
@@ -245,70 +208,53 @@ export function ReturnsChart({
             ]}
             tickFormatter={v => `${Number(Number(v).toFixed(1))}%`}
           />
-          <Tooltip
-            content={<CustomTooltip />}
-            cursor={{ fill: 'rgba(148, 163, 184, 0.08)', radius: 6 }}
-            animationDuration={150}
-            wrapperStyle={{ outline: 'none' }}
-          />
+          <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
           <Bar
             dataKey="plotVal"
             radius={[6, 6, 0, 0]}
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
-            isAnimationActive={true}
-            animationBegin={30}
-            animationDuration={650}
-            animationEasing="ease-out"
+            isAnimationActive={false}
           >
             <LabelList
-              dataKey="posVal"
-              position="top"
-              offset={5}
-              formatter={(val: any) => {
-                if (val == null || isNaN(val)) return ''
-                const num = Number(val)
-                if (Math.abs(num) < 0.0001) return '+0.00%'
-                return `${num >= 0 ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
-              }}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                transition: 'all 0.3s ease',
-              }}
-            />
-            <LabelList
-              dataKey="negVal"
-              position="bottom"
-              offset={5}
-              formatter={(val: any) => {
-                if (val == null || isNaN(val)) return ''
-                const num = Number(val)
-                return `-${Math.abs(num) < 1 ? Math.abs(num).toFixed(2) : Math.abs(num).toFixed(1)}%`
-              }}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                transition: 'all 0.3s ease',
+              dataKey="value"
+              content={(props: any) => {
+                const { x = 0, y = 0, width = 0, height = 0, value, index } = props
+                const raw = typeof value === 'number' ? value : (data[index]?.value ?? 0)
+                if (raw == null || isNaN(raw)) return null
+
+                const isZero = Math.abs(raw) < 0.0001
+                const isPos = raw >= 0
+                const formatted = isZero
+                  ? '+0.00%'
+                  : `${isPos ? '+' : ''}${Math.abs(raw) < 1 ? raw.toFixed(2) : raw.toFixed(1)}%`
+
+                // For positive values, y is the top of the bar; label sits above (y - 6)
+                // For negative values, y is the baseline (0 line), height extends down; label sits below
+                const posX = x + width / 2
+                const posY = isPos ? y - 6 : y + height + 13
+
+                return (
+                  <text
+                    x={posX}
+                    y={posY}
+                    textAnchor="middle"
+                    fill="#94a3b8"
+                    fontSize={compact ? 9.5 : 10.5}
+                    fontFamily="monospace"
+                    fontWeight={700}
+                    className="select-none pointer-events-none fill-slate-500 dark:fill-slate-400"
+                  >
+                    {formatted}
+                  </text>
+                )
               }}
             />
             {data.map((d, i) => (
               <Cell
                 key={`cell-${mode}-${selectedBroker}-${d.name}-${i}`}
                 fill={d.value >= 0 ? 'url(#barGreen)' : 'url(#barRed)'}
-                opacity={1}
-                style={{
-                  cursor: 'pointer',
-                  transition: 'filter 0.18s ease',
-                  filter: hoveredBarIndex === i
-                    ? (d.value >= 0 ? 'drop-shadow(0 2px 8px rgba(16,185,129,0.4))' : 'drop-shadow(0 2px 8px rgba(244,63,94,0.4))')
-                    : 'none',
-                }}
-                onMouseEnter={() => setHoveredBarIndex(i)}
-                onMouseLeave={() => setHoveredBarIndex(null)}
+                className="transition-all duration-150 hover:brightness-125 cursor-pointer"
               />
             ))}
           </Bar>
