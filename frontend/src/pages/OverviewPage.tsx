@@ -396,22 +396,43 @@ export function OverviewPage() {
     let dayAmount: number | null = null
     let weekPct: number | undefined = undefined
     let weekAmount: number | null = null
+    let hasPositionChanges = false
 
-    // 1. Compute Day Metric (1D) strictly from active positions updated to the latest reporting NAV date.
-    // Unupdated positions compute as 0.00 € (0.00%) today.
-    // dayAmount and dayPct MUST be computed together to guarantee matching signs and magnitude.
+    // 1. Compute Day Metric (1D)
+    // Check if positions have active, non-zero daily changes reported today
+    let positionsDailyChange = 0
+
     if (positions.length > 0) {
-      const totalDailyChange = positions.reduce((acc, p) => {
-        const pDate = p.price_date || p.last_updated
-        if (pDate && pDate === latestNavDate) {
-          return acc + (p.daily_change || 0) * (p.shares || 1)
+      for (const p of positions) {
+        if (typeof p.daily_change === 'number' && !isNaN(p.daily_change) && p.daily_change !== 0) {
+          hasPositionChanges = true
+          positionsDailyChange += p.daily_change * (p.shares || 1)
         }
-        return acc
-      }, 0)
+      }
+    }
+
+    if (hasPositionChanges) {
       const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
-      dayAmount = Math.round(totalDailyChange * 100) / 100
-      const prevVal = totalVal - totalDailyChange
-      dayPct = prevVal > 0 ? (totalDailyChange / prevVal) * 100 : 0
+      dayAmount = Math.round(positionsDailyChange * 100) / 100
+      const prevVal = totalVal - positionsDailyChange
+      dayPct = prevVal > 0 ? (positionsDailyChange / prevVal) * 100 : 0
+    } else if (performance && performance.length >= 2) {
+      // Compute 1D directly from the last 2 sessions of the performance series
+      const sorted = [...performance]
+        .filter((p) => p && p.date && typeof p.value === 'number')
+        .sort((a, b) => a.date.localeCompare(b.date))
+      const navSorted = latestNavDate ? sorted.filter((p) => p.date <= latestNavDate) : sorted
+      const activeSorted = navSorted.length >= 2 ? navSorted : sorted
+      if (activeSorted.length >= 2) {
+        const last = activeSorted[activeSorted.length - 1]
+        const prev = activeSorted[activeSorted.length - 2]
+        const lastInv = last.invested ?? last.value
+        const prevInv = prev.invested ?? prev.value
+        const inflow = lastInv - prevInv
+        const diff = (last.value - inflow) - prev.value
+        dayAmount = Math.round(diff * 100) / 100
+        dayPct = prev.value > 0 ? (diff / prev.value) * 100 : 0
+      }
     } else if (analytics?.return_1d !== undefined) {
       dayPct = analytics.return_1d
       if (displaySummary?.total_value) {
@@ -433,8 +454,10 @@ export function OverviewPage() {
         // 7 business sessions ago (or up to 7 sessions)
         const weekIdx = Math.max(0, activeSorted.length - 1 - 7)
         const weekPoint = activeSorted[weekIdx]
-        const weekInflow = (last.invested ?? 0) - (weekPoint.invested ?? 0)
-        const wProfit = (last.value - weekPoint.value) - weekInflow
+        const lastInv = last.invested ?? last.value
+        const weekInv = weekPoint.invested ?? weekPoint.value
+        const weekInflow = lastInv - weekInv
+        const wProfit = (last.value - weekInflow) - weekPoint.value
         weekAmount = Math.round(wProfit * 100) / 100
         weekPct = weekPoint.value > 0 ? (wProfit / weekPoint.value) * 100 : 0
       }
@@ -450,6 +473,7 @@ export function OverviewPage() {
       dayAmount: dayAmount !== null && !isNaN(dayAmount) ? Math.round(dayAmount * 100) / 100 : undefined,
       weekPct: weekPct !== undefined ? Number(weekPct.toFixed(2)) : undefined,
       weekAmount: weekAmount !== null && !isNaN(weekAmount) ? Math.round(weekAmount * 100) / 100 : undefined,
+      hasPositionChanges,
     }
   }, [performance, analytics, positions, displaySummary, latestNavDate])
 
@@ -508,9 +532,8 @@ export function OverviewPage() {
       }
 
       const isLatest = i === slice.length - 1
-      if (isLatest) {
+      if (isLatest && shortTermMetrics?.hasPositionChanges) {
         if (shortTermMetrics?.dayPct !== undefined) {
-          // Today's return takes the real-time calculated return of today's incoming NAV batch
           dayReturnPct = shortTermMetrics.dayPct
         }
         if (shortTermMetrics?.dayAmount !== undefined) {

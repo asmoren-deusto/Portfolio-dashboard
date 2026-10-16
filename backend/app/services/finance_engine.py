@@ -355,7 +355,12 @@ def calculate_period_return(value_series: list[dict], days: int) -> Optional[flo
             curr = value_series[-1][key]
             return round(float((curr / prev - 1) * 100), 2) if prev and prev > 0 else 0.0
 
-        cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
+        last_date_str = value_series[-1].get("date")
+        if last_date_str:
+            last_date = pd.to_datetime(last_date_str)
+            cutoff = last_date - pd.Timedelta(days=days)
+        else:
+            cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
         cutoff_str = str(cutoff.date())
         pts_before = [
             v for v in value_series

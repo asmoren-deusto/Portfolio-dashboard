@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 17:14:24
+- **Fecha de exportación:** 2026-10-16 17:18:57
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 102
+- **Total de interacciones registradas:** 104
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1518,5 +1518,29 @@ Se ha ajustado el espaciado y la animación del círculo indicador en vivo:
 ### 👤 Usuario (2026-10-16 14:46:55)
 
 en rendimiento al hacer over y en algunas ocasiones/recargas los % desaparecen
+
+---
+
+### 🤖 Asistente (2026-10-16 15:14:27)
+
+Se ha corregido el problema por el cual desaparecían las etiquetas de porcentaje (`%`) en la gráfica de **Rendimiento** ([ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)):
+
+### Causa del Problema
+1. **Re-renderizados en Hover:** Había un estado React (`hoveredBarIndex`) que se actualizaba en cada `onMouseEnter`/`onMouseLeave` de las barras. Al mover el ratón, el componente se re-renderizaba continuamente.
+2. **Conflicto de Animación en Recharts:** Cada re-renderizado reactivaba el ciclo de animación (`isAnimationActive={true}`) de Recharts, lo que provocaba que las etiquetas `<LabelList>` se ocultasen u omitieran mientras duraba la animación.
+3. **Múltiples `<LabelList>` con valores `undefined`:** Se usaban dos componentes `<LabelList>` independientes (`posVal` y `negVal`), lo que generaba colisiones en el gestor de layout de Recharts en ciertas cargas o cambios de resolución de `ResponsiveContainer`.
+
+### Solución Implementada
+- **Eliminación del estado en hover:** El resaltado de la barra activa ahora se realiza mediante CSS acelerado por GPU (`hover:brightness-125 transition-all`) y el cursor translúcido del `Tooltip`, sin forzar re-renders de React.
+- **Renderizador de etiquetas SVG unificado:** Se reemplazaron las dos instancias por un único generador personalizado (`<LabelList content={...} />`) que calcula de forma determinista la posición (encima de la barra si es positiva, debajo si es negativa) leyendo directamente los datos de la serie.
+- **Desactivación de la animación interna de la barra:** Se desactivó `isAnimationActive={false}` en el nodo `<Bar>`, de modo que los textos SVG se pintan de inmediato y nunca se pierden al redimensionar la ventana o interactuar con el ratón. (La transición suave general sigue a cargo del wrapper Framer Motion).
+
+Desplegado y sincronizado en Git bajo la versión **`v3.0.104`**.
+
+---
+
+### 👤 Usuario (2026-10-16 14:49:05)
+
+revisa tambien los valores para los ultimos dias y la semana
 
 ---
