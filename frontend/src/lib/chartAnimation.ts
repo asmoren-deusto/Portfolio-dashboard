@@ -11,11 +11,15 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
     return
   }
 
-  // Find the plot area (main series canvas) in lightweight-charts
-  const plotCanvasWrapper = container.querySelector('table tr:first-child td:first-child') as HTMLElement | null
-  const target = plotCanvasWrapper || container
+  // Find the plot area (main series canvas wrapper) in lightweight-charts
+  const canvas = container.querySelector('canvas')
+  const target = (canvas?.closest('td') || canvas?.parentElement || container) as HTMLElement
 
-  if (typeof target.animate === 'function') {
+  if (target && typeof target.animate === 'function') {
+    try {
+      target.getAnimations?.().forEach(a => a.cancel())
+    } catch {}
+
     target.animate(
       [
         { clipPath: 'inset(0 100% 0 0)' },

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 13:58:41
+- **Fecha de exportación:** 2026-10-16 14:06:46
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 55
+- **Total de interacciones registradas:** 57
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -822,5 +822,23 @@ Publicado y sincronizado en la versión **v3.0.81**.
 ### 👤 Usuario (2026-10-16 11:25:07)
 
 en rendimiento vuelve a los % originales en gris, estos los has colocado mal además
+
+---
+
+### 🤖 Asistente (2026-10-16 11:58:43)
+
+Se han restaurado los porcentajes originales en la gráfica de **Rendimiento**:
+
+- En [ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx):
+  - **Color original:** Restaurado el tono gris neutro (`#94a3b8`) con tipografía monospace y negrita.
+  - **Posicionamiento natural:** Se ha vuelto al posicionamiento nativo `position="top"` de Recharts con sus márgenes y dominios originales, eliminando los desajustes de coordenadas manuales.
+
+Publicado y sincronizado en la versión **v3.0.82**.
+
+---
+
+### 👤 Usuario (2026-10-16 11:28:47)
+
+la animacion de evolucion patrimonial no funciona
 
 ---

@@ -165,7 +165,7 @@ export function PerformanceChart({
 
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
 
-  const { selectedBroker, period } = useAppStore()
+  const { selectedBroker, period, refreshAnimKey } = useAppStore()
   // Entity selection: 'stacked' by default when 'all' brokers selected (mantiene el estacado de entidades), o broker individual
   const selectedEntity = selectedBroker === 'all' ? 'stacked' : selectedBroker.toLowerCase()
 
@@ -173,11 +173,14 @@ export function PerformanceChart({
   const [sweepKey, setSweepKey] = useState(0)
   const [isSweepAnimating, setIsSweepAnimating] = useState(true)
 
-  // Trigger sweep curtain animation on data, period, or entity change
+  // Trigger sweep curtain animation on data, period, entity, or refresh change
   useEffect(() => {
     setIsSweepAnimating(true)
     setSweepKey(prev => prev + 1)
-  }, [data, selectedEntity, chartMode, period])
+    requestAnimationFrame(() => {
+      triggerChartAnimation(containerRef.current, 850)
+    })
+  }, [data, selectedEntity, chartMode, period, refreshAnimKey])
 
   // Helper to safely extract broker value and invested
   const getBrokerData = (p: PricePoint | null | undefined, brokerKey: string) => {
@@ -834,11 +837,13 @@ export function PerformanceChart({
       }
 
       chart.timeScale().fitContent()
-      triggerChartAnimation(containerRef.current, 850)
+      requestAnimationFrame(() => {
+        triggerChartAnimation(containerRef.current, 850)
+      })
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
-  }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics, period])
+  }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics, period, refreshAnimKey])
 
   return (
     <div data-private className="w-full flex flex-col justify-between flex-1 min-h-0 select-none">
