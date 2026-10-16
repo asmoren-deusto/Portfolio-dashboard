@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 16:59:36
+- **Fecha de exportación:** 2026-10-16 17:08:39
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 96
+- **Total de interacciones registradas:** 98
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1437,5 +1437,30 @@ Queda implementada y verificada la **animación y filtrado por entidad en la gr�
 ### 👤 Usuario (2026-10-16 14:20:32)
 
 que el globo de rendimiento sea como el resto
+
+---
+
+### 🤖 Asistente (2026-10-16 14:59:39)
+
+El globo informativo (tooltip flotante) de la gráfica de **Rendimiento** ([ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)) ha sido unificado con la estética de las demás gráficas del panel:
+
+1. **Diseño y Estilo Aurora:**
+   - Geometría redondeada `rounded-2xl`, acabado de cristal `bg-white/95 dark:bg-[#1a1f2b]/95`, `backdrop-blur-md`, bordes sutiles `border-slate-200/90 dark:border-white/10` y sombra profunda `shadow-2xl`.
+   - Encabezado con tipografía tenue y formato fecha/período legible.
+
+2. **Indicadores y Filas de Métricas:**
+   - Punto indicador de color (`bg-emerald-500` / `bg-rose-500`) según el signo del retorno.
+   - Cifras en fuente monoespaciada con peso destacado (`text-[12.5px]`), porcentaje con signo explícito (`+`/`-`).
+   - Fila de ganancia neta en divisa monetaria (`fmt.currency(amount)`) con separador sutil cuando hay importe calculado disponible.
+   - Resalte de columna sobre la barra activa con cursor suave translúcido y bordes redondeados.
+
+3. **Versión y Release:**
+   - Desplegado y sincronizado en el repositorio bajo la versión **`v3.0.101`** mediante el protocolo de release automático.
+
+---
+
+### 👤 Usuario (2026-10-16 14:24:33)
+
+mete algo parecido a esto y si se te ocurre algun otro detalle chulo o iconos para otras cosas tb
 
 ---

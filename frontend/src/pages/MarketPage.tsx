@@ -14,10 +14,15 @@ import {
   Filter,
   Sparkles,
   Columns2,
+  Globe,
+  Zap,
+  PieChart,
+  Cpu,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMarketIndices, useMarketQuotes, type MarketStock } from '@/api/queries'
 import { MarketTicker } from '@/components/market/MarketTicker'
+import { MarketSessionsBar } from '@/components/market/MarketSessionsBar'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockCard } from '@/components/market/StockCard'
 import { StockTableRow } from '@/components/market/StockTableRow'
@@ -29,13 +34,59 @@ import { SimulatedPortfolioCard } from '@/components/market/SimulatedPortfolioCa
 import { fmt } from '@/lib/utils'
 
 const INDEX_TABS = [
-  { id: 'TICKER', label: 'Ticker superior' },
-  { id: 'Todos', label: 'Todos los Mercados' },
-  { id: 'ETFs', label: 'ETFs Cartera' },
-  { id: 'SP500', label: 'S&P 500' },
-  { id: 'NASDAQ100', label: 'NASDAQ 100' },
-  { id: 'IBEX35', label: 'IBEX 35' },
-  { id: 'DAX', label: 'DAX 40' },
+  {
+    id: 'TICKER',
+    label: 'Ticker superior',
+    icon: <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />,
+  },
+  {
+    id: 'Todos',
+    label: 'Todos los Mercados',
+    icon: <Globe className="w-3.5 h-3.5 text-blue-500 shrink-0" />,
+  },
+  {
+    id: 'ETFs',
+    label: 'ETFs Cartera',
+    icon: <PieChart className="w-3.5 h-3.5 text-violet-500 shrink-0" />,
+  },
+  {
+    id: 'SP500',
+    label: 'S&P 500',
+    icon: (
+      <img
+        src="https://flagcdn.com/w40/us.png"
+        alt="EE.UU."
+        className="w-4 h-2.5 rounded-2xs object-cover shrink-0 shadow-2xs"
+      />
+    ),
+  },
+  {
+    id: 'NASDAQ100',
+    label: 'NASDAQ 100',
+    icon: <Cpu className="w-3.5 h-3.5 text-cyan-400 shrink-0" />,
+  },
+  {
+    id: 'IBEX35',
+    label: 'IBEX 35',
+    icon: (
+      <img
+        src="https://flagcdn.com/w40/es.png"
+        alt="España"
+        className="w-4 h-2.5 rounded-2xs object-cover shrink-0 shadow-2xs"
+      />
+    ),
+  },
+  {
+    id: 'DAX',
+    label: 'DAX 40',
+    icon: (
+      <img
+        src="https://flagcdn.com/w40/de.png"
+        alt="Alemania"
+        className="w-4 h-2.5 rounded-2xs object-cover shrink-0 shadow-2xs"
+      />
+    ),
+  },
 ]
 
 export const TICKER_ORDER = [
@@ -234,6 +285,19 @@ export const MarketPage: React.FC = () => {
       {/* Real-time Ticker Bar */}
       <MarketTicker onSelectStock={setSelectedStock} />
 
+      {/* Global Market Trading Sessions Bar (Tokyo, Europe, New York) */}
+      <MarketSessionsBar
+        onSelectSession={(sessionId) => {
+          if (sessionId === 'europe') {
+            setSelectedIndex('IBEX35')
+          } else if (sessionId === 'ny') {
+            setSelectedIndex('SP500')
+          } else if (sessionId === 'tokyo') {
+            setSelectedIndex('Todos')
+          }
+        }}
+      />
+
       {/* Simulated Live Portfolio Performance via Proxy ETFs */}
       <SimulatedPortfolioCard
         marketStats={stats}
@@ -263,7 +327,7 @@ export const MarketPage: React.FC = () => {
                       setSortBy('market_cap_desc')
                     }
                   }}
-                  className={`relative px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors z-10 ${
+                  className={`relative px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors z-10 flex items-center gap-1.5 ${
                     active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.03]'
                   }`}
                 >
@@ -274,6 +338,7 @@ export const MarketPage: React.FC = () => {
                       transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
                     />
                   )}
+                  <span className="flex items-center shrink-0">{tab.icon}</span>
                   <span>{tab.label}</span>
                 </motion.button>
               )
