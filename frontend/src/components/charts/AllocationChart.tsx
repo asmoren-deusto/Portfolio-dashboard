@@ -31,15 +31,10 @@ export function AllocationChart({
   height,
 }: AllocationChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [isInitialAnim, setIsInitialAnim] = useState(true)
   const theme = useAppStore((s) => s.theme)
+  const selectedBroker = useAppStore((s) => s.selectedBroker)
+  const refreshAnimKey = useAppStore((s) => s.refreshAnimKey)
   const palette = theme === 'dark' ? PALETTE_DARK : PALETTE_LIGHT
-
-  useEffect(() => {
-    setIsInitialAnim(true)
-    const timer = setTimeout(() => setIsInitialAnim(false), 600)
-    return () => clearTimeout(timer)
-  }, [mode])
 
   const chartHeight = height ?? (showLegend ? 235 : 295)
   const isCompact = chartHeight <= 265
@@ -139,12 +134,16 @@ export function AllocationChart({
   return (
     <div className="flex flex-col gap-3 min-w-0 w-full">
       {/* Donut Chart Container */}
-      <div
+      <motion.div
+        key={`alloc-wrapper-${selectedBroker}-${refreshAnimKey}-${mode}`}
+        initial={{ opacity: 0.85, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.32, ease: 'easeOut' }}
         style={{ height: chartHeight }}
         className="relative flex items-center justify-center w-full min-w-0"
       >
         <ResponsiveContainer width="100%" height={chartHeight}>
-          <PieChart>
+          <PieChart key={`alloc-pie-${mode}-${selectedBroker}-${refreshAnimKey}-${data.length}-${Math.round(total)}`}>
             <Pie
               data={data}
               cx="50%"
@@ -154,9 +153,9 @@ export function AllocationChart({
               paddingAngle={2.5}
               dataKey="value"
               strokeWidth={0}
-              isAnimationActive={isInitialAnim}
+              isAnimationActive={true}
               animationBegin={0}
-              animationDuration={500}
+              animationDuration={550}
               animationEasing="ease-out"
               onMouseEnter={(_, index) => {
                 setHoveredIndex(index)
@@ -233,7 +232,7 @@ export function AllocationChart({
             </AnimatePresence>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Legend in 2 columns */}
       {showLegend && (

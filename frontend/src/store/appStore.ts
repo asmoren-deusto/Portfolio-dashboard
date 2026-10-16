@@ -195,9 +195,11 @@ const initialUser = getStoredActiveUser()
 
 export const useAppStore = create<AppState>((set, get) => ({
   period: '1y',
-  setPeriod: (period) => set({ period }),
+  setPeriod: (period) =>
+    set((s) => (s.period === period ? s : { period, refreshAnimKey: s.refreshAnimKey + 1 })),
   selectedBroker: 'all',
-  setSelectedBroker: (selectedBroker) => set({ selectedBroker }),
+  setSelectedBroker: (selectedBroker) =>
+    set((s) => (s.selectedBroker === selectedBroker ? s : { selectedBroker, refreshAnimKey: s.refreshAnimKey + 1 })),
   theme: savedTheme,
   setTheme: (theme) => {
     applyTheme(theme)

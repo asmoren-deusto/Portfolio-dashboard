@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { motion } from 'framer-motion'
 import {
   TrendingUp,
   TrendingDown,
@@ -10,6 +11,7 @@ import type { PricePoint } from '@/lib/mockData'
 import { usePerformance } from '@/api/queries'
 import { cn } from '@/lib/utils'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
+import { useAppStore } from '@/store/appStore'
 
 export interface MonthlyReturnsHeatmapProps {
   data?: PricePoint[]
@@ -85,6 +87,8 @@ export function MonthlyReturnsHeatmap({
   isLoading: propLoading,
 }: MonthlyReturnsHeatmapProps) {
   const displayStats = showStats !== undefined ? showStats : !compact
+  const selectedBroker = useAppStore((s) => s.selectedBroker)
+  const refreshAnimKey = useAppStore((s) => s.refreshAnimKey)
 
   // Fetch performance series starting from 2025 onwards (2025-01-01)
   const shouldFetchFrom2025 = !propData || propData.length < 150
@@ -286,7 +290,14 @@ export function MonthlyReturnsHeatmap({
   }
 
   return (
-    <div data-private className={cn("space-y-3.5", className)}>
+    <motion.div
+      key={`heatmap-${selectedBroker}-${refreshAnimKey}-${rows.length}`}
+      initial={{ opacity: 0.85, scale: 0.99 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      data-private
+      className={cn("space-y-3.5", className)}
+    >
       {/* Institutional Metric Highlights */}
       {stats && displayStats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -449,6 +460,6 @@ export function MonthlyReturnsHeatmap({
           </tbody>
         </table>
       </div>
-    </div>
+    </motion.div>
   )
 }

@@ -92,6 +92,8 @@ export function BenchmarkEvolutionChart({
   const [hoveredPoint, setHoveredPoint] = useState<BenchmarkComparisonPoint | null>(null)
 
   const theme = useAppStore((s) => s.theme)
+  const selectedBroker = useAppStore((s) => s.selectedBroker)
+  const refreshAnimKey = useAppStore((s) => s.refreshAnimKey)
   const isDark = theme === 'dark'
 
   const points = data?.points ?? []
@@ -523,18 +525,18 @@ export function BenchmarkEvolutionChart({
 
       chart.timeScale().fitContent()
 
-      // Trigger timeline sweep animation on load & when benchmark, mode or period changes
-      const sweepKey = `${points?.length || 0}_${mode}_${showPortfolio}_${showSp500}_${showBce}_${showMsci}_${showNasdaq}_${showStoxx}_${showNikkei}_${points?.[0]?.date || ''}_${points?.[points.length - 1]?.date || ''}`
+      // Trigger timeline sweep animation on load & when benchmark, mode, entity or period changes
+      const sweepKey = `${selectedBroker}_${refreshAnimKey}_${points?.length || 0}_${mode}_${showPortfolio}_${showSp500}_${showBce}_${showMsci}_${showNasdaq}_${showStoxx}_${showNikkei}_${points?.[0]?.date || ''}_${points?.[points.length - 1]?.date || ''}`
       if (points.length > 0 && sweepKey !== lastSweepKeyRef.current) {
         lastSweepKeyRef.current = sweepKey
         requestAnimationFrame(() => {
-          triggerChartAnimation(containerRef.current)
+          triggerChartAnimation(containerRef.current, 750)
         })
       }
     } catch (err) {
       console.warn('Failed to update benchmark series:', err)
     }
-  }, [points, mode, showPortfolio, showSp500, showBce, showMsci, showNasdaq, showStoxx, showNikkei, isDark, chartVersion])
+  }, [points, mode, showPortfolio, showSp500, showBce, showMsci, showNasdaq, showStoxx, showNikkei, isDark, chartVersion, selectedBroker, refreshAnimKey])
 
   const alphaSp =
     activePoint && activePoint.portfolio_twr !== undefined && activePoint.sp500 !== undefined

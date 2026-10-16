@@ -89,6 +89,7 @@ export function ReturnsChart({
   height = 240
 }: ReturnsChartProps) {
   const refreshAnimKey = useAppStore(s => s.refreshAnimKey)
+  const selectedBroker = useAppStore(s => s.selectedBroker)
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null)
 
   if (mode === 'global' && !analytics) {
@@ -157,10 +158,10 @@ export function ReturnsChart({
 
   return (
     <motion.div
-      key={`${mode}-${refreshAnimKey}`}
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
+      key={`${mode}-${selectedBroker}-${refreshAnimKey}-${data.map(d => d.value).join('_')}`}
+      initial={{ opacity: 0, scale: 0.98, y: 3 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
       data-private
       style={{ height }}
       className="w-full"

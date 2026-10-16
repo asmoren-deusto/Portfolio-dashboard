@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 14:58:35
+- **Fecha de exportación:** 2026-10-16 15:23:06
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 73
+- **Total de interacciones registradas:** 75
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1070,5 +1070,42 @@ He aplicado una **optimización integral del rendimiento de la web**, abordando 
 ### 👤 Usuario (2026-10-16 12:38:51)
 
 los % en rendimiento vuelven a estar mal colocados, revisa eesto por favor
+
+---
+
+### 🤖 Asistente (2026-10-16 12:58:37)
+
+He corregido definitivamente la colocación de los porcentajes en la gráfica de **Rendimiento** ([ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx)).
+
+---
+
+### 🔍 ¿Qué estaba ocurriendo?
+
+1. En el intento anterior de asegurar la visibilidad de los datos, el cálculo manual de coordenadas SVG (`Math.max(14, y - 6)`) provocaba que en la pantalla de **Analítica y Riesgo** la etiqueta de `1 Día` (+0.24%) quedase anclada arriba del todo a 14px de la cabecera, flotando lejos de su barra.
+2. En las barras negativas (como en la vista semanal), la suma manual de `y + height + 12` desalineaba los textos respecto al eje.
+3. Además, cuando un valor era exactamente `0.00%`, Recharts asignaba una altura de 0 píxeles al rectángulo de la barra y descartaba la etiqueta por completo.
+
+---
+
+### 🛠️ Solución Aplicada (`v3.0.91`)
+
+1. **Eliminación del cálculo manual arbitrario:**
+   - Se descartó la función manual con `Math.max` y se volvió al motor nativo de posicionamiento de Recharts.
+2. **Arquitectura dual `top` y `bottom` nativa:**
+   - **Barras positivas y neutras ($v \ge 0$):** utilizan `<LabelList dataKey="posVal" position="top" offset={5} />`. Cada porcentaje se posa directamente sobre la cabeza de la barra correspondiente.
+   - **Barras negativas ($v < 0$):** utilizan `<LabelList dataKey="negVal" position="bottom" offset={5} />`. Cada porcentaje se sitúa de forma limpia debajo de la barra negativa, sin solaparse con la línea cero ni invadir las fechas del eje X.
+3. **Soporte para barras en cero (`+0.00%`):**
+   - Para valores exactamente en 0, se asigna una altura subpíxel (`0.0001`) imperceptible a la vista, garantizando que Recharts reconozca la barra y dibuje el texto `+0.00%` justo sobre la línea base.
+4. **Estilo original intacto:**
+   - Tipografía monoespaciada en negrita (`font-mono font-bold`) y color gris neutro original (`#94a3b8` / `slate-400`).
+
+---
+🚀 Los cambios han sido validados visualmente con capturas en la vista Global, Semanal y en la página de Analítica, y se encuentran sincronizados y desplegados en Git en la versión **`v3.0.91`**.
+
+---
+
+### 👤 Usuario (2026-10-16 13:04:15)
+
+al cambiar de entidad o en general los valores, anima las graficas
 
 ---
