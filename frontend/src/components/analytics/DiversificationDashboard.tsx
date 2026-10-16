@@ -327,19 +327,29 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             const Icon = tab.icon
             const isActive = activeTab === tab.id
             return (
-              <button
+              <motion.button
                 key={tab.id}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={cn(
-                  'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer',
+                  'relative flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap cursor-pointer',
                   isActive
-                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm font-bold'
+                    ? 'text-blue-600 dark:text-blue-400 font-bold'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 )}
               >
-                <Icon size={14} className={isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'} />
-                <span>{tab.label}</span>
-              </button>
+                {isActive && (
+                  <motion.div
+                    layoutId="diversificationTabPill"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-slate-700 shadow-sm"
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <Icon size={14} className={isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'} />
+                  <span>{tab.label}</span>
+                </span>
+              </motion.button>
             )
           })}
         </div>

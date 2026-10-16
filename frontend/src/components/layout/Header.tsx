@@ -149,11 +149,12 @@ export function Header({
               const isSelected = selectedBroker === b.value
 
               return (
-                <button
+                <motion.button
                   key={b.value}
                   onClick={() => setSelectedBroker(b.value)}
+                  whileTap={{ scale: 0.96 }}
                   className={cn(
-                    'relative flex-1 sm:flex-initial text-center rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-1 text-xs font-semibold transition-all duration-150',
+                    'relative flex-1 sm:flex-initial text-center rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-1 text-xs font-semibold transition-colors duration-150',
                     isSelected
                       ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
@@ -163,7 +164,7 @@ export function Header({
                     <motion.div
                       layoutId="headerBrokerPill"
                       className={cn('absolute inset-0 rounded-lg shadow-sm', cfg.activeBg)}
-                      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                     />
                   )}
                   <span className="relative z-10 flex items-center justify-center gap-1.5">
@@ -178,7 +179,7 @@ export function Header({
                     )}
                     <span>{b.label}</span>
                   </span>
-                </button>
+                </motion.button>
               )
             })}
           </div>

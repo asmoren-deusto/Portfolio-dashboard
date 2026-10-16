@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { KpiCard } from '@/components/ui/KpiCard'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { AllocationChart } from '@/components/charts/AllocationChart'
 import { BenchmarkEvolutionChart, type BenchmarkChartMode } from '@/components/charts/BenchmarkEvolutionChart'
@@ -115,88 +116,130 @@ export function AnalyticsPage() {
         </div>
 
         <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start sm:self-auto border border-slate-200/60 dark:border-white/5">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.96 }}
             onClick={() => handleTabChange('performance')}
             className={cn(
-              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200',
+              'relative flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150',
               mainTab === 'performance'
-                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                ? 'text-blue-600 dark:text-blue-400 font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             )}
           >
-            <TrendingUp size={14} />
-            <span>Rentabilidad & Riesgo</span>
-          </button>
-          <button
+            {mainTab === 'performance' && (
+              <motion.div
+                layoutId="analyticsMainTabPill"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-slate-700 shadow-sm"
+                transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-2">
+              <TrendingUp size={14} />
+              <span>Rentabilidad & Riesgo</span>
+            </span>
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.96 }}
             onClick={() => handleTabChange('diversification')}
             className={cn(
-              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 relative',
+              'relative flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150',
               mainTab === 'diversification'
-                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                ? 'text-blue-600 dark:text-blue-400 font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             )}
           >
-            <Globe size={14} />
-            <span>Diversificación vs Mundo</span>
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            {mainTab === 'diversification' && (
+              <motion.div
+                layoutId="analyticsMainTabPill"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-slate-700 shadow-sm"
+                transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-2">
+              <Globe size={14} />
+              <span>Diversificación vs Mundo</span>
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
             </span>
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {mainTab === 'diversification' ? (
-        <DiversificationDashboard positions={positions} isLoading={positionsFetching} />
-      ) : (
-        <>
-          {/* KPI grid with luxury styling */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
-        <KpiCard
-          label="TWR (Time-Weighted)"
-          value={analytics ? fmt.pct(analytics.twr) : '—'}
-          sub="Elimina efecto de aportaciones"
-          changePositive={(analytics?.twr ?? 0) >= 0}
-          delay={0}
-          icon={<TrendingUp size={16} className="text-emerald-400" />}
-          loading={analyticsFetching}
-        />
-        <KpiCard
-          label="CAGR Anualizado"
-          value={analytics ? fmt.pct(analytics.cagr) : '—'}
-          sub="Crecimiento compuesto anual"
-          changePositive={(analytics?.cagr ?? 0) >= 0}
-          delay={0.04}
-          icon={<BarChart3 size={16} className="text-blue-400" />}
-          loading={analyticsFetching}
-        />
-        <KpiCard
-          label="Volatilidad Anual"
-          value={analytics ? fmt.pct(analytics.volatility, false) : '—'}
-          sub="Desviación típica (σ)"
-          delay={0.08}
-          icon={<Activity size={16} className="text-amber-400" />}
-          loading={analyticsFetching}
-        />
-        <KpiCard
-          label="Sharpe Ratio"
-          value={analytics ? fmt.ratio(analytics.sharpe_ratio) : '—'}
-          sub={isSharpeGood ? 'Excelente (> 1.0)' : 'Aceptable'}
-          changePositive={isSharpeGood}
-          delay={0.12}
-          icon={<ShieldCheck size={16} className="text-indigo-400" />}
-          loading={analyticsFetching}
-        />
-        <KpiCard
-          label="Max Drawdown"
-          value={analytics ? fmt.pct(analytics.max_drawdown) : '—'}
-          sub="Caída máxima histórica"
-          changePositive={false}
-          delay={0.16}
-          icon={<TrendingDown size={16} className="text-rose-400" />}
-          loading={analyticsFetching}
-        />
-      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        {mainTab === 'diversification' ? (
+          <motion.div
+            key="diversification"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="w-full flex flex-col gap-4"
+          >
+            <DiversificationDashboard positions={positions} isLoading={positionsFetching} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="performance"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="w-full flex flex-col gap-4"
+          >
+            {/* KPI grid with luxury styling */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
+              <KpiCard
+                hoverGlow
+                label="TWR (Time-Weighted)"
+                value={<AnimatedNumber value={analytics?.twr} format={fmt.pct} />}
+                sub="Elimina efecto de aportaciones"
+                changePositive={(analytics?.twr ?? 0) >= 0}
+                delay={0}
+                icon={<TrendingUp size={16} className="text-emerald-400" />}
+                loading={analyticsFetching}
+              />
+              <KpiCard
+                hoverGlow
+                label="CAGR Anualizado"
+                value={<AnimatedNumber value={analytics?.cagr} format={fmt.pct} />}
+                sub="Crecimiento compuesto anual"
+                changePositive={(analytics?.cagr ?? 0) >= 0}
+                delay={0.04}
+                icon={<BarChart3 size={16} className="text-blue-400" />}
+                loading={analyticsFetching}
+              />
+              <KpiCard
+                hoverGlow
+                label="Volatilidad Anual"
+                value={<AnimatedNumber value={analytics?.volatility} format={(n) => fmt.pct(n, false)} />}
+                sub="Desviación típica (σ)"
+                delay={0.08}
+                icon={<Activity size={16} className="text-amber-400" />}
+                loading={analyticsFetching}
+              />
+              <KpiCard
+                hoverGlow
+                label="Sharpe Ratio"
+                value={<AnimatedNumber value={analytics?.sharpe_ratio} format={(n) => fmt.ratio(n)} />}
+                sub={isSharpeGood ? 'Excelente (> 1.0)' : 'Aceptable'}
+                changePositive={isSharpeGood}
+                delay={0.12}
+                icon={<ShieldCheck size={16} className="text-indigo-400" />}
+                loading={analyticsFetching}
+              />
+              <KpiCard
+                hoverGlow
+                label="Max Drawdown"
+                value={<AnimatedNumber value={analytics?.max_drawdown} format={fmt.pct} />}
+                sub="Caída máxima histórica"
+                changePositive={false}
+                delay={0.16}
+                icon={<TrendingDown size={16} className="text-rose-400" />}
+                loading={analyticsFetching}
+              />
+            </div>
 
       {/* Benchmark Comparison Card */}
       <Card delay={0.18} loading={analyticsFetching || benchmarkFetching}>
@@ -712,8 +755,9 @@ export function AnalyticsPage() {
           </table>
         </div>
       </Card>
-        </>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Position Detail Modal */}
       <PositionDetailModal

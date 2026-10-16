@@ -28,6 +28,7 @@ import {
 import { Link } from 'react-router-dom'
 
 import { KpiCard } from '@/components/ui/KpiCard'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { PerformanceChart, PerformanceChartSkeleton } from '@/components/charts/PerformanceChart'
 import { AllocationChart, AllocationChartSkeleton } from '@/components/charts/AllocationChart'
@@ -598,7 +599,12 @@ export function OverviewPage() {
             hoverGlow
             hero
             label="Valor Total de la Cartera"
-            value={fmt.currency(displaySummary?.total_value)}
+            value={
+              <AnimatedNumber
+                value={displaySummary?.total_value}
+                format={fmt.currency}
+              />
+            }
             extra={
               ((shortTermMetrics && (shortTermMetrics.dayPct !== undefined || shortTermMetrics.weekPct !== undefined)) || (sessionPct !== undefined && !isNaN(sessionPct))) && (
                 <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
@@ -677,11 +683,13 @@ export function OverviewPage() {
             hoverGlow
             label="Rendimiento Anualizado"
             value={
-              analytics?.annualized_return !== undefined
-                ? fmt.pct(analytics.annualized_return)
-                : displaySummary
-                  ? fmt.pct(displaySummary.total_pnl_pct)
-                  : '—'
+              analytics?.annualized_return !== undefined ? (
+                <AnimatedNumber value={analytics.annualized_return} format={fmt.pct} />
+              ) : displaySummary ? (
+                <AnimatedNumber value={displaySummary.total_pnl_pct} format={fmt.pct} />
+              ) : (
+                '—'
+              )
             }
             valueColor="text-emerald-600 dark:text-emerald-400"
             tag="TIR Anual"
@@ -696,7 +704,16 @@ export function OverviewPage() {
           <KpiCard
             hoverGlow
             label="Plusvalía Acumulada"
-            value={displaySummary ? `${pnlPositive ? '+' : ''}${fmt.currency(displaySummary.total_pnl)}` : '—'}
+            value={
+              displaySummary ? (
+                <AnimatedNumber
+                  value={displaySummary.total_pnl}
+                  format={(n) => `${n >= 0 ? '+' : ''}${fmt.currency(n)}`}
+                />
+              ) : (
+                '—'
+              )
+            }
             valueColor={pnlPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
             tag={pnlPositive ? "+ Ganancia" : "- Pérdida"}
             tagColor={pnlPositive ? "emerald" : "rose"}
@@ -733,7 +750,7 @@ export function OverviewPage() {
 
               <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isRefreshingPrices ? "opacity-65" : "opacity-100")}>
                 <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
-                  {fmt.currency(displaySummary?.total_invested)}
+                  <AnimatedNumber value={displaySummary?.total_invested} format={fmt.currency} />
                 </div>
                 <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
                   {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos. (act. {updatedPositionsCount}/{displaySummary?.num_positions ?? positions.length})
@@ -761,7 +778,7 @@ export function OverviewPage() {
             hoverGlow
             hideTagOnMobile
             label={`Rentabilidad (${periodLabel})`}
-            value={fmt.pct(periodReturnPct)}
+            value={<AnimatedNumber value={periodReturnPct} format={fmt.pct} />}
             valueColor={periodReturnPct >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
             tag={periodReturnPct >= 0 ? "Rentabilidad" : "Pérdida"}
             tagColor={periodReturnPct >= 0 ? "emerald" : "rose"}
@@ -776,7 +793,12 @@ export function OverviewPage() {
             hoverGlow
             hideTagOnMobile
             label={`Plusvalía (${periodLabel})`}
-            value={`${periodProfitValue >= 0 ? '+' : ''}${fmt.currency(periodProfitValue)}`}
+            value={
+              <AnimatedNumber
+                value={periodProfitValue}
+                format={(n) => `${n >= 0 ? '+' : ''}${fmt.currency(n)}`}
+              />
+            }
             valueColor={periodProfitValue >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
             tag={periodProfitValue >= 0 ? "+ Ganancia" : "- Pérdida"}
             tagColor={periodProfitValue >= 0 ? "emerald" : "rose"}
@@ -791,7 +813,7 @@ export function OverviewPage() {
             hoverGlow
             hideTagOnMobile
             label={`Aportaciones (${periodLabel})`}
-            value={perfStats ? fmt.currency(perfStats.periodInflow) : '—'}
+            value={perfStats ? <AnimatedNumber value={perfStats.periodInflow} format={fmt.currency} /> : '—'}
             valueColor="text-blue-600 dark:text-blue-400"
             tag={perfStats && perfStats.periodInflow > 0 ? "Inversión neta" : "Sin compras"}
             tagColor="blue"
@@ -806,7 +828,7 @@ export function OverviewPage() {
             hoverGlow
             hideTagOnMobile
             label={`Volatilidad (${periodLabel})`}
-            value={volVal !== null ? fmt.pct(volVal, false) : '—'}
+            value={volVal !== null ? <AnimatedNumber value={volVal} format={(n) => fmt.pct(n, false)} /> : '—'}
             valueColor="text-amber-500 dark:text-amber-400"
             tag={volTag}
             tagColor="amber"
@@ -821,7 +843,7 @@ export function OverviewPage() {
             hoverGlow
             hideTagOnMobile
             label={`Máxima Caída (${periodLabel})`}
-            value={ddVal !== null ? fmt.pct(ddVal) : '—'}
+            value={ddVal !== null ? <AnimatedNumber value={ddVal} format={fmt.pct} /> : '—'}
             valueColor="text-rose-500 dark:text-rose-400"
             tag={ddTag}
             tagColor="rose"
@@ -863,7 +885,8 @@ export function OverviewPage() {
                 <div className="hidden sm:flex items-center gap-1.5">
                   {/* Mode Selector (€ vs %) */}
                   <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
                       onClick={() => setPerfChartMode('currency')}
                       className={`relative min-w-[24px] px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${perfChartMode === 'currency'
                           ? 'text-slate-900 dark:text-white font-bold'
@@ -879,8 +902,9 @@ export function OverviewPage() {
                         />
                       )}
                       <span className="relative z-10">€</span>
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
                       onClick={() => setPerfChartMode('percent')}
                       className={`relative min-w-[24px] px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${perfChartMode === 'percent'
                           ? 'text-slate-900 dark:text-white font-bold'
@@ -896,12 +920,13 @@ export function OverviewPage() {
                         />
                       )}
                       <span className="relative z-10">%</span>
-                    </button>
+                    </motion.button>
                   </div>
 
                   {/* Toggle Invested Capital (only in € mode) */}
                   {perfChartMode === 'currency' && (
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
                       onClick={() => setPerfShowInvested(v => !v)}
                       className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${perfShowInvested
                           ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-semibold'
@@ -911,14 +936,15 @@ export function OverviewPage() {
                     >
                       <span className={`w-2.5 h-0.5 border-t-2 border-dashed ${perfShowInvested ? 'border-indigo-600 dark:border-indigo-400' : 'border-slate-400'}`} />
                       <span>Aportado</span>
-                    </button>
+                    </motion.button>
                   )}
                 </div>
               )}
 
               {/* Curva / Matriz Mensual ALWAYS on the far right */}
               <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => setChartView('evolution')}
                   className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'evolution'
                       ? 'text-slate-900 dark:text-white font-bold'
@@ -933,8 +959,9 @@ export function OverviewPage() {
                     />
                   )}
                   <span className="relative z-10">Curva</span>
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => setChartView('heatmap')}
                   className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'heatmap'
                       ? 'text-slate-900 dark:text-white font-bold'
@@ -951,7 +978,7 @@ export function OverviewPage() {
                   <span className="relative z-10">
                     Matriz<span className="hidden sm:inline"> Mensual</span>
                   </span>
-                </button>
+                </motion.button>
               </div>
             </div>
           </CardHeader>
@@ -1022,8 +1049,9 @@ export function OverviewPage() {
             {/* Toggle Mode */}
             <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
               {(['asset', 'type'] as AllocMode[]).map((m) => (
-                <button
+                <motion.button
                   key={m}
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => setAllocMode(m)}
                   className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${allocMode === m
                       ? 'text-slate-900 dark:text-white font-bold'
@@ -1040,7 +1068,7 @@ export function OverviewPage() {
                   <span className="relative z-10 text-[11px]">
                     {m === 'asset' ? 'Activo' : 'Tipo'}
                   </span>
-                </button>
+                </motion.button>
               ))}
             </div>
           </CardHeader>
@@ -1131,7 +1159,8 @@ export function OverviewPage() {
             </div>
 
             <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.96 }}
                 onClick={() => {
                   setReturnsPeriodMode('global')
                   try { localStorage.setItem('returns_period_mode', 'global') } catch { }
@@ -1149,8 +1178,9 @@ export function OverviewPage() {
                   />
                 )}
                 <span className="relative z-10 text-[11px]">Global</span>
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.96 }}
                 onClick={() => {
                   setReturnsPeriodMode('weekly')
                   try { localStorage.setItem('returns_period_mode', 'weekly') } catch { }
@@ -1168,47 +1198,58 @@ export function OverviewPage() {
                   />
                 )}
                 <span className="relative z-10 text-[11px]">Semanal</span>
-              </button>
+              </motion.button>
             </div>
           </CardHeader>
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-              {returnsPeriodMode === 'global' ? (
-                !analytics && analyticsFetching ? (
-                  <ReturnsChartSkeleton compact height={260} />
-                ) : (
-                  <ReturnsChart
-                    analytics={analytics}
-                    mode={returnsPeriodMode}
-                    weeklyData={weeklyReturnsData}
-                    day1Pct={shortTermMetrics?.dayPct}
-                    day1Amount={shortTermMetrics?.dayAmount}
-                    weekPct={shortTermMetrics?.weekPct}
-                    weekAmount={shortTermMetrics?.weekAmount}
-                    totalPortfolioValue={displaySummary?.total_value}
-                    compact
-                    height={260}
-                  />
-                )
-              ) : (
-                (!weeklyReturnsData || weeklyReturnsData.length === 0) && perfFetching ? (
-                  <ReturnsChartSkeleton compact height={260} />
-                ) : (
-                  <ReturnsChart
-                    analytics={analytics}
-                    mode={returnsPeriodMode}
-                    weeklyData={weeklyReturnsData}
-                    day1Pct={shortTermMetrics?.dayPct}
-                    day1Amount={shortTermMetrics?.dayAmount}
-                    weekPct={shortTermMetrics?.weekPct}
-                    weekAmount={shortTermMetrics?.weekAmount}
-                    totalPortfolioValue={displaySummary?.total_value}
-                    compact
-                    height={260}
-                  />
-                )
-              )}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={returnsPeriodMode}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="flex flex-col justify-center flex-1 min-h-0 w-full"
+                >
+                  {returnsPeriodMode === 'global' ? (
+                    !analytics && analyticsFetching ? (
+                      <ReturnsChartSkeleton compact height={260} />
+                    ) : (
+                      <ReturnsChart
+                        analytics={analytics}
+                        mode={returnsPeriodMode}
+                        weeklyData={weeklyReturnsData}
+                        day1Pct={shortTermMetrics?.dayPct}
+                        day1Amount={shortTermMetrics?.dayAmount}
+                        weekPct={shortTermMetrics?.weekPct}
+                        weekAmount={shortTermMetrics?.weekAmount}
+                        totalPortfolioValue={displaySummary?.total_value}
+                        compact
+                        height={260}
+                      />
+                    )
+                  ) : (
+                    (!weeklyReturnsData || weeklyReturnsData.length === 0) && perfFetching ? (
+                      <ReturnsChartSkeleton compact height={260} />
+                    ) : (
+                      <ReturnsChart
+                        analytics={analytics}
+                        mode={returnsPeriodMode}
+                        weeklyData={weeklyReturnsData}
+                        day1Pct={shortTermMetrics?.dayPct}
+                        day1Amount={shortTermMetrics?.dayAmount}
+                        weekPct={shortTermMetrics?.weekPct}
+                        weekAmount={shortTermMetrics?.weekAmount}
+                        totalPortfolioValue={displaySummary?.total_value}
+                        compact
+                        height={260}
+                      />
+                    )
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </div>
 
             {/* Useful Stats Strip (Matching Card 1) */}

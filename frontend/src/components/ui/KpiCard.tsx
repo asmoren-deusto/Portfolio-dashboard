@@ -5,7 +5,7 @@ import { LoadingDot } from '@/components/ui/LoadingDot'
 
 interface KpiCardProps {
   label: string
-  value: string
+  value: React.ReactNode
   sub?: string
   change?: string
   changePositive?: boolean

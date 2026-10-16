@@ -9,6 +9,7 @@ import {
 import type { PricePoint } from '@/lib/mockData'
 import { usePerformance } from '@/api/queries'
 import { cn } from '@/lib/utils'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 
 export interface MonthlyReturnsHeatmapProps {
   data?: PricePoint[]
@@ -295,7 +296,7 @@ export function MonthlyReturnsHeatmap({
                 Tasa de Acierto
               </span>
               <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 block">
-                {stats.winRate}%
+                <AnimatedNumber value={stats.winRate} format={(n) => `${n.toFixed(0)}%`} />
               </span>
               <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">
                 {stats.positiveMonths} de {stats.totalMonths} meses en verde
@@ -312,7 +313,14 @@ export function MonthlyReturnsHeatmap({
                 Mejor Mes
               </span>
               <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 block">
-                {stats.bestMonth ? `${stats.bestMonth.val >= 0 ? '+' : ''}${stats.bestMonth.val.toFixed(2)}%` : '—'}
+                {stats.bestMonth ? (
+                  <AnimatedNumber
+                    value={stats.bestMonth.val}
+                    format={(n) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`}
+                  />
+                ) : (
+                  '—'
+                )}
               </span>
               <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">
                 {stats.bestMonth ? stats.bestMonth.label : '—'}
@@ -329,7 +337,14 @@ export function MonthlyReturnsHeatmap({
                 Peor Mes
               </span>
               <span className="text-xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-0.5 block">
-                {stats.worstMonth ? `${stats.worstMonth.val >= 0 ? '+' : ''}${stats.worstMonth.val.toFixed(2)}%` : '—'}
+                {stats.worstMonth ? (
+                  <AnimatedNumber
+                    value={stats.worstMonth.val}
+                    format={(n) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`}
+                  />
+                ) : (
+                  '—'
+                )}
               </span>
               <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">
                 {stats.worstMonth ? stats.worstMonth.label : '—'}
@@ -346,7 +361,10 @@ export function MonthlyReturnsHeatmap({
                 Media Mensual
               </span>
               <span className={cn("text-xl font-bold font-mono mt-0.5 block", (stats.avgMonthly ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
-                {(stats.avgMonthly ?? 0) >= 0 ? '+' : ''}{(stats.avgMonthly ?? 0).toFixed(2)}%
+                <AnimatedNumber
+                  value={stats.avgMonthly}
+                  format={(n) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`}
+                />
               </span>
               <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">
                 tasa promedio / mes

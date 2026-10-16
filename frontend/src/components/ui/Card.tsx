@@ -19,9 +19,25 @@ interface CardProps {
 }
 
 export function Card({ children, className, glass = true, loading = false }: CardProps) {
+  const cardRef = React.useRef<HTMLDivElement>(null)
+  const [mousePos, setMousePos] = React.useState({ x: -1000, y: -1000, opacity: 0 })
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top, opacity: 1 })
+  }
+
+  const handleMouseLeave = () => {
+    setMousePos((prev) => ({ ...prev, opacity: 0 }))
+  }
+
   return (
     <CardContext.Provider value={{ loading }}>
       <div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         className={cn(
           'relative rounded-2xl overflow-hidden transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
           'bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
@@ -30,9 +46,20 @@ export function Card({ children, className, glass = true, loading = false }: Car
           className
         )}
       >
+        {/* Subtle interactive spotlight glow on hover */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-px rounded-2xl transition-opacity duration-400 z-0"
+          style={{
+            opacity: mousePos.opacity,
+            background: `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(59, 130, 246, 0.06), transparent 75%)`,
+          }}
+        />
         {/* Subtle shine line at top */}
         <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.06] to-transparent dark:via-white/[0.12] z-10" />
-        {children}
+        <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full h-full">
+          {children}
+        </div>
       </div>
     </CardContext.Provider>
   )

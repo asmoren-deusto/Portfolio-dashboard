@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { PALETTE_LIGHT, PALETTE_DARK, fmt } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
@@ -187,32 +188,48 @@ export function AllocationChart({
 
         {/* Center label */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-3 z-10">
-          <div className={`${centerMaxW} flex flex-col items-center justify-center`}>
-            {hoveredItem ? (
-              <>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate w-full">
-                  {hoveredItem.name}
-                </span>
-                <span data-private className="text-xl font-bold text-slate-950 dark:text-white tabular-nums tracking-tight my-0.5">
-                  {fmt.currency(hoveredItem.value)}
-                </span>
-                <span data-private className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
-                  {(hoveredItem.pct ?? 0).toFixed(1)}%
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
-                  Total
-                </span>
-                <span data-private className="text-2xl font-bold text-slate-950 dark:text-slate-100 tabular-nums tracking-tight my-0.5">
-                  {fmt.currency(total)}
-                </span>
-                <span data-private className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                  {data.length} {mode === 'asset' ? 'posiciones' : 'tipos'}
-                </span>
-              </>
-            )}
+          <div className={`${centerMaxW} flex flex-col items-center justify-center min-h-[72px]`}>
+            <AnimatePresence mode="wait" initial={false}>
+              {hoveredItem ? (
+                <motion.div
+                  key={hoveredItem.isin || hoveredItem.name}
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.94 }}
+                  transition={{ duration: 0.14, ease: 'easeOut' }}
+                  className="flex flex-col items-center justify-center w-full"
+                >
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate w-full">
+                    {hoveredItem.name}
+                  </span>
+                  <span data-private className="text-xl font-bold text-slate-950 dark:text-white tabular-nums tracking-tight my-0.5">
+                    {fmt.currency(hoveredItem.value)}
+                  </span>
+                  <span data-private className="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
+                    {(hoveredItem.pct ?? 0).toFixed(1)}%
+                  </span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="total"
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.94 }}
+                  transition={{ duration: 0.14, ease: 'easeOut' }}
+                  className="flex flex-col items-center justify-center w-full"
+                >
+                  <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
+                    Total
+                  </span>
+                  <span data-private className="text-2xl font-bold text-slate-950 dark:text-slate-100 tabular-nums tracking-tight my-0.5">
+                    {fmt.currency(total)}
+                  </span>
+                  <span data-private className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                    {data.length} {mode === 'asset' ? 'posiciones' : 'tipos'}
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

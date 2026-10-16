@@ -295,18 +295,28 @@ export function RootLayout() {
             />
           </div>
 
-          {/* Page Content Animation (KPIs, Charts, Tables fade in quickly without header flickering) */}
+          {/* Page Content Animation (Atmospheric blur & clean fade without layout shifts) */}
           <main
-            key={location.pathname}
-            className={`animate-in-quick flex flex-1 flex-col gap-4 px-4 pt-4 md:px-7 md:pt-4 md:pb-6 ${
+            className={`flex flex-1 flex-col gap-4 px-4 pt-4 md:px-7 md:pt-4 md:pb-6 ${
               isNativePlatform()
                 ? 'pb-[calc(6.6rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(6.6rem+env(safe-area-inset-bottom,0px))]'
                 : 'pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] sm:pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))]'
             }`}
           >
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, filter: 'blur(3px)' }}
+                animate={{ opacity: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, filter: 'blur(3px)' }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-1 flex-col gap-4 w-full"
+              >
+                <ErrorBoundary>
+                  <Outlet />
+                </ErrorBoundary>
+              </motion.div>
+            </AnimatePresence>
           </main>
         </div>
 
