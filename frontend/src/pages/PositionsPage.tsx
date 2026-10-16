@@ -431,6 +431,19 @@ export function PositionsPage() {
                                   </>
                                 )}
                                 <BrokerBadge broker={p.broker} className="ml-1" />
+                                {(p.price_date || p.last_updated) && (
+                                  <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-[10.5px] text-slate-500 dark:text-slate-400 font-mono ml-1">
+                                    <span
+                                      className={cn(
+                                        'w-1.5 h-1.5 rounded-full',
+                                        Math.floor((Date.now() - new Date(p.price_date || p.last_updated!).getTime()) / 86400000) <= 3
+                                          ? 'bg-emerald-500'
+                                          : 'bg-amber-500'
+                                      )}
+                                    />
+                                    NAV {new Date(p.price_date || p.last_updated!).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                                  </span>
+                                )}
                                 {p.asset_type === 'epsv' && (
                                   <span data-private className="ml-1 px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
                                     DCA 416,66 €/mes (día 7)

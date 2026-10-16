@@ -374,6 +374,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
                 Simulación en Directo de Cartera
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
+                  <span className="live-dot emerald" />
+                  EN DIRECTO
+                </span>
                 <span className="hidden sm:inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
                   TradingView • ETFs Réplica
                 </span>
@@ -398,7 +402,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           {/* Market status badge */}
           <span
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-[11px] font-bold border shrink-0',
+              'inline-flex items-center gap-2 px-3 h-8 rounded-full text-[11px] font-bold border shrink-0',
               summary?.market_state === 'REGULAR'
                 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                 : summary?.market_state === 'PRE' || summary?.market_state === 'POST'
@@ -408,12 +412,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           >
             <span
               className={cn(
-                'w-1.5 h-1.5 rounded-full',
+                'live-dot',
                 summary?.market_state === 'REGULAR'
-                  ? 'bg-emerald-500 animate-pulse'
+                  ? 'emerald'
                   : summary?.market_state === 'PRE' || summary?.market_state === 'POST'
-                  ? 'bg-amber-500'
-                  : 'bg-slate-400'
+                  ? 'warn'
+                  : 'slate'
               )}
             />
             {summary?.market_state === 'REGULAR'

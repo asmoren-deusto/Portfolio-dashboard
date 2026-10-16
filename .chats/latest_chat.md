@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 15:54:02
+- **Fecha de exportación:** 2026-10-16 16:18:56
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 85
+- **Total de interacciones registradas:** 87
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1268,5 +1268,29 @@ He revisado a fondo las animaciones de la tabla de posiciones y el comportamient
 ### 👤 Usuario (2026-10-16 13:19:07)
 
 el monthly returns heatmap que cada mes tenga el mismo ancho
+
+---
+
+### 🤖 Asistente (2026-10-16 13:54:05)
+
+He actualizado el componente [MonthlyReturnsHeatmap.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/MonthlyReturnsHeatmap.tsx) para que todas las columnas de meses tengan exactamente la misma anchura:
+
+### 🛠️ Cambios implementados:
+1. **Distribución fija y uniforme (`table-fixed` + `<colgroup>`)**:
+   - Se ha configurado la tabla con `table-layout: fixed` y un grupo de columnas (`<colgroup>`) donde las 12 columnas correspondientes a los meses (Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic) se reparten el espacio disponible de forma simétrica e idéntica.
+2. **Celdas normalizadas al 100% de la columna**:
+   - Cada celda interior se expande al `100%` del ancho de la columna asignada, con `whitespace-nowrap`, evitando que meses con porcentajes más largos (como `+18.45%`) ensanchen su columna respecto a meses con guion (`—`) o cifras cortas (`+0.2%`).
+3. **Columnas de Año y Total Año preservadas**:
+   - La columna de **Año** mantiene un ancho fijo compacto al inicio y la de **Total Año** su espacio óptimo al final.
+
+### 🚀 Publicación y Sincronización:
+- **Versión**: Actualizada a **`v3.0.96`**.
+- **Git**: Cambios sincronizados y subidos a la rama principal (`main`).
+
+---
+
+### 👤 Usuario (2026-10-16 13:54:52)
+
+copiate esa animacion del circulo de aurora, tb el uso de los globos de informacion. tb ese elemento de navs . en general revisa el panel aurora para ver que elementos de disño puedes copiar
 
 ---

@@ -162,8 +162,8 @@ export function PerformanceChart({
 
   const { theme } = useAppStore()
   const isDark = theme === 'dark'
-
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null)
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
 
   const { selectedBroker, period, refreshAnimKey } = useAppStore()
   // Entity selection: 'stacked' by default when 'all' brokers selected (mantiene el estacado de entidades), o broker individual
@@ -351,16 +351,14 @@ export function PerformanceChart({
         },
         crosshair: {
           vertLine: {
-            color: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.22)',
-            labelBackgroundColor: isDark ? '#1e293b' : '#0f172a',
+            color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(15,23,42,0.25)',
+            labelVisible: false,
             width: 1,
             style: LineStyle.Dashed,
           },
           horzLine: {
-            color: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.22)',
-            labelBackgroundColor: isDark ? '#1e293b' : '#0f172a',
-            width: 1,
-            style: LineStyle.Dashed,
+            visible: false,
+            labelVisible: false,
           },
         },
         rightPriceScale: {
@@ -385,10 +383,10 @@ export function PerformanceChart({
         lineWidth: 2,
         priceLineVisible: false,
         lastValueVisible: true, // Only Top layer shows badge on right axis
-        crosshairMarkerRadius: 5,
+        crosshairMarkerRadius: 5.5,
         crosshairMarkerBackgroundColor: '#10b981',
         crosshairMarkerBorderColor: '#ffffff',
-        crosshairMarkerBorderWidth: 2,
+        crosshairMarkerBorderWidth: 2.5,
         priceFormat: {
           type: 'custom',
           formatter: (p: number) => fmt.currency(p),
@@ -459,21 +457,34 @@ export function PerformanceChart({
 
       // Crosshair inspection listener
       chart.subscribeCrosshairMove(param => {
-        if (!param || !param.time || !dataRef.current) {
+        if (!param || !param.time || !dataRef.current || !param.point) {
           setHoveredPoint(null)
+          setTooltipPos(null)
           return
         }
-        const timeStr = typeof param.time === 'string'
-          ? param.time
-          : (param.time as any).year
-          ? `${(param.time as any).year}-${String((param.time as any).month).padStart(2, '0')}-${String((param.time as any).day).padStart(2, '0')}`
-          : String(param.time)
+        let timeStr = ''
+        if (typeof param.time === 'string') {
+          timeStr = param.time
+        } else if (typeof param.time === 'number') {
+          const ms = param.time > 1e11 ? param.time : param.time * 1000
+          timeStr = new Date(ms).toISOString().slice(0, 10)
+        } else if (param.time && typeof param.time === 'object') {
+          const t: any = param.time
+          if (t.year) {
+            timeStr = `${t.year}-${String(t.month).padStart(2, '0')}-${String(t.day).padStart(2, '0')}`
+          }
+        }
 
-        const match = dataRef.current.find(p => p.date === timeStr)
+        const match =
+          (dataRef.current || []).find(p => p.date === timeStr || p.date.startsWith(timeStr)) ||
+          ((metrics?.sumPoints as any[]) || []).find(p => p.date === timeStr || p.date.startsWith(timeStr))
+
         if (match) {
-          setHoveredPoint(match)
+          setHoveredPoint(match as PricePoint)
+          setTooltipPos({ x: param.point.x, y: param.point.y })
         } else {
           setHoveredPoint(null)
+          setTooltipPos(null)
         }
       })
     } catch (err) {
@@ -668,6 +679,9 @@ export function PerformanceChart({
             bottomColor: isDark ? cfg.bottomColorDark : cfg.bottomColorLight,
             lineWidth: 2,
             crosshairMarkerBackgroundColor: cfg.color,
+            crosshairMarkerBorderColor: '#ffffff',
+            crosshairMarkerBorderWidth: 2.5,
+            crosshairMarkerRadius: 5.5,
             lastValueVisible: true,
             autoscaleInfoProvider: (original: any) => {
               const res = original()
@@ -706,6 +720,9 @@ export function PerformanceChart({
             bottomColor: mainBottomColor,
             lineWidth: 2,
             crosshairMarkerBackgroundColor: mainLineColor,
+            crosshairMarkerBorderColor: '#ffffff',
+            crosshairMarkerBorderWidth: 2.5,
+            crosshairMarkerRadius: 5.5,
             lastValueVisible: true,
             autoscaleInfoProvider: (original: any) => {
               const res = original()
@@ -798,6 +815,9 @@ export function PerformanceChart({
           bottomColor: bottomGrad,
           lineWidth: 2,
           crosshairMarkerBackgroundColor: mainColor,
+          crosshairMarkerBorderColor: '#ffffff',
+          crosshairMarkerBorderWidth: 2.5,
+          crosshairMarkerRadius: 5.5,
           lastValueVisible: true,
           autoscaleInfoProvider: undefined,
           priceFormat: {
@@ -841,7 +861,118 @@ export function PerformanceChart({
   return (
     <div data-private className="w-full flex flex-col justify-between flex-1 min-h-0 select-none">
       {/* Canvas Container */}
-      <div data-private ref={containerRef} style={{ height }} className="w-full relative rounded-lg overflow-hidden">
+      <div
+        data-private
+        ref={containerRef}
+        onPointerMove={(e) => {
+          if (!chartRef.current || !containerRef.current || !dataRef.current.length) return
+          const rect = containerRef.current.getBoundingClientRect()
+          const x = e.clientX - rect.left
+          const y = e.clientY - rect.top
+          if (x < 0 || x > rect.width || y < 0 || y > rect.height) return
+
+          try {
+            const time = chartRef.current.timeScale().coordinateToTime(x)
+            if (time) {
+              let timeStr = ''
+              if (typeof time === 'string') {
+                timeStr = time
+              } else if (typeof time === 'number') {
+                const ms = time > 1e11 ? time : time * 1000
+                timeStr = new Date(ms).toISOString().slice(0, 10)
+              } else if (typeof time === 'object' && (time as any).year) {
+                const t: any = time
+                timeStr = `${t.year}-${String(t.month).padStart(2, '0')}-${String(t.day).padStart(2, '0')}`
+              }
+              const match =
+                (dataRef.current || []).find((p) => p.date === timeStr || p.date.startsWith(timeStr)) ||
+                (((metrics?.sumPoints as any[]) || []).find((p) => p.date === timeStr || p.date.startsWith(timeStr)))
+              if (match) {
+                setHoveredPoint(match as PricePoint)
+                setTooltipPos({ x, y })
+              }
+            }
+          } catch {}
+        }}
+        onPointerLeave={() => {
+          setHoveredPoint(null)
+          setTooltipPos(null)
+        }}
+        onMouseLeave={() => {
+          setHoveredPoint(null)
+          setTooltipPos(null)
+        }}
+        style={{ height }}
+        className="w-full relative rounded-lg overflow-hidden"
+      >
+        {/* Floating Aurora Balloon Tooltip (Image 1) */}
+        {hoveredPoint && tooltipPos && (
+          <div
+            className="pointer-events-none absolute z-30 min-w-[170px] max-w-[240px] px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1a1f2b]/95 backdrop-blur-md border border-slate-200/90 dark:border-white/10 shadow-2xl transition-all duration-75 text-xs select-none"
+            style={{
+              left: Math.max(10, Math.min(
+                (containerRef.current?.clientWidth || 300) - 195,
+                tooltipPos.x + 16 > (containerRef.current?.clientWidth || 300) - 195
+                  ? tooltipPos.x - 190
+                  : tooltipPos.x + 16
+              )),
+              top: Math.max(10, Math.min(
+                height - 110,
+                tooltipPos.y - 45
+              )),
+            }}
+          >
+            {/* Date Header */}
+            <div className="text-[11.5px] font-medium text-slate-400 dark:text-slate-400 mb-1.5 capitalize">
+              {formatDateSpanish(hoveredPoint.date)}
+            </div>
+
+            {/* Metric Rows */}
+            <div className="flex flex-col gap-1.5">
+              {/* Valor */}
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
+                  {selectedEntity === 'all' || selectedEntity === 'stacked' ? 'Valor' : (ENTITY_CONFIGS[selectedEntity]?.label || 'Valor')}
+                </span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white text-[12.5px]">
+                  {chartMode === 'currency'
+                    ? fmt.currency(activeSelectedMetrics?.val)
+                    : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
+                </span>
+              </div>
+
+              {/* Invertido */}
+              {showInvested && chartMode === 'currency' && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-400 shrink-0" />
+                    Invertido
+                  </span>
+                  <span className="font-mono font-bold text-slate-700 dark:text-slate-300 text-[12.5px]">
+                    {fmt.currency(activeSelectedMetrics?.inv)}
+                  </span>
+                </div>
+              )}
+
+              {/* Rendimiento / Ganancia */}
+              {activeSelectedMetrics && (
+                <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-white/[0.08] text-[11px]">
+                  <span className="text-slate-500 dark:text-slate-400">Rendimiento</span>
+                  <span
+                    className={cn(
+                      'font-mono font-bold',
+                      activeSelectedMetrics.diff >= 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    {activeSelectedMetrics.diff >= 0 ? '+' : ''}{fmt.currency(activeSelectedMetrics.diff)} ({fmt.pct(activeSelectedMetrics.pct)})
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {/* Glowing Scanline Animation: sweeps from left to right as the curve reveals and fades before reaching axis */}
         {isSweepAnimating && (
           <motion.div

@@ -90,6 +90,7 @@ export function BenchmarkEvolutionChart({
   // Bumped each time the chart instance is (re)created so data is re-applied to the new series
   const [chartVersion, setChartVersion] = useState(0)
   const [hoveredPoint, setHoveredPoint] = useState<BenchmarkComparisonPoint | null>(null)
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
 
   const theme = useAppStore((s) => s.theme)
   const selectedBroker = useAppStore((s) => s.selectedBroker)
@@ -132,15 +133,14 @@ export function BenchmarkEvolutionChart({
         },
         crosshair: {
           vertLine: {
-            color: isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.20)',
-            labelBackgroundColor: isDark ? '#2d2d2d' : '#1e293b',
+            color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(15,23,42,0.25)',
+            labelVisible: false,
             width: 1,
-            style: LineStyle.Dotted,
+            style: LineStyle.Dashed,
           },
           horzLine: {
-            color: isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.20)',
-            labelBackgroundColor: isDark ? '#2d2d2d' : '#1e293b',
-            style: LineStyle.Dotted,
+            visible: false,
+            labelVisible: false,
           },
         },
         rightPriceScale: {
@@ -164,10 +164,10 @@ export function BenchmarkEvolutionChart({
         lineWidth: 2,
         priceLineVisible: false,
         lastValueVisible: true,
-        crosshairMarkerRadius: 4,
+        crosshairMarkerRadius: 5.5,
         crosshairMarkerBackgroundColor: '#2563eb',
         crosshairMarkerBorderColor: '#ffffff',
-        crosshairMarkerBorderWidth: 1.5,
+        crosshairMarkerBorderWidth: 2.5,
         priceFormat: {
           type: 'custom',
           formatter: (p: number) => `${p >= 0 ? '+' : ''}${p.toFixed(2)}%`,
@@ -306,21 +306,32 @@ export function BenchmarkEvolutionChart({
 
       // Crosshair tracking
       chart.subscribeCrosshairMove((param) => {
-        if (!param || !param.time || !pointsRef.current) {
+        if (!param || !param.time || !pointsRef.current || !param.point) {
           setHoveredPoint(null)
+          setTooltipPos(null)
           return
         }
-        const timeStr =
-          typeof param.time === 'string'
-            ? param.time
-            : (param.time as any).year
-            ? `${(param.time as any).year}-${String((param.time as any).month).padStart(2, '0')}-${String(
-                (param.time as any).day
-              ).padStart(2, '0')}`
-            : String(param.time)
+        let timeStr = ''
+        if (typeof param.time === 'string') {
+          timeStr = param.time
+        } else if (typeof param.time === 'number') {
+          const ms = param.time > 1e11 ? param.time : param.time * 1000
+          timeStr = new Date(ms).toISOString().slice(0, 10)
+        } else if (param.time && typeof param.time === 'object') {
+          const t: any = param.time
+          if (t.year) {
+            timeStr = `${t.year}-${String(t.month).padStart(2, '0')}-${String(t.day).padStart(2, '0')}`
+          }
+        }
 
-        const match = pointsRef.current.find((p) => p.date === timeStr)
-        setHoveredPoint(match || null)
+        const match = pointsRef.current.find((p) => p.date === timeStr || p.date.startsWith(timeStr))
+        if (match) {
+          setHoveredPoint(match)
+          setTooltipPos({ x: param.point.x, y: param.point.y })
+        } else {
+          setHoveredPoint(null)
+          setTooltipPos(null)
+        }
       })
     } catch (err) {
       console.warn('Failed to initialize benchmark chart:', err)
@@ -896,7 +907,107 @@ export function BenchmarkEvolutionChart({
       </div>
 
       {/* 3. Canvas Container */}
-      <div className="relative w-full flex-1 min-h-[220px]">
+      <div
+        onMouseLeave={() => {
+          setHoveredPoint(null)
+          setTooltipPos(null)
+        }}
+        className="relative w-full flex-1 min-h-[220px]"
+      >
+        {/* Floating Aurora Balloon Tooltip (Image 1) */}
+        {hoveredPoint && tooltipPos && (
+          <div
+            className="pointer-events-none absolute z-30 min-w-[170px] max-w-[240px] px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1a1f2b]/95 backdrop-blur-md border border-slate-200/90 dark:border-white/10 shadow-2xl transition-all duration-75 text-xs select-none"
+            style={{
+              left: Math.max(10, Math.min(
+                (containerRef.current?.clientWidth || 300) - 195,
+                tooltipPos.x + 16 > (containerRef.current?.clientWidth || 300) - 195
+                  ? tooltipPos.x - 190
+                  : tooltipPos.x + 16
+              )),
+              top: Math.max(10, Math.min(
+                height - 110,
+                tooltipPos.y - 45
+              )),
+            }}
+          >
+            {/* Date Header */}
+            <div className="text-[11.5px] font-medium text-slate-400 dark:text-slate-400 mb-1.5 capitalize">
+              {formatDateSpanish(hoveredPoint.date)}
+            </div>
+
+            {/* Metric Rows */}
+            <div className="flex flex-col gap-1.5">
+              {mode === 'percent' ? (
+                <>
+                  {showPortfolio && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                        Cartera
+                      </span>
+                      <span className={cn(
+                        "font-mono font-bold text-[12.5px]",
+                        hoveredPoint.portfolio_twr >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                      )}>
+                        {hoveredPoint.portfolio_twr >= 0 ? '+' : ''}{hoveredPoint.portfolio_twr.toFixed(2)}%
+                      </span>
+                    </div>
+                  )}
+                  {showSp500 && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                        S&P 500
+                      </span>
+                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-[12.5px]">
+                        {hoveredPoint.sp500 >= 0 ? '+' : ''}{hoveredPoint.sp500.toFixed(2)}%
+                      </span>
+                    </div>
+                  )}
+                  {showBce && hoveredPoint.bce_rate !== undefined && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                        Tasa BCE
+                      </span>
+                      <span className="font-mono font-bold text-slate-700 dark:text-slate-300 text-[12.5px]">
+                        {hoveredPoint.bce_rate >= 0 ? '+' : ''}{hoveredPoint.bce_rate.toFixed(2)}%
+                      </span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">Valor</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white text-[12.5px]">
+                      {fmt.currency(hoveredPoint.value)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
+                      Invertido
+                    </span>
+                    <span className="font-mono font-bold text-slate-700 dark:text-slate-300 text-[12.5px]">
+                      {fmt.currency(hoveredPoint.invested)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-white/[0.08] text-[11px]">
+                    <span className="text-slate-500 dark:text-slate-400">Rendimiento</span>
+                    <span className={cn(
+                      "font-mono font-bold",
+                      hoveredPoint.value - hoveredPoint.invested >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                    )}>
+                      {hoveredPoint.value - hoveredPoint.invested >= 0 ? '+' : ''}{fmt.currency(hoveredPoint.value - hoveredPoint.invested)}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
         {/* Always mounted: the chart is created once on mount and needs this node to exist */}
         <div ref={containerRef} className="w-full h-full" />
         {points.length === 0 && (

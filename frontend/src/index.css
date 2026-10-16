@@ -311,4 +311,72 @@
 
 .animate-in-quick {
   animation: quickFadeSlide 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Aurora Live Dot with Animated Expanding Halo ── */
+.live-dot {
+  position: relative;
+  display: inline-block;
+  width: 7.5px;
+  height: 7.5px;
+  border-radius: 50%;
+  background: #0d9488;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.live-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.8px solid #0d9488;
+  animation: live-ping 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+.live-dot.warn {
+  background: #d97706;
+}
+.live-dot.warn::after {
+  border-color: #d97706;
+}
+
+.live-dot.emerald {
+  background: #10b981;
+}
+.live-dot.emerald::after {
+  border-color: #10b981;
+}
+
+.live-dot.blue {
+  background: #3b82f6;
+}
+.live-dot.blue::after {
+  border-color: #3b82f6;
+}
+
+.live-dot.purple {
+  background: #a855f7;
+}
+.live-dot.purple::after {
+  border-color: #a855f7;
+}
+
+.live-dot.slate {
+  background: #94a3b8;
+}
+.live-dot.slate::after {
+  display: none;
+}
+
+@keyframes live-ping {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }

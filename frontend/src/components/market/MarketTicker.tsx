@@ -423,29 +423,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
           >
             {mainStatusLabel === 'Cerrado' ? (
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="inline-flex rounded-full h-2 w-2 bg-slate-400 dark:bg-slate-500" />
-              </span>
+              <span className="live-dot slate" />
             ) : mainStatusLabel === 'Pre-mercado' ? (
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute -inset-0.5 rounded-full bg-amber-500 opacity-70" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
-              </span>
+              <span className="live-dot warn" />
             ) : mainStatusLabel === 'Post-mercado' ? (
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute -inset-0.5 rounded-full bg-purple-500 opacity-70" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
-              </span>
+              <span className="live-dot purple" />
             ) : mainStatusLabel === 'FUTURES' ? (
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute -inset-0.5 rounded-full bg-sky-400 opacity-50" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
-              </span>
+              <span className="live-dot blue" />
             ) : (
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute -inset-0.5 rounded-full bg-emerald-500 opacity-70" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
-              </span>
+              <span className="live-dot emerald" />
             )}
             {!isNative && (
               <div className="flex flex-col leading-tight">

@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { HeaderActions } from '@/components/layout/HeaderActions'
 import { useHeaderContext } from '@/context/HeaderContext'
+import { usePositions, useAnalytics } from '@/api/queries'
 
 const PERIODS = [
   { label: '1M', value: '1mo' },
@@ -79,8 +80,33 @@ export function Header({
   showBrokerSelector = true,
   children,
 }: HeaderProps) {
-  const { period, setPeriod, selectedBroker, setSelectedBroker, useMock } = useAppStore()
+  const { period, setPeriod, selectedBroker, setSelectedBroker, useMock, openNavAlertHistory } = useAppStore()
   const brokers = useMock ? DEMO_BROKERS : BROKERS
+  const { data: positions = [] } = usePositions()
+  const { data: analytics } = useAnalytics()
+
+  const total = analytics?.total_positions_count ?? positions.length
+  const updated = analytics?.updated_positions_count ?? positions.filter((p) => {
+    const d = p.price_date || p.last_updated
+    if (!d) return false
+    const days = Math.floor((Date.now() - new Date(d).getTime()) / 86400000)
+    return days <= 3
+  }).length
+
+  const navFresh = updated != null && total != null && total > 0 ? updated >= total : true
+
+  const navDate = React.useMemo(() => {
+    if (analytics?.latest_nav_date) {
+      return new Date(analytics.latest_nav_date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+    }
+    const dates = positions
+      .map((p) => p.price_date || p.last_updated)
+      .filter(Boolean) as string[]
+    if (!dates.length) return null
+    dates.sort()
+    const latest = dates[dates.length - 1]
+    return latest ? new Date(latest).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : null
+  }, [analytics?.latest_nav_date, positions])
 
   // Reset the filter when it doesn't exist for the active profile (e.g. after switching user)
   React.useEffect(() => {
@@ -149,6 +175,24 @@ export function Header({
         {/* Extra page actions (e.g. Transactions actions) appear to the left of the fixed controls */}
         <div ref={setPortalNode} className="flex items-center gap-2 shrink-0 empty:hidden" />
         {children && <div className="flex items-center gap-2 shrink-0">{children}</div>}
+
+        {/* NAVs status badge (Aurora design) */}
+        {total > 0 && (
+          <button
+            onClick={openNavAlertHistory}
+            type="button"
+            title={
+              navFresh
+                ? 'Todos los NAVs están al día. Haz clic para ver el historial de actualizaciones.'
+                : `${updated}/${total} NAVs actualizados. Haz clic para ver el historial.`
+            }
+            className="hidden sm:inline-flex items-center gap-2 h-9 px-3 rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#252526] text-[12px] font-medium text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 transition-all shadow-none cursor-pointer"
+          >
+            <span className={cn('live-dot', !navFresh ? 'warn' : 'emerald')} />
+            <span>{navFresh ? 'NAVs al día' : `NAVs ${updated}/${total}`}</span>
+            {navDate && <span className="font-mono text-slate-400 dark:text-slate-500">· {navDate}</span>}
+          </button>
+        )}
 
         {/* Broker / Entity Selector Pill */}
         {/* Global Broker Switcher with Matching Entity Color Dots */}
