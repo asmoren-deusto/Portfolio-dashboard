@@ -1234,40 +1234,49 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                 usd_fx_series = None
 
                 if fetch_period == "1d" and unique_sessions:
-                    # Target strictly the latest active trading session.
-                    # Only reset to a new daily session once the regular market opens (09:30 NY / 15:30 Madrid).
-                    # Before 15:30 Madrid, maintain the previous session with its post-market closing value.
+                    # Trajectory continuada sin cortes antes (10:00) ni despues (15:30).
+                    # - Mantiene la sesion anterior con su cierre de post-market (hasta las 02:00 Madrid).
+                    # - Al abrir el pre-market (10:00 Madrid) y la sesion regular (15:30 Madrid),
+                    #   la linea continua de forma fluida y acumulativa sin reseteos ni saltos.
                     latest_session = unique_sessions[-1]
-                    regular_open_idxs = [
+                    curr_idxs = [
                         idx for idx, d in zip(closes.index, session_dates)
-                        if d == latest_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 9 * 60 + 30
+                        if d == latest_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 4 * 60
                     ]
-                    if regular_open_idxs:
-                        target_session = latest_session
-                        target_idxs = [
+
+                    if len(unique_sessions) > 1:
+                        prev_session = unique_sessions[-2]
+                        # Sesion previa: desde apertura regular (15:30 Madrid / 09:30 NY) hasta fin de post-market (02:00 Madrid / 20:00 NY)
+                        prev_idxs = [
                             idx for idx, d in zip(closes.index, session_dates)
-                            if d == latest_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 4 * 60
-                        ] or [idx for idx, d in zip(closes.index, session_dates) if d == target_session]
-                    elif len(unique_sessions) > 1:
-                        target_session = unique_sessions[-2]
-                        target_idxs = [
-                            idx for idx, d in zip(closes.index, session_dates)
-                            if d == target_session and (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) >= 4 * 60
-                        ] or [idx for idx, d in zip(closes.index, session_dates) if d == target_session]
+                            if d == prev_session and 9 * 60 + 30 <= (idx.astimezone(ny_tz).hour * 60 + idx.astimezone(ny_tz).minute) <= 20 * 60
+                        ]
                     else:
-                        target_session = latest_session
-                        target_idxs = [idx for idx, d in zip(closes.index, session_dates) if d == target_session]
+                        prev_idxs = []
 
-                    prev_session_dates = [idx for idx, d in zip(closes.index, session_dates) if d < target_session]
+                    if curr_idxs and prev_idxs:
+                        target_idxs = prev_idxs + curr_idxs
+                    elif curr_idxs:
+                        target_idxs = curr_idxs
+                    elif prev_idxs:
+                        target_idxs = prev_idxs
+                    else:
+                        target_idxs = [idx for idx, d in zip(closes.index, session_dates) if d == latest_session]
 
-                    # Baseline is the previous trading session's closing price
+                    # Referencia base: cierre regular de la sesion previa (22:00 Madrid / 16:00 NY)
+                    # Esto garantiza continuidad exacta entre el cierre de post-market y el arranque de pre-market
                     base_dict = {}
+                    prev_close_candidates = [
+                        i for i in prev_idxs
+                        if (i.astimezone(ny_tz).hour * 60 + i.astimezone(ny_tz).minute) < 16 * 60
+                    ] if prev_idxs else []
+
                     for t in closes.columns:
                         pc = quotes.get(t, {}).get("prev_close")
                         if pc and pc > 0:
                             base_dict[t] = float(pc)
-                        elif prev_session_dates:
-                            base_dict[t] = float(closes.loc[prev_session_dates, t].dropna().iloc[-1])
+                        elif prev_close_candidates:
+                            base_dict[t] = float(closes.loc[prev_close_candidates[-1], t])
                         elif target_idxs:
                             base_dict[t] = float(closes.loc[target_idxs[0], t])
                         else:
@@ -1281,8 +1290,8 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
                         target_fx = fx_aligned.loc[target_idxs]
                         fx_prev = eurusd_prev
                         if not fx_prev or fx_prev <= 0:
-                            if prev_session_dates:
-                                fx_prev = float(fx_aligned.loc[prev_session_dates].dropna().iloc[-1])
+                            if prev_close_candidates:
+                                fx_prev = float(fx_aligned.loc[prev_close_candidates[-1]])
                             else:
                                 fx_prev = float(target_fx.iloc[0])
                         usd_fx_series = ((fx_prev / target_fx) - 1.0) * 100.0
@@ -1319,24 +1328,33 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session) -> d
 
                     t_unix = int(dt_madrid.timestamp())
 
-                    # Phase change markers (Apertura Regular 15:30, Post-Market 22:00) strictly for intraday
-                    if fetch_period == "1d" and prev_phase is not None and phase != prev_phase:
-                        if phase == "REGULAR":
+                    # Phase change markers strictly for intraday
+                    if fetch_period == "1d":
+                        if prev_ny_d is not None and ny_d != prev_ny_d and phase == "PRE":
                             session_markers.append({
                                 "time_unix": t_unix,
-                                "label": "Apertura Regular (15:30)",
-                                "type": "regular_open",
-                                "color": "#10b981",
+                                "label": "Pre-Market (10:00)",
+                                "type": "pre_market",
+                                "color": "#3b82f6",
                                 "phase": phase,
                             })
-                        elif phase == "POST":
-                            session_markers.append({
-                                "time_unix": t_unix,
-                                "label": "Post-Market (22:00)",
-                                "type": "post_market",
-                                "color": "#f59e0b",
-                                "phase": phase,
-                            })
+                        elif prev_phase is not None and phase != prev_phase:
+                            if phase == "REGULAR":
+                                session_markers.append({
+                                    "time_unix": t_unix,
+                                    "label": "Apertura Regular (15:30)",
+                                    "type": "regular_open",
+                                    "color": "#10b981",
+                                    "phase": phase,
+                                })
+                            elif phase == "POST":
+                                session_markers.append({
+                                    "time_unix": t_unix,
+                                    "label": "Post-Market (22:00)",
+                                    "type": "post_market",
+                                    "color": "#f59e0b",
+                                    "phase": phase,
+                                })
 
                     prev_ny_d = ny_d
                     prev_phase = phase

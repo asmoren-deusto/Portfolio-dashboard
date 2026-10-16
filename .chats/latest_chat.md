@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 16:18:56
+- **Fecha de exportación:** 2026-10-16 16:39:42
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 87
+- **Total de interacciones registradas:** 90
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1292,5 +1292,49 @@ He actualizado el componente [MonthlyReturnsHeatmap.tsx](file:///c:/Users/comos/
 ### 👤 Usuario (2026-10-16 13:54:52)
 
 copiate esa animacion del circulo de aurora, tb el uso de los globos de informacion. tb ese elemento de navs . en general revisa el panel aurora para ver que elementos de disño puedes copiar
+
+---
+
+### 🤖 Asistente (2026-10-16 14:18:59)
+
+He incorporado con éxito los tres elementos de diseño del panel Aurora que solicitaste:
+
+### 1. 🎈 Globos de Información Flotantes en Gráficos (Tooltips Aurora)
+* **Tooltip flotante en curvas ([PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) y [BenchmarkEvolutionChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/BenchmarkEvolutionChart.tsx)):**
+  * Al pasar el ratón por la curva aparece el globo flotante con esquinas redondeadas (`rounded-2xl`), efecto cristal (`backdrop-blur-md`), cabecera de fecha y desglose de **Valor**, **• Invertido** y **Rendimiento**.
+  * Marcador de doble anillo (`crosshairMarkerRadius: 5.5`, borde blanco `crosshairMarkerBorderWidth: 2.5`) directamente sobre el punto seleccionado de la curva.
+  * Línea de cursor vertical discontinua sin saturación horizontal, permitiendo una lectura limpia idéntica al diseño de Aurora.
+
+### 2. 🟢 Animación del Círculo Aurora (`live-dot`)
+* **Animación Halo / Radar Ping ([index.css](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css)):**
+  * Se implementó la clase `.live-dot` con `@keyframes live-ping` (anillo exterior en expansión y desvanecimiento suave con curva cúbica `cubic-bezier(0.16, 1, 0.3, 1)` sin deformar el punto interior).
+  * Variantes disponibles: `.warn` (ámbar), `.emerald` (verde sesión), `.blue`, `.purple` y `.slate`.
+  * Integrada en la insignia **EN DIRECTO** ([SimulatedPortfolioCard.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)) y en el estado del mercado ([MarketTicker.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx)).
+
+### 3. 🏷️ Elemento de Estado de NAVs
+* **Píldora de estado en la cabecera ([Header.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/Header.tsx)):**
+  * Muestra el estado en vivo: `[ • NAVs X/Y · D mes ]` (con punto ámbar pulsante si hay NAVs pendientes de actualizar o verde si están al día).
+  * Al hacer clic en la píldora, abre directamente el informe modal de historial de actualizaciones de NAVs.
+  * Se añadió también el indicador de antigüedad del NAV en la tabla de activos ([PositionsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/PositionsPage.tsx)).
+
+---
+🚀 **Release publicada:** sincronizado y versionado a `v3.0.97` siguiendo el protocolo automático de releases.
+
+---
+
+### 👤 Usuario (2026-10-16 13:56:38)
+
+aqui la idea es que la grafica sea continuada no que cortes antes o despues -> 2. Mantenimiento del valor de Post-Market (sin reset a las 10:00)
+Causa: La condición de selección de sesión cortaba a las 04:00 NY (10:00 Madrid), forzando el reseteo de la sesión al iniciarse el pre-market estadounidense y descartando la sesión anterior completada con su cierre de post-market.
+Solución:
+El umbral de apertura de nueva sesión regular se fijó en la apertura real del mercado estadounidense (15:30 Madrid / 09:30 NY).
+Durante toda la noche y la mañana europea (antes de las 15:30), la gráfica mantiene la sesión anterior completa junto con su valor de cierre de post-market (hasta las 02:00 Madrid / 20:00 NY), sin resetearse a las 10:00.
+A las 15:30 Madrid, al sonar la campana de Wall Street, arranca de forma limpia la nueva sesión intradía.
+
+---
+
+### 👤 Usuario (2026-10-16 14:38:29)
+
+continua
 
 ---
