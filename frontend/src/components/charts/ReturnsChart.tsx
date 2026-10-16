@@ -86,14 +86,7 @@ export function ReturnsChart({
   height = 240
 }: ReturnsChartProps) {
   const refreshAnimKey = useAppStore(s => s.refreshAnimKey)
-  const [isInitialAnim, setIsInitialAnim] = useState(true)
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null)
-
-  useEffect(() => {
-    setIsInitialAnim(true)
-    const timer = setTimeout(() => setIsInitialAnim(false), 700)
-    return () => clearTimeout(timer)
-  }, [mode, refreshAnimKey])
 
   if (mode === 'global' && !analytics) {
     return <ReturnsChartSkeleton compact={compact} height={height} />
@@ -148,6 +141,31 @@ export function ReturnsChart({
         ]
   }
 
+  const renderCustomBarLabel = (props: any) => {
+    const { x, y, width, height, value } = props
+    if (value === undefined || value === null || isNaN(Number(value))) return null
+    const num = Number(value)
+    const isPos = num >= 0
+    const formatted = `${isPos ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
+    const barX = (x ?? 0) + ((width ?? 0) / 2)
+    const barY = isPos ? Math.max(14, (y ?? 0) - 6) : (y ?? 0) + (height ?? 0) + 12
+
+    return (
+      <text
+        x={barX}
+        y={barY}
+        textAnchor="middle"
+        fill="#94a3b8"
+        className="font-mono font-bold select-none pointer-events-none"
+        style={{
+          fontSize: compact ? '9.5px' : '10.5px',
+        }}
+      >
+        {formatted}
+      </text>
+    )
+  }
+
   return (
     <motion.div
       key={`${mode}-${refreshAnimKey}`}
@@ -161,7 +179,7 @@ export function ReturnsChart({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={compact ? { top: 22, right: 8, left: 4, bottom: 18 } : { top: 24, right: 14, left: 8, bottom: 20 }}
+          margin={compact ? { top: 24, right: 8, left: 4, bottom: 20 } : { top: 26, right: 14, left: 8, bottom: 22 }}
         >
           <defs>
             <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
@@ -190,11 +208,11 @@ export function ReturnsChart({
             domain={[
               (dataMin: number) => {
                 const min = Number.isFinite(dataMin) ? dataMin : 0
-                return min < 0 ? min * 1.35 : 0
+                return min < 0 ? min * 1.45 : 0
               },
               (dataMax: number) => {
                 const max = Number.isFinite(dataMax) ? dataMax : 0
-                return max > 0 ? max * 1.35 : 0
+                return max > 0 ? max * 1.45 : 0
               }
             ]}
             tickFormatter={v => `${Number(Number(v).toFixed(1))}%`}
@@ -205,24 +223,11 @@ export function ReturnsChart({
             dataKey="value"
             radius={[6, 6, 0, 0]}
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
-            isAnimationActive={isInitialAnim}
-            animationDuration={650}
-            animationEasing="ease-out"
+            isAnimationActive={false}
           >
             <LabelList
               dataKey="value"
-              position="top"
-              formatter={(val: any) => {
-                if (val == null || isNaN(val)) return ''
-                const num = Number(val)
-                return `${num >= 0 ? '+' : ''}${Math.abs(num) < 1 ? num.toFixed(2) : num.toFixed(1)}%`
-              }}
-              style={{
-                fill: '#94a3b8',
-                fontSize: compact ? '9.5px' : '10.5px',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-              }}
+              content={renderCustomBarLabel}
             />
             {data.map((d, i) => (
               <Cell
