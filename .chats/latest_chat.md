@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 13:57:31
+- **Fecha de exportación:** 2026-10-16 13:58:41
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 53
+- **Total de interacciones registradas:** 55
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -804,5 +804,23 @@ Cambios sincronizados y publicados en la versión **v3.0.80**.
 ### 👤 Usuario (2026-10-16 11:22:48)
 
 en rendimineto no difumines el resto al hacer hover sobre uno
+
+---
+
+### 🤖 Asistente (2026-10-16 11:57:33)
+
+Se ha eliminado el efecto de difuminado/atenuación sobre las barras en la gráfica de **Rendimiento**:
+
+- En [ReturnsChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx):
+  - Todas las barras mantienen ahora su opacidad al 100% (`opacity={1}`) en todo momento, sin que las demás barras pierdan intensidad al posar el cursor sobre una barra en particular.
+  - La barra activa sobre la que se hace hover sigue recibiendo el sutil realce (`drop-shadow`) y el tooltip flotante translúcido.
+
+Publicado y sincronizado en la versión **v3.0.81**.
+
+---
+
+### 👤 Usuario (2026-10-16 11:25:07)
+
+en rendimiento vuelve a los % originales en gris, estos los has colocado mal además
 
 ---
