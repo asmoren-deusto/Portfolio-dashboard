@@ -134,11 +134,8 @@ export function AllocationChart({
   return (
     <div className="flex flex-col gap-3 min-w-0 w-full">
       {/* Donut Chart Container */}
-      <motion.div
+      <div
         key={`alloc-wrapper-${selectedBroker}-${refreshAnimKey}-${mode}`}
-        initial={{ opacity: 0.85, scale: 0.97 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.32, ease: 'easeOut' }}
         style={{ height: chartHeight }}
         className="relative flex items-center justify-center w-full min-w-0"
       >
@@ -154,8 +151,8 @@ export function AllocationChart({
               dataKey="value"
               strokeWidth={0}
               isAnimationActive={true}
-              animationBegin={30}
-              animationDuration={750}
+              animationBegin={0}
+              animationDuration={680}
               animationEasing="ease-out"
               onMouseEnter={(_, index) => {
                 setHoveredIndex(index)
@@ -232,7 +229,7 @@ export function AllocationChart({
             </AnimatePresence>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Legend in 2 columns */}
       {showLegend && (

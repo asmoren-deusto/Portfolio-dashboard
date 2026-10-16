@@ -194,11 +194,8 @@ export function ReturnsChart({
   })
 
   return (
-    <motion.div
+    <div
       key={`ret-wrap-${mode}-${selectedBroker}-${refreshAnimKey}`}
-      initial={{ opacity: 0.85, scale: 0.99, y: 2 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       data-private
       style={{ height }}
       className="w-full"
@@ -256,8 +253,8 @@ export function ReturnsChart({
             radius={[6, 6, 0, 0]}
             maxBarSize={compact ? (mode === 'weekly' ? 30 : 34) : 44}
             isAnimationActive={true}
-            animationBegin={30}
-            animationDuration={750}
+            animationBegin={0}
+            animationDuration={680}
             animationEasing="ease-out"
           >
             <LabelList
@@ -316,6 +313,6 @@ export function ReturnsChart({
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </motion.div>
+    </div>
   )
 }

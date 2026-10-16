@@ -3,7 +3,25 @@
  * Animates the series canvas plot area with a left-to-right sweep (0% to 100% time reveal)
  * matching the visual delight of institutional financial terminal charts.
  */
-export function triggerChartAnimation(container: HTMLElement | null, duration = 750) {
+export function prepareChartForAnimation(container: HTMLElement | null) {
+  if (!container) return
+  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    return
+  }
+  const table = container.querySelector('table')
+  const canvas = container.querySelector('canvas')
+  const paneDiv = (canvas?.closest('td')?.firstElementChild || canvas?.parentElement) as HTMLElement
+  const target = (table || (paneDiv && paneDiv.tagName === 'DIV' ? paneDiv : container)) as HTMLElement
+
+  if (target) {
+    try {
+      target.getAnimations?.().forEach(a => a.cancel())
+    } catch {}
+    target.style.clipPath = 'inset(0 100% 0 0)'
+  }
+}
+
+export function triggerChartAnimation(container: HTMLElement | null, duration = 440) {
   if (!container) return
 
   // Respect user preference for reduced motion
@@ -12,7 +30,6 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
   }
 
   // Find the primary chart element in lightweight-charts.
-  // The <table> wraps all panes and canvases cleanly, allowing a unified sweep animation.
   const table = container.querySelector('table')
   const canvas = container.querySelector('canvas')
   const paneDiv = (canvas?.closest('td')?.firstElementChild || canvas?.parentElement) as HTMLElement

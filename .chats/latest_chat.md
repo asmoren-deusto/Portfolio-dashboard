@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 21:42:05
+- **Fecha de exportación:** 2026-10-16 21:53:16
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 38
+- **Total de interacciones registradas:** 40
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -590,5 +590,31 @@ Verificado y publicado en Git bajo la versión **v3.0.119**.
 ### 👤 Usuario (2026-10-16 19:32:46)
 
 en rendimiento a veces los % parpadean, revisalo pero no toques nada del diseño, solo asegura que no parpadeen/desaparezcan
+
+---
+
+### 🤖 Asistente (2026-10-16 19:42:08)
+
+### Solución implementada (Diseño 100% intacto)
+
+Se identificaron y corrigieron las **dos causas técnicas** que provocaban que los porcentajes (`%`) parpadearan o desaparecieran intermitentemente en la tarjeta de Rendimiento:
+
+1. **Bucle de eventos hover sobre las etiquetas de las barras:**
+   - En [ReturnsChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/ReturnsChart.tsx), las etiquetas de texto SVG `<LabelList>` tenían asignada una propiedad CSS `transition: 'all 0.3s ease'` y no tenían desactivados los eventos del ratón (`pointerEvents`).
+   - Al pasar el cursor cerca del extremo de una barra, el puntero tocaba el texto del porcentaje, provocando que la barra detectara un `mouseleave` inmediato (y al pixel siguiente un `mouseenter`), entrando en un bucle rápido de renderizado. Durante ese bucle, la transición de 300 ms del texto intentaba recalcular su opacidad/posición una y otra vez, haciendo que los números temblaran o se desvanecieran.
+   - **Solución:** Se añadió `pointerEvents: 'none'` y `userSelect: 'none'` a las etiquetas y al tooltip, y se retiró la transición CSS directa en las coordenadas SVG. El ratón atraviesa limpiamente las etiquetas sin interrumpir la barra y los porcentajes permanecen **completamente estables y sólidos**.
+
+2. **Desaparición temporal de los `%` en las píldoras inferiores:**
+   - En [OverviewPage.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx), los valores de las píldoras (`7D: -1.77%` / `1D: ...`) estaban envueltos en un componente `<AnimatePresence mode="wait">` cuya clave (`key`) dependía del propio valor numérico.
+   - Cada vez que cambiaba una métrica o se refrescaba la consulta, `mode="wait"` desmontaba el texto viejo haciéndolo desaparecer a opacidad 0 durante 200 ms antes de permitir que entrara el nuevo, dejando un hueco en blanco temporal (el "parpadeo").
+   - **Solución:** Se renderiza directamente el `<span>` preservando exactamente la misma tipografía, tamaño, colores y disposición, pero con transiciones directas de color (`transition-colors duration-150`). Los números ya no desaparecen ni se ocultan en ningún momento.
+
+El diseño visual, paleta de colores y proporciones se mantienen **exactamente iguales**. Compilado y publicado en Git bajo la versión **v3.0.120**.
+
+---
+
+### 👤 Usuario (2026-10-16 19:37:19)
+
+los tres graficos no van a la vez ni de coña, retrasa mucho el 1, y adelanta bastante el 3
 
 ---

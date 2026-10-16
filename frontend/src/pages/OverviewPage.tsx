@@ -1254,33 +1254,22 @@ export function OverviewPage() {
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
             <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={`${returnsPeriodMode}-${selectedBroker}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                  className="flex flex-col justify-center flex-1 min-h-0 w-full"
-                >
-                  {isChartsInitialLoading ? (
-                    <ReturnsChartSkeleton compact height={260} />
-                  ) : (
-                    <ReturnsChart
-                      analytics={analytics}
-                      mode={returnsPeriodMode}
-                      weeklyData={weeklyReturnsData}
-                      day1Pct={shortTermMetrics?.dayPct}
-                      day1Amount={shortTermMetrics?.dayAmount}
-                      weekPct={shortTermMetrics?.weekPct}
-                      weekAmount={shortTermMetrics?.weekAmount}
-                      totalPortfolioValue={displaySummary?.total_value}
-                      compact
-                      height={260}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
+              {isChartsInitialLoading ? (
+                <ReturnsChartSkeleton compact height={260} />
+              ) : (
+                <ReturnsChart
+                  analytics={analytics}
+                  mode={returnsPeriodMode}
+                  weeklyData={weeklyReturnsData}
+                  day1Pct={shortTermMetrics?.dayPct}
+                  day1Amount={shortTermMetrics?.dayAmount}
+                  weekPct={shortTermMetrics?.weekPct}
+                  weekAmount={shortTermMetrics?.weekAmount}
+                  totalPortfolioValue={displaySummary?.total_value}
+                  compact
+                  height={260}
+                />
+              )}
             </div>
 
             {/* Useful Stats Strip (Matching Card 1) */}

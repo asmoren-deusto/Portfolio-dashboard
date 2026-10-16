@@ -21,7 +21,7 @@ import {
   Flame,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { triggerChartAnimation } from '@/lib/chartAnimation'
+import { triggerChartAnimation, prepareChartForAnimation } from '@/lib/chartAnimation'
 
 export type ChartMode = 'currency' | 'percent'
 
@@ -867,13 +867,12 @@ export function PerformanceChart({
       }
 
       chart.timeScale().fitContent()
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsSweepAnimating(true)
-          setSweepKey(prev => prev + 1)
-          triggerChartAnimation(containerRef.current, 750)
-        })
-      })
+      prepareChartForAnimation(containerRef.current)
+      setTimeout(() => {
+        setIsSweepAnimating(true)
+        setSweepKey(prev => prev + 1)
+        triggerChartAnimation(containerRef.current, 440)
+      }, 240)
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
@@ -1007,9 +1006,9 @@ export function PerformanceChart({
               opacity: [0.9, 0.9, 0],
             }}
             transition={{
-              duration: 0.75,
+              duration: 0.44,
               ease: [0.25, 1, 0.5, 1],
-              opacity: { duration: 0.75, times: [0, 0.8, 1], ease: 'easeOut' },
+              opacity: { duration: 0.44, times: [0, 0.8, 1], ease: 'easeOut' },
             }}
             onAnimationComplete={() => setIsSweepAnimating(false)}
             className="absolute inset-y-0 w-0.5 pointer-events-none z-20 bg-gradient-to-b from-transparent via-emerald-500/50 dark:via-emerald-400/60 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.45)]"
