@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 14:17:26
+- **Fecha de exportación:** 2026-10-16 14:26:02
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 65
+- **Total de interacciones registradas:** 67
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -932,5 +932,30 @@ Publicado y sincronizado en la versión **v3.0.86**.
 ### 👤 Usuario (2026-10-16 12:07:46)
 
 evolucion patrimonial aparece una linea recta (de la animacion) siempre encima del eje Y derecho
+
+---
+
+### 🤖 Asistente (2026-10-16 12:17:28)
+
+Se ha eliminado por completo la línea vertical residual que quedaba visible sobre el eje Y derecho en la gráfica de **Evolución Patrimonial**:
+
+### Origen del problema
+1. **Artefacto de `clip-path` permanente:** En [chartAnimation.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), la animación utilizaba `fill: 'both'` con `inset(0 0% 0 0)`. Esto dejaba activo de forma permanente el plano de recorte exactamente sobre el borde derecho de la celda de la gráfica, provocando que el motor de renderizado de Chromium dibujara una línea/borde anti-alias vertical de 1px sobre la escala de precios.
+2. **Scanline al final del recorrido:** En [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx), la línea luminosa llegaba hasta `calc(100% - 58px)` sin atenuar su opacidad antes de tocar el eje.
+
+### Solución aplicada
+1. **[chartAnimation.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts)**:
+   - Se ajustó el final del keyframe de recorte a `inset(0 -6px 0 0)` para que sobrepase el límite antes de terminar.
+   - Se añadió un callback de limpieza (`onfinish` y `oncancel`) que cancela la animación y remueve completamente el `clipPath` (`target.style.clipPath = ''`), garantizando que no quede ninguna máscara ni línea activa sobre el DOM.
+2. **[PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx)**:
+   - Se agregó una curva de desvanecimiento suave a la línea de barrido (`opacity: [0.9, 0.9, 0]`) para que desaparezca con suavidad antes de alcanzar el eje Y derecho, desmontándose limpiamente.
+
+Verificado en navegador con grabación y sincronizado en la versión **v3.0.87**.
+
+---
+
+### 👤 Usuario (2026-10-16 12:11:47)
+
+tengo un tiempo libre asi que revisa a conciencia todas las animaciones de la web,
 
 ---

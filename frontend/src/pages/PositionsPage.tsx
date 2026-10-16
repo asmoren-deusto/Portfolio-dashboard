@@ -230,10 +230,11 @@ export function PositionsPage() {
           {FILTER_TABS.map((tab) => {
             const active = activeFilter === tab.id
             return (
-              <button
+              <motion.button
                 key={tab.id}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => setActiveFilter(tab.id)}
-                className={`relative px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
+                className={`relative px-4 py-2 text-xs font-semibold rounded-xl transition-colors whitespace-nowrap ${
                   active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
@@ -241,11 +242,11 @@ export function PositionsPage() {
                   <motion.div
                     layoutId="posTypeTab"
                     className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
                   />
                 )}
                 <span className="relative z-10">{tab.label}</span>
-              </button>
+              </motion.button>
             )
           })}
         </div>
@@ -296,28 +297,44 @@ export function PositionsPage() {
 
           {/* View Toggle */}
           <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 shadow-sm dark:bg-[#252526] dark:border-white/[0.08]">
-            <button
+            <motion.button
+              whileTap={{ scale: 0.94 }}
               onClick={() => setViewMode('table')}
-              className={`p-1.5 rounded-lg transition-colors ${
+              className={`relative p-1.5 rounded-lg transition-colors ${
                 viewMode === 'table'
-                  ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
+                  ? 'text-slate-900 dark:text-white'
                   : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
               title="Vista de Tabla"
             >
-              <List className="w-4 h-4" />
-            </button>
-            <button
+              {viewMode === 'table' && (
+                <motion.div
+                  layoutId="positionsViewModePill"
+                  className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
+                  transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
+                />
+              )}
+              <List className="w-4 h-4 relative z-10" />
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.94 }}
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-lg transition-colors ${
+              className={`relative p-1.5 rounded-lg transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
+                  ? 'text-slate-900 dark:text-white'
                   : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
               title="Vista de Tarjetas"
             >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
+              {viewMode === 'grid' && (
+                <motion.div
+                  layoutId="positionsViewModePill"
+                  className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
+                  transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
+                />
+              )}
+              <LayoutGrid className="w-4 h-4 relative z-10" />
+            </motion.button>
           </div>
         </div>
       </div>

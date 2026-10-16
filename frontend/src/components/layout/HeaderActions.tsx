@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { RefreshCw, Sun, Moon, Eye, EyeOff, ChevronDown, Check, LogOut, Bell } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
 import { useRefreshPortfolio } from '@/hooks/useRefreshPortfolio'
 
@@ -138,13 +138,24 @@ export function HeaderActions({
           </button>
 
           {/* Dropdown Menu */}
-          {userMenuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setUserMenuOpen(false)}
-              />
-              <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xl z-50 p-2 text-xs">
+          <AnimatePresence>
+            {userMenuOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.1 }}
+                  className="fixed inset-0 z-40"
+                  onClick={() => setUserMenuOpen(false)}
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -6 }}
+                  transition={{ duration: 0.12, ease: 'easeOut' }}
+                  className="absolute right-0 mt-2 w-64 rounded-2xl bg-white/95 dark:bg-[#252526]/95 backdrop-blur-xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xl z-50 p-2 text-xs origin-top-right"
+                >
                 {/* Active user header */}
                 <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04] mb-2">
                   <div className="flex items-center gap-2.5">
@@ -239,19 +250,21 @@ export function HeaderActions({
                     <span>Cerrar sesión / Salir</span>
                   </button>
                 </div>
-              </div>
+              </motion.div>
             </>
           )}
-        </div>
-      )}
+        </AnimatePresence>
+      </div>
+    )}
 
       {/* Privacy Mode Toggle */}
-      <button
+      <motion.button
+        whileTap={{ scale: 0.92 }}
         onClick={togglePrivacyMode}
         aria-label={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
         aria-pressed={privacyMode}
         className={cn(
-          'flex items-center justify-center border transition-all active:scale-95',
+          'flex items-center justify-center border transition-all',
           btnSize,
           privacyMode
             ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-white/20 dark:bg-white/[0.08] dark:text-white'
@@ -260,13 +273,14 @@ export function HeaderActions({
         title={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
       >
         {privacyMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-      </button>
+      </motion.button>
 
       {/* Quick Theme Toggle Button */}
-      <button
+      <motion.button
+        whileTap={{ scale: 0.92, rotate: 12 }}
         onClick={toggleTheme}
         className={cn(
-          'flex items-center justify-center border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 transition-all active:scale-95 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300',
+          'flex items-center justify-center border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 transition-all dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300',
           btnSize
         )}
         title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
@@ -276,14 +290,15 @@ export function HeaderActions({
         ) : (
           <Moon className="w-4 h-4 text-slate-700" />
         )}
-      </button>
+      </motion.button>
 
       {/* NAV Updates History / Bell */}
-      <button
+      <motion.button
+        whileTap={{ scale: 0.92 }}
         onClick={openNavAlertHistory}
         aria-label="Ver informe de actualizaciones de NAVs"
         className={cn(
-          'relative flex items-center justify-center border transition-all active:scale-95',
+          'relative flex items-center justify-center border transition-all',
           btnSize,
           (lastNavAlertHistory?.updatedCount ?? 0) > 0
             ? 'border-emerald-300 bg-emerald-50/60 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400'
@@ -301,7 +316,7 @@ export function HeaderActions({
             {lastNavAlertHistory?.updatedCount}
           </span>
         )}
-      </button>
+      </motion.button>
 
       {/* Refresh button */}
       {!hideRefresh && (

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { isNativePlatform } from '@/api/config'
 import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
 
 interface TabItem {
   to: string
@@ -76,7 +77,11 @@ export const MobileTabBar: React.FC = () => {
                   {label}
                 </span>
                 {isActive && (
-                  <span className="absolute -bottom-0.5 w-3 h-0.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                  <motion.div
+                    layoutId="mobileTabIndicator"
+                    className="absolute -bottom-0.5 w-4 h-0.5 rounded-full bg-blue-600 dark:bg-blue-400"
+                    transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                  />
                 )}
               </>
             )}

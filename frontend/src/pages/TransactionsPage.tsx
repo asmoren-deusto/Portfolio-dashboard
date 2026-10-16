@@ -221,10 +221,11 @@ export function TransactionsPage() {
           {TYPE_TABS.map((tab) => {
             const active = activeType === tab.id
             return (
-              <button
+              <motion.button
                 key={tab.id}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => setActiveType(tab.id)}
-                className={`relative px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
+                className={`relative px-4 py-2 text-xs font-semibold rounded-xl transition-colors whitespace-nowrap ${
                   active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
@@ -232,11 +233,11 @@ export function TransactionsPage() {
                   <motion.div
                     layoutId="txTypeTab"
                     className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
                   />
                 )}
                 <span className="relative z-10">{tab.label}</span>
-              </button>
+              </motion.button>
             )
           })}
         </div>

@@ -251,8 +251,9 @@ export const MarketPage: React.FC = () => {
             {INDEX_TABS.map((tab) => {
               const active = selectedIndex === tab.id
               return (
-                <button
+                <motion.button
                   key={tab.id}
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => {
                     setSelectedIndex(tab.id)
                     setSelectedSector('Todos')
@@ -270,11 +271,11 @@ export const MarketPage: React.FC = () => {
                     <motion.div
                       layoutId="activeMarketTabPill"
                       className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm -z-10"
-                      transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
                     />
                   )}
                   <span>{tab.label}</span>
-                </button>
+                </motion.button>
               )
             })}
           </div>
@@ -295,52 +296,84 @@ export const MarketPage: React.FC = () => {
 
             {/* View Mode Switcher (Dual / Heatmap / Grid / Table) */}
             <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.08]">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setViewMode('split')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                   viewMode === 'split'
-                    ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
+                    ? 'text-slate-900 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Vista dual: listado y heatmap paralelos"
               >
-                <Columns2 className="w-3.5 h-3.5" />
-                <span>Dual</span>
-              </button>
-              <button
+                {viewMode === 'split' && (
+                  <motion.div
+                    layoutId="marketViewModePill"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
+                  />
+                )}
+                <Columns2 className="w-3.5 h-3.5 relative z-10" />
+                <span className="relative z-10">Dual</span>
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setViewMode('heatmap')}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                   viewMode === 'heatmap'
-                    ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
+                    ? 'text-slate-900 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Mapa de calor interactivo completo"
               >
-                <Layers className="w-3.5 h-3.5" />
-                <span>Heatmap</span>
-              </button>
-              <button
+                {viewMode === 'heatmap' && (
+                  <motion.div
+                    layoutId="marketViewModePill"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
+                  />
+                )}
+                <Layers className="w-3.5 h-3.5 relative z-10" />
+                <span className="relative z-10">Heatmap</span>
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-all ${
+                className={`relative p-1.5 rounded-lg transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
+                    ? 'text-slate-900 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Vista de cuadrícula con logos"
               >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
+                {viewMode === 'grid' && (
+                  <motion.div
+                    layoutId="marketViewModePill"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
+                  />
+                )}
+                <LayoutGrid className="w-4 h-4 relative z-10" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg transition-all ${
+                className={`relative p-1.5 rounded-lg transition-colors ${
                   viewMode === 'table'
-                    ? 'bg-white text-slate-900 dark:bg-[#333333] dark:border dark:border-white/10 dark:text-white shadow-sm'
+                    ? 'text-slate-900 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Vista de tabla densa"
               >
-                <List className="w-4 h-4" />
-              </button>
+                {viewMode === 'table' && (
+                  <motion.div
+                    layoutId="marketViewModePill"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
+                    transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
+                  />
+                )}
+                <List className="w-4 h-4 relative z-10" />
+              </motion.button>
             </div>
           </div>
         </div>
