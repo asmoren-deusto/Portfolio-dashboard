@@ -37,7 +37,7 @@ export function AllocationChart({
 
   useEffect(() => {
     setIsInitialAnim(true)
-    const timer = setTimeout(() => setIsInitialAnim(false), 300)
+    const timer = setTimeout(() => setIsInitialAnim(false), 600)
     return () => clearTimeout(timer)
   }, [mode])
 
@@ -156,7 +156,7 @@ export function AllocationChart({
               strokeWidth={0}
               isAnimationActive={isInitialAnim}
               animationBegin={0}
-              animationDuration={250}
+              animationDuration={500}
               animationEasing="ease-out"
               onMouseEnter={(_, index) => {
                 setHoveredIndex(index)
@@ -178,7 +178,7 @@ export function AllocationChart({
                   opacity={activeIndex === null || activeIndex === i ? 1 : 0.4}
                   style={{
                     cursor: 'pointer',
-                    transition: 'opacity 0.2s ease',
+                    transition: 'opacity 0.1s ease',
                     filter: activeIndex === i ? 'drop-shadow(0 2px 8px rgba(0,0,0,0.18))' : 'none',
                   }}
                 />
@@ -194,10 +194,10 @@ export function AllocationChart({
               {hoveredItem ? (
                 <motion.div
                   key={hoveredItem.isin || hoveredItem.name}
-                  initial={{ opacity: 0, scale: 0.94 }}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.94 }}
-                  transition={{ duration: 0.14, ease: 'easeOut' }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.07, ease: 'easeOut' }}
                   className="flex flex-col items-center justify-center w-full"
                 >
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate w-full">
@@ -213,10 +213,10 @@ export function AllocationChart({
               ) : (
                 <motion.div
                   key="total"
-                  initial={{ opacity: 0, scale: 0.94 }}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.94 }}
-                  transition={{ duration: 0.14, ease: 'easeOut' }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.07, ease: 'easeOut' }}
                   className="flex flex-col items-center justify-center w-full"
                 >
                   <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
@@ -253,7 +253,7 @@ export function AllocationChart({
                   setHoveredIndex(null)
                   if (onHoverIsin) onHoverIsin(null)
                 }}
-                style={{ opacity: isOtherHovered ? 0.45 : 1, transition: 'opacity 0.15s ease' }}
+                style={{ opacity: isOtherHovered ? 0.45 : 1, transition: 'opacity 0.08s ease' }}
                 className={`flex items-center gap-1.5 py-1 px-1.5 rounded-lg transition-colors cursor-pointer ${
                   isHovered
                     ? 'bg-slate-100/90 dark:bg-white/10 ring-1 ring-slate-200/90 dark:ring-white/10'

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-16 14:11:04
+- **Fecha de exportación:** 2026-10-16 14:13:23
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 61
+- **Total de interacciones registradas:** 63
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -889,5 +889,24 @@ Publicado y sincronizado en la versión **v3.0.84**.
 ### 👤 Usuario (2026-10-16 11:56:39)
 
 la animacion de cambio de pagina, mucho más rapida
+
+---
+
+### 🤖 Asistente (2026-10-16 12:11:06)
+
+Se ha optimizado la transición entre páginas en **[RootLayout.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx)** para que sea mucho más rápida e inmediata:
+
+- **Salida casi instantánea (`exit`):** Reducida a **50 ms** (`duration: 0.05`), eliminando el tiempo de espera muerto al hacer clic en cualquier sección.
+- **Entrada ultrarrápida (`animate`):** Ajustada a **140 ms** (`duration: 0.14`) con aceleración suave `[0.16, 1, 0.3, 1]`.
+- **Eliminación del retardo por `blur`:** Se suprimió el filtro pesado de desenfoque (`blur(6px)`) que retrasaba el renderizado en GPU, sustituyéndolo por un microdesplazamiento vertical limpio de solo 6px.
+- **Tiempo total de cambio:** Ha pasado de más de 560 ms a **menos de 190 ms**, proporcionando una navegación reactiva e instantánea.
+
+Verificado en navegador y sincronizado en la versión **v3.0.85**.
+
+---
+
+### 👤 Usuario (2026-10-16 11:58:20)
+
+en distribucion que la animacion sea más rapida, la mitad -----> revierte este cambio de la 3.0.80, no me referia a la animacion de carga inicial sino a la aparicion de los datos (fade) cuando cambias (haces hover) sobre el grafico, esa SI, a la mitad
 
 ---

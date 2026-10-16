@@ -507,7 +507,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                         paddingAngle={2}
                         minAngle={4}
                         strokeWidth={0}
-                        animationDuration={200}
+                        animationDuration={400}
                         animationEasing="ease-out"
                         onMouseEnter={(_, index) => {
                           if (geoDonutData[index]) {
@@ -527,7 +527,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                               opacity={isDimmed ? 0.4 : 1}
                               style={{
                                 cursor: 'pointer',
-                                transition: 'opacity 0.2s ease, filter 0.2s ease',
+                                transition: 'opacity 0.1s ease, filter 0.1s ease',
                                 filter: isHovered ? 'drop-shadow(0 2px 8px rgba(0,0,0,0.18))' : 'none',
                               }}
                             />
@@ -552,9 +552,9 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </ResponsiveContainer>
 
                   {/* Centered Total / Interactive Hover Detail */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-3 text-center transition-all duration-200">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-3 text-center transition-all duration-100">
                     {activeGeoItem ? (
-                      <div className="flex flex-col items-center animate-in fade-in duration-150 max-w-[170px]">
+                      <div className="flex flex-col items-center animate-in fade-in duration-75 max-w-[170px]">
                         <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5 leading-tight">
                           <span className="text-base select-none leading-none">{activeGeoItem.flag}</span>
                           <span className="truncate max-w-[125px]">{activeGeoItem.shortName}</span>
