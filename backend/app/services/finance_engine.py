@@ -60,7 +60,7 @@ def calculate_portfolio_value_series(
     if not transactions:
         return []
 
-    # Build price DataFrame per asset
+    # Build price series per asset
     all_dates = set()
     price_frames: dict[str, pd.Series] = {}
 
@@ -85,40 +85,50 @@ def calculate_portfolio_value_series(
 
     date_range = pd.date_range(min(all_dates), max(all_dates), freq="B")  # business days
 
+    # Pre-build instantaneous O(1) price lookup table: price_lookup[isin][date_str]
+    # Forward-fills historical prices and back-fills earliest price, perfectly matching original fallback logic
+    price_lookup: dict[str, dict[str, float]] = {}
+    for isin, s in price_frames.items():
+        aligned = s.reindex(date_range).ffill().bfill()
+        price_lookup[isin] = {str(d.date()): float(v) for d, v in aligned.items()}
+
     # For each date, calculate portfolio value
     portfolio_values = []
+    current_active_tx = []
+    current_positions = {}
+    pending_txs = list(tx_sorted)
 
     for d in date_range:
         d_str = str(d.date())
         if start_date and d_str < start_date:
             continue
 
-        # Get positions as of this date
-        active_tx = [tx for tx in tx_sorted if tx["date"] <= d_str]
-        if not active_tx:
+        # Incrementally update transactions and positions
+        has_new_tx = False
+        while pending_txs and pending_txs[0]["date"] <= d_str:
+            current_active_tx.append(pending_txs.pop(0))
+            has_new_tx = True
+
+        if not current_active_tx:
             continue
 
-        positions = calculate_positions(active_tx)
+        if has_new_tx or not current_positions:
+            current_positions = calculate_positions(current_active_tx)
+
+        positions = current_positions
         total = 0.0
 
         for isin, pos in positions.items():
             if isin == "TR_TRANSFER" or isin.startswith("TR_"):
                 continue
-            price = None
-            if isin in price_frames:
-                series = price_frames[isin]
-                available = series[series.index <= d]
-                if not available.empty:
-                    price = float(available.iloc[-1])
-                elif not series.empty:
-                    price = float(series.iloc[0])
+            price = price_lookup.get(isin, {}).get(d_str)
             if price is None or price <= 0:
                 price = pos.get("avg_cost", 0)
             total += pos["shares"] * price
 
         # Account for cash in transit during internal fund transfers (traspasos internos).
-        traspaso_sells = sum(tx["amount"] for tx in active_tx if tx["type"] == "sell" and "traspaso" in (tx.get("notes") or "").lower())
-        traspaso_buys = sum(tx["amount"] for tx in active_tx if tx["type"] == "buy" and "traspaso" in (tx.get("notes") or "").lower())
+        traspaso_sells = sum(tx["amount"] for tx in current_active_tx if tx["type"] == "sell" and "traspaso" in (tx.get("notes") or "").lower())
+        traspaso_buys = sum(tx["amount"] for tx in current_active_tx if tx["type"] == "buy" and "traspaso" in (tx.get("notes") or "").lower())
         cash_in_transit = max(0.0, traspaso_sells - traspaso_buys)
         total += cash_in_transit
 
@@ -129,12 +139,12 @@ def calculate_portfolio_value_series(
         ) + cash_in_transit
 
         # Entity / Broker breakdown
-        distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in active_tx)
+        distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in current_active_tx)
         brokers_data = {}
         for b in sorted(distinct_brokers):
             if b in ("trade_republic", "traderepublic"):
                 continue
-            b_tx = [tx for tx in active_tx if (tx.get("broker") or "myinvestor").lower() == b]
+            b_tx = [tx for tx in current_active_tx if (tx.get("broker") or "myinvestor").lower() == b]
             if not b_tx:
                 continue
             b_positions = calculate_positions(b_tx)
@@ -143,14 +153,7 @@ def calculate_portfolio_value_series(
             for isin, pos in b_positions.items():
                 if isin.startswith("TR_") or pos.get("shares", 0) <= 0.0001:
                     continue
-                price = None
-                if isin in price_frames:
-                    series = price_frames[isin]
-                    available = series[series.index <= d]
-                    if not available.empty:
-                        price = float(available.iloc[-1])
-                    elif not series.empty:
-                        price = float(series.iloc[0])
+                price = price_lookup.get(isin, {}).get(d_str)
                 if price is None or (price <= 0 and isin != "TR_TRANSFER"):
                     price = pos.get("avg_cost", 0)
                 b_val += pos["shares"] * price
@@ -208,28 +211,37 @@ def calculate_portfolio_nav_series(
 
     date_range = pd.date_range(min(all_dates), max(all_dates), freq="B")
 
+    price_lookup: dict[str, dict[str, float]] = {}
+    for isin, s in price_frames.items():
+        aligned = s.reindex(date_range).ffill().bfill()
+        price_lookup[isin] = {str(d.date()): float(v) for d, v in aligned.items()}
+
     nav = 100.0
     nav_series = []
     prev_positions = None
     prev_total_val = None
 
+    current_active_tx = []
+    current_positions = {}
+    pending_txs = list(tx_sorted)
+
     for d in date_range:
         d_str = str(d.date())
-        active_tx = [tx for tx in tx_sorted if tx["date"] <= d_str]
-        if not active_tx:
+        has_new_tx = False
+        while pending_txs and pending_txs[0]["date"] <= d_str:
+            current_active_tx.append(pending_txs.pop(0))
+            has_new_tx = True
+
+        if not current_active_tx:
             continue
 
-        cur_positions = calculate_positions(active_tx)
+        if has_new_tx or not current_positions:
+            current_positions = calculate_positions(current_active_tx)
+
+        cur_positions = current_positions
         cur_total_val = 0.0
         for isin, pos in cur_positions.items():
-            price = None
-            if isin in price_frames:
-                s = price_frames[isin]
-                avail = s[s.index <= d]
-                if not avail.empty:
-                    price = float(avail.iloc[-1])
-                elif not s.empty:
-                    price = float(s.iloc[0])
+            price = price_lookup.get(isin, {}).get(d_str)
             if price is None or (price <= 0 and isin != "TR_TRANSFER"):
                 price = pos.get("avg_cost", 0)
             cur_total_val += pos["shares"] * price
@@ -240,14 +252,7 @@ def calculate_portfolio_nav_series(
         if prev_positions is not None and prev_total_val is not None and prev_total_val > 0:
             val_market_prev = 0.0
             for isin, pos in prev_positions.items():
-                price = None
-                if isin in price_frames:
-                    s = price_frames[isin]
-                    avail = s[s.index <= d]
-                    if not avail.empty:
-                        price = float(avail.iloc[-1])
-                    elif not s.empty:
-                        price = float(s.iloc[0])
+                price = price_lookup.get(isin, {}).get(d_str)
                 if price is None or (price <= 0 and isin != "TR_TRANSFER"):
                     price = pos.get("avg_cost", 0)
                 val_market_prev += pos["shares"] * price

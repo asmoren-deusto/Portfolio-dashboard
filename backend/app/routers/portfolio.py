@@ -269,7 +269,6 @@ _latest_nav_alert: dict | None = None
 
 async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> dict:
     global _latest_nav_alert
-    clear_portfolio_caches()
     transactions = _get_all_transactions(db, user_id)
     positions = calculate_positions(transactions)
     active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001 and not isin.startswith("TR_")}
@@ -340,7 +339,8 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
                 updated_items.append(data)
 
     logger.info(f"Refreshed prices for {len(results)} assets: {len(updated_items)} updated")
-    clear_portfolio_caches()
+    if len(updated_items) > 0:
+        clear_portfolio_caches()
     res_payload = {
         "status": "ok",
         "updated_at": datetime.now().isoformat(),
@@ -452,15 +452,17 @@ async def update_price(req: UpdatePriceRequest, user_id: str = Depends(get_curre
 
 
 _perf_cache: dict[str, tuple[datetime, list[dict]]] = {}
+_bench_cache: dict[str, tuple[datetime, dict]] = {}
+_analytics_cache: dict[str, tuple[datetime, dict]] = {}
 
 
 def clear_portfolio_caches():
     _perf_cache.clear()
     _bench_cache.clear()
+    _analytics_cache.clear()
     _price_cache.clear()
     try:
-        from app.services.price_service import _history_cache, _price_cache as _svc_price_cache
-        _history_cache.clear()
+        from app.services.price_service import _price_cache as _svc_price_cache
         _svc_price_cache.clear()
     except Exception:
         pass
@@ -558,9 +560,6 @@ async def get_performance(
     return [PerformancePoint(**v) for v in value_series]
 
 
-_bench_cache: dict[str, tuple[datetime, dict]] = {}
-
-
 def _get_ecb_deposit_rate(date_str: str) -> float:
     """Returns official annualized ECB deposit facility rate (%) for a given YYYY-MM-DD date."""
     if date_str < "2022-07-27":
@@ -643,11 +642,24 @@ async def get_benchmark_comparison(
 
     price_history = {}
     all_isins = set(t["isin"] for t in transactions)
-    for isin in all_isins:
+
+    async def _fetch_bench_asset(isin):
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
-        history = await get_price_history(isin, ticker, period)
-        curr_p = await get_current_price(isin, ticker, db=db)
+        (history_res, price_res) = await asyncio.gather(
+            get_price_history(isin, ticker, period),
+            get_current_price(isin, ticker, db=db),
+            return_exceptions=True
+        )
+        history = [dict(h) for h in history_res] if isinstance(history_res, list) else []
+        curr_p = price_res if isinstance(price_res, (int, float)) else None
+        return isin, history, curr_p
+
+    bench_bundles = await asyncio.gather(*[_fetch_bench_asset(isin) for isin in all_isins], return_exceptions=True)
+    for res in bench_bundles:
+        if not isinstance(res, tuple):
+            continue
+        isin, history, curr_p = res
         if history:
             if curr_p and curr_p > 0:
                 history[-1]["price"] = round(curr_p, 4)
@@ -831,6 +843,12 @@ async def get_benchmark_comparison(
 @router.get("/analytics")
 async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_user_id), broker: str | None = None, db: Session = Depends(get_db)):
     """Return all computed risk/return metrics."""
+    cache_key = f"{user_id}:{broker}:{period}"
+    if cache_key in _analytics_cache:
+        ts, cached = _analytics_cache[cache_key]
+        if (datetime.now() - ts).total_seconds() < 600:
+            return cached
+
     transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
         return {}
@@ -991,7 +1009,7 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     portfolio_daily_ret = round(weighted_1d / active_val, 2) if active_val > 0 else None
     ret_1d = portfolio_daily_ret if portfolio_daily_ret is not None else calculate_period_return(series_for_returns, 1)
 
-    return {
+    res = {
         "annualized_return": annualized_ret,
         "net_profit": net_profit,
         "net_profit_pct": net_profit_pct,
@@ -1013,3 +1031,5 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         "return_6m": calculate_period_return(series_for_returns, 180),
         "return_1y": calculate_period_return(series_for_returns, 365),
     }
+    _analytics_cache[cache_key] = (datetime.now(), res)
+    return res

@@ -84,19 +84,25 @@ async def startup():
 
     async def _periodic_nav_scanner():
         # Allow initial app boot and warm-up to finish first
-        await asyncio.sleep(20)
+        await asyncio.sleep(30)
         while True:
             try:
                 from app.database import SessionLocal
                 from app.routers.portfolio import check_portfolio_navs
                 db = SessionLocal()
-                logger.info("Executing periodic NAV scanner (4 min interval)...")
+                logger.info("Executing periodic NAV scanner...")
                 await check_portfolio_navs(user_id="asier", db=db)
                 db.close()
             except Exception as e:
                 logger.warning(f"Error in periodic NAV scanner: {e}")
-            # Wait 4 minutes (240 seconds) for faster fresh NAV detection
-            await asyncio.sleep(240)
+
+            # Intelligent interval: Funds publish NAVs weekdays 18:00-23:59 CET.
+            now = datetime.now()
+            is_weekday = now.weekday() < 5
+            is_evening = 18 <= now.hour <= 23
+            # 15 minutes (900s) during publication window, 45 minutes (2700s) off-hours
+            sleep_sec = 900 if (is_weekday and is_evening) else 2700
+            await asyncio.sleep(sleep_sec)
 
     import asyncio
     asyncio.create_task(_warm_cache())

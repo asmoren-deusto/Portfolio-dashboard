@@ -101,26 +101,23 @@ export async function prefetchAllBrokers(
   if (!queryClient || !currentUser) return
 
   const isDemo = Boolean(currentUser?.isDemo)
+  // Skip 'all' since the active view already queries 'all'
   const brokers = isDemo
-    ? ['all', 'kutxabank', 'scalable', 'traderepublic']
-    : ['all', 'myinvestor', 'bbva', 'indexa']
+    ? ['kutxabank', 'scalable', 'traderepublic']
+    : ['myinvestor', 'bbva', 'indexa']
 
   const userSummaryBase = currentUser?.summary ?? MOCK_SUMMARY
   const userPositionsBase = currentUser?.positions ?? MOCK_POSITIONS
-  const userPerfBase = currentUser?.performance ?? MOCK_PERFORMANCE
-  const userAnalyticsBase = currentUser?.analytics ?? MOCK_ANALYTICS
 
-  const promises: Promise<any>[] = []
+  const lightPromises: Promise<any>[] = []
 
   for (const broker of brokers) {
-    const brokerQuery = broker !== 'all' ? `?broker=${broker}` : ''
-    const brokerQueryAmp = broker !== 'all' ? `&broker=${broker}` : ''
+    const brokerQuery = `?broker=${broker}`
 
     // 1. Summary
-    const summaryKey = ['summary', currentUser.id, period, broker]
-    promises.push(
+    lightPromises.push(
       queryClient.prefetchQuery({
-        queryKey: summaryKey,
+        queryKey: ['summary', currentUser.id, period, broker],
         queryFn: () =>
           isDemo
             ? Promise.resolve(demoSummary(userSummaryBase, userPositionsBase, broker))
@@ -130,47 +127,20 @@ export async function prefetchAllBrokers(
     )
 
     // 2. Positions
-    const positionsKey = ['positions', currentUser.id, broker]
-    promises.push(
+    lightPromises.push(
       queryClient.prefetchQuery({
-        queryKey: positionsKey,
+        queryKey: ['positions', currentUser.id, broker],
         queryFn: () =>
           isDemo
-            ? Promise.resolve(userPositionsBase.filter((p: any) => broker === 'all' || p.broker === broker))
+            ? Promise.resolve(userPositionsBase.filter((p: any) => p.broker === broker))
             : get<Position[]>(`/portfolio/positions${brokerQuery}`),
-        staleTime: 1000 * 60 * 5,
-      })
-    )
-
-    // 3. Performance
-    const perfKey = ['performance', currentUser.id, period, broker, undefined]
-    promises.push(
-      queryClient.prefetchQuery({
-        queryKey: perfKey,
-        queryFn: () =>
-          isDemo
-            ? Promise.resolve(demoScale(userPerfBase[period] ?? userPerfBase['1y'] ?? [], userPositionsBase, broker))
-            : get<PricePoint[]>(`/portfolio/performance?period=${period}${brokerQueryAmp}`),
-        staleTime: 1000 * 60 * 5,
-      })
-    )
-
-    // 4. Analytics
-    const analyticsKey = ['analytics', currentUser.id, broker]
-    promises.push(
-      queryClient.prefetchQuery({
-        queryKey: analyticsKey,
-        queryFn: () =>
-          isDemo
-            ? Promise.resolve(userAnalyticsBase)
-            : get<Analytics>(`/portfolio/analytics?period=2y${brokerQueryAmp}`),
         staleTime: 1000 * 60 * 5,
       })
     )
   }
 
   try {
-    await Promise.allSettled(promises)
+    await Promise.allSettled(lightPromises)
   } catch (err) {
     console.warn('Error prefetching broker data:', err)
   }

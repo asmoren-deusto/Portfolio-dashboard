@@ -67,10 +67,10 @@ export function RootLayout() {
   useEffect(() => {
     if (!currentUser) return
     const timer = setTimeout(() => {
-      prefetchAllBrokers(queryClient, currentUser, period)
-    }, 1200)
+      prefetchAllBrokers(queryClient, currentUser, '1y')
+    }, 1500)
     return () => clearTimeout(timer)
-  }, [currentUser, period, queryClient])
+  }, [currentUser?.id, queryClient])
 
   useEffect(() => {
     const isDark = theme === 'dark'

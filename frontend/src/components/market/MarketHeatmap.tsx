@@ -258,6 +258,9 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
         let computedHeight = 720
         if (isFullscreen) {
           computedHeight = Math.max(500, window.innerHeight - 130)
+        } else if (clientWidth < 640) {
+          // Responsive compact mobile height to prevent DOM overload
+          computedHeight = heightMode === 'expanded' ? 520 : 420
         } else if (heightMode === 'expanded') {
           // Expanded height: generous space so no bottom sector is clipped
           computedHeight = Math.max(760, Math.min(940, Math.round(clientWidth * 0.64)))
@@ -343,6 +346,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
   }, [eligibleStocks, dimensions])
 
   const handleMouseMove = (e: React.MouseEvent, stock: MarketStock) => {
+    if (typeof window !== 'undefined' && 'ontouchstart' in window && (e.nativeEvent as any).pointerType === 'touch') return
     const rect = containerRef.current?.getBoundingClientRect()
     if (!rect) return
     setHoveredStock({

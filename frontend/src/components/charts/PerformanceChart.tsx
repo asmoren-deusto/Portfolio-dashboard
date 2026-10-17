@@ -888,6 +888,7 @@ export function PerformanceChart({
         data-private
         ref={containerRef}
         onPointerMove={(e) => {
+          if (e.pointerType === 'touch') return
           if (!chartRef.current || !containerRef.current || !dataRef.current.length) return
           const rect = containerRef.current.getBoundingClientRect()
           const x = e.clientX - rect.left

@@ -808,8 +808,8 @@ async def _fetch_ft_official(isin: str) -> tuple[Optional[float], Optional[str]]
     return None, None
 
 
-async def _fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]]:
-    """Fetch latest price and date from Yahoo Finance."""
+def _sync_fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]]:
+    """Synchronous worker for Yahoo Finance price fetch."""
     try:
         t = yf.Ticker(ticker)
         hist = t.history(period="5d")
@@ -824,6 +824,11 @@ async def _fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str
     except Exception as e:
         logger.warning(f"Yahoo Finance error for {ticker}: {e}")
     return None, None
+
+
+async def _fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]]:
+    """Fetch latest price and date from Yahoo Finance offloaded to a worker thread."""
+    return await asyncio.to_thread(_sync_fetch_yahoo_price, ticker)
 
 
 async def _fetch_quefondos_price(isin: str) -> tuple[Optional[float], Optional[str]]:
@@ -865,18 +870,14 @@ async def _fetch_morningstar_price(isin: str) -> Optional[float]:
     Fetch NAV from Morningstar public endpoint.
     Uses the public search + quote endpoint (no auth required).
     """
+    if not (len(isin) == 12 and isin.isalnum()):
+        return None
     try:
         async with httpx.AsyncClient(timeout=10) as client:
-            # Search by ISIN to get Morningstar ID
-            search_url = (
-                f"https://www.morningstar.es/es/funds/SecuritySearchResults.aspx"
-                f"?type=ALL&term={isin}"
-            )
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                 "Accept": "application/json, text/html, */*",
             }
-            # Try the Morningstar API endpoint directly
             api_url = f"https://api.morningstar.com/v2/search/securities?term={isin}&limit=1"
             resp = await client.get(api_url, headers=headers)
             if resp.status_code == 200:
@@ -886,6 +887,43 @@ async def _fetch_morningstar_price(isin: str) -> Optional[float]:
                     return float(results[0].get("nav", 0) or 0) or None
     except Exception as e:
         logger.warning(f"Morningstar error for {isin}: {e}")
+    return None
+
+
+def _sync_fetch_yahoo_history(ticker: str, yf_period: str) -> list[dict]:
+    """Fetch history from yfinance in a synchronous worker thread to avoid event loop blocking."""
+    try:
+        t = yf.Ticker(ticker)
+        hist = t.history(period=yf_period)
+        if not hist.empty and len(hist) > 1:
+            return [
+                {"date": str(idx.date()), "price": round(float(row["Close"]), 4)}
+                for idx, row in hist.iterrows()
+                if float(row["Close"]) > 0
+            ]
+    except Exception as e:
+        logger.debug(f"Yahoo history error for {ticker}: {e}")
+    return []
+
+
+def _get_period_cutoff(period: str) -> str | None:
+    now = datetime.now()
+    if period in ["1m", "1mo"]:
+        return (now - timedelta(days=30)).strftime("%Y-%m-%d")
+    elif period in ["3m", "3mo"]:
+        return (now - timedelta(days=90)).strftime("%Y-%m-%d")
+    elif period in ["6m", "6mo"]:
+        return (now - timedelta(days=180)).strftime("%Y-%m-%d")
+    elif period == "ytd":
+        return f"{now.year}-01-01"
+    elif period in ["1y", "12mo"]:
+        return (now - timedelta(days=365)).strftime("%Y-%m-%d")
+    elif period in ["2y"]:
+        return (now - timedelta(days=730)).strftime("%Y-%m-%d")
+    elif period in ["3y"]:
+        return (now - timedelta(days=365 * 3)).strftime("%Y-%m-%d")
+    elif period in ["5y"]:
+        return (now - timedelta(days=365 * 5)).strftime("%Y-%m-%d")
     return None
 
 
@@ -903,10 +941,28 @@ async def get_price_history(
     """
     ticker = KNOWN_TICKERS.get(isin) or ticker
     cache_key = f"{isin}:{ticker}:{period}"
+
+    # 1. Direct hit in history cache
     if cache_key in _history_cache:
         ts, cached_data = _history_cache[cache_key]
-        if (datetime.now() - ts).total_seconds() < 1800:
+        if (datetime.now() - ts).total_seconds() < 3600:
             return cached_data
+
+    # 2. Check if a longer historical horizon is already cached for this asset.
+    # If so, slice it instantly in memory without external web requests!
+    cutoff = _get_period_cutoff(period)
+    for candidate_period in ["max", "all", "5y", "2y", "1y"]:
+        longer_key = f"{isin}:{ticker}:{candidate_period}"
+        if longer_key in _history_cache:
+            ts, parent_data = _history_cache[longer_key]
+            if (datetime.now() - ts).total_seconds() < 3600 and parent_data:
+                if cutoff is None:
+                    _history_cache[cache_key] = (ts, parent_data)
+                    return parent_data
+                elif parent_data[0]["date"] <= cutoff:
+                    sliced = [p for p in parent_data if p["date"] >= cutoff]
+                    _history_cache[cache_key] = (ts, sliced)
+                    return sliced
 
     if isin == "TR_TRANSFER":
         res = [
@@ -923,34 +979,33 @@ async def get_price_history(
     if isin.startswith("0192") or isin == "0192#0011":
         y_ticker = ticker or KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
         try:
-            yf_period = "1mo" if period in ["1m", "1mo"] else ("3mo" if period in ["3m", "3mo"] else ("6mo" if period in ["6m", "6mo"] else ("1y" if period in ["1y", "12mo"] else ("max" if period == "all" else period))))
-            t = yf.Ticker(y_ticker)
-            hist = t.history(period=yf_period)
-            if not hist.empty and len(hist) > 1:
-                res = [
-                    {"date": str(idx.date()), "price": round(float(row["Close"]), 4)}
-                    for idx, row in hist.iterrows()
-                    if float(row["Close"]) > 0
-                ]
-                if res:
-                    # Merge any newer points from DB PriceCache
-                    try:
-                        from app.database import SessionLocal
-                        from app.models import PriceCache
-                        db_s = SessionLocal()
-                        recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
-                        existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
-                        for rp in recent_prices:
-                            if rp.date in existing_dates:
-                                res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                            else:
-                                res.append({"date": rp.date, "price": round(rp.price, 4)})
-                        res.sort(key=lambda x: x["date"])
-                        db_s.close()
-                    except Exception:
-                        pass
-                    _history_cache[cache_key] = (datetime.now(), res)
-                    return res
+            yf_period = "max" if period in ["max", "all", "5y"] else "2y"
+            raw_hist = await asyncio.to_thread(_sync_fetch_yahoo_history, y_ticker, yf_period)
+            if raw_hist:
+                res = raw_hist
+                # Merge any newer points from DB PriceCache
+                try:
+                    from app.database import SessionLocal
+                    from app.models import PriceCache
+                    db_s = SessionLocal()
+                    recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                    existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
+                    for rp in recent_prices:
+                        if rp.date in existing_dates:
+                            res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                        else:
+                            res.append({"date": rp.date, "price": round(rp.price, 4)})
+                    res.sort(key=lambda x: x["date"])
+                    db_s.close()
+                except Exception:
+                    pass
+                _history_cache[f"{isin}:{ticker}:{yf_period}"] = (datetime.now(), res)
+                if cutoff:
+                    sliced = [p for p in res if p["date"] >= cutoff]
+                    _history_cache[cache_key] = (datetime.now(), sliced)
+                    return sliced
+                _history_cache[cache_key] = (datetime.now(), res)
+                return res
         except Exception as e:
             logger.debug(f"Yahoo history error for Indexa {y_ticker}: {e}")
 
@@ -998,38 +1053,36 @@ async def get_price_history(
             _history_cache[cache_key] = (datetime.now(), az_hist)
             return az_hist
 
-    # 1. Try Yahoo Finance (works for stocks, ETFs and European funds)
+    # 1. Try Yahoo Finance (works for stocks, ETFs and European funds) offloaded to thread
     if ticker:
         try:
-            yf_period = "1mo" if period in ["1m", "1mo"] else ("3mo" if period in ["3m", "3mo"] else ("6mo" if period in ["6m", "6mo"] else ("1y" if period in ["1y", "12mo"] else ("max" if period == "all" else period))))
-            t = yf.Ticker(ticker)
-            hist = t.history(period=yf_period)
-            if not hist.empty and len(hist) > 1:
-                res = [
-                    {"date": str(idx.date()), "price": round(float(row["Close"]), 4)}
-                    for idx, row in hist.iterrows()
-                    if float(row["Close"]) > 0
-                ]
-                if res:
-                    # Merge any newer or authoritative points from DB PriceCache
-                    try:
-                        from app.database import SessionLocal
-                        from app.models import PriceCache
-                        db_s = SessionLocal()
-                        recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
-                        existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
-                        for rp in recent_prices:
-                            if rp.price is not None and rp.price > 0:
-                                if rp.date in existing_dates:
-                                    res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                                else:
-                                    res.append({"date": rp.date, "price": round(rp.price, 4)})
-                        res.sort(key=lambda x: x["date"])
-                        db_s.close()
-                    except Exception:
-                        pass
-                    _history_cache[cache_key] = (datetime.now(), res)
-                    return res
+            yf_period = "max" if period in ["max", "all", "5y"] else "2y"
+            res = await asyncio.to_thread(_sync_fetch_yahoo_history, ticker, yf_period)
+            if res:
+                # Merge any newer or authoritative points from DB PriceCache
+                try:
+                    from app.database import SessionLocal
+                    from app.models import PriceCache
+                    db_s = SessionLocal()
+                    recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                    existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
+                    for rp in recent_prices:
+                        if rp.price is not None and rp.price > 0:
+                            if rp.date in existing_dates:
+                                res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                            else:
+                                res.append({"date": rp.date, "price": round(rp.price, 4)})
+                    res.sort(key=lambda x: x["date"])
+                    db_s.close()
+                except Exception:
+                    pass
+                _history_cache[f"{isin}:{ticker}:{yf_period}"] = (datetime.now(), res)
+                if cutoff:
+                    sliced = [p for p in res if p["date"] >= cutoff]
+                    _history_cache[cache_key] = (datetime.now(), sliced)
+                    return sliced
+                _history_cache[cache_key] = (datetime.now(), res)
+                return res
         except Exception as e:
             logger.debug(f"Yahoo history error for {ticker}: {e}")
 
@@ -1057,7 +1110,7 @@ async def get_price_history(
                 if row.price is not None and row.price >= 0:
                     points_dict[row.date] = round(float(row.price), 4)
 
-            # Latest live price
+            # Latest live price from cache/db
             current, current_date = await get_price_with_date(isin, ticker, db=db)
             if current is not None and current >= 0:
                 t_date = current_date or datetime.now().strftime("%Y-%m-%d")
@@ -1065,6 +1118,8 @@ async def get_price_history(
 
             if points_dict:
                 sorted_pts = [{"date": d, "price": p} for d, p in sorted(points_dict.items())]
+                if cutoff:
+                    sorted_pts = [p for p in sorted_pts if p["date"] >= cutoff]
                 _history_cache[cache_key] = (datetime.now(), sorted_pts)
                 return sorted_pts
         finally:
