@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { TrendingUp, TrendingDown, Clock } from 'lucide-react'
 import { useMarketIndices, type MarketStock } from '@/api/queries'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
@@ -259,6 +259,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
       return i.last_updated > latest ? i.last_updated : latest
     }, null)
 
+  const NUM_SETS = 6
+  const repeatedIndices = useMemo(() => {
+    const sets = []
+    for (let i = 0; i < NUM_SETS; i++) {
+      sets.push(...rawIndices)
+    }
+    return sets
+  }, [rawIndices])
+
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const isMouseDownRef = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -288,8 +297,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
         !isMouseDownRef.current &&
         !isInteractingRef.current
       ) {
-        currentScrollPosRef.current += speed * dt
-        el.scrollLeft = currentScrollPosRef.current
+        const oneSetWidth = el.scrollWidth / NUM_SETS
+        if (oneSetWidth > 0) {
+          currentScrollPosRef.current += speed * dt
+          // Seamlessly loop inside middle sets (between set 2 and 3)
+          if (currentScrollPosRef.current >= 3 * oneSetWidth) {
+            currentScrollPosRef.current -= oneSetWidth
+          }
+          el.scrollLeft = currentScrollPosRef.current
+        }
       }
 
       rafId = requestAnimationFrame(animate)
@@ -336,28 +352,29 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
     const el = scrollContainerRef.current
     if (!el) return
 
-    const oneSetWidth = el.scrollWidth / 3
+    const oneSetWidth = el.scrollWidth / NUM_SETS
     if (oneSetWidth <= 0) return
 
-    if (el.scrollLeft >= 2 * oneSetWidth) {
-      el.scrollLeft -= oneSetWidth
-    } else if (el.scrollLeft < oneSetWidth) {
-      el.scrollLeft += oneSetWidth
+    // Keep manual drag safely in the middle sets without ever hitting container bounds
+    if (el.scrollLeft >= 4 * oneSetWidth) {
+      el.scrollLeft -= 2 * oneSetWidth
+    } else if (el.scrollLeft < 1 * oneSetWidth) {
+      el.scrollLeft += 2 * oneSetWidth
     }
 
     currentScrollPosRef.current = el.scrollLeft
   }
 
-  // Initial scroll position in the middle third
+  // Initial scroll position safely centered in the middle sets
   useEffect(() => {
     const el = scrollContainerRef.current
     if (!el) return
     const setInitialScroll = () => {
       if (!el) return
-      const oneSetWidth = el.scrollWidth / 3
-      if (oneSetWidth > 0 && el.scrollLeft === 0) {
-        el.scrollLeft = oneSetWidth
-        currentScrollPosRef.current = oneSetWidth
+      const oneSetWidth = el.scrollWidth / NUM_SETS
+      if (oneSetWidth > 0 && (el.scrollLeft === 0 || el.scrollLeft < oneSetWidth)) {
+        el.scrollLeft = 2 * oneSetWidth
+        currentScrollPosRef.current = 2 * oneSetWidth
       }
     }
     setInitialScroll()
@@ -479,7 +496,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
               style={{ touchAction: 'pan-x' }}
             >
               <div className="flex items-center gap-1.5 sm:gap-2 pt-1.5 pb-0.5 w-max">
-                {[...rawIndices, ...rawIndices, ...rawIndices].map((idx: any, index: number) => {
+                {repeatedIndices.map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
                 const extPrice: number | null =

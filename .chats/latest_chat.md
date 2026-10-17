@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-17 13:22:33
+- **Fecha de exportación:** 2026-10-17 13:45:02
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 52
+- **Total de interacciones registradas:** 54
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -843,5 +843,62 @@ Este commit se centró en dos frentes críticos: **optimización masiva de rendi
 ### 👤 Usuario (2026-10-17 11:04:28)
 
 la grafica de evolucion sigue sin animarse, no se que pasa que lo solucionas y al dia ya no se anima.....
+
+---
+
+### 🤖 Asistente (2026-10-17 11:22:36)
+
+### 🔍 Causa exacta de por qué se rompió esta mañana tras funcionar ayer
+
+Ayer la animación estaba calibrada y funcionando, pero en el commit de esta mañana (`630edc7` a las 10:06h) se introdujeron dos condiciones que anularon por completo el barrido:
+
+1. **Falso positivo de móvil (`navigator.maxTouchPoints > 0`):**
+   Para intentar optimizar dispositivos móviles, se añadió la función `isTouchOrMobile()`:
+   ```ts
+   'ontouchstart' in window || (navigator.maxTouchPoints > 0)
+   ```
+   En **prácticamente cualquier portátil Windows** (con trackpad de precisión o pantalla táctil), Windows reporta `maxTouchPoints = 10` o mayor. Esto provocó que en tu ordenador el gráfico se clasificara como teléfono móvil, saltándose por completo la animación de barrido de 1.1s (`clip-path: inset(...)`) y sustituyéndola por un fade de opacidad de solo 350ms imperceptible.
+
+2. **Elemento destino erróneo (`<table>` ignora `clip-path` en Chromium):**
+   El selector evaluaba `(table || paneDiv)`. Al existir la tabla interna de *lightweight-charts*, seleccionaba siempre el `<table>`. En los navegadores basados en Chromium (Chrome, Edge, Electron), las etiquetas `<table>` **ignoran las propiedades CSS de `clip-path: inset(...)`**, provocando que el recorte de la curva quedara siempre al 0%.
+
+---
+
+### 🛠️ Solución definitiva aplicada
+
+En [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts):
+
+1. **Targeting exacto del contenedor de lienzos (`paneDiv`):**
+   Se implementó `getChartTarget(container)`:
+   ```ts
+   function getChartTarget(container: HTMLElement | null): HTMLElement | null {
+     if (!container) return null
+     const canvas = container.querySelector('canvas')
+     const paneDiv = (canvas?.closest('td')?.firstElementChild || canvas?.parentElement) as HTMLElement
+     if (paneDiv && paneDiv.tagName === 'DIV') {
+       return paneDiv
+     }
+     const tvContainer = container.querySelector('.tv-lightweight-charts') as HTMLElement
+     if (tvContainer) return tvContainer
+     return container
+   }
+   ```
+   El elemento `<div>` que envuelve los lienzos dentro de la celda de la gráfica sí interpola el `clipPath` al 100% de forma acelerada por GPU, revelando la curva progresivamente de izquierda a derecha sin afectar a la escala de precios derecha.
+
+2. **Eliminación del bypass que desactivaba el barrido:**
+   Se eliminó la comprobación que anulaba el barrido en pantallas con puntos táctiles / trackpads Windows, restaurando la animación de 1.1s sincronizada con la scanline esmeralda.
+
+---
+
+### 🚀 Despliegue completado
+- Verificado con `npm run build` sin errores.
+- Inspeccionado en navegador comprobando la interpolación de fotogramas de `clipPath: inset(...)`.
+- Versión actualizada y subida a Git: **v3.0.126** mediante el protocolo `sync_release.py`.
+
+---
+
+### 👤 Usuario (2026-10-17 11:24:52)
+
+en firefox no funciona. tb el ticker superior en ambas plataformas deja de moverse
 
 ---
