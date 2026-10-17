@@ -75,7 +75,9 @@ export function BenchmarkEvolutionChart({
   const nikkeiLineRef = useRef<any>(null)
   const investedLineRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
+  const lastControlKeyRef = useRef<string>('')
   const lastSweepKeyRef = useRef<string>('')
+  const animEndTimeRef = useRef<number>(0)
 
   const [internalMode, setInternalMode] = useState<BenchmarkChartMode>(defaultMode)
   const mode = propMode !== undefined ? propMode : internalMode
@@ -537,13 +539,28 @@ export function BenchmarkEvolutionChart({
       chart.timeScale().fitContent()
 
       // Trigger timeline sweep animation on load & when benchmark, mode, entity or period changes
-      const sweepKey = `${selectedBroker}_${refreshAnimKey}_${points?.length || 0}_${mode}_${showPortfolio}_${showSp500}_${showBce}_${showMsci}_${showNasdaq}_${showStoxx}_${showNikkei}_${points?.[0]?.date || ''}_${points?.[points.length - 1]?.date || ''}`
-      if (points.length > 0 && sweepKey !== lastSweepKeyRef.current) {
-        lastSweepKeyRef.current = sweepKey
-        prepareChartForAnimation(containerRef.current)
-        requestAnimationFrame(() => {
-          triggerChartAnimation(containerRef.current, 750)
-        })
+      const controlKey = `${selectedBroker}_${refreshAnimKey}_${mode}_${showPortfolio}_${showSp500}_${showBce}_${showMsci}_${showNasdaq}_${showStoxx}_${showNikkei}`
+      const dataKey = `${points?.length || 0}_${points?.[0]?.date || ''}_${points?.[points.length - 1]?.date || ''}`
+      const sweepKey = `${controlKey}_${dataKey}`
+
+      if (points.length >= 2 && sweepKey !== lastSweepKeyRef.current) {
+        const controlChanged = controlKey !== lastControlKeyRef.current
+        const now = performance.now()
+        const isCurrentlyAnimating = now < animEndTimeRef.current
+
+        if (isCurrentlyAnimating && !controlChanged) {
+          lastSweepKeyRef.current = sweepKey
+          lastControlKeyRef.current = controlKey
+        } else {
+          lastSweepKeyRef.current = sweepKey
+          lastControlKeyRef.current = controlKey
+          animEndTimeRef.current = now + 750
+
+          prepareChartForAnimation(containerRef.current)
+          requestAnimationFrame(() => {
+            triggerChartAnimation(containerRef.current, 750)
+          })
+        }
       }
     } catch (err) {
       console.warn('Failed to update benchmark series:', err)

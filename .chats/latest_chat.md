@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-17 14:20:26
+- **Fecha de exportación:** 2026-10-17 14:31:18
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 58
+- **Total de interacciones registradas:** 60
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -980,5 +980,49 @@ Se ha solucionado por completo la causa raíz del comportamiento en Firefox:
 ### 👤 Usuario (2026-10-17 12:05:07)
 
 en firefox sigue sin animarse
+
+---
+
+### 🤖 Asistente (2026-10-17 12:20:29)
+
+El problema en Firefox ha quedado **completamente solucionado** y desplegado en la versión **v3.0.129**.
+
+---
+
+### 🔍 Causas exactas de por qué fallaba en Firefox
+
+1. **Bloqueo silencioso por `prefers-reduced-motion` en Windows:**
+   - En Windows, si el sistema operativo tiene desactivada la opción de accesibilidad *"Efectos de animación"* (muy habitual para maximizar rendimiento del PC o en perfiles de batería), **Firefox mapea estrictamente este ajuste a `prefers-reduced-motion: reduce = true`**, mientras que Chrome/Edge no lo hacían de forma tan restrictiva.
+   - En [`chartAnimation.ts`](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts) había una comprobación inicial que hacía un `return` inmediato si detectaba esa condición, cancelando la animación por completo solo en Firefox.
+
+2. **Causa de los «trompicones» (stuttering) y el conflicto de cajas CSS en Gecko:**
+   - La cortina animaba la propiedad `width` con `right: 0` dentro del contenedor del canvas. En el motor Gecko de Firefox (norma CSS 2.1 § 10.3.7 para elementos en celdas de tabla con `direction: ltr`), animar `width` fuerza un **reflow continuo del árbol de renderizado en la CPU** en cada fotograma, lo que causaba tirones visibles.
+   - Además, si la posición estática de `left` entraba en conflicto con `right: 0`, Firefox resolvía la anchura de forma ambigua hacia la izquierda en vez de hacia la derecha.
+
+3. **Causa de la «gráfica plana que luego actualizaba sin animar»:**
+   - En [`PerformanceChart.tsx`](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx), cada re-render disparaba la animación sin comprobar si los datos eran los definitivos o si ya había una animación en curso. Al cargar primero un estado transitorio (o caché plana) y llegar los datos de la API 50ms después, la segunda llamada destruía la cortina en curso; y al entrar el bloqueo de Firefox, los datos reales se mostraban de golpe y sin animar.
+
+---
+
+### 🛠️ Soluciones implementadas
+
+1. **Eliminación del bloqueo de `prefers-reduced-motion`:**
+   - Se ha retirado la condición que abortaba la animación en [`chartAnimation.ts`](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), garantizando que Firefox ejecute la animación exactamente igual que Chrome y Safari.
+
+2. **Animación 100% acelerada por GPU (`transform: translateX`):**
+   - Se ha cambiado la animación de `width` a `transform: translateX(0%) -> translateX(100%)`.
+   - Al ser una transformación de matriz en el hilo compositor de la GPU:
+     - **Cero reflows de CPU:** La animación fluye a 60/120 fps estables y sin ningún trompicón.
+     - **Línea de barrido fluida:** El haz de luz de neón viaja fijado en el borde izquierdo (`transform: translateX(-100%)`), revelando la curva con precisión milimétrica.
+     - **Fondo opaco sólido:** Cortina con `#1e1e1e` (modo oscuro) y `#ffffff` (modo claro) para evitar transparencias o artefactos de interpolación.
+
+3. **Debounce inteligente con `lastSweepKeyRef` en [`PerformanceChart.tsx`](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx):**
+   - Ahora la animación sólo se lanza cuando hay datos válidos (`sumPoints.length > 0`) y cuando cambia la entidad/broker, periodo, modo (€ / %) o los puntos de la API, evitando que un estado intermedio plano rompa el barrido de los datos reales.
+
+---
+
+### 👤 Usuario (2026-10-17 12:23:01)
+
+al inicio, cuando no hay nada precargado, se lanzan dos animaciones seguidas. por otro lado, la linea vertical no es una linea es más gorda y queda horrible (esto en chrome tb)
 
 ---

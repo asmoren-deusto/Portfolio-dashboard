@@ -159,7 +159,9 @@ export function PerformanceChart({
   const markersRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
   const entityPriceLinesRef = useRef<IPriceLine[]>([])
+  const lastControlKeyRef = useRef<string>('')
   const lastSweepKeyRef = useRef<string>('')
+  const animEndTimeRef = useRef<number>(0)
 
   const { theme } = useAppStore()
   const isDark = theme === 'dark'
@@ -866,13 +868,31 @@ export function PerformanceChart({
       chart.timeScale().fitContent()
 
       // Trigger timeline sweep animation on load & when entity, mode, period, or points change
-      const sweepKey = `${selectedEntity}_${chartMode}_${period}_${refreshAnimKey}_${metrics.sumPoints.length}_${metrics.sumPoints[0]?.value || 0}_${metrics.sumPoints[metrics.sumPoints.length - 1]?.value || 0}`
-      if (metrics.sumPoints.length > 0 && sweepKey !== lastSweepKeyRef.current) {
-        lastSweepKeyRef.current = sweepKey
-        prepareChartForAnimation(containerRef.current)
-        requestAnimationFrame(() => {
-          triggerChartAnimation(containerRef.current, 1100)
-        })
+      const controlKey = `${selectedEntity}_${chartMode}_${period}_${refreshAnimKey}`
+      const dataKey = `${metrics.sumPoints.length}_${metrics.sumPoints[0]?.value || 0}_${metrics.sumPoints[metrics.sumPoints.length - 1]?.value || 0}`
+      const sweepKey = `${controlKey}_${dataKey}`
+
+      if (metrics.sumPoints.length >= 2 && sweepKey !== lastSweepKeyRef.current) {
+        const controlChanged = controlKey !== lastControlKeyRef.current
+        const now = performance.now()
+        const isCurrentlyAnimating = now < animEndTimeRef.current
+
+        // If an animation is already actively running and only the underlying data points settled
+        // (common on initial startup where placeholder/initial data is swiftly replaced by API data),
+        // update the series data seamlessly underneath without restarting the sweep from 0.
+        if (isCurrentlyAnimating && !controlChanged) {
+          lastSweepKeyRef.current = sweepKey
+          lastControlKeyRef.current = controlKey
+        } else {
+          lastSweepKeyRef.current = sweepKey
+          lastControlKeyRef.current = controlKey
+          animEndTimeRef.current = now + 1100
+
+          prepareChartForAnimation(containerRef.current)
+          requestAnimationFrame(() => {
+            triggerChartAnimation(containerRef.current, 1100)
+          })
+        }
       }
     } catch (err) {
       console.warn('Error updating chart series:', err)

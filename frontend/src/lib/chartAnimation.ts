@@ -66,19 +66,21 @@ export function prepareChartForAnimation(container: HTMLElement | null) {
   curtain.style.transform = 'translateX(0%)'
   curtain.style.willChange = 'transform'
 
-  // Glowing institutional scanline attached directly to the curtain's leading reveal edge
+  const isDark = document.documentElement.classList.contains('dark')
+
+  // Fine, razor-sharp 1.5px vertical line attached directly to the curtain's leading reveal edge
   const scanline = document.createElement('div')
   scanline.className = 'chart-sweep-scanline'
   scanline.style.position = 'absolute'
   scanline.style.left = '0'
   scanline.style.top = '0'
   scanline.style.bottom = '0'
-  scanline.style.width = '32px'
+  scanline.style.width = '1.5px'
   scanline.style.transform = 'translateX(-100%)'
-  scanline.style.background =
-    'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.28) 60%, rgba(147, 197, 253, 0.9) 100%)'
-  scanline.style.boxShadow = '0 0 16px rgba(59, 130, 246, 0.45)'
-  scanline.style.borderRight = '2px solid rgba(191, 219, 254, 0.95)'
+  scanline.style.backgroundColor = isDark ? '#60a5fa' : '#3b82f6'
+  scanline.style.boxShadow = isDark
+    ? '0 0 3px rgba(96, 165, 250, 0.6)'
+    : '0 0 2px rgba(59, 130, 246, 0.4)'
   scanline.style.pointerEvents = 'none'
 
   curtain.appendChild(scanline)
