@@ -28,7 +28,7 @@ function getEffectiveBgColor(element: HTMLElement | null): string {
   return isDark ? '#1e1e1e' : '#ffffff'
 }
 
-export function prepareChartForAnimation(container: HTMLElement | null) {
+export function prepareChartForAnimation(container: HTMLElement | null, accentColor?: string) {
   if (!container) return
 
   const target = getChartTarget(container)
@@ -51,6 +51,8 @@ export function prepareChartForAnimation(container: HTMLElement | null) {
   })
 
   const bg = getEffectiveBgColor(target)
+  const isDark = document.documentElement.classList.contains('dark')
+  const baseColor = accentColor || (isDark ? '#34d399' : '#10b981')
 
   // Full-width curtain anchored at left: 0, top: 0, covering the canvas plot area
   const curtain = document.createElement('div')
@@ -66,28 +68,26 @@ export function prepareChartForAnimation(container: HTMLElement | null) {
   curtain.style.transform = 'translateX(0%)'
   curtain.style.willChange = 'transform'
 
-  const isDark = document.documentElement.classList.contains('dark')
-
-  // Fine, razor-sharp 1.5px vertical line attached directly to the curtain's leading reveal edge
+  // Diffused, subtle vertical scanning line ending a couple pixels before top and bottom
   const scanline = document.createElement('div')
   scanline.className = 'chart-sweep-scanline'
   scanline.style.position = 'absolute'
   scanline.style.left = '0'
-  scanline.style.top = '0'
-  scanline.style.bottom = '0'
-  scanline.style.width = '1.5px'
+  scanline.style.top = '4px'
+  scanline.style.bottom = '4px'
+  scanline.style.width = '2px'
+  scanline.style.borderRadius = '9999px'
   scanline.style.transform = 'translateX(-100%)'
-  scanline.style.backgroundColor = isDark ? '#60a5fa' : '#3b82f6'
-  scanline.style.boxShadow = isDark
-    ? '0 0 3px rgba(96, 165, 250, 0.6)'
-    : '0 0 2px rgba(59, 130, 246, 0.4)'
+  scanline.style.background = `linear-gradient(180deg, transparent 0%, ${baseColor} 12%, ${baseColor} 88%, transparent 100%)`
+  scanline.style.opacity = '0.85'
+  scanline.style.boxShadow = `0 0 5px 1px ${baseColor}66, 0 0 10px 2px ${baseColor}26`
   scanline.style.pointerEvents = 'none'
 
   curtain.appendChild(scanline)
   target.appendChild(curtain)
 }
 
-export function triggerChartAnimation(container: HTMLElement | null, duration = 1100) {
+export function triggerChartAnimation(container: HTMLElement | null, duration = 1100, accentColor?: string) {
   if (!container) return
 
   const target = getChartTarget(container)
@@ -99,7 +99,7 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
 
   let curtain = target.querySelector('.chart-sweep-curtain') as HTMLElement | null
   if (!curtain) {
-    prepareChartForAnimation(container)
+    prepareChartForAnimation(container, accentColor)
     curtain = target.querySelector('.chart-sweep-curtain') as HTMLElement | null
   }
   if (!curtain) return

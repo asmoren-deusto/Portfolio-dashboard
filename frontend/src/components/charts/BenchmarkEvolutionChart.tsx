@@ -556,9 +556,10 @@ export function BenchmarkEvolutionChart({
           lastControlKeyRef.current = controlKey
           animEndTimeRef.current = now + 750
 
-          prepareChartForAnimation(containerRef.current)
+          const benchColor = isDark ? '#60a5fa' : '#3b82f6'
+          prepareChartForAnimation(containerRef.current, benchColor)
           requestAnimationFrame(() => {
-            triggerChartAnimation(containerRef.current, 750)
+            triggerChartAnimation(containerRef.current, 750, benchColor)
           })
         }
       }

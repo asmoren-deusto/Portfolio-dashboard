@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-17 14:31:18
+- **Fecha de exportación:** 2026-10-17 14:45:17
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 60
+- **Total de interacciones registradas:** 62
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1024,5 +1024,35 @@ El problema en Firefox ha quedado **completamente solucionado** y desplegado en 
 ### 👤 Usuario (2026-10-17 12:23:01)
 
 al inicio, cuando no hay nada precargado, se lanzan dos animaciones seguidas. por otro lado, la linea vertical no es una linea es más gorda y queda horrible (esto en chrome tb)
+
+---
+
+### 🤖 Asistente (2026-10-17 12:31:21)
+
+Ambos puntos han sido corregidos y desplegados en la versión **v3.0.130**:
+
+---
+
+### 1. 🎯 Eliminación de la doble animación en el arranque
+* **Causa:** Cuando la aplicación abría sin nada precargado en caché, se producían dos llegadas de datos consecutivas:
+  1. La resolución inicial síncrona o esqueleto rápido, que montaba la gráfica e iniciaba el barrido.
+  2. La respuesta definitiva de red de `/portfolio/performance` que llegaba ~150 ms después, actualizando los puntos y reiniciando abruptamente una segunda animación desde cero.
+* **Solución:**
+  - En [`PerformanceChart.tsx`](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) y [`BenchmarkEvolutionChart.tsx`](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/BenchmarkEvolutionChart.tsx), se ha desacoplado el estado de control (`controlKey`: broker, periodo, modo €/%, refresco) del estado de datos (`dataKey`).
+  - Si una animación ya está en curso y llegan los datos definitivos de la API sin que el usuario haya pulsado otro botón, **los datos de la curva se actualizan por debajo sin reiniciar la animación**, permitiendo que el barrido inicial continúe de forma limpia y continua de izquierda a derecha. Solo se ejecuta **una única animación fluida**.
+
+---
+
+### 2. ⚡ Línea vertical fina y nítida (1.5 px)
+* **Causa:** La versión anterior montaba un bloque de `32px` de ancho con gradiente horizontal y un difuminado `box-shadow` de `16px`, lo que generaba una franja ancha y borrosa en lugar de una línea.
+* **Solución:**
+  - En [`chartAnimation.ts`](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts), se ha sustituido por un **trazo vertical ultra-fino de 1.5 px** (`width: '1.5px'`) con un micro-resplandor sutil (`2-3px`) en azul institucional (`#60a5fa` en modo oscuro, `#3b82f6` en modo claro).
+  - Ahora se percibe como una línea vertical nítida, elegante y milimétrica tanto en Chrome como en Firefox.
+
+---
+
+### 👤 Usuario (2026-10-17 12:37:49)
+
+difumina un poco la barra, que sea más sutil, que acabe un par de pixeles antes y que sea del color del activo o en consolidado lo que tu veas. la evolucion en porcentaje (usando el selector) creo que está mal
 
 ---

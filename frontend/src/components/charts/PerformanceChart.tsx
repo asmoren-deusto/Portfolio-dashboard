@@ -268,7 +268,8 @@ export function PerformanceChart({
 
     const periodInflow = last.invested - first.invested
     const periodProfit = (last.value - first.value) - periodInflow
-    const periodReturnPct = first.value > 0 ? (periodProfit / first.value) * 100 : 0
+    const capitalBase = first.value + Math.max(0, periodInflow) * 0.5
+    const periodReturnPct = capitalBase > 0 ? (periodProfit / capitalBase) * 100 : 0
 
     return {
       first,
@@ -319,7 +320,8 @@ export function PerformanceChart({
     if (metrics && metrics.first) {
       const inflow = inv - metrics.first.invested
       const profit = (val - metrics.first.value) - inflow
-      periodPct = metrics.first.value > 0 ? (profit / metrics.first.value) * 100 : 0
+      const capitalBase = metrics.first.value + Math.max(0, inflow) * 0.5
+      periodPct = capitalBase > 0 ? (profit / capitalBase) * 100 : 0
     }
 
     return { val, inv, diff, pct, periodPct }
@@ -809,16 +811,19 @@ export function PerformanceChart({
         }
 
         const baseVal = metrics.first.value
-        const baseInv = metrics.first.invested
 
         const pctPoints = metrics.sumPoints.map(p => {
-          const inflow = p.invested - baseInv
-          const profit = (p.value - baseVal) - inflow
-          const pct = baseVal > 0 ? (profit / baseVal) * 100 : 0
+          let pct = 0
+          if (p.invested > 0) {
+            pct = ((p.value - p.invested) / p.invested) * 100
+          } else if (baseVal > 0) {
+            pct = ((p.value - baseVal) / baseVal) * 100
+          }
           return { time: p.date, value: Number(pct.toFixed(2)) }
         })
 
-        const isPositive = (metrics.periodReturnPct ?? 0) >= 0
+        const lastPct = pctPoints.length > 0 ? pctPoints[pctPoints.length - 1].value : (metrics.periodReturnPct ?? 0)
+        const isPositive = lastPct >= 0
         const mainColor = isPositive ? (isDark ? '#10b981' : '#059669') : (isDark ? '#f43f5e' : '#e11d48')
         const topGrad = isPositive
           ? (isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)')
@@ -888,9 +893,15 @@ export function PerformanceChart({
           lastControlKeyRef.current = controlKey
           animEndTimeRef.current = now + 1100
 
-          prepareChartForAnimation(containerRef.current)
+          const isProfitable = (metrics.periodProfit ?? 0) >= 0 || (metrics.last && metrics.last.value >= metrics.last.invested)
+          const sweepAccentColor =
+            selectedEntity !== 'all' && selectedEntity !== 'stacked' && ENTITY_CONFIGS[selectedEntity]
+              ? ENTITY_CONFIGS[selectedEntity].color
+              : (isProfitable ? (isDark ? '#34d399' : '#10b981') : (isDark ? '#fb7185' : '#f43f5e'))
+
+          prepareChartForAnimation(containerRef.current, sweepAccentColor)
           requestAnimationFrame(() => {
-            triggerChartAnimation(containerRef.current, 1100)
+            triggerChartAnimation(containerRef.current, 1100, sweepAccentColor)
           })
         }
       }
@@ -974,15 +985,22 @@ export function PerformanceChart({
 
             {/* Metric Rows */}
             <div className="flex flex-col gap-1.5">
-              {/* Valor */}
+              {/* Valor / Rentabilidad */}
               <div className="flex items-center justify-between gap-3">
                 <span className="text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
-                  {selectedEntity === 'all' || selectedEntity === 'stacked' ? 'Valor' : (ENTITY_CONFIGS[selectedEntity]?.label || 'Valor')}
+                  {chartMode === 'currency'
+                    ? (selectedEntity === 'all' || selectedEntity === 'stacked' ? 'Valor' : (ENTITY_CONFIGS[selectedEntity]?.label || 'Valor'))
+                    : 'Rentabilidad'}
                 </span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white text-[12.5px]">
+                <span className={cn(
+                  "font-mono font-bold text-[12.5px]",
+                  chartMode === 'currency'
+                    ? "text-slate-900 dark:text-white"
+                    : ((activeSelectedMetrics?.pct ?? 0) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")
+                )}>
                   {chartMode === 'currency'
                     ? fmt.currency(activeSelectedMetrics?.val)
-                    : `${(activeSelectedMetrics?.periodPct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.periodPct ?? 0).toFixed(2)}%`}
+                    : `${(activeSelectedMetrics?.pct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.pct ?? 0).toFixed(2)}%`}
                 </span>
               </div>
 
