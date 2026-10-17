@@ -11,7 +11,7 @@ import {
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
 import { Calendar } from 'lucide-react'
-import { triggerChartAnimation } from '@/lib/chartAnimation'
+import { triggerChartAnimation, prepareChartForAnimation } from '@/lib/chartAnimation'
 import type { BenchmarkComparisonPoint, BenchmarkComparisonData } from '@/api/queries'
 
 export type BenchmarkChartMode = 'percent' | 'currency'
@@ -540,6 +540,7 @@ export function BenchmarkEvolutionChart({
       const sweepKey = `${selectedBroker}_${refreshAnimKey}_${points?.length || 0}_${mode}_${showPortfolio}_${showSp500}_${showBce}_${showMsci}_${showNasdaq}_${showStoxx}_${showNikkei}_${points?.[0]?.date || ''}_${points?.[points.length - 1]?.date || ''}`
       if (points.length > 0 && sweepKey !== lastSweepKeyRef.current) {
         lastSweepKeyRef.current = sweepKey
+        prepareChartForAnimation(containerRef.current)
         requestAnimationFrame(() => {
           triggerChartAnimation(containerRef.current, 750)
         })

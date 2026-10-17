@@ -169,10 +169,6 @@ export function PerformanceChart({
   // Entity selection: 'stacked' by default when 'all' brokers selected (mantiene el estacado de entidades), o broker individual
   const selectedEntity = selectedBroker === 'all' ? 'stacked' : selectedBroker.toLowerCase()
 
-  // Sweep reveal animation state
-  const [sweepKey, setSweepKey] = useState(0)
-  const [isSweepAnimating, setIsSweepAnimating] = useState(false)
-
   // Helper to safely extract broker value and invested
   const getBrokerData = (p: PricePoint | null | undefined, brokerKey: string) => {
     if (!p || !p.brokers) return { value: 0, invested: 0 }
@@ -868,11 +864,9 @@ export function PerformanceChart({
 
       chart.timeScale().fitContent()
       prepareChartForAnimation(containerRef.current)
-      setTimeout(() => {
-        setIsSweepAnimating(true)
-        setSweepKey(prev => prev + 1)
+      requestAnimationFrame(() => {
         triggerChartAnimation(containerRef.current, 1100)
-      }, 80)
+      })
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
@@ -997,24 +991,7 @@ export function PerformanceChart({
             </div>
           </div>
         )}
-        {/* Glowing Scanline Animation: sweeps from left to right as the curve reveals and fades before reaching axis */}
-        {isSweepAnimating && (
-          <motion.div
-            key={`scanline-${sweepKey}`}
-            initial={{ left: '0%', opacity: 0.9 }}
-            animate={{
-              left: isNativePlatform() ? '100%' : 'calc(100% - 58px)',
-              opacity: [0.9, 0.9, 0],
-            }}
-            transition={{
-              duration: 1.1,
-              ease: [0.25, 1, 0.5, 1],
-              opacity: { duration: 1.1, times: [0, 0.85, 1], ease: 'easeOut' },
-            }}
-            onAnimationComplete={() => setIsSweepAnimating(false)}
-            className="absolute inset-y-0 w-0.5 pointer-events-none z-20 bg-gradient-to-b from-transparent via-emerald-500/50 dark:via-emerald-400/60 to-transparent shadow-[0_0_10px_rgba(16,185,129,0.45)]"
-          />
-        )}
+
 
         {/* Floating Small In-Chart Legend (Only shown in Desglose/Stacked mode) */}
         {availableBrokers.length > 1 && selectedEntity === 'stacked' && (

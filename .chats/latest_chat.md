@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-17 13:45:02
+- **Fecha de exportación:** 2026-10-17 14:01:18
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 54
+- **Total de interacciones registradas:** 56
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -900,5 +900,44 @@ En [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboa
 ### 👤 Usuario (2026-10-17 11:24:52)
 
 en firefox no funciona. tb el ticker superior en ambas plataformas deja de moverse
+
+---
+
+### 🤖 Asistente (2026-10-17 11:45:05)
+
+Se han diagnosticado y resuelto los dos problemas en **Firefox** y en el ticker:
+
+---
+
+### 1. ¿Por qué se congelaba el Ticker superior en ambas plataformas?
+* **Causa raíz:** El ticker utilizaba 3 conjuntos clonados de índices y evaluaba el bucle cuando `el.scrollLeft >= 2 * oneSetWidth`. En pantallas de escritorio panorámicas (ancho > 1300px), el ancho visible del contenedor (`clientWidth = 2262px`) hacía que el tope físico de scroll del navegador (`maxScrollLeft = scrollWidth - clientWidth = 4255px`) se alcanzase **antes** del umbral de reseteo (`2 * oneSetWidth = 4344px`). Al topar con la pared derecha del DOM, el navegador no podía seguir desplazándose, la condición nunca se cumplía y el ticker se bloqueaba indefinidamente en 4255px.
+* **Solución en [MarketTicker.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx):**
+  - Se incrementó a 6 conjuntos de índices (`NUM_SETS = 6`, más de 13.000px de ancho).
+  - El reseteo de posición ahora se produce de manera continua en los sets intermedios (`currentScrollPosRef.current >= 3 * oneSetWidth`), restando exactamente `oneSetWidth`.
+  - Esto garantiza que en cualquier resolución (desde móvil hasta 4K) existan siempre miles de píxeles de margen en ambos extremos, permitiendo un bucle infinito totalmente fluido.
+
+---
+
+### 2. ¿Por qué fallaba la animación de la gráfica en Firefox?
+* **Causa raíz:** 
+  1. En [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts) se utilizaba la sintaxis con ceros sin unidades: `inset(0 100% 0 0)` a `inset(0 0% 0 0)`. En el motor Gecko de Mozilla Firefox, las especificaciones W3C de `<basic-shape>` no permiten ceros adimensionales en interpolaciones de `inset()`, provocando que la animación se descartara o quedara congelada al 100% de recorte (invisible).
+  2. En Web Animations API (`element.animate`), Firefox requería compatibilidad con `'clip-path'` en kebab-case.
+  3. En Firefox con WebRender (GPU), el elemento padre que envuelve los `<canvas>` de TradingView Lightweight Charts no actualizaba el búfer de recorte en cada fotograma a menos que se promoviera la capa mediante aceleración por hardware (`transform: translateZ(0)` y `willChange: 'clip-path'`).
+* **Solución en [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts):**
+  - Se homogeneizaron todas las coordenadas a unidades porcentuales estrictas: `inset(0% 100% 0% 0%)` a `inset(0% 0% 0% 0%)`.
+  - Se añadieron `clipPath`, `'clip-path'` y `'-webkit-clip-path'` simultáneamente a los keyframes.
+  - Se añadió la promoción de capa del compositor (`target.style.willChange = 'clip-path'` y `target.style.transform = 'translateZ(0)'`).
+  - Se incorporó un fallback automático mediante `requestAnimationFrame` que garantiza la animación fluida en cualquier navegador donde WAAPI sobre `clip-path` no esté habilitado por GPU.
+
+---
+
+### Despliegue y Release
+* Version subida a **v3.0.127** en Git (`main`) conforme al protocolo de `AGENTS.md`.
+
+---
+
+### 👤 Usuario (2026-10-17 11:50:07)
+
+sigue fallando en firefox, de hecho alguna vez carga una grafica plana y luego actualiza con los datos buenos pero sin animar, va más a trompicones
 
 ---

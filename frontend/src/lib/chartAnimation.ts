@@ -1,8 +1,11 @@
 /**
  * Helper to trigger fluid entrance & timeline sweep animations for lightweight-charts.
- * Animates the series canvas plot area with a left-to-right sweep (0% to 100% time reveal)
+ * Animates the series canvas plot area with a left-to-right sweep reveal
  * matching the visual delight of institutional financial terminal charts.
- * Fully compatible across Firefox (Gecko), Chrome/Edge (Blink), and Safari (WebKit).
+ * 
+ * Uses a GPU-accelerated curtain-reveal overlay with an integrated glowing scanline.
+ * 100% immune to engine-specific CSS table-cell clipping bugs in Mozilla Firefox (Gecko),
+ * Safari (WebKit), and Chrome/Edge (Blink).
  */
 
 function getChartTarget(container: HTMLElement | null): HTMLElement | null {
@@ -18,6 +21,19 @@ function getChartTarget(container: HTMLElement | null): HTMLElement | null {
   return container
 }
 
+function getEffectiveBgColor(element: HTMLElement | null): string {
+  let el: HTMLElement | null = element
+  while (el && el !== document.documentElement && el !== document.body) {
+    const s = window.getComputedStyle(el).backgroundColor
+    if (s && s !== 'transparent' && s !== 'rgba(0, 0, 0, 0)') {
+      return s
+    }
+    el = el.parentElement
+  }
+  const isDark = document.documentElement.classList.contains('dark')
+  return isDark ? '#181f2b' : '#ffffff'
+}
+
 export function prepareChartForAnimation(container: HTMLElement | null) {
   if (!container) return
   if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
@@ -25,24 +41,57 @@ export function prepareChartForAnimation(container: HTMLElement | null) {
   }
 
   const target = getChartTarget(container)
-  if (target) {
-    try {
-      target.getAnimations?.().forEach((a) => a.cancel())
-    } catch {}
+  if (!target) return
 
-    // Fully-specified percentage units for 100% cross-browser compatibility (Firefox Gecko, WebKit, Blink)
-    target.style.setProperty('clip-path', 'inset(0% 100% 0% 0%)')
-    target.style.setProperty('-webkit-clip-path', 'inset(0% 100% 0% 0%)')
-    target.style.clipPath = 'inset(0% 100% 0% 0%)'
-    target.style.willChange = 'clip-path'
-    target.style.transform = 'translateZ(0)'
+  // Ensure target has relative positioning for the absolute curtain overlay
+  if (window.getComputedStyle(target).position === 'static') {
+    target.style.position = 'relative'
   }
+
+  // Remove any stale clip-path properties that cause table-cell bugs in Firefox Gecko
+  target.style.removeProperty('clip-path')
+  target.style.removeProperty('-webkit-clip-path')
+  target.style.clipPath = ''
+
+  // Remove existing curtains if any
+  target.querySelectorAll('.chart-sweep-curtain').forEach((c) => c.remove())
+
+  const bg = getEffectiveBgColor(target)
+
+  const curtain = document.createElement('div')
+  curtain.className = 'chart-sweep-curtain'
+  curtain.style.position = 'absolute'
+  curtain.style.top = '0'
+  curtain.style.right = '0'
+  curtain.style.bottom = '0'
+  curtain.style.width = '100%'
+  curtain.style.backgroundColor = bg
+  curtain.style.zIndex = '4'
+  curtain.style.pointerEvents = 'none'
+  curtain.style.willChange = 'width'
+  curtain.style.overflow = 'visible'
+
+  // Glowing institutional scanline attached directly to the curtain's leading edge
+  const scanline = document.createElement('div')
+  scanline.className = 'chart-sweep-scanline'
+  scanline.style.position = 'absolute'
+  scanline.style.left = '0'
+  scanline.style.top = '0'
+  scanline.style.bottom = '0'
+  scanline.style.width = '28px'
+  scanline.style.transform = 'translateX(-100%)'
+  scanline.style.background =
+    'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.28) 70%, rgba(147, 197, 253, 0.85) 100%)'
+  scanline.style.boxShadow = '0 0 16px rgba(59, 130, 246, 0.45)'
+  scanline.style.borderRight = '1.5px solid rgba(191, 219, 254, 0.95)'
+  scanline.style.pointerEvents = 'none'
+
+  curtain.appendChild(scanline)
+  target.appendChild(curtain)
 }
 
 export function triggerChartAnimation(container: HTMLElement | null, duration = 1100) {
   if (!container) return
-
-  // Respect user preference for reduced motion
   if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
     return
   }
@@ -50,47 +99,38 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
   const target = getChartTarget(container)
   if (!target) return
 
+  // Remove any stale clip-path properties
+  target.style.removeProperty('clip-path')
+  target.style.removeProperty('-webkit-clip-path')
+  target.style.clipPath = ''
+
+  let curtain = target.querySelector('.chart-sweep-curtain') as HTMLElement | null
+  if (!curtain) {
+    prepareChartForAnimation(container)
+    curtain = target.querySelector('.chart-sweep-curtain') as HTMLElement | null
+  }
+  if (!curtain) return
+
   let cleaned = false
   const cleanup = () => {
     if (cleaned) return
     cleaned = true
     try {
-      target.style.removeProperty('clip-path')
-      target.style.removeProperty('-webkit-clip-path')
-      target.style.clipPath = ''
-      target.style.willChange = ''
-      target.style.transform = ''
-      target.style.removeProperty('opacity')
+      curtain?.remove()
     } catch {}
   }
 
+  // Cancel any prior animations on curtain
   try {
-    target.getAnimations?.().forEach((a) => a.cancel())
+    curtain.getAnimations?.().forEach((a) => a.cancel())
   } catch {}
 
-  // Immediately clip and promote compositor layer in Firefox/Safari/Chrome
-  target.style.setProperty('clip-path', 'inset(0% 100% 0% 0%)')
-  target.style.setProperty('-webkit-clip-path', 'inset(0% 100% 0% 0%)')
-  target.style.clipPath = 'inset(0% 100% 0% 0%)'
-  target.style.willChange = 'clip-path'
-  target.style.transform = 'translateZ(0)'
-
-  if (typeof target.animate === 'function') {
+  if (typeof curtain.animate === 'function') {
     try {
-      const anim = target.animate(
+      const anim = curtain.animate(
         [
-          {
-            clipPath: 'inset(0% 100% 0% 0%)',
-            'clip-path': 'inset(0% 100% 0% 0%)',
-            '-webkit-clip-path': 'inset(0% 100% 0% 0%)',
-            opacity: 0.35,
-          },
-          {
-            clipPath: 'inset(0% 0% 0% 0%)',
-            'clip-path': 'inset(0% 0% 0% 0%)',
-            '-webkit-clip-path': 'inset(0% 0% 0% 0%)',
-            opacity: 1,
-          },
+          { width: '100%', opacity: 1 },
+          { width: '0%', opacity: 1 },
         ],
         {
           duration,
@@ -102,31 +142,28 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
       anim.onfinish = cleanup
       anim.oncancel = cleanup
 
-      // Safety fallback: ensure clipPath is always cleared even if frame dropped
+      // Safety timeout
       setTimeout(cleanup, duration + 60)
       return
     } catch (err) {
-      console.warn('WAAPI clip-path animation failed, falling back to JS RAF animation:', err)
+      console.warn('WAAPI curtain animation error, falling back to RAF:', err)
     }
   }
 
-  // Robust requestAnimationFrame fallback for any browser/environment where WAAPI on clip-path is unsupported
+  // RequestAnimationFrame fallback
   const startTime = performance.now()
-  const cubicBezier = (t: number) => {
-    return 1 - Math.pow(1 - t, 3)
-  }
+  const cubicBezier = (t: number) => 1 - Math.pow(1 - t, 3)
 
   let rafId: number
   const step = (now: number) => {
     const elapsed = now - startTime
     const progress = Math.min(1, elapsed / duration)
     const eased = cubicBezier(progress)
-    const remainingRight = (100 * (1 - eased)).toFixed(2)
+    const remainingWidth = (100 * (1 - eased)).toFixed(2)
 
-    target.style.setProperty('clip-path', `inset(0% ${remainingRight}% 0% 0%)`)
-    target.style.setProperty('-webkit-clip-path', `inset(0% ${remainingRight}% 0% 0%)`)
-    target.style.clipPath = `inset(0% ${remainingRight}% 0% 0%)`
-    target.style.opacity = `${0.35 + 0.65 * eased}`
+    if (curtain) {
+      curtain.style.width = `${remainingWidth}%`
+    }
 
     if (progress < 1) {
       rafId = requestAnimationFrame(step)

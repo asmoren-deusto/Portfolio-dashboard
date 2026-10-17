@@ -30,7 +30,7 @@ import { isNativePlatform } from '@/api/config'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
-import { triggerChartAnimation } from '@/lib/chartAnimation'
+import { triggerChartAnimation, prepareChartForAnimation } from '@/lib/chartAnimation'
 
 export interface EtfInfo {
   name: string
@@ -358,6 +358,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         const sweepKey = `${selectedBroker}_${period}_${currencyMode}_${refreshAnimKey}_${formatted.length}_${formatted[0]?.value}_${formatted[formatted.length - 1]?.value}`
         if (sweepKey !== lastSweepKeyRef.current) {
           lastSweepKeyRef.current = sweepKey
+          prepareChartForAnimation(chartContainerRef.current)
           requestAnimationFrame(() => {
             triggerChartAnimation(chartContainerRef.current, 750)
           })
