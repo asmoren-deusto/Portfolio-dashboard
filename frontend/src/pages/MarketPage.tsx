@@ -521,8 +521,7 @@ export const MarketPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/80 dark:divide-white/[0.03]">
-                  <AnimatePresence initial={false}>
-                    {isFetching && filteredStocks.length === 0 ? (
+                  {isFetching && filteredStocks.length === 0 ? (
                       <TableSkeletonRows rows={10} cols={7} />
                     ) : (
                       filteredStocks.map((stock, i) => {
@@ -534,12 +533,8 @@ export const MarketPage: React.FC = () => {
                             : null
 
                         return (
-                          <motion.tr
+                          <tr
                             key={stock.ticker}
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -3 }}
-                            transition={{ duration: 0.18, delay: Math.min(i * 0.012, 0.15) }}
                             onClick={() => setSelectedStock(stock)}
                             className={`transition-all cursor-pointer group ${
                               isSelected
@@ -672,10 +667,9 @@ export const MarketPage: React.FC = () => {
                             <span className="text-[10px] text-slate-400 dark:text-slate-600">—</span>
                           )}
                         </td>
-                      </motion.tr>
+                      </tr>
                     )
                   }))}
-                </AnimatePresence>
                 </tbody>
               </table>
             </div>

@@ -860,8 +860,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                    <AnimatePresence initial={false}>
-                      {isLoading ? (
+                    {isLoading ? (
                         <TableSkeletonRows rows={5} cols={6} />
                       ) : (
                         holdings.map((h, i) => {
@@ -871,12 +870,8 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           const isGainPos = (h.simulated_gain_amount ?? 0) >= 0
 
                           return (
-                            <motion.tr
+                            <tr
                               key={h.isin}
-                              initial={{ opacity: 0, y: 3 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -2 }}
-                              transition={{ duration: 0.18, delay: Math.min(i * 0.015, 0.2) }}
                               className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                             >
                           {/* Col 1: Fondo y Badge de Entidad */}
@@ -968,10 +963,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               {isGainPos ? '+' : ''}{fmt.currency(h.simulated_gain_amount ?? 0)}
                             </span>
                           </td>
-                        </motion.tr>
+                        </tr>
                       )
                     }))}
-                  </AnimatePresence>
                 </tbody>
                 </table>
               </div>
@@ -992,8 +986,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                    <AnimatePresence initial={false}>
-                      {isLoading ? (
+                    {isLoading ? (
                         <TableSkeletonRows rows={4} cols={6} />
                       ) : (
                         etfs.map((etf, i) => {
@@ -1005,12 +998,8 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           const isImpactPos = totalImpact >= 0
 
                           return (
-                            <motion.tr
+                            <tr
                               key={etf.ticker}
-                              initial={{ opacity: 0, y: 3 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -2 }}
-                              transition={{ duration: 0.18, delay: Math.min(i * 0.015, 0.2) }}
                               className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                             >
                               <td className="py-1.5 px-2.5">
@@ -1082,10 +1071,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               {isImpactPos ? '+' : ''}{fmt.currency(totalImpact)}
                             </span>
                           </td>
-                        </motion.tr>
+                        </tr>
                       )
                     }))}
-                  </AnimatePresence>
                 </tbody>
                 </table>
               </div>

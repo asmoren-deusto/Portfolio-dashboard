@@ -58,7 +58,7 @@ const SPOTLIGHT_COLORS = {
   indigo: '99, 102, 241',
 }
 
-export function KpiCard({
+function KpiCardComponent({
   label,
   value,
   sub,
@@ -241,3 +241,5 @@ export function KpiCard({
     </div>
   )
 }
+
+export const KpiCard = React.memo(KpiCardComponent)

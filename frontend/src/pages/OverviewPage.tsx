@@ -1421,11 +1421,8 @@ export function OverviewPage() {
                         const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
 
                         return (
-                          <motion.tr
+                          <tr
                             key={p.isin}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.15 }}
                             onClick={() => setSelectedPosition(p)}
                             onMouseEnter={() => setHoveredIsin(p.isin)}
                             onMouseLeave={() => setHoveredIsin(null)}
@@ -1543,7 +1540,7 @@ export function OverviewPage() {
                                 </span>
                               </div>
                             </td>
-                          </motion.tr>
+                          </tr>
                         )
                       })
                     )}
@@ -1578,11 +1575,8 @@ export function OverviewPage() {
                           const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
 
                           return (
-                            <motion.tr
+                            <tr
                               key={p.isin}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ duration: 0.15 }}
                               onClick={() => setSelectedPosition(p)}
                               onMouseEnter={() => setHoveredIsin(p.isin)}
                               onMouseLeave={() => setHoveredIsin(null)}
@@ -1700,7 +1694,7 @@ export function OverviewPage() {
                                   </span>
                                 </div>
                               </td>
-                            </motion.tr>
+                            </tr>
                           )
                         })
                       )}
@@ -1889,12 +1883,9 @@ export function OverviewPage() {
                     const pos = positions.find((p) => p.isin === t.isin)
 
                     return (
-                      <motion.tr
+                      <tr
                         key={t.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.15 }}
-                          onClick={() => {
+                        onClick={() => {
                             if (pos) setSelectedPosition(pos)
                           }}
                           className="hover:bg-slate-50/90 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
@@ -1952,7 +1943,7 @@ export function OverviewPage() {
                               {isDiv ? `+${fmt.currency(t.amount)}` : fmt.currency(t.amount)}
                             </span>
                           </td>
-                        </motion.tr>
+                        </tr>
                       )
                     })
                   )}

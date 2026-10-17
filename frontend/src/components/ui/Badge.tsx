@@ -1,3 +1,4 @@
+import React from 'react'
 import { cn, ASSET_TYPE_LABELS } from '@/lib/utils'
 
 const configs: Record<string, { label: string; bg: string; text: string; border: string }> = {
@@ -59,7 +60,7 @@ interface BadgeProps {
   className?: string
 }
 
-export function AssetBadge({ type, className }: BadgeProps) {
+export const AssetBadge = React.memo(function AssetBadge({ type, className }: BadgeProps) {
   const cfg = configs[type] ?? configs.fund
   return (
     <span className={cn(
@@ -69,14 +70,14 @@ export function AssetBadge({ type, className }: BadgeProps) {
       {cfg.label}
     </span>
   )
-}
+})
 
 interface BrokerBadgeProps {
   broker?: string | null
   className?: string
 }
 
-export function BrokerBadge({ broker, className }: BrokerBadgeProps) {
+export const BrokerBadge = React.memo(function BrokerBadge({ broker, className }: BrokerBadgeProps) {
   const raw = (broker || '').trim()
   const key = raw.toLowerCase().replace(/[^a-z0-9]/g, '')
   const cfg = brokerConfigs[key] || {
@@ -96,7 +97,7 @@ export function BrokerBadge({ broker, className }: BrokerBadgeProps) {
       <span>{cfg.label}</span>
     </span>
   )
-}
+})
 
 interface PnlBadgeProps {
   value: number | null | undefined
@@ -104,7 +105,7 @@ interface PnlBadgeProps {
   className?: string
 }
 
-export function PnlBadge({ value, suffix = '', className }: PnlBadgeProps) {
+export const PnlBadge = React.memo(function PnlBadge({ value, suffix = '', className }: PnlBadgeProps) {
   if (value == null) return <span className="text-slate-500">—</span>
   const pos = value >= 0
   return (
@@ -116,4 +117,4 @@ export function PnlBadge({ value, suffix = '', className }: PnlBadgeProps) {
       {pos ? '+' : ''}{value.toFixed(2)}{suffix}
     </span>
   )
-}
+})

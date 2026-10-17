@@ -236,11 +236,8 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
   const [heightMode, setHeightMode] = useState<'standard' | 'expanded'>(
     defaultExpanded ? 'expanded' : 'standard'
   )
-  const [hoveredStock, setHoveredStock] = useState<{
-    stock: MarketStock
-    x: number
-    y: number
-  } | null>(null)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+  const [hoveredStock, setHoveredStock] = useState<MarketStock | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [localSector, setLocalSector] = useState<string>('Todos')
 
@@ -345,15 +342,22 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
     )
   }, [eligibleStocks, dimensions])
 
-  const handleMouseMove = (e: React.MouseEvent, stock: MarketStock) => {
+  const updateTooltipPos = (clientX: number, clientY: number) => {
+    if (!tooltipRef.current || !containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const left = Math.min(clientX - rect.left + 14, (dimensions.width || 800) - 260)
+    const top = Math.min(clientY - rect.top + 14, (dimensions.height || 500) - 170)
+    tooltipRef.current.style.transform = `translate3d(${left}px, ${top}px, 0)`
+  }
+
+  const handleMouseEnter = (e: React.MouseEvent, stock: MarketStock) => {
     if (typeof window !== 'undefined' && 'ontouchstart' in window && (e.nativeEvent as any).pointerType === 'touch') return
-    const rect = containerRef.current?.getBoundingClientRect()
-    if (!rect) return
-    setHoveredStock({
-      stock,
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    })
+    setHoveredStock(stock)
+    updateTooltipPos(e.clientX, e.clientY)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    updateTooltipPos(e.clientX, e.clientY)
   }
 
   const handleMouseLeave = () => {
@@ -552,7 +556,8 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
                     <div
                       key={stock.ticker}
                       onClick={() => onSelectStock(stock)}
-                      onMouseMove={(e) => handleMouseMove(e, stock)}
+                      onMouseEnter={(e) => handleMouseEnter(e, stock)}
+                      onMouseMove={handleMouseMove}
                       onMouseLeave={handleMouseLeave}
                       style={{
                         position: 'absolute',
@@ -617,44 +622,46 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
         {/* Floating Tooltip */}
         {hoveredStock && (
           <div
+            ref={tooltipRef}
             style={{
               position: 'absolute',
-              left: `${Math.min(hoveredStock.x + 14, (dimensions.width || 800) - 260)}px`,
-              top: `${Math.min(hoveredStock.y + 14, (dimensions.height || 500) - 170)}px`,
+              left: 0,
+              top: 0,
+              willChange: 'transform',
             }}
-            className="pointer-events-none z-50 w-64 rounded-2xl bg-white/75 dark:bg-[#181818]/75 border border-slate-200/60 dark:border-white/15 p-4 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
+            className="pointer-events-none z-50 w-64 rounded-2xl bg-white/95 dark:bg-[#181818]/95 border border-slate-200/90 dark:border-white/15 p-4 shadow-2xl"
           >
             {/* Header with Logo */}
             <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-200/80 dark:border-white/[0.08]">
               <CompanyLogo
-                ticker={hoveredStock.stock.ticker}
-                name={hoveredStock.stock.name}
-                domain={hoveredStock.stock.domain}
+                ticker={hoveredStock.ticker}
+                name={hoveredStock.name}
+                domain={hoveredStock.domain}
                 size="sm"
               />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                  {hoveredStock.stock.name || getHeatmapDisplayName(hoveredStock.stock, true)}
+                  {hoveredStock.name || getHeatmapDisplayName(hoveredStock, true)}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs font-mono text-slate-700 dark:text-slate-400">
-                  <span>{hoveredStock.stock.ticker}</span>
-                  {hoveredStock.stock.market_state === 'PRE' && (
+                  <span>{hoveredStock.ticker}</span>
+                  {hoveredStock.market_state === 'PRE' && (
                     <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
                       Pre
                     </span>
                   )}
-                  {(hoveredStock.stock.market_state === 'POST' || hoveredStock.stock.market_state === 'POSTPOST') && (
+                  {(hoveredStock.market_state === 'POST' || hoveredStock.market_state === 'POSTPOST') && (
                     <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30">
                       Post
                     </span>
                   )}
-                  {(hoveredStock.stock.market_state === 'FUTURES' || hoveredStock.stock.market_state === 'OVERNIGHT') && (
+                  {(hoveredStock.market_state === 'FUTURES' || hoveredStock.market_state === 'OVERNIGHT') && (
                     <span className="inline-flex items-center text-[8.5px] font-bold uppercase tracking-tight px-1.5 py-0.5 rounded-full border leading-none bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
                       FUTURES
                     </span>
                   )}
                   <span>•</span>
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">{hoveredStock.stock.sector}</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-semibold">{hoveredStock.sector}</span>
                 </div>
               </div>
             </div>
@@ -664,14 +671,14 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-400">Tamaño (Cap.):</span>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {formatMarketCap(hoveredStock.stock.market_cap)}
+                  {formatMarketCap(hoveredStock.market_cap)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-400">Precio Actual:</span>
                 <span className="font-bold text-slate-800 dark:text-slate-200">
-                  {hoveredStock.stock.price ? fmt.currency(hoveredStock.stock.price) : '—'}
+                  {hoveredStock.price ? fmt.currency(hoveredStock.price) : '—'}
                 </span>
               </div>
 
@@ -679,11 +686,11 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
                 <span className="text-slate-600 dark:text-slate-400">Rendimiento Hoy:</span>
                 <span
                   className={`font-bold flex items-center gap-1 ${
-                    (hoveredStock.stock.change_pct ?? 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                    (hoveredStock.change_pct ?? 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                   }`}
                 >
-                  {(hoveredStock.stock.change_pct ?? 0) >= 0 ? '↑ +' : '↓ '}
-                  {hoveredStock.stock.change_pct?.toFixed(2)}%
+                  {(hoveredStock.change_pct ?? 0) >= 0 ? '↑ +' : '↓ '}
+                  {hoveredStock.change_pct?.toFixed(2)}%
                 </span>
               </div>
             </div>

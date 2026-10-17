@@ -1379,12 +1379,9 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-white/[0.05]">
-                  {rebalanceBands.map((b, i) => (
-                    <motion.tr
+                  {rebalanceBands.map((b) => (
+                    <tr
                       key={b.regionId}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.18, delay: Math.min(i * 0.02, 0.2) }}
                       className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors"
                     >
                       <td className="py-3 font-semibold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1428,7 +1425,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                           {b.urgency === 'optimal' ? '🟢 En Tolerancia' : b.urgency === 'warning' ? '🟡 Desviación Moderada' : '🔴 Rebalanceo Prioritario'}
                         </span>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>

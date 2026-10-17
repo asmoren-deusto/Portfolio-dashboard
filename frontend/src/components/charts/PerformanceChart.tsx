@@ -205,6 +205,19 @@ export function PerformanceChart({
 
   const dataRef = useRef<PricePoint[]>(data)
   dataRef.current = data
+  const dataMapRef = useRef<Map<string, PricePoint>>(new Map())
+  useEffect(() => {
+    const map = new Map<string, PricePoint>()
+    for (const p of data || []) {
+      if (p && p.date) {
+        map.set(p.date, p)
+        if (p.date.length > 10) {
+          map.set(p.date.slice(0, 10), p)
+        }
+      }
+    }
+    dataMapRef.current = map
+  }, [data])
 
   // Metrics computation for selected sum or single entity
   const metrics = useMemo(() => {
@@ -481,6 +494,7 @@ export function PerformanceChart({
         }
 
         const match =
+          dataMapRef.current.get(timeStr) ||
           (dataRef.current || []).find(p => p.date === timeStr || p.date.startsWith(timeStr)) ||
           ((metrics?.sumPoints as any[]) || []).find(p => p.date === timeStr || p.date.startsWith(timeStr))
 
@@ -964,7 +978,7 @@ export function PerformanceChart({
         {/* Floating Aurora Balloon Tooltip (Image 1) */}
         {hoveredPoint && tooltipPos && (
           <div
-            className="pointer-events-none absolute z-30 min-w-[170px] max-w-[240px] px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1a1f2b]/95 backdrop-blur-md border border-slate-200/90 dark:border-white/10 shadow-2xl transition-all duration-75 text-xs select-none"
+            className="pointer-events-none absolute z-30 min-w-[170px] max-w-[240px] px-3.5 py-2.5 rounded-2xl bg-white/98 dark:bg-[#1a1f2b]/98 border border-slate-200/90 dark:border-white/10 shadow-2xl text-xs select-none"
             style={{
               left: Math.max(10, Math.min(
                 (containerRef.current?.clientWidth || 300) - 195,

@@ -337,12 +337,9 @@ export function TransactionsPage() {
                   const displayName = (t as any).name || assetInfo?.name || t.isin
 
                   return (
-                    <motion.tr
+                    <tr
                       key={t.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.15 }}
-                        onClick={() => {
+                      onClick={() => {
                           if (assetInfo) setSelectedPosition(assetInfo)
                         }}
                         className={`group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] last:border-0 ${
@@ -417,7 +414,7 @@ export function TransactionsPage() {
                           )}
                         </button>
                       </td>
-                    </motion.tr>
+                    </tr>
                   )
                 })
               )}

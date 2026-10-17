@@ -78,7 +78,7 @@ function getAvatarGradient(str: string): string {
   return gradients[index]
 }
 
-export const CompanyLogo: React.FC<CompanyLogoProps> = ({
+export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   ticker,
   isin,
   name,
@@ -226,6 +226,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
           loaded ? 'opacity-100' : 'opacity-0'
         }`}
         loading="lazy"
+        decoding="async"
         onLoad={() => setLoaded(true)}
         onError={handleError}
       />
@@ -234,4 +235,4 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
       )}
     </div>
   )
-}
+})

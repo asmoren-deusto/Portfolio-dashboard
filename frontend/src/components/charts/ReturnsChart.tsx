@@ -58,7 +58,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const isPositive = v >= 0
 
   return (
-    <div className="pointer-events-none min-w-[170px] max-w-[240px] px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1a1f2b]/95 backdrop-blur-md border border-slate-200/90 dark:border-white/10 shadow-2xl text-xs select-none transition-all">
+    <div className="pointer-events-none min-w-[170px] max-w-[240px] px-3.5 py-2.5 rounded-2xl bg-white/98 dark:bg-[#1a1f2b]/98 border border-slate-200/90 dark:border-white/10 shadow-2xl text-xs select-none">
       {/* Date / Period Header */}
       <div className="text-[11.5px] font-medium text-slate-400 dark:text-slate-400 mb-1.5 capitalize flex items-center justify-between">
         <span>{fullName}</span>

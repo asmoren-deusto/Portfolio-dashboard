@@ -8,7 +8,7 @@ interface MiniDonutProps {
   color?: string
 }
 
-export function MiniDonut({ value, size = 24, strokeWidth = 3.5, className, color }: MiniDonutProps) {
+export const MiniDonut = React.memo(function MiniDonut({ value, size = 24, strokeWidth = 3.5, className, color }: MiniDonutProps) {
   const clamped = Math.max(0, Math.min(100, value || 0))
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
@@ -39,4 +39,4 @@ export function MiniDonut({ value, size = 24, strokeWidth = 3.5, className, colo
       />
     </svg>
   )
-}
+})

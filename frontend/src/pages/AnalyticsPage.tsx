@@ -701,14 +701,11 @@ export function AnalyticsPage() {
                   .slice()
                   .sort((a, b) => b.unrealized_pnl_pct - a.unrealized_pnl_pct)
                   .map((p) => (
-                    <motion.tr data-private
+                    <tr data-private
                       key={p.isin}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.15 }}
-                        onClick={() => setSelectedPosition(p)}
-                        className="group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] cursor-pointer last:border-0"
-                      >
+                      onClick={() => setSelectedPosition(p)}
+                      className="group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] cursor-pointer last:border-0"
+                    >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <CompanyLogo
@@ -753,7 +750,7 @@ export function AnalyticsPage() {
                         </span>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 )))}
             </tbody>
           </table>

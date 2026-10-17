@@ -391,12 +391,9 @@ export function PositionsPage() {
                     const pDate = p.price_date || p.last_updated
                     const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
                     return (
-                      <motion.tr
+                      <tr
                         key={p.isin}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.15 }}
-                          onClick={() => setSelectedPosition(p)}
+                        onClick={() => setSelectedPosition(p)}
                           title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
                           className="group border-b border-slate-100 hover:bg-slate-50/80 dark:border-white/[0.03] dark:hover:bg-white/[0.035] cursor-pointer last:border-0 transition-colors"
                         >
@@ -512,7 +509,7 @@ export function PositionsPage() {
                             </span>
                           </div>
                         </td>
-                      </motion.tr>
+                      </tr>
                     )})
                   )}
               </tbody>
