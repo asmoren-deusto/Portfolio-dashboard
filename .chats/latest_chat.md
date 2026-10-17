@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-17 14:45:17
+- **Fecha de exportación:** 2026-10-17 14:56:01
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 62
+- **Total de interacciones registradas:** 64
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1054,5 +1054,40 @@ Ambos puntos han sido corregidos y desplegados en la versión **v3.0.130**:
 ### 👤 Usuario (2026-10-17 12:37:49)
 
 difumina un poco la barra, que sea más sutil, que acabe un par de pixeles antes y que sea del color del activo o en consolidado lo que tu veas. la evolucion en porcentaje (usando el selector) creo que está mal
+
+---
+
+### 🤖 Asistente (2026-10-17 12:45:20)
+
+Ambos cambios han sido completados y desplegados en la versión **v3.0.131**:
+
+---
+
+### 1. 🎨 Barra de barrido sutil, difuminada y dinámica
+- **Extremos remetidos:** Ahora la barra no llega hasta los bordes superior e inferior del contenedor (`top: 4px; bottom: 4px; border-radius: 9999px`), quedando flotante y estilizada.
+- **Difuminado y sutileza:** 
+  - Ancho fino de `2px` con gradiente vertical que se desvanece suavemente en las puntas (`linear-gradient(180deg, transparent 0%, color 12%, color 88%, transparent 100%)`).
+  - Resplandor multicapa suave y translúcido (`box-shadow: 0 0 5px ... 0 0 10px ...`), eliminando cualquier aspecto tosco o agresivo.
+- **Color dinámico adaptado al activo:**
+  - **En vista Consolidada / Cartera Total:** Adopta el color de la curva de rentabilidad (`#34d399` / `#10b981` en verde esmeralda si está en beneficios, o tono rosa/rojo si estuviera en pérdidas).
+  - **En vista por Entidad / Broker:** Adopta automáticamente el color de marca del broker activo (MyInvestor en azul `#3b82f6`, Indexa en ámbar `#f59e0b`, etc.).
+
+---
+
+### 2. 📈 Corrección de la evolución en porcentaje (`%`)
+- **Causa del error:** Al pulsar el selector `%`, el código calculaba:
+  $$\text{inflow} = \text{inv}_t - \text{inv}_0$$
+  $$\text{pct} = \frac{(\text{val}_t - \text{val}_0) - \text{inflow}}{\text{val}_0} \times 100$$
+  Al existir aportaciones periódicas (DCA), dividir el beneficio incremental entre el valor base inicial $\text{val}_0$ distorsionaba completamente el cálculo (arrojando un irreal `+3.87%` cuando la rentabilidad real de la cartera era de más del `+19%` / `+20%`).
+- **Corrección aplicada:**
+  - Ahora cada punto de la curva representa la **rentabilidad acumulada real sobre capital invertido** en esa fecha:
+    $$\text{pct}_t = \frac{\text{val}_t - \text{inv}_t}{\text{inv}_t} \times 100$$
+  - En el tooltip, la fila principal pasa a llamarse coherentemente **`Rentabilidad`** (en verde o rojo según sea positiva o negativa) y coincide con el valor exacto de la curva y el badge lateral de la escala (mostrando el `+19.05%` / `+20.34%` real de la cartera).
+
+---
+
+### 👤 Usuario (2026-10-17 12:38:31)
+
+haz una mejora importante del rendimiento web, parece que al pc le cuesta mucho renderizar todo sobretodo en firefox
 
 ---

@@ -375,7 +375,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   }, [chartPoints, sessionMarkers, currencyMode, selectedBroker, period, refreshAnimKey])
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20 p-3.5 sm:p-4 transition-all">
+    <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-xl dark:shadow-black/20 p-3.5 sm:p-4 transition-all">
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 dark:border-white/[0.06]">
         <div className="flex items-center gap-2.5">
@@ -707,16 +707,16 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             {isNativePlatform() && (minPct !== undefined && maxPct !== undefined) && (
               <div className="absolute left-2 top-2.5 bottom-7 pointer-events-none flex flex-col justify-between items-start z-10 text-[9.5px] font-mono select-none">
                 <span className={cn(
-                  "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 backdrop-blur-xs font-bold shadow-2xs leading-none",
+                  "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 font-bold shadow-2xs leading-none",
                   maxPct >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
                 )}>
                   {maxPct >= 0 ? '+' : ''}{maxPct.toFixed(2)}%
                 </span>
-                <span className="px-1.5 py-0.5 rounded bg-white/60 dark:bg-[#181818]/65 border border-slate-200/40 dark:border-white/5 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-medium leading-none">
+                <span className="px-1.5 py-0.5 rounded bg-white/60 dark:bg-[#181818]/65 border border-slate-200/40 dark:border-white/5 text-slate-500 dark:text-slate-400 font-medium leading-none">
                   0.00%
                 </span>
                 <span className={cn(
-                  "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 backdrop-blur-xs font-bold shadow-2xs leading-none",
+                  "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 font-bold shadow-2xs leading-none",
                   minPct >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
                 )}>
                   {minPct >= 0 ? '+' : ''}{minPct.toFixed(2)}%
@@ -849,7 +849,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             {activeTab === 'funds' && (
               <div className="overflow-x-auto overflow-y-auto max-h-[370px] sm:max-h-[385px] rounded-lg border border-slate-200/60 dark:border-white/[0.06] relative">
                 <table className="w-full text-left text-xs border-collapse min-w-[760px]">
-                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
+                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
                       <th className="py-1.5 px-2.5 min-w-[240px]">Fondo en Cartera</th>
                       <th className="py-1.5 px-2.5 min-w-[190px]">ETF Réplica</th>
@@ -981,7 +981,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             {activeTab === 'etfs' && (
               <div className="overflow-x-auto overflow-y-auto max-h-[370px] sm:max-h-[385px] rounded-lg border border-slate-200/60 dark:border-white/[0.06] relative">
                 <table className="w-full text-left text-xs border-collapse">
-                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 backdrop-blur-xs text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
+                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
                       <th className="py-1.5 px-2.5">ETF Réplica / Mercado</th>
                       <th className="py-1.5 px-2 text-right">Cotiz. en Vivo</th>

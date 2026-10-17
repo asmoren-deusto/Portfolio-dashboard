@@ -188,7 +188,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   return (
     <span
       title={tooltips[effectiveState] || effectiveState}
-      className={`absolute -top-1 right-1 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1px] rounded-full border shadow-2xs leading-none backdrop-blur-xs select-none ${cls}`}
+      className={`absolute -top-1 right-1 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1px] rounded-full border shadow-2xs leading-none select-none ${cls}`}
     >
       {labels[effectiveState] || effectiveState}
     </span>
@@ -279,8 +279,30 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   const touchTimerRef = useRef<number | null>(null)
   const touchStartXRef = useRef(0)
   const currentScrollPosRef = useRef(0)
+  const oneSetWidthRef = useRef(0)
+  const isProgrammaticScrollRef = useRef(false)
 
-  // Auto-scroll loop using requestAnimationFrame (pauses when hovering, dragging or touching)
+  // Measure and cache set width to eliminate el.scrollWidth reads from 60fps RAF loop
+  useEffect(() => {
+    const el = scrollContainerRef.current
+    if (!el) return
+
+    const updateSetWidth = () => {
+      if (!el) return
+      const w = el.scrollWidth / NUM_SETS
+      if (w > 0) {
+        oneSetWidthRef.current = w
+      }
+    }
+
+    updateSetWidth()
+    const ro = new ResizeObserver(updateSetWidth)
+    ro.observe(el)
+
+    return () => ro.disconnect()
+  }, [rawIndices.length])
+
+  // Auto-scroll loop using requestAnimationFrame (pauses when hovering, dragging, touching, or tab is hidden)
   useEffect(() => {
     const speed = 36 // pixels per second for a gentle, readable pace
     let lastTime = performance.now()
@@ -293,17 +315,24 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
       const el = scrollContainerRef.current
       if (
         el &&
+        !document.hidden &&
         !isHoveredRef.current &&
         !isMouseDownRef.current &&
         !isInteractingRef.current
       ) {
-        const oneSetWidth = el.scrollWidth / NUM_SETS
+        let oneSetWidth = oneSetWidthRef.current
+        if (oneSetWidth <= 0) {
+          oneSetWidth = el.scrollWidth / NUM_SETS
+          oneSetWidthRef.current = oneSetWidth
+        }
+
         if (oneSetWidth > 0) {
           currentScrollPosRef.current += speed * dt
           // Seamlessly loop inside middle sets (between set 2 and 3)
           if (currentScrollPosRef.current >= 3 * oneSetWidth) {
             currentScrollPosRef.current -= oneSetWidth
           }
+          isProgrammaticScrollRef.current = true
           el.scrollLeft = currentScrollPosRef.current
         }
       }
@@ -349,10 +378,16 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
 
   // Seamless wrap-around on scroll (infinite loop in both directions)
   const handleScroll = () => {
+    // If scroll was triggered by the programmatic RAF ticker, bypass layout queries completely
+    if (isProgrammaticScrollRef.current) {
+      isProgrammaticScrollRef.current = false
+      return
+    }
+
     const el = scrollContainerRef.current
     if (!el) return
 
-    const oneSetWidth = el.scrollWidth / NUM_SETS
+    const oneSetWidth = oneSetWidthRef.current || (el.scrollWidth / NUM_SETS)
     if (oneSetWidth <= 0) return
 
     // Keep manual drag safely in the middle sets without ever hitting container bounds
@@ -371,7 +406,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
     if (!el) return
     const setInitialScroll = () => {
       if (!el) return
-      const oneSetWidth = el.scrollWidth / NUM_SETS
+      const oneSetWidth = oneSetWidthRef.current || (el.scrollWidth / NUM_SETS)
       if (oneSetWidth > 0 && (el.scrollLeft === 0 || el.scrollLeft < oneSetWidth)) {
         el.scrollLeft = 2 * oneSetWidth
         currentScrollPosRef.current = 2 * oneSetWidth
@@ -427,7 +462,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   return (
     <>
       <div className={cn(
-        "relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover backdrop-blur-md py-1 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200",
+        "relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover py-1 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200",
         isNative ? "px-2.5" : "px-3 sm:px-3.5"
       )}>
         <div className="flex items-center">
@@ -493,7 +528,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                 'scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
                 isDragging ? 'cursor-grabbing' : 'cursor-grab'
               )}
-              style={{ touchAction: 'pan-x' }}
+              style={{ touchAction: 'pan-x', contain: 'content', willChange: 'scroll-position' }}
             >
               <div className="flex items-center gap-1.5 sm:gap-2 pt-1.5 pb-0.5 w-max">
                 {repeatedIndices.map((idx: any, index: number) => {

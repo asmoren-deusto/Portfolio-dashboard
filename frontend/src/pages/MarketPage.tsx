@@ -308,7 +308,7 @@ export const MarketPage: React.FC = () => {
       />
 
       {/* Controls & Filter Bar (Single Unified Row) */}
-      <div className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm dark:shadow-xl dark:shadow-black/20">
+      <div className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-xl dark:shadow-black/20">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           {/* Left: Index Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 relative">
@@ -733,7 +733,7 @@ export const MarketPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="overflow-x-auto rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-xl"
+          className="overflow-x-auto rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] shadow-sm dark:shadow-xl"
         >
           <table className="w-full text-left border-collapse">
             <thead>

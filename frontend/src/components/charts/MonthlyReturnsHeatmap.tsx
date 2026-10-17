@@ -404,7 +404,7 @@ export function MonthlyReturnsHeatmap({
             ))}
             <col className="w-24 sm:w-28" />
           </colgroup>
-          <thead className={tableMaxHeight ? "sticky top-0 bg-white/95 dark:bg-[#1e1e1e]/95 backdrop-blur-xs z-10" : ""}>
+          <thead className={tableMaxHeight ? "sticky top-0 bg-white/95 dark:bg-[#1e1e1e]/95 z-10" : ""}>
             <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               <th className="py-2 px-2 text-left font-bold text-slate-800 dark:text-slate-200">
                 Año

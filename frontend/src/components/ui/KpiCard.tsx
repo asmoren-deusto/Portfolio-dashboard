@@ -89,7 +89,7 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 backdrop-blur-md transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
+        'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
         'bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
         'dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]',
         borderAccent && ACCENT_BORDERS[borderAccent],

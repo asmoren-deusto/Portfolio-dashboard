@@ -18,18 +18,22 @@ interface CardProps {
   loading?: boolean
 }
 
-export function Card({ children, className, glass = true, loading = false }: CardProps) {
+export function Card({ children, className, glass = false, loading = false }: CardProps) {
   const cardRef = React.useRef<HTMLDivElement>(null)
-  const [mousePos, setMousePos] = React.useState({ x: -1000, y: -1000, opacity: 0 })
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return
-    const rect = cardRef.current.getBoundingClientRect()
-    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top, opacity: 1 })
+    const el = cardRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    el.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`)
+    el.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`)
+    el.style.setProperty('--mouse-opacity', '1')
   }
 
   const handleMouseLeave = () => {
-    setMousePos((prev) => ({ ...prev, opacity: 0 }))
+    const el = cardRef.current
+    if (!el) return
+    el.style.setProperty('--mouse-opacity', '0')
   }
 
   return (
@@ -46,13 +50,13 @@ export function Card({ children, className, glass = true, loading = false }: Car
           className
         )}
       >
-        {/* Subtle interactive spotlight glow on hover */}
+        {/* Subtle interactive spotlight glow on hover (zero React re-renders) */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-px rounded-2xl transition-opacity duration-400 z-0"
+          className="pointer-events-none absolute -inset-px rounded-2xl transition-opacity duration-300 z-0"
           style={{
-            opacity: mousePos.opacity,
-            background: `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(59, 130, 246, 0.06), transparent 75%)`,
+            opacity: 'var(--mouse-opacity, 0)',
+            background: 'radial-gradient(350px circle at var(--mouse-x, -1000px) var(--mouse-y, -1000px), rgba(59, 130, 246, 0.06), transparent 75%)',
           }}
         />
         {/* Subtle shine line at top */}

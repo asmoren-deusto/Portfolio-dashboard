@@ -755,7 +755,7 @@ export function OverviewPage() {
             loading={isGlobalUpdating}
           />
           <div
-            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card backdrop-blur-md transition-all duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]"
+            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card transition-all duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
           >
             <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/[0.12] z-10" />
@@ -1356,7 +1356,8 @@ export function OverviewPage() {
       </div>
 
       {/* Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
-      <Card className="w-full relative overflow-hidden" delay={0.3} loading={isRefreshingPrices}>
+      <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 500px' }}>
+        <Card className="w-full relative overflow-hidden" delay={0.3} loading={isRefreshingPrices}>
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -1710,10 +1711,12 @@ export function OverviewPage() {
             </div>
           )
         })()}
-      </Card>
+        </Card>
+      </div>
 
       {/* ── Comparativa de Rendimiento vs Benchmarks (Analítica) ─────────────── */}
-      <Card className="w-full" delay={0.32} loading={benchmarkFetching}>
+      <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 420px' }}>
+        <Card className="w-full" delay={0.32} loading={benchmarkFetching}>
         <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
@@ -1780,9 +1783,13 @@ export function OverviewPage() {
           />
         </div>
       </Card>
+    </div>
 
       {/* ── Últimos Movimientos y Mapa de Calor del Mercado (Uno a cada lado) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"
+        style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 480px' }}
+      >
         {/* Columna Izquierda: Tabla de Últimos Movimientos */}
         <Card className="w-full flex flex-col h-full relative overflow-hidden" delay={0.35}>
           <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3">

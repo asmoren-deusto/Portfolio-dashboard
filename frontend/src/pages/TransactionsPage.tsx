@@ -178,7 +178,7 @@ export function TransactionsPage() {
 
       {/* Summary KPI Highlights */}
       <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Total Operaciones</span>
             <Layers className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
@@ -191,7 +191,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Inversión Neta Total</span>
             <TrendingUp className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
@@ -204,7 +204,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Dividendos Percibidos</span>
             <DollarSign className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
@@ -217,7 +217,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] shadow-sm dark:shadow-lg dark:shadow-black/20 cursor-card">
           <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span>Reembolsos / Ventas</span>
             <TrendingDown className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
@@ -234,7 +234,7 @@ export function TransactionsPage() {
       {/* Control Bar: Type Tabs, Actions & Search */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
         {/* Type tabs with sliding pill */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.07] backdrop-blur-md shadow-sm overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.07] shadow-sm overflow-x-auto">
           {TYPE_TABS.map((tab) => {
             const active = activeType === tab.id
             return (

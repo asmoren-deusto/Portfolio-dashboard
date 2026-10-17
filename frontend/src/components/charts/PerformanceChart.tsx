@@ -1331,7 +1331,7 @@ export function PerformanceChartSkeleton({
 
       {/* Bottom HUD Skeleton with Matching Separator Line */}
       <div className="pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
-        <div className="flex items-center justify-between gap-2 px-3 py-1 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] backdrop-blur-xs h-[32px] sm:h-[34px]">
+        <div className="flex items-center justify-between gap-2 px-3 py-1 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] h-[32px] sm:h-[34px]">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-white/20" />
