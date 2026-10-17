@@ -159,6 +159,7 @@ export function PerformanceChart({
   const markersRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
   const entityPriceLinesRef = useRef<IPriceLine[]>([])
+  const lastSweepKeyRef = useRef<string>('')
 
   const { theme } = useAppStore()
   const isDark = theme === 'dark'
@@ -863,10 +864,16 @@ export function PerformanceChart({
       }
 
       chart.timeScale().fitContent()
-      prepareChartForAnimation(containerRef.current)
-      requestAnimationFrame(() => {
-        triggerChartAnimation(containerRef.current, 1100)
-      })
+
+      // Trigger timeline sweep animation on load & when entity, mode, period, or points change
+      const sweepKey = `${selectedEntity}_${chartMode}_${period}_${refreshAnimKey}_${metrics.sumPoints.length}_${metrics.sumPoints[0]?.value || 0}_${metrics.sumPoints[metrics.sumPoints.length - 1]?.value || 0}`
+      if (metrics.sumPoints.length > 0 && sweepKey !== lastSweepKeyRef.current) {
+        lastSweepKeyRef.current = sweepKey
+        prepareChartForAnimation(containerRef.current)
+        requestAnimationFrame(() => {
+          triggerChartAnimation(containerRef.current, 1100)
+        })
+      }
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }

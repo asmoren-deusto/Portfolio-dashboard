@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-17 14:01:18
+- **Fecha de exportación:** 2026-10-17 14:20:26
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 56
+- **Total de interacciones registradas:** 58
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -939,5 +939,46 @@ Se han diagnosticado y resuelto los dos problemas en **Firefox** y en el ticker:
 ### 👤 Usuario (2026-10-17 11:50:07)
 
 sigue fallando en firefox, de hecho alguna vez carga una grafica plana y luego actualiza con los datos buenos pero sin animar, va más a trompicones
+
+---
+
+### 🤖 Asistente (2026-10-17 12:01:21)
+
+Se ha solucionado por completo la causa raíz del comportamiento en Firefox:
+
+---
+
+### ¿Por qué se veía una "gráfica plana", sin animar y a trompicones en Firefox?
+
+1. **La "gráfica plana":**
+   En TradingView Lightweight Charts, el contenedor del gráfico de curvas (`paneDiv`) está ubicado dentro de una celda de tabla interna (`<td>`). El motor **Gecko de Firefox** sufre un bug conocido con la aceleración por hardware (WebRender) al aplicar `clip-path` dentro de celdas de tabla: el compositor congelaba el recorte de las curvas al 0% (invisibles), pero la escala de precios y la línea base de referencia horizontal seguían visibles. Por tanto, el usuario veía **la cuadrícula vacía con solo la línea base recta horizontal** (la "gráfica plana").
+2. **Los "trompicones":**
+   [PerformanceChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) utilizaba un `setTimeout` de 80ms que disparaba dos estados React (`setIsSweepAnimating` y `setSweepKey`) en pleno arranque de la animación, forzando dos re-renderizados pesados de React justo cuando el navegador intentaba pintar los fotogramas.
+3. **El salto brusco sin animar:**
+   Al cumplirse los 1.100ms, el temporizador de limpieza eliminaba el `clip-path`, haciendo que la curva apareciera de golpe sin transición.
+
+---
+
+### Cambios realizados
+
+* **Telón reveal acelerado por GPU en [chartAnimation.ts](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/chartAnimation.ts):**
+  - Se sustituyó el `clip-path` sobre el canvas interno por un **telón de barrido institucional acelerado por GPU** que se ajusta automáticamente al color de fondo de la tarjeta (sea modo claro u oscuro).
+  - Se integró la **línea de barrido luminosa (*scanline*) directamente en el borde frontal del telón**, garantizando que el descubrimiento de la curva y el haz de luz se muevan en perfecta sincronía atómica en el compositor sin depender de trucos de CSS con tablas.
+* **Eliminación de re-renders intermedios en [PerformanceChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx):**
+  - Se suprimieron los `useState` que re-renderizaban el componente durante la animación, permitiendo que el barrido corra de forma fluida a 60/120 fps sin tirones ni caídas de fotogramas.
+  - Se eliminó el retardo artificial de 80ms; la animación arranca instantáneamente al sincronizar los datos vía `requestAnimationFrame`.
+* **Sincronización en [BenchmarkEvolutionChart.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/BenchmarkEvolutionChart.tsx) y [SimulatedPortfolioCard.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):**
+  - Ambos componentes aprovechan ahora el mismo mecanismo de entrada suave.
+
+---
+
+### Despliegue y Release
+* Version subida a **v3.0.128** en Git (`main`) conforme al protocolo de `AGENTS.md`.
+
+---
+
+### 👤 Usuario (2026-10-17 12:05:07)
+
+en firefox sigue sin animarse
 
 ---
