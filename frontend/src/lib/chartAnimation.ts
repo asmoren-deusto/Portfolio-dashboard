@@ -68,19 +68,18 @@ export function prepareChartForAnimation(container: HTMLElement | null, accentCo
   curtain.style.transform = 'translateX(0%)'
   curtain.style.willChange = 'transform'
 
-  // Diffused, subtle vertical scanning line ending a couple pixels before top and bottom
+  // Diffused, subtle vertical scanning line spanning full container height
   const scanline = document.createElement('div')
   scanline.className = 'chart-sweep-scanline'
   scanline.style.position = 'absolute'
   scanline.style.left = '0'
-  scanline.style.top = '4px'
-  scanline.style.bottom = '4px'
+  scanline.style.top = '0'
+  scanline.style.bottom = '0'
   scanline.style.width = '2px'
-  scanline.style.borderRadius = '9999px'
   scanline.style.transform = 'translateX(-100%)'
-  scanline.style.background = `linear-gradient(180deg, transparent 0%, ${baseColor} 12%, ${baseColor} 88%, transparent 100%)`
+  scanline.style.background = `linear-gradient(180deg, transparent 0%, ${baseColor} 3%, ${baseColor} 97%, transparent 100%)`
   scanline.style.opacity = '0.85'
-  scanline.style.boxShadow = `0 0 5px 1px ${baseColor}66, 0 0 10px 2px ${baseColor}26`
+  scanline.style.boxShadow = `0 0 6px 1px ${baseColor}66, 0 0 12px 2px ${baseColor}26`
   scanline.style.pointerEvents = 'none'
 
   curtain.appendChild(scanline)
@@ -133,11 +132,45 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
         }
       )
 
-      anim.onfinish = cleanup
+      // Animate scanline to rapidly fade out in the final stretch (84% -> 100%)
+      const scanline = curtain.querySelector('.chart-sweep-scanline') as HTMLElement
+      if (scanline && typeof scanline.animate === 'function') {
+        scanline.animate(
+          [
+            { opacity: 0.85, offset: 0 },
+            { opacity: 0.85, offset: 0.84 },
+            { opacity: 0, offset: 1.0 },
+          ],
+          {
+            duration,
+            easing: 'ease-out',
+            fill: 'forwards',
+          }
+        )
+      }
+
+      // Fast fadeout on animation completion before removing from DOM
+      anim.onfinish = () => {
+        if (!curtain) {
+          cleanup()
+          return
+        }
+        try {
+          const fadeAnim = curtain.animate(
+            [{ opacity: 1 }, { opacity: 0 }],
+            { duration: 140, easing: 'ease-out', fill: 'forwards' }
+          )
+          fadeAnim.onfinish = cleanup
+          setTimeout(cleanup, 160)
+        } catch {
+          cleanup()
+        }
+      }
+
       anim.oncancel = cleanup
 
       // Safety timeout
-      setTimeout(cleanup, duration + 100)
+      setTimeout(cleanup, duration + 300)
       return
     } catch (err) {
       console.warn('WAAPI curtain animation error, falling back to RAF:', err)
@@ -157,12 +190,25 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
 
     if (curtain) {
       curtain.style.transform = `translateX(${tx}%)`
+      if (progress >= 0.84) {
+        const fadeProg = (progress - 0.84) / 0.16
+        const scanline = curtain.querySelector('.chart-sweep-scanline') as HTMLElement
+        if (scanline) {
+          scanline.style.opacity = `${(0.85 * (1 - fadeProg)).toFixed(3)}`
+        }
+      }
     }
 
     if (progress < 1) {
       rafId = requestAnimationFrame(step)
     } else {
-      cleanup()
+      if (curtain) {
+        curtain.style.transition = 'opacity 140ms ease-out'
+        curtain.style.opacity = '0'
+        setTimeout(cleanup, 150)
+      } else {
+        cleanup()
+      }
     }
   }
 
@@ -170,5 +216,5 @@ export function triggerChartAnimation(container: HTMLElement | null, duration = 
   setTimeout(() => {
     cancelAnimationFrame(rafId)
     cleanup()
-  }, duration + 100)
+  }, duration + 300)
 }

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-17 14:56:01
+- **Fecha de exportación:** 2026-10-17 14:59:08
 - **ID de Conversación:** `f171600a-28d6-4929-a83c-91794f13d8d0`
-- **Total de interacciones registradas:** 64
+- **Total de interacciones registradas:** 66
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1089,5 +1089,59 @@ Ambos cambios han sido completados y desplegados en la versión **v3.0.131**:
 ### 👤 Usuario (2026-10-17 12:38:31)
 
 haz una mejora importante del rendimiento web, parece que al pc le cuesta mucho renderizar todo sobretodo en firefox
+
+---
+
+### 🤖 Asistente (2026-10-17 12:56:03)
+
+Se ha implementado una **optimización integral de rendimiento web**, enfocada especialmente en resolver los cuellos de botella críticos del motor de renderizado de Firefox (WebRender) y liberar tanto la CPU como la GPU:
+
+---
+
+### 1. Eliminación de Re-renders en cascada por movimiento de ratón
+* **Problema:** En [Card.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Card.tsx), cada movimiento de ratón ejecutaba `setMousePos` (estado React) y `getBoundingClientRect()`. Dado que [Card](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Card.tsx) envuelve casi toda la interfaz (gráficos, tablas de posiciones, KPIs, etc.), mover el cursor sobre cualquier tarjeta obligaba a React a re-renderizar todo el componente y sus hijos 60 veces por segundo.
+* **Solución:** Se reemplazó el estado React por variables CSS (`--mouse-x`, `--mouse-y`, `--mouse-opacity`) asignadas directamente al nodo DOM. El efecto visual de spotlight interactivo se mantiene idéntico, pero con **0 re-renders de React al mover el ratón**.
+
+---
+
+### 2. Eliminación de multi-pass `backdrop-blur` en tarjetas opacas
+* **Problema:** En Firefox, `backdrop-filter: blur(...)` exige al compositor crear texturas intermedias fuera de pantalla y aplicar un shader Gaussiano separable horizontal y vertical en cada fotograma. Había más de 30 elementos simultáneos con `backdrop-blur-md` en tarjetas que ya tenían fondos opacos (`bg-white/95` y `dark:bg-[#1e1e1e]/96`), donde el desenfoque era invisible pero consumía un porcentaje masivo de la GPU.
+* **Solución:** Se eliminó el desenfoque redundante en tarjetas base:
+  - [Card.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Card.tsx)
+  - [KpiCard.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/KpiCard.tsx)
+  - [MarketTicker.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx) (contenedor y badges)
+  - [TransactionsPage.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/TransactionsPage.tsx), [PositionsPage.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/PositionsPage.tsx), [StockCard.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/StockCard.tsx) y [SimulatedPortfolioCard.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)
+  - *Se preserva el blur únicamente en elementos verdaderamente flotantes y semitransparentes (modales oscurecidos y tooltips sobre el canvas).*
+
+---
+
+### 3. Eliminación de Layout Thrashing en el Ticker Superior
+* **Problema:** En [MarketTicker.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx), el bucle `requestAnimationFrame` consultaba `el.scrollWidth` en cada fotograma (60 Hz) y, al asignar `el.scrollLeft`, disparaba el evento `onScroll`, el cual volvía a leer `el.scrollWidth`, forzando recálculos síncronos de layout (reflow) continuos.
+* **Solución:**
+  - Caché de ancho en `oneSetWidthRef` medido únicamente al montar o cambiar el tamaño de ventana vía `ResizeObserver`.
+  - Bandera `isProgrammaticScrollRef` para que el evento `onScroll` no ejecute cálculos ni lecturas DOM innecesarias durante el desplazamiento automático.
+  - Aislamiento de capas del compositor con `contain: content` y `will-change: scroll-position`.
+  - Pausa automática de la animación cuando la pestaña está en segundo plano (`document.hidden`).
+
+---
+
+### 4. Renderizado diferido bajo la vista con `content-visibility: auto`
+* **Implementación:** Siguiendo la guía oficial de modern web performance, se configuró `content-visibility: auto; contain-intrinsic-size: auto none auto <alto>px` en las secciones pesadas bajo el pliegue inicial de [OverviewPage.tsx](file:///c:/Users/Asier/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx):
+  - Tabla completa de **Posiciones en Cartera** (`500px`)
+  - **Comparativa de Rendimiento vs Benchmarks** (`420px`)
+  - **Últimos Movimientos & Market Heatmap** (`480px`)
+* **Resultado:** Firefox y Chrome ahora omiten por completo los cálculos de estilo, layout y pintado de estas secciones hasta que el usuario se desplaza cerca de ellas, reduciendo drásticamente el tiempo de carga y el uso inicial de memoria.
+
+---
+
+### 📦 Release sincronizado
+Los cambios se han compilado y publicado automáticamente bajo la versión **`v3.0.132`** mediante el protocolo de releases del proyecto.
+
+---
+
+### 👤 Usuario (2026-10-17 12:46:48)
+
+1. 🎨 Barra de barrido sutil, difuminada y dinámica
+Extremos remetidos: Ahora la barra no llega hasta los bordes superior e inferior del contenedor (top: 4px; bottom: 4px; border-radius: 9999px), quedando flotante y estilizada. --> elimina esto y haz que al terminar el barrido haga un fadeout rapido
 
 ---
