@@ -30,6 +30,7 @@ import { isNativePlatform } from '@/api/config'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
+import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { triggerChartAnimation, prepareChartForAnimation } from '@/lib/chartAnimation'
 
 export interface EtfInfo {
@@ -970,8 +971,8 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
-                      <th className="py-1.5 px-2 min-w-[140px] max-w-[165px]">Fondo en Cartera</th>
-                      <th className="py-1.5 px-2 min-w-[125px] max-w-[150px]">ETF Réplica</th>
+                      <th className="py-1.5 px-2 min-w-[150px] max-w-[180px]">Fondo en Cartera</th>
+                      <th className="py-1.5 px-2 min-w-[140px] max-w-[165px]">ETF Réplica</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Valor Cartera</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Peso</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Cotiz. ETF</th>
@@ -993,29 +994,49 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               key={h.isin}
                               className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                             >
-                          {/* Col 1: Fondo (L1) e ISIN limpio (L2) */}
-                          <td className="py-1.5 px-2 min-w-[140px] max-w-[165px]">
-                            <div
-                              className="font-bold text-xs text-slate-900 dark:text-white truncate"
-                              title={h.fund_name}
-                            >
-                              {h.fund_name}
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5">
-                              {h.isin}
+                          {/* Col 1: Fondo (L1) e ISIN limpio (L2) con icono */}
+                          <td className="py-1.5 px-2 min-w-[150px] max-w-[180px]">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <CompanyLogo
+                                isin={h.isin}
+                                name={h.fund_name}
+                                size="xs"
+                                className="shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <div
+                                  className="font-bold text-xs text-slate-900 dark:text-white truncate"
+                                  title={h.fund_name}
+                                >
+                                  {h.fund_name}
+                                </div>
+                                <div className="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5">
+                                  {h.isin}
+                                </div>
+                              </div>
                             </div>
                           </td>
 
-                          {/* Col 2: Fondo Réplica (L1) y Descripción (L2, sin código ETF) */}
-                          <td className="py-1.5 px-2 min-w-[125px] max-w-[150px]">
-                            <div
-                              className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate"
-                              title={displayName}
-                            >
-                              {displayName}
-                            </div>
-                            <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
-                              {etfInfo?.category || h.etf_desc || 'Renta Variable'}
+                          {/* Col 2: Fondo Réplica (L1) y Descripción (L2) con icono */}
+                          <td className="py-1.5 px-2 min-w-[140px] max-w-[165px]">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <CompanyLogo
+                                ticker={h.etf_ticker}
+                                name={displayName}
+                                size="xs"
+                                className="shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <div
+                                  className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate"
+                                  title={displayName}
+                                >
+                                  {displayName}
+                                </div>
+                                <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
+                                  {etfInfo?.category || h.etf_desc || 'Renta Variable'}
+                                </div>
+                              </div>
                             </div>
                           </td>
 
@@ -1081,7 +1102,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
-                      <th className="py-1.5 px-2 min-w-[140px] max-w-[170px]">ETF Réplica / Mercado</th>
+                      <th className="py-1.5 px-2 min-w-[155px] max-w-[190px]">ETF Réplica / Mercado</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Cotiz. en Vivo</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Var. Día</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Peso Cartera</th>
@@ -1106,20 +1127,30 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               key={etf.ticker}
                               className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                             >
-                              <td className="py-1.5 px-2 min-w-[140px] max-w-[170px]">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span
-                                    className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[150px]"
-                                    title={displayName}
-                                  >
-                                    {displayName}
-                                  </span>
-                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
-                                    {etf.ticker}
-                                  </span>
-                                </div>
-                                <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[180px] mt-0.5 font-medium">
-                                  {info?.category || 'Renta Variable'}
+                              <td className="py-1.5 px-2 min-w-[155px] max-w-[190px]">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <CompanyLogo
+                                    ticker={etf.ticker}
+                                    name={displayName}
+                                    size="xs"
+                                    className="shrink-0"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span
+                                        className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[140px]"
+                                        title={displayName}
+                                      >
+                                        {displayName}
+                                      </span>
+                                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
+                                        {etf.ticker}
+                                      </span>
+                                    </div>
+                                    <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[180px] mt-0.5 font-medium">
+                                      {info?.category || 'Renta Variable'}
+                                    </div>
+                                  </div>
                                 </div>
                               </td>
 

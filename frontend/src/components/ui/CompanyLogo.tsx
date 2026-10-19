@@ -32,28 +32,40 @@ const ISIN_DOMAINS: Record<string, string> = {
 function getMarketIcon(ticker?: string): React.ReactNode {
   switch (ticker) {
     case '^GSPC':
-      return <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+    case 'ES=F':
+      return <TrendingUp className="w-full h-full p-0.5 text-blue-600 dark:text-blue-400" />
     case '^IXIC':
-      return <BarChart3 className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+    case 'NQ=F':
+    case 'XLK':
+      return <BarChart3 className="w-full h-full p-0.5 text-cyan-600 dark:text-cyan-400" />
     case 'URTH':
+    case 'ACWI':
     case 'EEM':
-      return <Globe className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+      return <Globe className="w-full h-full p-0.5 text-teal-600 dark:text-teal-400" />
     case '^IBEX':
     case '^STOXX50E':
+    case 'FEZ':
+    case 'EXW1.DE':
+    case 'MEUD.PA':
     case '^N225':
-      return <Landmark className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+    case 'EWJ':
+    case 'NIY=F':
+      return <Landmark className="w-full h-full p-0.5 text-indigo-600 dark:text-indigo-400" />
+    case 'COWZ':
+    case 'EFV':
+      return <TrendingUp className="w-full h-full p-0.5 text-emerald-600 dark:text-emerald-400" />
     case 'GC=F':
-      return <Coins className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+      return <Coins className="w-full h-full p-0.5 text-amber-600 dark:text-amber-400" />
     case 'SI=F':
-      return <Coins className="w-5 h-5 text-slate-400 dark:text-slate-300" />
+      return <Coins className="w-full h-full p-0.5 text-slate-400 dark:text-slate-300" />
     case 'BZ=F':
     case 'CL=F':
-      return <Droplets className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+      return <Droplets className="w-full h-full p-0.5 text-sky-600 dark:text-sky-400" />
     case 'BTC-EUR':
-      return <Bitcoin className="w-5 h-5 text-orange-500" />
+      return <Bitcoin className="w-full h-full p-0.5 text-orange-500" />
     case 'EURUSD=X':
     case 'EURJPY=X':
-      return <ArrowLeftRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+      return <ArrowLeftRight className="w-full h-full p-0.5 text-emerald-600 dark:text-emerald-400" />
     default:
       return null
   }

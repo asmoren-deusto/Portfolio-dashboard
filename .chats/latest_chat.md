@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:57:01
+- **Fecha de exportación:** 2026-10-19 11:03:12
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 50
+- **Total de interacciones registradas:** 52
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -967,5 +967,24 @@ Compilado, verificado con `npm run build` y sincronizado en Git bajo la versión
 ### 👤 Usuario (2026-10-19 08:51:07)
 
 en peso en simulacion de cartera mete el grafiquillo de linea abajo que tenias antes
+
+---
+
+### 🤖 Asistente (2026-10-19 08:57:03)
+
+Listo. Se ha reincorporado la barrita horizontal de progreso en la columna **Peso** ([SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)):
+
+- **Porcentaje superior:** Formato numérico limpio (`26.0%`, etc.).
+- **Barra inferior:** Línea horizontal sutil con fondo tenue y relleno índigo proporcional a la ponderación del fondo en la cartera.
+- **Ambas pestañas:** Aplicado de forma idéntica en *Por Fondos* y en *ETFs Agrupados*.
+- **Alineación:** Mantiene los anchos optimizados de las dos primeras columnas y sin píldoras de proxies para que toda la fila quepa sin cortes.
+
+Compilado, verificado con `npm run build` y sincronizado en Git bajo la versión **`v3.0.149`**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:51:50)
+
+añade los iconos de los fondos tb al desglose de fondos y replicas
 
 ---
