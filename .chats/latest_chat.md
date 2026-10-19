@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 11:27:07
+- **Fecha de exportación:** 2026-10-19 11:42:20
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 70
+- **Total de interacciones registradas:** 72
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1211,5 +1211,22 @@ Actualizado y desplegado en la versión **v3.0.158**.
 ### 👤 Usuario (2026-10-19 09:26:31)
 
 cobas baja y a la izquierda
+
+---
+
+### 🤖 Asistente (2026-10-19 09:27:10)
+
+Ajustada la posición de la **`C`** de Cobas en [CompanyLogo.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx):
+
+- **Hacia la izquierda**: Desplazada de `x: 16 → 15` para compensar el espacio abierto de la curva de la C y centrar su masa óptica.
+- **Hacia abajo**: Desplazada de `y: 24 → 24.8` para equilibrar la distancia respecto al borde inferior del círculo.
+
+Compilado y sincronizado en la versión **v3.0.159**.
+
+---
+
+### 👤 Usuario (2026-10-19 09:37:24)
+
+en la version movil al abrir la app sale la pagina en blanco hasta que carga aunque se seleccione el modo oscuro
 
 ---

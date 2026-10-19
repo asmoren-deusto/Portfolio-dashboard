@@ -89,14 +89,18 @@ function applyTheme(theme: Theme) {
     if (isDark) {
       document.documentElement.classList.add('dark')
       document.documentElement.classList.remove('light')
+      document.documentElement.style.backgroundColor = '#1c1c1c'
+      document.documentElement.style.colorScheme = 'dark'
     } else {
       document.documentElement.classList.add('light')
       document.documentElement.classList.remove('dark')
+      document.documentElement.style.backgroundColor = '#f6f8fb'
+      document.documentElement.style.colorScheme = 'light'
     }
     localStorage.setItem('theme', theme)
 
     // Adapt iOS Safari status bar and mobile browser chrome color dynamically
-    const targetColor = isDark ? '#1c1c1c' : '#ffffff'
+    const targetColor = isDark ? '#1c1c1c' : '#f6f8fb'
     const themeMetas = document.querySelectorAll('meta[name="theme-color"]')
     if (themeMetas.length > 0) {
       themeMetas.forEach((meta) => meta.setAttribute('content', targetColor))
@@ -109,8 +113,9 @@ function applyTheme(theme: Theme) {
   }
 }
 
-const savedTheme =
-  (typeof window !== 'undefined' ? (localStorage.getItem('theme') as Theme) : null) || 'light'
+const savedTheme: Theme =
+  (typeof window !== 'undefined' ? (localStorage.getItem('theme') as Theme) : null) ||
+  (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
 applyTheme(savedTheme)
 
 // Load custom user profiles if saved

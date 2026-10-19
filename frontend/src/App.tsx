@@ -12,13 +12,26 @@ const LoginPage = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m
 
 function PageLoadingFallback() {
   return (
-    <div className="w-full flex-1 flex flex-col gap-4 animate-pulse pt-2">
+    <div className="w-full min-h-[60vh] flex-1 flex flex-col gap-4 animate-pulse pt-2 px-3 sm:px-6">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="h-24 rounded-2xl bg-slate-200/60 dark:bg-white/[0.04]" />
         ))}
       </div>
       <div className="h-96 rounded-2xl bg-slate-200/60 dark:bg-white/[0.04]" />
+    </div>
+  )
+}
+
+function LoginLoadingFallback() {
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-[#1c1c1c]">
+      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center animate-pulse shadow-xl shadow-blue-500/25">
+        <svg viewBox="0 0 24 24" width="26" height="26" stroke="#ffffff" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+          <polyline points="16 7 22 7 22 13"></polyline>
+        </svg>
+      </div>
     </div>
   )
 }
@@ -52,7 +65,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <Suspense fallback={<PageLoadingFallback />}><LoginPage /></Suspense>,
+    element: <Suspense fallback={<LoginLoadingFallback />}><LoginPage /></Suspense>,
   },
 ])
 

@@ -6,6 +6,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>PortfolioPro — Dashboard de Inversión</title>
   <meta name="description" content="PortfolioPro — Dashboard de cartera de inversión, fondos indexados, ETFs y análisis patrimonial." />
+
+  <!-- Anti-FOUC & Instant Mobile Theme Initialization (Ejecutado síncronamente antes del primer render) -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var isDark = saved ? saved === 'dark' : prefersDark;
+        var doc = document.documentElement;
+        if (isDark) {
+          doc.classList.add('dark');
+          doc.classList.remove('light');
+          doc.style.backgroundColor = '#1c1c1c';
+          doc.style.colorScheme = 'dark';
+        } else {
+          doc.classList.add('light');
+          doc.classList.remove('dark');
+          doc.style.backgroundColor = '#f6f8fb';
+          doc.style.colorScheme = 'light';
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Critical Inline Styles: evita pantalla en blanco en navegadores móviles y PWA -->
+  <style>
+    html {
+      background-color: #1c1c1c;
+      color-scheme: dark;
+    }
+    html.dark, html.dark body {
+      background-color: #1c1c1c !important;
+      color-scheme: dark;
+      color: #cccccc;
+    }
+    html.light, html.light body, html:not(.dark), html:not(.dark) body {
+      background-color: #f6f8fb !important;
+      color-scheme: light;
+      color: #0f172a;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    #root {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Splash inicial instantáneo mientras se descargan e inicializan los bundles de React */
+    .initial-app-loader {
+      flex: 1;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      user-select: none;
+    }
+    .initial-app-logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.45);
+      animation: initial-logo-pulse 1.8s ease-in-out infinite;
+    }
+    .initial-app-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(148, 163, 184, 0.2);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: initial-spin 0.8s linear infinite;
+    }
+    @keyframes initial-logo-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(1.06); opacity: 1; }
+    }
+    @keyframes initial-spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
   
   <!-- Prevención de caché estancada en navegadores y WebView móvil iOS/Android -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -18,7 +112,7 @@
   <meta name="theme-color" content="#1c1c1c" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PortfolioPro" />
   <meta name="application-name" content="PortfolioPro" />
   <meta name="format-detection" content="telephone=no" />
@@ -38,7 +132,17 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div class="initial-app-loader">
+      <div class="initial-app-logo">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+          <polyline points="16 7 22 7 22 13"></polyline>
+        </svg>
+      </div>
+      <div class="initial-app-spinner"></div>
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
