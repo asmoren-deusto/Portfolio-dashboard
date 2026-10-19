@@ -863,17 +863,17 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               {bestStock ? (
                 <div
                   onClick={() => onSelectStock?.(bestStock)}
-                  className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5 border border-emerald-500/25 hover:border-emerald-500/40 cursor-pointer transition-all shadow-2xs group flex flex-col justify-between"
+                  className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5 border border-emerald-500/25 hover:border-emerald-500/40 cursor-pointer transition-all shadow-2xs group flex flex-col justify-between"
                 >
-                  <div className="flex items-center justify-between text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <span>Mayor Ganancia</span>
-                    <Flame className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <Flame className="w-4 h-4 text-emerald-500 shrink-0" />
                   </div>
-                  <div className="flex items-baseline justify-between mt-1 gap-1">
-                    <span className="text-xs sm:text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate" title={bestStock.name}>
+                  <div className="flex items-baseline justify-between mt-1 gap-1.5">
+                    <span className="text-sm sm:text-[15px] font-extrabold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate" title={bestStock.name}>
                       {bestStock.name}
                     </span>
-                    <span className="text-[11px] font-bold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20 shrink-0">
+                    <span className="text-xs sm:text-[13px] font-extrabold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-lg border border-emerald-500/30 shadow-2xs shrink-0">
                       +{bestStock.change_pct?.toFixed(2)}%
                     </span>
                   </div>
@@ -882,24 +882,24 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs" />
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs" />
               )}
 
               {/* 2. Mayor Caída */}
               {worstStock ? (
                 <div
                   onClick={() => onSelectStock?.(worstStock)}
-                  className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] hover:bg-rose-50/50 dark:hover:bg-rose-500/5 border border-rose-500/25 hover:border-rose-500/40 cursor-pointer transition-all shadow-2xs group flex flex-col justify-between"
+                  className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] hover:bg-rose-50/50 dark:hover:bg-rose-500/5 border border-rose-500/25 hover:border-rose-500/40 cursor-pointer transition-all shadow-2xs group flex flex-col justify-between"
                 >
-                  <div className="flex items-center justify-between text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <span>Mayor Caída</span>
-                    <TrendingDown className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                    <TrendingDown className="w-4 h-4 text-rose-500 shrink-0" />
                   </div>
-                  <div className="flex items-baseline justify-between mt-1 gap-1">
-                    <span className="text-xs sm:text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate" title={worstStock.name}>
+                  <div className="flex items-baseline justify-between mt-1 gap-1.5">
+                    <span className="text-sm sm:text-[15px] font-extrabold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate" title={worstStock.name}>
                       {worstStock.name}
                     </span>
-                    <span className="text-[11px] font-bold font-mono text-rose-700 dark:text-rose-300 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/20 shrink-0">
+                    <span className="text-xs sm:text-[13px] font-extrabold font-mono text-rose-700 dark:text-rose-300 bg-rose-500/15 px-2.5 py-0.5 rounded-lg border border-rose-500/30 shadow-2xs shrink-0">
                       {worstStock.change_pct?.toFixed(2)}%
                     </span>
                   </div>
@@ -908,27 +908,30 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs" />
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs" />
               )}
 
               {/* 3. Amplitud de Mercado & Seguimiento */}
-              <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <span>Amplitud Mercado</span>
-                  <Layers className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  <Layers className="w-4 h-4 text-blue-500 shrink-0" />
                 </div>
                 <div className="flex items-baseline justify-between mt-1">
-                  <div className="text-xs sm:text-[13px] font-bold font-mono text-slate-900 dark:text-white">
-                    {totalStocks ?? 0} <span className="text-[10.5px] font-semibold text-slate-500 dark:text-slate-400 font-sans">activos</span>
+                  <div className="text-sm sm:text-[15px] font-extrabold font-mono text-slate-900 dark:text-white">
+                    {totalStocks ?? 0} <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-sans">activos</span>
                   </div>
-                  <div className="text-[11px] font-mono font-bold">
-                    <span className="text-emerald-600 dark:text-emerald-400">{marketStats.advancing} ↑</span>
-                    <span className="text-slate-300 dark:text-slate-600 mx-1">/</span>
-                    <span className="text-rose-600 dark:text-rose-400">{marketStats.declining} ↓</span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="px-2 py-0.5 rounded-md font-mono font-extrabold text-xs bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
+                      {marketStats.advancing} ↑
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md font-mono font-extrabold text-xs bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25">
+                      {marketStats.declining} ↓
+                    </span>
                   </div>
                 </div>
                 {/* Barra proporcional avance vs retroceso */}
-                <div className="w-full h-1.5 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden flex mt-1">
+                <div className="w-full h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden flex mt-1.5">
                   <div
                     style={{
                       width: `${((marketStats.advancing || 0) / Math.max(1, (marketStats.advancing || 0) + (marketStats.declining || 0))) * 100}%`,
@@ -946,58 +949,68 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
               {/* 4. Divisa EUR / USD (Impacto Divisa en Cartera) */}
               {summary?.fx_info ? (
-                <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    <span>Divisa EUR / USD</span>
-                    <ArrowLeftRight className="w-3.5 h-3.5 text-teal-500 shrink-0" />
-                  </div>
-                  <div className="flex items-baseline justify-between mt-1">
-                    <span className="text-xs sm:text-[13px] font-bold font-mono text-slate-900 dark:text-white">
-                      {summary.fx_info.eur_usd_rate.toFixed(4)}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[10.5px] font-bold font-mono px-1.5 py-0.2 rounded border',
-                        (summary.fx_info.usd_strength_pct ?? 0) >= 0
-                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
-                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20'
-                      )}
-                    >
-                      {(summary.fx_info.usd_strength_pct ?? 0) >= 0 ? '+' : ''}
-                      {summary.fx_info.usd_strength_pct?.toFixed(2)}% USD
-                    </span>
-                  </div>
-                  <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                    Impacto Cartera:{' '}
-                    <span
-                      className={cn(
-                        'font-mono font-bold',
-                        (summary.fx_info.fx_contribution_pct ?? 0) >= 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      )}
-                    >
-                      {(summary.fx_info.fx_contribution_pct ?? 0) >= 0 ? '+' : ''}
-                      {summary.fx_info.fx_contribution_pct?.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
+                (() => {
+                  const eurUsdRate = summary.fx_info.eur_usd_rate
+                  const eurUsdChange = summary.fx_info.eur_usd_change_pct ?? -(summary.fx_info.usd_strength_pct ?? 0)
+                  const isEurUsdPos = eurUsdChange >= 0
+                  return (
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
+                      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <span>Divisa EUR / USD</span>
+                        <ArrowLeftRight className="w-4 h-4 text-teal-500 shrink-0" />
+                      </div>
+                      <div className="flex items-baseline justify-between mt-1 gap-1.5">
+                        <span className="text-sm sm:text-[15px] font-extrabold font-mono text-slate-900 dark:text-white">
+                          {eurUsdRate.toFixed(4)}
+                        </span>
+                        <span
+                          className={cn(
+                            'text-xs sm:text-[13px] font-extrabold font-mono px-2.5 py-0.5 rounded-lg border shadow-2xs shrink-0',
+                            isEurUsdPos
+                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
+                              : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/25'
+                          )}
+                        >
+                          {isEurUsdPos ? '+' : ''}
+                          {eurUsdChange.toFixed(2)}%
+                        </span>
+                      </div>
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                        Impacto Cartera:{' '}
+                        <span
+                          className={cn(
+                            'font-mono font-bold',
+                            (summary.fx_info.fx_contribution_pct ?? 0) >= 0
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-rose-600 dark:text-rose-400'
+                          )}
+                        >
+                          {(summary.fx_info.fx_contribution_pct ?? 0) >= 0 ? '+' : ''}
+                          {summary.fx_info.fx_contribution_pct?.toFixed(2)}%
+                        </span>
+                        <span className="text-slate-400 text-[10.5px] ml-1">
+                          ({(summary.fx_info.usd_strength_pct ?? 0) >= 0 ? '+' : ''}{summary.fx_info.usd_strength_pct?.toFixed(2)}% USD)
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })()
               ) : (
-                <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <span>Rango Sesión</span>
-                    <Activity className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    <Activity className="w-4 h-4 text-indigo-500 shrink-0" />
                   </div>
                   <div className="flex items-baseline justify-between mt-1">
-                    <span className={cn('text-xs font-bold font-mono', minPct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                    <span className={cn('text-xs sm:text-sm font-extrabold font-mono', minPct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
                       {minPct >= 0 ? '+' : ''}{minPct.toFixed(2)}%
                     </span>
                     <span className="text-slate-400 text-xs font-sans">↔</span>
-                    <span className={cn('text-xs font-bold font-mono', maxPct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                    <span className={cn('text-xs sm:text-sm font-extrabold font-mono', maxPct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
                       {maxPct >= 0 ? '+' : ''}{maxPct.toFixed(2)}%
                     </span>
                   </div>
-                  <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5">
                     Amplitud: <span className="font-bold text-slate-800 dark:text-slate-200">{(maxPct - minPct).toFixed(2)}%</span>
                   </div>
                 </div>

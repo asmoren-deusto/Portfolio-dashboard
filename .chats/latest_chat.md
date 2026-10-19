@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 11:15:22
+- **Fecha de exportación:** 2026-10-19 11:18:02
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 58
+- **Total de interacciones registradas:** 60
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1067,5 +1067,37 @@ Sincronizado y desplegado en la versión **v3.0.152**.
 ### 👤 Usuario (2026-10-19 08:59:40)
 
 mejora los iconos de azvalor y ishares
+
+---
+
+### 🤖 Asistente (2026-10-19 09:15:25)
+
+Se han renovado y perfeccionado los logos de **Azvalor** e **iShares** ([`CompanyLogo.tsx`](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx)):
+
+### Mejoras implementadas:
+
+1. **iShares (by BlackRock)**:
+   - **Antes**: Se mostraba un círculo gris descolorido con una "i" serif estándar de color negro (pareciendo un icono de información `ℹ️`).
+   - **Ahora**: Renderizado vectorial auténtico con:
+     - Fondo negro puro (`bg-black`) con sutil borde de contraste.
+     - La icónica **"i" itálica inclinada en rojo iShares** (`#FA3E3E`) con su punto circular.
+     - La letra **"S" en blanco puro** (`#FFFFFF`), recreando fielmente el emblema oficial de BlackRock iShares.
+
+2. **Azvalor Asset Management**:
+   - **Antes**: Si el favicon fallaba, generaba un degradado morado con el prefijo del ISIN español (`ES0`).
+   - **Ahora**: Renderizado corporativo directo con:
+     - Fondo en el color azul corporativo oficial (**Azul Lapislázuli** `#0B2144`).
+     - Monograma nítido con **"az" en blanco** y **"V" en azul cian** (`#38BDF8`), reconocible de inmediato en cualquier resolución.
+
+3. **Corrección del fallback de iniciales para todos los fondos**:
+   - Se ha corregido el algoritmo de iniciales para que, en caso de fondos sin icono externo, nunca más tome las letras del ISIN (`ES0...`, `LU1...`, `IE0...`), sino las iniciales limpias del nombre del fondo (ej. `AZ` para Azvalor, `CS` para Cobas, `FID` para Fidelity, `DNB` para DNB, etc.).
+
+Sincronizado y desplegado en la versión **v3.0.153**.
+
+---
+
+### 👤 Usuario (2026-10-19 09:13:47)
+
+al ser cuadradas los badges pueden ser más grandes. el EUR/USD me marca algo distinto que arriba ¿?
 
 ---
