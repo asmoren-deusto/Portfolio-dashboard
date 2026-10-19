@@ -156,14 +156,14 @@ export const CobasLogo: React.FC<{ sizeClasses: string; className?: string; titl
       className={`${sizeClasses} rounded-full bg-[#681421] flex items-center justify-center shrink-0 border border-rose-300/30 shadow-xs overflow-hidden select-none ${className}`}
       title={title}
     >
-      <svg viewBox="0 0 32 32" className="w-[90%] h-[90%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 32 32" className="w-[96%] h-[96%]" fill="none" xmlns="http://www.w3.org/2000/svg">
         <text
           x="16"
-          y="23"
+          y="24"
           textAnchor="middle"
           fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
           fontWeight="700"
-          fontSize="22"
+          fontSize="25.5"
           letterSpacing="-0.5"
           fill="#FFFFFF"
         >

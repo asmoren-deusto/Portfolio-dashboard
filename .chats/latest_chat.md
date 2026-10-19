@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 11:25:12
+- **Fecha de exportación:** 2026-10-19 11:25:46
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 66
+- **Total de interacciones registradas:** 68
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1175,5 +1175,24 @@ Los cambios han sido compilados y sincronizados en la versión **v3.0.156**.
 ### 👤 Usuario (2026-10-19 09:24:32)
 
 azValor perfecto, en iShares mueve hacia abajo y la derecha y pelo más negrita
+
+---
+
+### 🤖 Asistente (2026-10-19 09:25:14)
+
+Ajustado en [CompanyLogo.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx):
+
+- **iShares (`iS`)**:
+  - **Desplazamiento**: Movido hacia abajo (`y: 22.5 → 23.5`) y hacia la derecha (`x: 16 → 17`), equilibrando el peso visual que generaba la `i` más estrecha a la izquierda.
+  - **Grosor**: Se incrementó a `fontWeight="800"` (un toque más negrita que el 700 anterior) para que resalte con más presencia sobre el fondo negro.
+- **Azvalor (`azV`)**: Se mantiene exactamente como te ha gustado (`fontSize="18"`, `fontWeight="700"`).
+
+Actualizado y desplegado en la versión **v3.0.157**.
+
+---
+
+### 👤 Usuario (2026-10-19 09:24:51)
+
+cobas haz la C más grande
 
 ---
