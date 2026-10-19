@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:55:51
+- **Fecha de exportación:** 2026-10-19 10:57:01
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 48
+- **Total de interacciones registradas:** 50
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -942,5 +942,30 @@ Compilado, verificado con `npm run build` y publicado en Git bajo la versión **
 ### 👤 Usuario (2026-10-19 08:50:22)
 
 ahí mete el rendimiento en % de 1D y de 7D, quita el de 7D €, al pasar el raton que te diga los €
+
+---
+
+### 🤖 Asistente (2026-10-19 08:55:54)
+
+Listo. Se ha actualizado la barra inferior de métricas en la tarjeta de **Rendimiento** ([OverviewPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx)):
+
+1. **Rendimiento 1D (%)**:
+   - Muestra el porcentaje de hoy: `1D: +X.XX%` / `-X.XX%`.
+   - **Tooltip al pasar el ratón**: Muestra la ganancia/pérdida neta en euros y porcentaje exacto (ej. *Rendimiento hoy (1D): +124,50 € (+0.85%)*).
+
+2. **Rendimiento 7D (%)**:
+   - Sustituye a la anterior caja de euros y muestra el porcentaje de los 7 días: `7D: -1.52%` (con icono de calendario y color dinámico verde/rojo).
+   - **Tooltip al pasar el ratón**: Muestra el desglose en euros (ej. *Rendimiento últimos 7 días (7D): -1.196,83 € (-1.52%)*).
+
+3. **Eliminación de la caja `7D €`**:
+   - Ya no ocupa espacio fijo en la tarjeta; la información monetaria queda accesible de forma limpia en el hover de la propia píldora de 7D.
+
+Compilado, verificado con `npm run build` y sincronizado en Git bajo la versión **`v3.0.148`**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:51:07)
+
+en peso en simulacion de cartera mete el grafiquillo de linea abajo que tenias antes
 
 ---

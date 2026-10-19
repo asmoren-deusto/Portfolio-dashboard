@@ -1034,6 +1034,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                             <div className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
                               {h.weight.toFixed(1)}%
                             </div>
+                            <div className="w-12 h-1 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-0.5">
+                              <div
+                                className="h-full rounded-full bg-indigo-500"
+                                style={{ width: `${Math.min(100, (h.weight / 35) * 100)}%` }}
+                              />
+                            </div>
                           </td>
 
                           {/* Live ETF Quote Price and Daily % */}
@@ -1137,6 +1143,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
                                 <div className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
                                   {etf.weight}%
+                                </div>
+                                <div className="w-12 h-1 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-0.5">
+                                  <div
+                                    className="h-full rounded-full bg-indigo-500"
+                                    style={{ width: `${Math.min(100, (etf.weight / 35) * 100)}%` }}
+                                  />
                                 </div>
                               </td>
 
