@@ -565,13 +565,29 @@ export function OverviewPage() {
   }, [performance, latestNavDate])
 
   const secondaryStats = useMemo(() => {
+    // 1D metrics
+    let dayPct = shortTermMetrics?.dayPct ?? analytics?.return_1d
+    let dayAmt = shortTermMetrics?.dayAmount
+
+    if (weeklyReturnsData && weeklyReturnsData.length > 0) {
+      const lastBar = weeklyReturnsData[weeklyReturnsData.length - 1]
+      if (lastBar.value !== undefined) dayPct = lastBar.value
+      if (lastBar.amount !== undefined) dayAmt = lastBar.amount
+    }
+
+    const dayTitle =
+      dayAmt !== undefined && dayPct !== undefined
+        ? `Rendimiento hoy (1D): ${dayAmt >= 0 ? '+' : ''}${fmt.currency(dayAmt)} (${fmt.pct(dayPct)})`
+        : dayPct !== undefined
+          ? `Rendimiento hoy (1D): ${fmt.pct(dayPct)}`
+          : 'Rendimiento hoy (1D)'
+
     if (returnsPeriodMode === 'global') {
-      const dayPct = shortTermMetrics?.dayPct ?? analytics?.return_1d
       const ytd = analytics?.return_ytd
       return {
         box1Label: '1D:',
         box1Val: dayPct !== undefined ? fmt.pct(dayPct) : '—',
-        box1Title: dayPct !== undefined ? `Rendimiento de hoy (1 Día): ${fmt.pct(dayPct)}` : 'Rendimiento de hoy (1 Día)',
+        box1Title: dayTitle,
         box1Positive: (dayPct ?? 0) >= 0,
         box2Label: 'YTD:',
         box2Val: ytd !== undefined ? fmt.pct(ytd) : '—',
@@ -579,7 +595,7 @@ export function OverviewPage() {
         box2Positive: (ytd ?? 0) >= 0,
       }
     } else {
-      // For weekly view, compute 7D and 7D € directly from the 7 sessions shown in weeklyReturnsData
+      // For weekly view, compute 7D directly from the 7 sessions shown in weeklyReturnsData
       let weekAmt = shortTermMetrics?.weekAmount
       let weekPct = shortTermMetrics?.weekPct ?? analytics?.return_1w
 
@@ -594,15 +610,22 @@ export function OverviewPage() {
         weekPct = Number(((compFactor - 1.0) * 100).toFixed(2))
       }
 
+      const weekTitle =
+        weekAmt !== undefined && weekPct !== undefined
+          ? `Rendimiento últimos 7 días (7D): ${weekAmt >= 0 ? '+' : ''}${fmt.currency(weekAmt)} (${fmt.pct(weekPct)})`
+          : weekPct !== undefined
+            ? `Rendimiento últimos 7 días (7D): ${fmt.pct(weekPct)}`
+            : 'Rendimiento últimos 7 días (7D)'
+
       return {
-        box1Label: '7D:',
-        box1Val: weekPct !== undefined ? fmt.pct(weekPct) : '—',
-        box1Title: weekAmt !== undefined ? `Rendimiento últimos 7 días: ${fmt.currency(weekAmt)} (${fmt.pct(weekPct || 0)})` : 'Rendimiento últimos 7 días',
-        box1Positive: (weekPct ?? 0) >= 0,
-        box2Label: '7D €:',
-        box2Val: weekAmt !== undefined ? fmt.currency(weekAmt) : '—',
-        box2Title: weekAmt !== undefined ? `Ganancia o pérdida neta últimos 7 días: ${fmt.currency(weekAmt)}` : 'Ganancia o pérdida neta 7 días',
-        box2Positive: (weekAmt ?? 0) >= 0,
+        box1Label: '1D:',
+        box1Val: dayPct !== undefined ? fmt.pct(dayPct) : '—',
+        box1Title: dayTitle,
+        box1Positive: (dayPct ?? 0) >= 0,
+        box2Label: '7D:',
+        box2Val: weekPct !== undefined ? fmt.pct(weekPct) : '—',
+        box2Title: weekTitle,
+        box2Positive: (weekPct ?? 0) >= 0,
       }
     }
   }, [returnsPeriodMode, weeklyReturnsData, shortTermMetrics, analytics])
@@ -1311,7 +1334,7 @@ export function OverviewPage() {
                             : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
                       )}
                     >
-                      {returnsPeriodMode === 'global' ? <Calendar size={12} /> : <Euro size={12} />}
+                      <Calendar size={12} />
                     </div>
                     <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
                       {secondaryStats.box2Label}

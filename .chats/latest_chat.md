@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:50:49
+- **Fecha de exportación:** 2026-10-19 10:55:51
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 46
+- **Total de interacciones registradas:** 48
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -924,5 +924,23 @@ Listo. Se han aplicado los cambios en [SimulatedPortfolioCard.tsx](file:///c:/Us
 ### 👤 Usuario (2026-10-19 08:48:58)
 
 elimina el rendimiento a 7D de la tarjeta valor total de la cartera en vision general
+
+---
+
+### 🤖 Asistente (2026-10-19 08:50:51)
+
+Listo. Se ha eliminado la píldora de rendimiento a **7D** de la tarjeta **"Valor Total de la Cartera"** en la página de Visión General ([OverviewPage.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx)).
+
+Ahora la tarjeta conserva únicamente:
+- **Hoy (1D)**: Variación oficial del último NAV reportado.
+- **Live**: Variación intradía en directo según los mercados continuos (con acceso directo a Mercado).
+
+Compilado, verificado con `npm run build` y publicado en Git bajo la versión **`v3.0.147`**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:50:22)
+
+ahí mete el rendimiento en % de 1D y de 7D, quita el de 7D €, al pasar el raton que te diga los €
 
 ---
