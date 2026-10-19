@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:38:34
+- **Fecha de exportación:** 2026-10-19 10:42:59
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 38
+- **Total de interacciones registradas:** 40
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -627,5 +627,57 @@ asegurate de que esto que pasaba con japon  no pasa en otros casos --->  El moti
 ### 🤖 Asistente (2026-10-19 08:38:02)
 
 He lanzado la comprobación cruzada para verificar que no existe ninguna discrepancia entre los índices y las réplicas. Esperando la salida...
+
+---
+
+### 🤖 Asistente (2026-10-19 08:38:38)
+
+He realizado una **auditoría completa y exhaustiva** de todos los índices de la barra superior/widgets frente a las réplicas de la cartera simulada en [market.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py) para garantizar que no existan discrepancias entre mercado de contado físico y mercados continuos/futuros.
+
+---
+
+### 🔍 Hallazgos de la auditoría y correcciones aplicadas
+
+1. **MSCI World (`URTH` vs `ES=F`)**:
+   - *Situación previa:* La réplica de cartera (`URTH`) proyectaba el movimiento continuo mediante futuros S&P 500 (`ES=F` a `+0.59%`), pero en la barra superior de índices `URTH` no estaba en `INDEX_PROXY_MAP`, marcando `0.00%`.
+   - *Corrección:* Se añadió `"URTH": "ES=F"` a `INDEX_PROXY_MAP`. Ahora ambos reflejan exactamente el mismo valor continuo (`+0.59%`).
+
+2. **Mercados Emergentes (`EEM`)**:
+   - *Situación previa:* En la cartera se forzaba un proxy a `^HSI` (Hang Seng de Hong Kong, que cierra a las 09:00 CET), mientras que la barra superior mostraba `EEM` (ETF estadounidense cotizado en NYSE Arca con más de 31 millones de acciones diarias y pre-market activo desde las 10:00 CET).
+   - *Corrección:* Se homogeneizó la fuente: tanto en la barra superior como en la cartera simulada se utiliza `EEM` con sus cotizaciones directas de pre-market (`+1.19%`), eliminando cualquier desfase con bolsas asiáticas ya cerradas.
+
+3. **Homogeneización de proxies a nivel de módulo (`ETF_PREMARKET_LIVE_PROXIES`)**:
+   - Se trasladó la definición al nivel superior del módulo para asegurar una única fuente de verdad y coherencia simétrica 1:1:
+     - **S&P 500 / RV USA (`COWZ`, `^GSPC`):** Futuros `ES=F` (CME Globex 24h).
+     - **Nasdaq / Tecnología (`XLK`, `^IXIC`):** Futuros `NQ=F` (CME Globex 24h).
+     - **Japón (`EWJ`, `^N225`):** Futuros `NIY=F` (CME Globex 24h).
+     - **MSCI World / Global (`URTH`, `ACWI`):** Futuros `ES=F` (CME Globex 24h).
+     - **Europa (`FEZ`, `EFV`, `^STOXX50E`):** Contado continuo `^STOXX50E` (sesión regular europea 09:00–17:30 CET).
+     - **Emergentes (`EEM`):** Cotización real extendida directa de `EEM`.
+
+---
+
+### 📊 Verificación cruzada en tiempo real
+
+Ejecutamos el test de coherencia directa entre los endpoints `_fetch_indices_fresh` y `_fetch_simulated_portfolio_sync`:
+
+| Fondo de Cartera | Réplica ETF | Cambio Réplica | Proxy Utilizado | Índice Barra Superior | Cambio Índice | Estado |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Fidelity MSCI World** | `URTH` | **+0.59%** | `ES=F` | MSCI World | **+0.59%** | ✅ Idéntico |
+| **Indexa EPSV Renta Variable** | `ACWI` | **+0.59%** | `ES=F` | MSCI World | **+0.59%** | ✅ Idéntico |
+| **DNB Fund Technology** | `XLK` | **+1.15%** | `NQ=F` | NASDAQ | **+1.15%** | ✅ Idéntico |
+| **Azvalor Internacional** | `COWZ` | **+0.59%** | `ES=F` | S&P 500 | **+0.59%** | ✅ Idéntico |
+| **Fidelity MSCI Japan** | `EWJ` | **+1.69%** | `NIY=F` | Nikkei 225 | **+1.69%** | ✅ Idéntico |
+| **iShares Emerging Markets** | `EEM` | **+1.19%** | Directo (Pre-market) | Emergentes | **+1.19%** | ✅ Idéntico |
+| **Fidelity Euro 50** | `FEZ` | **-0.86%** | `^STOXX50E` | Euro 50 | **-0.86%** | ✅ Idéntico |
+| **Cobas Internacional** | `EFV` | **-0.86%** | `^STOXX50E` | Euro 50 | **-0.86%** | ✅ Idéntico |
+
+Todos los componentes han sido desplegados y sincronizados en la versión **`v3.0.143`**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:31:15)
+
+reduce un poco las dos primeras columnas para que quepa todo el horizontal. la linea de peso igual si es un circulo cabe mejor
 
 ---

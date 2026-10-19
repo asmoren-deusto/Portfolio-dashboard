@@ -81,6 +81,34 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
   },
 }
 
+const WeightCircle: React.FC<{ weight: number }> = ({ weight }) => (
+  <div className="flex items-center justify-end gap-1.5" title={`Peso en cartera: ${weight.toFixed(1)}%`}>
+    <svg className="w-3.5 h-3.5 -rotate-90 shrink-0" viewBox="0 0 36 36">
+      <circle
+        cx="18"
+        cy="18"
+        r="15.9155"
+        fill="none"
+        className="stroke-slate-200 dark:stroke-white/[0.1]"
+        strokeWidth="4"
+      />
+      <circle
+        cx="18"
+        cy="18"
+        r="15.9155"
+        fill="none"
+        className="stroke-indigo-500 dark:stroke-indigo-400"
+        strokeWidth="4"
+        strokeDasharray={`${Math.min(100, Math.max(0, weight))}, 100`}
+        strokeLinecap="round"
+      />
+    </svg>
+    <span className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
+      {weight.toFixed(1)}%
+    </span>
+  </div>
+)
+
 export interface SimulatedPortfolioCardProps {
   marketStats?: {
     advancing: number
@@ -967,15 +995,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             {/* TAB 1: Desglose por Fondos en Cartera */}
             {activeTab === 'funds' && (
               <div className="overflow-x-auto overflow-y-auto max-h-[480px] sm:max-h-[520px] rounded-lg border border-slate-200/60 dark:border-white/[0.06] relative">
-                <table className="w-full text-left text-xs border-collapse min-w-[760px]">
+                <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
-                      <th className="py-1.5 px-2.5 min-w-[220px]">Fondo en Cartera</th>
-                      <th className="py-1.5 px-2.5 min-w-[190px]">ETF Réplica</th>
-                      <th className="py-1.5 px-2 text-right whitespace-nowrap">Valor Cartera</th>
-                      <th className="py-1.5 px-2 text-right whitespace-nowrap">Peso</th>
-                      <th className="py-1.5 px-2 text-right whitespace-nowrap">Cotiz. ETF</th>
-                      <th className="py-1.5 px-2.5 text-right whitespace-nowrap">Impacto Hoy</th>
+                      <th className="py-1.5 px-2 min-w-[140px] max-w-[165px]">Fondo en Cartera</th>
+                      <th className="py-1.5 px-2 min-w-[125px] max-w-[150px]">ETF Réplica</th>
+                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Valor Cartera</th>
+                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Peso</th>
+                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Cotiz. ETF</th>
+                      <th className="py-1.5 px-2 text-right whitespace-nowrap">Impacto Hoy</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
@@ -994,9 +1022,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                             >
                           {/* Col 1: Fondo (L1) e ISIN limpio (L2) */}
-                          <td className="py-1.5 px-2.5 min-w-[220px]">
+                          <td className="py-1.5 px-2 min-w-[140px] max-w-[165px]">
                             <div
-                              className="font-bold text-xs text-slate-900 dark:text-white truncate max-w-[240px]"
+                              className="font-bold text-xs text-slate-900 dark:text-white truncate"
                               title={h.fund_name}
                             >
                               {h.fund_name}
@@ -1007,20 +1035,20 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           </td>
 
                           {/* Col 2: Fondo Réplica (L1) y Descripción (L2, sin código ETF) */}
-                          <td className="py-1.5 px-2.5 min-w-[190px]">
+                          <td className="py-1.5 px-2 min-w-[125px] max-w-[150px]">
                             <div
-                              className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[210px]"
+                              className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate"
                               title={displayName}
                             >
                               {displayName}
                             </div>
-                            <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[210px] mt-0.5">
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
                               {etfInfo?.category || h.etf_desc || 'Renta Variable'}
                             </div>
                           </td>
 
                           {/* Fund Value in Portfolio */}
-                          <td className="py-1.5 px-2 text-right whitespace-nowrap">
+                          <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
                             <div className="font-mono font-bold text-xs text-slate-900 dark:text-white">
                               {fmt.currency(h.fund_value)}
                             </div>
@@ -1030,20 +1058,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           </td>
 
                           {/* Weight */}
-                          <td className="py-1.5 px-2 text-right whitespace-nowrap">
-                            <div className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
-                              {h.weight.toFixed(1)}%
-                            </div>
-                            <div className="w-12 h-1 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-0.5">
-                              <div
-                                className="h-full rounded-full bg-indigo-500"
-                                style={{ width: `${Math.min(100, (h.weight / 35) * 100)}%` }}
-                              />
-                            </div>
+                          <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
+                            <WeightCircle weight={h.weight} />
                           </td>
 
                           {/* Live ETF Quote Price and Daily % */}
-                          <td className="py-1.5 px-2 text-right whitespace-nowrap">
+                          <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end gap-1.5">
                               {h.proxy_used && (
                                 <span
@@ -1065,7 +1085,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           </td>
 
                           {/* Estimated Impact in € */}
-                          <td className="py-1.5 px-2.5 text-right whitespace-nowrap">
+                          <td className="py-1.5 px-2 text-right whitespace-nowrap">
                             <span
                               className={cn(
                                 'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
@@ -1091,12 +1111,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
-                      <th className="py-1.5 px-2.5">ETF Réplica / Mercado</th>
-                      <th className="py-1.5 px-2 text-right">Cotiz. en Vivo</th>
-                      <th className="py-1.5 px-2 text-right">Var. Día</th>
-                      <th className="py-1.5 px-2 text-right">Peso Cartera</th>
-                      <th className="py-1.5 px-2 text-right">Capital Replicado</th>
-                      <th className="py-1.5 px-2.5 text-right">Impacto Total</th>
+                      <th className="py-1.5 px-2 min-w-[140px] max-w-[170px]">ETF Réplica / Mercado</th>
+                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Cotiz. en Vivo</th>
+                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Var. Día</th>
+                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Peso Cartera</th>
+                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Capital Replicado</th>
+                      <th className="py-1.5 px-2 text-right whitespace-nowrap">Impacto Total</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
@@ -1116,10 +1136,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               key={etf.ticker}
                               className="hover:bg-slate-100/70 dark:hover:bg-white/[0.03] transition-colors group"
                             >
-                              <td className="py-1.5 px-2.5">
+                              <td className="py-1.5 px-2 min-w-[140px] max-w-[170px]">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   <span
-                                    className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[220px]"
+                                    className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[150px]"
                                     title={displayName}
                                   >
                                     {displayName}
@@ -1128,12 +1148,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                                     {etf.ticker}
                                   </span>
                                 </div>
-                                <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[220px] mt-0.5 font-medium">
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[180px] mt-0.5 font-medium">
                                   {info?.category || 'Renta Variable'}
                                 </div>
                               </td>
 
-                              <td className="py-1.5 px-2 text-right font-mono font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                              <td className="py-1.5 px-1.5 text-right font-mono font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
                                 <div className="flex items-center justify-end gap-1.5">
                                   {etf.proxy_used && (
                                     <span
@@ -1147,7 +1167,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                                 </div>
                               </td>
 
-                              <td className="py-1.5 px-2 text-right whitespace-nowrap">
+                              <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
                                 <span
                                   className={cn(
                                     'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
@@ -1160,23 +1180,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                                 </span>
                               </td>
 
-                              <td className="py-1.5 px-2 text-right whitespace-nowrap">
-                                <div className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
-                                  {etf.weight}%
-                                </div>
-                                <div className="w-12 h-1 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden ml-auto mt-0.5">
-                                  <div
-                                    className="h-full rounded-full bg-indigo-500"
-                                    style={{ width: `${Math.min(100, (etf.weight / 35) * 100)}%` }}
-                                  />
-                                </div>
+                              <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
+                                <WeightCircle weight={etf.weight} />
                               </td>
 
-                              <td className="py-1.5 px-2 text-right font-mono font-bold text-xs text-slate-900 dark:text-white whitespace-nowrap">
+                              <td className="py-1.5 px-1.5 text-right font-mono font-bold text-xs text-slate-900 dark:text-white whitespace-nowrap">
                                 {fmt.currency(replicatedVal)}
                               </td>
 
-                              <td className="py-1.5 px-2.5 text-right whitespace-nowrap">
+                              <td className="py-1.5 px-2 text-right whitespace-nowrap">
                                 <span
                                   className={cn(
                                     'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
