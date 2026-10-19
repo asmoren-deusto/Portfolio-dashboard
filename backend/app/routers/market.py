@@ -1141,7 +1141,7 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
     ETF_PREMARKET_LIVE_PROXIES = {
         "FEZ": "^STOXX50E",  # Euro Stoxx 50 cash index (sesión europea 09:00 - 17:30 CET)
         "EFV": "^STOXX50E",  # RV Internacional EAFE Value (sesión europea)
-        "EWJ": "^N225",      # Nikkei 225 (sesión de Tokio)
+        "EWJ": "NIY=F",      # Futuros Nikkei 225 24h CME Globex (guía RV Japón fuera de horas de Tokio)
         "EEM": "^HSI",       # Hang Seng Index (referencia de emergentes en la mañana europea)
         "URTH": "ES=F",      # Futuros S&P 500 24h CME Globex (guía RV global antes de apertura NY)
         "ACWI": "ES=F",      # Futuros S&P 500 24h

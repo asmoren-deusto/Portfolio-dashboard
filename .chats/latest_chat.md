@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:20:08
+- **Fecha de exportación:** 2026-10-19 10:23:56
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 29
+- **Total de interacciones registradas:** 31
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -509,5 +509,40 @@ Para solucionar esto, el sistema mapea cada fondo a su **mercado subyacente más
 ### 👤 Usuario (2026-10-19 08:17:02)
 
 intenta que quepan más filas. yo subiria el ISIN a la segunda linea (lo primero) y la descripcion de la segunda columna tb a la segunda linea, quitaria el codigo de las replicas (p,ej URTH) En Cotiz. ETF quitaria lo de Cierre: XX
+
+---
+
+### 🤖 Asistente (2026-10-19 08:20:11)
+
+Se ha rediseñado la tabla en [SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx) para que sea mucho más compacta y quepan prácticamente todas las posiciones de un vistazo sin necesidad de scroll:
+
+---
+
+### Cambios aplicados:
+
+1. **Fondo en Cartera (Columna 1):**
+   * **Línea 1:** Nombre del fondo en negrita.
+   * **Línea 2:** El **ISIN** en primer lugar, seguido de la píldora de la entidad (`BBVA`, `MyInvestor`, `Indexa`, etc.) en la misma línea.
+
+2. **ETF Réplica (Columna 2):**
+   * **Línea 1:** Nombre del mercado o índice de la réplica.
+   * **Línea 2:** La **descripción** de la categoría en la segunda línea.
+   * Se ha **eliminado el código ticker** (`URTH`, `XLK`, `COWZ`, etc.) para despejar el espacio visual.
+
+3. **Cotiz. ETF (Columna 5):**
+   * Se ha **eliminado por completo la línea intermedia redundante `Cierre: XX`**.
+   * Ahora muestra limpiamente el porcentaje en vivo (con la etiqueta del proxy CME Globex si aplica, ej. `ES=F`) y el precio de cotización justo debajo.
+
+4. **Mayor capacidad vertical:**
+   * Reducido el padding vertical de las filas de `py-1.5` a `py-1`.
+   * Ampliada la altura máxima visible de la tabla de `370px` a `500px`, permitiendo ver cómodamente todas las filas de la cartera juntas.
+
+*(Compilado, verificado y sincronizado en la versión **v3.0.139**).*
+
+---
+
+### 👤 Usuario (2026-10-19 08:18:17)
+
+por que me marca los futuros de nikkei a +1.62 y la replica a -0.66?
 
 ---
