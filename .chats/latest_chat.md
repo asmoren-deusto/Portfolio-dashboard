@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:12:22
+- **Fecha de exportación:** 2026-10-19 10:20:08
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 25
+- **Total de interacciones registradas:** 29
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -427,5 +427,87 @@ Ambos cambios han sido validados y sincronizados en la versión **v3.0.137**.
 ### 👤 Usuario (2026-10-19 08:00:31)
 
 el cierre oficial va cambiando a cada poco, ahora
+
+---
+
+### 🤖 Asistente (2026-10-19 08:12:24)
+
+### ¿Por qué iba cambiando el **Cierre Oficial** a cada poco?
+
+El motivo exacto era este:
+
+1. **La causa:**  
+   Al solicitar las cotizaciones de los ETFs de referencia en horario de pre-apertura (`market_state == "PRE"`), Yahoo Finance devuelve en su campo general `change_pct` la variación de los **cruces u operaciones tempranas de pre-mercado**, o `0.0%` si aún no ha habido ninguna operación en ese ETF.
+   
+   En el backend, en [market.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py), la variable `official_close_pct` estaba leyendo directamente `q.get("change_pct")` en vez de aislar la variación del cierre regular:
+   ```python
+   # Antes (incorrecto):
+   official_close_pct = q.get("change_pct", 0.0) or 0.0
+   ```
+   * Si en un refresco entraba un cruce temprano en `XLK` (+1.5%), ese ETF aportaba un número positivo.
+   * Si en el siguiente refresco otro ETF no tenía cruces, aportaba `0.0%` en lugar de su cierre oficial de la sesión anterior (por ejemplo, `URTH` que cerró a -0.85%).
+   * Esto provocaba que la tarjeta de **Cierre Oficial (2026-10-16)** fluctuara entre **-0.85%**, **-0.50%**, etc., cada vez que cambiaba la caché o entraba un micro-tick de pre-mercado.
+
+---
+
+### Solución aplicada
+
+1. **Aislamiento estricto de la sesión regular:**  
+   Tanto en `_fetch_ticker_extended` como en `_fetch_yahoo_chart_quote`, ahora se calcula y expone explícitamente `regular_change_pct`:
+   $$\text{regular\_change\_pct} = \frac{\text{regular\_price} - \text{prev\_close}}{\text{prev\_close}} \times 100$$
+   Es decir, el precio de cierre oficial de la última sesión cerrada (viernes 16) comparado contra el cierre previo.
+
+2. **Cierre Oficial blindado e inmutable:**  
+   En la función de la cartera simulada, el **Cierre Oficial** se calcula única y exclusivamente a partir de `regular_change_pct` (o `regular_price` vs `prev_close`). 
+   
+   * Ahora el **Cierre Oficial del viernes 16 queda 100% fijo y estático en su valor real ponderado: `-0.61%` (`-472,14 €`)**, sin importar qué trades o ticks ocurran en el pre-mercado.
+   * El indicador dinámico que se mueve y oscila en tiempo real es el bloque de **Pre-Apertura** (`+0.20%` / `+0.52%`), tal y como debe ser.
+
+*(Liberado y sincronizado en la versión **v3.0.138**).*
+
+---
+
+### 👤 Usuario (2026-10-19 08:12:17)
+
+todas las replicas tienen datos 24/7 o al menos se mantienen actualizadas cuando hay datos
+
+---
+
+### 🤖 Asistente (2026-10-19 08:12:42)
+
+**No todos los mercados físicos cotizan 24/7**, pero **nuestro sistema de réplicas está diseñado específicamente para que la cartera nunca se quede sin datos ni con valores congelados a cero**:
+
+---
+
+### 1. ¿Cómo funcionan las réplicas fuera de la sesión regular de EE.UU.?
+
+Los ETFs de contado (`URTH`, `XLK`, `FEZ`, etc.) cotizan en Nueva York (de 15:30 a 22:00 CET). Por la mañana en Europa, esos ETFs apenas tienen volumen. 
+
+Para solucionar esto, el sistema mapea cada fondo a su **mercado subyacente más líquido y continuo**:
+
+| Réplica / Fondo | Proxy Activo en Directo | Horario de Negociación | Estado fuera de horario |
+| :--- | :--- | :--- | :--- |
+| **Tecnología (DNB / XLK)** | **`NQ=F`** *(Futuros Nasdaq 100 CME)* | **23 horas / día (24/5)** *(Dom 23:00 a Vie 22:00 CET)* | Se actualiza en tiempo real de madrugada y toda la mañana. |
+| **Global / EE.UU. (URTH, ACWI, COWZ)** | **`ES=F`** *(Futuros S&P 500 CME)* | **23 horas / día (24/5)** *(Dom 23:00 a Vie 22:00 CET)* | Se actualiza en tiempo real continuo. |
+| **Europa (FEZ, EFV)** | **`^STOXX50E`** *(Euro Stoxx 50)* | **09:00 a 17:30 CET** *(Lunes a Viernes)* | En directo ahora mismo. Tras las 17:30 mantiene el cierre consolidado europeo. |
+| **Japón (EWJ)** | **`^N225`** *(Nikkei 225 Tokio)* | **01:00 a 07:30 CET** *(Madrugada española)* | A partir de las 07:30 conserva el resultado de la sesión de hoy (`-0.66%`). |
+| **Emergentes (EEM)** | **`^HSI`** *(Hang Seng)* | **02:30 a 09:00 CET** | Mantiene el resultado de la sesión asiática consolidada. |
+| **Divisa (EUR/USD)** | **`EURUSD=X`** *(Forex interbancario)* | **24 horas / 5 días** *(Continuo lunes a viernes)* | Ajusta el impacto divisa en tiempo real a cada segundo. |
+| **Criptomonedas** | **`BTC-EUR` / `ETH`** | **24/7 los 365 días** | Nunca cierra. |
+
+---
+
+### 2. ¿Se mantienen siempre actualizadas cuando hay datos?
+
+**Sí:**
+* **Horario 24/5 continuo (EE.UU. y Globales):** Al estar conectados a los futuros continuos de Chicago (*CME Globex*), los fondos que representan la mayor parte de tu cartera (S&P 500, MSCI World, Nasdaq) se mueven en directo tanto a las 06:00 de la mañana como a las 14:00 o a las 23:00.
+* **Sesiones que ya han cerrado hoy (como Japón o Asia):** No se quedan en blanco ni a `0.00%`. El sistema conserva el rendimiento oficial consolidado de la sesión de hoy para computar con total precisión el impacto en tu cartera.
+* **Filtro de seguridad:** Si un mercado está cerrado y no hay nueva sesión, se mantiene el último dato consolidado válido sin generar picos ni distorsiones.
+
+---
+
+### 👤 Usuario (2026-10-19 08:17:02)
+
+intenta que quepan más filas. yo subiria el ISIN a la segunda linea (lo primero) y la descripcion de la segunda columna tb a la segunda linea, quitaria el codigo de las replicas (p,ej URTH) En Cotiz. ETF quitaria lo de Cierre: XX
 
 ---
