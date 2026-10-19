@@ -148,6 +148,19 @@ INDEX_PROXY_MAP = {
     "^GSPC": "ES=F",   # S&P 500 E-mini futures (CME Globex)
     "^IXIC": "NQ=F",   # Nasdaq 100 E-mini futures (CME Globex)
     "^N225": "NIY=F",  # Nikkei 225 Yen Futures (CME Globex)
+    "URTH":  "ES=F",   # MSCI World ETF proyectado vía futuros S&P 500 fuera de sesión regular
+}
+
+# Proxy mapping for portfolio ETF replicas outside regular cash sessions (09:30-16:00 ET)
+# to keep replicas in sync with live 24h CME futures or European cash sessions
+ETF_PREMARKET_LIVE_PROXIES = {
+    "FEZ":  "^STOXX50E",  # Euro Stoxx 50 cash index (sesión europea 09:00 - 17:30 CET)
+    "EFV":  "^STOXX50E",  # RV Internacional EAFE Value (sesión europea)
+    "EWJ":  "NIY=F",      # Futuros Nikkei 225 24h CME Globex (guía RV Japón fuera de horas de Tokio)
+    "URTH": "ES=F",       # Futuros S&P 500 24h CME Globex (guía RV global antes de apertura NY)
+    "ACWI": "ES=F",       # Futuros S&P 500 24h
+    "XLK":  "NQ=F",       # Futuros Nasdaq 100 24h CME Globex (guía tecnológica para DNB Fund)
+    "COWZ": "ES=F",       # Futuros S&P 500 24h (guía RV EE.UU.)
 }
 
 # In-memory cache (shorter TTL for real-time feel)
@@ -251,14 +264,14 @@ def get_market_session_for_ticker(ticker: str, dt_utc: datetime | None = None) -
             return "REGULAR"
         return "CLOSED"
 
-    # Asian assets
-    if ticker in ("^N225",) or ticker.endswith(".T"):
+    # Asian assets (Tokyo, Hong Kong, etc.)
+    if ticker in ("^N225", "^HSI") or any(ticker.endswith(s) for s in (".T", ".HK", ".SS", ".SZ")):
         dt_tokyo = dt_utc.astimezone(ZoneInfo("Asia/Tokyo"))
         weekday_tokyo = dt_tokyo.weekday()
         mins_tokyo = dt_tokyo.hour * 60 + dt_tokyo.minute
-        if weekday_tokyo < 5 and 9 * 60 <= mins_tokyo < 15 * 60 + 30:
+        if weekday_tokyo < 5 and 9 * 60 <= mins_tokyo < 16 * 60:
             return "REGULAR"
-        # If outside Tokyo cash hours, check if proxy future is trading on Globex
+        # If outside Asian cash hours, check if proxy future is trading on Globex
         if ticker in INDEX_PROXY_MAP:
             if weekday_ny == 5 or (weekday_ny == 6 and dt_ny.hour < 18) or (weekday_ny == 4 and mins_ny >= 17 * 60):
                 return "CLOSED"
@@ -805,6 +818,7 @@ async def _fetch_indices_fresh():
                     q["change"] = implied_change
                     q["change_pct"] = proxy_pct
                     q["regular_price"] = base_p
+                    q["proxy_used"] = proxy_sym
 
         elif idx_state in ("PRE", "POST"):
             # Asset with direct pre/post data (e.g. ETFs like URTH, EEM)
@@ -856,6 +870,7 @@ async def _fetch_indices_fresh():
             "volume":            q.get("volume"),
             "currency":          cur,
             "market_cap":        q.get("market_cap"),
+            "proxy_used":        q.get("proxy_used"),
             "last_updated":      q.get("last_updated", _now_iso()),
             "logo_url":          "",
         })
@@ -1136,19 +1151,6 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
     # Extended quotes for all ETF proxies and EURUSD currency
     quotes = _fetch_quotes_extended(fetch_tickers)
 
-    # ── Underlying session live proxies when ETF is outside regular cash session ──
-    # Map each ETF to its active 24h CME Globex futures or cash index
-    ETF_PREMARKET_LIVE_PROXIES = {
-        "FEZ": "^STOXX50E",  # Euro Stoxx 50 cash index (sesión europea 09:00 - 17:30 CET)
-        "EFV": "^STOXX50E",  # RV Internacional EAFE Value (sesión europea)
-        "EWJ": "NIY=F",      # Futuros Nikkei 225 24h CME Globex (guía RV Japón fuera de horas de Tokio)
-        "EEM": "^HSI",       # Hang Seng Index (referencia de emergentes en la mañana europea)
-        "URTH": "ES=F",      # Futuros S&P 500 24h CME Globex (guía RV global antes de apertura NY)
-        "ACWI": "ES=F",      # Futuros S&P 500 24h
-        "XLK": "NQ=F",       # Futuros Nasdaq 100 24h CME Globex (guía tecnológica para DNB Fund)
-        "COWZ": "ES=F",      # Futuros S&P 500 24h (guía RV EE.UU.)
-    }
-
     # Fetch quotes for all needed proxies
     needed_proxy_tickers = list(set(ETF_PREMARKET_LIVE_PROXIES.values()))
     proxy_quotes = _fetch_quotes_extended(needed_proxy_tickers)
@@ -1174,16 +1176,21 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
 
         # When cash equity market is outside regular session (PRE, POST, CLOSED, or FUTURES),
         # project live movements using the active underlying futures/index proxy
-        if m_state != "REGULAR" and t in ETF_PREMARKET_LIVE_PROXIES:
-            p_tick = ETF_PREMARKET_LIVE_PROXIES[t]
-            pq = proxy_quotes.get(p_tick, {})
-            p_chg = pq.get("change_pct")
-            if p_chg is not None:
-                quotes[t]["change_pct"] = p_chg
-                quotes[t]["proxy_used"] = p_tick
-                quotes[t]["is_indicative"] = True
-                if official_close_price:
-                    quotes[t]["price"] = round(official_close_price * (1.0 + p_chg / 100.0), 2)
+        if m_state != "REGULAR":
+            p_tick = ETF_PREMARKET_LIVE_PROXIES.get(t)
+            if p_tick:
+                pq = proxy_quotes.get(p_tick, {})
+                p_chg = pq.get("change_pct")
+                if p_chg is not None:
+                    quotes[t]["change_pct"] = p_chg
+                    quotes[t]["proxy_used"] = p_tick
+                    quotes[t]["is_indicative"] = True
+                    if official_close_price:
+                        quotes[t]["price"] = round(official_close_price * (1.0 + p_chg / 100.0), 2)
+            elif m_state in ("PRE", "POST") and q.get("change_pct") is not None:
+                # Direct pre/post market quote (e.g. EEM with active liquid US pre-market trades)
+                quotes[t]["is_indicative"] = False
+                quotes[t]["proxy_used"] = None
 
     # Attach live ETF quote info & simulated gain to each holding
     for h in holdings:
