@@ -385,10 +385,19 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
             decimals = price_precision if price_precision is not None else (2 if abs(value) >= 1 else 6)
             return round(value, decimals)
 
+        reg_chg = round(regular_price - previous_close, 4) if (regular_price and previous_close) else 0.0
+        reg_chg_pct = (
+            round(meta.get("regularMarketChangePercent"), 2)
+            if meta.get("regularMarketChangePercent") is not None
+            else (round((regular_price - previous_close) / previous_close * 100.0, 2) if (regular_price and previous_close) else 0.0)
+        )
+
         return {
             "ticker": ticker,
             "price": rounded(display_price),
             "regular_price": rounded(regular_price),
+            "regular_change": reg_chg,
+            "regular_change_pct": reg_chg_pct,
             "pre_market_price": rounded(pre_price),
             "post_market_price": rounded(post_price),
             "pre_market_change_pct": round((pre_price - regular_price) / regular_price * 100, 2) if pre_price is not None and regular_price else None,
@@ -544,10 +553,19 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             decimals = 2 if abs(v) >= 1 else 6
             return round(v, decimals)
 
+        reg_chg = round(regular_price - prev_close, 4) if (regular_price and prev_close) else 0.0
+        reg_chg_pct = (
+            round(getattr(fi, "regular_market_change_percent"), 2)
+            if getattr(fi, "regular_market_change_percent", None) is not None
+            else (round((regular_price - prev_close) / prev_close * 100.0, 2) if (regular_price and prev_close) else 0.0)
+        )
+
         res = {
             "ticker":              ticker,
             "price":               _r(display_price, price_precision),
             "regular_price":       _r(regular_price, price_precision),
+            "regular_change":      reg_chg,
+            "regular_change_pct":  reg_chg_pct,
             "pre_market_price":    _r(pre_price, price_precision),
             "post_market_price":   _r(post_price, price_precision),
             "pre_market_change_pct":  pre_chg_pct,
@@ -1138,9 +1156,17 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
     for t in etf_tickers_list:
         q = quotes.get(t, {})
         m_state = q.get("market_state")
-        # Record official regular session close values
-        official_close_pct = q.get("change_pct", 0.0) or 0.0
-        official_close_price = q.get("regular_price") or q.get("price")
+        # Record official regular session close values (guaranteed static historical close of last regular session)
+        reg_p = q.get("regular_price") or q.get("price")
+        prev_c = q.get("prev_close")
+        if q.get("regular_change_pct") is not None:
+            official_close_pct = q["regular_change_pct"]
+        elif reg_p and prev_c and prev_c > 0:
+            official_close_pct = round((reg_p - prev_c) / prev_c * 100.0, 2)
+        else:
+            official_close_pct = q.get("change_pct", 0.0) or 0.0
+
+        official_close_price = reg_p
         quotes[t]["official_close_pct"] = official_close_pct
         quotes[t]["official_close_price"] = official_close_price
         quotes[t]["is_indicative"] = False

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:05:22
+- **Fecha de exportación:** 2026-10-19 10:12:22
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 23
+- **Total de interacciones registradas:** 25
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -395,5 +395,37 @@ que es de ese último pico abajo y los tooltips superiores con distintas horas t
 ### 👤 Usuario (2026-10-19 07:59:39)
 
 que es de ese último pico abajo y los tooltips superiores con distintas horas todos ahi
+
+---
+
+### 🤖 Asistente (2026-10-19 08:05:24)
+
+Los dos problemas que se observaban en la captura tenían causas muy concretas:
+
+---
+
+### 1. ¿Por qué se producía ese pico vertical hacia abajo al final?
+* **Causa:** En la construcción de las velas históricas intradía (de 06:00 a 09:55), el backend tenía una condición que asignaba el futuro del S&P 500 (`ES=F` al **+0.59%**) como proxy para **todos los activos no estadounidenses** (fondos europeos y asiáticos como Eurostoxx `FEZ` al -0.78%, Japón `EWJ` al -0.66%, etc.). Esto inflaba artificialmente la rentabilidad histórica de la curva hasta **+0.95%**.
+* Sin embargo, el último punto de la gráfica se sincronizaba con el resumen real en vivo (`summary`), el cual sí leía las cotizaciones reales europeas y asiáticas en negativo.
+* Al llegar al último punto, la serie caía abruptamente de **+0.95% a +0.62%** en una sola vela, creando ese corte vertical en acantilado.
+* **Solución aplicada:** En [market.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py), se corrigió la asignación de proxies: los activos europeos y asiáticos ya no heredan el S&P estadounidense sino su variación real de cotización a lo largo de toda la serie. Ahora la curva histórica converge de forma fluida y continua con el valor en tiempo real (diferencia menor a 0.01%).
+
+---
+
+### 2. ¿Por qué estaban las etiquetas superiores con distintas horas amontonadas ahí (`15:30 • Apertura`, `22:00 • After-Hours`)?
+* **Causa:** El backend generaba los marcadores de las sesiones completas del día (10:00 Pre-market, 15:30 Regular y 22:00 After-Hours). En el frontend, el componente [SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx) buscaba en la serie la vela más cercana a cada hora. Como la gráfica intradía actual solo llega hasta las ~10:00, las horas futuras (15:30 y 22:00) encontraban como vela más próxima la última disponible en el extremo derecho, posicionándose las dos en la misma coordenada X y solapándose.
+* **Solución aplicada:** 
+  1. En el **backend**, los marcadores de sesión solo se devuelven si la hora correspondiente ya ha transcurrido o es inminente.
+  2. En el **frontend**, se añadió un filtro de límites (`firstTime` y `lastTime`) para que nunca se renderice un marcador cuya hora caiga fuera del rango temporal de los datos visibles en pantalla.
+
+---
+
+Ambos cambios han sido validados y sincronizados en la versión **v3.0.137**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:00:31)
+
+el cierre oficial va cambiando a cada poco, ahora
 
 ---
