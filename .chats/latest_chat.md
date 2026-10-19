@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 09:50:22
+- **Fecha de exportación:** 2026-10-19 10:05:22
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 20
+- **Total de interacciones registradas:** 23
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -342,5 +342,58 @@ Las cifras que devuelve Yahoo Finance corresponden al momento temporal del siste
 ### 👤 Usuario (2026-10-19 07:34:59)
 
 haz que funcine como la web que te paso. la idea general es tener la grafica contínua pero marcando los arranques de pre, regular, post y usando la referencia como la web que te paso. los valores tienes que estar lo más actualizados posibles y acturar sobre la referencia anterior para ver el cambio en tiempo real
+
+---
+
+### 🤖 Asistente (2026-10-19 07:50:25)
+
+He ajustado y sincronizado el sistema para replicar el comportamiento de la referencia de **Investing.com**:
+
+---
+
+### 1. ¿Por qué el DNB Fund bajaba (-2,51%) mientras el Nasdaq subía (+1,29%)?
+* **Causa raíz:** DNB Fund (fondo tecnológico) está replicado por el ETF de Wall Street **`XLK`** (Technology Select Sector SPDR). En la sesión regular del viernes, `XLK` cayó un **-2,51%**.
+* En horario fuera de mercado regular (antes de las 10:00 Madrid / 04:00 NY), Yahoo Finance marcaba `XLK` como `market_state = "CLOSED"`. Debido a una condición estricta previa, `XLK` se quedaba congelado en el **cierre del viernes (-2,51%)**, mientras que en la barra de índices el Nasdaq utilizaba el futuro continuo de CME Globex (`NQ=F`), que hoy lunes en pre-apertura cotiza en positivo (**+1,29%**).
+* **Solución aplicada:** Ahora, fuera de la sesión regular de contado, el backend sincroniza automáticamente cada ETF con su futuro/índice continuo en tiempo real (`XLK` ➔ `NQ=F`, `URTH` ➔ `ES=F`, `FEZ` ➔ `^STOXX50E`). De este modo, **DNB Fund cotiza en vivo en sintonía exacta con el futuro del Nasdaq (+1,31%)**, eliminando cualquier contradicción.
+
+---
+
+### 2. Referencia base y dónde arranca la gráfica
+* **Referencia base fija:** Tal como en Investing.com, la referencia es siempre el **cierre regular de la sesión anterior** (*Previous Close*, 0,00% baseline). Todo cambio porcentual o monetario se calcula con la fórmula `(precio_actual - cierre_anterior) / cierre_anterior * 100`.
+* **Corrección del salto a las 23:00:** La divisa `EURUSD=X` abre los domingos a las 23:00 Madrid (17:00 NY) mientras que la renta variable está cerrada. El backend rellenaba con `ffill` los precios del viernes sobre las velas nocturnas de divisas, provocando una línea plana de domingo noche y un salto extraño. Ahora se filtran estrictamente las sesiones bursátiles de renta variable y la gráfica 1D de hoy traza la trayectoria continua y limpia desde la apertura de pre-apertura/mañana.
+
+---
+
+### 3. Visualización Dual (Idéntica a Investing.com)
+1. **Línea de Referencia Base Horizontal:**
+   * La gráfica de TradingView incluye una línea punteada visible en **`0.00%`** etiquetada como **`Ref. 0.00%`**, permitiendo ver de inmediato si la sesión o la pre-apertura está por encima o por debajo del cierre previo.
+2. **Marcadores de arranque de fases:**
+   * **`10:00 • Pre-market`** (arranque de la pre-apertura oficial en Wall Street, línea azul punteada).
+   * **`15:30 • Apertura Regular`** (campana de apertura de la sesión regular, línea verde).
+   * **`22:00 • Post-Market`** (campana de cierre de contado y arranque del after-hours, línea ámbar).
+3. **Bloque KPI Dual:**
+   * **Cierre Oficial Última Sesión:** Muestra el resultado oficial de la sesión cerrada (`-0,85% • -657,90 €`, Viernes 16 oct.).
+   * **Pre-Apertura (en directo):** En un recuadro destacado con punto verde parpadeante en tiempo real, hora de la cotización (`09:48`) y variación acumulada en vivo (`+0,56% • +433,44 €`) proyectada por los futuros CME Globex.
+4. **Tabla de Fondos y Réplicas:**
+   * Muestra la cotización en vivo con badge del futuro correspondiente (**`NQ=F`** para DNB Fund, **`ES=F`** para MSCI World).
+   * Añade el desglose claro del cierre anterior (`Cierre: -2,51%`), ofreciendo transparencia total entre la sesión cerrada y el movimiento en tiempo real de hoy.
+
+---
+
+### Despliegue y Release
+* Compilación verificada con `npm run build` (0 errores).
+* Versión incrementada y sincronizada a Git: **`v3.0.136`** vía [sync_release.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/scripts/sync_release.py).
+
+---
+
+### 👤 Usuario (2026-10-19 07:59:22)
+
+que es de ese último pico abajo y los tooltips superiores con distintas horas todos ahi
+
+---
+
+### 👤 Usuario (2026-10-19 07:59:39)
+
+que es de ese último pico abajo y los tooltips superiores con distintas horas todos ahi
 
 ---

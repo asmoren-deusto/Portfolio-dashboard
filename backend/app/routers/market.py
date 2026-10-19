@@ -1297,6 +1297,9 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                         es_prev = proxy_quotes.get("ES=F", {}).get("prev_close") or (es_closes_raw.dropna().iloc[0] if es_closes_raw is not None and not es_closes_raw.dropna().empty else None)
                         nq_prev = proxy_quotes.get("NQ=F", {}).get("prev_close") or (nq_closes_raw.dropna().iloc[0] if nq_closes_raw is not None and not nq_closes_raw.dropna().empty else None)
 
+                        es_filled = es_closes_raw.ffill().bfill() if es_closes_raw is not None else None
+                        nq_filled = nq_closes_raw.ffill().bfill() if nq_closes_raw is not None else None
+
                         for t in etf_cols:
                             etf_series = closes_etfs[t].loc[target_idxs]
                             b_val = base_dict.get(t, 1.0)
@@ -1304,16 +1307,18 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                             if etf_series.dropna().nunique() > 1 and not etf_series.isna().all():
                                 norm_dict[t] = ((etf_series.ffill().bfill() - b_val) / b_val) * 100.0
                             else:
-                                # Use underlying futures proxy trajectory for the pre-market
-                                proxy_sym = ETF_PREMARKET_LIVE_PROXIES.get(t, "ES=F")
-                                if proxy_sym == "NQ=F" and nq_closes_raw is not None and nq_prev and nq_prev > 0:
-                                    proxy_series = nq_closes_raw.loc[target_idxs]
-                                    norm_dict[t] = ((proxy_series.ffill().bfill() - float(nq_prev)) / float(nq_prev)) * 100.0
-                                elif es_closes_raw is not None and es_prev and es_prev > 0:
-                                    proxy_series = es_closes_raw.loc[target_idxs]
-                                    norm_dict[t] = ((proxy_series.ffill().bfill() - float(es_prev)) / float(es_prev)) * 100.0
+                                # Use underlying futures proxy trajectory strictly for matched proxies
+                                proxy_sym = ETF_PREMARKET_LIVE_PROXIES.get(t)
+                                if proxy_sym == "NQ=F" and nq_filled is not None and nq_prev and nq_prev > 0:
+                                    proxy_series = nq_filled.reindex(target_idxs).ffill().bfill()
+                                    norm_dict[t] = ((proxy_series - float(nq_prev)) / float(nq_prev)) * 100.0
+                                elif proxy_sym == "ES=F" and es_filled is not None and es_prev and es_prev > 0:
+                                    proxy_series = es_filled.reindex(target_idxs).ffill().bfill()
+                                    norm_dict[t] = ((proxy_series - float(es_prev)) / float(es_prev)) * 100.0
                                 else:
-                                    norm_dict[t] = pd.Series(quotes.get(t, {}).get("change_pct", 0.0), index=target_idxs)
+                                    # For European / Asian assets or unproxied ETFs, use their actual quoted change_pct
+                                    live_chg = quotes.get(t, {}).get("change_pct", 0.0) or 0.0
+                                    norm_dict[t] = pd.Series(live_chg, index=target_idxs)
 
                         norm_df = pd.DataFrame(norm_dict, index=target_idxs)
 
@@ -1326,32 +1331,36 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                         weights_aligned = weights_series.reindex(norm_df.columns).fillna(0.0)
                         sim_pct = norm_df.dot(weights_aligned)
 
-                        # Standard phase markers for today's session
+                        # Standard phase markers for today's session (only for reached or imminent phases)
+                        now_unix = int(now_madrid.timestamp())
                         today_1000 = int(now_madrid.replace(hour=10, minute=0, second=0, microsecond=0).timestamp())
                         today_1530 = int(now_madrid.replace(hour=15, minute=30, second=0, microsecond=0).timestamp())
                         today_2200 = int(now_madrid.replace(hour=22, minute=0, second=0, microsecond=0).timestamp())
 
-                        session_markers.append({
-                            "time_unix": today_1000,
-                            "label": "10:00 • Pre-market",
-                            "type": "pre_market",
-                            "color": "#3b82f6",
-                            "phase": "PRE",
-                        })
-                        session_markers.append({
-                            "time_unix": today_1530,
-                            "label": "15:30 • Apertura Regular",
-                            "type": "regular_open",
-                            "color": "#10b981",
-                            "phase": "REGULAR",
-                        })
-                        session_markers.append({
-                            "time_unix": today_2200,
-                            "label": "22:00 • Post-Market",
-                            "type": "post_market",
-                            "color": "#f59e0b",
-                            "phase": "POST",
-                        })
+                        if now_unix >= today_1000 - 300:
+                            session_markers.append({
+                                "time_unix": today_1000,
+                                "label": "10:00 • Pre-market",
+                                "type": "pre_market",
+                                "color": "#3b82f6",
+                                "phase": "PRE",
+                            })
+                        if now_unix >= today_1530 - 300:
+                            session_markers.append({
+                                "time_unix": today_1530,
+                                "label": "15:30 • Apertura Regular",
+                                "type": "regular_open",
+                                "color": "#10b981",
+                                "phase": "REGULAR",
+                            })
+                        if now_unix >= today_2200 - 300:
+                            session_markers.append({
+                                "time_unix": today_2200,
+                                "label": "22:00 • Post-Market",
+                                "type": "post_market",
+                                "color": "#f59e0b",
+                                "phase": "POST",
+                            })
 
                     else:
                         # Display the LAST COMPLETED REGULAR SESSION (e.g. Friday) from 15:30 to 22:00 Madrid

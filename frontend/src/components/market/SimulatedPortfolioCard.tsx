@@ -150,7 +150,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
     const pts = chartPointsRef.current
     const positions: Array<{ marker: SessionMarker; x: number }> = []
 
+    const firstTime = pts[0].time_unix
+    const lastTime = pts[pts.length - 1].time_unix
+
     for (const marker of sessionMarkersRef.current) {
+      // Do not place markers for future events that have not occurred yet in the dataset
+      if (marker.time_unix < firstTime - 600 || marker.time_unix > lastTime + 300) {
+        continue
+      }
+
       // Find closest time_unix in dataset
       let closestTime = pts[0].time_unix
       let minDiff = Math.abs(pts[0].time_unix - marker.time_unix)
@@ -160,6 +168,11 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           minDiff = diff
           closestTime = pts[i].time_unix
         }
+      }
+
+      // If the difference is too large (> 15 mins), the marker is outside this trading range
+      if (minDiff > 900) {
+        continue
       }
 
       const x = timeScale.timeToCoordinate(closestTime as UTCTimestamp)
