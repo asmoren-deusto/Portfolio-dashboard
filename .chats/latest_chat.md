@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 11:06:36
+- **Fecha de exportación:** 2026-10-19 11:11:36
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 54
+- **Total de interacciones registradas:** 56
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1012,5 +1012,28 @@ Sincronizado y desplegado en la versión **v3.0.150**.
 ### 👤 Usuario (2026-10-19 08:52:46)
 
 esa barrita -> todo el ancho
+
+---
+
+### 🤖 Asistente (2026-10-19 09:06:38)
+
+Se ha ajustado la barra de progreso en las tarjetas de sesiones de mercado ([`MarketSessionsBar.tsx`](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketSessionsBar.tsx)):
+
+### Cambios realizados:
+1. **Fila dedicada a todo el ancho**:
+   - Se ha retirado la barra comprimida (`w-12 sm:w-16`) que estaba apretada junto al nombre de la sesión.
+   - Ahora ocupa **todo el ancho de la tarjeta** en una fila inferior dedicada, con un gradiente fluido y el porcentaje al extremo derecho (`flex-1 h-1.5` + `{s.progressPct}%`).
+2. **Espacio para textos limpios**:
+   - Los nombres de las bolsas y las ciudades/hubs (`Europa`, `Madrid / Frankfurt`, etc.) ya no sufren truncamiento ni recortes.
+3. **Alineación uniforme entre tarjetas**:
+   - Para las sesiones que están cerradas, se mantiene un placeholder invisible de la misma altura para que las tres tarjetas (Tokio, Europa, Nueva York) conserven exactamente la misma altura y proporción en la cuadrícula.
+
+Sincronizado y desplegado en la versión **v3.0.151**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:58:49)
+
+queda hueco encima y abajo de la grafica, mira su puedes reorganizar las tarjetas o añadir alguna util para cuadrar el espacio mejor
 
 ---
