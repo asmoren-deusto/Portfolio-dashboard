@@ -102,11 +102,11 @@ export const ISharesLogo: React.FC<{ sizeClasses: string; className?: string; ti
     >
       <svg viewBox="0 0 32 32" className="w-[90%] h-[90%]" fill="none" xmlns="http://www.w3.org/2000/svg">
         <text
-          x="16"
-          y="22.5"
+          x="17"
+          y="23.5"
           textAnchor="middle"
           fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-          fontWeight="700"
+          fontWeight="800"
           fontSize="19"
           letterSpacing="-0.5"
         >

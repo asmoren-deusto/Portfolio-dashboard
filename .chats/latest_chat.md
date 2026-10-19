@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 11:24:29
+- **Fecha de exportación:** 2026-10-19 11:25:12
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 64
+- **Total de interacciones registradas:** 66
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1150,5 +1150,30 @@ Los cambios han sido compilados y sincronizados en la versión **v3.0.155**.
 ### 👤 Usuario (2026-10-19 09:23:09)
 
 haz un poco ma´s grandes las letras pero menos negritas
+
+---
+
+### 🤖 Asistente (2026-10-19 09:24:32)
+
+Se han ajustado las tipografías tanto en los logos como en las tarjetas para que se lean con más claridad y elegancia sin verse excesivamente gruesas:
+
+### 1. Logos de Fondos ([CompanyLogo.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx))
+- **Grosor reducido**: De `fontWeight="900"` (black/extra pesado) a `fontWeight="700"` (bold limpio).
+- **Tamaño aumentado**:
+  - **Cobas (`C`)**: Aumentado a `fontSize="22"` (escala `90%` del círculo).
+  - **iShares (`iS`)**: Aumentado a `fontSize="19"` (escala `90%` del círculo).
+  - **Azvalor (`azV`)**: Aumentado a `fontSize="18"` (escala `94%` del círculo) con espaciado equilibrado para que no se apelmacen.
+
+### 2. Tarjetas cuadradas 2x2 ([SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx))
+- Se suavizó el peso de los textos principales y badges de `font-extrabold` (800) a `font-bold` (700).
+- Se aumentó ligeramente el tamaño de fuente (`text-[14.5px] sm:text-base` para nombres/precios y `text-xs sm:text-[13.5px]` para los badges de rentabilidad), logrando mayor legibilidad y un aspecto más estilizado.
+
+Los cambios han sido compilados y sincronizados en la versión **v3.0.156**.
+
+---
+
+### 👤 Usuario (2026-10-19 09:24:32)
+
+azValor perfecto, en iShares mueve hacia abajo y la derecha y pelo más negrita
 
 ---
