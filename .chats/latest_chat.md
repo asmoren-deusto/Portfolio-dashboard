@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:48:33
+- **Fecha de exportación:** 2026-10-19 10:50:49
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 44
+- **Total de interacciones registradas:** 46
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -907,5 +907,22 @@ Ambas correcciones están integradas, verificadas y publicadas en **`v3.0.145`**
 ### 👤 Usuario (2026-10-19 08:43:49)
 
 anula lo del peso con el circulo y elimina todos esos badges
+
+---
+
+### 🤖 Asistente (2026-10-19 08:48:36)
+
+Listo. Se han aplicado los cambios en [SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+1. **Peso como texto simple:** Se anuló el indicador circular SVG en la columna *Peso*, dejando únicamente el porcentaje numérico en formato limpio (`26.0%`, etc.).
+2. **Eliminación de badges:** Se eliminaron todas las píldoras/badges de proxies (`ES=F`, `NQ=F`, `NIY=F`, `^STOXX50E`) de la columna *Cotiz. ETF*, dejando la cotización y variación limpia y alineada.
+3. **Ambas pestañas actualizadas:** Los cambios se aplicaron tanto en *Por Fondos* como en *ETFs Agrupados*.
+4. **Build y Sincronización:** Compilado con éxito (`npm run build`) y publicado en Git con la versión **`v3.0.146`**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:48:58)
+
+elimina el rendimiento a 7D de la tarjeta valor total de la cartera en vision general
 
 ---

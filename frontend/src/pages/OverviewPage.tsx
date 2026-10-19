@@ -636,7 +636,7 @@ export function OverviewPage() {
               />
             }
             extra={
-              ((shortTermMetrics && (shortTermMetrics.dayPct !== undefined || shortTermMetrics.weekPct !== undefined)) || (sessionPct !== undefined && !isNaN(sessionPct))) && (
+              ((shortTermMetrics && shortTermMetrics.dayPct !== undefined) || (sessionPct !== undefined && !isNaN(sessionPct))) && (
                 <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
                   {shortTermMetrics?.dayPct !== undefined && (
                     <span
@@ -673,24 +673,6 @@ export function OverviewPage() {
                       <span>Live:</span>
                       <span className="font-bold">{fmt.pct(sessionPct)}</span>
                     </Link>
-                  )}
-
-                  {shortTermMetrics?.weekPct !== undefined && (
-                    <span
-                      data-private
-                      title={shortTermMetrics.weekAmount !== undefined ? `Rendimiento 7 Días: ${shortTermMetrics.weekAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.weekAmount)} (${fmt.pct(shortTermMetrics.weekPct)})` : `Rendimiento 7 Días: ${fmt.pct(shortTermMetrics.weekPct)}`}
-                      className={cn(
-                        'inline-flex items-center font-mono font-semibold border transition-all cursor-default',
-                        isNativePlatform() ? 'px-1.5 py-0.5 text-[10.5px] rounded-md gap-0.5' : 'px-2 py-0.5 text-xs rounded-lg gap-1',
-                        shortTermMetrics.weekPct >= 0
-                          ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20'
-                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
-                      )}
-                    >
-                      <Calendar className={isNativePlatform() ? "w-2.5 h-2.5 stroke-[2.2]" : "w-3 h-3 stroke-[2.5]"} />
-                      <span>7D:</span>
-                      <span className="font-bold">{fmt.pct(shortTermMetrics.weekPct)}</span>
-                    </span>
                   )}
                 </div>
               )
