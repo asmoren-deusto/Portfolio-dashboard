@@ -100,15 +100,19 @@ export const ISharesLogo: React.FC<{ sizeClasses: string; className?: string; ti
       className={`${sizeClasses} rounded-full bg-black flex items-center justify-center shrink-0 border border-white/20 shadow-xs overflow-hidden select-none ${className}`}
       title={title}
     >
-      <svg viewBox="0 0 32 32" className="w-[82%] h-[82%]" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* iShares distinctive slanted italic 'i' in red */}
-        <circle cx="10" cy="8.5" r="2.4" fill="#FA3E3E" />
-        <path d="M8.2 13.5H12.2L10.2 23.5H6.2L8.2 13.5Z" fill="#FA3E3E" />
-        {/* Bold 'S' in crisp white */}
-        <path
-          d="M15.5 22.2C16.5 22.8 17.7 23.2 19 23.2C21.4 23.2 22.8 21.9 22.8 20.2C22.8 17.5 19.3 16.9 19.3 15.6C19.3 14.8 20 14.3 21 14.3C22 14.3 22.9 14.7 23.6 15.2L24.5 13.4C23.6 12.8 22.3 12.4 21 12.4C18.7 12.4 17.3 13.7 17.3 15.4C17.3 18.2 20.8 18.7 20.8 20C20.8 20.9 20 21.4 18.9 21.4C17.7 21.4 16.6 20.9 15.8 20.3L15.5 22.2Z"
-          fill="#FFFFFF"
-        />
+      <svg viewBox="0 0 32 32" className="w-[88%] h-[88%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text
+          x="16"
+          y="22"
+          textAnchor="middle"
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          fontWeight="900"
+          fontSize="17.5"
+          letterSpacing="-0.5"
+        >
+          <tspan fill="#FA3E3E">i</tspan>
+          <tspan fill="#FFFFFF">S</tspan>
+        </text>
       </svg>
     </div>
   )
@@ -124,15 +128,15 @@ export const AzvalorLogo: React.FC<{ sizeClasses: string; className?: string; ti
       className={`${sizeClasses} rounded-full bg-[#0b2144] flex items-center justify-center shrink-0 border border-blue-400/30 shadow-xs overflow-hidden select-none ${className}`}
       title={title}
     >
-      <svg viewBox="0 0 32 32" className="w-[84%] h-[84%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 32 32" className="w-[92%] h-[92%]" fill="none" xmlns="http://www.w3.org/2000/svg">
         <text
           x="16"
-          y="21"
+          y="22"
           textAnchor="middle"
           fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
           fontWeight="900"
-          fontSize="14.5"
-          letterSpacing="-0.8"
+          fontSize="16.5"
+          letterSpacing="-0.9"
           fill="#FFFFFF"
         >
           az<tspan fill="#38BDF8" fontWeight="800">V</tspan>
@@ -149,12 +153,23 @@ export const CobasLogo: React.FC<{ sizeClasses: string; className?: string; titl
 }) => {
   return (
     <div
-      className={`${sizeClasses} rounded-full bg-[#681421] flex items-center justify-center shrink-0 border border-rose-300/25 shadow-xs overflow-hidden select-none ${className}`}
+      className={`${sizeClasses} rounded-full bg-[#681421] flex items-center justify-center shrink-0 border border-rose-300/30 shadow-xs overflow-hidden select-none ${className}`}
       title={title}
     >
-      <span className="font-sans font-black tracking-tighter text-white text-[9.5px] leading-none select-none">
-        cobas
-      </span>
+      <svg viewBox="0 0 32 32" className="w-[88%] h-[88%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text
+          x="16"
+          y="22.5"
+          textAnchor="middle"
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          fontWeight="900"
+          fontSize="19.5"
+          letterSpacing="-0.5"
+          fill="#FFFFFF"
+        >
+          C
+        </text>
+      </svg>
     </div>
   )
 }
