@@ -631,59 +631,50 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   </div>
                 </div>
 
-                {/* 2. Live Indicative Pre-Market Box (CME Futures Proxy over Previous Reference) */}
-                <div
-                  className={cn(
-                    'flex items-center gap-2.5 px-3 py-1 rounded-xl border transition-all shadow-2xs',
-                    currentPct >= 0
-                      ? 'bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/30'
-                      : 'bg-rose-500/10 dark:bg-rose-500/15 border-rose-500/30'
-                  )}
-                >
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
-                      <span className={cn('live-dot', currentPct >= 0 ? 'emerald' : 'warn')} />
-                      <span>Pre-apertura {summary.pre_market_time || 'en directo'}</span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-0.5">
-                      <AnimatePresence mode="wait" initial={false}>
-                        <motion.span
-                          key={`pre-pct-${selectedBroker}-${currencyMode}-${currentPct}`}
-                          initial={{ opacity: 0, y: 3 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -3 }}
-                          transition={{ duration: 0.2 }}
-                          className={cn(
-                            'text-lg sm:text-xl font-black font-mono tracking-tight',
-                            currentPct >= 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-rose-600 dark:text-rose-400'
-                          )}
-                        >
-                          {currentPct >= 0 ? '+' : ''}
-                          {currentPct.toFixed(2)}%
-                        </motion.span>
-                      </AnimatePresence>
+                {/* 2. Live Indicative Pre-Market (CME Futures Proxy over Previous Reference) */}
+                <div className="pl-1 sm:pl-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                    <span className={cn('live-dot', currentPct >= 0 ? 'emerald' : 'warn')} />
+                    <span>Pre-apertura {summary.pre_market_time || 'en directo'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span
+                        key={`pre-pct-${selectedBroker}-${currencyMode}-${currentPct}`}
+                        initial={{ opacity: 0, y: 3 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -3 }}
+                        transition={{ duration: 0.2 }}
+                        className={cn(
+                          'text-lg sm:text-xl font-black font-mono tracking-tight leading-none',
+                          currentPct >= 0
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                        )}
+                      >
+                        {currentPct >= 0 ? '+' : ''}
+                        {currentPct.toFixed(2)}%
+                      </motion.span>
+                    </AnimatePresence>
 
-                      <AnimatePresence mode="wait" initial={false}>
-                        <motion.span
-                          key={`pre-amt-${selectedBroker}-${currencyMode}-${currentAmount}`}
-                          initial={{ opacity: 0, y: 3 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -3 }}
-                          transition={{ duration: 0.2 }}
-                          className={cn(
-                            'text-xs font-bold font-mono px-1.5 py-0.2 rounded border',
-                            currentAmount >= 0
-                              ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-emerald-500/30'
-                              : 'bg-rose-500/20 text-rose-800 dark:text-rose-200 border-rose-500/30'
-                          )}
-                        >
-                          {currentAmount >= 0 ? '+' : ''}
-                          {fmt.currency(currentAmount)}
-                        </motion.span>
-                      </AnimatePresence>
-                    </div>
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span
+                        key={`pre-amt-${selectedBroker}-${currencyMode}-${currentAmount}`}
+                        initial={{ opacity: 0, y: 3 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -3 }}
+                        transition={{ duration: 0.2 }}
+                        className={cn(
+                          'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center leading-none',
+                          currentAmount >= 0
+                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                            : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
+                        )}
+                      >
+                        {currentAmount >= 0 ? '+' : ''}
+                        {fmt.currency(currentAmount)}
+                      </motion.span>
+                    </AnimatePresence>
                   </div>
                 </div>
               </div>

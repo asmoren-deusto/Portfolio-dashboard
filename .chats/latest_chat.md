@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:25:39
+- **Fecha de exportación:** 2026-10-19 10:26:42
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 33
+- **Total de interacciones registradas:** 35
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -577,5 +577,29 @@ Se ha actualizado el proxy de Japón (`EWJ`) en [market.py](file:///c:/Users/Asi
 ### 👤 Usuario (2026-10-19 08:22:41)
 
 elimina la pildora de entidad en el desglose de replicas. amplia un poco el padding
+
+---
+
+### 🤖 Asistente (2026-10-19 08:25:41)
+
+Aplicados ambos cambios en [SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+1. **Eliminada la píldora de entidad en el desglose:**  
+   * En la columna de **Fondo en Cartera**, se ha retirado la píldora de broker (`BBVA`, `MyInvestor`, `Indexa`, etc.).  
+   * Ahora la celda muestra de forma limpia y directa:
+     * **Línea 1:** Nombre del fondo en negrita.
+     * **Línea 2:** El **ISIN** en tipografía monoespaciada gris (`text-slate-400`).
+
+2. **Padding vertical ampliado:**  
+   * Se ha aumentado el padding de las celdas de `py-1` a `py-1.5` en ambas pestañas (fondos y réplicas agrupadas).
+   * La tabla respira con mayor holgura visual manteniendo una altura contenida para que sigan entrando las posiciones completas.
+
+*(Compilado, verificado y sincronizado en la versión **v3.0.141**).*
+
+---
+
+### 👤 Usuario (2026-10-19 08:23:49)
+
+quita el recuadro externo, de la linea inferior centra en altura el badge con la cantidad
 
 ---
