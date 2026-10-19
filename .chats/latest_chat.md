@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:46:20
+- **Fecha de exportación:** 2026-10-19 10:48:33
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 42
+- **Total de interacciones registradas:** 44
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -854,5 +854,58 @@ INFO:     Application shutdown complete.
 INFO:     Finished server process [24220]
 [INFO] Servidores detenidos correctamente.
 PS C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard>
+
+---
+
+### 🤖 Asistente (2026-10-19 08:46:23)
+
+El problema que provocaba que la app local se cerrara periódicamente se debía a la conjunción de **dos causas concretas**:
+
+---
+
+### 1. El detonante: Señales cruzadas en consola de Windows y `WatchFiles`
+En el log aparecía:
+```text
+WARNING: WatchFiles detected changes in 'app\routers\market.py'. Reloading...
+[INFO] Deteniendo servicios...
+¿Desea terminar el trabajo por lotes (S/N)? INFO: Shutting down
+```
+- **Qué ocurría:** Cuando Uvicorn detecta cambios en caliente con `--reload`, para reiniciar el worker envía una señal de terminación (`CTRL_C_EVENT` / `CTRL_BREAK_EVENT`) a su proceso hijo.
+- En Windows, al ejecutarse mediante `subprocess.Popen` sin aislamiento de grupo de procesos, esa señal se propagaba a **toda la consola**.
+- Como consecuencia:
+  1. `npm.cmd` recibía la señal y preguntaba el clásico `¿Desea terminar el trabajo por lotes (S/N)?`.
+  2. `start.py` recibía un `KeyboardInterrupt`, creyendo que el usuario había pulsado `Ctrl+C`, y ejecutaba su bloque `finally:` matando todo el entorno.
+  3. Si Uvicorn se detenía por cualquier motivo, `start.py` hacía un `break` en lugar de auto-resucitarlo (a diferencia de Vite).
+
+---
+
+### 2. El error no capturado en `_periodic_nav_scanner`:
+En el log también figuraba:
+```text
+future: <Task finished name='Task-4' coro=<..._periodic_nav_scanner() done...> exception=NameError("name 'datetime' is not defined")>
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'?
+```
+- A los 30 segundos de arrancar, el escáner de fondos ejecutaba `now = datetime.now()`, pero `from datetime import datetime` faltaba en los imports superiores de [main.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/main.py), provocando que la tarea en segundo plano colapsara.
+
+---
+
+### 🛠️ Soluciones aplicadas
+
+1. **Aislamiento de procesos en [start.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/start.py):**
+   - Se añadió `creationflags=subprocess.CREATE_NEW_PROCESS_GROUP` en Windows. Así, las recargas internas de Uvicorn quedan aisladas en su propio grupo y **no emiten falsos Ctrl+C** al proceso principal ni a Vite.
+   - Se configuró `stdin=subprocess.DEVNULL` en los procesos secundarios para evitar el bloqueo interactivo de Windows (`¿Desea terminar el trabajo por lotes...?`).
+   - Se implementó **auto-resurrección automática** también para Uvicorn (si por alguna razón se cae, `start.py` lo reinicia en 1 segundo sin tumbar la sesión).
+
+2. **Corrección del escáner en [main.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/main.py):**
+   - Se importó `from datetime import datetime`.
+   - Se blindó todo el bucle de `_periodic_nav_scanner` con captura de excepciones y manejo de `asyncio.CancelledError`, impidiendo que cualquier error imprevisto mate la corrutina.
+
+Ambas correcciones están integradas, verificadas y publicadas en **`v3.0.145`**. Ya puedes ejecutar `python start.py` de forma continua y estable sin que se detenga durante las recargas automáticas.
+
+---
+
+### 👤 Usuario (2026-10-19 08:43:49)
+
+anula lo del peso con el circulo y elimina todos esos badges
 
 ---

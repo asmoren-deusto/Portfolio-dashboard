@@ -81,34 +81,6 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
   },
 }
 
-const WeightCircle: React.FC<{ weight: number }> = ({ weight }) => (
-  <div className="flex items-center justify-end gap-1.5" title={`Peso en cartera: ${weight.toFixed(1)}%`}>
-    <svg className="w-3.5 h-3.5 -rotate-90 shrink-0" viewBox="0 0 36 36">
-      <circle
-        cx="18"
-        cy="18"
-        r="15.9155"
-        fill="none"
-        className="stroke-slate-200 dark:stroke-white/[0.1]"
-        strokeWidth="4"
-      />
-      <circle
-        cx="18"
-        cy="18"
-        r="15.9155"
-        fill="none"
-        className="stroke-indigo-500 dark:stroke-indigo-400"
-        strokeWidth="4"
-        strokeDasharray={`${Math.min(100, Math.max(0, weight))}, 100`}
-        strokeLinecap="round"
-      />
-    </svg>
-    <span className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
-      {weight.toFixed(1)}%
-    </span>
-  </div>
-)
-
 export interface SimulatedPortfolioCardProps {
   marketStats?: {
     advancing: number
@@ -1059,23 +1031,15 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
                           {/* Weight */}
                           <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
-                            <WeightCircle weight={h.weight} />
+                            <div className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
+                              {h.weight.toFixed(1)}%
+                            </div>
                           </td>
 
                           {/* Live ETF Quote Price and Daily % */}
                           <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
-                            <div className="flex items-center justify-end gap-1.5">
-                              {h.proxy_used && (
-                                <span
-                                  className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25"
-                                  title={`Proyección en tiempo real vía futuros ${h.proxy_used}`}
-                                >
-                                  {h.proxy_used}
-                                </span>
-                              )}
-                              <span className={cn('font-mono font-bold text-xs', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-                                {isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%
-                              </span>
+                            <div className={cn('font-mono font-bold text-xs', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                              {isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%
                             </div>
                             {h.etf_price && (
                               <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
@@ -1154,17 +1118,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               </td>
 
                               <td className="py-1.5 px-1.5 text-right font-mono font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
-                                <div className="flex items-center justify-end gap-1.5">
-                                  {etf.proxy_used && (
-                                    <span
-                                      className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25"
-                                      title={`Proyección en tiempo real vía futuros ${etf.proxy_used}`}
-                                    >
-                                      {etf.proxy_used}
-                                    </span>
-                                  )}
-                                  <span>{etf.price ? fmt.currency(etf.price, etf.currency) : '-'}</span>
-                                </div>
+                                <span>{etf.price ? fmt.currency(etf.price, etf.currency) : '-'}</span>
                               </td>
 
                               <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
@@ -1181,7 +1135,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               </td>
 
                               <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
-                                <WeightCircle weight={etf.weight} />
+                                <div className="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
+                                  {etf.weight}%
+                                </div>
                               </td>
 
                               <td className="py-1.5 px-1.5 text-right font-mono font-bold text-xs text-slate-900 dark:text-white whitespace-nowrap">
