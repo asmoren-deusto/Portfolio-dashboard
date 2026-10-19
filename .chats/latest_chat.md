@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:23:56
+- **Fecha de exportación:** 2026-10-19 10:25:39
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 31
+- **Total de interacciones registradas:** 33
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -544,5 +544,38 @@ Se ha rediseñado la tabla en [SimulatedPortfolioCard.tsx](file:///c:/Users/Asie
 ### 👤 Usuario (2026-10-19 08:18:17)
 
 por que me marca los futuros de nikkei a +1.62 y la replica a -0.66?
+
+---
+
+### 🤖 Asistente (2026-10-19 08:23:59)
+
+El motivo de esa discrepancia era una **diferencia de fuente entre el mercado de contado físico y el mercado de futuros continuos**:
+
+---
+
+### ¿Por qué ocurría esto?
+
+1. **La tarjeta de "Mayor Ganancia" (`+1.62%` / `+1.71%`)**:  
+   Como la Bolsa de Tokio cerró esta madrugada (a las 07:30 CET), el widget de índices proyecta el Nikkei 225 a través de los **futuros continuos de Chicago (`NIY=F` - CME Globex)**, los cuales cotizan 23 horas al día y ahora mismo van subiendo con fuerza un **`+1.6%`**.
+
+2. **La réplica del fondo de Japón en la tabla (`-0.66%`)**:  
+   En la tabla de simulación de fondos, la réplica de Japón (`EWJ`) estaba configurada apuntando a `^N225` (el índice de contado de Tokio). Como la sesión física de Tokio ya había cerrado esta mañana con una caída consolidada del **`-0.66%`**, la réplica se quedó fijada en ese dato antiguo en vez de conectarse a los futuros activos.
+
+---
+
+### Solución aplicada
+
+Se ha actualizado el proxy de Japón (`EWJ`) en [market.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py) para que utilice directamente los **futuros continuos `NIY=F` (CME Globex)** fuera del horario de Tokio:
+
+* Ahora el fondo de Japón (`Fidelity MSCI Japan`) en la tabla replica en tiempo real los futuros de Tokio (`NIY=F` al **`+1.5%` / `+1.6%`** con la etiqueta `NIY=F`).
+* Todo el panel queda **100% coherente y sincronizado**: tanto la tarjeta de Mayor Ganancia como la réplica de tu fondo reflejan exactamente la misma cotización en vivo de los futuros japoneses.
+
+*(Liberado y sincronizado en la versión **v3.0.140**).*
+
+---
+
+### 👤 Usuario (2026-10-19 08:22:41)
+
+elimina la pildora de entidad en el desglose de replicas. amplia un poco el padding
 
 ---
