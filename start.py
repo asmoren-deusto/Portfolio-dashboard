@@ -82,6 +82,7 @@ if __name__ == "__main__":
     print(" Presione Ctrl+C para detener todo.\n")
 
     npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
+    creation_flags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
 
     frontend_proc = None
     backend_proc = None
@@ -89,7 +90,12 @@ if __name__ == "__main__":
     try:
         # 1. Iniciar Vite frontend
         if os.path.exists(os.path.join(frontend_dir, "package.json")):
-            frontend_proc = subprocess.Popen([npm_cmd, "run", "dev"], cwd=frontend_dir)
+            frontend_proc = subprocess.Popen(
+                [npm_cmd, "run", "dev"],
+                cwd=frontend_dir,
+                stdin=subprocess.DEVNULL,
+                creationflags=creation_flags
+            )
         else:
             print("[WARN] No se encontró la carpeta frontend o package.json")
 
@@ -99,22 +105,38 @@ if __name__ == "__main__":
             "--reload", "--reload-dir", "app", "--reload-include", "*.py",
             "--host", "0.0.0.0", "--port", "8000"
         ]
-        backend_proc = subprocess.Popen(backend_cmd, cwd=backend_dir)
+        backend_proc = subprocess.Popen(
+            backend_cmd,
+            cwd=backend_dir,
+            stdin=subprocess.DEVNULL,
+            creationflags=creation_flags
+        )
 
         # 3. Abrir navegador en segundo plano
         threading.Thread(target=open_browser, daemon=True).start()
 
-        # 4. Supervisor continuo: resucitar Vite si se detiene
+        # 4. Supervisor continuo: resucitar Vite o Backend si se detienen
         while True:
             time.sleep(1.0)
             if frontend_proc and frontend_proc.poll() is not None:
-                print("\n[WARN] El servidor frontend de Vite se detuvo. Reiniciando...")
+                print(f"\n[WARN] El servidor frontend de Vite se detuvo (código: {frontend_proc.returncode}). Reiniciando frontend...")
                 time.sleep(1.0)
-                frontend_proc = subprocess.Popen([npm_cmd, "run", "dev"], cwd=frontend_dir)
+                frontend_proc = subprocess.Popen(
+                    [npm_cmd, "run", "dev"],
+                    cwd=frontend_dir,
+                    stdin=subprocess.DEVNULL,
+                    creationflags=creation_flags
+                )
 
             if backend_proc and backend_proc.poll() is not None:
-                print("\n[WARN] El servidor backend de Uvicorn se detuvo. Código:", backend_proc.returncode)
-                break
+                print(f"\n[WARN] El servidor backend de Uvicorn se detuvo (código: {backend_proc.returncode}). Reiniciando backend...")
+                time.sleep(1.0)
+                backend_proc = subprocess.Popen(
+                    backend_cmd,
+                    cwd=backend_dir,
+                    stdin=subprocess.DEVNULL,
+                    creationflags=creation_flags
+                )
 
     except KeyboardInterrupt:
         print("\n[INFO] Deteniendo servicios...")

@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 10:42:59
+- **Fecha de exportación:** 2026-10-19 10:46:20
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 40
+- **Total de interacciones registradas:** 42
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -679,5 +679,180 @@ Todos los componentes han sido desplegados y sincronizados en la versión **`v3.
 ### 👤 Usuario (2026-10-19 08:31:15)
 
 reduce un poco las dos primeras columnas para que quepa todo el horizontal. la linea de peso igual si es un circulo cabe mejor
+
+---
+
+### 🤖 Asistente (2026-10-19 08:43:02)
+
+Se han aplicado las optimizaciones de espacio y diseño en [SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx):
+
+1. **Ajuste de anchos para evitar corte horizontal**:
+   - **Columna 1 ("Fondo en Cartera"):** Reducida a `min-w-[140px] max-w-[165px]` con truncado inteligente.
+   - **Columna 2 ("ETF Réplica"):** Reducida a `min-w-[125px] max-w-[150px]`.
+   - **Tabla general:** Se eliminó el ancho forzado de `min-w-[760px]`, permitiendo que la tabla se ajuste al contenedor y que la última columna **"Impacto Hoy"** quepa en pantalla completa sin cortarse ni requerir scroll horizontal.
+   - **Paddings laterales:** Optimizados a `px-1.5` en las columnas intermedias para maximizar el área útil.
+
+2. **Indicador de Peso en formato Círculo**:
+   - Se sustituyó la barra horizontal inferior por un **anillo de progreso circular SVG compacto (`14px`)** junto al porcentaje (`WeightCircle`).
+   - El arco del círculo se rellena de forma proporcional exacta al porcentaje de peso en la cartera (`0%` a `100%`), reduciendo tanto el ancho como la altura ocupada.
+   - Aplicado de manera consistente tanto en la pestaña **"Por Fondos"** como en **"ETFs Agrupados"**.
+
+3. **Release y Sincronización**:
+   - Compilado y verificado con `npm run build`.
+   - Sincronizado y publicado en Git mediante `sync_release.py` con la versión **`v3.0.144`**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:34:24)
+
+la app local dev se me para cada poco y tengo que reiniciarla: INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/QCOM?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/AMAT?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/MU?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/META?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/IBM?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/CSCO?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/AMD?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/ADBE?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/PLTR?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/MSFT?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/AVGO?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/CRM?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/GOOGL?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/INTC?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/TSLA?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:63513 - "GET /api/portfolio/summary?broker=myinvestor HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63515 - "GET /api/portfolio/summary?broker=bbva HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63517 - "GET /api/portfolio/positions?broker=bbva HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63514 - "GET /api/portfolio/positions?broker=myinvestor HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/AMZN?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/PG?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:63546 - "GET /api/portfolio/positions?broker=indexa HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63545 - "GET /api/portfolio/summary?broker=indexa HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/HD?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/PM?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/COST?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/KO?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/BRK-B?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/WMT?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/MCD?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/MA?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/PEP?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/JPM?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/AXP?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/BAC?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/GS?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/WFC?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/V?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/MS?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/BLK?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/%5EHSI?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/ABBV?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/AZN?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/GILD?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/LLY?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/JNJ?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/RTX?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/AMGN?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/MRK?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/UNP?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/CAT?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/PFE?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/UNH?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/GE?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/HON?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:63412 - "GET /api/market/simulated-portfolio?period=1d&user_id=asier HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/BA?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/NFLX?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/VZ?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/DIS?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/T?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/XOM?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/SHEL?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/COP?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/CVX?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/NEE?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:63449 - "GET /api/market/quotes HTTP/1.1" 200 OK
+INFO:app.main:Executing periodic NAV scanner...
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU0261952682-Fidelity_funds__euro_stoxx_50_tm_aacc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE000QAZP7L2-Ishares_emerging_markets_index_ie_s_acc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=LU1598719752 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5NH74-Fidelity_msci_japan_index_p_acc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/ES0112611001-Azvalor_internacional_fi "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU1598719752-Cobas_international_fund_p_eur_acc "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU0302296495-Dnb_fund_technology_a_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=IE00BYX5NH74 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5M476-Fidelity_msci_emerging_markets_index_p_acc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5NX33-Fidelity_msci_world_index_p_acc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=ES0112611001 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=IE00BYX5NH74:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=LU1598719752:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU0261952682-Fidelity_euro_stoxx_50_aacceur "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://areacliente.azvalor.com/api/product/international/prices?filename=international "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=LU0261952682 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=IE00BYX5NX33 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=IE000QAZP7L2 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=LU0302296495:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=LU0261952682:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=IE00BYX5NX33:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU1598719752-Cobas_international_p_acc_eur "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU0302296495-Dnb_fund_technology_retail_a "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=IE00BYX5M476 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5M476-Fidelity_msci_emerg_mkts_indx_eur_p_acc "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5NH74-Fidelity_msci_japan_index_eur_p_acc_h "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=LU0302296495 "HTTP/1.1 200 "
+INFO:app.services.price_service:Selected LU0302296495 NAV 2097.3822 (2026-10-15) from source: finect
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE000QAZP7L2-Ishares_emergmkts_idx_ie_s_acc_eur "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=ES0112611001:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=IE00BYX5M476:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5NX33-Fidelity_msci_world_index_eur_p_acc "HTTP/1.1 200 OK"
+INFO:app.services.price_service:Selected ES0112611001 NAV 361.83522 (2026-10-15) from source: quefondos        
+INFO:httpx:HTTP Request: GET https://indexacapital.com/es/esp/stats/download?stat=epsv "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=IE000QAZP7L2:EUR "HTTP/1.1 200 OK"
+INFO:app.services.price_service:Selected IE00BYX5NH74 NAV 14.5672 (2026-10-16) from source: finect
+INFO:app.services.price_service:Selected IE000QAZP7L2 NAV 13.548 (2026-10-15) from source: finect
+INFO:app.services.price_service:Selected LU0261952682 NAV 28.86 (2026-10-16) from source: finect
+INFO:httpx:HTTP Request: GET https://www.cobasam.com/productos/cobas-lux-sicav/lux_international_eur/ "HTTP/1.1 200 OK"
+INFO:app.services.price_service:Selected IE00BYX5NX33 NAV 14.472 (2026-10-16) from source: finect
+INFO:app.services.price_service:Selected IE00BYX5M476 NAV 8.7431 (2026-10-16) from source: finect
+INFO:app.services.price_service:Selected LU1598719752 NAV 179.51 (2026-10-15) from source: cobas
+INFO:app.routers.portfolio:Refreshed prices for 9 assets: 0 updated
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-4' coro=<startup.<locals>._periodic_nav_scanner() done, defined at C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py:85> exception=NameError("name 'datetime' is not defined")>
+Traceback (most recent call last):
+  File "C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py", line 100, in _periodic_nav_scanner
+    now = datetime.now()
+          ^^^^^^^^
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'?
+INFO:     127.0.0.1:63700 - "GET /api/portfolio/latest-nav-alert?since=nav_1792396724515 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63714 - "GET /api/market/simulated-portfolio?period=1d&user_id=asier HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63744 - "GET /api/market/indices HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63780 - "GET /api/portfolio/latest-nav-alert?since=nav_1792396724515 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63783 - "GET /api/portfolio/latest-nav-alert?since=nav_1792396724515 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/URTH?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/EEM?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/%5EIXIC?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:63877 - "GET /api/portfolio/latest-nav-alert?since=nav_1792396724515 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/FEZ?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/EWJ?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/COWZ?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/EFV?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/ACWI?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/XLK?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://query1.finance.yahoo.com/v8/finance/chart/%5EHSI?range=1d&interval=1m&includePrePost=true "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:63882 - "GET /api/market/simulated-portfolio?period=1d&user_id=asier HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61766 - "GET /api/portfolio/latest-nav-alert?since=nav_1792396724515 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61779 - "GET /api/portfolio/latest-nav-alert?since=nav_1792396724515 HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app\routers\market.py'. Reloading...
+ 
+[INFO] Deteniendo servicios...
+¿Desea terminar el trabajo por lotes (S/N)? INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [24220]
+[INFO] Servidores detenidos correctamente.
+PS C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard>
 
 ---

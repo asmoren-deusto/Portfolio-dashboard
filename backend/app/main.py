@@ -6,6 +6,9 @@ from fastapi.responses import FileResponse
 import os
 import logging
 
+from datetime import datetime
+import asyncio
+
 from app.database import init_db
 from app.routers import portfolio, transactions, assets, market, auth
 
@@ -84,8 +87,13 @@ async def startup():
 
     async def _periodic_nav_scanner():
         # Allow initial app boot and warm-up to finish first
-        await asyncio.sleep(30)
+        try:
+            await asyncio.sleep(30)
+        except asyncio.CancelledError:
+            return
+
         while True:
+            sleep_sec = 2700
             try:
                 from app.database import SessionLocal
                 from app.routers.portfolio import check_portfolio_navs
@@ -93,16 +101,22 @@ async def startup():
                 logger.info("Executing periodic NAV scanner...")
                 await check_portfolio_navs(user_id="asier", db=db)
                 db.close()
+
+                # Intelligent interval: Funds publish NAVs weekdays 18:00-23:59 CET.
+                now = datetime.now()
+                is_weekday = now.weekday() < 5
+                is_evening = 18 <= now.hour <= 23
+                # 15 minutes (900s) during publication window, 45 minutes (2700s) off-hours
+                sleep_sec = 900 if (is_weekday and is_evening) else 2700
+            except asyncio.CancelledError:
+                break
             except Exception as e:
                 logger.warning(f"Error in periodic NAV scanner: {e}")
 
-            # Intelligent interval: Funds publish NAVs weekdays 18:00-23:59 CET.
-            now = datetime.now()
-            is_weekday = now.weekday() < 5
-            is_evening = 18 <= now.hour <= 23
-            # 15 minutes (900s) during publication window, 45 minutes (2700s) off-hours
-            sleep_sec = 900 if (is_weekday and is_evening) else 2700
-            await asyncio.sleep(sleep_sec)
+            try:
+                await asyncio.sleep(sleep_sec)
+            except asyncio.CancelledError:
+                break
 
     import asyncio
     asyncio.create_task(_warm_cache())
