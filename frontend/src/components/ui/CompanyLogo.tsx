@@ -90,6 +90,75 @@ function getAvatarGradient(str: string): string {
   return gradients[index]
 }
 
+export const ISharesLogo: React.FC<{ sizeClasses: string; className?: string; title?: string }> = ({
+  sizeClasses,
+  className = '',
+  title = 'iShares by BlackRock',
+}) => {
+  return (
+    <div
+      className={`${sizeClasses} rounded-full bg-black flex items-center justify-center shrink-0 border border-white/20 shadow-xs overflow-hidden select-none ${className}`}
+      title={title}
+    >
+      <svg viewBox="0 0 32 32" className="w-[82%] h-[82%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* iShares distinctive slanted italic 'i' in red */}
+        <circle cx="10" cy="8.5" r="2.4" fill="#FA3E3E" />
+        <path d="M8.2 13.5H12.2L10.2 23.5H6.2L8.2 13.5Z" fill="#FA3E3E" />
+        {/* Bold 'S' in crisp white */}
+        <path
+          d="M15.5 22.2C16.5 22.8 17.7 23.2 19 23.2C21.4 23.2 22.8 21.9 22.8 20.2C22.8 17.5 19.3 16.9 19.3 15.6C19.3 14.8 20 14.3 21 14.3C22 14.3 22.9 14.7 23.6 15.2L24.5 13.4C23.6 12.8 22.3 12.4 21 12.4C18.7 12.4 17.3 13.7 17.3 15.4C17.3 18.2 20.8 18.7 20.8 20C20.8 20.9 20 21.4 18.9 21.4C17.7 21.4 16.6 20.9 15.8 20.3L15.5 22.2Z"
+          fill="#FFFFFF"
+        />
+      </svg>
+    </div>
+  )
+}
+
+export const AzvalorLogo: React.FC<{ sizeClasses: string; className?: string; title?: string }> = ({
+  sizeClasses,
+  className = '',
+  title = 'Azvalor Asset Management',
+}) => {
+  return (
+    <div
+      className={`${sizeClasses} rounded-full bg-[#0b2144] flex items-center justify-center shrink-0 border border-blue-400/30 shadow-xs overflow-hidden select-none ${className}`}
+      title={title}
+    >
+      <svg viewBox="0 0 32 32" className="w-[84%] h-[84%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text
+          x="16"
+          y="21"
+          textAnchor="middle"
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          fontWeight="900"
+          fontSize="14.5"
+          letterSpacing="-0.8"
+          fill="#FFFFFF"
+        >
+          az<tspan fill="#38BDF8" fontWeight="800">V</tspan>
+        </text>
+      </svg>
+    </div>
+  )
+}
+
+export const CobasLogo: React.FC<{ sizeClasses: string; className?: string; title?: string }> = ({
+  sizeClasses,
+  className = '',
+  title = 'Cobas Asset Management',
+}) => {
+  return (
+    <div
+      className={`${sizeClasses} rounded-full bg-[#681421] flex items-center justify-center shrink-0 border border-rose-300/25 shadow-xs overflow-hidden select-none ${className}`}
+      title={title}
+    >
+      <span className="font-sans font-black tracking-tighter text-white text-[9.5px] leading-none select-none">
+        cobas
+      </span>
+    </div>
+  )
+}
+
 export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   ticker,
   isin,
@@ -143,25 +212,32 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     Boolean(ticker && ticker.toLowerCase().includes('ishares')) ||
     Boolean(isin && (isin === 'IE000QAZP7L2' || isin === 'IE000ZYRH0Q7'))
 
+  const isAzvalor =
+    Boolean(cleanDomain?.includes('azvalor')) ||
+    (name || '').toLowerCase().includes('azvalor') ||
+    Boolean(isin && isin === 'ES0112611001')
+
+  const isCobas =
+    Boolean(cleanDomain?.includes('cobas')) ||
+    (name || '').toLowerCase().includes('cobas') ||
+    Boolean(isin && isin === 'LU1598719752')
+
+  // Direct high-fidelity vector rendering for core funds & asset managers
+  if (isIShares) {
+    return <ISharesLogo sizeClasses={sizeClasses} className={className} title={`${name} (iShares)`} />
+  }
+
+  if (isAzvalor) {
+    return <AzvalorLogo sizeClasses={sizeClasses} className={className} title={`${name} (Azvalor)`} />
+  }
+
+  if (isCobas) {
+    return <CobasLogo sizeClasses={sizeClasses} className={className} title={`${name} (Cobas)`} />
+  }
+
   const roundedClass = 'rounded-full'
-
-  const imgPadding = isIShares
-    ? {
-        xs: 'p-0.5',
-        sm: 'p-0.5',
-        md: 'p-1',
-        lg: 'p-1.5',
-        xl: 'p-2',
-      }[size]
-    : 'p-0'
-
-  const containerBg = isIShares
-    ? 'bg-slate-200 dark:bg-slate-200 shadow-sm text-slate-900'
-    : 'bg-slate-100/90 dark:bg-[#252526] shadow-sm'
-
-  const imgFit = isIShares
-    ? 'object-contain'
-    : 'object-cover scale-100'
+  const containerBg = 'bg-slate-100/90 dark:bg-[#252526] shadow-sm'
+  const imgFit = 'object-cover scale-100'
 
   const getSource = (step: number) => {
     if (!cleanDomain && !logoUrl) return null
@@ -180,8 +256,25 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   }
 
   const currentSrc = getSource(attempt)
+
+  // Smart clean initials calculation (avoids showing country codes like ES0, LU1 from ISINs)
+  const getCleanInitials = (): string => {
+    if (ticker && ticker.length <= 5 && !ticker.includes('=')) {
+      return ticker.slice(0, 3).toUpperCase()
+    }
+    const cleanName = (name || '').trim()
+    if (cleanName) {
+      const words = cleanName.split(/\s+/).filter((w) => w.length > 1 && !/^(el|la|los|las|de|del|in|and|the|fi|clase|fond|fund)$/i.test(w))
+      if (words.length >= 2) {
+        return (words[0][0] + words[1][0]).toUpperCase()
+      }
+      return cleanName.slice(0, 3).toUpperCase()
+    }
+    return (ticker || isin || '').slice(0, 3).toUpperCase()
+  }
+
+  const initials = getCleanInitials()
   const fallbackStr = ticker || isin || name
-  const initials = fallbackStr.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || name.slice(0, 2).toUpperCase()
 
   const handleError = () => {
     if (attempt < 2 && cleanDomain) {
@@ -206,17 +299,6 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   }
 
   if (attempt >= 3 || !currentSrc) {
-    if (isIShares) {
-      return (
-        <div
-          className={`${sizeClasses} ${roundedClass} bg-slate-200 dark:bg-slate-200 flex items-center justify-center font-bold tracking-tight text-slate-900 shadow-sm shrink-0 ${className}`}
-          title={`${name} (${fallbackStr})`}
-        >
-          <span className="font-serif italic text-base leading-none select-none text-slate-900">i</span>
-        </div>
-      )
-    }
-
     return (
       <div
         className={`${sizeClasses} ${roundedClass} bg-gradient-to-br ${getAvatarGradient(fallbackStr)} flex items-center justify-center font-bold tracking-tight text-white shadow-md shrink-0 ${className}`}
@@ -229,7 +311,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
 
   return (
     <div
-      className={`${sizeClasses} ${imgPadding} relative ${roundedClass} ${containerBg} flex items-center justify-center overflow-hidden shrink-0 transition-all ${className}`}
+      className={`${sizeClasses} relative ${roundedClass} ${containerBg} flex items-center justify-center overflow-hidden shrink-0 transition-all ${className}`}
     >
       <img
         src={currentSrc}
