@@ -870,10 +870,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     <Flame className="w-4 h-4 text-emerald-500 shrink-0" />
                   </div>
                   <div className="flex items-baseline justify-between mt-1 gap-1.5">
-                    <span className="text-sm sm:text-[15px] font-extrabold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate" title={bestStock.name}>
+                    <span className="text-[14.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate" title={bestStock.name}>
                       {bestStock.name}
                     </span>
-                    <span className="text-xs sm:text-[13px] font-extrabold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-lg border border-emerald-500/30 shadow-2xs shrink-0">
+                    <span className="text-xs sm:text-[13.5px] font-bold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-lg border border-emerald-500/30 shadow-2xs shrink-0">
                       +{bestStock.change_pct?.toFixed(2)}%
                     </span>
                   </div>
@@ -896,10 +896,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     <TrendingDown className="w-4 h-4 text-rose-500 shrink-0" />
                   </div>
                   <div className="flex items-baseline justify-between mt-1 gap-1.5">
-                    <span className="text-sm sm:text-[15px] font-extrabold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate" title={worstStock.name}>
+                    <span className="text-[14.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate" title={worstStock.name}>
                       {worstStock.name}
                     </span>
-                    <span className="text-xs sm:text-[13px] font-extrabold font-mono text-rose-700 dark:text-rose-300 bg-rose-500/15 px-2.5 py-0.5 rounded-lg border border-rose-500/30 shadow-2xs shrink-0">
+                    <span className="text-xs sm:text-[13.5px] font-bold font-mono text-rose-700 dark:text-rose-300 bg-rose-500/15 px-2.5 py-0.5 rounded-lg border border-rose-500/30 shadow-2xs shrink-0">
                       {worstStock.change_pct?.toFixed(2)}%
                     </span>
                   </div>
@@ -918,14 +918,14 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   <Layers className="w-4 h-4 text-blue-500 shrink-0" />
                 </div>
                 <div className="flex items-baseline justify-between mt-1">
-                  <div className="text-sm sm:text-[15px] font-extrabold font-mono text-slate-900 dark:text-white">
+                  <div className="text-[14.5px] sm:text-base font-bold font-mono text-slate-900 dark:text-white">
                     {totalStocks ?? 0} <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-sans">activos</span>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="px-2 py-0.5 rounded-md font-mono font-extrabold text-xs bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
+                    <span className="px-2 py-0.5 rounded-md font-mono font-bold text-xs sm:text-[12.5px] bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
                       {marketStats.advancing} ↑
                     </span>
-                    <span className="px-2 py-0.5 rounded-md font-mono font-extrabold text-xs bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25">
+                    <span className="px-2 py-0.5 rounded-md font-mono font-bold text-xs sm:text-[12.5px] bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25">
                       {marketStats.declining} ↓
                     </span>
                   </div>
@@ -960,12 +960,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                         <ArrowLeftRight className="w-4 h-4 text-teal-500 shrink-0" />
                       </div>
                       <div className="flex items-baseline justify-between mt-1 gap-1.5">
-                        <span className="text-sm sm:text-[15px] font-extrabold font-mono text-slate-900 dark:text-white">
+                        <span className="text-[14.5px] sm:text-base font-bold font-mono text-slate-900 dark:text-white">
                           {eurUsdRate.toFixed(4)}
                         </span>
                         <span
                           className={cn(
-                            'text-xs sm:text-[13px] font-extrabold font-mono px-2.5 py-0.5 rounded-lg border shadow-2xs shrink-0',
+                            'text-xs sm:text-[13.5px] font-bold font-mono px-2.5 py-0.5 rounded-lg border shadow-2xs shrink-0',
                             isEurUsdPos
                               ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                               : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/25'

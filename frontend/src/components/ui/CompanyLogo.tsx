@@ -100,14 +100,14 @@ export const ISharesLogo: React.FC<{ sizeClasses: string; className?: string; ti
       className={`${sizeClasses} rounded-full bg-black flex items-center justify-center shrink-0 border border-white/20 shadow-xs overflow-hidden select-none ${className}`}
       title={title}
     >
-      <svg viewBox="0 0 32 32" className="w-[88%] h-[88%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 32 32" className="w-[90%] h-[90%]" fill="none" xmlns="http://www.w3.org/2000/svg">
         <text
           x="16"
-          y="22"
+          y="22.5"
           textAnchor="middle"
           fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-          fontWeight="900"
-          fontSize="17.5"
+          fontWeight="700"
+          fontSize="19"
           letterSpacing="-0.5"
         >
           <tspan fill="#FA3E3E">i</tspan>
@@ -128,18 +128,18 @@ export const AzvalorLogo: React.FC<{ sizeClasses: string; className?: string; ti
       className={`${sizeClasses} rounded-full bg-[#0b2144] flex items-center justify-center shrink-0 border border-blue-400/30 shadow-xs overflow-hidden select-none ${className}`}
       title={title}
     >
-      <svg viewBox="0 0 32 32" className="w-[92%] h-[92%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 32 32" className="w-[94%] h-[94%]" fill="none" xmlns="http://www.w3.org/2000/svg">
         <text
           x="16"
-          y="22"
+          y="22.5"
           textAnchor="middle"
           fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-          fontWeight="900"
-          fontSize="16.5"
-          letterSpacing="-0.9"
+          fontWeight="700"
+          fontSize="18"
+          letterSpacing="-0.6"
           fill="#FFFFFF"
         >
-          az<tspan fill="#38BDF8" fontWeight="800">V</tspan>
+          az<tspan fill="#38BDF8" fontWeight="700">V</tspan>
         </text>
       </svg>
     </div>
@@ -156,14 +156,14 @@ export const CobasLogo: React.FC<{ sizeClasses: string; className?: string; titl
       className={`${sizeClasses} rounded-full bg-[#681421] flex items-center justify-center shrink-0 border border-rose-300/30 shadow-xs overflow-hidden select-none ${className}`}
       title={title}
     >
-      <svg viewBox="0 0 32 32" className="w-[88%] h-[88%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 32 32" className="w-[90%] h-[90%]" fill="none" xmlns="http://www.w3.org/2000/svg">
         <text
           x="16"
-          y="22.5"
+          y="23"
           textAnchor="middle"
           fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-          fontWeight="900"
-          fontSize="19.5"
+          fontWeight="700"
+          fontSize="22"
           letterSpacing="-0.5"
           fill="#FFFFFF"
         >
