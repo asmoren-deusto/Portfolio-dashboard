@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 11:25:46
+- **Fecha de exportación:** 2026-10-19 11:27:07
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 68
+- **Total de interacciones registradas:** 70
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1194,5 +1194,22 @@ Actualizado y desplegado en la versión **v3.0.157**.
 ### 👤 Usuario (2026-10-19 09:24:51)
 
 cobas haz la C más grande
+
+---
+
+### 🤖 Asistente (2026-10-19 09:25:48)
+
+Se ha incrementado el tamaño de la **`C`** de Cobas en [CompanyLogo.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx):
+
+- **Tamaño de fuente**: Aumentado de `fontSize="22"` a `fontSize="25.5"`.
+- **Aprovechamiento del círculo**: Escala al `96%` con alineación vertical centrada (`y="24"`), llenando el espacio circular de forma equilibrada y manteniendo la misma nitidez.
+
+Actualizado y desplegado en la versión **v3.0.158**.
+
+---
+
+### 👤 Usuario (2026-10-19 09:26:31)
+
+cobas baja y a la izquierda
 
 ---

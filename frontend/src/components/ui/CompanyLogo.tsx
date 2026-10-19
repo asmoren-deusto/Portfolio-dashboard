@@ -158,8 +158,8 @@ export const CobasLogo: React.FC<{ sizeClasses: string; className?: string; titl
     >
       <svg viewBox="0 0 32 32" className="w-[96%] h-[96%]" fill="none" xmlns="http://www.w3.org/2000/svg">
         <text
-          x="16"
-          y="24"
+          x="15"
+          y="24.8"
           textAnchor="middle"
           fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
           fontWeight="700"
