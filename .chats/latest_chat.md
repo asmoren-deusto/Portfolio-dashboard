@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-19 11:03:12
+- **Fecha de exportación:** 2026-10-19 11:06:36
 - **ID de Conversación:** `148ae8c0-241e-4364-990c-9ef1e7506136`
-- **Total de interacciones registradas:** 52
+- **Total de interacciones registradas:** 54
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -986,5 +986,31 @@ Compilado, verificado con `npm run build` y sincronizado en Git bajo la versión
 ### 👤 Usuario (2026-10-19 08:51:50)
 
 añade los iconos de los fondos tb al desglose de fondos y replicas
+
+---
+
+### 🤖 Asistente (2026-10-19 09:03:15)
+
+Se han añadido los iconos y logos tanto al desglose de fondos como al de réplicas en la tarjeta de **Simulación de Cartera**:
+
+### Cambios realizados:
+1. **Desglose 'Por Fondos'** ([`SimulatedPortfolioCard.tsx`](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)):
+   - **Columna 1 ("Fondo en Cartera")**: Se integra [`CompanyLogo`](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx) en tamaño `xs` (22px) usando el `isin` y nombre del fondo, mostrando el logo oficial de la gestora (Fidelity, Cobas, Azvalor, DNB, iShares, Indexa Capital, etc.).
+   - **Columna 2 ("ETF Réplica")**: Se integra [`CompanyLogo`](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx) en tamaño `xs` para el ETF o proxy de mercado asociado.
+
+2. **Desglose 'ETFs Agrupados'** ([`SimulatedPortfolioCard.tsx`](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)):
+   - **Columna 1 ("ETF Réplica / Mercado")**: Se añade [`CompanyLogo`](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx) junto al nombre y ticker del ETF réplica agrupado.
+
+3. **Mapeo de iconos temáticos** ([`CompanyLogo.tsx`](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx)):
+   - Soporte y ajuste de escala para réplicas y proxies continuos (`URTH`, `ACWI`, `XLK`, `COWZ`, `EEM`, `EWJ`, `FEZ`, `EFV`, `ES=F`, `NQ=F`, `NIY=F`, `EXW1.DE`, `MEUD.PA`).
+   - Dimensionado proporcional del SVG interior para evitar cualquier desbordamiento.
+
+Sincronizado y desplegado en la versión **v3.0.150**.
+
+---
+
+### 👤 Usuario (2026-10-19 08:52:46)
+
+esa barrita -> todo el ancho
 
 ---

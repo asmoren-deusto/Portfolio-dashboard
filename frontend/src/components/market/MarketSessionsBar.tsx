@@ -181,7 +181,7 @@ export const MarketSessionsBar: React.FC<MarketSessionsBarProps> = ({
                     />
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 flex-nowrap">
+                    <div className="flex items-center gap-1.5">
                       <span className="text-[13px] font-bold text-slate-900 dark:text-white truncate">
                         {s.name}
                       </span>
@@ -197,25 +197,8 @@ export const MarketSessionsBar: React.FC<MarketSessionsBarProps> = ({
                         )}
                         title={s.label}
                       />
-                      {/* Progress of the session to the right of the name */}
-                      {isOpen && (
-                        <div
-                          className="flex items-center gap-1.5 ml-1 shrink-0"
-                          title={`Jornada: ${s.progressPct}% transcurrido`}
-                        >
-                          <div className="w-12 sm:w-16 h-1.5 bg-slate-200/80 dark:bg-white/10 rounded-full overflow-hidden">
-                            <div
-                              style={{ width: `${s.progressPct}%` }}
-                              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full"
-                            />
-                          </div>
-                          <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
-                            {s.progressPct}%
-                          </span>
-                        </div>
-                      )}
                     </div>
-                    <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 truncate leading-tight">
+                    <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
                       {s.city}
                     </div>
                   </div>
@@ -240,6 +223,44 @@ export const MarketSessionsBar: React.FC<MarketSessionsBarProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* Barra de progreso de la sesión a todo el ancho */}
+              {isOpen ? (
+                <div
+                  className="w-full flex items-center gap-2 mt-2 pt-0.5 relative z-10"
+                  title={`Jornada: ${s.progressPct}% transcurrido`}
+                >
+                  <div className="flex-1 h-1.5 bg-slate-200/80 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      style={{ width: `${s.progressPct}%` }}
+                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                    {s.progressPct}%
+                  </span>
+                </div>
+              ) : isPreOrPost && s.progressPct > 0 ? (
+                <div
+                  className="w-full flex items-center gap-2 mt-2 pt-0.5 relative z-10"
+                  title={`Fase: ${s.label} • ${s.progressPct}%`}
+                >
+                  <div className="flex-1 h-1.5 bg-slate-200/60 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                    <div
+                      style={{ width: `${s.progressPct}%` }}
+                      className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-500"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 shrink-0">
+                    {s.progressPct}%
+                  </span>
+                </div>
+              ) : (
+                <div className="w-full flex items-center gap-2 mt-2 pt-0.5 relative z-10 invisible select-none pointer-events-none">
+                  <div className="flex-1 h-1.5" />
+                  <span className="text-[10px] font-mono">0%</span>
+                </div>
+              )}
             </div>
           )
         })}
