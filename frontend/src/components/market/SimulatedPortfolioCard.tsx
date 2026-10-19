@@ -190,6 +190,14 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
     ? (currencyMode === 'eur' ? (hoveredPoint.simulated_eur_amount ?? hoveredPoint.simulated_amount) : hoveredPoint.simulated_amount)
     : (currencyMode === 'eur' ? (summary?.fx_info?.simulated_eur_amount ?? summary?.simulated_daily_amount ?? 0) : (summary?.simulated_daily_amount ?? 0))
 
+  // Official previous session close values (Investing.com style baseline)
+  const officialClosePct = currencyMode === 'eur'
+    ? (summary?.official_close_eur_pct ?? summary?.official_close_pct ?? 0)
+    : (summary?.official_close_pct ?? 0)
+  const officialCloseAmount = currencyMode === 'eur'
+    ? (summary?.official_close_eur_amount ?? summary?.official_close_amount ?? 0)
+    : (summary?.official_close_amount ?? 0)
+
   // Initialize and maintain TradingView Lightweight Charts instance
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -264,13 +272,14 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         crosshairMarkerBorderWidth: 2,
       })
 
-      // Add clean baseline at 0.00% (hidden on price scale to avoid overlapping the current price badge)
+      // Add clean visible baseline at 0.00% (Investing.com style reference line)
       areaSeries.createPriceLine({
         price: 0,
-        color: isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.20)',
+        color: isDark ? 'rgba(255, 255, 255, 0.40)' : 'rgba(71, 85, 105, 0.45)',
         lineWidth: 1,
-        lineStyle: LineStyle.Dashed,
-        axisLabelVisible: false,
+        lineStyle: LineStyle.Dotted,
+        axisLabelVisible: true,
+        title: 'Ref. 0.00%',
       })
 
       chartRef.current = chart
@@ -525,20 +534,13 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         
         {/* Left Column (lg:col-span-5): Official TradingView Chart (Zero Distortion, 100% Adaptive) */}
         <div className="lg:col-span-5 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5">
-          {/* KPI Summary Header */}
-          <div className="flex items-start justify-between gap-2 mb-2 pb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
-                <span>
-                  {hoveredPoint
-                    ? `A las ${hoveredPoint.label} (Madrid)`
-                    : period === '1d'
-                    ? summary?.is_session_today
-                      ? 'Rendimiento Sesión Hoy'
-                      : `Cierre Última Sesión • ${summary?.session_display || 'Viernes 9 oct.'}`
-                    : `Periodo (${period.toUpperCase()})`}
-                </span>
-                {hoveredPoint ? (
+          {/* KPI Summary Header (Investing.com Style: Dual Official Close vs Live Pre-Market) */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2.5 pb-2.5 border-b border-slate-200/60 dark:border-white/[0.06]">
+            {hoveredPoint ? (
+              /* Hover inspection state */
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
+                  <span>A las {hoveredPoint.label} (Madrid)</span>
                   <div className="flex items-center gap-1">
                     <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                       {hoveredPoint.time_ny ? `${hoveredPoint.time_ny} NY` : 'Inspección'}
@@ -562,19 +564,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                       </span>
                     )}
                   </div>
-                ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                )}
-              </div>
+                </div>
 
-              <div className="flex items-center gap-3 mt-1 flex-wrap">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={`sim-pct-${selectedBroker}-${currencyMode}-${currentPct}`}
-                    initial={{ opacity: 0, y: 3 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -3 }}
-                    transition={{ duration: 0.2 }}
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <span
                     className={cn(
                       'text-xl sm:text-2xl font-extrabold font-mono tracking-tight',
                       currentPct >= 0
@@ -584,16 +577,8 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   >
                     {currentPct >= 0 ? '+' : ''}
                     {currentPct.toFixed(2)}%
-                  </motion.span>
-                </AnimatePresence>
-
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={`sim-amt-${selectedBroker}-${currencyMode}-${currentAmount}`}
-                    initial={{ opacity: 0, y: 3 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -3 }}
-                    transition={{ duration: 0.2 }}
+                  </span>
+                  <span
                     className={cn(
                       'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs',
                       currentAmount >= 0
@@ -603,10 +588,140 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   >
                     {currentAmount >= 0 ? '+' : ''}
                     {fmt.currency(currentAmount)}
-                  </motion.span>
-                </AnimatePresence>
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : summary?.is_pre_market ? (
+              /* DUAL DISPLAY (Investing.com Style): Official Close + Live Pre-Market */
+              <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                {/* 1. Official Session Close (Previous Day Base Reference) */}
+                <div className="pr-3 sm:pr-4 border-r border-slate-200/70 dark:border-white/[0.08]">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <span>Cierre Oficial • {summary.official_session_date || 'Sesión anterior'}</span>
+                  </div>
+                  <div className="flex items-baseline gap-2 mt-0.5">
+                    <span
+                      className={cn(
+                        'text-lg sm:text-xl font-extrabold font-mono tracking-tight',
+                        officialClosePct >= 0
+                          ? 'text-emerald-600/90 dark:text-emerald-400/90'
+                          : 'text-rose-600/90 dark:text-rose-400/90'
+                      )}
+                    >
+                      {officialClosePct >= 0 ? '+' : ''}
+                      {officialClosePct.toFixed(2)}%
+                    </span>
+                    <span className="text-[11px] font-semibold font-mono text-slate-500 dark:text-slate-400">
+                      {officialCloseAmount >= 0 ? '+' : ''}
+                      {fmt.currency(officialCloseAmount)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. Live Indicative Pre-Market Box (CME Futures Proxy over Previous Reference) */}
+                <div
+                  className={cn(
+                    'flex items-center gap-2.5 px-3 py-1 rounded-xl border transition-all shadow-2xs',
+                    currentPct >= 0
+                      ? 'bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/30'
+                      : 'bg-rose-500/10 dark:bg-rose-500/15 border-rose-500/30'
+                  )}
+                >
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                      <span className={cn('live-dot', currentPct >= 0 ? 'emerald' : 'warn')} />
+                      <span>Pre-apertura {summary.pre_market_time || 'en directo'}</span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-0.5">
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                          key={`pre-pct-${selectedBroker}-${currencyMode}-${currentPct}`}
+                          initial={{ opacity: 0, y: 3 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -3 }}
+                          transition={{ duration: 0.2 }}
+                          className={cn(
+                            'text-lg sm:text-xl font-black font-mono tracking-tight',
+                            currentPct >= 0
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-rose-600 dark:text-rose-400'
+                          )}
+                        >
+                          {currentPct >= 0 ? '+' : ''}
+                          {currentPct.toFixed(2)}%
+                        </motion.span>
+                      </AnimatePresence>
+
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                          key={`pre-amt-${selectedBroker}-${currencyMode}-${currentAmount}`}
+                          initial={{ opacity: 0, y: 3 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -3 }}
+                          transition={{ duration: 0.2 }}
+                          className={cn(
+                            'text-xs font-bold font-mono px-1.5 py-0.2 rounded border',
+                            currentAmount >= 0
+                              ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-emerald-500/30'
+                              : 'bg-rose-500/20 text-rose-800 dark:text-rose-200 border-rose-500/30'
+                          )}
+                        >
+                          {currentAmount >= 0 ? '+' : ''}
+                          {fmt.currency(currentAmount)}
+                        </motion.span>
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Regular live market hours state */
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
+                  <span>{period === '1d' ? 'Rendimiento Sesión Hoy' : `Periodo (${period.toUpperCase()})`}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={`sim-pct-${selectedBroker}-${currencyMode}-${currentPct}`}
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -3 }}
+                      transition={{ duration: 0.2 }}
+                      className={cn(
+                        'text-xl sm:text-2xl font-extrabold font-mono tracking-tight',
+                        currentPct >= 0
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                      )}
+                    >
+                      {currentPct >= 0 ? '+' : ''}
+                      {currentPct.toFixed(2)}%
+                    </motion.span>
+                  </AnimatePresence>
+
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={`sim-amt-${selectedBroker}-${currencyMode}-${currentAmount}`}
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -3 }}
+                      transition={{ duration: 0.2 }}
+                      className={cn(
+                        'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs',
+                        currentAmount >= 0
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
+                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
+                      )}
+                    >
+                      {currentAmount >= 0 ? '+' : ''}
+                      {fmt.currency(currentAmount)}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
 
             {/* Context Pills: Base & Min/Max */}
             <div className="flex flex-col items-end gap-1.5">
@@ -933,16 +1048,24 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
                           {/* Live ETF Quote Price and Daily % */}
                           <td className="py-1.5 px-2 text-right whitespace-nowrap">
-                            <div className="flex items-center justify-end gap-1">
-                              {(summary?.market_state === 'PRE' || summary?.market_state === 'POST') && (
-                                <span className="text-[9px] font-bold font-mono px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                  {summary.market_state}
+                            <div className="flex items-center justify-end gap-1.5">
+                              {h.proxy_used && (
+                                <span
+                                  className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25"
+                                  title={`Proyección en tiempo real vía futuros ${h.proxy_used}`}
+                                >
+                                  {h.proxy_used}
                                 </span>
                               )}
                               <span className={cn('font-mono font-bold text-xs', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
                                 {isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%
                               </span>
                             </div>
+                            {h.official_close_pct !== undefined && h.is_indicative && (
+                              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono text-right" title="Cierre oficial de la última sesión regular">
+                                Cierre: {h.official_close_pct >= 0 ? '+' : ''}{h.official_close_pct.toFixed(2)}%
+                              </div>
+                            )}
                             {h.etf_price && (
                               <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                                 {fmt.currency(h.etf_price, 'USD')}
@@ -1020,10 +1143,13 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                           </td>
 
                           <td className="py-1.5 px-2 text-right font-mono font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
-                            <div className="flex items-center justify-end gap-1">
-                              {(summary?.market_state === 'PRE' || summary?.market_state === 'POST') && (
-                                <span className="text-[9px] font-bold font-mono px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                  {summary.market_state}
+                            <div className="flex items-center justify-end gap-1.5">
+                              {etf.proxy_used && (
+                                <span
+                                  className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25"
+                                  title={`Proyección en tiempo real vía futuros ${etf.proxy_used}`}
+                                >
+                                  {etf.proxy_used}
                                 </span>
                               )}
                               <span>{etf.price ? fmt.currency(etf.price, etf.currency) : '-'}</span>
@@ -1041,6 +1167,11 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                             >
                               {isPos ? '+' : ''}{etf.change_pct?.toFixed(2)}%
                             </span>
+                            {etf.official_close_pct !== undefined && etf.is_indicative && (
+                              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono text-right" title="Cierre oficial de la última sesión regular">
+                                Cierre: {etf.official_close_pct >= 0 ? '+' : ''}{etf.official_close_pct.toFixed(2)}%
+                              </div>
+                            )}
                           </td>
 
                           <td className="py-1.5 px-2 text-right whitespace-nowrap">

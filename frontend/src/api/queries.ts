@@ -496,7 +496,12 @@ export interface SimulatedHolding {
   etf_price?: number
   etf_change_pct?: number
   etf_change?: number
+  official_close_pct?: number
+  official_close_price?: number
+  is_indicative?: boolean
+  proxy_used?: string | null
   simulated_gain_amount?: number
+  official_gain_amount?: number
 }
 
 export interface SimulatedEtfSummary {
@@ -508,6 +513,10 @@ export interface SimulatedEtfSummary {
   pre_market_price?: number
   post_market_price?: number
   change_pct?: number
+  official_close_pct?: number
+  official_close_price?: number
+  is_indicative?: boolean
+  proxy_used?: string | null
   currency: string
 }
 
@@ -551,6 +560,20 @@ export interface SimulatedPortfolioResponse {
     total_value: number
     simulated_daily_pct: number
     simulated_daily_amount: number
+    simulated_eur_pct?: number
+    simulated_eur_amount?: number
+    official_close_pct?: number
+    official_close_amount?: number
+    official_close_eur_pct?: number
+    official_close_eur_amount?: number
+    official_session_date?: string
+    official_session_display?: string
+    is_pre_market?: boolean
+    pre_market_pct?: number
+    pre_market_amount?: number
+    pre_market_eur_pct?: number
+    pre_market_eur_amount?: number
+    pre_market_time?: string
     market_state: string
     as_of: string
     session_date?: string
