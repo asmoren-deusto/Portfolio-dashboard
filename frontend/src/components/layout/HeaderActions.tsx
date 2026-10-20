@@ -108,7 +108,7 @@ export function HeaderActions({
 
       {/* User Account / Profile Dropdown Menu */}
       {!hideUser && currentUser && (
-        <div className="relative">
+        <div className="relative z-30">
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
             className={cn(
@@ -146,7 +146,7 @@ export function HeaderActions({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.1 }}
-                  className="fixed inset-0 z-40"
+                  className="fixed inset-0 z-[90]"
                   onClick={() => setUserMenuOpen(false)}
                 />
                 <motion.div
@@ -154,7 +154,7 @@ export function HeaderActions({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -6 }}
                   transition={{ duration: 0.12, ease: 'easeOut' }}
-                  className="absolute right-0 mt-2 w-64 rounded-2xl bg-white/95 dark:bg-[#252526]/95 backdrop-blur-xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xl z-50 p-2 text-xs origin-top-right"
+                  className="absolute right-0 mt-2 w-64 rounded-2xl bg-white/98 dark:bg-[#252526]/98 backdrop-blur-xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xl z-[100] p-2 text-xs origin-top-right"
                 >
                 {/* Active user header */}
                 <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04] mb-2">

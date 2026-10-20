@@ -121,9 +121,9 @@ export function Header({
 
   return (
     <div className="flex items-center justify-between gap-3 w-full">
-      {/* Title & Badges */}
-      <div className="flex items-center gap-3 min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-950 dark:text-white leading-none truncate">
+      {/* Title, NAV Indicator & Badges */}
+      <div className="flex items-center gap-3 min-w-0 flex-wrap">
+        <h1 className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-none truncate">
           <motion.span
             key={title}
             initial={{ opacity: 0.35 }}
@@ -133,6 +133,24 @@ export function Header({
             {title}
           </motion.span>
         </h1>
+
+        {/* NAVs status badge immediately to the right of Visión General / Title */}
+        {total > 0 && (
+          <button
+            onClick={openNavAlertHistory}
+            type="button"
+            title={
+              navFresh
+                ? 'Todos los NAVs están al día. Haz clic para ver el historial de actualizaciones.'
+                : `${updated}/${total} NAVs actualizados. Haz clic para ver el historial.`
+            }
+            className="inline-flex items-center gap-1.5 h-7.5 px-2.5 rounded-lg bg-slate-100/80 hover:bg-slate-200/70 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors shadow-none cursor-pointer shrink-0"
+          >
+            <span className={cn('live-dot', !navFresh ? 'warn' : 'emerald')} />
+            <span>{navFresh ? 'NAVs al día' : `NAVs ${updated}/${total}`}</span>
+            {navDate && <span className="font-mono text-slate-400 dark:text-slate-500 text-[11px]">· {navDate}</span>}
+          </button>
+        )}
 
         {badge && (
           <span
@@ -158,24 +176,6 @@ export function Header({
         {/* Extra page actions (e.g. Transactions actions) appear to the left of the fixed controls */}
         <div ref={setPortalNode} className="flex items-center gap-2 shrink-0 empty:hidden" />
         {children && <div className="flex items-center gap-2 shrink-0">{children}</div>}
-
-        {/* NAVs status badge (Clean, borderless pill matching Stitch reference) */}
-        {total > 0 && (
-          <button
-            onClick={openNavAlertHistory}
-            type="button"
-            title={
-              navFresh
-                ? 'Todos los NAVs están al día. Haz clic para ver el historial de actualizaciones.'
-                : `${updated}/${total} NAVs actualizados. Haz clic para ver el historial.`
-            }
-            className="hidden sm:inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg bg-slate-100/80 hover:bg-slate-200/70 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors shadow-none cursor-pointer shrink-0"
-          >
-            <span className={cn('live-dot', !navFresh ? 'warn' : 'emerald')} />
-            <span>{navFresh ? 'NAVs al día' : `NAVs ${updated}/${total}`}</span>
-            {navDate && <span className="font-mono text-slate-400 dark:text-slate-500 text-[11px]">· {navDate}</span>}
-          </button>
-        )}
 
         {/* Broker / Entity Selector Pill (Clean background, borderless container) */}
         {showBrokerSelector && (

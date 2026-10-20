@@ -328,7 +328,7 @@ export function RootLayout() {
           {/* Top Bar with Selectors & Black Market Ticker Strip (Stitch / Reference Design) */}
           <div className="flex flex-col w-full md:sticky md:top-0 z-30 shadow-xs">
             {/* Top White Bar with Selectors (Desktop only) - Exactly 60px to align ticker top with sidebar separator */}
-            <div className="hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#111827] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 backdrop-blur-md">
+            <div className="relative z-20 hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#111827] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 backdrop-blur-md">
               <Header
                 title={pageMeta.title}
                 subtitle={pageMeta.subtitle}
@@ -336,7 +336,9 @@ export function RootLayout() {
             </div>
 
             {/* Black Live Market Ticker Strip attached directly under the white bar */}
-            <MarketTicker fullWidth />
+            <div className="relative z-10">
+              <MarketTicker fullWidth />
+            </div>
           </div>
 
           {/* Page Content Animation: Instant mounting with silky smooth opacity transition and zero layout shifts */}
