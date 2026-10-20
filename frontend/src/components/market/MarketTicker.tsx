@@ -565,14 +565,14 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                       <span className="text-[10.5px] font-medium text-slate-300 whitespace-nowrap leading-none">
                         {idx.name}
                       </span>
-                      <span className="text-[11px] font-bold text-white tracking-tight mt-[1.5px] tabular-nums leading-none whitespace-nowrap">
+                      <span className="text-[11px] font-bold text-white tracking-tight mt-[1.5px] tabular-nums font-mono leading-none whitespace-nowrap">
                         {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
                       </span>
                     </div>
 
                     {/* Change % badge — fixed height, no extra lines */}
                     <div
-                      className={`flex items-center gap-0.5 text-[10.5px] font-semibold tabular-nums px-1.5 py-[1px] rounded-md border shrink-0 ${
+                      className={`flex items-center gap-0.5 text-[10.5px] font-semibold tabular-nums font-mono px-1.5 py-[1px] rounded-md border shrink-0 ${
                         isPos
                           ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30'
                           : 'text-rose-400 bg-rose-500/15 border-rose-500/30'

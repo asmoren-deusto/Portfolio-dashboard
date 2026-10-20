@@ -160,7 +160,7 @@ function KpiCardComponent({
             <div
               data-private
               className={cn(
-                "text-2xl sm:text-[28px] font-extrabold font-display tracking-tight leading-tight shrink-0",
+                "text-2xl sm:text-[28px] font-bold font-mono tracking-tight leading-tight shrink-0",
                 valueColor || "text-slate-950 dark:text-white"
               )}
             >
@@ -201,7 +201,7 @@ function KpiCardComponent({
           <div
             data-private
             className={cn(
-              "text-lg sm:text-[22px] font-extrabold font-display tracking-tight leading-tight shrink-0",
+              "text-lg sm:text-[22px] font-bold font-mono tracking-tight leading-tight shrink-0",
               valueColor || "text-slate-950 dark:text-white"
             )}
           >
