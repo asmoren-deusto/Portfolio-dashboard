@@ -112,7 +112,7 @@ export function HeaderActions({
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
             className={cn(
-              "flex items-center gap-1.5 rounded-full bg-slate-100/70 hover:bg-slate-200/60 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-xs font-semibold transition-all active:scale-95 cursor-pointer",
+              "flex items-center gap-1.5 rounded-full border border-slate-200/80 hover:border-slate-300 dark:border-white/10 dark:hover:border-white/20 bg-slate-100/70 hover:bg-slate-200/60 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-2xs",
               compact ? "p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1" : "h-8.5 pl-1.5 pr-2.5"
             )}
             title="Perfil activo y cambio de usuario"
