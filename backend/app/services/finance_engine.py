@@ -11,6 +11,23 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def is_internal_traspaso(notes: str) -> bool:
+    """
+    Determine if a transaction note represents an internal fund-to-fund transfer
+    within the portfolio (e.g. 'reembolso por traspaso interno', 'suscripción por traspaso interno',
+    'traspaso fondo en contra', 'traspaso fondos a favor'),
+    as opposed to an external capital movement (e.g. 'traspaso de entrada desde Trade Republic').
+    """
+    if not notes:
+        return False
+    n = notes.lower()
+    if "traspaso" not in n:
+        return False
+    if any(k in n for k in ("entrada", "salida a", "externo", "externa", "aportaci")):
+        return False
+    return True
+
+
 def calculate_positions(transactions: list[dict]) -> dict[str, dict]:
     """
     Calculate current positions from transaction history.
@@ -127,8 +144,8 @@ def calculate_portfolio_value_series(
             total += pos["shares"] * price
 
         # Account for cash in transit during internal fund transfers (traspasos internos).
-        traspaso_sells = sum(tx["amount"] for tx in current_active_tx if tx["type"] == "sell" and "traspaso" in (tx.get("notes") or "").lower())
-        traspaso_buys = sum(tx["amount"] for tx in current_active_tx if tx["type"] == "buy" and "traspaso" in (tx.get("notes") or "").lower())
+        traspaso_sells = sum(tx["amount"] for tx in current_active_tx if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
+        traspaso_buys = sum(tx["amount"] for tx in current_active_tx if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
         cash_in_transit = max(0.0, traspaso_sells - traspaso_buys)
         total += cash_in_transit
 
@@ -401,9 +418,14 @@ def calculate_xirr(
 
     flows: list[tuple[str, float]] = []
     for tx in transactions:
-        notes = (tx.get("notes") or "").lower()
-        if "traspaso" in notes:
+        # Ignore non-portfolio transfer placeholders
+        if (tx.get("isin") or "").startswith("TR_") or tx.get("broker") in ("trade_republic", "traderepublic"):
             continue
+
+        notes = tx.get("notes") or ""
+        if is_internal_traspaso(notes):
+            continue
+
         amt = float(tx.get("amount") or 0.0)
         if amt <= 0:
             continue
