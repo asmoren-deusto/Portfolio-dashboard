@@ -5,7 +5,7 @@ import { cn, fmt, getConsensusNavDate } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { HeaderActions } from '@/components/layout/HeaderActions'
 import { useHeaderContext } from '@/context/HeaderContext'
-import { usePositions, useAnalytics } from '@/api/queries'
+import { usePositions, useAnalytics, usePortfolioSummary } from '@/api/queries'
 
 const PERIODS = [
   { label: '1M', value: '1mo' },
@@ -84,6 +84,7 @@ export function Header({
   const brokers = useMock ? DEMO_BROKERS : BROKERS
   const { data: positions = [] } = usePositions()
   const { data: analytics } = useAnalytics()
+  const { data: summary } = usePortfolioSummary()
 
   const consensusNavDate = React.useMemo(() => {
     return getConsensusNavDate(positions, analytics?.latest_nav_date)
@@ -101,8 +102,25 @@ export function Header({
 
   const navFresh = updated != null && total != null && total > 0 ? updated >= total : true
 
-  const navDate = React.useMemo(() => {
-    return consensusNavDate ? fmt.dateShort(consensusNavDate) : null
+  const syncTimeStr = React.useMemo(() => {
+    const raw = summary?.last_updated || positions.find((p) => p.last_updated)?.last_updated
+    if (raw) {
+      try {
+        const d = new Date(raw)
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+  }, [summary?.last_updated, positions])
+
+  const dateLabel = React.useMemo(() => {
+    if (!consensusNavDate) return 'Hoy'
+    const today = new Date().toISOString().slice(0, 10)
+    return consensusNavDate >= today ? 'Hoy' : fmt.dateShort(consensusNavDate)
   }, [consensusNavDate])
 
   // Reset the filter when it doesn't exist for the active profile (e.g. after switching user)
@@ -144,11 +162,33 @@ export function Header({
                 ? 'Todos los NAVs están al día. Haz clic para ver el historial de actualizaciones.'
                 : `${updated}/${total} NAVs actualizados. Haz clic para ver el historial.`
             }
-            className="inline-flex items-center gap-1.5 h-[26px] px-2.5 rounded-lg border border-slate-200/90 dark:border-white/10 bg-slate-50/80 hover:bg-slate-100/90 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] hover:border-slate-300 dark:hover:border-white/20 text-[11px] font-semibold text-slate-700 dark:text-slate-300 transition-all shadow-2xs cursor-pointer shrink-0"
+            className={cn(
+              "inline-flex items-center gap-2 h-7 px-2.5 rounded-xl border text-[11.5px] transition-all cursor-pointer shrink-0 shadow-2xs hover:opacity-95 active:scale-97",
+              navFresh
+                ? "bg-[#ecfdf5] border-emerald-300/70 dark:bg-emerald-950/40 dark:border-emerald-700/40"
+                : "bg-amber-50/90 border-amber-300/70 dark:bg-amber-950/40 dark:border-amber-700/40"
+            )}
           >
-            <span className={cn('live-dot', !navFresh ? 'warn' : 'emerald')} />
-            <span>{navFresh ? 'NAVs al día' : `NAVs ${updated}/${total}`}</span>
-            {navDate && <span className="font-mono text-slate-400 dark:text-slate-500 text-[10px]">· {navDate}</span>}
+            {/* Vertical capsule dot */}
+            <span
+              className={cn(
+                "w-1.5 h-3 rounded-full shrink-0",
+                navFresh ? "bg-emerald-600 dark:bg-emerald-400" : "bg-amber-500 animate-pulse"
+              )}
+            />
+            {/* Green label */}
+            <span
+              className={cn(
+                "font-bold leading-none",
+                navFresh ? "text-emerald-800 dark:text-emerald-300" : "text-amber-800 dark:text-amber-300"
+              )}
+            >
+              NAVs {updated}/{total}
+            </span>
+            {/* Muted date & time */}
+            <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium leading-none">
+              ({dateLabel}, {syncTimeStr})
+            </span>
           </button>
         )}
 
