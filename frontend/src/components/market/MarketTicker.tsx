@@ -8,6 +8,8 @@ import { isNativePlatform } from '@/api/config'
 
 interface MarketTickerProps {
   onSelectStock?: (stock: MarketStock) => void
+  fullWidth?: boolean
+  className?: string
 }
 
 function formatTickerName(name: string): string {
@@ -195,7 +197,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   )
 }
 
-export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => {
+export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullWidth = true, className }) => {
   const { data, isLoading, dataUpdatedAt } = useMarketIndices()
   const [internalSelectedStock, setInternalSelectedStock] = useState<MarketStock | null>(null)
 
@@ -462,15 +464,19 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
   return (
     <>
       <div className={cn(
-        "relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover py-1 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] transition-all duration-200",
-        isNative ? "px-2.5" : "px-3 sm:px-3.5"
+        "relative overflow-hidden w-full transition-all duration-200",
+        fullWidth
+          ? "rounded-none bg-white/95 border-b border-slate-200/80 dark:bg-[#191919]/95 dark:border-white/[0.08] py-1 shadow-2xs backdrop-blur-md px-3 sm:px-4 md:px-7"
+          : "rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover py-1 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] px-3 sm:px-3.5",
+        className
       )}>
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
           <div
             className={cn(
-              "flex items-center border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20 bg-white/95 dark:bg-[#1e1e1e]/96",
-              isNative ? "pl-1 pr-2 gap-1" : "pl-1 pr-3 gap-2"
+              "flex items-center border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20",
+              fullWidth ? "bg-white/95 dark:bg-[#191919]/95" : "bg-white/95 dark:bg-[#1e1e1e]/96",
+              isNative ? "pl-0 pr-2 gap-1" : "pr-3 sm:pr-3.5 gap-2"
             )}
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
           >
@@ -503,10 +509,20 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
           </div>
 
           {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
-          <div className={cn("relative flex-1 overflow-hidden py-0 group", isNative ? "ml-1.5" : "ml-2")}>
+          <div className={cn("relative flex-1 overflow-hidden py-0 group", isNative ? "ml-1.5" : "ml-2.5")}>
             {/* Subtle fade edges for smooth transition */}
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 dark:from-[#1e1e1e] to-transparent z-10" />
+            <div className={cn(
+              "pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10",
+              fullWidth
+                ? "bg-gradient-to-r from-white/95 dark:from-[#191919] to-transparent"
+                : "bg-gradient-to-r from-white/95 dark:from-[#1e1e1e] to-transparent"
+            )} />
+            <div className={cn(
+              "pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10",
+              fullWidth
+                ? "bg-gradient-to-l from-white/95 dark:from-[#191919] to-transparent"
+                : "bg-gradient-to-l from-white/95 dark:from-[#1e1e1e] to-transparent"
+            )} />
 
             {/* Seamless scrolling marquee track with interactive drag */}
             <div
@@ -530,7 +546,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
               )}
               style={{ touchAction: 'pan-x', contain: 'content', willChange: 'scroll-position' }}
             >
-              <div className="flex items-center gap-1.5 sm:gap-2 pt-1.5 pb-0.5 w-max">
+              <div className="flex items-center gap-2 sm:gap-3 pt-1 pb-0.5 w-max">
                 {repeatedIndices.map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
@@ -546,7 +562,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     tabIndex={0}
                     key={`${idx.name}-${index}`}
                     onClick={() => handleCardClick(idx)}
-                    className="relative flex items-center gap-2 px-2 sm:px-2.5 py-[3px] rounded-xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-blue-400/60 shadow-2xs hover:shadow-xs transition-all shrink-0 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:border-white/[0.07] dark:hover:border-white/20 cursor-pointer active:scale-[0.98]"
+                    className="relative flex items-center gap-2 px-2.5 py-1 rounded-xl hover:bg-slate-100/80 dark:hover:bg-white/[0.06] transition-colors shrink-0 cursor-pointer active:scale-[0.98]"
                   >
                     {/* Floating Overlaid State Badge (Upper-right corner) */}
                     {state !== 'REGULAR' && (
@@ -562,7 +578,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                     />
                     {/* Name + price — always exactly 2 lines, no extra rows */}
                     <div className="flex flex-col justify-center min-w-0">
-                      <span className="text-[10.5px] font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap leading-none">
+                      <span className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap leading-none">
                         {idx.name}
                       </span>
                       <span className="text-[11px] font-bold text-slate-900 tracking-tight dark:text-white mt-[1.5px] tabular-nums leading-none whitespace-nowrap">
@@ -570,12 +586,12 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock }) => 
                       </span>
                     </div>
 
-                    {/* Change % badge — fixed height, no extra lines */}
+                    {/* Change % badge — clean borderless badge */}
                     <div
-                      className={`flex items-center gap-0.5 text-[10.5px] font-semibold tabular-nums px-1.5 py-[1px] rounded-md border shrink-0 ${
+                      className={`flex items-center gap-0.5 text-[10.5px] font-semibold tabular-nums px-1.5 py-[1px] rounded-md shrink-0 ${
                         isPos
-                          ? 'text-emerald-800 bg-emerald-50/90 border-emerald-300/80 dark:text-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/20'
-                          : 'text-rose-800 bg-rose-50/90 border-rose-300/80 dark:text-rose-300 dark:bg-rose-500/10 dark:border-rose-500/20'
+                          ? 'text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/15'
+                          : 'text-rose-700 bg-rose-500/10 dark:text-rose-400 dark:bg-rose-500/15'
                       }`}
                     >
                       {isPos ? (
