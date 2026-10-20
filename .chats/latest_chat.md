@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-20 11:47:53
+- **Fecha de exportación:** 2026-10-20 12:16:39
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 5
+- **Total de interacciones registradas:** 9
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -167,5 +167,107 @@ sequenceDiagram
 ### 👤 Usuario (2026-10-20 09:41:53)
 
 Ventana inteligente de escaneo: resto del dia: dejalo en 30 minutos. el reloj que indica la antiguedad de los datos no se actualiza entonces al visibilizar la pagina, es lo que me mosquea. y aparte de los navs, que pasa con los valores de mercado en tiempo real?
+
+---
+
+### 🤖 Asistente (2026-10-20 09:47:55)
+
+He aplicado los cambios solicitados y ajustado la reactividad de la plataforma. A continuación te detallo cómo ha quedado configurado y cómo opera el sistema de cotizaciones en tiempo real:
+
+---
+
+### 1. Ventana de escaneo ajustada a 30 minutos
+
+En [`backend/app/main.py`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/main.py#L95-L115), el escáner periódico autónomo ha quedado configurado así:
+* **Horario de publicación de fondos (Lunes a Viernes, 18:00 – 23:59 CET):** Escaneo cada **15 minutos**.
+* **Resto del día y fines de semana:** Escaneo cada **30 minutos** (reducido desde los 45 min anteriores).
+
+---
+
+### 2. ¿Por qué el reloj de antigüedad no se actualizaba al visibilizar la pestaña?
+
+Había dos motivos por los que el reloj y las cotizaciones no se ponían al día al regresar a la pestaña:
+
+1. **`handleAppResume` solo consultaba alertas de fondos:**
+   Al enfocar la pestaña, el frontend únicamente comprobaba si había una nueva alerta de NAV de fondos (`/latest-nav-alert`). Si las gestoras no habían publicado fondos nuevos, no forzaba el refresco de las cotizaciones de mercado ni del reloj.
+2. **`staleTime` de React Query:**
+   Las cotizaciones de mercado tenían un tiempo de validez en caché de 55 segundos. Si volvías a la pestaña, React Query las consideraba "frescas" en memoria y no pedía los nuevos segundos/minutos.
+
+#### 🛠️ Solución implementada:
+* En [`frontend/src/components/layout/RootLayout.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx#L146-L165), al detectar `visibilitychange` o `window.focus`, ahora **invalida y fuerza la recarga inmediata de**:
+  * `market-indices` (el reloj del ticker y los índices mundiales).
+  * `market-quotes` (todas las acciones del mercado).
+  * `simulated-portfolio` (la estimación de sesión de tu cartera en vivo).
+  * `summary` y `positions` (patrimonio y precios).
+* En [`frontend/src/api/queries.ts`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/api/queries.ts#L444-L606), se ha activado `refetchOnWindowFocus: 'always'` en todos los hooks de mercado. Al hacer clic o volver a la pestaña, el reloj se sincroniza en el acto con la hora del servidor.
+
+---
+
+### 3. ¿Cómo funcionan los valores de mercado en tiempo real?
+
+Aparte de los fondos (que son diarios), la plataforma tiene un **motor de cotizaciones en vivo en el Backend** ([`backend/app/routers/market.py`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py)):
+
+#### A. Ticker e Índices Globales (En directo)
+* **S&P 500, Nasdaq, Nikkei, IBEX, Euro Stoxx 50, Oro, Petróleo, Cripto y Divisas:**
+  * Se consultan en paralelo vía Yahoo Finance con una caché en memoria de 60 segundos (para no sufrir bloqueos de tasa o rate-limits).
+  * En el frontend, el Ticker superior y la barra de sesiones se consultan cada 60 segundos en primer plano.
+* **Sesiones extendidas y Futuros CME Globex 24h:**
+  * Cuando las bolsas de contado de Nueva York cierran (fuera del horario 15:30 – 22:00 CET), el backend conmuta automáticamente a los **futuros E-mini de Chicago (Globex)**:
+    * `^GSPC` (S&P 500) $\rightarrow$ Futuro `ES=F`
+    * `^IXIC` (Nasdaq) $\rightarrow$ Futuro `NQ=F`
+    * `^N225` (Nikkei) $\rightarrow$ Futuro `NIY=F`
+  * Esto permite que el Ticker muestre si el mercado sube o baja incluso de madrugada o en preapertura, etiquetando el estado como `PRE`, `POST` o `FUTURES`.
+  * **Bitcoin (BTC/EUR)** cotiza 24/7/365 en continuo.
+
+#### B. Tu Cartera en Tiempo Real: "Live / Sesión Hoy"
+* Dado que los fondos de inversión no actualizan su valor hasta la noche, en [`OverviewPage.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx#L682-L698) y en la página de **Mercado** tienes la píldora **`Live: ±X.XX%`**.
+* **¿Cómo se calcula?**
+  El backend mapea la asignación de tus fondos a réplicas líquidas de ETFs y futuros:
+  * Fondo MSCI World $\rightarrow$ Réplica con ETF `URTH` / Futuro S&P 500 `ES=F`.
+  * Fondo Euro Stoxx / Europa $\rightarrow$ Réplica con ETF `FEZ` / `^STOXX50E`.
+  * Fondo DNB Tecnología $\rightarrow$ Réplica con ETF `XLK` / Futuro Nasdaq `NQ=F`.
+* Gracias a esto, puedes ver una estimación fidedigna de cómo se está moviendo tu patrimonio a las 11:00 o a las 16:30 sin tener que esperar a que MyInvestor o Indexa publiquen el valor a medianoche.
+
+Todos los cambios han sido probados, compilados y sincronizados en la versión **v3.0.162**.
+
+---
+
+### 👤 Usuario (2026-10-20 09:50:45)
+
+cada cuanto se actualizan los datos de mercado?
+
+---
+
+### 🤖 Asistente (2026-10-20 09:50:45)
+
+Los datos de mercado en tiempo real se actualizan en **dos capas** (Frontend y Backend) con los siguientes intervalos exactos:
+
+---
+
+### ⏱️ Intervalos de actualización
+
+| Sección / Dato | Intervalo en Pantalla (Frontend) | Caducidad Caché (Backend) |
+| :--- | :---: | :---: |
+| **Ticker superior e Índices** <br>*(S&P 500, Nasdaq, IBEX, Oro, BTC, etc.)* | **Cada 60 segundos** (1 min) | **60 segundos** *(Stale-while-revalidate)* |
+| **Acciones individuales** <br>*(Pestaña Mercado / Lista completa)* | **Cada 60 segundos** (1 min) | **60 segundos** |
+| **Estimación "Live" de tu Cartera** <br>*(Píldora "Live: ±X.XX%" en Visión General)* | **Cada 45 segundos** | **30 segundos** |
+| **Gráficos históricos / Intradía** <br>*(Velas y líneas interactivas por activo)* | Al hacer clic / **Cada 2 minutos** | **2 minutos** |
+
+---
+
+### 🔄 Reglas de comportamiento
+
+1. **Al volver a la pestaña (Instantáneo):**
+   * Gracias a `refetchOnWindowFocus: 'always'` y a los eventos de visibilidad, en cuanto haces clic en la pestaña o la traes al frente, **se fuerza una recarga inmediata (0 segundos de espera)** sin importar en qué punto del minuto estaba el temporizador.
+2. **Pestaña en segundo plano (Pausa inteligente):**
+   * Si minimizas la ventana o estás en otra pestaña, las peticiones continuas se **pausan** para no consumir CPU, ancho de banda ni batería innecesariamente.
+3. **Velocidad sin bloqueos:**
+   * El backend utiliza una técnica llamada *Stale-while-revalidate*: si la caché tiene más de 60 segundos, te sirve el último valor instantáneamente (en < 5 ms) mientras en un hilo secundario consulta a Yahoo Finance/Globex para que la interfaz nunca se quede congelada.
+
+---
+
+### 👤 Usuario (2026-10-20 10:01:39)
+
+@[c:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\stitch_asier_moreno_portfolio_redesign.zip] utiliza el contenido de ese zip que viene de google stitch como inspiracion para rediseñar la web. no hagas los cambios directamente sobre frontend, puedes usar el esqueleto de frontend-aurora eliminando sus diseños y trabajar ahi
 
 ---
