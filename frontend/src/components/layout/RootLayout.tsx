@@ -150,6 +150,12 @@ export function RootLayout() {
       if (now - lastResumeRefetch > 8000) {
         lastResumeRefetch = now
         checkNavAlerts()
+        // Immediately refresh live market data & portfolio summaries when returning to tab
+        queryClient.invalidateQueries({ queryKey: ['market-indices'], refetchType: 'active' })
+        queryClient.invalidateQueries({ queryKey: ['market-quotes'], refetchType: 'active' })
+        queryClient.invalidateQueries({ queryKey: ['simulated-portfolio'], refetchType: 'active' })
+        queryClient.invalidateQueries({ queryKey: ['summary'], refetchType: 'active' })
+        queryClient.invalidateQueries({ queryKey: ['positions'], refetchType: 'active' })
       }
     }
 

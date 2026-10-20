@@ -93,7 +93,7 @@ async def startup():
             return
 
         while True:
-            sleep_sec = 2700
+            sleep_sec = 1800
             try:
                 from app.database import SessionLocal
                 from app.routers.portfolio import check_portfolio_navs
@@ -106,8 +106,8 @@ async def startup():
                 now = datetime.now()
                 is_weekday = now.weekday() < 5
                 is_evening = 18 <= now.hour <= 23
-                # 15 minutes (900s) during publication window, 45 minutes (2700s) off-hours
-                sleep_sec = 900 if (is_weekday and is_evening) else 2700
+                # 15 minutes (900s) during publication window, 30 minutes (1800s) off-hours
+                sleep_sec = 900 if (is_weekday and is_evening) else 1800
             except asyncio.CancelledError:
                 break
             except Exception as e:

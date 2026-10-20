@@ -441,6 +441,7 @@ export function useMarketQuotes(index?: string, enabled = true) {
     staleTime: 1000 * 55,        // 55 s — just under cache TTL
     refetchInterval: 1000 * 60,  // poll every 60 s
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: 'always',
   })
 }
 
@@ -452,6 +453,7 @@ export function useMarketIndices() {
     staleTime: 1000 * 55,
     refetchInterval: 1000 * 60,
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: 'always',
   })
 }
 
@@ -602,6 +604,7 @@ export function useSimulatedPortfolio(period: string = '1d') {
     staleTime: 1000 * 30, // 30s
     refetchInterval: 1000 * 45, // poll every 45s
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: 'always',
   })
 }
 
