@@ -5,11 +5,16 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
         surface: '#0f1420',
         card: '#141928',
+        'stitch-canvas': '#F6F8FB',
+        'stitch-blue': '#2563EB',
+        'stitch-dark': '#0B1C30',
+        'stitch-emerald': '#059669',
       },
       boxShadow: {
         'blue-glow': '0 0 40px rgba(79,142,247,0.1)',
