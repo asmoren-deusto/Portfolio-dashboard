@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { ArrowLeftRight, BarChart3, Bitcoin, Coins, Droplets, Globe, Landmark, TrendingUp } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface CompanyLogoProps {
   ticker?: string
@@ -305,7 +306,12 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   if (marketIcon) {
     return (
       <div
-        className={`${sizeClasses} ${roundedClass} bg-slate-100 flex items-center justify-center shrink-0 dark:bg-slate-800/90 ${className}`}
+        className={cn(
+          sizeClasses,
+          roundedClass,
+          'bg-slate-100 flex items-center justify-center shrink-0 dark:bg-slate-800/90',
+          className
+        )}
         title={`${name} (${ticker})`}
       >
         {marketIcon}
@@ -316,7 +322,12 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   if (attempt >= 3 || !currentSrc) {
     return (
       <div
-        className={`${sizeClasses} ${roundedClass} bg-gradient-to-br ${getAvatarGradient(fallbackStr)} flex items-center justify-center font-bold tracking-tight text-white shadow-md shrink-0 ${className}`}
+        className={cn(
+          sizeClasses,
+          roundedClass,
+          `bg-gradient-to-br ${getAvatarGradient(fallbackStr)} flex items-center justify-center font-bold tracking-tight text-white shadow-md shrink-0`,
+          className
+        )}
         title={`${name} (${fallbackStr})`}
       >
         {initials}
@@ -326,7 +337,14 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
 
   return (
     <div
-      className={`${sizeClasses} relative ${roundedClass} ${containerBg} flex items-center justify-center overflow-hidden shrink-0 transition-all ${className}`}
+      className={cn(
+        sizeClasses,
+        'relative',
+        roundedClass,
+        containerBg,
+        'flex items-center justify-center overflow-hidden shrink-0 transition-all',
+        className
+      )}
     >
       <img
         src={currentSrc}

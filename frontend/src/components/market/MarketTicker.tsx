@@ -190,7 +190,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
   return (
     <span
       title={tooltips[effectiveState] || effectiveState}
-      className={`absolute -top-1 right-1 z-10 inline-flex items-center text-[7px] font-bold uppercase tracking-tight px-1 py-[1px] rounded-full border shadow-2xs leading-none select-none ${cls}`}
+      className={`absolute -top-1.5 right-0.5 z-10 inline-flex items-center text-[7.5px] font-bold uppercase tracking-tight px-1.5 py-[1.5px] rounded-full border shadow-2xs leading-none select-none ${cls}`}
     >
       {labels[effectiveState] || effectiveState}
     </span>
@@ -464,7 +464,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
   return (
     <>
       <div className={cn(
-        "relative overflow-hidden w-full transition-all duration-200",
+        "dark relative overflow-hidden w-full transition-all duration-200",
         fullWidth
           ? "rounded-none bg-[#0B1C30] text-white border-b border-slate-800/90 py-1.5 px-3 sm:px-4 md:px-7 shadow-xs"
           : "rounded-2xl bg-[#0B1C30] text-white border border-slate-800/80 shadow-md py-1 px-3 sm:px-3.5",
@@ -552,6 +552,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       domain={domain}
                       logoUrl={logo}
                       size="xs"
+                      className="!bg-[#14263c] !border !border-slate-700/60 shadow-xs"
                     />
 
                     {/* Name + price + currency inline */}
@@ -567,10 +568,10 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       </span>
                     </div>
 
-                    {/* Change % badge — dark tinted pill matching reference */}
+                    {/* Change % badge — dark tinted pill matching reference, slightly larger */}
                     <span
                       className={cn(
-                        "text-[10.5px] font-bold font-mono tabular-nums px-1.5 py-0.5 rounded ml-0.5 shrink-0 leading-none",
+                        "text-[11.5px] font-bold font-mono tabular-nums px-2 py-0.5 rounded-md ml-0.5 shrink-0 leading-none",
                         isPos
                           ? "bg-emerald-500/20 text-emerald-400"
                           : "bg-rose-500/20 text-rose-400"

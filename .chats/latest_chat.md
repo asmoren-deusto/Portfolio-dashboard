@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-20 16:40:39
+- **Fecha de exportación:** 2026-10-20 16:43:59
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 33
+- **Total de interacciones registradas:** 35
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -616,5 +616,21 @@ Se ha adaptado el indicador de NAVs en [Header.tsx](file:///c:/Users/AsierM/Docu
 ### 👤 Usuario (2026-10-20 14:34:56)
 
 al selector de usuario metele bordecillo
+
+---
+
+### 🤖 Asistente (2026-10-20 14:40:42)
+
+Añadido el borde al selector de usuario en [HeaderActions.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx#L112-L119):
+
+- **Borde sutil refinado:** `border border-slate-200/80 hover:border-slate-300 dark:border-white/10 dark:hover:border-white/20`.
+- **Sombra suave:** `shadow-2xs` integrada para un acabado más pulido y delimitado.
+- **Build y Sync:** Verificado y sincronizado en Git con la versión **v3.0.175**.
+
+---
+
+### 👤 Usuario (2026-10-20 14:38:05)
+
+los iconos del ticker con fondo oscuro, aumenta un pelo los badges
 
 ---
