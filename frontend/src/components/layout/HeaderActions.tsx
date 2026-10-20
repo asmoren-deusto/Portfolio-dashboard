@@ -43,7 +43,7 @@ export function HeaderActions({
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const { handleRefresh, isRefreshingPrices, refreshSuccess } = useRefreshPortfolio()
 
-  const btnSize = compact ? 'w-8 h-8 rounded-lg' : 'w-9 h-9 rounded-xl'
+  const btnSize = compact ? 'w-8 h-8 rounded-lg' : 'w-8.5 h-8.5 rounded-lg'
 
   return (
     <div className={cn('flex items-center gap-1 sm:gap-2', className)}>
@@ -62,8 +62,8 @@ export function HeaderActions({
             value={selectedBroker}
             onChange={(e) => setSelectedBroker(e.target.value)}
             className={cn(
-              "appearance-none rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none font-semibold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 transition-all active:scale-95",
-              compact ? "pl-4.5 pr-5 py-1 text-xs rounded-lg h-8 leading-none max-w-[92px] sm:max-w-[110px] truncate" : "h-9 pl-5 pr-7 text-xs flex items-center"
+              "appearance-none rounded-lg bg-slate-100/80 hover:bg-slate-200/70 border-0 font-semibold text-slate-700 cursor-pointer focus:outline-none dark:bg-white/[0.05] dark:hover:bg-white/[0.09] dark:text-slate-200 transition-all active:scale-95",
+              compact ? "pl-4.5 pr-5 py-1 text-xs rounded-lg h-7.5 leading-none max-w-[92px] sm:max-w-[110px] truncate" : "h-8.5 pl-5 pr-7 text-xs flex items-center"
             )}
             title="Filtrar por entidad bancaria / broker"
           >
@@ -91,8 +91,8 @@ export function HeaderActions({
             onChange={(e) => setPeriod(e.target.value as typeof period)}
             style={compact ? { fontSize: '10px' } : undefined}
             className={cn(
-              "appearance-none rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none font-bold text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500/50 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 transition-all active:scale-95 no-forced-size",
-              compact ? "pl-2 pr-3.5 py-0.5 text-[10px] rounded-lg h-7.5 leading-none w-[46px] sm:w-[50px]" : "h-9 pl-3 pr-7 text-xs flex items-center"
+              "appearance-none rounded-lg bg-slate-100/80 hover:bg-slate-200/70 border-0 font-bold text-slate-700 cursor-pointer focus:outline-none dark:bg-white/[0.05] dark:hover:bg-white/[0.09] dark:text-slate-200 transition-all active:scale-95 no-forced-size",
+              compact ? "pl-2 pr-3.5 py-0.5 text-[10px] rounded-lg h-7.5 leading-none w-[46px] sm:w-[50px]" : "h-8.5 pl-3 pr-7 text-xs flex items-center"
             )}
             title="Seleccionar horizonte temporal"
           >
@@ -112,13 +112,13 @@ export function HeaderActions({
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
             className={cn(
-              "flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none text-xs font-semibold transition-all dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:border-white/10 dark:text-slate-200 active:scale-95",
-              compact ? "p-1 sm:pl-2 sm:pr-2.5 sm:py-1.5" : "h-9 pl-2 pr-2.5"
+              "flex items-center gap-1.5 rounded-full bg-slate-100/70 hover:bg-slate-200/60 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-xs font-semibold transition-all active:scale-95 cursor-pointer",
+              compact ? "p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1" : "h-8.5 pl-1.5 pr-2.5"
             )}
             title="Perfil activo y cambio de usuario"
           >
             <div
-              className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] text-white shadow-xs shrink-0 ring-1 ring-black/10 dark:ring-white/10"
+              className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] text-white shadow-xs shrink-0 ring-1 ring-black/10 dark:ring-white/10"
               style={{
                 background: currentUser.bgGradient || 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
                 backgroundColor: '#059669',
@@ -130,7 +130,7 @@ export function HeaderActions({
               <span className="font-bold text-[11px] text-slate-900 dark:text-white max-w-[110px] truncate">
                 {currentUser.name}
               </span>
-              <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium">
+              <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">
                 {currentUser.badge}
               </span>
             </div>
@@ -264,11 +264,11 @@ export function HeaderActions({
         aria-label={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
         aria-pressed={privacyMode}
         className={cn(
-          'flex items-center justify-center border transition-all',
+          'flex items-center justify-center rounded-lg transition-colors cursor-pointer',
           btnSize,
           privacyMode
-            ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-white/20 dark:bg-white/[0.08] dark:text-white'
-            : 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300'
+            ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300'
+            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06]'
         )}
         title={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
       >
@@ -280,7 +280,7 @@ export function HeaderActions({
         whileTap={{ scale: 0.92, rotate: 12 }}
         onClick={toggleTheme}
         className={cn(
-          'flex items-center justify-center border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 transition-all dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300',
+          'flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] transition-colors cursor-pointer',
           btnSize
         )}
         title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
@@ -288,7 +288,7 @@ export function HeaderActions({
         {theme === 'dark' ? (
           <Sun className="w-4 h-4 text-amber-400" />
         ) : (
-          <Moon className="w-4 h-4 text-slate-700" />
+          <Moon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
         )}
       </motion.button>
 
@@ -298,11 +298,11 @@ export function HeaderActions({
         onClick={openNavAlertHistory}
         aria-label="Ver informe de actualizaciones de NAVs"
         className={cn(
-          'relative flex items-center justify-center border transition-all',
+          'relative flex items-center justify-center rounded-lg transition-colors cursor-pointer',
           btnSize,
           (lastNavAlertHistory?.updatedCount ?? 0) > 0
-            ? 'border-emerald-300 bg-emerald-50/60 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400'
-            : 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300'
+            ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
+            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06]'
         )}
         title={
           lastNavAlertHistory
@@ -320,15 +320,16 @@ export function HeaderActions({
 
       {/* Refresh button */}
       {!hideRefresh && (
-        <button
+        <motion.button
+          whileTap={{ scale: 0.92 }}
           onClick={handleRefresh}
           disabled={isRefreshingPrices}
           className={cn(
-            'flex items-center justify-center border border-slate-200/90 transition-all active:scale-95 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-200 dark:border-white/10 dark:hover:border-white/20',
+            'flex items-center justify-center rounded-lg transition-colors cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed',
             btnSize,
-            'bg-white hover:bg-slate-50 text-slate-700',
-            isRefreshingPrices && 'opacity-85 cursor-wait bg-blue-50/60 text-blue-700 border-blue-300 dark:bg-white/[0.08] dark:text-white dark:border-white/20',
-            refreshSuccess && 'border-emerald-300 text-emerald-600 bg-emerald-50/40 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-500/10'
+            refreshSuccess
+              ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06]'
           )}
           title={isRefreshingPrices ? 'Buscando y actualizando NAVs oficiales en directo...' : 'Buscar y actualizar los NAVs oficiales en tiempo real desde las gestoras'}
         >
@@ -342,7 +343,7 @@ export function HeaderActions({
               <RefreshCw className={cn('w-3.5 h-3.5', isRefreshingPrices ? 'text-blue-500' : 'text-slate-500 dark:text-slate-400')} />
             </motion.div>
           )}
-        </button>
+        </motion.button>
       )}
     </div>
   )

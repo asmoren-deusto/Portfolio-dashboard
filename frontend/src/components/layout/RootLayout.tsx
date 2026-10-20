@@ -327,8 +327,8 @@ export function RootLayout() {
 
           {/* Top Bar with Selectors & Black Market Ticker Strip (Stitch / Reference Design) */}
           <div className="flex flex-col w-full md:sticky md:top-0 z-30 shadow-xs">
-            {/* Top White Bar with Selectors (Desktop only) */}
-            <div className="hidden md:block w-full bg-white dark:bg-[#111827] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 py-2.5 backdrop-blur-md">
+            {/* Top White Bar with Selectors (Desktop only) - Exactly 60px to align ticker top with sidebar separator */}
+            <div className="hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#111827] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 backdrop-blur-md">
               <Header
                 title={pageMeta.title}
                 subtitle={pageMeta.subtitle}
