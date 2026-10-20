@@ -466,8 +466,8 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
       <div className={cn(
         "dark relative overflow-hidden w-full transition-all duration-200",
         fullWidth
-          ? "rounded-none bg-[#0B1C30] text-white border-b border-slate-800/90 py-1.5 px-3 sm:px-4 md:px-7 shadow-xs"
-          : "rounded-2xl bg-[#0B1C30] text-white border border-slate-800/80 shadow-md py-1 px-3 sm:px-3.5",
+          ? "rounded-none bg-[#0B1C30] text-white border-b border-slate-800/90 py-0.5 px-3 sm:px-4 md:px-7 shadow-xs"
+          : "rounded-2xl bg-[#0B1C30] text-white border border-slate-800/80 shadow-md py-0.5 px-3 sm:px-3.5",
         className
       )}>
         <div className="flex items-center">
@@ -525,7 +525,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
               )}
               style={{ touchAction: 'pan-x', contain: 'content', willChange: 'scroll-position' }}
             >
-              <div className="flex items-center gap-2 sm:gap-3.5 py-0.5 w-max">
+              <div className="flex items-center gap-2 sm:gap-3.5 py-0 w-max">
                 {repeatedIndices.map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
@@ -539,7 +539,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                     tabIndex={0}
                     key={`${idx.name}-${index}`}
                     onClick={() => handleCardClick(idx)}
-                    className="relative flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-800/80 transition-colors shrink-0 cursor-pointer active:scale-[0.98]"
+                    className="relative flex items-center gap-1.5 px-2 py-0 rounded-lg hover:bg-slate-800/80 transition-colors shrink-0 cursor-pointer active:scale-[0.98]"
                   >
                     {/* Floating Overlaid State Badge (Upper-right corner) */}
                     {state !== 'REGULAR' && (
