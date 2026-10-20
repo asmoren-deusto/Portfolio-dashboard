@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-20 16:45:21
+- **Fecha de exportación:** 2026-10-20 16:50:06
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 37
+- **Total de interacciones registradas:** 40
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -655,5 +655,27 @@ Se han aplicado los cambios en el ticker y los badges:
 ### 👤 Usuario (2026-10-20 14:41:22)
 
 los iconos superiores derechos que el hover sea circular
+
+---
+
+### 🤖 Asistente (2026-10-20 14:45:24)
+
+Se ha actualizado el hover de los iconos superiores derechos a formato circular en [HeaderActions.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx#L46-L47):
+
+- **Forma circular (`rounded-full`):** Aplicado a `btnSize` y a los cuatro botones de acción (Modo Discreto, Selector de Tema, Campana de Historial de NAVs y Sincronización de Precios).
+- **Efecto visual:** Al interactuar o pasar el cursor, el fondo resaltado (`hover:bg-slate-100/80` y `dark:hover:bg-white/[0.06]`) es perfectamente circular.
+- **Build y Sync:** Verificado y sincronizado en Git con la versión **v3.0.177**.
+
+---
+
+### 👤 Usuario (2026-10-20 14:48:50)
+
+iconos un poco más grandes en el ticker
+
+---
+
+### 👤 Usuario (2026-10-20 14:49:24)
+
+el fondo del icono que se note un pelin, ahora es el mismo o casi que el fondo
 
 ---

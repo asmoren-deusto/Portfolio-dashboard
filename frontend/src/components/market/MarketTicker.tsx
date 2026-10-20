@@ -551,8 +551,8 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       name={idx.name}
                       domain={domain}
                       logoUrl={logo}
-                      size="xs"
-                      className="!bg-[#14263c] !border !border-slate-700/60 shadow-xs"
+                      size="sm"
+                      className="!bg-slate-700/70 !border !border-slate-600/70 shadow-xs"
                     />
 
                     {/* Name + price + currency inline */}
