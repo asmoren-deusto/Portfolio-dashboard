@@ -43,7 +43,7 @@ export function HeaderActions({
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const { handleRefresh, isRefreshingPrices, refreshSuccess } = useRefreshPortfolio()
 
-  const btnSize = compact ? 'w-8 h-8 rounded-lg' : 'w-8.5 h-8.5 rounded-lg'
+  const btnSize = compact ? 'w-8 h-8 rounded-full' : 'w-8.5 h-8.5 rounded-full'
 
   return (
     <div className={cn('flex items-center gap-1 sm:gap-2', className)}>
@@ -264,7 +264,7 @@ export function HeaderActions({
         aria-label={privacyMode ? 'Desactivar modo discreto' : 'Activar modo discreto'}
         aria-pressed={privacyMode}
         className={cn(
-          'flex items-center justify-center rounded-lg transition-colors cursor-pointer',
+          'flex items-center justify-center rounded-full transition-colors cursor-pointer',
           btnSize,
           privacyMode
             ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300'
@@ -280,7 +280,7 @@ export function HeaderActions({
         whileTap={{ scale: 0.92, rotate: 12 }}
         onClick={toggleTheme}
         className={cn(
-          'flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] transition-colors cursor-pointer',
+          'flex items-center justify-center rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] transition-colors cursor-pointer',
           btnSize
         )}
         title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
@@ -298,7 +298,7 @@ export function HeaderActions({
         onClick={openNavAlertHistory}
         aria-label="Ver informe de actualizaciones de NAVs"
         className={cn(
-          'relative flex items-center justify-center rounded-lg transition-colors cursor-pointer',
+          'relative flex items-center justify-center rounded-full transition-colors cursor-pointer',
           btnSize,
           (lastNavAlertHistory?.updatedCount ?? 0) > 0
             ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
@@ -325,7 +325,7 @@ export function HeaderActions({
           onClick={handleRefresh}
           disabled={isRefreshingPrices}
           className={cn(
-            'flex items-center justify-center rounded-lg transition-colors cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed',
+            'flex items-center justify-center rounded-full transition-colors cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed',
             btnSize,
             refreshSuccess
               ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
