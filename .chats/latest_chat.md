@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-20 12:39:43
+- **Fecha de exportación:** 2026-10-20 12:42:41
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 13
+- **Total de interacciones registradas:** 15
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -374,5 +374,33 @@ Se ha actualizado el **frontend principal** (`frontend/`) incorporando la identi
 ### 👤 Usuario (2026-10-20 10:33:53)
 
 la fuente de los numeros no es la misma
+
+---
+
+### 🤖 Asistente (2026-10-20 10:39:46)
+
+Tienes toda la razón. Al aplicar los tokens de Stitch habíamos asignado temporalmente `font-display` (`Plus Jakarta Sans`) a los números principales de [KpiCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/KpiCard.tsx), lo que provocaba que se vieran en una fuente distinta a:
+
+- Los badges de variación (`+17,35%`, `1D`, `YTD`, etc.).
+- Las métricas secundarias y subtítulos.
+- Los valores de tablas, posiciones, transacciones y carteras.
+
+### Correcciones aplicadas:
+1. **[KpiCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/KpiCard.tsx):**
+   - Restaurado `font-mono` (`JetBrains Mono` con espaciado tabular exacto) tanto en las tarjetas hero como en las tarjetas KPI regulares (`font-bold font-mono tracking-tight`).
+2. **[MarketTicker.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx):**
+   - Aplicado `font-mono` a los precios y porcentajes del ticker de mercado para que coincidan al 100% con la misma familia tipográfica numérica del resto del dashboard.
+3. **Distribución tipográfica limpia:**
+   - **Títulos y encabezados:** `Plus Jakarta Sans` (`font-display`).
+   - **Textos descriptivos y etiquetas:** `Inter` (`font-sans`).
+   - **Todos los números y métricas financieras:** `JetBrains Mono` (`font-mono` con `tabular-nums`).
+
+Compilación verificada con éxito y publicada en la versión **`v3.0.165`**.
+
+---
+
+### 👤 Usuario (2026-10-20 10:41:12)
+
+devuelve el ticker a como era antes y estos titulos tb
 
 ---

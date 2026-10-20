@@ -124,7 +124,7 @@ export function Header({
       {/* Title & Subtitle */}
       <div>
         <div className="h-9 flex items-center gap-2.5 flex-wrap">
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-none font-display">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white leading-none">
             <motion.span
               key={title}
               initial={{ opacity: 0.35 }}
