@@ -144,11 +144,11 @@ export function Header({
                 ? 'Todos los NAVs están al día. Haz clic para ver el historial de actualizaciones.'
                 : `${updated}/${total} NAVs actualizados. Haz clic para ver el historial.`
             }
-            className="inline-flex items-center gap-1.5 h-7.5 px-2.5 rounded-lg bg-slate-100/80 hover:bg-slate-200/70 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors shadow-none cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1.5 h-[26px] px-2.5 rounded-lg border border-slate-200/90 dark:border-white/10 bg-slate-50/80 hover:bg-slate-100/90 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] hover:border-slate-300 dark:hover:border-white/20 text-[11px] font-semibold text-slate-700 dark:text-slate-300 transition-all shadow-2xs cursor-pointer shrink-0"
           >
             <span className={cn('live-dot', !navFresh ? 'warn' : 'emerald')} />
             <span>{navFresh ? 'NAVs al día' : `NAVs ${updated}/${total}`}</span>
-            {navDate && <span className="font-mono text-slate-400 dark:text-slate-500 text-[11px]">· {navDate}</span>}
+            {navDate && <span className="font-mono text-slate-400 dark:text-slate-500 text-[10px]">· {navDate}</span>}
           </button>
         )}
 

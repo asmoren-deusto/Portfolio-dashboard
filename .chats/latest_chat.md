@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-20 16:32:26
+- **Fecha de exportación:** 2026-10-20 16:33:15
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 25
+- **Total de interacciones registradas:** 27
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -537,5 +537,31 @@ Todo ha sido verificado, compilado con cero errores y desplegado en Git bajo la 
 ### 👤 Usuario (2026-10-20 14:27:52)
 
 mueve el indicador de nav a la derecha de Vision General. Revisa el estilo de letra de esos titulos grandes. Ojo con los dropdown menus que quedan debajo del ticker al abrirlos
+
+---
+
+### 🤖 Asistente (2026-10-20 14:32:29)
+
+Se han aplicado los cambios solicitados con precisión:
+
+1. **Indicador de NAVs a la derecha del título principal:**
+   - Se ha trasladado el botón/indicador de NAVs (`NAVs al día · fecha` o `NAVs 8/9`) directamente a la izquierda, colocado inmediatamente a la derecha de **Visión General** en [Header.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/Header.tsx).
+   - Se eliminó el duplicado de la zona derecha, dejando los controles de selección de entidad, selector temporal, perfil y acciones limpiamente agrupados.
+
+2. **Tipografía de los títulos grandes:**
+   - Se ha ajustado el título principal a **`text-2xl sm:text-[26px] font-extrabold tracking-tight`** con la fuente del sistema (`Inter`), dándole peso, presencia ejecutiva y excelente legibilidad sin que quede empequeñecido dentro de la barra de 60px.
+
+3. **Capas y apilamiento (Z-Index) de menús desplegables:**
+   - En [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx), la barra blanca de cabecera ahora cuenta con **`relative z-20`** y el contenedor del ticker con **`relative z-10`**.
+   - En [HeaderActions.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/HeaderActions.tsx), el menú desplegable de perfil/cambio de usuario se configuró en **`z-[100]`** con overlay en **`z-[90]`**.
+   - Al abrir cualquier menú desplegable, este flota siempre por encima de la franja negra del ticker y del contenido de la página.
+
+Compilado sin errores y publicado en Git bajo la versión **`v3.0.171`**.
+
+---
+
+### 👤 Usuario (2026-10-20 14:32:12)
+
+metele un bordecillo al indicador de NAVs, hazlo un poco menos alto
 
 ---
