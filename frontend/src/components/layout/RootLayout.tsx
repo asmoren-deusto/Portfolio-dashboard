@@ -14,6 +14,7 @@ import { MobileTabBar } from '@/components/layout/MobileTabBar'
 import { UserProfileModal } from '@/components/layout/UserProfileModal'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useRefreshPortfolio } from '@/hooks/useRefreshPortfolio'
+import { MarketTicker } from '@/components/market/MarketTicker'
 import { cn } from '@/lib/utils'
 
 import { useQueryClient } from '@tanstack/react-query'
@@ -324,12 +325,18 @@ export function RootLayout() {
           {/* Spacer to prevent content overlap with fixed mobile header */}
           <div className="h-[calc(max(0.45rem,calc(env(safe-area-inset-top,0px)-2px))+2.4rem)] md:hidden shrink-0" aria-hidden="true" />
 
-          {/* Persistent Top Header (Desktop only: shows titles, subtitles, and horizontal pills) */}
-          <div className="hidden md:block px-4 pt-3 sm:px-6 sm:pt-4 md:px-7 md:pt-4">
-            <Header
-              title={pageMeta.title}
-              subtitle={pageMeta.subtitle}
-            />
+          {/* Top Bar with Selectors & Black Market Ticker Strip (Stitch / Reference Design) */}
+          <div className="flex flex-col w-full md:sticky md:top-0 z-30 shadow-xs">
+            {/* Top White Bar with Selectors (Desktop only) */}
+            <div className="hidden md:block w-full bg-white dark:bg-[#111827] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 py-2.5 backdrop-blur-md">
+              <Header
+                title={pageMeta.title}
+                subtitle={pageMeta.subtitle}
+              />
+            </div>
+
+            {/* Black Live Market Ticker Strip attached directly under the white bar */}
+            <MarketTicker fullWidth />
           </div>
 
           {/* Page Content Animation: Instant mounting with silky smooth opacity transition and zero layout shifts */}

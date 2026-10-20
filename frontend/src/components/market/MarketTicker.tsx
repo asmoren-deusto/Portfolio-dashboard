@@ -466,41 +466,30 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
       <div className={cn(
         "relative overflow-hidden w-full transition-all duration-200",
         fullWidth
-          ? "rounded-none bg-white/95 border-b border-slate-200/80 dark:bg-[#191919]/95 dark:border-white/[0.08] py-1 shadow-2xs backdrop-blur-md px-3 sm:px-4 md:px-7"
-          : "rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover py-1 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.14] px-3 sm:px-3.5",
+          ? "rounded-none bg-[#0B1C30] text-white border-b border-slate-800/90 py-1.5 px-3 sm:px-4 md:px-7 shadow-xs"
+          : "rounded-2xl bg-[#0B1C30] text-white border border-slate-800/80 shadow-md py-1 px-3 sm:px-3.5",
         className
       )}>
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
           <div
             className={cn(
-              "flex items-center border-r border-slate-200/80 dark:border-white/10 shrink-0 z-20",
-              fullWidth ? "bg-white/95 dark:bg-[#191919]/95" : "bg-white/95 dark:bg-[#1e1e1e]/96",
-              isNative ? "pl-0 pr-2 gap-1" : "pr-3 sm:pr-3.5 gap-2"
+              "flex items-center border-r border-slate-700/80 shrink-0 z-20 bg-[#0B1C30]",
+              isNative ? "pl-0 pr-2 gap-1.5" : "pr-3 sm:pr-3.5 gap-2"
             )}
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
           >
             <div className="flex items-center justify-center w-4 h-4 shrink-0">
-              {mainStatusLabel === 'Cerrado' ? (
-                <span className="live-dot slate" />
-              ) : mainStatusLabel === 'Pre-mercado' ? (
-                <span className="live-dot warn" />
-              ) : mainStatusLabel === 'Post-mercado' ? (
-                <span className="live-dot purple" />
-              ) : mainStatusLabel === 'FUTURES' ? (
-                <span className="live-dot blue" />
-              ) : (
-                <span className="live-dot emerald" />
-              )}
+              <span className="live-dot emerald" />
             </div>
             {!isNative && (
-              <div className="flex flex-col leading-tight pl-0.5">
-                <span className="text-[10.5px] font-semibold tracking-wider text-slate-800 dark:text-slate-100 uppercase">
-                  {mainStatusLabel}
+              <div className="flex items-center gap-1.5 pl-0.5">
+                <span className="text-[11px] font-bold tracking-wider text-slate-200 uppercase whitespace-nowrap">
+                  MERCADOS EN VIVO
                 </span>
                 {lastUpdated && (
-                  <span className="flex items-center gap-0.5 text-[9px] text-slate-400 dark:text-slate-500 mt-[1px]">
-                    <Clock className="w-2.5 h-2.5" />
+                  <span className="hidden xl:flex items-center gap-0.5 text-[9px] text-slate-400 font-mono">
+                    <Clock className="w-2.5 h-2.5 text-emerald-400" />
                     {fmtUpdated(lastUpdated)}
                   </span>
                 )}
@@ -511,18 +500,8 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
           {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
           <div className={cn("relative flex-1 overflow-hidden py-0 group", isNative ? "ml-1.5" : "ml-2.5")}>
             {/* Subtle fade edges for smooth transition */}
-            <div className={cn(
-              "pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10",
-              fullWidth
-                ? "bg-gradient-to-r from-white/95 dark:from-[#191919] to-transparent"
-                : "bg-gradient-to-r from-white/95 dark:from-[#1e1e1e] to-transparent"
-            )} />
-            <div className={cn(
-              "pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10",
-              fullWidth
-                ? "bg-gradient-to-l from-white/95 dark:from-[#191919] to-transparent"
-                : "bg-gradient-to-l from-white/95 dark:from-[#1e1e1e] to-transparent"
-            )} />
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-[#0B1C30] to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-l from-[#0B1C30] to-transparent" />
 
             {/* Seamless scrolling marquee track with interactive drag */}
             <div
@@ -546,15 +525,13 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
               )}
               style={{ touchAction: 'pan-x', contain: 'content', willChange: 'scroll-position' }}
             >
-              <div className="flex items-center gap-2 sm:gap-3 pt-1 pb-0.5 w-max">
+              <div className="flex items-center gap-2 sm:gap-3.5 py-0.5 w-max">
                 {repeatedIndices.map((idx: any, index: number) => {
                 const isPos = (idx.change_pct ?? 0) >= 0
                 const state: string = idx.market_state || 'REGULAR'
-                const extPrice: number | null =
-                  state === 'PRE' ? (idx.pre_market_price ?? null) :
-                  (state === 'POST' || state === 'POSTPOST') ? (idx.post_market_price ?? null) : null
                 const domain = idx.domain || getAssetDomain(idx.name, idx.ticker || '')
                 const logo = idx.logo_url || getAssetLogo(idx.name, idx.ticker || '')
+                const currency = idx.currency || (['^IBEX', '^GDAXI', '^STOXX50E', 'BTC-EUR'].includes(idx.ticker) || idx.name === 'BTC/EUR' || idx.name === 'Euro 50' || idx.name.includes('IBEX') ? 'EUR' : 'USD')
 
                 return (
                   <div
@@ -562,7 +539,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                     tabIndex={0}
                     key={`${idx.name}-${index}`}
                     onClick={() => handleCardClick(idx)}
-                    className="relative flex items-center gap-2 px-2.5 py-1 rounded-xl hover:bg-slate-100/80 dark:hover:bg-white/[0.06] transition-colors shrink-0 cursor-pointer active:scale-[0.98]"
+                    className="relative flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-800/80 transition-colors shrink-0 cursor-pointer active:scale-[0.98]"
                   >
                     {/* Floating Overlaid State Badge (Upper-right corner) */}
                     {state !== 'REGULAR' && (
@@ -576,33 +553,31 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       logoUrl={logo}
                       size="xs"
                     />
-                    {/* Name + price — always exactly 2 lines, no extra rows */}
-                    <div className="flex flex-col justify-center min-w-0">
-                      <span className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap leading-none">
-                        {idx.name}
+
+                    {/* Name + price + currency inline */}
+                    <div className="flex items-center gap-1 min-w-0">
+                      <span className="text-[11px] font-medium text-slate-400 whitespace-nowrap">
+                        {idx.name}:
                       </span>
-                      <span className="text-[11px] font-bold text-slate-900 tracking-tight dark:text-white mt-[1.5px] tabular-nums leading-none whitespace-nowrap">
+                      <span className="text-[11px] font-bold text-white font-mono tabular-nums tracking-tight whitespace-nowrap">
                         {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
+                      </span>
+                      <span className="text-[9.5px] font-mono text-slate-400 uppercase whitespace-nowrap">
+                        {currency}
                       </span>
                     </div>
 
-                    {/* Change % badge — clean borderless badge */}
-                    <div
-                      className={`flex items-center gap-0.5 text-[10.5px] font-semibold tabular-nums px-1.5 py-[1px] rounded-md shrink-0 ${
+                    {/* Change % badge — dark tinted pill matching reference */}
+                    <span
+                      className={cn(
+                        "text-[10.5px] font-bold font-mono tabular-nums px-1.5 py-0.5 rounded ml-0.5 shrink-0 leading-none",
                         isPos
-                          ? 'text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/15'
-                          : 'text-rose-700 bg-rose-500/10 dark:text-rose-400 dark:bg-rose-500/15'
-                      }`}
-                    >
-                      {isPos ? (
-                        <TrendingUp className="w-2.5 h-2.5 stroke-[2.5]" />
-                      ) : (
-                        <TrendingDown className="w-2.5 h-2.5 stroke-[2.5]" />
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : "bg-rose-500/20 text-rose-400"
                       )}
-                      <span>
-                        {isPos ? '+' : ''}{idx.change_pct?.toFixed(2)}%
-                      </span>
-                    </div>
+                    >
+                      {isPos ? '+' : ''}{idx.change_pct?.toFixed(2)}%
+                    </span>
                   </div>
                 )
               })}

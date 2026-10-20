@@ -282,11 +282,6 @@ export const MarketPage: React.FC = () => {
 
   return (
     <div className="space-y-4 pb-8">
-      {/* Real-time Ticker Bar (Franja continua edge-to-edge de lado a lado) */}
-      <div className="-mx-4 md:-mx-7 -mt-4 mb-0.5">
-        <MarketTicker onSelectStock={setSelectedStock} fullWidth />
-      </div>
-
       {/* Global Market Trading Sessions Bar (Tokyo, Europe, New York) */}
       <MarketSessionsBar
         onSelectSession={(sessionId) => {

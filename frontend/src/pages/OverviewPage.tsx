@@ -632,11 +632,6 @@ export function OverviewPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      {/* Live Market Ticker (Franja continua edge-to-edge de lado a lado) */}
-      <div className="-mx-4 md:-mx-7 -mt-4 mb-0.5">
-        <MarketTicker onSelectStock={setSelectedStock} fullWidth />
-      </div>
-
       {/* 1. Métricas Globales (Totales Cartera) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between px-0.5">

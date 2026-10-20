@@ -112,29 +112,31 @@ export function HeaderActions({
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
             className={cn(
-              "flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 shadow-none text-xs font-semibold transition-all dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:border-white/10 dark:text-slate-200 active:scale-95",
-              compact ? "p-1 sm:pl-2 sm:pr-2.5 sm:py-1.5" : "h-9 pl-2 pr-2.5"
+              "flex items-center gap-2 rounded-full border border-slate-200/90 dark:border-white/10 bg-slate-50/80 dark:bg-white/[0.04] hover:bg-slate-100/90 dark:hover:bg-white/[0.08] shadow-none transition-all active:scale-95 cursor-pointer",
+              compact ? "p-1 sm:pl-1 sm:pr-2.5 sm:py-1" : "h-9 pl-1 pr-2.5"
             )}
             title="Perfil activo y cambio de usuario"
           >
             <div
-              className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] text-white shadow-xs shrink-0 ring-1 ring-black/10 dark:ring-white/10"
+              className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs text-white shadow-xs shrink-0 ring-1 ring-black/10 dark:ring-white/10"
               style={{
-                background: currentUser.bgGradient || 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
-                backgroundColor: '#059669',
+                background: currentUser.isDemo
+                  ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                  : 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+                backgroundColor: currentUser.isDemo ? '#2563eb' : '#059669',
               }}
             >
               {currentUser.avatar}
             </div>
-            <div className="flex flex-col text-left leading-tight hidden sm:flex">
-              <span className="font-bold text-[11px] text-slate-900 dark:text-white max-w-[110px] truncate">
+            <div className="flex flex-col text-left leading-none hidden sm:flex">
+              <span className="font-bold text-xs text-slate-900 dark:text-white max-w-[110px] truncate">
                 {currentUser.name}
               </span>
-              <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium">
-                {currentUser.badge}
+              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">
+                {currentUser.isDemo ? 'MODO DEMO' : 'ACCESO TOTAL'}
               </span>
             </div>
-            <ChevronDown size={12} className="text-slate-400" />
+            <ChevronDown size={13} className="text-slate-400" />
           </button>
 
           {/* Dropdown Menu */}
