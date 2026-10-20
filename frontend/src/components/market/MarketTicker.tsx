@@ -166,9 +166,9 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
     PRE: 'Pre',
     POST: 'Post',
     POSTPOST: 'Post',
-    FUTURES: 'FUTURES',
-    OVERNIGHT: 'FUTURES',
-    CLOSED: 'Closed',
+    FUTURES: 'Futures',
+    OVERNIGHT: 'Futures',
+    CLOSED: 'Cerrado',
   }
   const tooltips: Record<string, string> = {
     PRE: 'Pre-mercado',
@@ -179,18 +179,18 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
     CLOSED: 'Mercado Cerrado',
   }
   const colors: Record<string, string> = {
-    PRE: 'bg-amber-100/95 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30',
-    POST: 'bg-purple-100/95 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
-    POSTPOST: 'bg-purple-100/95 text-purple-800 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
-    FUTURES: 'bg-sky-50/90 text-sky-700 border-sky-200/90 dark:bg-sky-500/10 dark:text-sky-300/90 dark:border-sky-500/20',
-    OVERNIGHT: 'bg-sky-50/90 text-sky-700 border-sky-200/90 dark:bg-sky-500/10 dark:text-sky-300/90 dark:border-sky-500/20',
-    CLOSED: 'bg-slate-200/95 text-slate-700 border-slate-300 dark:bg-slate-800/95 dark:text-slate-300 dark:border-slate-600',
+    PRE: 'bg-amber-500/20 text-amber-400',
+    POST: 'bg-purple-500/20 text-purple-400',
+    POSTPOST: 'bg-purple-500/20 text-purple-400',
+    FUTURES: 'bg-sky-500/20 text-sky-400',
+    OVERNIGHT: 'bg-sky-500/20 text-sky-400',
+    CLOSED: 'bg-slate-500/20 text-slate-400',
   }
   const cls = colors[effectiveState] || colors.CLOSED
   return (
     <span
       title={tooltips[effectiveState] || effectiveState}
-      className={`inline-flex items-center text-[8px] font-bold uppercase tracking-tight px-1.5 py-[1.5px] rounded border shadow-2xs leading-none select-none shrink-0 ${cls}`}
+      className={`text-[11px] font-bold font-mono uppercase tracking-tight px-2 py-0.5 rounded-md ml-0.5 shrink-0 leading-none select-none ${cls}`}
     >
       {labels[effectiveState] || effectiveState}
     </span>
@@ -550,15 +550,11 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       className="!bg-slate-700/70 !border !border-slate-600/70 shadow-xs"
                     />
 
-                    {/* Name + State badge directly after ticker + price + currency inline */}
+                    {/* Name + price + currency inline */}
                     <div className="flex items-center gap-1 min-w-0">
-                      <span className="text-[11px] font-medium text-slate-300 whitespace-nowrap">
-                        {idx.name}
+                      <span className="text-[11px] font-medium text-slate-400 whitespace-nowrap">
+                        {idx.name}:
                       </span>
-                      {state !== 'REGULAR' && (
-                        <MarketStateBadge state={state} name={idx.name} />
-                      )}
-                      <span className="text-[11px] font-medium text-slate-500 whitespace-nowrap">:</span>
                       <span className="text-[11px] font-bold text-white font-mono tabular-nums tracking-tight whitespace-nowrap">
                         {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
                       </span>
@@ -578,6 +574,11 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                     >
                       {isPos ? '+' : ''}{idx.change_pct?.toFixed(2)}%
                     </span>
+
+                    {/* Market state badge (Futures, Pre, Post, etc.) directly AFTER the % badge with same style */}
+                    {state !== 'REGULAR' && (
+                      <MarketStateBadge state={state} name={idx.name} />
+                    )}
                   </div>
                 )
               })}
