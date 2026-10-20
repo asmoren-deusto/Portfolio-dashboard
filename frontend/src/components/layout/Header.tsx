@@ -123,7 +123,7 @@ export function Header({
     <div className="flex items-center justify-between gap-3 w-full">
       {/* Title, NAV Indicator & Badges */}
       <div className="flex items-center gap-3 min-w-0 flex-wrap">
-        <h1 className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-none truncate">
+        <h1 className="text-lg sm:text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-none truncate">
           <motion.span
             key={title}
             initial={{ opacity: 0.35 }}
