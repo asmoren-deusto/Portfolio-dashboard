@@ -722,12 +722,12 @@ export const EMPTY_PERFORMANCE: Record<string, PricePoint[]> = {
 }
 
 export const ASIER_REAL_SUMMARY: PortfolioSummary = {
-  total_value: 66123.43,
-  total_invested: 59852.93,
-  total_pnl: 6270.49,
-  total_pnl_pct: 10.48,
-  num_positions: 8,
-  last_updated: '2026-09-27T12:00:00Z',
+  total_value: 60100.20,
+  total_invested: 53807.10,
+  total_pnl: 6293.10,
+  total_pnl_pct: 11.69,
+  num_positions: 7,
+  last_updated: '2026-10-20T12:00:00Z',
 }
 
 export const ASIER_REAL_POSITIONS: Position[] = [
@@ -884,28 +884,6 @@ export const ASIER_REAL_POSITIONS: Position[] = [
     broker: 'bbva',
     last_updated: '2026-09-25',
     price_date: '2026-09-25',
-  },
-  {
-    isin: 'LU1598719752',
-    name: 'Cobas Lux SICAV - Cobas International Fund P EUR Acc',
-    ticker: '0P0001AZ4C',
-    domain: 'cobasam.com',
-    category: 'Renta Variable Global Value',
-    ter: 1.85,
-    geo: 'Global',
-    asset_type: 'fund',
-    currency: 'EUR',
-    shares: 34.2638,
-    avg_cost: 176.4384,
-    current_price: 175.79,
-    current_value: 6023.23,
-    invested_amount: 6045.83,
-    unrealized_pnl: -22.60,
-    unrealized_pnl_pct: -0.37,
-    weight: 9.11,
-    broker: 'bbva',
-    last_updated: '2026-09-24',
-    price_date: '2026-09-24',
   },
 ]
 

@@ -1036,6 +1036,12 @@ PRICES = json.loads(r'''[
     "date": "2026-10-09",
     "price": 97.31,
     "currency": "EUR"
+  },
+  {
+    "isin": "LU1598719752",
+    "date": "2026-10-20",
+    "price": 180.91,
+    "currency": "EUR"
   }
 ]''')
 
@@ -3103,5 +3109,17 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-01-15",
     "broker": "traderepublic",
     "notes": "Aportación a Trade Republic (Pérdida patrimonial 2026)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU1598719752",
+    "type": "sell",
+    "shares": 34.2638,
+    "price": 180.91,
+    "amount": 6198.66,
+    "fees": 0.0,
+    "date": "2026-10-20",
+    "broker": "bbva",
+    "notes": "Venta/Reembolso de valores (Retención fiscal: 167,83 €, Líquido: 6.030,83 €, Orden: 3026288535376785)"
   }
 ]''')
