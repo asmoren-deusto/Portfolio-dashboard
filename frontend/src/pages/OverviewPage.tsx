@@ -249,11 +249,13 @@ export function OverviewPage() {
         const prev = performance[i - 1].value
         const prevInvested = performance[i - 1].invested ?? prev
         const curInvested = p.invested ?? p.value
-        const netInflow = curInvested - prevInvested
+        const netInflow = p.net_inflow !== undefined && p.net_inflow !== null ? p.net_inflow : (curInvested - prevInvested)
 
         if (prev > 0) {
-          // Market return of the day excluding net cash inflows
-          const dayReturn = (p.value - netInflow - prev) / prev
+          // Pure market return of the day excluding external cash injections/withdrawals
+          const dayReturn = p.daily_return !== undefined && p.daily_return !== null
+            ? p.daily_return / 100
+            : (p.value - netInflow - prev) / prev
           dailyRets.push(dayReturn)
 
           marketIndex = marketIndex * (1.0 + dayReturn)
@@ -436,10 +438,12 @@ export function OverviewPage() {
         const prev = activeSorted[activeSorted.length - 2]
         const lastInv = last.invested ?? last.value
         const prevInv = prev.invested ?? prev.value
-        const inflow = lastInv - prevInv
+        const inflow = last.net_inflow !== undefined && last.net_inflow !== null ? last.net_inflow : (lastInv - prevInv)
         const diff = (last.value - inflow) - prev.value
         dayAmount = Math.round(diff * 100) / 100
-        dayPct = prev.value > 0 ? (diff / prev.value) * 100 : 0
+        dayPct = last.daily_return !== undefined && last.daily_return !== null
+          ? last.daily_return
+          : (prev.value > 0 ? (diff / prev.value) * 100 : 0)
       }
     } else if (analytics?.return_1d !== undefined) {
       dayPct = analytics.return_1d
@@ -462,9 +466,14 @@ export function OverviewPage() {
         // 7 business sessions ago (or up to 7 sessions)
         const weekIdx = Math.max(0, activeSorted.length - 1 - 7)
         const weekPoint = activeSorted[weekIdx]
-        const lastInv = last.invested ?? last.value
-        const weekInv = weekPoint.invested ?? weekPoint.value
-        const weekInflow = lastInv - weekInv
+        const slice = activeSorted.slice(weekIdx + 1)
+        const weekInflow = slice.reduce((sum, pt, idx) => {
+          if (pt.net_inflow !== undefined && pt.net_inflow !== null) {
+            return sum + pt.net_inflow
+          }
+          const prevPt = activeSorted[weekIdx + idx]
+          return sum + ((pt.invested ?? pt.value) - (prevPt.invested ?? prevPt.value))
+        }, 0)
         const wProfit = (last.value - weekInflow) - weekPoint.value
         weekAmount = Math.round(wProfit * 100) / 100
         weekPct = weekPoint.value > 0 ? (wProfit / weekPoint.value) * 100 : 0
@@ -527,11 +536,13 @@ export function OverviewPage() {
 
       const prevInvested = prev.invested ?? prev.value
       const curInvested = cur.invested ?? cur.value
-      const netInflow = curInvested - prevInvested
+      const netInflow = cur.net_inflow !== undefined && cur.net_inflow !== null ? cur.net_inflow : (curInvested - prevInvested)
 
       const dayReturnAmount = Math.round(((cur.value - netInflow) - prev.value) * 100) / 100
       let dayReturnPct = 0
-      if (prev.value > 0) {
+      if (cur.daily_return !== undefined && cur.daily_return !== null) {
+        dayReturnPct = Number(cur.daily_return.toFixed(2))
+      } else if (prev.value > 0) {
         dayReturnPct = Number((((cur.value - netInflow) - prev.value) / prev.value * 100).toFixed(2))
       }
 

@@ -135,10 +135,12 @@ export function MonthlyReturnsHeatmap({
       const curVal = cur.value
       const prevInv = prev.invested ?? prevVal
       const curInv = cur.invested ?? curVal
-      const netInflow = curInv - prevInv
+      const netInflow = cur.net_inflow !== undefined && cur.net_inflow !== null ? cur.net_inflow : (curInv - prevInv)
 
       if (prevVal > 0) {
-        let r = (curVal - netInflow - prevVal) / prevVal
+        let r = cur.daily_return !== undefined && cur.daily_return !== null
+          ? cur.daily_return / 100
+          : (curVal - netInflow - prevVal) / prevVal
         // Safety bounds against extreme spikes / artificial data
         r = Math.max(-0.25, Math.min(0.25, r))
 

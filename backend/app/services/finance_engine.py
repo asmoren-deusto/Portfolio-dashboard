@@ -109,21 +109,25 @@ def calculate_portfolio_value_series(
         aligned = s.reindex(date_range).ffill().bfill()
         price_lookup[isin] = {str(d.date()): float(v) for d, v in aligned.items()}
 
-    # For each date, calculate portfolio value
+    # For each date, calculate portfolio value, true daily market return, and net capital inflows
     portfolio_values = []
     current_active_tx = []
     current_positions = {}
     pending_txs = list(tx_sorted)
+    prev_positions = None
+    prev_total_val = None
+    prev_cit = 0.0
 
     for d in date_range:
         d_str = str(d.date())
-        if start_date and d_str < start_date:
-            continue
 
         # Incrementally update transactions and positions
         has_new_tx = False
+        txs_today = []
         while pending_txs and pending_txs[0]["date"] <= d_str:
-            current_active_tx.append(pending_txs.pop(0))
+            tx = pending_txs.pop(0)
+            current_active_tx.append(tx)
+            txs_today.append(tx)
             has_new_tx = True
 
         if not current_active_tx:
@@ -154,6 +158,40 @@ def calculate_portfolio_value_series(
             pos["invested_amount"] for isin, pos in positions.items()
             if pos["shares"] > 0.0001 and isin != "TR_TRANSFER" and not isin.startswith("TR_")
         ) + cash_in_transit
+
+        # Net external cash inflow on this day (buys add external capital, sells remove capital, traspasos remain inside portfolio)
+        day_inflow = 0.0
+        for tx in txs_today:
+            if is_internal_traspaso(tx.get("notes") or "") or (tx.get("isin") or "").startswith("TR_"):
+                continue
+            if (tx.get("broker") or "").lower() in ("trade_republic", "traderepublic"):
+                continue
+            if tx["type"] == "buy":
+                day_inflow += tx["amount"]
+            elif tx["type"] == "sell":
+                day_inflow -= tx["amount"]
+
+        # Calculate pure market return for the day, isolated from any buy/sell cash flow
+        daily_return = 0.0
+        if prev_positions is not None and prev_total_val is not None and prev_total_val > 0:
+            val_market_prev = 0.0
+            for isin, pos in prev_positions.items():
+                if isin == "TR_TRANSFER" or isin.startswith("TR_"):
+                    continue
+                price = price_lookup.get(isin, {}).get(d_str)
+                if price is None or (price <= 0 and isin != "TR_TRANSFER"):
+                    price = pos.get("avg_cost", 0)
+                val_market_prev += pos["shares"] * price
+            val_market_prev += prev_cit
+            r_t = (val_market_prev / prev_total_val) - 1.0
+            daily_return = round(r_t * 100, 4)
+
+        prev_positions = {k: dict(v) for k, v in positions.items()}
+        prev_total_val = total
+        prev_cit = cash_in_transit
+
+        if start_date and d_str < start_date:
+            continue
 
         # Entity / Broker breakdown
         distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in current_active_tx)
@@ -191,6 +229,8 @@ def calculate_portfolio_value_series(
                 "date": d_str,
                 "value": round(total, 2),
                 "invested": round(active_invested, 2),
+                "daily_return": daily_return,
+                "net_inflow": round(day_inflow, 2),
                 "brokers": brokers_data,
             })
 

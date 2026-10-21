@@ -74,6 +74,8 @@ export interface PricePoint {
   value: number
   price?: number
   invested?: number
+  daily_return?: number
+  net_inflow?: number
   brokers?: Record<string, { value: number; invested?: number }>
 }
 
