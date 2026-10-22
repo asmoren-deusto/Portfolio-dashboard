@@ -96,12 +96,10 @@
     --sar: env(safe-area-inset-right, 0px);
   }
 
-  /* Aislamiento de capas GPU para evitar difuminado/rasterizado borroso en iOS WebKit y PWA */
+  /* Renderizado nítido de tipografía en cabeceras sin degradación por matriz 3D en WebKit */
   header {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
