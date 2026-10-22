@@ -325,21 +325,24 @@ export function RootLayout() {
           {/* Spacer to prevent content overlap with fixed mobile header */}
           <div className="h-[calc(max(0.45rem,calc(env(safe-area-inset-top,0px)-2px))+2.4rem)] md:hidden shrink-0" aria-hidden="true" />
 
-          {/* Top Bar with Selectors & Black Market Ticker Strip (Stitch / Reference Design) */}
-          <div className="flex flex-col w-full md:sticky md:top-0 z-30 shadow-xs">
-            {/* Top White Bar with Selectors (Desktop only) - Exactly 60px to align ticker top with sidebar separator */}
-            <div className="relative z-20 hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0">
-              <Header
-                title={pageMeta.title}
-                subtitle={pageMeta.subtitle}
-              />
-            </div>
-
-            {/* Black Live Market Ticker Strip attached directly under the white bar */}
-            <div className="relative z-10">
-              <MarketTicker fullWidth />
-            </div>
+          {/* Top White Bar with Selectors (Desktop only) - Exactly 60px sticky top bar */}
+          <div className="relative z-30 hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 md:sticky md:top-0 shadow-xs">
+            <Header
+              title={pageMeta.title}
+              subtitle={pageMeta.subtitle}
+            />
           </div>
+
+          {/* Live Market Ticker Strip:
+              - Desktop: Fixed full-width ribbon across the entire viewport (0 to 100vw), including the lateral menu
+              - Mobile: In-flow right under the mobile header spacer
+          */}
+          <div className="relative z-10 md:fixed md:top-[60px] md:left-0 md:right-0 md:z-[51] shadow-xs">
+            <MarketTicker fullWidth />
+          </div>
+
+          {/* Desktop spacer to prevent content overlap under the fixed full-width ticker */}
+          <div className="hidden md:block h-[36px] shrink-0" aria-hidden="true" />
 
           {/* Page Content Animation: Instant mounting with silky smooth opacity transition and zero layout shifts */}
           <main

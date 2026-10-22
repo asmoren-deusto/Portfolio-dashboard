@@ -466,15 +466,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
       <div className={cn(
         "dark relative overflow-hidden w-full transition-all duration-200",
         fullWidth
-          ? "rounded-none bg-[#1d1d1d] dark:bg-[#212121] text-white border-b border-white/[0.08] dark:border-white/[0.08] py-1.5 px-3 sm:px-4 md:px-7 shadow-xs"
+          ? "h-[36px] flex items-center rounded-none bg-[#1d1d1d] dark:bg-[#212121] text-white border-b border-white/[0.08] dark:border-white/[0.08] px-3 sm:px-4 shadow-xs"
           : "rounded-2xl bg-[#1d1d1d] dark:bg-[#212121] text-white border border-white/10 dark:border-white/[0.08] shadow-md py-1.5 px-3 sm:px-3.5",
         className
       )}>
-        <div className="flex items-center">
+        <div className="flex items-center w-full h-full">
           {/* Live Indicator (Fixed on left) */}
           <div
             className={cn(
-              "flex items-center border-r border-white/10 dark:border-white/[0.08] shrink-0 z-20 bg-[#1d1d1d] dark:bg-[#212121]",
+              "flex items-center h-full border-r border-white/10 dark:border-white/[0.08] shrink-0 z-20 bg-[#1d1d1d] dark:bg-[#212121]",
               isNative ? "pl-0 pr-2 gap-1.5" : "pr-3 sm:pr-3.5 gap-2"
             )}
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
