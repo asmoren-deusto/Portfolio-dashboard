@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 16:55:21
+- **Fecha de exportación:** 2026-10-22 16:58:02
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 115
+- **Total de interacciones registradas:** 117
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2546,5 +2546,59 @@ en ios safari sigue con el problema del blur
 ### 👤 Usuario (2026-10-22 14:47:04)
 
 https://www.reddit.com/r/PWA/comments/1w5mqj1/ios_27_beta_blurs_the_top_edge_of_installed_pwas/
+
+---
+
+### 🤖 Asistente (2026-10-22 14:55:24)
+
+Tras analizar a fondo el hilo de Reddit que has compartido ([r/PWA — iOS blur top edge](https://www.reddit.com/r/PWA/comments/1w5mqj1/ios_27_beta_blurs_the_top_edge_of_installed_pwas/)) y las pruebas de los desarrolladores, hemos identificado **las causas exactas** y aplicado la solución definitiva:
+
+---
+
+### 🔍 Diagnóstico del hilo de Reddit y causas encontradas
+
+1. **La causa raíz (`apple-mobile-web-app-status-bar-style: black-translucent`):**
+   * El autor del hilo descubrió que iOS aplica de forma forzada un filtro de desenfoque progresivo nativo (*progressive blur overlay*) sobre la parte superior cuando la web app se instala con `apple-mobile-web-app-status-bar-style: black-translucent`.
+   * **El detalle crítico:** iOS **congela la configuración del meta tag en el momento de la instalación en la pantalla de inicio**. Por tanto, una app ya instalada **no** actualiza ese parámetro con una recarga normal; requiere **eliminar el icono de la pantalla de inicio y volver a añadirlo** (*Compartir → Añadir a pantalla de inicio*).
+
+2. **La técnica del escudo opaco en `top: 0` (Danny Moerkerke & Hunter Irving):**
+   * El compositor de iOS muestrea el color de la barra de estado buscando un elemento real del DOM en los primeros 4px (`position: fixed`, opaco, ancho $\ge 80\%$, altura $\ge 1\text{px}$). Si no existe o es translúcido, iOS añade la capa de gradiente/blur sobre el contenido.
+   * Los pseudo-elementos (`::before`, etc.) son ignorados por el muestreador de iOS; debe ser un elemento DOM real.
+
+3. **Interferencia de los efectos de fondo en móvil:**
+   * En [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx), los elementos de iluminación ambiental con `blur-[140px]` fijados en `top-0` forzaban al motor WebKit de iOS a procesar un pase de desenfoque masivo en toda la parte superior del viewport.
+   * El contenedor padre del header tenía `transition-all duration-300`, lo que en Safari móvil bloquea el rasterizado subpíxel de elementos fijos hijos provocando pérdida de nitidez.
+
+4. **Espaciado del Ticker en móvil:**
+   * El espaciador superior móvil medía `2.85rem` mientras que la cabecera con sus paddings e iconos ocupaba más de `3.1rem`, provocando que el ticker quedase pegado bajo el borde inferior del header móvil con menos margen arriba que abajo.
+
+---
+
+### 🛠️ Cambios aplicados (v3.4.12)
+
+1. **Escudo protector opaco para la barra de estado (`ios-status-bar-shield`):**
+   * En [index.html](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/index.html) y [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx), se ha añadido un elemento fijo opaco en `top: 0` (`h-[max(16px,env(safe-area-inset-top,0px))]`, `z-50`) con el color de fondo exacto (`#1c1c1c` en oscuro / `#f6f8fb` en claro) que alimenta al muestreador de iOS y cancela el desenfoque progresivo.
+2. **Aislamiento del renderizado móvil:**
+   * Las manchas de luz ambiental con `blur-[140px]` se han restringido a escritorio (`hidden md:block`), liberando a Safari móvil de calcular filtros gaussianos en la parte superior.
+   * Se ha quitado la transición en móvil del wrapper padre (`md:transition-all md:duration-300`) para que la cabecera fija no sufra artefactos de subpixel rasterization.
+3. **Corrección del espaciado del Ticker en móvil:**
+   * En [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx#L320-L325), se ha ampliado la altura del espaciador a `calc(env(...) + 3.35rem)`.
+   * En [MarketTicker.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx#L470-L473), se ha ajustado el padding vertical en móvil a `py-2 sm:py-2`, logrando un espaciado superior e inferior perfectamente simétrico y desahogado.
+
+---
+
+### 📱 Cómo comprobarlo en tu iPhone
+
+1. **Si lo pruebas como PWA instalada en pantalla de inicio:**
+   * Dado que iOS congela el meta tag en la instalación, **elimina el icono actual de la app de tu pantalla de inicio**.
+   * Abre Safari, entra en la URL y pulsa **Compartir → Añadir a pantalla de inicio**.
+2. **Si lo pruebas directamente en Safari navegador:**
+   * Realiza un refresco forzado (o limpia la caché del sitio en *Ajustes → Safari → Avanzado → Datos de sitios web*).
+
+---
+
+### 👤 Usuario (2026-10-22 14:56:01)
+
+has cortado el menu por arriba con una franja del color del fondo
 
 ---

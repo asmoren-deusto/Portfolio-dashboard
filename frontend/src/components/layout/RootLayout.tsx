@@ -89,10 +89,6 @@ export function RootLayout() {
     if (themeMetas.length > 0) {
       themeMetas.forEach((meta) => meta.setAttribute('content', targetColor))
     }
-    const shield = document.getElementById('ios-status-bar-shield')
-    if (shield) {
-      shield.style.backgroundColor = targetColor
-    }
   }, [theme])
 
   // Periodic Watcher for New NAVs & Instant Refresh on Tab/App Resume
@@ -240,9 +236,6 @@ export function RootLayout() {
   return (
     <HeaderProvider>
       <div className={`relative flex min-h-screen bg-[#f6f8fb] text-slate-800 dark:bg-[#1c1c1c] dark:text-slate-100 overflow-x-clip selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-[#264f78] dark:selection:text-white transition-colors duration-200${privacyMode ? ' privacy-mode' : ''}`}>
-        {/* Dedicated solid status bar backing plate for iOS Safari / PWA (guarantees crisp opaque status bar sampling with no progressive blur) */}
-        <div className="fixed top-0 left-0 right-0 h-[max(16px,env(safe-area-inset-top,0px))] bg-white dark:bg-[#1c1c1c] z-50 pointer-events-none md:hidden" aria-hidden="true" />
-
         {/* Refined ambient background lighting — subtle graphite and neutral cool haze (desktop only to prevent iOS WebKit mobile blur passes) */}
         <div className="hidden md:block pointer-events-none fixed top-0 left-1/4 w-[750px] h-[350px] bg-gradient-to-br from-blue-500/[0.05] via-indigo-500/[0.03] to-transparent blur-[140px] rounded-full -z-10 dark:from-slate-600/[0.04] dark:via-zinc-600/[0.02]" />
         <div className="hidden md:block pointer-events-none fixed top-1/3 right-4 w-[500px] h-[300px] bg-gradient-to-bl from-violet-500/[0.04] to-transparent blur-[130px] rounded-full -z-10 dark:from-slate-500/[0.03]" />

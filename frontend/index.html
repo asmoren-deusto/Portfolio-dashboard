@@ -51,22 +51,6 @@
       color-scheme: light;
       color: #0f172a;
     }
-    /* Fixed solid plate to prevent iOS Safari & PWA top progressive blur overlay */
-    #ios-status-bar-shield {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: max(16px, env(safe-area-inset-top, 0px));
-      z-index: 99999;
-      pointer-events: none;
-    }
-    html.dark #ios-status-bar-shield {
-      background-color: #1c1c1c !important;
-    }
-    html.light #ios-status-bar-shield, html:not(.dark) #ios-status-bar-shield {
-      background-color: #f6f8fb !important;
-    }
     body {
       margin: 0;
       padding: 0;
@@ -148,7 +132,6 @@
 </head>
 
 <body>
-  <div id="ios-status-bar-shield" aria-hidden="true"></div>
   <div id="root">
     <div class="initial-app-loader">
       <div class="initial-app-logo">
