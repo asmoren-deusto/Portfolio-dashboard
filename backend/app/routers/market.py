@@ -1302,20 +1302,26 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
         download_period = "2d" if fetch_period == "1d" else fetch_period
         include_prepost = fetch_period in ("1d", "5d")
 
-        # Download cash ETFs, futures proxies and EURUSD
-        download_tickers = list(set(etf_tickers_list + ["ES=F", "NQ=F", "EURUSD=X"]))
+        # Download cash ETFs, all futures/index proxies and EURUSD
+        all_proxy_symbols = list(set(ETF_PREMARKET_LIVE_PROXIES.values()))
+        download_tickers = list(set(etf_tickers_list + all_proxy_symbols + ["ES=F", "NQ=F", "EURUSD=X"]))
 
         df = yf.download(download_tickers, period=download_period, interval=interval, prepost=include_prepost, progress=False)
         if df is not None and not df.empty:
             closes_raw = df["Close"] if "Close" in df else df
             if isinstance(closes_raw, pd.DataFrame):
                 fx_closes_raw = closes_raw["EURUSD=X"] if ("EURUSD=X" in closes_raw.columns) else None
-                es_closes_raw = closes_raw["ES=F"] if ("ES=F" in closes_raw.columns) else None
-                nq_closes_raw = closes_raw["NQ=F"] if ("NQ=F" in closes_raw.columns) else None
+                
+                # Fetch official previous regular close for proxies from daily data if needed
+                proxy_prev_closes = {}
+                for psym in all_proxy_symbols:
+                    pq_prev = proxy_quotes.get(psym, {}).get("prev_close")
+                    if pq_prev and pq_prev > 0:
+                        proxy_prev_closes[psym] = float(pq_prev)
 
                 # Keep only equity ETF columns for the fund calculation
                 etf_cols = [c for c in closes_raw.columns if c in etf_tickers_list]
-                closes_etfs = closes_raw[etf_cols] if etf_cols else closes_raw.drop(columns=["EURUSD=X", "ES=F", "NQ=F"], errors="ignore")
+                closes_etfs = closes_raw[etf_cols] if etf_cols else closes_raw.drop(columns=["EURUSD=X"] + all_proxy_symbols, errors="ignore")
 
                 if closes_raw.index.tz is None:
                     closes_raw.index = closes_raw.index.tz_localize(ny_tz)
@@ -1323,10 +1329,6 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
 
                 if fx_closes_raw is not None and fx_closes_raw.index.tz is None:
                     fx_closes_raw.index = fx_closes_raw.index.tz_localize(ny_tz)
-                if es_closes_raw is not None and es_closes_raw.index.tz is None:
-                    es_closes_raw.index = es_closes_raw.index.tz_localize(ny_tz)
-                if nq_closes_raw is not None and nq_closes_raw.index.tz is None:
-                    nq_closes_raw.index = nq_closes_raw.index.tz_localize(ny_tz)
 
                 session_dates = [idx.astimezone(ny_tz).date() for idx in closes_raw.index]
                 # Filter out weekends from sessions
@@ -1358,31 +1360,26 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                         # TODAY's live session trajectory starting with pre-market
                         target_idxs = today_idxs
 
-                        # Reconstruct intraday ETF returns using live futures if cash ETF has not yet traded in pre-market
+                        # Reconstruct intraday ETF returns using live proxies or active pre-market quotes
                         norm_dict = {}
-                        es_prev = proxy_quotes.get("ES=F", {}).get("prev_close") or (es_closes_raw.dropna().iloc[0] if es_closes_raw is not None and not es_closes_raw.dropna().empty else None)
-                        nq_prev = proxy_quotes.get("NQ=F", {}).get("prev_close") or (nq_closes_raw.dropna().iloc[0] if nq_closes_raw is not None and not nq_closes_raw.dropna().empty else None)
-
-                        es_filled = es_closes_raw.ffill().bfill() if es_closes_raw is not None else None
-                        nq_filled = nq_closes_raw.ffill().bfill() if nq_closes_raw is not None else None
-
                         for t in etf_cols:
-                            etf_series = closes_etfs[t].loc[target_idxs]
-                            b_val = base_dict.get(t, 1.0)
-                            # If cash ETF has valid intraday variations:
-                            if etf_series.dropna().nunique() > 1 and not etf_series.isna().all():
-                                norm_dict[t] = ((etf_series.ffill().bfill() - b_val) / b_val) * 100.0
-                            else:
-                                # Use underlying futures proxy trajectory strictly for matched proxies
-                                proxy_sym = ETF_PREMARKET_LIVE_PROXIES.get(t)
-                                if proxy_sym == "NQ=F" and nq_filled is not None and nq_prev and nq_prev > 0:
-                                    proxy_series = nq_filled.reindex(target_idxs).ffill().bfill()
-                                    norm_dict[t] = ((proxy_series - float(nq_prev)) / float(nq_prev)) * 100.0
-                                elif proxy_sym == "ES=F" and es_filled is not None and es_prev and es_prev > 0:
-                                    proxy_series = es_filled.reindex(target_idxs).ffill().bfill()
-                                    norm_dict[t] = ((proxy_series - float(es_prev)) / float(es_prev)) * 100.0
+                            proxy_sym = ETF_PREMARKET_LIVE_PROXIES.get(t)
+                            if proxy_sym and proxy_sym in closes_raw.columns:
+                                p_prev = proxy_prev_closes.get(proxy_sym)
+                                proxy_series = closes_raw[proxy_sym].loc[target_idxs].ffill().bfill()
+                                if not p_prev and not proxy_series.empty:
+                                    p_prev = float(proxy_series.iloc[0])
+                                if p_prev and p_prev > 0:
+                                    norm_dict[t] = ((proxy_series - p_prev) / p_prev) * 100.0
                                 else:
-                                    # For European / Asian assets or unproxied ETFs, use their actual quoted change_pct
+                                    live_chg = quotes.get(t, {}).get("change_pct", 0.0) or 0.0
+                                    norm_dict[t] = pd.Series(live_chg, index=target_idxs)
+                            else:
+                                etf_series = closes_etfs[t].loc[target_idxs]
+                                b_val = base_dict.get(t, 1.0)
+                                if etf_series.dropna().nunique() > 1 and not etf_series.isna().all():
+                                    norm_dict[t] = ((etf_series.ffill().bfill() - b_val) / b_val) * 100.0
+                                else:
                                     live_chg = quotes.get(t, {}).get("change_pct", 0.0) or 0.0
                                     norm_dict[t] = pd.Series(live_chg, index=target_idxs)
 
