@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 15:42:36
+- **Fecha de exportación:** 2026-10-22 15:45:18
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 92
+- **Total de interacciones registradas:** 94
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2245,5 +2245,27 @@ estos tiitulos no los cambies de fuente, pon la antigua
 ### 👤 Usuario (2026-10-22 13:40:48)
 
 esos titulos, pon la fuente vieja
+
+---
+
+### 🤖 Asistente (2026-10-22 13:42:38)
+
+Listo. He restaurado la fuente original para esos títulos:
+
+### 🛠️ Ajustes aplicados:
+1. **Títulos de tarjetas y widgets ("Evolución Patrimonial", etc.)**:
+   - Vuelven a su fuente clásica y limpia previa (**Inter**) mediante regla en [index.css](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css) y clase explícita en [CardTitle](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Card.tsx#L51-L69).
+2. **Título principal de página ("Visión General")**:
+   - Se mantiene con la tipografía **Outfit** (`h1`).
+3. **Cuerpo, tablas y métricas generales**:
+   - Continúan con **Plus Jakarta Sans**.
+
+🚀 Sincronizado y publicado en Git bajo la versión **v3.4.1**.
+
+---
+
+### 👤 Usuario (2026-10-22 13:43:35)
+
+no está exactamente igual, has subido esos textos como 1px
 
 ---

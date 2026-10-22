@@ -61,7 +61,7 @@ export function CardTitle({
   const isUpdating = loading !== undefined ? loading : ctx.loading
 
   return (
-    <h2 className={cn('text-[15px] font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 font-inter', className)}>
+    <h2 className={cn('text-[15px] font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 font-inter translate-y-[1px]', className)}>
       <span>{children}</span>
       {isUpdating && <LoadingDot />}
     </h2>
