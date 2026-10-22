@@ -84,10 +84,14 @@ export function RootLayout() {
     }
 
     // Sync theme-color for iOS Safari / Chrome Mobile
-    const targetColor = isDark ? '#1c1c1c' : '#ffffff'
+    const targetColor = isDark ? '#1c1c1c' : '#f6f8fb'
     const themeMetas = document.querySelectorAll('meta[name="theme-color"]')
     if (themeMetas.length > 0) {
       themeMetas.forEach((meta) => meta.setAttribute('content', targetColor))
+    }
+    const shield = document.getElementById('ios-status-bar-shield')
+    if (shield) {
+      shield.style.backgroundColor = targetColor
     }
   }, [theme])
 
@@ -236,9 +240,12 @@ export function RootLayout() {
   return (
     <HeaderProvider>
       <div className={`relative flex min-h-screen bg-[#f6f8fb] text-slate-800 dark:bg-[#1c1c1c] dark:text-slate-100 overflow-x-clip selection:bg-blue-500/20 selection:text-blue-700 dark:selection:bg-[#264f78] dark:selection:text-white transition-colors duration-200${privacyMode ? ' privacy-mode' : ''}`}>
-        {/* Refined ambient background lighting — subtle graphite and neutral cool haze */}
-        <div className="pointer-events-none fixed top-0 left-1/4 w-[750px] h-[350px] bg-gradient-to-br from-blue-500/[0.05] via-indigo-500/[0.03] to-transparent blur-[140px] rounded-full -z-10 dark:from-slate-600/[0.04] dark:via-zinc-600/[0.02]" />
-        <div className="pointer-events-none fixed top-1/3 right-4 w-[500px] h-[300px] bg-gradient-to-bl from-violet-500/[0.04] to-transparent blur-[130px] rounded-full -z-10 dark:from-slate-500/[0.03]" />
+        {/* Dedicated solid status bar backing plate for iOS Safari / PWA (guarantees crisp opaque status bar sampling with no progressive blur) */}
+        <div className="fixed top-0 left-0 right-0 h-[max(16px,env(safe-area-inset-top,0px))] bg-white dark:bg-[#1c1c1c] z-50 pointer-events-none md:hidden" aria-hidden="true" />
+
+        {/* Refined ambient background lighting — subtle graphite and neutral cool haze (desktop only to prevent iOS WebKit mobile blur passes) */}
+        <div className="hidden md:block pointer-events-none fixed top-0 left-1/4 w-[750px] h-[350px] bg-gradient-to-br from-blue-500/[0.05] via-indigo-500/[0.03] to-transparent blur-[140px] rounded-full -z-10 dark:from-slate-600/[0.04] dark:via-zinc-600/[0.02]" />
+        <div className="hidden md:block pointer-events-none fixed top-1/3 right-4 w-[500px] h-[300px] bg-gradient-to-bl from-violet-500/[0.04] to-transparent blur-[130px] rounded-full -z-10 dark:from-slate-500/[0.03]" />
 
         {/* Floating Pull-to-Refresh Indicator */}
         <AnimatePresence>
@@ -269,9 +276,9 @@ export function RootLayout() {
 
         <Sidebar />
 
-        <div className={`flex flex-1 flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
+        <div className={`flex flex-1 flex-col min-h-screen md:transition-all md:duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
           {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop - Opaque solid background with crisp Retina text) */}
-          <header className={`fixed top-0 left-0 right-0 md:sticky z-30 flex items-center justify-between px-3 sm:px-4 pt-[max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))] pb-2 bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+          <header className={`fixed top-0 left-0 right-0 md:sticky z-40 flex items-center justify-between px-3 sm:px-4 pt-[max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))] pb-2 bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
             <div className="flex items-center gap-1.5 shrink-0">
               {/* Only show hamburger button when NOT native (native uses bottom MobileTabBar) */}
               {!isNativePlatform() && (
@@ -322,8 +329,8 @@ export function RootLayout() {
             </div>
           </header>
 
-          {/* Spacer to prevent content overlap with fixed mobile header */}
-          <div className="h-[calc(max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))+2.85rem)] md:hidden shrink-0" aria-hidden="true" />
+          {/* Spacer to prevent content overlap with fixed mobile header (calculated with extra breathing space for mobile ticker) */}
+          <div className="h-[calc(max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))+3.35rem)] md:hidden shrink-0" aria-hidden="true" />
 
           {/* Top White Bar with Selectors (Desktop only) - Exactly 60px sticky top bar */}
           <div className="relative z-30 hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 md:sticky md:top-0 shadow-xs">

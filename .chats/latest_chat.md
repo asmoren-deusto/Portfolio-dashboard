@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 16:39:15
+- **Fecha de exportación:** 2026-10-22 16:55:21
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 112
+- **Total de interacciones registradas:** 115
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2496,5 +2496,55 @@ Se ha ajustado la línea vertical del ticker para que coincida de forma milimét
 ### 👤 Usuario (2026-10-22 14:35:36)
 
 el ticker en version movil tiene menos espaciado superior, revisa, y no se ha resuelto el tema del blur en iphone
+
+---
+
+### 🤖 Asistente (2026-10-22 14:39:18)
+
+Se han identificado y resuelto los dos puntos reportados:
+
+---
+
+### 1. Solución definitiva al difuminado en iPhone (PWA)
+
+El motivo por el cual seguía viéndose difuminado en iOS se debía a dos factores críticos a nivel de sistema y motor WebKit:
+
+1. **Meta tag `apple-mobile-web-app-status-bar-style` en [index.html](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/index.html#L120):**
+   - Tenía el valor `black-translucent`. En iOS PWA instalada, este valor fuerza a WebKit a colocar una vista nativa de desenfoque (`UIVisualEffectView`) sobre los primeros ~60px de la pantalla para garantizar contraste con el reloj del sistema.
+   - **Solución:** Se cambió a `<meta name="apple-mobile-web-app-status-bar-style" content="default" />`. Con `default`, iOS pinta una barra sólida integrada con `<meta name="theme-color" content="#1c1c1c" />` y **no aplica ninguna capa de desenfoque del sistema** sobre el contenido.
+2. **Eliminación de matrices 3D (`translateZ(0)`) en [index.css](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css#L98-L105) y [RootLayout.tsx](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx#L274):**
+   - En pantallas Retina de iOS, forzar aceleración por hardware con `translateZ(0)` en contenedores de texto estáticos hace que WebKit rasterice la tipografía como un mapa de bits plano sin antialiasing subpíxel, provocando que el texto se vea borroso.
+   - **Solución:** Se eliminó `transform: translateZ(0)` y se aplicó `-webkit-font-smoothing: antialiased;` nativo.
+3. **Cota de la cabecera móvil en [RootLayout.tsx](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx#L274):**
+   - El padding superior tenía `calc(env(safe-area-inset-top) - 2px)`. Se ajustó a `calc(env(safe-area-inset-top, 0px) + 4px)` para garantizar que el logo y los botones queden situados holgadamente por debajo del área del *Dynamic Island* / *Notch*.
+
+> **Nota para PWA en iOS:** Al ser un cambio de meta tags de PWA, si tienes la web instalada como icono en la pantalla de inicio de tu iPhone, debes **eliminar el icono de la pantalla de inicio y volver a añadirlo desde Safari** ("Compartir" > "Añadir a pantalla de inicio") para que iOS recargue la nueva configuración de la barra de estado.
+
+---
+
+### 2. Espaciado superior del Ticker en móvil
+
+En la versión anterior, al ajustar el ticker para escritorio, se había fijado una altura estricta con `py-0` y el espaciador superior de la cabecera móvil se había quedado corto (~38px frente a los 43px reales de la cabecera fija), provocando que la cabecera solapase el inicio del ticker.
+
+- **Ajuste del espaciador en [RootLayout.tsx](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx#L326):** Se amplió la reserva de espacio de la cabecera fija a `calc(max(0.65rem, env(safe-area-inset-top)) + 2.85rem)`, dejando un margen limpio y holgado.
+- **Padding vertical en [MarketTicker.tsx](file:///C:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx#L470):** En móvil se recuperó el padding vertical cómodo `py-1.5`, manteniendo exclusivamente en escritorio (`md:`) la altura calibrada `h-[36px]` y `md:py-0` alineada a 230px.
+
+---
+
+### Despliegue
+- Build completado con éxito con `npm run build`.
+- Cambios sincronizados y subidos a Git bajo la versión **v3.4.11**.
+
+---
+
+### 👤 Usuario (2026-10-22 14:44:24)
+
+en ios safari sigue con el problema del blur
+
+---
+
+### 👤 Usuario (2026-10-22 14:47:04)
+
+https://www.reddit.com/r/PWA/comments/1w5mqj1/ios_27_beta_blurs_the_top_edge_of_installed_pwas/
 
 ---
