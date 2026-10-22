@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 14:34:45
+- **Fecha de exportación:** 2026-10-22 14:47:02
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 69
+- **Total de interacciones registradas:** 71
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1910,5 +1910,34 @@ mete marcadores de apertura para las distintas bolsas y muestra el gráfico desd
 ### 👤 Usuario (2026-10-22 12:34:27)
 
 continua
+
+---
+
+### 🤖 Asistente (2026-10-22 12:34:48)
+
+### Cambios Implementados
+
+1. **Gráfico desde el Cierre del Día Anterior:**
+   - La serie temporal intradiaria arranca ahora exactamente a las **22:00 (hora de Madrid) del día anterior**, coincidiendo con la campana de cierre oficial de Wall Street (`16:00 ET`), punto base cero del rendimiento diario (`0.00%`).
+   - Muestra la transición completa: desde el cierre de ayer, pasando por el after-hours estadounidense, la sesión asiática/nocturna, la mañana europea y la pre-apertura de Wall Street hasta el minuto actual.
+
+2. **Marcadores Verticales de Apertura por Bolsas (Hora de Madrid):**
+   - **22:00 • Cierre Ayer** (Gris pizarra): Marca el cierre regular estadounidense del día anterior que sirve de referencia.
+   - **01:00 • Tokio** (Rojo carmesí): Apertura del Nikkei 225 y mercados asiáticos.
+   - **09:00 • Europa** (Azul): Apertura de las bolsas europeas (Euro Stoxx 50, IBEX 35, DAX).
+   - **10:00 • Pre-market** (Índigo): Inicio oficial del pre-market de EE.UU.
+   - **15:30 • Wall Street** (Verde esmeralda): Apertura de la sesión regular estadounidense (aparece en cuanto se alcanza o aproxima dicha hora).
+   - **22:00 • After-Hours** (Ámbar): Cierre regular y paso a mercado extendido nocturno.
+
+3. **Etiquetas Escalonadas Multi-nivel:**
+   - En el frontend, las etiquetas de los marcadores ahora se escalonan dinámicamente en 3 alturas para que los eventos cercanos en el tiempo no se solapen y se lean con total nitidez.
+
+Sincronizado y desplegado en **v3.0.191**. Al refrescar el navegador podrás ver la gráfica completa desde las 22:00 de ayer con todas las marcas de apertura internacional.
+
+---
+
+### 👤 Usuario (2026-10-22 12:40:46)
+
+mira si puedes hace que los marcadores "salgan" de la grafica. te paso captura:
 
 ---

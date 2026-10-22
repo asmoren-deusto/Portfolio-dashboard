@@ -525,7 +525,7 @@ export interface SimulatedEtfSummary {
 export interface SessionMarker {
   time_unix: number
   label: string
-  type: 'session_break' | 'regular_open' | 'post_market' | 'pre_market'
+  type: 'session_break' | 'regular_open' | 'post_market' | 'pre_market' | 'cierre_ayer' | 'tokyo' | 'europa' | string
   color: string
   phase?: string
 }

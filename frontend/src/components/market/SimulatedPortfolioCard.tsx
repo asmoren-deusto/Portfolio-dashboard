@@ -140,7 +140,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
   // Dynamic vertical dotted line markers
   const [markerPositions, setMarkerPositions] = useState<
-    Array<{ marker: SessionMarker; x: number }>
+    Array<{ marker: SessionMarker; x: number; clampedX: number }>
   >([])
 
   const updateMarkerPositions = () => {
@@ -150,10 +150,13 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
     }
     const timeScale = chartRef.current.timeScale()
     const pts = chartPointsRef.current
-    const positions: Array<{ marker: SessionMarker; x: number }> = []
+    const positions: Array<{ marker: SessionMarker; x: number; clampedX: number }> = []
 
     const firstTime = pts[0].time_unix
     const lastTime = pts[pts.length - 1].time_unix
+    const containerWidth = chartContainerRef.current?.clientWidth || 300
+    const minMargin = Math.min(64, Math.max(35, containerWidth * 0.16))
+    const maxMargin = containerWidth - minMargin
 
     for (const marker of sessionMarkersRef.current) {
       // Do not place markers for future events that have not occurred yet in the dataset
@@ -179,7 +182,8 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
       const x = timeScale.timeToCoordinate(closestTime as UTCTimestamp)
       if (x !== null && !isNaN(x)) {
-        positions.push({ marker, x })
+        const clampedX = Math.max(minMargin, Math.min(maxMargin, x))
+        positions.push({ marker, x, clampedX })
       }
     }
     setMarkerPositions(positions)
@@ -253,7 +257,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         rightPriceScale: {
           visible: !isNativePlatform(),
           borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-          scaleMargins: { top: 0.18, bottom: 0.10 },
+          scaleMargins: { top: 0.10, bottom: 0.08 },
           autoScale: true,
         },
         timeScale: {
@@ -761,108 +765,127 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           </div>
 
           {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
-          <div className="relative w-full flex-1 min-h-[275px] sm:min-h-[295px] select-none rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/[0.05] bg-slate-100/40 dark:bg-black/20">
-            {isLoading && (
-              <div className="absolute inset-0 z-20 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40">
-                <LoadingDot />
-                <span className="ml-2 font-medium">Cargando gráfica TradingView...</span>
-              </div>
-            )}
+          <div className="relative w-full flex-1 min-h-[305px] sm:min-h-[325px] select-none rounded-xl overflow-hidden border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20 flex flex-col">
+            {/* Dedicated Top Marker Track for Session Badges (Outside the Chart Area) */}
+            {period === '1d' && markerPositions.length > 0 && (
+              <div className="relative w-full h-[46px] shrink-0 bg-slate-200/40 dark:bg-white/[0.025] border-b border-slate-200/70 dark:border-white/[0.06] px-1 select-none overflow-hidden">
+                {markerPositions.map(({ marker, x, clampedX }, index) => {
+                  const isCierre = marker.type === 'cierre_ayer'
+                  const isTokyo = marker.type === 'tokyo'
+                  const isEuropa = marker.type === 'europa'
+                  const isPre = marker.type === 'pre_market'
+                  const isWallStreet = marker.type === 'regular_open'
+                  const isAfterHours = marker.type === 'post_market'
 
-            {/* Dotted Vertical Session & Phase Markers */}
-            <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-              {markerPositions.map(({ marker, x }, index) => {
-                const isCierre = marker.type === 'cierre_ayer'
-                const isTokyo = marker.type === 'tokyo'
-                const isEuropa = marker.type === 'europa'
-                const isPre = marker.type === 'pre_market'
-                const isWallStreet = marker.type === 'regular_open'
-                const isAfterHours = marker.type === 'post_market'
+                  const labelText = marker.label
+                  const level = index % 2
+                  const badgeTopStyle = level === 0 ? 'top-[3px]' : 'top-[24px]'
 
-                const labelText = marker.label
+                  return (
+                    <div key={`marker-top-${marker.time_unix}-${marker.label}`}>
+                      {/* Subtle vertical tick guide inside track pointing towards chart line */}
+                      <div
+                        className="absolute top-0 bottom-0 w-0 -translate-x-1/2 border-l border-dotted pointer-events-none opacity-40 dark:opacity-30"
+                        style={{ left: `${Math.round(x)}px`, borderColor: marker.color }}
+                      />
 
-                // Alternar altura en 3 niveles (top-[4px], top-[26px], top-[48px]) para que marcadores cercanos no choquen
-                const level = index % 3
-                const badgeTopStyle = level === 0 ? 'top-[4px]' : level === 1 ? 'top-[26px]' : 'top-[48px]'
-
-                return (
-                  <div
-                    key={`${marker.time_unix}-${marker.label}`}
-                    className="absolute inset-y-0 bottom-6 pointer-events-none"
-                    style={{ left: `${Math.round(x)}px` }}
-                  >
-                    {/* Vertical dotted line from top to bottom axis */}
-                    <div
-                      className="absolute inset-y-0 w-0 -translate-x-1/2 border-l-2 border-dotted"
-                      style={{
-                        borderColor: marker.color,
-                        opacity: 0.85,
-                      }}
-                    />
-
-                    {/* Staggered session tag with description positioned alternatively */}
-                    <div
-                      className={cn(
-                        'absolute px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-xs z-20 backdrop-blur-md transition-all',
-                        badgeTopStyle,
-                        isCierre
-                          ? 'bg-slate-100/95 text-slate-700 border-slate-300 dark:bg-slate-800/90 dark:text-slate-300 dark:border-slate-600'
-                          : isTokyo
-                          ? 'bg-rose-50/95 text-rose-800 border-rose-400/50 dark:bg-rose-950/90 dark:text-rose-300 dark:border-rose-500/50'
-                          : isEuropa
-                          ? 'bg-blue-50/95 text-blue-800 border-blue-400/50 dark:bg-blue-950/90 dark:text-blue-300 dark:border-blue-500/50'
-                          : isPre
-                          ? 'bg-indigo-50/95 text-indigo-800 border-indigo-400/50 dark:bg-indigo-950/90 dark:text-indigo-300 dark:border-indigo-500/50'
-                          : isWallStreet
-                          ? 'bg-emerald-50/95 text-emerald-800 border-emerald-400/50 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-500/50'
-                          : isAfterHours
-                          ? 'bg-amber-50/95 text-amber-800 border-amber-400/50 dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-500/50'
-                          : 'bg-slate-50/95 text-slate-800 border-slate-300 dark:bg-slate-800/90 dark:text-slate-200 dark:border-slate-600'
-                      )}
-                    >
-                      {labelText}
+                      {/* Floating pill badge outside graph canvas, clamped to prevent boundary cutoff */}
+                      <div
+                        className={cn(
+                          'absolute px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-xs z-20 backdrop-blur-md transition-all',
+                          badgeTopStyle,
+                          isCierre
+                            ? 'bg-slate-100/95 text-slate-700 border-slate-300 dark:bg-slate-800/95 dark:text-slate-300 dark:border-slate-600'
+                            : isTokyo
+                            ? 'bg-rose-50/95 text-rose-800 border-rose-400/50 dark:bg-rose-950/95 dark:text-rose-300 dark:border-rose-500/50'
+                            : isEuropa
+                            ? 'bg-blue-50/95 text-blue-800 border-blue-400/50 dark:bg-blue-950/95 dark:text-blue-300 dark:border-blue-500/50'
+                            : isPre
+                            ? 'bg-indigo-50/95 text-indigo-800 border-indigo-400/50 dark:bg-indigo-950/95 dark:text-indigo-300 dark:border-indigo-500/50'
+                            : isWallStreet
+                            ? 'bg-emerald-50/95 text-emerald-800 border-emerald-400/50 dark:bg-emerald-950/95 dark:text-emerald-300 dark:border-emerald-500/50'
+                            : isAfterHours
+                            ? 'bg-amber-50/95 text-amber-800 border-amber-400/50 dark:bg-amber-950/95 dark:text-amber-300 dark:border-amber-500/50'
+                            : 'bg-slate-50/95 text-slate-800 border-slate-300 dark:bg-slate-800/95 dark:text-slate-200 dark:border-slate-600'
+                        )}
+                        style={{ left: `${Math.round(clampedX)}px` }}
+                      >
+                        {labelText}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
+            )}
+
+            {/* TradingView Chart Canvas Area */}
+            <div className="relative w-full flex-1 min-h-[255px] overflow-hidden">
+              {isLoading && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40">
+                  <LoadingDot />
+                  <span className="ml-2 font-medium">Cargando gráfica TradingView...</span>
+                </div>
+              )}
+
+              {/* Dotted Vertical Session & Phase Lines across the chart canvas */}
+              {period === '1d' && (
+                <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+                  {markerPositions.map(({ marker, x }) => (
+                    <div
+                      key={`chart-line-${marker.time_unix}-${marker.label}`}
+                      className="absolute inset-y-0 bottom-6 pointer-events-none"
+                      style={{ left: `${Math.round(x)}px` }}
+                    >
+                      {/* Vertical dotted line from top to bottom axis */}
+                      <div
+                        className="absolute inset-y-0 w-0 -translate-x-1/2 border-l-2 border-dotted"
+                        style={{
+                          borderColor: marker.color,
+                          opacity: 0.85,
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div
+                ref={chartContainerRef}
+                className="w-full h-full"
+                onMouseLeave={() => setHoveredPoint(null)}
+              />
+
+              {/* Floating In-Chart Y-Axis Scale on the LEFT (Native) */}
+              {isNativePlatform() && (minPct !== undefined && maxPct !== undefined) && (
+                <div className="absolute left-2 top-2.5 bottom-7 pointer-events-none flex flex-col justify-between items-start z-10 text-[9.5px] font-mono select-none">
+                  <span className={cn(
+                    "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 font-bold shadow-2xs leading-none",
+                    maxPct >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
+                  )}>
+                    {maxPct >= 0 ? '+' : ''}{maxPct.toFixed(2)}%
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-white/60 dark:bg-[#181818]/65 border border-slate-200/40 dark:border-white/5 text-slate-500 dark:text-slate-400 font-medium leading-none">
+                    0.00%
+                  </span>
+                  <span className={cn(
+                    "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 font-bold shadow-2xs leading-none",
+                    minPct >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
+                  )}>
+                    {minPct >= 0 ? '+' : ''}{minPct.toFixed(2)}%
+                  </span>
+                </div>
+              )}
+
+              {/* Floating touch scrub detail badge on native (top-right) */}
+              {isNativePlatform() && hoveredPoint && (
+                <div className="absolute top-2 right-2 z-20 pointer-events-none flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-900/90 dark:bg-black/90 text-white text-[11px] font-mono shadow-md backdrop-blur-xs border border-white/10">
+                  <span className={cn("font-bold", (hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct) >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                    {((hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct) >= 0 ? '+' : '')}{((hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct)).toFixed(2)}%
+                  </span>
+                  <span className="text-slate-400 text-[10px]">{hoveredPoint.label}</span>
+                </div>
+              )}
             </div>
-
-            <div
-              ref={chartContainerRef}
-              className="w-full h-full"
-              onMouseLeave={() => setHoveredPoint(null)}
-            />
-
-            {/* Floating In-Chart Y-Axis Scale on the LEFT (Native) */}
-            {isNativePlatform() && (minPct !== undefined && maxPct !== undefined) && (
-              <div className="absolute left-2 top-2.5 bottom-7 pointer-events-none flex flex-col justify-between items-start z-10 text-[9.5px] font-mono select-none">
-                <span className={cn(
-                  "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 font-bold shadow-2xs leading-none",
-                  maxPct >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
-                )}>
-                  {maxPct >= 0 ? '+' : ''}{maxPct.toFixed(2)}%
-                </span>
-                <span className="px-1.5 py-0.5 rounded bg-white/60 dark:bg-[#181818]/65 border border-slate-200/40 dark:border-white/5 text-slate-500 dark:text-slate-400 font-medium leading-none">
-                  0.00%
-                </span>
-                <span className={cn(
-                  "px-1.5 py-0.5 rounded bg-white/80 dark:bg-[#181818]/85 border border-slate-200/70 dark:border-white/10 font-bold shadow-2xs leading-none",
-                  minPct >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
-                )}>
-                  {minPct >= 0 ? '+' : ''}{minPct.toFixed(2)}%
-                </span>
-              </div>
-            )}
-
-            {/* Floating touch scrub detail badge on native (top-right) */}
-            {isNativePlatform() && hoveredPoint && (
-              <div className="absolute top-2 right-2 z-20 pointer-events-none flex items-center gap-2 px-2 py-1 rounded-lg bg-slate-900/90 dark:bg-black/90 text-white text-[11px] font-mono shadow-md backdrop-blur-xs border border-white/10">
-                <span className={cn("font-bold", (hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct) >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                  {((hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct) >= 0 ? '+' : '')}{((hoveredPoint.simulated_eur_pct ?? hoveredPoint.simulated_pct)).toFixed(2)}%
-                </span>
-                <span className="text-slate-400 text-[10px]">{hoveredPoint.label}</span>
-              </div>
-            )}
           </div>
 
           {/* Market Overview Highlights (Cuadrícula 2x2 equilibrada sin huecos) */}
