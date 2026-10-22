@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 14:55:32
+- **Fecha de exportación:** 2026-10-22 14:58:45
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 73
+- **Total de interacciones registradas:** 75
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1967,5 +1967,30 @@ Ya está desplegado y sincronizado con el repositorio en la versión **`v3.0.192
 ### 👤 Usuario (2026-10-22 12:48:58)
 
 no me gusta tu propuesta, haz que "salga" del grafico de forma natural
+
+---
+
+### 🤖 Asistente (2026-10-22 12:55:34)
+
+He adaptado el diseño para que los marcadores **salgan del marco de la gráfica de forma totalmente natural**:
+
+1. **Eliminación de la barra superior artificial:**
+   - Se ha retirado la pista/barra divisoria superior que fragmentaba la tarjeta, devolviendo a la gráfica su aspecto unificado, limpio y fluido.
+
+2. **Salida natural del marco (`overflow-visible`):**
+   - El marco de la gráfica ya no corta los marcadores con `overflow-hidden`.
+   - Cuando una etiqueta se sitúa en el extremo izquierdo (`22:00 • Cierre Ayer`) o en el derecho, **sobresale naturalmente hacia afuera del marco de la gráfica** sin sufrir ningún tipo de recorte.
+   - El canvas interno de TradingView conserva sus bordes redondeados (`rounded-xl overflow-hidden`) mientras que las etiquetas y líneas flotan con `z-30` por encima y fuera del perímetro según sea necesario.
+
+3. **Margen de escala:**
+   - La escala vertical mantiene un 18% de holgura superior para que las etiquetas no colisionen con el trazado de la curva.
+
+Los cambios ya están sincronizados en el repositorio en la versión **`v3.0.193`**.
+
+---
+
+### 👤 Usuario (2026-10-22 12:57:03)
+
+mueve la etiqueta de cierre ayer a la derecha para que quepa en la gráfica. la linea debe seguir en su sitio
 
 ---

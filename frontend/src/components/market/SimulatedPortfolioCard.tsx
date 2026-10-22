@@ -761,7 +761,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           </div>
 
           {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
-          <div className="relative w-full flex-1 min-h-[275px] sm:min-h-[295px] select-none rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20">
+          <div className="relative w-full flex-1 min-h-[275px] sm:min-h-[295px] select-none rounded-xl overflow-hidden border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20">
             {isLoading && (
               <div className="absolute inset-0 z-20 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40 rounded-xl">
                 <LoadingDot />
@@ -808,11 +808,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                         }}
                       />
 
-                      {/* Staggered session badge: sobresale naturalmente del marco sin cortarse */}
+                      {/* Staggered session badge: Cierre Ayer se desplaza a la derecha de la línea para caber en la gráfica */}
                       <div
                         className={cn(
-                          'absolute px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-xs z-30 backdrop-blur-md transition-all',
+                          'absolute px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap border select-none shadow-xs z-30 backdrop-blur-md transition-all',
                           badgeTopStyle,
+                          isCierre ? 'translate-x-1.5' : '-translate-x-1/2',
                           isCierre
                             ? 'bg-slate-100/95 text-slate-700 border-slate-300 dark:bg-slate-800/95 dark:text-slate-300 dark:border-slate-600'
                             : isTokyo
