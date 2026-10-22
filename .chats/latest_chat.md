@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 15:39:40
+- **Fecha de exportación:** 2026-10-22 15:42:36
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 89
+- **Total de interacciones registradas:** 92
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2214,5 +2214,36 @@ Haz clic en los botones en la cabecera, pruébalas todas en vivo y dime cuál te
 ### 👤 Usuario (2026-10-22 13:35:48)
 
 usa plus jakarta para el resto pero Outfit para los titulos
+
+---
+
+### 🤖 Asistente (2026-10-22 13:39:43)
+
+Ya está aplicada la combinación tipográfica en toda la aplicación:
+
+### 🎨 Combinación Tipográfica Configurada
+1. **Títulos y Encabezados (`Outfit`)**:
+   - Asignada a todos los elementos `h1`, `h2`, `h3`, `h4`, `h5`, `h6` y clases de utilidad de cabecera (`.font-title`, `.font-heading`, `.font-display`, `.font-headline-*`).
+   - Le aporta a "Visión General", nombres de tarjetas y secciones un estilo geométrico, vanguardista y limpio.
+2. **Cuerpo, Datos y UI (`Plus Jakarta Sans`)**:
+   - Asignada globalmente al `html, body`, tablas, etiquetas, métricas y controles.
+   - Excelente legibilidad para cifras financieras, botones y navegación.
+3. **Limpieza de interfaz**:
+   - Se han retirado los selectores temporales de prueba tanto del [Header.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/Header.tsx) como del [UserProfileModal.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/UserProfileModal.tsx).
+   - Se optimizó la carga en [index.html](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/index.html) y [index.css](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css).
+
+🚀 **Release & Sync ejecutado**: Se incrementó la versión a **v3.4.0** (aplicando la regla de salto de subversión al llegar a 50) y los cambios ya están subidos a Git.
+
+---
+
+### 👤 Usuario (2026-10-22 13:40:10)
+
+estos tiitulos no los cambies de fuente, pon la antigua
+
+---
+
+### 👤 Usuario (2026-10-22 13:40:48)
+
+esos titulos, pon la fuente vieja
 
 ---

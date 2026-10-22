@@ -60,12 +60,16 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Headings & Titles: Outfit */
-  h1, h2, h3, h4, h5, h6, .font-title, .font-heading {
+  /* Título principal de página: Outfit */
+  h1, .font-outfit {
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
   }
 
-  .font-outfit { font-family: 'Outfit', sans-serif !important; }
+  /* Títulos de tarjetas, widgets y paneles (Evolución Patrimonial, etc.): Fuente clásica original (Inter) */
+  h2, h3, h4, h5, h6, .card-title, .font-title, .font-heading, .font-inter {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+  }
+
   .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
   /* Variables de Safe Area de iOS (Notch, Dynamic Island y Barra inferior de inicio) */
