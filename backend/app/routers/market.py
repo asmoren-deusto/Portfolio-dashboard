@@ -15,8 +15,36 @@ from app.models import PriceCache
 from app.routers.portfolio import _get_all_transactions, _get_asset
 from app.services.finance_engine import calculate_positions
 
+import math
+
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/market", tags=["market"])
+
+
+def _clean_float(v, default=None):
+    """Safely convert a value to float, converting NaN/Inf to default (None)."""
+    if v is None:
+        return default
+    try:
+        val = float(v)
+        if math.isnan(val) or math.isinf(val):
+            return default
+        return val
+    except (ValueError, TypeError):
+        return default
+
+
+def _sanitize_for_json(obj):
+    """Recursively converts NaN and Inf floats to None for RFC 8259 JSON compliance."""
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    elif isinstance(obj, dict):
+        return {k: _sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [_sanitize_for_json(v) for v in obj]
+    return obj
 
 # ── Curated stock universe with metadata ───────────────────────────────────────
 STOCK_UNIVERSE = [
@@ -334,20 +362,20 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
         timestamps = result.get("timestamp") or []
         closes = quote_data.get("close") or []
         valid_prices = [
-            (timestamp, price)
+            (timestamp, _clean_float(price))
             for timestamp, price in zip(timestamps, closes)
-            if price is not None
+            if _clean_float(price) is not None
         ]
         last_price = valid_prices[-1][1] if valid_prices else None
-        regular_price = meta.get("regularMarketPrice") or last_price
+        regular_price = _clean_float(meta.get("regularMarketPrice")) or last_price
         if regular_price is None:
             return None
 
         market_state = get_market_session_for_ticker(ticker)
 
-        previous_close = meta.get("chartPreviousClose") or meta.get("previousClose")
-        raw_pre = meta.get("preMarketPrice")
-        raw_post = meta.get("postMarketPrice")
+        previous_close = _clean_float(meta.get("chartPreviousClose")) or _clean_float(meta.get("previousClose"))
+        raw_pre = _clean_float(meta.get("preMarketPrice"))
+        raw_post = _clean_float(meta.get("postMarketPrice"))
 
         # Fallback to actual pre/post trades from valid_prices if meta leaves them empty
         current_period = meta.get("currentTradingPeriod", {})
@@ -369,63 +397,65 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
         )
 
         reference = previous_close or regular_price
-        change = display_price - reference if reference else 0.0
-        change_pct = change / reference * 100 if reference else 0.0
+        change = round(display_price - reference, 4) if (display_price is not None and reference is not None) else 0.0
+        change_pct = round(change / reference * 100, 2) if (reference and reference > 0 and change is not None) else 0.0
 
         if ticker == "EURUSD=X" and meta.get("regularMarketChangePercent") is not None:
-            raw_chg_pct = meta.get("regularMarketChangePercent")
+            raw_chg_pct = _clean_float(meta.get("regularMarketChangePercent"))
             if raw_chg_pct is not None and regular_price:
                 calc_prev = regular_price / (1.0 + raw_chg_pct / 100.0)
                 previous_close = round(calc_prev, 4)
                 reference = previous_close
-                change = round(display_price - reference, 4)
+                change = round(display_price - reference, 4) if display_price is not None else 0.0
                 change_pct = round(raw_chg_pct, 2)
         elif ticker.endswith("=F") and meta.get("regularMarketChangePercent") is not None:
-            raw_chg_pct = meta.get("regularMarketChangePercent")
+            raw_chg_pct = _clean_float(meta.get("regularMarketChangePercent"))
             if raw_chg_pct is not None and reference and display_price:
                 change = round(display_price - reference, 4)
                 change_pct = round(raw_chg_pct, 2)
 
         def latest_value(key: str):
             values = quote_data.get(key) or []
-            return next((value for value in reversed(values) if value is not None), None)
+            return next((value for value in reversed(values) if _clean_float(value) is not None), None)
 
         price_precision = 4 if ticker == "EURUSD=X" else None
 
         def rounded(value):
-            if value is None:
+            clean_v = _clean_float(value)
+            if clean_v is None:
                 return None
-            decimals = price_precision if price_precision is not None else (2 if abs(value) >= 1 else 6)
-            return round(value, decimals)
+            decimals = price_precision if price_precision is not None else (2 if abs(clean_v) >= 1 else 6)
+            return round(clean_v, decimals)
 
         reg_chg = round(regular_price - previous_close, 4) if (regular_price and previous_close) else 0.0
+        raw_reg_pct = _clean_float(meta.get("regularMarketChangePercent"))
         reg_chg_pct = (
-            round(meta.get("regularMarketChangePercent"), 2)
-            if meta.get("regularMarketChangePercent") is not None
+            round(raw_reg_pct, 2)
+            if raw_reg_pct is not None
             else (round((regular_price - previous_close) / previous_close * 100.0, 2) if (regular_price and previous_close) else 0.0)
         )
 
-        return {
+        return _sanitize_for_json({
             "ticker": ticker,
             "price": rounded(display_price),
             "regular_price": rounded(regular_price),
-            "regular_change": reg_chg,
-            "regular_change_pct": reg_chg_pct,
+            "regular_change": _clean_float(reg_chg, 0.0),
+            "regular_change_pct": _clean_float(reg_chg_pct, 0.0),
             "pre_market_price": rounded(pre_price),
             "post_market_price": rounded(post_price),
             "pre_market_change_pct": round((pre_price - regular_price) / regular_price * 100, 2) if pre_price is not None and regular_price else None,
             "post_market_change_pct": round((post_price - regular_price) / regular_price * 100, 2) if post_price is not None and regular_price else None,
             "market_state": market_state,
             "prev_close": rounded(previous_close),
-            "change": round(change, 4),
-            "change_pct": round(change_pct, 2),
-            "day_high": rounded(max((value for value in quote_data.get("high", []) if value is not None), default=meta.get("regularMarketDayHigh"))),
-            "day_low": rounded(min((value for value in quote_data.get("low", []) if value is not None), default=meta.get("regularMarketDayLow"))),
+            "change": _clean_float(round(change, 4), 0.0),
+            "change_pct": _clean_float(round(change_pct, 2), 0.0),
+            "day_high": rounded(max((value for value in quote_data.get("high", []) if _clean_float(value) is not None), default=meta.get("regularMarketDayHigh"))),
+            "day_low": rounded(min((value for value in quote_data.get("low", []) if _clean_float(value) is not None), default=meta.get("regularMarketDayLow"))),
             "volume": int(latest_value("volume") or meta.get("regularMarketVolume") or 0) or None,
-            "market_cap": meta.get("marketCap"),
+            "market_cap": _clean_float(meta.get("marketCap")),
             "currency": meta.get("currency", "USD"),
             "last_updated": _now_iso(),
-        }
+        })
     except Exception as e:
         logger.debug(f"Yahoo chart fallback failed for {ticker}: {e}")
         return None
@@ -442,22 +472,23 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         t = yf.Ticker(ticker)
         fi = t.fast_info
 
-        regular_price = getattr(fi, "last_price", None)
+        regular_price = _clean_float(getattr(fi, "last_price", None))
         quote_type    = getattr(fi, "quote_type", "")
-        reg_prev_close = getattr(fi, "regular_market_previous_close", None)
+        reg_prev_close = _clean_float(getattr(fi, "regular_market_previous_close", None))
+        fi_prev_close  = _clean_float(getattr(fi, "previous_close", None))
 
         # For futures ('GC=F', 'BZ=F', 'CL=F', etc.), fast_info.previous_close reflects
         # the overnight electronic session pause tick rather than the official previous daily settlement.
         # regular_market_previous_close provides the true official previous daily close.
         if quote_type == "FUTURE" or ticker.endswith("=F"):
-            prev_close = reg_prev_close or getattr(fi, "previous_close", None)
+            prev_close = reg_prev_close or fi_prev_close
         else:
-            prev_close = getattr(fi, "previous_close", None) or reg_prev_close
+            prev_close = fi_prev_close or reg_prev_close
 
-        day_high      = getattr(fi, "day_high", None)
-        day_low       = getattr(fi, "day_low", None)
-        volume        = getattr(fi, "last_volume", None)
-        market_cap    = getattr(fi, "market_cap", None)
+        day_high      = _clean_float(getattr(fi, "day_high", None))
+        day_low       = _clean_float(getattr(fi, "day_low", None))
+        volume        = _clean_float(getattr(fi, "last_volume", None))
+        market_cap    = _clean_float(getattr(fi, "market_cap", None))
         currency      = getattr(fi, "currency", "USD")
 
         # Extended hours prices & fallback via fast chart quote
@@ -472,25 +503,25 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             chart_q = _fetch_yahoo_chart_quote(ticker)
             if chart_q:
                 if regular_price is None:
-                    regular_price = chart_q.get("regular_price")
+                    regular_price = _clean_float(chart_q.get("regular_price"))
                 if not prev_close:
-                    prev_close = chart_q.get("prev_close")
+                    prev_close = _clean_float(chart_q.get("prev_close"))
                 if not day_high:
-                    day_high = chart_q.get("day_high")
+                    day_high = _clean_float(chart_q.get("day_high"))
                 if not day_low:
-                    day_low = chart_q.get("day_low")
+                    day_low = _clean_float(chart_q.get("day_low"))
                 if not volume:
-                    volume = chart_q.get("volume")
+                    volume = _clean_float(chart_q.get("volume"))
                 if not market_cap:
-                    market_cap = chart_q.get("market_cap")
+                    market_cap = _clean_float(chart_q.get("market_cap"))
                 if not currency:
                     currency = chart_q.get("currency")
                 if market_state == "PRE":
-                    pre_price = chart_q.get("pre_market_price")
-                    pre_chg_pct = chart_q.get("pre_market_change_pct")
+                    pre_price = _clean_float(chart_q.get("pre_market_price"))
+                    pre_chg_pct = _clean_float(chart_q.get("pre_market_change_pct"))
                 elif market_state in ("POST", "POSTPOST"):
-                    post_price = chart_q.get("post_market_price")
-                    post_chg_pct = chart_q.get("post_market_change_pct")
+                    post_price = _clean_float(chart_q.get("post_market_price"))
+                    post_chg_pct = _clean_float(chart_q.get("post_market_change_pct"))
 
         # Choose the most current price based on the active physical market state
         if market_state == "PRE":
@@ -511,7 +542,7 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         if display_price is None:
             fallback = _fetch_yahoo_chart_quote(ticker)
             if fallback:
-                return fallback
+                return _sanitize_for_json(fallback)
             return {"ticker": ticker, "error": "no_price"}
 
         # ── Change calculation ──────────────────────────────────────────────────
@@ -525,7 +556,7 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             elif pre_chg_pct is not None and abs(pre_chg_pct) > 0.001:
                 ref = regular_price or display_price
                 chg_pct = pre_chg_pct
-                chg = round((ref * chg_pct) / 100.0, 4)
+                chg = round((ref * chg_pct) / 100.0, 4) if ref else 0.0
             else:
                 ref = regular_price or display_price
                 chg = 0.0
@@ -538,7 +569,7 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             elif post_chg_pct is not None and abs(post_chg_pct) > 0.001:
                 ref = regular_price or display_price
                 chg_pct = post_chg_pct
-                chg = round((ref * chg_pct) / 100.0, 4)
+                chg = round((ref * chg_pct) / 100.0, 4) if ref else 0.0
             else:
                 ref = regular_price or display_price
                 chg = 0.0
@@ -546,8 +577,8 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         else:
             # REGULAR or CLOSED: change vs previous close
             ref = prev_close or regular_price or display_price
-            chg = round(display_price - ref, 4) if ref else 0
-            chg_pct = round((display_price - ref) / ref * 100, 2) if ref and ref > 0 else 0.0
+            chg = round(display_price - ref, 4) if (display_price is not None and ref is not None) else 0.0
+            chg_pct = round((display_price - ref) / ref * 100, 2) if (ref and ref > 0 and display_price is not None) else 0.0
 
         price_precision = 4 if ticker == "EURUSD=X" else None
         if price_precision is not None:
@@ -559,41 +590,43 @@ def _fetch_ticker_extended(ticker: str) -> dict:
                 prev_close = round(prev_close, price_precision)
 
         def _r(v, precision=None):
-            if v is None:
+            clean_v = _clean_float(v)
+            if clean_v is None:
                 return None
             if precision is not None:
-                return round(v, precision)
-            decimals = 2 if abs(v) >= 1 else 6
-            return round(v, decimals)
+                return round(clean_v, precision)
+            decimals = 2 if abs(clean_v) >= 1 else 6
+            return round(clean_v, decimals)
 
         reg_chg = round(regular_price - prev_close, 4) if (regular_price and prev_close) else 0.0
+        fi_reg_pct = _clean_float(getattr(fi, "regular_market_change_percent", None))
         reg_chg_pct = (
-            round(getattr(fi, "regular_market_change_percent"), 2)
-            if getattr(fi, "regular_market_change_percent", None) is not None
+            round(fi_reg_pct, 2)
+            if fi_reg_pct is not None
             else (round((regular_price - prev_close) / prev_close * 100.0, 2) if (regular_price and prev_close) else 0.0)
         )
 
-        res = {
+        res = _sanitize_for_json({
             "ticker":              ticker,
             "price":               _r(display_price, price_precision),
             "regular_price":       _r(regular_price, price_precision),
-            "regular_change":      reg_chg,
-            "regular_change_pct":  reg_chg_pct,
+            "regular_change":      _clean_float(reg_chg, 0.0),
+            "regular_change_pct":  _clean_float(reg_chg_pct, 0.0),
             "pre_market_price":    _r(pre_price, price_precision),
             "post_market_price":   _r(post_price, price_precision),
-            "pre_market_change_pct":  pre_chg_pct,
-            "post_market_change_pct": post_chg_pct,
+            "pre_market_change_pct":  _clean_float(pre_chg_pct),
+            "post_market_change_pct": _clean_float(post_chg_pct),
             "market_state":        market_state,
             "prev_close":          _r(prev_close, price_precision),
-            "change":              round(chg, 4),
-            "change_pct":          chg_pct,
+            "change":              _clean_float(round(chg, 4), 0.0),
+            "change_pct":          _clean_float(round(chg_pct, 2), 0.0),
             "day_high":            _r(day_high, price_precision),
             "day_low":             _r(day_low, price_precision),
             "volume":              int(volume) if volume else None,
-            "market_cap":          market_cap,
+            "market_cap":          _clean_float(market_cap),
             "currency":            currency or "USD",
             "last_updated":        _now_iso(),
-        }
+        })
         _set_cached_ticker(ticker, res)
         return res
     except Exception as e:
@@ -687,12 +720,12 @@ async def get_quotes(index: Optional[str] = None):
             "logo_url":            f"https://www.google.com/s2/favicons?domain={stock['domain']}&sz=128",
         })
 
-    return {
+    return _sanitize_for_json({
         "stocks":          result,
         "count":           len(result),
         "cached":          _is_fresh(cache_key),
         "cache_timestamp": datetime.fromtimestamp(cache_ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-    }
+    })
 
 
 async def _refresh_indices_in_background():
@@ -840,8 +873,8 @@ async def _fetch_indices_fresh():
             q["post_market_price"] = None
             q["pre_market_change_pct"] = None
             q["post_market_change_pct"] = None
-            base_p = q.get("regular_price") or q.get("price") or q.get("prev_close")
-            prev_p = q.get("prev_close")
+            base_p = _clean_float(q.get("regular_price") or q.get("price") or q.get("prev_close"))
+            prev_p = _clean_float(q.get("prev_close"))
             if base_p:
                 q["price"] = base_p
                 if prev_p and prev_p > 0:
@@ -855,30 +888,30 @@ async def _fetch_indices_fresh():
             "domain":            domain_map.get(name, "finance.yahoo.com"),
             "sector":            sector_map.get(name, "Índice de Mercado"),
             "index":             [name],
-            "price":             q.get("price"),
-            "regular_price":     q.get("regular_price"),
-            "pre_market_price":  q.get("pre_market_price"),
-            "post_market_price": q.get("post_market_price"),
-            "pre_market_change_pct":  q.get("pre_market_change_pct"),
-            "post_market_change_pct": q.get("post_market_change_pct"),
+            "price":             _clean_float(q.get("price")),
+            "regular_price":     _clean_float(q.get("regular_price")),
+            "pre_market_price":  _clean_float(q.get("pre_market_price")),
+            "post_market_price": _clean_float(q.get("post_market_price")),
+            "pre_market_change_pct":  _clean_float(q.get("pre_market_change_pct")),
+            "post_market_change_pct": _clean_float(q.get("post_market_change_pct")),
             "market_state":      q.get("market_state", "REGULAR"),
-            "change":            q.get("change"),
-            "change_pct":        q.get("change_pct"),
-            "prev_close":        q.get("prev_close"),
-            "day_high":          q.get("day_high"),
-            "day_low":           q.get("day_low"),
+            "change":            _clean_float(q.get("change"), 0.0),
+            "change_pct":        _clean_float(q.get("change_pct"), 0.0),
+            "prev_close":        _clean_float(q.get("prev_close")),
+            "day_high":          _clean_float(q.get("day_high")),
+            "day_low":           _clean_float(q.get("day_low")),
             "volume":            q.get("volume"),
             "currency":          cur,
-            "market_cap":        q.get("market_cap"),
+            "market_cap":        _clean_float(q.get("market_cap")),
             "proxy_used":        q.get("proxy_used"),
             "last_updated":      q.get("last_updated", _now_iso()),
             "logo_url":          "",
         })
 
-    data = {
+    data = _sanitize_for_json({
         "indices":         result,
         "cache_timestamp": _now_iso(),
-    }
+    })
     _quote_cache[cache_key] = {"data": data, "ts": time.time()}
     return data
 
@@ -938,29 +971,29 @@ def _fetch_history_sync(ticker: str, period: str) -> dict:
 
         if not points:
             fi = t.fast_info
-            curr = getattr(fi, "last_price", 100.0) or 100.0
-            prev = getattr(fi, "previous_close", curr) or curr
+            curr = _clean_float(getattr(fi, "last_price", None), default=100.0)
+            prev = _clean_float(getattr(fi, "previous_close", None), default=curr)
             points = [
                 {"date": "Inicio", "time": "Inicio", "price": round(float(prev), 4)},
                 {"date": "Actual", "time": "Actual", "price": round(float(curr), 4)},
             ]
 
-        first_p = points[0]["price"] if points else 0
-        last_p = points[-1]["price"] if points else 0
+        first_p = _clean_float(points[0]["price"] if points else 0, 0.0)
+        last_p = _clean_float(points[-1]["price"] if points else 0, 0.0)
         chg = round(last_p - first_p, 4)
-        chg_pct = round((last_p - first_p) / first_p * 100, 2) if first_p else 0
-        prices = [pt["price"] for pt in points]
+        chg_pct = round((last_p - first_p) / first_p * 100, 2) if first_p and first_p > 0 else 0.0
+        prices = [pt["price"] for pt in points if _clean_float(pt.get("price")) is not None]
 
-        return {
+        return _sanitize_for_json({
             "ticker": ticker,
             "period": period,
             "count": len(points),
-            "period_change": chg,
-            "period_change_pct": chg_pct,
-            "min_price": min(prices) if prices else 0,
-            "max_price": max(prices) if prices else 0,
+            "period_change": _clean_float(chg, 0.0),
+            "period_change_pct": _clean_float(chg_pct, 0.0),
+            "min_price": min(prices) if prices else 0.0,
+            "max_price": max(prices) if prices else 0.0,
             "points": points,
-        }
+        })
     except Exception as e:
         logger.warning(f"Error fetching history for {ticker} ({period}): {e}")
         return {
@@ -1042,7 +1075,7 @@ def _fetch_benchmarks_sync(period: str) -> dict:
         point["bce_rate"] = round((bce_factor - 1.0) * 100.0, 2)
         points.append(point)
 
-    return {"period": period, "points": points}
+    return _sanitize_for_json({"period": period, "points": points})
 
 
 @router.get("/benchmarks")
@@ -1566,7 +1599,7 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
     mins_ny_now = now_ny.hour * 60 + now_ny.minute
     is_pre_market = (now_ny.weekday() < 5) and (mins_ny_now < 9 * 60 + 30)
 
-    return {
+    return _sanitize_for_json({
         "summary": {
             "total_value": round(total_val, 2),
             # Live simulation values (active futures / pre-market projection)
@@ -1612,7 +1645,7 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
         "chart_points": chart_points,
         "session_markers": session_markers,
         "cache_timestamp": _now_iso(),
-    }
+    })
 
 
 @router.get("/simulated-portfolio")

@@ -2,9 +2,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import os
 import logging
+import math
 
 from datetime import datetime
 import asyncio
@@ -15,10 +16,31 @@ from app.routers import portfolio, transactions, assets, market, auth
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+def _sanitize_nan_inf(obj):
+    """Recursively convert float NaN and Inf to None (JSON null) to guarantee RFC 8259 compliance."""
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    elif isinstance(obj, dict):
+        return {k: _sanitize_nan_inf(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [_sanitize_nan_inf(v) for v in obj]
+    return obj
+
+
+class SafeJSONResponse(JSONResponse):
+    """Custom JSONResponse that sanitizes NaN and Inf floats into nulls before serialization."""
+    def render(self, content) -> bytes:
+        return super().render(_sanitize_nan_inf(content))
+
+
 app = FastAPI(
     title="Portfolio Dashboard API",
     description="Personal investment portfolio tracker",
     version="1.0.0",
+    default_response_class=SafeJSONResponse,
 )
 
 # CORS — allow frontend dev server, mobile apps and production domain

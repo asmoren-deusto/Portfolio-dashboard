@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-21 14:30:12
+- **Fecha de exportación:** 2026-10-22 09:27:44
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 54
+- **Total de interacciones registradas:** 56
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -818,5 +818,776 @@ el rendimiento de ayer creo que está acusando la transacción o algo le pasa po
 ### 🤖 Asistente (2026-10-21 12:19:36)
 
 Consultando las métricas de rendimiento y la serie de datos calculada por el backend...
+
+---
+
+### 🤖 Asistente (2026-10-21 12:30:15)
+
+Tenías toda la razón: **el rendimiento de ayer estaba totalmente distorsionado por la venta**. En realidad el mercado no bajó más de 1.000 €, sino solo **-270,16 € (-0,35%)**.
+
+---
+
+### 🔍 ¿Qué estaba ocurriendo?
+
+1. **La transacción del 20 de octubre:**
+   - Se vendieron/reembolsaron las participaciones de **Cobas Lux** por un total de **6.198,66 €** (coste de adquisición: 5.285,63 €, con una ganancia patrimonial de **+913,03 €**).
+2. **El error en la fórmula del frontend:**
+   - Para aislar las aportaciones y retiradas de dinero, el gráfico y las tarjetas hacían:
+     $$\text{netInflow} = \text{curInvested} - \text{prevInvested}$$
+   - Pero `invested` solo refleja la variación del **capital de coste inicial** (que bajó $-5.285,63\text{ €}$), **no el efectivo real reembolsado** ($6.198,66\text{ €}$).
+   - Por tanto, la fórmula calculaba:
+     $$(71.038,49 - (-5.285,63)) - 77.507,31 = 76.324,12 - 77.507,31 = \mathbf{-1.183,19\text{ €}}\quad (\mathbf{-1,53\%})$$
+   - Toda la ganancia generada por el fondo (+913,03 €) **se estaba restando erróneamente como si hubiese sido una pérdida de mercado**.
+
+---
+
+### 🛠️ Solución implementada
+
+1. **Backend ([`finance_engine.py`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py) y [`schemas.py`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/schemas.py)):**
+   - Ahora cada punto de la serie temporal (`PerformancePoint`) calcula e incluye:
+     - `net_inflow`: Flujo de capital neto real del día ($+amount$ para compras, $-amount$ para reembolsos/ventas; ignorando traspasos internos entre fondos).
+     - `daily_return`: Rendimiento ponderado de mercado puro ($r_t$) inmune a entradas/salidas de liquidez.
+2. **Frontend ([`OverviewPage.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx) y [`MonthlyReturnsHeatmap.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/MonthlyReturnsHeatmap.tsx)):**
+   - El gráfico de barras de los últimos 7 días (`weeklyReturnsData`) y las tarjetas de métricas (`1D` y `7D`) utilizan ahora el flujo real (`net_inflow`) y `daily_return`:
+     $$(71.038,49\text{ €} - (-6.198,66\text{ €})) - 77.507,31\text{ €} = \mathbf{-270,16\text{ €}}\quad (\mathbf{-0,35\%})$$
+3. **Liberación y Sincronización:**
+   - Se ha validado la compilación y se ha ejecutado `sync_release.py` incrementando la versión a **`v3.0.184`**.
+
+---
+
+### 👤 Usuario (2026-10-22 07:18:03)
+
+estos errores al arrancar/actualizar:     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 197, in render
+    return json.dumps(
+           ~~~~~~~~~~^
+        content,
+        ^^^^^^^^
+    ...<3 lines>...
+        separators=(",", ":"),
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ).encode("utf-8")
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+when serializing dict item 'change'
+when serializing list item 8
+when serializing dict item 'indices'
+INFO:     127.0.0.1:51926 - "GET /api/market/quotes HTTP/1.1" 500 Internal Server Error 
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 422, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 63, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 197, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py", line 45, in add_no_cache_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 173, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 149, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 149, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\routing.py", line 676, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1780, in handle
+    await self.original_router.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2789, in handle
+    await included_router._handle_selected(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1800, in _handle_selected
+    await original_route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1279, in handle
+    await app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 747, in app
+    response = actual_response_class(content, **response_args)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 194, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 197, in render
+    return json.dumps(
+           ~~~~~~~~~~^
+        content,
+        ^^^^^^^^
+    ...<3 lines>...
+        separators=(",", ":"),
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ).encode("utf-8")
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+when serializing dict item 'change'
+when serializing list item 83
+when serializing dict item 'stocks'
+INFO:     127.0.0.1:51922 - "GET /api/portfolio/latest-nav-alert?since=nav_1792593344088 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51925 - "GET /api/market/simulated-portfolio?period=1d&user_id=asier HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51923 - "GET /api/portfolio/positions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51924 - "GET /api/portfolio/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51933 - "GET /api/market/indices HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 422, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 63, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 197, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py", line 45, in add_no_cache_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 173, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 149, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 149, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\routing.py", line 676, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1780, in handle
+    await self.original_router.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2789, in handle
+    await included_router._handle_selected(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1800, in _handle_selected
+    await original_route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1279, in handle
+    await app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 747, in app
+    response = actual_response_class(content, **response_args)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 194, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 197, in render
+    return json.dumps(
+           ~~~~~~~~~~^
+        content,
+        ^^^^^^^^
+    ...<3 lines>...
+        separators=(",", ":"),
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ).encode("utf-8")
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+when serializing dict item 'change'
+when serializing list item 8
+when serializing dict item 'indices'
+INFO:     127.0.0.1:51934 - "GET /api/market/quotes HTTP/1.1" 500 Internal Server Error 
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 422, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 63, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 197, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py", line 45, in add_no_cache_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 173, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 149, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 149, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\routing.py", line 676, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1780, in handle
+    await self.original_router.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2789, in handle
+    await included_router._handle_selected(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1800, in _handle_selected
+    await original_route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1279, in handle
+    await app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 747, in app
+    response = actual_response_class(content, **response_args)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 194, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 197, in render
+    return json.dumps(
+           ~~~~~~~~~~^
+        content,
+        ^^^^^^^^
+    ...<3 lines>...
+        separators=(",", ":"),
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ).encode("utf-8")
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+when serializing dict item 'change'
+when serializing list item 83
+when serializing dict item 'stocks'
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5NH74-Fidelity_msci_japan_index_p_acc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU0302296495-Dnb_fund_technology_a_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=IE00BYX5M476 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE000QAZP7L2-Ishares_emerging_markets_index_ie_s_acc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5NX33-Fidelity_msci_world_index_p_acc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=ES0112611001 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/ES0112611001-Azvalor_internacional_fi "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5M476-Fidelity_msci_emerging_markets_index_p_acc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU0261952682-Fidelity_funds__euro_stoxx_50_tm_aacc_eur "HTTP/1.1 301 Moved Permanently"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=IE000QAZP7L2 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5NH74-Fidelity_msci_japan_index_eur_p_acc_h "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://areacliente.azvalor.com/api/product/international/prices?filename=international "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=IE00BYX5NH74 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=LU0302296495 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=LU0261952682:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU0302296495-Dnb_fund_technology_retail_a "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=IE000QAZP7L2:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=ES0112611001:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=LU0302296495:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=IE00BYX5NX33:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE000QAZP7L2-Ishares_emergmkts_idx_ie_s_acc_eur "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=IE00BYX5M476:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://markets.ft.com/data/funds/tearsheet/summary?s=IE00BYX5NH74:EUR "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=IE00BYX5NX33 "HTTP/1.1 200 "
+INFO:app.services.price_service:Selected LU0302296495 NAV 2087.578 (2026-10-20) from source: finect
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5NX33-Fidelity_msci_world_index_eur_p_acc "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/LU0261952682-Fidelity_euro_stoxx_50_aacceur "HTTP/1.1 200 OK"
+INFO:app.services.price_service:Selected ES0112611001 NAV 366.95938 (2026-10-20) from source: quefondos
+INFO:httpx:HTTP Request: GET https://www.finect.com/fondos-inversion/IE00BYX5M476-Fidelity_msci_emerg_mkts_indx_eur_p_acc "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.quefondos.com/es/fondos/ficha/index.html?isin=LU0261952682 "HTTP/1.1 200 "
+INFO:httpx:HTTP Request: GET https://indexacapital.com/es/esp/stats/download?stat=epsv "HTTP/1.1 200 OK"
+INFO:app.services.price_service:Selected LU0261952682 NAV 28.85 (2026-10-21) from source: ft
+INFO:app.services.price_service:Selected IE00BYX5NH74 NAV 14.51 (2026-10-21) from source: ft
+INFO:app.services.price_service:Selected IE00BYX5M476 NAV 8.74 (2026-10-21) from source: ft
+INFO:app.services.price_service:Selected IE00BYX5NX33 NAV 14.64 (2026-10-21) from source: ft
+INFO:app.services.price_service:Selected IE000QAZP7L2 NAV 13.427000045776367 (2026-10-20) from source: yahoo
+INFO:app.routers.portfolio:Refreshed prices for 8 assets: 7 updated
+INFO:     127.0.0.1:51941 - "POST /api/portfolio/refresh-prices?user_id=asier HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52000 - "GET /api/portfolio/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51999 - "GET /api/portfolio/positions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51997 - "GET /api/portfolio/analytics?period=2y HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51998 - "GET /api/portfolio/benchmark-comparison?period=1y HTTP/1.1"
+ 200 OK
+INFO:     127.0.0.1:52002 - "GET /api/portfolio/performance?period=1y HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52009 - "GET /api/portfolio/positions?broker=myinvestor HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52007 - "GET /api/portfolio/summary?broker=myinvestor HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52018 - "GET /api/portfolio/positions?broker=bbva HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52019 - "GET /api/portfolio/summary?broker=indexa HTTP/1.1" 200 OK  
+INFO:     127.0.0.1:52017 - "GET /api/portfolio/summary?broker=bbva HTTP/1.1" 200 OK    
+INFO:     127.0.0.1:52020 - "GET /api/portfolio/positions?broker=indexa HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52034 - "GET /api/market/indices HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 422, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 63, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 197, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py", line 45, in add_no_cache_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 173, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 149, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 149, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\routing.py", line 676, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1780, in handle
+    await self.original_router.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2789, in handle
+    await included_router._handle_selected(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1800, in _handle_selected
+    await original_route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1279, in handle
+    await app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 747, in app
+    response = actual_response_class(content, **response_args)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 194, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 197, in render
+    return json.dumps(
+           ~~~~~~~~~~^
+        content,
+        ^^^^^^^^
+    ...<3 lines>...
+        separators=(",", ":"),
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ).encode("utf-8")
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+when serializing dict item 'change'
+when serializing list item 8
+when serializing dict item 'indices'
+INFO:     127.0.0.1:52035 - "GET /api/market/quotes HTTP/1.1" 500 Internal Server Error 
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 422, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 63, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 197, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py", line 45, in add_no_cache_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 173, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 149, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 149, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\routing.py", line 676, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1780, in handle
+    await self.original_router.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2789, in handle
+    await included_router._handle_selected(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1800, in _handle_selected
+    await original_route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1279, in handle
+    await app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 747, in app
+    response = actual_response_class(content, **response_args)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 194, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 197, in render
+    return json.dumps(
+           ~~~~~~~~~~^
+        content,
+        ^^^^^^^^
+    ...<3 lines>...
+        separators=(",", ":"),
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ).encode("utf-8")
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+when serializing dict item 'change'
+when serializing list item 83
+when serializing dict item 'stocks'
+INFO:     127.0.0.1:52036 - "GET /api/market/simulated-portfolio?period=1d&user_id=asier HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52037 - "GET /api/portfolio/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52038 - "GET /api/portfolio/positions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52043 - "GET /api/market/indices HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 422, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 63, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 197, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py", line 45, in add_no_cache_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 173, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 149, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 149, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\routing.py", line 676, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1780, in handle
+    await self.original_router.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2789, in handle
+    await included_router._handle_selected(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1800, in _handle_selected
+    await original_route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1279, in handle
+    await app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 747, in app
+    response = actual_response_class(content, **response_args)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 194, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 197, in render
+    return json.dumps(
+           ~~~~~~~~~~^
+        content,
+        ^^^^^^^^
+    ...<3 lines>...
+        separators=(",", ":"),
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ).encode("utf-8")
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+when serializing dict item 'change'
+when serializing list item 8
+when serializing dict item 'indices'
+INFO:     127.0.0.1:52044 - "GET /api/market/quotes HTTP/1.1" 500 Internal Server Error 
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 422, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 63, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\applications.py", line 96, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 197, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\Documents\GitHub\Portfolio-dashboard\backend\app\main.py", line 45, in add_no_cache_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 173, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\base.py", line 149, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\cors.py", line 149, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\routing.py", line 676, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2734, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1780, in handle
+    await self.original_router.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 2789, in handle
+    await included_router._handle_selected(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1800, in _handle_selected
+    await original_route.handle(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 1279, in handle
+    await app(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 158, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 144, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py", line 747, in app
+    response = actual_response_class(content, **response_args)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 194, in __init__
+    super().__init__(content, status_code, headers, media_type, background)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 45, in __init__
+    self.body = self.render(content)
+                ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\responses.py", line 197, in render
+    return json.dumps(
+           ~~~~~~~~~~^
+        content,
+        ^^^^^^^^
+    ...<3 lines>...
+        separators=(",", ":"),
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ).encode("utf-8")
+    ^
+          ~~~~~~^^^^^
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\AsierM\AppData\Local\Python\pythoncore-3.14-64\Lib\json\encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+when serializing dict item 'change'
+when serializing list item 83
+when serializing dict item 'stocks'
+INFO:app.main:Executing periodic NAV
 
 ---
