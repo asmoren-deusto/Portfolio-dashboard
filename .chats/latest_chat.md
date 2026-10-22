@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 14:47:02
+- **Fecha de exportación:** 2026-10-22 14:55:32
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 71
+- **Total de interacciones registradas:** 73
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1939,5 +1939,33 @@ Sincronizado y desplegado en **v3.0.191**. Al refrescar el navegador podrás ver
 ### 👤 Usuario (2026-10-22 12:40:46)
 
 mira si puedes hace que los marcadores "salgan" de la grafica. te paso captura:
+
+---
+
+### 🤖 Asistente (2026-10-22 12:47:05)
+
+He modificado los marcadores para que **salgan completamente de la gráfica** y no interfieran con la curva ni queden recortados:
+
+### Cambios realizados:
+1. **Pista superior dedicada (fuera del lienzo de precios):**
+   - Se ha añadido una barra superior de sesiones justo encima del gráfico TradingView ([SimulatedPortfolioCard.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx#L768-L822)).
+   - Las insignias de las bolsas (`22:00 • Cierre Ayer`, `01:00 • Tokio`, `09:00 • Europa`, `10:00 • Pre-market`, etc.) ahora residen en esta franja superior externa, dejando el área de dibujo de la gráfica 100% limpia para ver las cotizaciones, la línea de referencia del 0.00% y los máximos/mínimos sin obstáculos ni solapamientos.
+
+2. **Líneas verticales continuas hacia el gráfico:**
+   - Desde cada marcador de la pista superior desciende la línea punteada de color hasta la base del gráfico, indicando el momento exacto de la sesión en el eje temporal.
+
+3. **Corrección del corte lateral (`clampedX`):**
+   - Se ha implementado un cálculo de anclaje con márgenes de seguridad para los extremos. El marcador inicial (`22:00 • Cierre Ayer`), que antes se cortaba a la izquierda (`[ierre Ayer`), ahora se mantiene completamente visible y legible dentro de los márgenes.
+
+4. **Escalado vertical optimizado:**
+   - Al no tener etiquetas flotantes dentro de la gráfica, se ha reducido el margen superior del eje de precios para aprovechar mejor la resolución y amplitud visual de la curva.
+
+Ya está desplegado y sincronizado con el repositorio en la versión **`v3.0.192`**.
+
+---
+
+### 👤 Usuario (2026-10-22 12:48:58)
+
+no me gusta tu propuesta, haz que "salga" del grafico de forma natural
 
 ---
