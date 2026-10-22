@@ -550,15 +550,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       className="!bg-slate-700/70 !border !border-slate-600/70 shadow-xs"
                     />
 
-                    {/* Name + price + currency inline */}
-                    <div className="flex items-center gap-1 min-w-0">
-                      <span className="text-[11px] font-medium text-slate-400 whitespace-nowrap">
+                    {/* Name + price + currency inline — vertically aligned with logo and badge */}
+                    <div className="flex items-center gap-1 min-w-0 leading-none -translate-y-[1px]">
+                      <span className="text-[11px] leading-none font-medium text-slate-400 whitespace-nowrap">
                         {idx.name}:
                       </span>
-                      <span className="text-[11px] font-bold text-white font-mono tabular-nums tracking-tight whitespace-nowrap">
+                      <span className="text-[11px] leading-none font-bold text-white font-mono tabular-nums tracking-tight whitespace-nowrap">
                         {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
                       </span>
-                      <span className="text-[9.5px] font-mono text-slate-400 uppercase whitespace-nowrap">
+                      <span className="text-[9.5px] leading-none font-mono text-slate-400 uppercase whitespace-nowrap">
                         {currency}
                       </span>
                     </div>

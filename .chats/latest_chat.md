@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 14:58:45
+- **Fecha de exportación:** 2026-10-22 15:21:55
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 75
+- **Total de interacciones registradas:** 77
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1992,5 +1992,26 @@ Los cambios ya están sincronizados en el repositorio en la versión **`v3.0.193
 ### 👤 Usuario (2026-10-22 12:57:03)
 
 mueve la etiqueta de cierre ayer a la derecha para que quepa en la gráfica. la linea debe seguir en su sitio
+
+---
+
+### 🤖 Asistente (2026-10-22 12:58:48)
+
+He modificado la posición de la etiqueta **"22:00 • Cierre Ayer"**:
+
+1. **Línea vertical intacta:**
+   - La línea punteada permanece exactamente en su coordenada temporal original en el eje X de la gráfica.
+
+2. **Etiqueta desplazada a la derecha:**
+   - La etiqueta pasa de estar centrada (`-translate-x-1/2`, lo que hacía que la mitad izquierda se saliera por el borde) a posicionarse a la derecha de la línea (`translate-x-1.5`).
+   - De este modo, la píldora se dibuja íntegramente hacia el interior de la gráfica con un margen de 6px respecto a la línea, siendo 100% legible y sin cortarse en el borde izquierdo.
+
+Los cambios ya están sincronizados en el repositorio en la versión **`v3.0.194`**.
+
+---
+
+### 👤 Usuario (2026-10-22 12:57:40)
+
+el texto de los activos parece estar más abajo
 
 ---
