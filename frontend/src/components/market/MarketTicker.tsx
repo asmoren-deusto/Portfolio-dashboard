@@ -468,7 +468,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
       <div className={cn(
         "dark relative overflow-hidden w-full transition-all duration-200",
         fullWidth
-          ? "py-2 sm:py-2 md:py-0 md:h-[36px] flex items-center rounded-none bg-[#1d1d1d] dark:bg-[#212121] text-white border-b border-slate-200/90 dark:border-white/[0.08] px-0 shadow-xs"
+          ? "py-2 sm:py-2 md:py-0 md:h-[40px] flex items-center rounded-none bg-[#1d1d1d] dark:bg-[#212121] text-white border-b border-slate-200/90 dark:border-white/[0.08] px-0 shadow-xs"
           : "rounded-2xl bg-[#1d1d1d] dark:bg-[#212121] text-white border border-white/10 dark:border-white/[0.08] shadow-md py-1.5 px-3 sm:px-3.5",
         className
       )}>

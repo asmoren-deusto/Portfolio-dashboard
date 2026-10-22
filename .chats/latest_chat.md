@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 17:02:31
+- **Fecha de exportación:** 2026-10-22 17:04:23
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 119
+- **Total de interacciones registradas:** 121
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2619,5 +2619,38 @@ El elemento que habíamos añadido como escudo para la barra de estado de iOS ut
 ### 👤 Usuario (2026-10-22 14:58:55)
 
 con esos tamaños de pantalla se ve mal el header, mira si puedes ajustar algo
+
+---
+
+### 🤖 Asistente (2026-10-22 15:02:33)
+
+Solucionado el solapamiento en anchos de pantalla intermedios (portátiles, tablets o ventanas reducidas).
+
+---
+
+### 🔍 Causa del problema
+En la captura se apreciaba que en anchos de pantalla medianos (entre `md` 768px y `xl` 1280px):
+1. **Espacio horizontal saturado:** El selector de brokers completo con sus 4 pestañas (`[Consolidado] [MyInvestor] [BBVA] [Indexa]`) consumía más de **330px**, sumado a los selectores, el nombre completo del usuario y los botones de acción (~430px) y el título con su badge (~320px).
+2. **Salto de línea descontrolado (`flex-wrap`):** Al no caber en la fila fija de 60px de altura, el bloque saltaba de línea hacia arriba y se montaba físicamente sobre *"Visión General"* y la píldora de *NAVs*.
+
+---
+
+### 🛠️ Ajustes aplicados (v3.4.14)
+
+1. **Selector de Broker Adaptativo:**
+   * En pantallas grandes ($\ge 1280\text{px}$ / `xl`), se muestra la botonera horizontal completa segmentada.
+   * En pantallas intermedias ($< 1280\text{px}$ / `md-lg`), el selector se transforma automáticamente en un desplegable compacto con el indicador de color del banco (`[ ● Consolidado ▾ ]`), liberando más de **210px** de espacio de golpe.
+2. **Perfil de Usuario Compacto:**
+   * En pantallas intermedias, el botón de perfil muestra el avatar circular con las iniciales y el chevron, ocultando el texto largo (*"Asier Moreno • Cuenta Principal"* que vuelve a desplegarse en `xl`).
+3. **Píldora de NAVs Optimizada:**
+   * En anchos intermedios muestra de forma limpia `NAVs 8/8`, reservando la hora y fecha completa para pantallas muy amplias (`2xl`).
+4. **Prohibición estricta de saltos de línea (`flex-nowrap`):**
+   * Se ha bloqueado el wrapping en todos los contenedores de la cabecera. Todo el contenido fluye siempre en una sola línea horizontal perfectamente alineada, sin colisiones ni solapamientos.
+
+---
+
+### 👤 Usuario (2026-10-22 14:59:58)
+
+haz el ticker un pelo más ancho  en modo escritorio
 
 ---

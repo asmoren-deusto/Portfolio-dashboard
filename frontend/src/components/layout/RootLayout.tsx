@@ -342,7 +342,7 @@ export function RootLayout() {
           </div>
 
           {/* Desktop spacer to prevent content overlap under the fixed full-width ticker */}
-          <div className="hidden md:block h-[36px] shrink-0" aria-hidden="true" />
+          <div className="hidden md:block h-[40px] shrink-0" aria-hidden="true" />
 
           {/* Page Content Animation: Instant mounting with silky smooth opacity transition and zero layout shifts */}
           <main

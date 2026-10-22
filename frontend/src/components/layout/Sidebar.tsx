@@ -133,7 +133,7 @@ export function Sidebar({ }: SidebarProps) {
         </div>
 
         {/* Space for the full-width ticker strip crossing over the sidebar on desktop */}
-        <div className="hidden md:block h-[36px] shrink-0" aria-hidden="true" />
+        <div className="hidden md:block h-[40px] shrink-0" aria-hidden="true" />
 
         {/* Nav Items */}
         <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
