@@ -104,8 +104,8 @@ function normalizeStock(idx: any): MarketStock {
     typeof idx.prev_close === 'number'
       ? idx.prev_close
       : price > 0
-      ? price / (1 + chgPct / 100)
-      : 0
+        ? price / (1 + chgPct / 100)
+        : 0
   const chg = typeof idx.change === 'number' ? idx.change : price - prevClose
 
   const domain = idx.domain || getAssetDomain(cleanName, idx.ticker || '')
@@ -247,11 +247,11 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
 
   const mainStatusLabel =
     isWeekend ? 'Cerrado' :
-    usState === 'REGULAR' ? 'En Vivo' :
-    usState === 'PRE' ? 'Pre-mercado' :
-    (usState === 'POST' || usState === 'POSTPOST') ? 'Post-mercado' :
-    (usState === 'FUTURES' || usState === 'OVERNIGHT') ? 'FUTURES' :
-    'Cerrado'
+      usState === 'REGULAR' ? 'En Vivo' :
+        usState === 'PRE' ? 'Pre-mercado' :
+          (usState === 'POST' || usState === 'POSTPOST') ? 'Post-mercado' :
+            (usState === 'FUTURES' || usState === 'OVERNIGHT') ? 'FUTURES' :
+              'Cerrado'
 
   // Last updated = from cache_timestamp if available, else most recent per-ticker timestamp
   const lastUpdated: string | null = data?.cache_timestamp ??
@@ -527,61 +527,61 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
             >
               <div className="flex items-center gap-2 sm:gap-3.5 py-0.5 w-max">
                 {repeatedIndices.map((idx: any, index: number) => {
-                const isPos = (idx.change_pct ?? 0) >= 0
-                const state: string = idx.market_state || 'REGULAR'
-                const domain = idx.domain || getAssetDomain(idx.name, idx.ticker || '')
-                const logo = idx.logo_url || getAssetLogo(idx.name, idx.ticker || '')
-                const currency = idx.currency || (['^IBEX', '^GDAXI', '^STOXX50E', 'BTC-EUR'].includes(idx.ticker) || idx.name === 'BTC/EUR' || idx.name === 'Euro 50' || idx.name.includes('IBEX') ? 'EUR' : 'USD')
+                  const isPos = (idx.change_pct ?? 0) >= 0
+                  const state: string = idx.market_state || 'REGULAR'
+                  const domain = idx.domain || getAssetDomain(idx.name, idx.ticker || '')
+                  const logo = idx.logo_url || getAssetLogo(idx.name, idx.ticker || '')
+                  const currency = idx.currency || (['^IBEX', '^GDAXI', '^STOXX50E', 'BTC-EUR'].includes(idx.ticker) || idx.name === 'BTC/EUR' || idx.name === 'Euro 50' || idx.name.includes('IBEX') ? 'EUR' : 'USD')
 
-                return (
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    key={`${idx.name}-${index}`}
-                    onClick={() => handleCardClick(idx)}
-                    className="relative flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-800/80 transition-colors shrink-0 cursor-pointer active:scale-[0.98]"
-                  >
-                    <CompanyLogo
-                      ticker={idx.ticker || idx.name}
-                      name={idx.name}
-                      domain={domain}
-                      logoUrl={logo}
-                      size="xs"
-                      className="!bg-slate-700/70 !border !border-slate-600/70 shadow-xs"
-                    />
-
-                    {/* Name + price + currency inline — vertically aligned with logo and badge */}
-                    <div className="flex items-center gap-1 min-w-0 leading-none -translate-y-[1px]">
-                      <span className="text-[11px] leading-none font-medium text-slate-400 whitespace-nowrap">
-                        {idx.name}:
-                      </span>
-                      <span className="text-[11px] leading-none font-bold text-white font-mono tabular-nums tracking-tight whitespace-nowrap">
-                        {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
-                      </span>
-                      <span className="text-[9.5px] leading-none font-mono text-slate-400 uppercase whitespace-nowrap">
-                        {currency}
-                      </span>
-                    </div>
-
-                    {/* Change % badge — dark tinted pill matching reference, slightly larger */}
-                    <span
-                      className={cn(
-                        "text-[11.5px] font-bold font-mono tabular-nums px-2 py-0.5 rounded-md ml-0.5 shrink-0 leading-none",
-                        isPos
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "bg-rose-500/20 text-rose-400"
-                      )}
+                  return (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      key={`${idx.name}-${index}`}
+                      onClick={() => handleCardClick(idx)}
+                      className="relative flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-800/80 transition-colors shrink-0 cursor-pointer active:scale-[0.98]"
                     >
-                      {isPos ? '+' : ''}{idx.change_pct?.toFixed(2)}%
-                    </span>
+                      <CompanyLogo
+                        ticker={idx.ticker || idx.name}
+                        name={idx.name}
+                        domain={domain}
+                        logoUrl={logo}
+                        size="xs"
+                        className="!bg-slate-700/70 !border !border-slate-600/70 shadow-xs"
+                      />
 
-                    {/* Market state badge (Futures, Pre, Post, etc.) directly AFTER the % badge with same style */}
-                    {state !== 'REGULAR' && (
-                      <MarketStateBadge state={state} name={idx.name} />
-                    )}
-                  </div>
-                )
-              })}
+                      {/* Name + price + currency inline — vertically aligned with logo and badge */}
+                      <div className="flex items-center gap-1 min-w-0 leading-none -translate-y-[1px]">
+                        <span className="text-[11px] leading-none font-medium text-slate-400 whitespace-nowrap">
+                          {idx.name}:
+                        </span>
+                        <span className="text-[11px] leading-none font-bold text-white font-mono tabular-nums tracking-tight whitespace-nowrap">
+                          {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
+                        </span>
+                        <span className="text-[9.5px] leading-none font-mono text-slate-400 uppercase whitespace-nowrap">
+                          {currency}
+                        </span>
+                      </div>
+
+                      {/* Change % badge — dark tinted pill matching reference, slightly larger */}
+                      <span
+                        className={cn(
+                          "text-[11.5px] font-bold font-mono tabular-nums px-2 py-0.5 rounded-md ml-0.5 shrink-0 leading-none",
+                          isPos
+                            ? "bg-emerald-500/20 text-emerald-400"
+                            : "bg-rose-500/20 text-rose-400"
+                        )}
+                      >
+                        {isPos ? '+' : ''}{idx.change_pct?.toFixed(2)}%
+                      </span>
+
+                      {/* Market state badge (Futures, Pre, Post, etc.) directly AFTER the % badge with same style */}
+                      {state !== 'REGULAR' && (
+                        <MarketStateBadge state={state} name={idx.name} />
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>

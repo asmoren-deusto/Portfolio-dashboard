@@ -12,7 +12,7 @@ Para permitir el trabajo fluido entre múltiples ordenadores sin pérdida de con
    ```
    Esto automatiza:
    - Exportación íntegra del chat actual a `.chats/latest_chat.md` y archivo histórico `.chats/archive/`.
-   - Incremento automático de versión (`patch`) en `frontend/package.json` y `frontend/src/version.ts`.
+   - Incremento automático de versión (`patch`) en `frontend/package.json` y `frontend/src/version.ts` (al llegar a 50 en la subversión, sube la subversión anterior y se reinicia).
    - Reflejo automático de la versión en la interfaz web (Sidebar y Login).
    - `git add .`, `git commit` y `git push`.
 

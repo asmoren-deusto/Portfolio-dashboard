@@ -164,6 +164,15 @@ def bump_version(bump_type="patch"):
     else:  # patch
         patch += 1
 
+    # Regla: cuando una subversión llega a 50, se incrementa la subversión anterior y reinicia
+    if patch >= 50:
+        minor += patch // 50
+        patch = patch % 50
+
+    if minor >= 50:
+        major += minor // 50
+        minor = minor % 50
+
     new_ver = f"{major}.{minor}.{patch}"
     pkg_data["version"] = new_ver
 

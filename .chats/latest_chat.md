@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 15:21:55
+- **Fecha de exportación:** 2026-10-22 15:23:15
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 77
+- **Total de interacciones registradas:** 79
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2013,5 +2013,25 @@ Los cambios ya están sincronizados en el repositorio en la versión **`v3.0.194
 ### 👤 Usuario (2026-10-22 12:57:40)
 
 el texto de los activos parece estar más abajo
+
+---
+
+### 🤖 Asistente (2026-10-22 13:21:59)
+
+He corregido la alineación vertical del texto de los activos en la barra de mercados ([MarketTicker.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx#L554-L564)):
+
+1. **Ajuste de altura de línea (`leading-none`):**
+   - El texto combinaba tipografía normal y monoespaciada (`font-mono`) con diferentes tamaños (`11px` y `9.5px`), lo que provocaba un *line-height* residual que empujaba la línea de base hacia abajo. Se ha aplicado `leading-none` a todos los elementos del bloque.
+
+2. **Compensación óptica vertical (`-translate-y-[1px]`):**
+   - Se ha elevado ligeramente el bloque de texto para que su centro óptico coincida con el centro exacto del icono circular (logo del activo) a la izquierda y la píldora porcentual a la derecha.
+
+Los cambios ya están sincronizados en el repositorio en la versión **`v3.0.195`**.
+
+---
+
+### 👤 Usuario (2026-10-22 12:59:52)
+
+cuando las subversiones lleguen a 50, sube la subversion anterior
 
 ---
