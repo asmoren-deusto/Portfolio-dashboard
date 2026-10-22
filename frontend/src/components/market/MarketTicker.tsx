@@ -466,15 +466,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
       <div className={cn(
         "dark relative overflow-hidden w-full transition-all duration-200",
         fullWidth
-          ? "rounded-none bg-[#161616] dark:bg-[#141414] text-white border-b border-white/[0.08] dark:border-white/[0.06] py-1.5 px-3 sm:px-4 md:px-7 shadow-xs"
-          : "rounded-2xl bg-[#161616] dark:bg-[#141414] text-white border border-white/10 dark:border-white/[0.08] shadow-md py-1.5 px-3 sm:px-3.5",
+          ? "rounded-none bg-[#202020] dark:bg-[#262626] text-white border-b border-white/[0.08] dark:border-white/[0.1] py-1.5 px-3 sm:px-4 md:px-7 shadow-xs"
+          : "rounded-2xl bg-[#202020] dark:bg-[#262626] text-white border border-white/10 dark:border-white/[0.1] shadow-md py-1.5 px-3 sm:px-3.5",
         className
       )}>
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
           <div
             className={cn(
-              "flex items-center border-r border-white/10 dark:border-white/[0.08] shrink-0 z-20 bg-[#161616] dark:bg-[#141414]",
+              "flex items-center border-r border-white/10 dark:border-white/[0.1] shrink-0 z-20 bg-[#202020] dark:bg-[#262626]",
               isNative ? "pl-0 pr-2 gap-1.5" : "pr-3 sm:pr-3.5 gap-2"
             )}
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
@@ -500,8 +500,8 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
           {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
           <div className={cn("relative flex-1 overflow-hidden py-0 group", isNative ? "ml-1.5" : "ml-2.5")}>
             {/* Subtle fade edges for smooth transition */}
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-[#161616] dark:from-[#141414] to-transparent" />
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-l from-[#161616] dark:from-[#141414] to-transparent" />
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-[#202020] dark:from-[#262626] to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-l from-[#202020] dark:from-[#262626] to-transparent" />
 
             {/* Seamless scrolling marquee track with interactive drag */}
             <div

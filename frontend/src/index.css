@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --tracking-tight: -0.015em;
+  --tracking-tight: -0.02em;
 }
 
 :root {
@@ -179,7 +179,7 @@
 
 @layer utilities {
   .tracking-tight {
-    letter-spacing: -0.015em !important;
+    letter-spacing: -0.02em !important;
   }
 
   .tabular-nums {
