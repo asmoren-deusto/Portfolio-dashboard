@@ -1349,9 +1349,11 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                     # Base reference is ALWAYS the official previous regular close (22:00 Madrid / 16:00 NY)
                     base_dict = {}
                     for t in etf_cols:
-                        pc = quotes.get(t, {}).get("prev_close")
-                        if pc and pc > 0:
-                            base_dict[t] = float(pc)
+                        q_t = quotes.get(t, {})
+                        # In pre-market, official_close_price / regular_price is the close of the completed previous regular session
+                        ref_p = q_t.get("official_close_price") or q_t.get("regular_price") or q_t.get("prev_close")
+                        if ref_p and float(ref_p) > 0:
+                            base_dict[t] = float(ref_p)
                         else:
                             base_dict[t] = float(closes_etfs[t].dropna().iloc[-1]) if not closes_etfs[t].dropna().empty else 1.0
                     base_s = pd.Series(base_dict)
