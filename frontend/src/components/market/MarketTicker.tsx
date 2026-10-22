@@ -5,6 +5,7 @@ import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { cn } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
+import { useAppStore } from '@/store/appStore'
 
 interface MarketTickerProps {
   onSelectStock?: (stock: MarketStock) => void
@@ -199,6 +200,7 @@ function MarketStateBadge({ state, name }: { state: string; name?: string }) {
 
 export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullWidth = true, className }) => {
   const { data, isLoading, dataUpdatedAt } = useMarketIndices()
+  const { sidebarCollapsed } = useAppStore()
   const [internalSelectedStock, setInternalSelectedStock] = useState<MarketStock | null>(null)
 
   const defaultIndices = [
@@ -466,35 +468,44 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
       <div className={cn(
         "dark relative overflow-hidden w-full transition-all duration-200",
         fullWidth
-          ? "h-[36px] flex items-center rounded-none bg-[#1d1d1d] dark:bg-[#212121] text-white border-b border-white/[0.08] dark:border-white/[0.08] px-3 sm:px-4 shadow-xs"
+          ? "h-[36px] flex items-center rounded-none bg-[#1d1d1d] dark:bg-[#212121] text-white border-b border-slate-200/90 dark:border-white/[0.08] px-0 shadow-xs"
           : "rounded-2xl bg-[#1d1d1d] dark:bg-[#212121] text-white border border-white/10 dark:border-white/[0.08] shadow-md py-1.5 px-3 sm:px-3.5",
         className
       )}>
         <div className="flex items-center w-full h-full">
-          {/* Live Indicator (Fixed on left) */}
+          {/* Live Indicator (Aligned exactly with the 230px sidebar line) */}
           <div
             className={cn(
-              "flex items-center h-full border-r border-white/10 dark:border-white/[0.08] shrink-0 z-20 bg-[#1d1d1d] dark:bg-[#212121]",
-              isNative ? "pl-0 pr-2 gap-1.5" : "pr-3 sm:pr-3.5 gap-2"
+              "flex items-center h-full border-r border-white/15 dark:border-white/[0.08] shrink-0 z-20 bg-[#1d1d1d] dark:bg-[#212121] transition-all duration-300",
+              isNative
+                ? "pl-2 pr-2.5 gap-1.5 w-auto"
+                : sidebarCollapsed
+                  ? "w-auto px-3.5 gap-2"
+                  : "w-auto md:w-[230px] md:min-w-[230px] md:max-w-[230px] px-3 sm:px-4 md:px-4 gap-2"
             )}
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
           >
-            <div className="flex items-center justify-center w-4 h-4 shrink-0">
-              <span className="live-dot emerald" />
-            </div>
-            {!isNative && (
-              <div className="flex items-center gap-1.5 pl-0.5">
-                <span className="text-[11px] font-bold tracking-wider text-slate-200 uppercase whitespace-nowrap">
-                  MERCADOS EN VIVO
-                </span>
-                {lastUpdated && (
-                  <span className="hidden xl:flex items-center gap-0.5 text-[9px] text-slate-400 font-mono">
-                    <Clock className="w-2.5 h-2.5 text-emerald-400" />
-                    {fmtUpdated(lastUpdated)}
+            <div className="flex items-center justify-between w-full min-w-0">
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center justify-center w-4 h-4 shrink-0">
+                  <span className="live-dot emerald" />
+                </div>
+                {!isNative && (
+                  <span className="text-[11px] font-bold tracking-wider text-slate-200 uppercase whitespace-nowrap">
+                    MERCADOS EN VIVO
                   </span>
                 )}
               </div>
-            )}
+              {!isNative && lastUpdated && (
+                <span className={cn(
+                  "items-center gap-1 text-[9px] text-slate-400 font-mono shrink-0 pl-1",
+                  sidebarCollapsed ? "hidden xl:flex" : "hidden sm:flex"
+                )}>
+                  <Clock className="w-2.5 h-2.5 text-emerald-400" />
+                  {fmtUpdated(lastUpdated)}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
