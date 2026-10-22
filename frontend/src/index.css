@@ -50,8 +50,8 @@
     box-sizing: border-box;
   }
 
-  html {
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  html, body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -60,28 +60,13 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Dynamic typography selector */
-  html[data-font="jakarta"], html[data-font="jakarta"] body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  html[data-font="outfit"], html[data-font="outfit"] body {
-    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  html[data-font="sora"], html[data-font="sora"] body {
-    font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  html[data-font="manrope"], html[data-font="manrope"] body {
-    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  html[data-font="inter"], html[data-font="inter"] body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Headings & Titles: Outfit */
+  h1, h2, h3, h4, h5, h6, .font-title, .font-heading {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
   }
 
-  .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
   .font-outfit { font-family: 'Outfit', sans-serif !important; }
-  .font-sora { font-family: 'Sora', sans-serif !important; }
-  .font-manrope { font-family: 'Manrope', sans-serif !important; }
-  .font-inter { font-family: 'Inter', sans-serif !important; }
+  .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
   /* Variables de Safe Area de iOS (Notch, Dynamic Island y Barra inferior de inicio) */
   :root {
@@ -181,11 +166,11 @@
   }
 
   .font-display {
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+    font-family: 'Outfit', -apple-system, sans-serif;
   }
 
   .font-headline-xl {
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+    font-family: 'Outfit', -apple-system, sans-serif;
     font-size: 32px;
     line-height: 38px;
     font-weight: 800;
@@ -199,7 +184,7 @@
   }
 
   .font-headline-lg {
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+    font-family: 'Outfit', -apple-system, sans-serif;
     font-size: 22px;
     line-height: 28px;
     font-weight: 700;
@@ -213,7 +198,7 @@
   }
 
   .font-headline-sm {
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+    font-family: 'Outfit', -apple-system, sans-serif;
     font-size: 17px;
     line-height: 23px;
     font-weight: 600;
@@ -221,14 +206,14 @@
   }
 
   .font-label-md {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 12.5px;
     line-height: 16px;
     font-weight: 600;
   }
 
   .font-label-sm {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 11px;
     line-height: 14px;
     font-weight: 700;

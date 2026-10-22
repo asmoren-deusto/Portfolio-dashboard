@@ -1,11 +1,10 @@
-import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark, RefreshCw, Type } from 'lucide-react'
+import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark, RefreshCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store/appStore'
 import { APP_VERSION } from '@/version'
 import { cn } from '@/lib/utils'
-import { BROKERS, DEMO_BROKERS, BROKER_CONFIG, FONT_OPTIONS } from '@/components/layout/Header'
+import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -29,15 +28,6 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
   const navigate = useNavigate()
   const brokers = useMock ? DEMO_BROKERS : BROKERS
 
-  const [currentFont, setCurrentFont] = useState<string>(() => {
-    return localStorage.getItem('portfolio-font') || 'jakarta'
-  })
-
-  const applyFont = (fontId: string) => {
-    setCurrentFont(fontId)
-    localStorage.setItem('portfolio-font', fontId)
-    document.documentElement.setAttribute('data-font', fontId)
-  }
 
   if (!currentUser) return null
 
@@ -145,44 +135,6 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
               </button>
             </div>
 
-            {/* Typography / Font Selector */}
-            <div className="mt-3.5">
-              <div className="flex items-center justify-between px-1 mb-1.5">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  <Type size={12} className="text-blue-500 dark:text-blue-400" />
-                  <span>Estilo Tipográfico</span>
-                </div>
-                <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 capitalize">
-                  {FONT_OPTIONS.find((f) => f.id === currentFont)?.label}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                {FONT_OPTIONS.map((f) => {
-                  const isSelected = currentFont === f.id
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={() => applyFont(f.id)}
-                      className={cn(
-                        'flex flex-col items-start p-2 rounded-xl text-xs transition-all border text-left active:scale-95 cursor-pointer',
-                        f.fontClass,
-                        isSelected
-                          ? 'border-blue-500/50 bg-blue-50/90 text-blue-900 dark:bg-white/[0.1] dark:text-white dark:border-white/20 shadow-2xs font-bold'
-                          : 'border-slate-200/80 bg-slate-50/60 hover:bg-slate-100/80 text-slate-700 dark:border-white/[0.06] dark:bg-white/[0.03] dark:hover:bg-white/[0.06] dark:text-slate-300'
-                      )}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-bold text-[11px] truncate">{f.label}</span>
-                        {isSelected && <Check size={11} className="text-blue-600 dark:text-blue-400 shrink-0 ml-1" />}
-                      </div>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 tracking-tight mt-0.5">
-                        Visión General
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
 
             {/* Entity / Broker Selector */}
             <div className="mt-4">
