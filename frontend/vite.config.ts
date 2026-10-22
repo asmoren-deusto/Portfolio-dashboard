@@ -52,8 +52,8 @@ export default defineConfig({
         changeOrigin: true,
         timeout: 30000,
         configure: (proxy) => {
-          proxy.on('error', (err, _req, res) => {
-            console.warn('[Vite Proxy] Backend reconectando o no disponible:', err.message)
+          proxy.on('error', (_err, req, res) => {
+            // Silenciar error ruidoso en consola durante el arranque/reinicio
             if (res && 'writeHead' in res && !res.headersSent) {
               res.writeHead(503, { 'Content-Type': 'application/json' })
               res.end(JSON.stringify({ detail: 'Backend reconectando...' }))

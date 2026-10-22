@@ -10,6 +10,7 @@ import os
 import webbrowser
 import time
 import threading
+import socket
 
 if sys.platform == "win32":
     try:
@@ -17,6 +18,17 @@ if sys.platform == "win32":
         sys.stderr.reconfigure(encoding="utf-8")
     except Exception:
         pass
+
+def wait_for_port(port: int, host: str = "127.0.0.1", timeout: float = 12.0) -> bool:
+    """Espera activamente a que un puerto esté abierto y aceptando conexiones."""
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            with socket.create_connection((host, port), timeout=0.3):
+                return True
+        except (OSError, ConnectionRefusedError):
+            time.sleep(0.2)
+    return False
 
 def kill_process_tree(proc):
     """Termina limpiamente un proceso y todos sus subprocesos hijos."""
@@ -39,8 +51,9 @@ def kill_process_tree(proc):
             pass
 
 def open_browser():
-    """Abrir dashboard una vez que los servidores hayan arrancado."""
-    time.sleep(2.5)
+    """Abrir dashboard una vez que frontend y backend hayan arrancado."""
+    wait_for_port(5173, timeout=15.0)
+    time.sleep(0.5)
     try:
         webbrowser.open("http://localhost:5173")
     except Exception:
@@ -88,18 +101,7 @@ if __name__ == "__main__":
     backend_proc = None
 
     try:
-        # 1. Iniciar Vite frontend
-        if os.path.exists(os.path.join(frontend_dir, "package.json")):
-            frontend_proc = subprocess.Popen(
-                [npm_cmd, "run", "dev"],
-                cwd=frontend_dir,
-                stdin=subprocess.DEVNULL,
-                creationflags=creation_flags
-            )
-        else:
-            print("[WARN] No se encontró la carpeta frontend o package.json")
-
-        # 2. Iniciar Uvicorn backend
+        # 1. Iniciar Uvicorn backend primero
         backend_cmd = [
             python, "-m", "uvicorn", "app.main:app",
             "--reload", "--reload-dir", "app", "--reload-include", "*.py",
@@ -112,7 +114,21 @@ if __name__ == "__main__":
             creationflags=creation_flags
         )
 
-        # 3. Abrir navegador en segundo plano
+        # Esperar a que el backend esté listo antes de arrancar Vite para evitar ECONNREFUSED
+        wait_for_port(8000, timeout=12.0)
+
+        # 2. Iniciar Vite frontend una vez que el backend ya acepta peticiones
+        if os.path.exists(os.path.join(frontend_dir, "package.json")):
+            frontend_proc = subprocess.Popen(
+                [npm_cmd, "run", "dev"],
+                cwd=frontend_dir,
+                stdin=subprocess.DEVNULL,
+                creationflags=creation_flags
+            )
+        else:
+            print("[WARN] No se encontró la carpeta frontend o package.json")
+
+        # 3. Abrir navegador en segundo plano tras levantar el frontend
         threading.Thread(target=open_browser, daemon=True).start()
 
         # 4. Supervisor continuo: resucitar Vite o Backend si se detienen
