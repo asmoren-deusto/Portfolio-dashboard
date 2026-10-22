@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 16:58:02
+- **Fecha de exportación:** 2026-10-22 17:02:31
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 117
+- **Total de interacciones registradas:** 119
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2600,5 +2600,24 @@ Tras analizar a fondo el hilo de Reddit que has compartido ([r/PWA — iOS blur 
 ### 👤 Usuario (2026-10-22 14:56:01)
 
 has cortado el menu por arriba con una franja del color del fondo
+
+---
+
+### 🤖 Asistente (2026-10-22 14:58:05)
+
+Corregido de inmediato. 
+
+El elemento que habíamos añadido como escudo para la barra de estado de iOS utilizaba un `max(16px, env(safe-area-inset-top))` que en escritorio evaluaba a 16px, superponiendo esa franja fija sobre la cabecera.
+
+### Cambios aplicados (v3.4.13):
+1. **Eliminación total del escudo artificial:** Se ha retirado por completo el elemento y sus estilos de [index.html](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/index.html) y [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx).
+2. **Restauración del menú y la cabecera:** La barra superior vuelve a coincidir limpia y exactamente contra el borde superior de la ventana en escritorio, sin cortes ni márgenes parásitos.
+3. **Mantenimiento de las mejoras móviles:** Se preserva el aislamiento de los filtros gaussianos en móvil y el espaciado equilibrado del ticker.
+
+---
+
+### 👤 Usuario (2026-10-22 14:58:55)
+
+con esos tamaños de pantalla se ve mal el header, mira si puedes ajustar algo
 
 ---

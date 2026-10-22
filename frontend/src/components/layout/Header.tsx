@@ -139,9 +139,9 @@ export function Header({
   const { portalNode, setPortalNode, hasExtra } = useHeaderContext()
 
   return (
-    <div className="flex items-center justify-between gap-3 w-full">
+    <div className="flex items-center justify-between gap-3 w-full min-w-0 flex-nowrap">
       {/* Title, NAV Indicator, Font Switcher & Badges */}
-      <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
+      <div className="flex items-center gap-2.5 min-w-0 flex-nowrap shrink-0">
         <h1 className="text-lg sm:text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-none truncate">
           {title}
         </h1>
@@ -173,14 +173,14 @@ export function Header({
             {/* Green label */}
             <span
               className={cn(
-                "font-bold leading-none",
+                "font-bold leading-none shrink-0",
                 navFresh ? "text-emerald-800 dark:text-emerald-300" : "text-amber-800 dark:text-amber-300"
               )}
             >
               NAVs {updated}/{total}
             </span>
-            {/* Muted date & time */}
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-none">
+            {/* Muted date & time - only shown on large screens to preserve horizontal space */}
+            <span className="hidden 2xl:inline text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-none">
               ({dateLabel}, {syncTimeStr})
             </span>
           </button>
@@ -206,14 +206,14 @@ export function Header({
       </div>
 
       {/* Right side controls: EXACT fixed position across all pages */}
-      <div className="flex items-center justify-end gap-2 shrink-0 ml-auto flex-wrap">
+      <div className="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0 ml-auto flex-nowrap">
         {/* Extra page actions (e.g. Transactions actions) appear to the left of the fixed controls */}
         <div ref={setPortalNode} className="flex items-center gap-2 shrink-0 empty:hidden" />
         {children && <div className="flex items-center gap-2 shrink-0">{children}</div>}
 
-        {/* Broker / Entity Selector Pill (Clean background, borderless container) */}
+        {/* Broker / Entity Selector Pill: Segmented tabs on xl (>= 1280px), compact dropdown on < xl */}
         {showBrokerSelector && (
-          <div className="w-full sm:w-auto h-8.5 flex items-center rounded-lg bg-slate-100/80 dark:bg-white/[0.05] p-0.5 shadow-none">
+          <div className="hidden xl:flex items-center h-8.5 rounded-lg bg-slate-100/80 dark:bg-white/[0.05] p-0.5 shadow-none shrink-0">
             {brokers.map((b) => {
               const cfg = BROKER_CONFIG[b.value] || {
                 dot: '',
@@ -227,7 +227,7 @@ export function Header({
                   onClick={() => setSelectedBroker(b.value)}
                   whileTap={{ scale: 0.96 }}
                   className={cn(
-                    'relative flex-1 sm:flex-initial text-center rounded-md px-2.5 py-1 text-xs font-semibold transition-colors duration-150',
+                    'relative flex-initial text-center rounded-md px-2.5 py-1 text-xs font-semibold transition-colors duration-150',
                     isSelected
                       ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
@@ -259,8 +259,12 @@ export function Header({
         )}
 
         {/* User profile, privacy mode, theme, period selector (1A), and refresh controls */}
-        <div className="hidden md:flex items-center shrink-0">
-          <HeaderActions showPeriod={showPeriodSelector} />
+        <div className="flex items-center shrink-0">
+          <HeaderActions
+            showPeriod={showPeriodSelector}
+            showBroker={showBrokerSelector}
+            brokerClassName="xl:hidden"
+          />
         </div>
       </div>
     </div>

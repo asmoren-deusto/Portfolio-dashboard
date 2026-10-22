@@ -21,6 +21,7 @@ interface HeaderActionsProps {
   compact?: boolean
   showPeriod?: boolean
   showBroker?: boolean
+  brokerClassName?: string
   hideUser?: boolean
   hideRefresh?: boolean
 }
@@ -30,6 +31,7 @@ export function HeaderActions({
   compact = false,
   showPeriod = false,
   showBroker = false,
+  brokerClassName,
   hideUser = false,
   hideRefresh = false,
 }: HeaderActionsProps) {
@@ -46,10 +48,10 @@ export function HeaderActions({
   const btnSize = compact ? 'w-8 h-8 rounded-full' : 'w-8.5 h-8.5 rounded-full'
 
   return (
-    <div className={cn('flex items-center gap-1 sm:gap-2', className)}>
+    <div className={cn('flex items-center gap-1 sm:gap-2 flex-nowrap shrink-0', className)}>
       {/* Broker / Entity selector if enabled */}
       {showBroker && (
-        <div className="relative shrink-0">
+        <div className={cn("relative shrink-0", brokerClassName)}>
           <div className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 flex items-center z-10">
             <span
               className={cn(
@@ -126,7 +128,7 @@ export function HeaderActions({
             >
               {currentUser.avatar}
             </div>
-            <div className="flex flex-col text-left leading-tight hidden sm:flex">
+            <div className="flex flex-col text-left leading-tight hidden xl:flex">
               <span className="font-bold text-[11px] text-slate-900 dark:text-white max-w-[110px] truncate">
                 {currentUser.name}
               </span>
