@@ -51,7 +51,7 @@
   }
 
   html {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -59,6 +59,29 @@
     background-color: var(--bg-app);
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* Dynamic typography selector */
+  html[data-font="jakarta"], html[data-font="jakarta"] body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  html[data-font="outfit"], html[data-font="outfit"] body {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  html[data-font="sora"], html[data-font="sora"] body {
+    font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  html[data-font="manrope"], html[data-font="manrope"] body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  html[data-font="inter"], html[data-font="inter"] body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+  .font-outfit { font-family: 'Outfit', sans-serif !important; }
+  .font-sora { font-family: 'Sora', sans-serif !important; }
+  .font-manrope { font-family: 'Manrope', sans-serif !important; }
+  .font-inter { font-family: 'Inter', sans-serif !important; }
 
   /* Variables de Safe Area de iOS (Notch, Dynamic Island y Barra inferior de inicio) */
   :root {

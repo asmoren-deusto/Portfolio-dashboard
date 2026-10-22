@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 15:30:55
+- **Fecha de exportación:** 2026-10-22 15:35:28
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 85
+- **Total de interacciones registradas:** 87
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2128,5 +2128,50 @@ Si quieres, **puedo aplicar la que más te llame la atención** (por ejemplo, **
 ### 👤 Usuario (2026-10-22 13:28:41)
 
 al hacer click todo el contenido sube menos el texto del precio
+
+---
+
+### 🤖 Asistente (2026-10-22 13:30:58)
+
+He corregido el comportamiento al hacer clic en los activos del ticker ([MarketTicker.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx#L538-L565)):
+
+### Causa del problema:
+1. El contenedor padre tenía la clase `active:scale-[0.98]`, que al hacer clic encogía el botón completo hacia su centro, moviendo hacia arriba los elementos perimetrales.
+2. La etiqueta del precio tenía un transform individual (`-translate-y-[-1px]`) aplicado a un elemento `<span>` en línea. En los motores de renderizado, aplicar transformaciones a un span `inline` dentro de un padre escalado crea una capa desacoplada que no acompañaba el movimiento del resto del bloque.
+
+### Solución aplicada:
+- **Alineación tipográfica pura (`items-baseline`):** Se ha alineado el nombre, el precio y la divisa a la misma línea de base (`items-baseline`), garantizando que los tres textos se mantengan siempre a la misma altura sin necesidad de traslaciones individuales.
+- **Eliminación de saltos en el clic:** Se ha reemplazado `active:scale-[0.98]` por un sombreado sutil de fondo (`active:bg-slate-700/80`), de forma que al pulsar el activo se obtiene *feedback* táctil instantáneo pero sin desplazamientos ni desajustes verticales entre el texto y el precio.
+
+Sincronizado en el repositorio en la versión **`v3.3.48`**.
+
+---
+
+### 👤 Usuario (2026-10-22 13:30:57)
+
+Aquí tienes las mejores alternativas tipográficas para darle un salto de calidad y personalidad al dashboard, alejándonos del clásico Inter (que es muy neutro):
+
+1. Plus Jakarta Sans (La reina de las fintech modernas — Estilo Revolut / Linear)
+Personalidad: Geométrica, limpia, con curvas redondeadas muy cuidadas y aire fresco y contemporáneo.
+Por qué mola: Transforma al instante la sensación de la app; "Visión General" se ve sofisticada, moderna y premium sin perder legibilidad en tablas ni gráficos.
+Ideal para: Todo el dashboard (tanto títulos como números y textos).
+2. Outfit (Minimalismo vanguardista — Estilo Apple / SaaS Premium)
+Personalidad: Fuertemente geométrica basada en círculos y líneas puras.
+Por qué mola: Da un toque muy estilizado y pulcro. Los títulos como "Visión General" ganan un impacto visual directo, amplio y muy elegante.
+Ideal para: Encabezados, títulos de página y métricas principales.
+3. Sora (Alta tecnología & Datos — Estilo Bloomberg Next-Gen / Web3)
+Personalidad: Diseñada específicamente para interfaces de datos y pantallas de alta densidad. Cuenta con cortes característicos en los vértices de las letras.
+Por qué mola: Le aporta ese carácter de terminal financiero avanzado y profesional, con mucha identidad propia.
+Ideal para: Paneles financieros, cifras y títulos tecnológicos.
+4. Manrope (Elegancia suiza / Neo-Grotesque refinada)
+Personalidad: Puente perfecto entre la neutralidad de Helvetica y la modernidad geométrica.
+Por qué mola: Súper nítida y compacta. En negrita (Semibold/Bold) los títulos tienen mucho peso y contundencia sin verse toscos.
+Ideal para: Una estética sobria, ejecutiva y de máxima fidelidad visual.
+5. Combinación dual (Títulos con personalidad + Contenido técnico)
+Títulos y encabezados: Cabinet Grotesk o Plus Jakarta Sans (títulos con gancho y personalidad).
+Tablas, cifras y gráficos: Geist (la fuente creada por Vercel para dashboards técnicos con números monoespaciados perfectos).
+¿Cuál te apetece probar?
+Si quieres, puedo aplicar la que más te llame la atención (por ejemplo, Plus Jakarta Sans u Outfit) en un momento para que veas en vivo cómo cambia el aspecto de los títulos y la app.
+ ----> pone varias opciones para que las vea y te digo
 
 ---

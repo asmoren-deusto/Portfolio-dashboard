@@ -1,8 +1,16 @@
-import React from 'react'
-import { ChevronDown } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { ChevronDown, Type } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { cn, fmt, getConsensusNavDate } from '@/lib/utils'
 import { motion } from 'framer-motion'
+
+export const FONT_OPTIONS = [
+  { id: 'jakarta', label: 'Plus Jakarta', fontClass: 'font-jakarta' },
+  { id: 'outfit', label: 'Outfit', fontClass: 'font-outfit' },
+  { id: 'sora', label: 'Sora', fontClass: 'font-sora' },
+  { id: 'manrope', label: 'Manrope', fontClass: 'font-manrope' },
+  { id: 'inter', label: 'Inter', fontClass: 'font-inter' },
+] as const
 import { HeaderActions } from '@/components/layout/HeaderActions'
 import { useHeaderContext } from '@/context/HeaderContext'
 import { usePositions, useAnalytics, usePortfolioSummary } from '@/api/queries'
@@ -135,15 +143,29 @@ export function Header({
     violet: 'bg-violet-50 text-violet-600 border-violet-200 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20 dark:shadow-violet-500/10',
   }[badgeColor]
 
+  const [currentFont, setCurrentFont] = useState<string>(() => {
+    return localStorage.getItem('portfolio-font') || 'jakarta'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-font', currentFont)
+  }, [currentFont])
+
+  const applyFont = (fontId: string) => {
+    setCurrentFont(fontId)
+    localStorage.setItem('portfolio-font', fontId)
+    document.documentElement.setAttribute('data-font', fontId)
+  }
+
   const { portalNode, setPortalNode, hasExtra } = useHeaderContext()
 
   return (
     <div className="flex items-center justify-between gap-3 w-full">
-      {/* Title, NAV Indicator & Badges */}
-      <div className="flex items-center gap-3 min-w-0 flex-wrap">
+      {/* Title, NAV Indicator, Font Switcher & Badges */}
+      <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
         <h1 className="text-lg sm:text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-none truncate">
           <motion.span
-            key={title}
+            key={`${title}-${currentFont}`}
             initial={{ opacity: 0.35 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
@@ -151,6 +173,34 @@ export function Header({
             {title}
           </motion.span>
         </h1>
+
+        {/* Interactive Font Preview & Selector */}
+        <div className="flex items-center rounded-lg bg-slate-100/90 dark:bg-white/[0.05] p-0.5 border border-slate-200/80 dark:border-white/[0.08] shadow-2xs shrink-0">
+          <div className="flex items-center gap-1 px-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <Type size={11} className="text-blue-500 dark:text-blue-400" />
+            <span className="hidden xl:inline">Fuente:</span>
+          </div>
+          {FONT_OPTIONS.map((f) => {
+            const isSelected = currentFont === f.id
+            return (
+              <button
+                key={f.id}
+                onClick={() => applyFont(f.id)}
+                type="button"
+                className={cn(
+                  'px-2 py-0.5 rounded-md text-[11px] transition-all select-none cursor-pointer',
+                  f.fontClass,
+                  isSelected
+                    ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white shadow-2xs font-bold ring-1 ring-black/5 dark:ring-white/10'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-medium'
+                )}
+                title={`Probar tipografía ${f.label}`}
+              >
+                {f.label}
+              </button>
+            )
+          })}
+        </div>
 
         {/* NAVs status badge immediately to the right of Visión General / Title */}
         {total > 0 && (
