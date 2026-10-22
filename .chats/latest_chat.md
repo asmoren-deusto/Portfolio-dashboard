@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 15:50:01
+- **Fecha de exportación:** 2026-10-22 15:52:40
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 96
+- **Total de interacciones registradas:** 98
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2281,5 +2281,27 @@ Corregido. He bajado exactamente **1px** la alineación vertical de esos título
 ### 👤 Usuario (2026-10-22 13:46:58)
 
 el texto parece un poco más denso ahora
+
+---
+
+### 🤖 Asistente (2026-10-22 13:50:04)
+
+He ajustado los factores que causaban esa sensación de mayor densidad en el texto:
+
+### 🔍 Causas y soluciones aplicadas:
+1. **Grosor del trazo (`font-weight`)**:
+   - Se ha pasado de `font-bold` (700) a **`font-semibold` (600)** en [CardTitle](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Card.tsx#L64), haciendo los trazos de las letras más finos, limpios y fieles a la captura original.
+2. **Espaciado entre letras (`letter-spacing`)**:
+   - Se ha aliviado el apretado `tracking-tight` (-0.025em) a un espaciado más aireado y natural (`tracking-[-0.01em]`), evitando que las letras se agrupen en exceso.
+3. **Gama completa de pesos en [index.html](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/index.html)**:
+   - Se ha cargado el set completo de pesos (300 al 900) para Inter, garantizando el renderizado exacto sin engrosamiento sintético del navegador.
+
+🚀 Sincronizado y publicado en Git en la versión **v3.4.3**.
+
+---
+
+### 👤 Usuario (2026-10-22 13:51:33)
+
+deja el tracking-tight en -0.02em
 
 ---

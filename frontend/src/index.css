@@ -2,6 +2,10 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --tracking-tight: -0.02em;
+}
+
 :root {
   --bg-app: #f6f8fb;
   --bg-sidebar: #ffffff;
@@ -161,6 +165,10 @@
 }
 
 @layer utilities {
+  .tracking-tight {
+    letter-spacing: -0.02em !important;
+  }
+
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
