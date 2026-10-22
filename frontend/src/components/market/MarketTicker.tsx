@@ -466,15 +466,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
       <div className={cn(
         "dark relative overflow-hidden w-full transition-all duration-200",
         fullWidth
-          ? "rounded-none bg-[#0B1C30] text-white border-b border-slate-800/90 py-1.5 px-3 sm:px-4 md:px-7 shadow-xs"
-          : "rounded-2xl bg-[#0B1C30] text-white border border-slate-800/80 shadow-md py-1.5 px-3 sm:px-3.5",
+          ? "rounded-none bg-[#161616] dark:bg-[#141414] text-white border-b border-white/[0.08] dark:border-white/[0.06] py-1.5 px-3 sm:px-4 md:px-7 shadow-xs"
+          : "rounded-2xl bg-[#161616] dark:bg-[#141414] text-white border border-white/10 dark:border-white/[0.08] shadow-md py-1.5 px-3 sm:px-3.5",
         className
       )}>
         <div className="flex items-center">
           {/* Live Indicator (Fixed on left) */}
           <div
             className={cn(
-              "flex items-center border-r border-slate-700/80 shrink-0 z-20 bg-[#0B1C30]",
+              "flex items-center border-r border-white/10 dark:border-white/[0.08] shrink-0 z-20 bg-[#161616] dark:bg-[#141414]",
               isNative ? "pl-0 pr-2 gap-1.5" : "pr-3 sm:pr-3.5 gap-2"
             )}
             title={`${mainStatusLabel}${lastUpdated ? ` • ${fmtUpdated(lastUpdated)}` : ''}`}
@@ -500,8 +500,8 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
           {/* Marquee Ticker Track (Draggable with mouse/hand, auto-scrolls, pauses on interaction) */}
           <div className={cn("relative flex-1 overflow-hidden py-0 group", isNative ? "ml-1.5" : "ml-2.5")}>
             {/* Subtle fade edges for smooth transition */}
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-[#0B1C30] to-transparent" />
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-l from-[#0B1C30] to-transparent" />
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-[#161616] dark:from-[#141414] to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-l from-[#161616] dark:from-[#141414] to-transparent" />
 
             {/* Seamless scrolling marquee track with interactive drag */}
             <div
@@ -539,7 +539,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       tabIndex={0}
                       key={`${idx.name}-${index}`}
                       onClick={() => handleCardClick(idx)}
-                      className="relative flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-800/80 active:bg-slate-700/80 transition-colors shrink-0 cursor-pointer"
+                      className="relative flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-white/[0.08] active:bg-white/[0.12] transition-colors shrink-0 cursor-pointer"
                     >
                       <CompanyLogo
                         ticker={idx.ticker || idx.name}
@@ -547,7 +547,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                         domain={domain}
                         logoUrl={logo}
                         size="xs"
-                        className="!bg-slate-700/70 !border !border-slate-600/70 shadow-xs"
+                        className="!bg-white/[0.07] !border !border-white/10 shadow-xs"
                       />
 
                       {/* Name + price + currency inline — locked on the same baseline */}

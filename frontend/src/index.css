@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --tracking-tight: -0.02em;
+  --tracking-tight: -0.015em;
 }
 
 :root {
@@ -54,7 +54,8 @@
     box-sizing: border-box;
   }
 
-  html, body {
+  html,
+  body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -65,16 +66,27 @@
   }
 
   /* Título principal de página: Outfit */
-  h1, .font-outfit {
+  h1,
+  .font-outfit {
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
   }
 
   /* Títulos de tarjetas, widgets y paneles (Evolución Patrimonial, etc.): Fuente clásica original (Inter) */
-  h2, h3, h4, h5, h6, .card-title, .font-title, .font-heading, .font-inter {
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .card-title,
+  .font-title,
+  .font-heading,
+  .font-inter {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
   }
 
-  .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+  .font-jakarta {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+  }
 
   /* Variables de Safe Area de iOS (Notch, Dynamic Island y Barra inferior de inicio) */
   :root {
@@ -96,6 +108,7 @@
 
   /* Evitar zoom automático forzado en iOS Safari al pulsar en campos de texto, permitiendo elementos compactos */
   @media screen and (max-width: 768px) {
+
     input:not([type="checkbox"]):not([type="radio"]):not(.no-forced-size):not([data-small]),
     select:not(.no-forced-size):not([data-small]),
     textarea:not(.no-forced-size) {
@@ -166,7 +179,7 @@
 
 @layer utilities {
   .tracking-tight {
-    letter-spacing: -0.02em !important;
+    letter-spacing: -0.015em !important;
   }
 
   .tabular-nums {
@@ -188,6 +201,7 @@
     font-weight: 800;
     letter-spacing: -0.03em;
   }
+
   @media (min-width: 768px) {
     .font-headline-xl {
       font-size: 36px;
@@ -202,6 +216,7 @@
     font-weight: 700;
     letter-spacing: -0.02em;
   }
+
   @media (min-width: 768px) {
     .font-headline-lg {
       font-size: 26px;
@@ -244,6 +259,7 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
+
   .dark .badge-demo {
     background: rgba(59, 130, 246, 0.15);
     color: #93c5fd;
@@ -260,6 +276,7 @@
     font-size: 11px;
     font-weight: 700;
   }
+
   .dark .badge-emerald {
     background: rgba(16, 185, 129, 0.15);
     color: #34d399;
@@ -272,6 +289,7 @@
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 10px 24px -5px rgba(15, 23, 42, 0.04);
     transition: border-color 0.15s, box-shadow 0.15s;
   }
+
   .dark .stitch-card {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 28px -5px rgba(0, 0, 0, 0.5);
   }
@@ -393,29 +411,26 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(226, 232, 240, 0.5) 0%,
-    rgba(241, 245, 249, 0.95) 50%,
-    rgba(226, 232, 240, 0.5) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(226, 232, 240, 0.5) 0%,
+      rgba(241, 245, 249, 0.95) 50%,
+      rgba(226, 232, 240, 0.5) 100%);
   background-size: 200% 100%;
   animation: shimmerWave 1.8s ease-in-out infinite;
 }
 
 .dark .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.03) 0%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.03) 100%);
   background-size: 200% 100%;
   animation: shimmerWave 1.8s ease-in-out infinite;
 }
@@ -461,6 +476,7 @@
 .live-dot.warn {
   background: #d97706;
 }
+
 .live-dot.warn::after {
   border-color: #d97706;
 }
@@ -468,6 +484,7 @@
 .live-dot.emerald {
   background: #10b981;
 }
+
 .live-dot.emerald::after {
   border-color: #10b981;
 }
@@ -475,6 +492,7 @@
 .live-dot.blue {
   background: #3b82f6;
 }
+
 .live-dot.blue::after {
   border-color: #3b82f6;
 }
@@ -482,6 +500,7 @@
 .live-dot.purple {
   background: #a855f7;
 }
+
 .live-dot.purple::after {
   border-color: #a855f7;
 }
@@ -489,6 +508,7 @@
 .live-dot.slate {
   background: #94a3b8;
 }
+
 .live-dot.slate::after {
   display: none;
 }
@@ -498,6 +518,7 @@
     transform: scale(0.7);
     opacity: 0.9;
   }
+
   100% {
     transform: scale(1.8);
     opacity: 0;
@@ -507,7 +528,8 @@
 .returns-chart-bar {
   transition: opacity 0.15s ease, filter 0.15s ease;
 }
+
 .returns-chart-bar:hover {
   opacity: 0.92;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
-}
+}

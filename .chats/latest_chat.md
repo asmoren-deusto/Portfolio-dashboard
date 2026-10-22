@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 15:52:40
+- **Fecha de exportación:** 2026-10-22 15:55:33
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 98
+- **Total de interacciones registradas:** 100
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2303,5 +2303,26 @@ He ajustado los factores que causaban esa sensación de mayor densidad en el tex
 ### 👤 Usuario (2026-10-22 13:51:33)
 
 deja el tracking-tight en -0.02em
+
+---
+
+### 🤖 Asistente (2026-10-22 13:52:43)
+
+Configurado. He establecido **`tracking-tight`** exactamente en **`-0.02em`**:
+
+### 🛠️ Cambios aplicados:
+1. **Configuración en el tema y utilidades ([index.css](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/index.css#L4-L6)):**
+   - Definida la variable de tema `@theme { --tracking-tight: -0.02em; }`.
+   - Añadida la regla `.tracking-tight { letter-spacing: -0.02em !important; }`.
+2. **Aplicado en [CardTitle](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Card.tsx#L64):**
+   - Usa `tracking-tight` (-0.02em) con `font-semibold` e `Inter`, obteniendo el espaciado exacto deseado.
+
+🚀 Sincronizado y publicado en Git en la versión **v3.4.4**.
+
+---
+
+### 👤 Usuario (2026-10-22 13:52:35)
+
+en fondo oscuro no me gusta el ticker con fondo azul, opta por un gris oscuro de la paleta en su lugar
 
 ---
