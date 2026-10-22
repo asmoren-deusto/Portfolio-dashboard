@@ -270,8 +270,8 @@ export function RootLayout() {
         <Sidebar />
 
         <div className={`flex flex-1 flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
-          {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop) */}
-          <header className={`fixed top-0 left-0 right-0 md:sticky z-30 flex items-center justify-between px-3 sm:px-4 pt-[max(0.45rem,calc(env(safe-area-inset-top,0px)-2px))] pb-1.5 bg-white/95 dark:bg-[#191919]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+          {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop - Opaque solid background to prevent iOS WebKit PWA blur bug) */}
+          <header className={`fixed top-0 left-0 right-0 md:sticky z-30 flex items-center justify-between px-3 sm:px-4 pt-[max(0.45rem,calc(env(safe-area-inset-top,0px)-2px))] pb-1.5 bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs isolate [transform:translateZ(0)] [-webkit-backface-visibility:hidden] ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
             <div className="flex items-center gap-1.5 shrink-0">
               {/* Only show hamburger button when NOT native (native uses bottom MobileTabBar) */}
               {!isNativePlatform() && (
@@ -328,7 +328,7 @@ export function RootLayout() {
           {/* Top Bar with Selectors & Black Market Ticker Strip (Stitch / Reference Design) */}
           <div className="flex flex-col w-full md:sticky md:top-0 z-30 shadow-xs">
             {/* Top White Bar with Selectors (Desktop only) - Exactly 60px to align ticker top with sidebar separator */}
-            <div className="relative z-20 hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 backdrop-blur-md">
+            <div className="relative z-20 hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0">
               <Header
                 title={pageMeta.title}
                 subtitle={pageMeta.subtitle}

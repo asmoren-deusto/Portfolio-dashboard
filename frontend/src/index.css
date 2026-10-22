@@ -96,6 +96,14 @@
     --sar: env(safe-area-inset-right, 0px);
   }
 
+  /* Aislamiento de capas GPU para evitar difuminado/rasterizado borroso en iOS WebKit y PWA */
+  header {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
   body {
     background-color: var(--bg-app);
     color: var(--text-primary);
