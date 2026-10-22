@@ -1340,11 +1340,14 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                     is_weekday = (now_ny.weekday() < 5)
                     today_ny_date = now_ny.date()
 
-                    # Check if we have active points for today (all points from 00:00 Madrid time)
-                    today_madrid_date = now_madrid.date()
+                    # Include from yesterday's official US close (22:00 Madrid / 16:00 NY) up to current time
+                    past_dates = sorted(list(set(idx.astimezone(madrid_tz).date() for idx in closes_raw.index if idx.astimezone(madrid_tz).date() < now_madrid.date())))
+                    yesterday_madrid_date = past_dates[-1] if past_dates else None
+
                     today_idxs = [
                         idx for idx in closes_raw.index
-                        if idx.astimezone(madrid_tz).date() == today_madrid_date
+                        if (yesterday_madrid_date and idx.astimezone(madrid_tz).date() == yesterday_madrid_date and idx.astimezone(madrid_tz).hour >= 22)
+                        or (idx.astimezone(madrid_tz).date() == now_madrid.date())
                     ]
 
                     # Base reference is ALWAYS the official previous regular close (22:00 Madrid / 16:00 NY)
@@ -1360,7 +1363,7 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                     base_s = pd.Series(base_dict)
 
                     if is_weekday and len(today_idxs) >= 2:
-                        # TODAY's live session trajectory starting with pre-market
+                        # Live trajectory starting with yesterday's close
                         target_idxs = today_idxs
 
                         # Reconstruct intraday ETF returns using live proxies or active pre-market quotes
@@ -1397,32 +1400,70 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                         weights_aligned = weights_series.reindex(norm_df.columns).fillna(0.0)
                         sim_pct = norm_df.dot(weights_aligned)
 
-                        # Standard phase markers for today's session (only for reached or imminent phases)
+                        # Marcadores de apertura de bolsas internacionales (hora Madrid)
                         now_unix = int(now_madrid.timestamp())
-                        today_1000 = int(now_madrid.replace(hour=10, minute=0, second=0, microsecond=0).timestamp())
-                        today_1530 = int(now_madrid.replace(hour=15, minute=30, second=0, microsecond=0).timestamp())
-                        today_2200 = int(now_madrid.replace(hour=22, minute=0, second=0, microsecond=0).timestamp())
 
-                        if now_unix >= today_1000 - 300:
+                        # 1. Cierre del día anterior (22:00 Madrid de ayer) si está en el rango
+                        if yesterday_madrid_date:
+                            dt_yesterday_close = datetime.combine(yesterday_madrid_date, datetime.min.time().replace(hour=22)).replace(tzinfo=madrid_tz)
                             session_markers.append({
-                                "time_unix": today_1000,
+                                "time_unix": int(dt_yesterday_close.timestamp()),
+                                "label": "22:00 • Cierre Ayer",
+                                "type": "cierre_ayer",
+                                "color": "#64748b",
+                                "phase": "CLOSED",
+                            })
+
+                        # 2. Apertura Bolsa de Tokio (01:00 Madrid)
+                        t_tokyo = int(now_madrid.replace(hour=1, minute=0, second=0, microsecond=0).timestamp())
+                        if now_unix >= t_tokyo - 300:
+                            session_markers.append({
+                                "time_unix": t_tokyo,
+                                "label": "01:00 • Tokio",
+                                "type": "tokyo",
+                                "color": "#e11d48",
+                                "phase": "REGULAR",
+                            })
+
+                        # 3. Apertura Bolsas Europeas (09:00 Madrid)
+                        t_europa = int(now_madrid.replace(hour=9, minute=0, second=0, microsecond=0).timestamp())
+                        if now_unix >= t_europa - 300:
+                            session_markers.append({
+                                "time_unix": t_europa,
+                                "label": "09:00 • Europa",
+                                "type": "europa",
+                                "color": "#2563eb",
+                                "phase": "REGULAR",
+                            })
+
+                        # 4. Pre-market Wall Street (10:00 Madrid / 04:00 NY)
+                        t_pre = int(now_madrid.replace(hour=10, minute=0, second=0, microsecond=0).timestamp())
+                        if now_unix >= t_pre - 300:
+                            session_markers.append({
+                                "time_unix": t_pre,
                                 "label": "10:00 • Pre-market",
                                 "type": "pre_market",
-                                "color": "#3b82f6",
+                                "color": "#6366f1",
                                 "phase": "PRE",
                             })
-                        if now_unix >= today_1530 - 300:
+
+                        # 5. Apertura Regular Wall Street (15:30 Madrid / 09:30 NY)
+                        t_ny = int(now_madrid.replace(hour=15, minute=30, second=0, microsecond=0).timestamp())
+                        if now_unix >= t_ny - 300:
                             session_markers.append({
-                                "time_unix": today_1530,
-                                "label": "15:30 • Apertura Regular",
+                                "time_unix": t_ny,
+                                "label": "15:30 • Wall Street",
                                 "type": "regular_open",
                                 "color": "#10b981",
                                 "phase": "REGULAR",
                             })
-                        if now_unix >= today_2200 - 300:
+
+                        # 6. Cierre / After-Hours Wall Street (22:00 Madrid / 16:00 NY)
+                        t_post = int(now_madrid.replace(hour=22, minute=0, second=0, microsecond=0).timestamp())
+                        if now_unix >= t_post - 300:
                             session_markers.append({
-                                "time_unix": today_2200,
-                                "label": "22:00 • Post-Market",
+                                "time_unix": t_post,
+                                "label": "22:00 • After-Hours",
                                 "type": "post_market",
                                 "color": "#f59e0b",
                                 "phase": "POST",

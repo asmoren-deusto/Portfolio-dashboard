@@ -772,17 +772,18 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             {/* Dotted Vertical Session & Phase Markers */}
             <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
               {markerPositions.map(({ marker, x }, index) => {
-                const isApertura = marker.label.includes('15:30') || marker.type === 'regular_open'
-                const isAfterHours = marker.label.includes('22:00') || marker.type === 'post_market'
-                const labelText = isApertura
-                  ? '15:30 • Apertura'
-                  : isAfterHours
-                  ? '22:00 • After-Hours'
-                  : marker.label
+                const isCierre = marker.type === 'cierre_ayer'
+                const isTokyo = marker.type === 'tokyo'
+                const isEuropa = marker.type === 'europa'
+                const isPre = marker.type === 'pre_market'
+                const isWallStreet = marker.type === 'regular_open'
+                const isAfterHours = marker.type === 'post_market'
 
-                // Alternar altura: par arriba (top-1 = 4px), impar abajo (top-7.5 = 30px) para que no choquen
-                const isOdd = index % 2 === 1
-                const badgeTopStyle = isOdd ? 'top-[30px]' : 'top-[5px]'
+                const labelText = marker.label
+
+                // Alternar altura en 3 niveles (top-[4px], top-[26px], top-[48px]) para que marcadores cercanos no choquen
+                const level = index % 3
+                const badgeTopStyle = level === 0 ? 'top-[4px]' : level === 1 ? 'top-[26px]' : 'top-[48px]'
 
                 return (
                   <div
@@ -804,11 +805,19 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                       className={cn(
                         'absolute px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-tight whitespace-nowrap -translate-x-1/2 border select-none shadow-xs z-20 backdrop-blur-md transition-all',
                         badgeTopStyle,
-                        isApertura
+                        isCierre
+                          ? 'bg-slate-100/95 text-slate-700 border-slate-300 dark:bg-slate-800/90 dark:text-slate-300 dark:border-slate-600'
+                          : isTokyo
+                          ? 'bg-rose-50/95 text-rose-800 border-rose-400/50 dark:bg-rose-950/90 dark:text-rose-300 dark:border-rose-500/50'
+                          : isEuropa
+                          ? 'bg-blue-50/95 text-blue-800 border-blue-400/50 dark:bg-blue-950/90 dark:text-blue-300 dark:border-blue-500/50'
+                          : isPre
+                          ? 'bg-indigo-50/95 text-indigo-800 border-indigo-400/50 dark:bg-indigo-950/90 dark:text-indigo-300 dark:border-indigo-500/50'
+                          : isWallStreet
                           ? 'bg-emerald-50/95 text-emerald-800 border-emerald-400/50 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-500/50'
                           : isAfterHours
                           ? 'bg-amber-50/95 text-amber-800 border-amber-400/50 dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-500/50'
-                          : 'bg-indigo-50/95 text-indigo-800 border-indigo-400/50 dark:bg-indigo-950/90 dark:text-indigo-300 dark:border-indigo-500/50'
+                          : 'bg-slate-50/95 text-slate-800 border-slate-300 dark:bg-slate-800/90 dark:text-slate-200 dark:border-slate-600'
                       )}
                     >
                       {labelText}
