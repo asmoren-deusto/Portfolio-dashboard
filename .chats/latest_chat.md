@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 15:23:15
+- **Fecha de exportación:** 2026-10-22 15:24:14
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 79
+- **Total de interacciones registradas:** 81
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2033,5 +2033,28 @@ Los cambios ya están sincronizados en el repositorio en la versión **`v3.0.195
 ### 👤 Usuario (2026-10-22 12:59:52)
 
 cuando las subversiones lleguen a 50, sube la subversion anterior
+
+---
+
+### 🤖 Asistente (2026-10-22 13:23:18)
+
+He implementado la regla de rotación de versiones en el protocolo de sincronización ([sync_release.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/scripts/sync_release.py#L164-L175)) y lo he dejado documentado en [AGENTS.md](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/AGENTS.md#L15):
+
+### Cómo funciona a partir de ahora:
+1. **Regla de rotación a 50:**
+   - Cada vez que la subversión (`patch`) alcance **50**, se incrementa automáticamente la subversión anterior (`minor += 1`) y la subversión se reinicia a `0`.
+   - Si `minor` alcanzase 50, se incrementa la versión `major`.
+
+2. **Normalización del historial:**
+   - La versión acumulada anterior (`3.0.195`) se ha normalizado automáticamente a **`3.3.46`** (196 versiones = 3 saltos de 50 + 46).
+   - En las próximas 4 subidas pasará a `3.3.47`, `3.3.48`, `3.3.49` y al llegar a 50 rotará automáticamente a **`3.4.0`**.
+
+Los cambios ya están sincronizados en el repositorio en la nueva versión **`v3.3.46`**.
+
+---
+
+### 👤 Usuario (2026-10-22 13:04:04)
+
+un poco menos alto
 
 ---

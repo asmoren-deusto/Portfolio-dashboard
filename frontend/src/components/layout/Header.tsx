@@ -163,7 +163,7 @@ export function Header({
                 : `${updated}/${total} NAVs actualizados. Haz clic para ver el historial.`
             }
             className={cn(
-              "inline-flex items-center gap-2 h-7 px-2.5 rounded-xl border text-[11.5px] transition-all cursor-pointer shrink-0 shadow-2xs hover:opacity-95 active:scale-97",
+              "inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border text-[11px] transition-all cursor-pointer shrink-0 shadow-2xs hover:opacity-95 active:scale-97",
               navFresh
                 ? "bg-[#ecfdf5] border-emerald-300/70 dark:bg-emerald-950/40 dark:border-emerald-700/40"
                 : "bg-amber-50/90 border-amber-300/70 dark:bg-amber-950/40 dark:border-amber-700/40"
@@ -172,7 +172,7 @@ export function Header({
             {/* Vertical capsule dot */}
             <span
               className={cn(
-                "w-1.5 h-3 rounded-full shrink-0",
+                "w-1.5 h-2.5 rounded-full shrink-0",
                 navFresh ? "bg-emerald-600 dark:bg-emerald-400" : "bg-amber-500 animate-pulse"
               )}
             />
@@ -186,7 +186,7 @@ export function Header({
               NAVs {updated}/{total}
             </span>
             {/* Muted date & time */}
-            <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium leading-none">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-none">
               ({dateLabel}, {syncTimeStr})
             </span>
           </button>

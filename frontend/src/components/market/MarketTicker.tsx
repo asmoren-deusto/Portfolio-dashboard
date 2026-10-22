@@ -551,7 +551,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       />
 
                       {/* Name + price + currency inline — vertically aligned with logo and badge */}
-                      <div className="flex items-center gap-1 min-w-0 leading-none -translate-y-[1px]">
+                      <div className="flex items-center gap-1 min-w-0 leading-none">
                         <span className="text-[11px] leading-none font-medium text-slate-400 whitespace-nowrap">
                           {idx.name}:
                         </span>
