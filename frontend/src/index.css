@@ -27,20 +27,20 @@
 }
 
 .dark {
-  --bg-app: #090e17;
-  --bg-sidebar: #111827;
-  --border-sidebar: #1e293b;
-  --bg-card: #111827;
-  --border-card: #1e293b;
+  --bg-app: #1c1c1c;
+  --bg-sidebar: #181818;
+  --border-sidebar: rgba(255, 255, 255, 0.08);
+  --bg-card: #202020;
+  --border-card: rgba(255, 255, 255, 0.08);
   --text-title: #f8fafc;
   --text-primary: #f1f5f9;
   --text-muted: #94a3b8;
 
-  --stitch-canvas: #090e17;
-  --stitch-card: #111827;
-  --stitch-border: #1e293b;
+  --stitch-canvas: #1c1c1c;
+  --stitch-card: #202020;
+  --stitch-border: rgba(255, 255, 255, 0.08);
   --stitch-primary: #3b82f6;
-  --stitch-dark: #070d18;
+  --stitch-dark: #161616;
   --yield-emerald: #34d399;
   --yield-emerald-bg: rgba(16, 185, 129, 0.12);
   --yield-emerald-border: rgba(16, 185, 129, 0.25);
