@@ -539,7 +539,7 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                       tabIndex={0}
                       key={`${idx.name}-${index}`}
                       onClick={() => handleCardClick(idx)}
-                      className="relative flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-800/80 transition-colors shrink-0 cursor-pointer active:scale-[0.98]"
+                      className="relative flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-800/80 active:bg-slate-700/80 transition-colors shrink-0 cursor-pointer"
                     >
                       <CompanyLogo
                         ticker={idx.ticker || idx.name}
@@ -550,15 +550,15 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
                         className="!bg-slate-700/70 !border !border-slate-600/70 shadow-xs"
                       />
 
-                      {/* Name + price + currency inline — vertically aligned with logo and badge */}
-                      <div className="flex items-center gap-1 min-w-0 leading-none">
-                        <span className="text-[11px] leading-none font-medium text-slate-400 whitespace-nowrap">
+                      {/* Name + price + currency inline — locked on the same baseline */}
+                      <div className="flex items-baseline gap-1 min-w-0 leading-none">
+                        <span className="text-[12px] font-medium text-slate-400 whitespace-nowrap leading-none">
                           {idx.name}:
                         </span>
-                        <span className="text-[11px] leading-none font-bold text-white font-mono tabular-nums tracking-tight whitespace-nowrap">
+                        <span className="text-[12px] font-bold text-white font-mono tabular-nums tracking-tight whitespace-nowrap leading-none">
                           {idx.price != null ? fmtPrice(idx.price, idx.ticker) : '—'}
                         </span>
-                        <span className="text-[9.5px] leading-none font-mono text-slate-400 uppercase whitespace-nowrap">
+                        <span className="text-[10px] font-mono text-slate-400 uppercase whitespace-nowrap leading-none">
                           {currency}
                         </span>
                       </div>
