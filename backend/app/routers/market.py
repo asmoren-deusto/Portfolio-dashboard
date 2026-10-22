@@ -1340,10 +1340,11 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                     is_weekday = (now_ny.weekday() < 5)
                     today_ny_date = now_ny.date()
 
-                    # Check if we have active points for today
+                    # Check if we have active points for today (all points from 00:00 Madrid time)
+                    today_madrid_date = now_madrid.date()
                     today_idxs = [
-                        idx for idx, d in zip(closes_raw.index, session_dates)
-                        if d == today_ny_date and (idx.astimezone(madrid_tz).hour >= 8 or idx.astimezone(ny_tz).hour >= 4)
+                        idx for idx in closes_raw.index
+                        if idx.astimezone(madrid_tz).date() == today_madrid_date
                     ]
 
                     # Base reference is ALWAYS the official previous regular close (22:00 Madrid / 16:00 NY)

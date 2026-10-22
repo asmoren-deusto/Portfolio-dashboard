@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-22 14:17:57
+- **Fecha de exportación:** 2026-10-22 14:24:39
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 64
+- **Total de interacciones registradas:** 66
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1837,5 +1837,41 @@ La curva evoluciona ahora de forma 100% continua, sin caídas artificiales ni pi
 ### 👤 Usuario (2026-10-22 12:15:18)
 
 está igual
+
+---
+
+### 🤖 Asistente (2026-10-22 12:18:00)
+
+### Diagnóstico y Solución Final
+
+Al revisar la ejecución interna del sistema, se descubrió la causa exacta por la que en tu pantalla seguía mostrándose el pico brusco:
+
+1. **Proceso Python/Uvicorn "zombi" en segundo plano:**
+   - En Windows, había quedado un proceso anterior de Uvicorn (`PID 17860` y `PID 7260`) escuchando en el puerto `8000`.
+   - Cuando Uvicorn se recargaba con los cambios de código, el proceso hijo que respondía a las llamadas HTTP del navegador **seguía ejecutando el código antiguo en memoria**, devolviendo los datos sin corregir (la curva flotando en -0.90% y cayendo al final a -1.45%).
+   - Al probar el código directamente con Python los datos salían perfectos, pero al hacer la petición web a `localhost:8000`, quien contestaba era el proceso huérfano viejo.
+
+2. **Acción realizada:**
+   - Se han terminado por completo los procesos huérfanos que retenían el puerto `8000`.
+   - El proceso activo con `reload` ha tomado el control exclusivo de la API.
+   - Verificado de inmediato contra `http://localhost:8000/api/market/simulated-portfolio`:
+     ```text
+     13:55 -> -1.48% (en EUR: -1.29%)
+     14:00 -> -1.44% (en EUR: -1.27%)
+     14:05 -> -1.44% (en EUR: -1.31%)
+     14:10 -> -1.44% (en EUR: -1.32%)
+     14:15 -> -1.44% (en EUR: -1.31%)
+     14:17 -> -1.44% (en EUR: -1.31%)
+     ```
+
+Ahora la curva en la interfaz web es completamente continua y suave en todo el rango intradiario, eliminando de forma definitiva el pico de caída.
+
+Actualizado y sincronizado en **v3.0.189**. Puedes pulsar recargar en el navegador para comprobar la gráfica corregida.
+
+---
+
+### 👤 Usuario (2026-10-22 12:22:32)
+
+por qué empiezas el gráfico a las 8 de Madrid, podrias empezarlo antes?
 
 ---
