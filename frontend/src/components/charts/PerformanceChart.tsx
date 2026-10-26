@@ -354,6 +354,135 @@ export function PerformanceChart({
     return { val, inv, diff, pct, periodPct }
   }, [activePoint, selectedEntity, availableBrokers, metrics])
 
+  interface PointBadge {
+    id: string
+    label: string
+    color: string
+    y: number
+    val?: number
+  }
+
+  // Small tooltips / badges to the left of the crosshair dots for each entity & invested line
+  const adjustedBadges = useMemo<PointBadge[]>(() => {
+    if (!hoveredPoint || !tooltipPos || !chartRef.current) return []
+    const badges: PointBadge[] = []
+
+    const hp = hoveredPoint as PricePoint
+    const orig = (data || []).find((p) => p.date === hp.date) || hp
+
+    if (chartMode === 'currency') {
+      if (selectedEntity === 'stacked' && availableBrokers.length > 1) {
+        const n = availableBrokers.length
+        if (n >= 3) {
+          // Bottom layer: b0 (Indexa)
+          const b0 = availableBrokers[0]
+          const cfg0 = ENTITY_CONFIGS[b0] || { label: b0, color: '#f59e0b' }
+          const v0 = getBrokerData(orig, b0).value
+          const y0 = slot0Ref.current?.priceToCoordinate(v0)
+          if (v0 > 0.01 && y0 !== null && y0 !== undefined && !isNaN(y0) && y0 >= 0 && y0 <= height) {
+            badges.push({ id: b0, label: cfg0.label, color: cfg0.color, y: y0, val: v0 })
+          }
+
+          // Middle layer: b1 (BBVA)
+          const b1 = availableBrokers[1]
+          const cfg1 = ENTITY_CONFIGS[b1] || { label: b1, color: '#10b981' }
+          const v1 = getBrokerData(orig, b1).value
+          const y1 = slot1Ref.current?.priceToCoordinate(v0 + v1)
+          if (v1 > 0.01 && y1 !== null && y1 !== undefined && !isNaN(y1) && y1 >= 0 && y1 <= height) {
+            badges.push({ id: b1, label: cfg1.label, color: cfg1.color, y: y1, val: v1 })
+          }
+
+          // Top layer: b2 (TradeRep / top entity)
+          const b2 = availableBrokers[2]
+          const cfg2 = ENTITY_CONFIGS[b2] || { label: b2, color: '#8b5cf6' }
+          const v2 = getBrokerData(orig, b2).value
+          const totalVal = hp.value ?? (v0 + v1 + v2)
+          const y2 = slot2Ref.current?.priceToCoordinate(totalVal)
+          if (v2 > 0.01 && y2 !== null && y2 !== undefined && !isNaN(y2) && y2 >= 0 && y2 <= height) {
+            badges.push({ id: b2, label: cfg2.label, color: cfg2.color, y: y2, val: v2 })
+          }
+        } else if (n === 2) {
+          const b0 = availableBrokers[0]
+          const cfg0 = ENTITY_CONFIGS[b0] || { label: b0, color: '#f59e0b' }
+          const v0 = getBrokerData(orig, b0).value
+          const y0 = slot0Ref.current?.priceToCoordinate(v0)
+          if (v0 > 0.01 && y0 !== null && y0 !== undefined && !isNaN(y0) && y0 >= 0 && y0 <= height) {
+            badges.push({ id: b0, label: cfg0.label, color: cfg0.color, y: y0, val: v0 })
+          }
+
+          const b1 = availableBrokers[1]
+          const cfg1 = ENTITY_CONFIGS[b1] || { label: b1, color: '#10b981' }
+          const v1 = getBrokerData(orig, b1).value
+          const y2 = slot2Ref.current?.priceToCoordinate(v0 + v1)
+          if (v1 > 0.01 && y2 !== null && y2 !== undefined && !isNaN(y2) && y2 >= 0 && y2 <= height) {
+            badges.push({ id: b1, label: cfg1.label, color: cfg1.color, y: y2, val: v1 })
+          }
+        }
+      } else if (selectedEntity !== 'all' && selectedEntity !== 'stacked') {
+        const cfg = ENTITY_CONFIGS[selectedEntity] || { label: selectedEntity, color: '#10b981' }
+        const val = getBrokerData(orig, selectedEntity).value || hp.value
+        const y = slot2Ref.current?.priceToCoordinate(val)
+        if (y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
+          badges.push({ id: selectedEntity, label: cfg.label, color: cfg.color, y, val })
+        }
+      } else {
+        const val = hp.value
+        const y = slot2Ref.current?.priceToCoordinate(val)
+        if (y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
+          badges.push({ id: 'total', label: 'Cartera Total', color: '#10b981', y, val })
+        }
+      }
+
+      // Invested Series (Aportado)
+      if (showInvested && investedSeriesRef.current) {
+        const inv = hp.invested ?? 0
+        const yInv = investedSeriesRef.current.priceToCoordinate(inv)
+        if (yInv !== null && yInv !== undefined && !isNaN(yInv) && yInv >= 0 && yInv <= height) {
+          badges.push({
+            id: 'invested',
+            label: 'Aportado',
+            color: isDark ? '#818cf8' : '#6366f1',
+            y: yInv,
+            val: inv,
+          })
+        }
+      }
+    } else {
+      // Percent Mode (%)
+      const pct = activeSelectedMetrics?.pct ?? 0
+      const y = slot2Ref.current?.priceToCoordinate(pct)
+      if (y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
+        const cfg = ENTITY_CONFIGS[selectedEntity] || {
+          label: selectedEntity === 'stacked' || selectedEntity === 'all' ? 'Rentabilidad' : selectedEntity,
+          color: '#10b981',
+        }
+        badges.push({ id: 'percent', label: cfg.label, color: cfg.color, y })
+      }
+    }
+
+    if (badges.length <= 1) return badges
+
+    // Anti-collision relaxation: sort ascending by y and ensure minimum gap of 22px
+    const sorted = [...badges].sort((a, b) => a.y - b.y)
+    const minGap = 22
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i].y - sorted[i - 1].y < minGap) {
+        sorted[i].y = sorted[i - 1].y + minGap
+      }
+    }
+    return sorted
+  }, [
+    hoveredPoint,
+    tooltipPos,
+    chartMode,
+    selectedEntity,
+    availableBrokers,
+    showInvested,
+    height,
+    isDark,
+    data,
+    activeSelectedMetrics,
+  ])
 
   // Initialize Lightweight Charts
   const initChart = useCallback(() => {
@@ -989,6 +1118,51 @@ export function PerformanceChart({
         style={{ height }}
         className="w-full relative rounded-lg overflow-hidden"
       >
+        {/* Floating Mini Entity Badges to the Left of Crosshair Dots */}
+        {hoveredPoint && tooltipPos && adjustedBadges.length > 0 && (
+          <>
+            {adjustedBadges.map((b) => {
+              const clientW = containerRef.current?.clientWidth || 300
+              const isMainOnRight = tooltipPos.x + 16 <= clientW - 195
+              const isLeft = isMainOnRight ? tooltipPos.x >= 75 : tooltipPos.x < 75
+
+              return (
+                <div
+                  key={b.id}
+                  className={cn(
+                    "pointer-events-none absolute z-35 flex items-center gap-1.5 px-2 py-0.5 rounded-md backdrop-blur-md shadow-md text-[10.5px] font-semibold tracking-tight select-none whitespace-nowrap border transition-transform duration-75",
+                    isDark
+                      ? "bg-[#181d28]/95 shadow-black/40 text-white"
+                      : "bg-white/95 shadow-slate-900/10 text-slate-800"
+                  )}
+                  style={{
+                    left: isLeft ? tooltipPos.x - 9 : tooltipPos.x + 9,
+                    top: Math.max(12, Math.min(height - 12, b.y)),
+                    transform: isLeft ? 'translate(-100%, -50%)' : 'translate(0, -50%)',
+                    borderColor: `${b.color}${isDark ? '60' : '40'}`,
+                  }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0 shadow-xs"
+                    style={{ backgroundColor: b.color }}
+                  />
+                  <span
+                    className="font-bold leading-none"
+                    style={{ color: b.color }}
+                  >
+                    {b.label}
+                  </span>
+                  {b.val !== undefined && b.val > 0 && chartMode === 'currency' && (
+                    <span className="font-mono text-[9.5px] font-medium text-slate-500 dark:text-slate-400 leading-none pl-0.5">
+                      {fmt.currency(b.val)}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </>
+        )}
+
         {/* Floating Aurora Balloon Tooltip (Image 1) */}
         {hoveredPoint && tooltipPos && (
           <div

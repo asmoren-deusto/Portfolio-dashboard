@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 20:45:44
+- **Fecha de exportación:** 2026-10-26 20:50:06
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 119
+- **Total de interacciones registradas:** 121
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1885,5 +1885,33 @@ el filtro a Trade superior falla
 ### 👤 Usuario (2026-10-26 19:32:06)
 
 Cambia el Trade superior por TradeRep y el badge tambien
+
+---
+
+### 🤖 Asistente (2026-10-26 19:45:47)
+
+Se han aplicado los cambios solicitados y solucionado el fallo al filtrar por Trade Republic:
+
+### 1. Actualización de etiquetas a **TradeRep**
+- **Selector Superior:** En [Header.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/Header.tsx), se ha cambiado la opción de `Trade` a **`TradeRep`** (valor `traderepublic`).
+- **Badges:** En [Badge.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Badge.tsx), la etiqueta del badge para Trade Republic se ha actualizado de `TRADE` a **`TradeRep`**.
+- **Configuración de Gráficos:** En [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx), la entidad `traderepublic` se etiqueta como `TradeRep`.
+
+---
+
+### 2. Corrección del fallo en el filtro
+- **Renderizado de gráficos temporales (Lightweight Charts):** Al filtrar por Trade Republic con una única compra realizada el día de hoy (26/10/2026), la serie de datos tenía un solo punto temporal. Las librerías de gráficos por áreas/líneas no pueden trazar segmentos con un solo punto (provocando que el gráfico apareciera en blanco/vacío). Se ha añadido tanto en backend ([portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py)) como en frontend ([PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx) y [BenchmarkEvolutionChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/BenchmarkEvolutionChart.tsx)) un punto base previo a 0 que permite trazar la curva ascendente hacia los 4.000,99 €.
+- **Fallback de datos de broker individual:** Si los puntos de la API no traían desglose anidado para la entidad filtrada, `PerformanceChart` ahora recurre a `p.value` directamente.
+- **Normalización de broker en backend y DB:** Se han unificado las referencias de `trade_republic` y `traderepublic` en la base de datos y en las consultas de [portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py) y [transactions.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/transactions.py).
+
+---
+
+Sincronizado y publicado en Git con la versión **v3.4.31**.
+
+---
+
+### 👤 Usuario (2026-10-26 19:35:08)
+
+mira si a la izquierda de los puntos puedes poner un tooltip pequeño con la entidad del color que toque (BBVA, TradeRep, Indexa, etc)
 
 ---
