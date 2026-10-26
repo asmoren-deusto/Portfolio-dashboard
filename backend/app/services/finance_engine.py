@@ -15,7 +15,7 @@ def is_internal_traspaso(notes: str) -> bool:
     """
     Determine if a transaction note represents an internal fund-to-fund transfer
     within the portfolio (e.g. 'reembolso por traspaso interno', 'suscripción por traspaso interno',
-    'traspaso fondo en contra', 'traspaso fondos a favor'),
+    'traspaso fondo en contra', 'traspaso fondos a favor', 'suscripción por traspaso externo (desde bbva...)'),
     as opposed to an external capital movement (e.g. 'traspaso de entrada desde Trade Republic').
     """
     if not notes:
@@ -23,7 +23,9 @@ def is_internal_traspaso(notes: str) -> bool:
     n = notes.lower()
     if "traspaso" not in n:
         return False
-    if any(k in n for k in ("entrada", "salida a", "externo", "externa", "aportaci")):
+    if "desde bbva" in n or "a cobas" in n or "desde cobas" in n or "desde amundi" in n:
+        return True
+    if any(k in n for k in ("traspaso de entrada", "entrada desde", "salida a", "aportaci")):
         return False
     return True
 
@@ -51,14 +53,31 @@ def calculate_traspaso_balances(transactions: list[dict]) -> dict[str, dict[str,
             positions[isin] = {"shares": 0.0, "total_cost": 0.0}
         pos = positions[isin]
 
-        is_traspaso = is_internal_traspaso(tx.get("notes") or "")
+        notes = (tx.get("notes") or "").lower()
+        is_traspaso = is_internal_traspaso(notes)
+
+        # Track source broker for cross-broker fund transfers
+        src_broker = broker
+        if is_traspaso and tx["type"] == "buy":
+            if "desde bbva" in notes:
+                src_broker = "bbva"
+            elif "desde myinvestor" in notes:
+                src_broker = "myinvestor"
+            elif "desde indexa" in notes:
+                src_broker = "indexa"
 
         if tx["type"] == "buy":
             pos["shares"] += tx["shares"]
             pos["total_cost"] += tx["amount"]
             if is_traspaso:
-                broker_buys_market[broker] = broker_buys_market.get(broker, 0.0) + tx["amount"]
-                broker_buys_cost[broker] = broker_buys_cost.get(broker, 0.0) + tx["amount"]
+                broker_buys_market[src_broker] = broker_buys_market.get(src_broker, 0.0) + tx["amount"]
+                pending_market = max(0.0, broker_sells_market.get(src_broker, 0.0) - (broker_buys_market.get(src_broker, 0.0) - tx["amount"]))
+                pending_cost = max(0.0, broker_sells_cost.get(src_broker, 0.0) - broker_buys_cost.get(src_broker, 0.0))
+                if pending_market > 0 and pending_cost > 0:
+                    absorbed_cost = min(pending_cost, (tx["amount"] / pending_market) * pending_cost)
+                else:
+                    absorbed_cost = tx["amount"]
+                broker_buys_cost[src_broker] = broker_buys_cost.get(src_broker, 0.0) + absorbed_cost
         elif tx["type"] == "sell":
             shares_before = pos["shares"]
             cost_before = pos["total_cost"]

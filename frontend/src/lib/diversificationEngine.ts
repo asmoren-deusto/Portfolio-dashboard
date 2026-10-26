@@ -229,6 +229,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'cash',
     currencies: { EUR: 1.0 },
   },
+  // BlackRock Global Funds - World Healthscience Fund A2 (LU0171307068)
+  LU0171307068: {
+    geo: { north_america: 0.70, europe: 0.20, japan: 0.05, other: 0.05 },
+    sectors: { health: 1.0 },
+    assetClass: 'equity',
+    currencies: { USD: 0.70, EUR: 0.20, Other: 0.10 },
+  },
 }
 
 /**

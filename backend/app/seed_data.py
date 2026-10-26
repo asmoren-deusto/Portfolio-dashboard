@@ -145,6 +145,15 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": null,
     "ter": 0.0
+  },
+  {
+    "isin": "LU0171307068",
+    "name": "BlackRock Global Funds - World Healthscience Fund A2 (EUR)",
+    "ticker": null,
+    "asset_type": "fund",
+    "currency": "EUR",
+    "category": "Renta Variable Sectorial Salud",
+    "ter": 1.81
   }
 ]''')
 
@@ -1767,6 +1776,18 @@ PRICES = json.loads(r'''[
     "isin": "TR_TRANSFER",
     "date": "2026-10-07",
     "price": 0.0,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0171307068",
+    "date": "2026-10-26",
+    "price": 73.44,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0171307068",
+    "date": "2026-10-27",
+    "price": 73.44,
     "currency": "EUR"
   }
 ]''')
@@ -3871,5 +3892,41 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-10-22",
     "broker": "bbva",
     "notes": "Traspaso fondo en contra (orden 9026292258674208, ref 0232188583771)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0171307068",
+    "type": "buy",
+    "shares": 4.33,
+    "price": 73.44,
+    "amount": 318.01,
+    "fees": 0.0,
+    "date": "2026-10-26",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Externo (desde BBVA, op 1/3 ref 302301198, orden 202610260008255)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0171307068",
+    "type": "buy",
+    "shares": 76.64,
+    "price": 73.44,
+    "amount": 5628.86,
+    "fees": 0.0,
+    "date": "2026-10-26",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Externo (desde BBVA, op 2/3 ref 302301200, orden 202610260008255)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0171307068",
+    "type": "buy",
+    "shares": 0.14,
+    "price": 73.44,
+    "amount": 10.30,
+    "fees": 0.0,
+    "date": "2026-10-26",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Externo (desde BBVA, op 3/3 ref 302301202, orden 202610260008255)"
   }
 ]''')
