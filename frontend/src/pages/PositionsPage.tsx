@@ -495,7 +495,7 @@ export function PositionsPage() {
                           <PnlBadge value={p.unrealized_pnl_pct} suffix="%" />
                           {p.irr !== undefined && p.irr !== null && (
                             <div className="text-[10px] text-emerald-500 dark:text-emerald-400 font-mono font-semibold mt-0.5" title="TIR anualizada ponderada por flujos">
-                              TIR +{p.irr}%
+                              TIR {p.irr >= 0 ? '+' : ''}{p.irr}%
                             </div>
                           )}
                         </td>

@@ -187,6 +187,7 @@ export function OverviewPage() {
       const total_pnl = total_value - total_invested
       const total_pnl_pct = total_invested > 0 ? (total_pnl / total_invested) * 100 : 0
       return {
+        ...summary,
         total_value: Math.round(total_value * 100) / 100,
         total_invested: Math.round(total_invested * 100) / 100,
         total_pnl: Math.round(total_pnl * 100) / 100,

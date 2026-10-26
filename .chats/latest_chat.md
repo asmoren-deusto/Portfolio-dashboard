@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 13:00:01
+- **Fecha de exportación:** 2026-10-26 13:08:01
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 142
+- **Total de interacciones registradas:** 144
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2966,5 +2966,34 @@ Fichas con jerarquía clara: *Etiqueta en versalitas · Cifra destacada · Conte
 ### 👤 Usuario (2026-10-26 11:57:50)
 
 no me gusta nada, quedate si acaso con algun dato interesante pero en cuanto a diseño vuelve a lo anterior
+
+---
+
+### 🤖 Asistente (2026-10-26 12:00:04)
+
+He revertido por completo el diseño de la pantalla principal (**Overview**) a su estado anterior:
+
+1. **Diseño y Maquetación anteriores restaurados**:
+   - Vuelven exactamente las tarjetas originales de **Métricas Globales**:
+     - *Valor Total de la Cartera* (2 columnas con sus badges de *Hoy* y *Live*).
+     - *Rendimiento Anualizado* (TIR Anual).
+     - *Plusvalía Acumulada*.
+     - *Total Invertido* (con la píldora DCA e información de posiciones).
+   - Se eliminaron por completo el bloque gigante de *NetWorthHero*, la barra de objetivo y las fichas *KpiTile*.
+   - Se eliminó el directorio temporal `frontend/src/components/overview/`.
+
+2. **Datos útiles conservados de forma discreta sin alterar el diseño**:
+   - En la tarjeta de **Plusvalía Acumulada**, el subtítulo ahora refleja si hay ganancias ya cobradas de ventas pasadas (p. ej. los `+851 €` cobrados de Cobas Lux).
+   - En la tabla de **[Posiciones](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/PositionsPage.tsx)** y en la **ficha modal de cada producto**, se conserva el dato de **TIR anualizada de cada fondo** en tipografía pequeña mono bajo el P&L (ej. *DNB Tech +34,2 %*, *Azvalor +42,4 %*, *MSCI World +25,8 %*), lo cual aporta valor analítico sin alterar la interfaz.
+
+3. **Release y Sincronización**:
+   - Versión actualizada a **v3.4.24**.
+   - Compilación verificada con `tsc && vite build` y cambios subidos a Git (`main`).
+
+---
+
+### 👤 Usuario (2026-10-26 12:04:21)
+
+no sé si veo estos cambios: Datos útiles conservados de forma discreta sin alterar el diseño
 
 ---
