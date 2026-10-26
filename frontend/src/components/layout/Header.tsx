@@ -20,14 +20,14 @@ export const BROKERS = [
   { label: 'MyInves', value: 'myinvestor' },
   { label: 'BBVA', value: 'bbva' },
   { label: 'Indexa', value: 'indexa' },
-  { label: 'Trade', value: 'traderepublic' },
+  { label: 'TradeRep', value: 'traderepublic' },
 ]
 
 export const DEMO_BROKERS = [
   { label: 'Consolidado', value: 'all' },
   { label: 'Kutxabank', value: 'kutxabank' },
   { label: 'Scalable', value: 'scalable' },
-  { label: 'Trade', value: 'traderepublic' },
+  { label: 'TradeRep', value: 'traderepublic' },
 ]
 
 export const BROKER_CONFIG: Record<string, { dot: string; activeBg: string }> = {

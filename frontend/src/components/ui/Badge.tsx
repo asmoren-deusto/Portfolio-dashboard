@@ -47,14 +47,14 @@ const brokerConfigs: Record<string, { label: string; bg: string; text: string; b
     dot: 'bg-rose-500',
   },
   traderepublic: {
-    label: 'TRADE',
+    label: 'TradeRep',
     bg: 'bg-violet-500/10 dark:bg-violet-500/15',
     text: 'text-violet-700 dark:text-violet-300',
     border: 'border-violet-500/20',
     dot: 'bg-violet-500',
   },
   trade_republic: {
-    label: 'TRADE',
+    label: 'TradeRep',
     bg: 'bg-violet-500/10 dark:bg-violet-500/15',
     text: 'text-violet-700 dark:text-violet-300',
     border: 'border-violet-500/20',

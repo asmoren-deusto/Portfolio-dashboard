@@ -37,7 +37,11 @@ def _get_all_transactions(db: Session, user_id: str = "asier", broker: str | Non
     if user_id:
         query = query.filter(Transaction.user_id == user_id)
     if broker and broker.lower() not in ["all", "todos"]:
-        query = query.filter(Transaction.broker == broker.lower())
+        b_clean = broker.lower().replace("_", "").replace("-", "")
+        if b_clean in ("traderepublic", "tr"):
+            query = query.filter(Transaction.broker.in_(["traderepublic", "trade_republic"]))
+        else:
+            query = query.filter(Transaction.broker == broker.lower())
     rows = query.order_by(Transaction.date).all()
     return [
         {
@@ -646,6 +650,24 @@ async def get_performance(
     except Exception as e:
         logger.warning(f"Error syncing latest performance point with summary: {e}")
 
+    # Ensure value_series has at least 2 points for smooth time-series rendering in charting engines
+    if len(value_series) == 1:
+        first_pt = value_series[0]
+        try:
+            pt_date = datetime.strptime(first_pt["date"], "%Y-%m-%d")
+            prev_date = (pt_date - timedelta(days=1)).strftime("%Y-%m-%d")
+        except Exception:
+            prev_date = "2026-10-25"
+        base_pt = {
+            "date": prev_date,
+            "value": 0.0,
+            "invested": 0.0,
+            "daily_return": 0.0,
+            "net_inflow": 0.0,
+            "brokers": {b: {"value": 0.0, "invested": 0.0} for b in first_pt.get("brokers", {}).keys()},
+        }
+        value_series.insert(0, base_pt)
+
     _perf_cache[cache_key] = (datetime.now(), value_series)
     return [PerformancePoint(**v) for v in value_series]
 
@@ -899,6 +921,26 @@ async def get_benchmark_comparison(
             "nasdaq100": nasdaq_ret,
             "eurostoxx50": stoxx_ret,
             "nikkei225": nikkei_ret,
+        })
+
+    if len(aligned_points) == 1:
+        pt0 = aligned_points[0]
+        try:
+            pt_date = datetime.strptime(pt0["date"], "%Y-%m-%d")
+            prev_date = (pt_date - timedelta(days=1)).strftime("%Y-%m-%d")
+        except Exception:
+            prev_date = "2026-10-25"
+        aligned_points.insert(0, {
+            "date": prev_date,
+            "value": 0.0,
+            "invested": 0.0,
+            "portfolio_twr": 0.0,
+            "sp500": 0.0,
+            "msci_world": 0.0,
+            "bce_rate": 0.0,
+            "nasdaq100": 0.0,
+            "eurostoxx50": 0.0,
+            "nikkei225": 0.0,
         })
 
     final_twr = aligned_points[-1]["portfolio_twr"] if aligned_points else 0.0

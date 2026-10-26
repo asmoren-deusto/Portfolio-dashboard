@@ -20,7 +20,11 @@ def get_transactions(user_id: str = Depends(get_current_user_id), broker: str | 
     """List all transactions ordered by date desc."""
     query = db.query(Transaction).filter(Transaction.user_id == user_id)
     if broker and broker.lower() not in ["all", "todos"]:
-        query = query.filter(Transaction.broker == broker.lower())
+        b_clean = broker.lower().replace("_", "").replace("-", "")
+        if b_clean in ("traderepublic", "tr"):
+            query = query.filter(Transaction.broker.in_(["traderepublic", "trade_republic"]))
+        else:
+            query = query.filter(Transaction.broker == broker.lower())
     return query.order_by(Transaction.date.desc()).all()
 
 

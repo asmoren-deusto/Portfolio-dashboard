@@ -53,6 +53,16 @@ function sanitizePoints(
       unique.push({ time: p.date as any, value: p[key] as number })
     }
   }
+  if (unique.length === 1) {
+    const single = unique[0]
+    try {
+      const d = new Date(single.time + 'T00:00:00')
+      d.setDate(d.getDate() - 1)
+      unique.unshift({ time: d.toISOString().slice(0, 10), value: 0 })
+    } catch {
+      unique.unshift({ time: '2026-10-25', value: 0 })
+    }
+  }
   return unique
 }
 

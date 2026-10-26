@@ -89,7 +89,7 @@ export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
   },
   traderepublic: {
     id: 'traderepublic',
-    label: 'Trade Republic',
+    label: 'TradeRep',
     color: '#8b5cf6', // violet
     topColorDark: 'rgba(139, 92, 246, 0.32)',
     topColorLight: 'rgba(139, 92, 246, 0.22)',
@@ -254,8 +254,8 @@ export function PerformanceChart({
         } else {
           // Individual Broker
           const bd = getBrokerData(p, selectedEntity)
-          val = bd.value
-          inv = bd.invested
+          val = bd.value > 0 ? bd.value : (p.value ?? 0)
+          inv = bd.invested > 0 ? bd.invested : (p.invested ?? 0)
         }
 
         sumPoints.push({ date: p.date, value: Math.max(0, val), invested: Math.max(0, inv) })
@@ -263,6 +263,20 @@ export function PerformanceChart({
     }
 
     if (!sumPoints.length) return null
+
+    if (sumPoints.length === 1) {
+      // Lightweight Charts requires at least 2 points for an area/line series timeline.
+      // Prepend previous day baseline at 0 so the chart draws a clean upward curve to the investment.
+      const single = sumPoints[0]
+      try {
+        const d = new Date(single.date + 'T00:00:00')
+        d.setDate(d.getDate() - 1)
+        const prevDate = d.toISOString().slice(0, 10)
+        sumPoints.unshift({ date: prevDate, value: 0, invested: 0 })
+      } catch {
+        sumPoints.unshift({ date: '2026-10-25', value: 0, invested: 0 })
+      }
+    }
 
     const first = sumPoints[0]
     const last = sumPoints[sumPoints.length - 1]
