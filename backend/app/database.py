@@ -156,6 +156,21 @@ def _seed_asier_data():
                 if sig not in existing_txs:
                     db.add(Transaction(**t_data))
                     existing_txs.add(sig)
+                else:
+                    tx_obj = db.query(Transaction).filter(
+                        Transaction.user_id == sig[0],
+                        Transaction.isin == sig[1],
+                        Transaction.date == sig[2],
+                        Transaction.type == sig[4],
+                        Transaction.amount == t_data["amount"],
+                    ).first()
+                    if tx_obj:
+                        if t_data.get("notes") and tx_obj.notes != t_data["notes"]:
+                            tx_obj.notes = t_data["notes"]
+                        if t_data.get("shares") is not None and abs((tx_obj.shares or 0) - t_data["shares"]) > 0.0001:
+                            tx_obj.shares = t_data["shares"]
+                        if t_data.get("price") is not None and abs((tx_obj.price or 0) - t_data["price"]) > 0.0001:
+                            tx_obj.price = t_data["price"]
 
             db.query(Transaction).filter(
                 Transaction.user_id == "asier",

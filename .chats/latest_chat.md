@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 11:41:29
+- **Fecha de exportación:** 2026-10-26 12:08:37
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 131
+- **Total de interacciones registradas:** 133
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2783,5 +2783,46 @@ Cuando recibas las confirmaciones de las compras/suscripciones en los fondos des
 ### 👤 Usuario (2026-10-26 10:34:37)
 
 el dato de valor total me cuadra, el de rendimiento puede que también, pero el de plusvalia y total invertido han cambiado y entiendo que no deberian
+
+---
+
+### 🤖 Asistente (2026-10-26 10:41:32)
+
+Tienes toda la razón, tu observación es **100% acertada desde el punto de vista financiero y fiscal**.
+
+### ¿Por qué habían cambiado la plusvalía y el total invertido?
+
+Al registrar el capital en tránsito de los dos fondos vendidos (**26.106,67 €**), el sistema estaba asignando ese importe íntegro como "capital invertido" de la posición transitoria. 
+
+En un traspaso con diferimiento fiscal:
+1. **No has aportado nuevo capital** de tu bolsillo: el dinero invertido históricamente por ti en esos dos fondos era de **22.709,38 €** (5.444,87 € en Emergentes y 17.264,51 € en World).
+2. Los **3.397,29 €** restantes eran **plusvalía latente** acumulada (+512,30 € en Emergentes y +2.884,99 € en World).
+3. Al sumar 26.106,67 € al total invertido en lugar de sus 22.709,38 € de coste fiscal de adquisición, el total invertido subía artificialmente (+3.397 €) y, por tanto, la plusvalía del portfolio se reducía en esa misma cuantía.
+
+---
+
+### ¿Cómo ha quedado corregido y reajustado?
+
+He creado la función [`calculate_traspaso_balances`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py#L31-L97) en el motor financiero que rastrea y conserva el **coste fiscal originario transferido**:
+
+1. **Posición en tránsito (`BBVA`):**
+   * **Valor actual a transferir:** **26.106,67 €** (saldo en tránsito blindado de las caídas).
+   * **Coste fiscal originario (Invertido):** **22.709,38 €**.
+   * **Plusvalía latente diferida:** **+3.397,29 € (+14,96%)**.
+2. **Resumen Global del Portfolio:**
+   * **Valor Total:** **70.749,92 €** *(44.643,25 € en los 6 fondos restantes + 26.106,67 € en tránsito)*.
+   * **Total Invertido:** **60.327,57 €** *(idéntico al que tenías antes de las ventas)*.
+   * **Plusvalía Total:** **+10.422,35 € (+17,28%)** *(toda tu ganancia acumulada queda íntegramente preservada)*.
+3. **Gráfica de Rentabilidad y Rendimiento:**
+   * La serie de *"Dinero Aportado / Total Invertido"* se mantiene completamente plana en **60.327 €** sin ningún salto artificial.
+   * La rentabilidad ponderada diaria y el TWR quedan alineados al 100%.
+
+Se ha verificado la paridad exacta al céntimo en todos los endpoints y publicado en la versión **v3.4.20**.
+
+---
+
+### 👤 Usuario (2026-10-26 10:47:20)
+
+la grafica de rendimiento varia entre la version local y la desplegada
 
 ---
