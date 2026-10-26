@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 20:30:00
+- **Fecha de exportación:** 2026-10-26 20:31:14
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 114
+- **Total de interacciones registradas:** 116
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1823,5 +1823,46 @@ He actualizado la fecha oficial del NAV para **BlackRock Global Funds - World He
 ### 👤 Usuario (2026-10-26 19:24:03)
 
 cambia el icono de blackrock por otro, pon icono al bono español. el badge de Trade republic que ponga sólo TRADE y añadelo al selector de entidades superior permitiendo filtrar por el. asegurate de ajustar todo
+
+---
+
+### 🤖 Asistente (2026-10-26 19:30:02)
+
+Se han implementado y verificado todos los ajustes solicitados:
+
+---
+
+### 🎨 1. Nuevos Iconos en [CompanyLogo.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx)
+
+- **BlackRock ([LU0171307068](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/seed_data.py)):**
+  - Se sustituyó el logo de iShares (*«iS»*) por el componente vectorial oficial **`BlackRockLogo`**: emblema circular en negro obsidiana (`#111111`) con la tipografía corporativa blanca **`BLK`** y la distintiva franja de contraste ámbar cálido (`#F59E0B`).
+- **Bono del Estado Español ([ES0000012411](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/seed_data.py)):**
+  - Se diseñó el componente **`SpanishBondLogo`**: circular con las franjas oficiales de la bandera de España (rojo `#AA151B` y gualda `#F1BF00` en proporción 1:2:1) y la corona real / escudo soberano en el centro.
+
+---
+
+### 🏷️ 2. Badge de Trade Republic: **`TRADE`** en [Badge.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Badge.tsx)
+
+- Se actualizó el texto del badge de `traderepublic` para que muestre exactamente **`TRADE`** (manteniendo su estilo violeta distintivo).
+
+---
+
+### 🏛️ 3. Selector de Entidades Superior y Filtros
+
+- **Cabecera ([Header.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/Header.tsx)):**
+  - Se añadió **`TRADE`** (`traderepublic`) a la lista de entidades activas (`Consolidado`, `MyInves`, `BBVA`, `Indexa`, `TRADE`).
+  - Al pulsar en **`TRADE`**, la interfaz filtra inmediatamente por los activos y saldos de Trade Republic (el Bono Español de 4.000,99 €).
+- **Prefetch y consultas ([queries.ts](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/api/queries.ts)):**
+  - Se añadió `traderepublic` al ciclo de precarga de entidades reales para que la navegación entre selectores sea instantánea.
+- **Pestaña de Renta Fija ([PositionsPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/PositionsPage.tsx)):**
+  - Se añadió la pestaña específica **`Bonos / Renta Fija`** junto a *Fondos*, *EPSV*, *ETFs* y *Acciones*.
+
+Compilación verificada con éxito (`npm run build`) y versión desplegada y sincronizada en Git (**v3.4.29**).
+
+---
+
+### 👤 Usuario (2026-10-26 19:29:13)
+
+En el selector superior Trade y no TRADE
 
 ---
