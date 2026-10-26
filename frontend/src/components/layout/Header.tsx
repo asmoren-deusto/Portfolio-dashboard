@@ -17,7 +17,7 @@ const PERIODS = [
 
 export const BROKERS = [
   { label: 'Consolidado', value: 'all' },
-  { label: 'MyInvestor', value: 'myinvestor' },
+  { label: 'MyInves', value: 'myinvestor' },
   { label: 'BBVA', value: 'bbva' },
   { label: 'Indexa', value: 'indexa' },
 ]

@@ -41,7 +41,7 @@ export interface EntityConfig {
 export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
   myinvestor: {
     id: 'myinvestor',
-    label: 'MyInvestor',
+    label: 'MyInves',
     color: '#3b82f6', // blue
     topColorDark: 'rgba(59, 130, 246, 0.32)',
     topColorLight: 'rgba(37, 99, 235, 0.22)',

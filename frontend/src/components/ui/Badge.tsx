@@ -12,7 +12,14 @@ const configs: Record<string, { label: string; bg: string; text: string; border:
 
 const brokerConfigs: Record<string, { label: string; bg: string; text: string; border: string; dot: string }> = {
   myinvestor: {
-    label: 'MyInvestor',
+    label: 'MyInves',
+    bg: 'bg-blue-500/10 dark:bg-blue-500/15',
+    text: 'text-blue-700 dark:text-blue-300',
+    border: 'border-blue-500/20',
+    dot: 'bg-blue-500',
+  },
+  myinves: {
+    label: 'MyInves',
     bg: 'bg-blue-500/10 dark:bg-blue-500/15',
     text: 'text-blue-700 dark:text-blue-300',
     border: 'border-blue-500/20',
@@ -81,7 +88,7 @@ export const BrokerBadge = React.memo(function BrokerBadge({ broker, className }
   const raw = (broker || '').trim()
   const key = raw.toLowerCase().replace(/[^a-z0-9]/g, '')
   const cfg = brokerConfigs[key] || {
-    label: raw || 'MyInvestor',
+    label: (raw.toLowerCase().includes('myinves') || raw.toLowerCase().includes('myinvestor')) ? 'MyInves' : (raw || 'MyInves'),
     bg: 'bg-blue-500/10 dark:bg-blue-500/15',
     text: 'text-blue-700 dark:text-blue-300',
     border: 'border-blue-500/20',
