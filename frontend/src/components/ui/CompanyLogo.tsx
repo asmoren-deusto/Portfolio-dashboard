@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ArrowLeftRight, BarChart3, Bitcoin, Coins, Droplets, Globe, Landmark, TrendingUp } from 'lucide-react'
+import { Activity, ArrowLeftRight, BarChart3, Bitcoin, Coins, Droplets, Globe, Landmark, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface CompanyLogoProps {
@@ -57,6 +57,11 @@ function getMarketIcon(ticker?: string): React.ReactNode {
     case 'COWZ':
     case 'EFV':
       return <TrendingUp className="w-full h-full p-0.5 text-emerald-600 dark:text-emerald-400" />
+    case 'IXJ':
+      return <Activity className="w-full h-full p-0.5 text-rose-500 dark:text-rose-400" />
+    case 'BWX':
+    case 'ZN=F':
+      return <Landmark className="w-full h-full p-0.5 text-amber-600 dark:text-amber-400" />
     case 'GC=F':
       return <Coins className="w-full h-full p-0.5 text-amber-600 dark:text-amber-400" />
     case 'SI=F':

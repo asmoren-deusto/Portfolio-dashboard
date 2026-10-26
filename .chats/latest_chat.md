@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 20:56:33
+- **Fecha de exportación:** 2026-10-26 21:04:31
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 123
+- **Total de interacciones registradas:** 125
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1944,5 +1944,40 @@ Sincronizado y publicado en Git con la versión **v3.4.32**.
 ### 👤 Usuario (2026-10-26 19:44:58)
 
 esto de bbva no es correcto, está en 20000 aprox al haber comprado ya el bfg de salud. los consolidados estan bien pero bbva no
+
+---
+
+### 🤖 Asistente (2026-10-26 19:56:35)
+
+El motivo del desfase en el filtro de **BBVA** era el siguiente:
+
+### 🔍 Causa identificada
+1. Al filtrar por la entidad **BBVA**, las consultas del backend (`get_portfolio_summary`, `get_positions`, `get_performance`, `get_analytics`) solo recibían las transacciones registradas bajo la etiqueta `bbva`.
+2. Como la compra de suscripción del fondo de salud (**BGF World Healthscience**) por valor de **5.957,17 €** se realizó en **MyInvestor**, el cálculo de traspasos pendientes (`calculate_traspaso_balances`) al filtrar por BBVA no podía ver esa compra de destino, asumiendo erróneamente que los **26.106,67 €** iniciales continuaban íntegramente en tránsito desde BBVA.
+3. En el consolidado sí cuadraba porque allí se procesaban todas las transacciones globales juntas (26.106,67 € − 5.957,17 € = 20.149,50 €).
+
+---
+
+### 🛠️ Solución aplicada
+- En [portfolio.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py) y [finance_engine.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py), el balance de traspasos entre entidades ahora se resuelve **siempre contra el conjunto global de transacciones del usuario**, y posteriormente se filtra el saldo que le corresponde a la entidad seleccionada.
+- Al seleccionar **BBVA**:
+  - **Valor Total:** **20.149,50 €** (la orden 175 que sigue en tránsito).
+  - **Invertido / Coste Fiscal:** **17.527,42 €**.
+  - **Plusvalía latente:** **+2.622,08 € (+14,96%)**.
+  - **Posición única:** `Liquidez en Traspaso (BBVA - En tránsito)`: **20.149,50 €**.
+- En **MyInvestor**:
+  - Ya cuenta con los **5.957,17 €** invertidos en el fondo de salud.
+- **Consolidado:**
+  - **BBVA:** 20.149,50 € + **MyInvestor:** 39.408,28 € + **Indexa:** 11.371,25 € + **TradeRep:** 4.000,99 € = **74.930,02 €** (coincidencia exacta al céntimo).
+
+---
+
+Sincronizado y publicado en Git con la versión **v3.4.33**.
+
+---
+
+### 👤 Usuario (2026-10-26 19:53:50)
+
+revisa el Desglose de Fondos y Réplicas para los nuevos fondos/bonos comprados
 
 ---

@@ -189,6 +189,8 @@ ETF_PREMARKET_LIVE_PROXIES = {
     "ACWI": "ES=F",       # Futuros S&P 500 24h
     "XLK":  "NQ=F",       # Futuros Nasdaq 100 24h CME Globex (guía tecnológica para DNB Fund)
     "COWZ": "ES=F",       # Futuros S&P 500 24h (guía RV EE.UU.)
+    "IXJ":  "ES=F",       # Futuros S&P 500 24h CME Globex (guía RV Sector Salud)
+    "BWX":  "ZN=F",       # Futuros 10-Yr T-Note 24h CME Globex (guía Deuda Soberana / Renta Fija)
 }
 
 # In-memory cache (shorter TTL for real-time feel)
@@ -1104,6 +1106,8 @@ PORTFOLIO_ETF_PROXIES = {
     "IE00BYX5NH74": {"ticker": "EWJ",  "name": "iShares MSCI Japan ETF", "desc": "Renta Variable Japón"},
     "LU0261952682": {"ticker": "FEZ",  "name": "SPDR EURO STOXX 50 ETF", "desc": "Euro Stoxx 50 (Europa)"},
     "LU1598719752": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE"},
+    "LU0171307068": {"ticker": "IXJ",  "name": "iShares Global Healthcare ETF", "desc": "Salud y Biotecnología Global"},
+    "ES0000012411": {"ticker": "BWX",  "name": "SPDR International Treasury Bond", "desc": "Deuda Soberana / Bonos España & Global"},
 }
 
 _sim_portfolio_cache: dict[str, dict] = {}
@@ -1120,6 +1124,8 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
         txs = _get_all_transactions(db, user_id="asier")
     if broker and broker != "all":
         b_clean = broker.lower().replace("-", "").replace("_", "")
+        if b_clean in ("traderep", "trade", "tr"):
+            b_clean = "traderepublic"
         txs = [t for t in txs if t.get("broker", "").lower().replace("-", "").replace("_", "") == b_clean]
     positions = calculate_positions(txs)
     active = {k: v for k, v in positions.items() if v.get("shares", 0) > 0.0001 and not k.startswith("TR_")}
@@ -1250,6 +1256,8 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
         "FEZ": 0.00,   # Euro Stoxx 50 0% USD (100% EUR)
         "EFV": 0.15,   # EAFE Value ~15% USD
         "EWJ": 0.05,   # Japan ~5% USD
+        "IXJ": 0.70,   # Global Healthcare ~70% USD
+        "BWX": 0.00,   # Bonos Soberanos España 0% USD (100% EUR)
     }
     portfolio_usd_exposure = sum(etf_weights.get(t, 0.0) * USD_EXPOSURE_WEIGHTS.get(t, 0.70) for t in etf_tickers_list)
 

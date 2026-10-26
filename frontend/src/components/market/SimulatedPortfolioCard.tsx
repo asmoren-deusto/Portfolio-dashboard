@@ -81,6 +81,16 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     shortName: 'EAFE Value',
     category: 'RV Internacional Value',
   },
+  IXJ: {
+    name: 'iShares Global Healthcare (Salud)',
+    shortName: 'Global Healthcare',
+    category: 'Sector Salud y Farmacia Global',
+  },
+  BWX: {
+    name: 'SPDR Int. Treasury (Deuda Soberana)',
+    shortName: 'Bonos Soberanos',
+    category: 'Renta Fija Soberana / Deuda Pública',
+  },
 }
 
 export interface SimulatedPortfolioCardProps {
@@ -1118,8 +1128,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                                 >
                                   {h.fund_name}
                                 </div>
-                                <div className="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5">
-                                  {h.isin}
+                                <div className="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5 flex items-center gap-1.5 flex-wrap">
+                                  <span>{h.isin}</span>
+                                  {h.broker && <BrokerBadge broker={h.broker} className="text-[9px] px-1 py-0 h-3.5 tracking-normal" />}
                                 </div>
                               </div>
                             </div>
