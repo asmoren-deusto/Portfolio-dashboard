@@ -154,6 +154,15 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Renta Variable Sectorial Salud",
     "ter": 1.81
+  },
+  {
+    "isin": "ES0000012411",
+    "name": "España Gobierno 5,75% Vto 30-Jul-2032 (Bonos y Obligaciones del Estado)",
+    "ticker": null,
+    "asset_type": "bond",
+    "currency": "EUR",
+    "category": "Renta Fija Soberana (España)",
+    "ter": 0.0
   }
 ]''')
 
@@ -1788,6 +1797,12 @@ PRICES = json.loads(r'''[
     "isin": "LU0171307068",
     "date": "2026-10-27",
     "price": 73.44,
+    "currency": "EUR"
+  },
+  {
+    "isin": "ES0000012411",
+    "date": "2026-10-26",
+    "price": 1.12806,
     "currency": "EUR"
   }
 ]''')
@@ -3928,5 +3943,17 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-10-26",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Externo (desde BBVA, op 3/3 ref 302301202, orden 202610260008255)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "ES0000012411",
+    "type": "buy",
+    "shares": 3546.79,
+    "price": 1.12806,
+    "amount": 4000.99,
+    "fees": 1.0,
+    "date": "2026-10-26",
+    "broker": "traderepublic",
+    "notes": "Compra Bono España 5,75% Jul 2032 en Lang & Schwarz (Nominal: 3.546,79 €, Cotización: 111,36%, Cupón corrido: 50,29 €, Comisión: 1,00 €)"
   }
 ]''')

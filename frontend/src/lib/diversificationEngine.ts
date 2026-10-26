@@ -236,6 +236,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'equity',
     currencies: { USD: 0.70, EUR: 0.20, Other: 0.10 },
   },
+  // Bonos y Obligaciones del Estado Español 5.75% 30-Jul-2032 (ES0000012411)
+  ES0000012411: {
+    geo: { europe: 1.0 },
+    sectors: { financials: 1.0 },
+    assetClass: 'fixed_income',
+    currencies: { EUR: 1.0 },
+  },
 }
 
 /**

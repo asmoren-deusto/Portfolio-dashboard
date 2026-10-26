@@ -249,8 +249,6 @@ def calculate_portfolio_value_series(
         for tx in txs_today:
             if is_internal_traspaso(tx.get("notes") or "") or (tx.get("isin") or "").startswith("TR_"):
                 continue
-            if (tx.get("broker") or "").lower() in ("trade_republic", "traderepublic"):
-                continue
             if tx["type"] == "buy":
                 day_inflow += tx["amount"]
             elif tx["type"] == "sell":
@@ -282,8 +280,6 @@ def calculate_portfolio_value_series(
         distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in current_active_tx)
         brokers_data = {}
         for b in sorted(distinct_brokers):
-            if b in ("trade_republic", "traderepublic"):
-                continue
             b_tx = [tx for tx in current_active_tx if (tx.get("broker") or "myinvestor").lower() == b]
             if not b_tx:
                 continue
@@ -552,7 +548,7 @@ def calculate_xirr(
     flows: list[tuple[str, float]] = []
     for tx in transactions:
         # Ignore non-portfolio transfer placeholders
-        if (tx.get("isin") or "").startswith("TR_") or tx.get("broker") in ("trade_republic", "traderepublic"):
+        if (tx.get("isin") or "").startswith("TR_"):
             continue
 
         notes = tx.get("notes") or ""
@@ -732,7 +728,7 @@ def calculate_enhanced_kpis(
 
     for tx in sorted(transactions, key=lambda x: str(x.get("date") or "")):
         isin = tx.get("isin") or ""
-        if isin.startswith("TR_") or tx.get("broker") in ("trade_republic", "traderepublic"):
+        if isin.startswith("TR_"):
             continue
 
         is_tr = is_internal_traspaso(tx.get("notes") or "")

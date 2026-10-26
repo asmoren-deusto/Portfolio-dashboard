@@ -597,7 +597,6 @@ async def get_performance(
     transactions = [
         t for t in raw_transactions
         if not (t.get("isin") or "").startswith("TR_")
-        and (t.get("broker") or "").lower() not in ("trade_republic", "traderepublic")
     ]
     if not transactions:
         transactions = raw_transactions
@@ -709,7 +708,6 @@ async def get_benchmark_comparison(
     transactions = [
         t for t in raw_transactions
         if not (t.get("isin") or "").startswith("TR_")
-        and (t.get("broker") or "").lower() not in ("trade_republic", "traderepublic")
     ]
     if not transactions:
         transactions = raw_transactions
@@ -948,7 +946,6 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     transactions = [
         t for t in transactions
         if not (t.get("isin") or "").startswith("TR_")
-        and t.get("broker") not in ("trade_republic", "traderepublic")
     ]
     if not transactions:
         return {}
