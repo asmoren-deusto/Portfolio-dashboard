@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 10:56:45
+- **Fecha de exportación:** 2026-10-26 10:59:00
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 125
+- **Total de interacciones registradas:** 127
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2684,5 +2684,30 @@ Listo. En vista móvil se ha eliminado el espacio que quedaba entre la cabecera 
 ### 👤 Usuario (2026-10-26 09:55:05)
 
 has bajado los elementos del titulo y ahora no quedan centrados
+
+---
+
+### 🤖 Asistente (2026-10-26 09:56:48)
+
+Corregido el centrado vertical de los elementos del título.
+
+---
+
+### 🔍 Causa
+Al añadir `padding-top` para el safe-area e imponer altura a la vez en el mismo contenedor flex, el navegador desplazaba el cálculo del eje cruzado hacia abajo, haciendo que el logo, el texto *PortfolioPro* y los botones quedaran caídos y desalineados.
+
+---
+
+### 🛠️ Solución aplicada (v3.4.17)
+En [RootLayout.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/RootLayout.tsx#L274-L327):
+1. **Separación de la zona de notch/safe-area:** Se ha desacoplado el safe-area superior en un bloque dedicado `h-[max(0.65rem, env(safe-area-inset-top, 0px) + 4px)]`.
+2. **Barra de navegación dedicada y centrada:** El contenido (logo, título *PortfolioPro*, menú hamburguesa y selectores) se aloja en una fila independiente de `44px` (`h-[44px] flex items-center`), garantizando un **centrado vertical milimétrico** independientemente del modelo de móvil.
+3. **Mantenimiento de distancia cero con el ticker:** El espaciador mantiene la misma altura total 1:1 (`safe-area + 44px`), de modo que el ticker sigue arrancando justo en el borde inferior de la cabecera sin ningún hueco.
+
+---
+
+### 👤 Usuario (2026-10-26 09:57:28)
+
+sigue sin estar centrado del todo, hay más margen blanco arriba
 
 ---

@@ -271,11 +271,9 @@ export function RootLayout() {
 
         <div className={`flex flex-1 flex-col min-h-screen md:transition-all md:duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
           {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop - Opaque solid background with crisp Retina text) */}
-          <header className={`fixed top-0 left-0 right-0 md:sticky z-40 bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
-            {/* Safe area inset for mobile notch / status bar */}
-            <div className="h-[max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))] md:hidden" aria-hidden="true" />
-
-            {/* Mobile Header Bar: exactly 44px tall, perfectly centered vertically */}
+          {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop - Opaque solid background with crisp Retina text) */}
+          <header className={`fixed top-0 left-0 right-0 md:sticky z-40 bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs pt-[env(safe-area-inset-top,0px)] ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+            {/* Mobile Header Bar: exactly 44px tall, 100% symmetrically centered vertically */}
             <div className="flex items-center justify-between px-3 sm:px-4 h-[44px] md:h-[50px]">
               <div className="flex items-center gap-1.5 shrink-0">
                 {/* Only show hamburger button when NOT native (native uses bottom MobileTabBar) */}
@@ -297,7 +295,7 @@ export function RootLayout() {
                   aria-label="Cuenta de inversor"
                 >
                   <AppLogo size={26} />
-                  <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white">
+                  <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white leading-none">
                     Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
                   </span>
                 </button>
@@ -329,7 +327,7 @@ export function RootLayout() {
           </header>
 
           {/* Spacer to prevent content overlap with fixed mobile header - calibrated 1:1 with header height for 0px gap with ticker */}
-          <div className="h-[calc(max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))+44px)] md:hidden shrink-0" aria-hidden="true" />
+          <div className="h-[calc(env(safe-area-inset-top,0px)+44px)] md:hidden shrink-0" aria-hidden="true" />
 
           {/* Top White Bar with Selectors (Desktop only) - Exactly 60px sticky top bar */}
           <div className="relative z-30 hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 md:sticky md:top-0 shadow-xs">
