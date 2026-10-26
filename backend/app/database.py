@@ -27,11 +27,32 @@ def get_db():
 
 
 def init_db():
-    from app.models import Asset, Transaction, PriceCache, User  # noqa
+    from app.models import Asset, Transaction, PriceCache, User, UserGoal  # noqa
     Base.metadata.create_all(bind=engine)
     _migrate_schema()
     _seed_default_users()
+    _seed_default_goals()
     _seed_asier_data()
+
+
+def _seed_default_goals():
+    from app.models import UserGoal
+    db = SessionLocal()
+    try:
+        for uid in ("asier", "demo"):
+            existing = db.query(UserGoal).filter(UserGoal.user_id == uid).first()
+            if not existing:
+                db.add(UserGoal(
+                    user_id=uid,
+                    name="Patrimonio neto",
+                    target_amount=100000.0,
+                    target_date=None,
+                ))
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
 
 
 def _migrate_schema():

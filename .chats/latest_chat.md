@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 12:18:55
+- **Fecha de exportación:** 2026-10-26 12:55:27
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 135
+- **Total de interacciones registradas:** 140
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -2877,5 +2877,44 @@ La discrepancia entre la gráfica de rendimiento local y la desplegada se debía
 ### 👤 Usuario (2026-10-26 11:15:12)
 
 cambia los badges de myinvestor por myinves
+
+---
+
+### 🤖 Asistente (2026-10-26 11:18:58)
+
+Se han actualizado los badges y etiquetas de **MyInvestor** por **MyInves**:
+
+1. **Badges de posiciones y operaciones ([Badge.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/Badge.tsx#L14-L26)):**
+   - El componente `BrokerBadge` muestra ahora `MyInves` (renderizado como `MYINVES` con el estilo y punto azul correspondiente) en las tablas y tarjetas de Posiciones, Movimientos y Visión General.
+2. **Píldoras del selector de entidad ([Header.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/layout/Header.tsx#L18-L23)):**
+   - Se actualizó el botón/píldora del filtro superior a `MyInves`, manteniendo `myinvestor` como identificador interno para las llamadas a la API sin romper ninguna consulta.
+3. **Leyenda de la gráfica de evolución ([PerformanceChart.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx#L41-L46)):**
+   - La etiqueta de desglose por entidad en la gráfica de rendimiento muestra ahora `MyInves`.
+
+🚀 **Release:** Publicada la versión `v3.4.22` y sincronizada en el repositorio.
+
+---
+
+### 👤 Usuario (2026-10-26 11:31:34)
+
+he visto https://github.com/danidm98/rumbo y me parece muy interesante. Mira las funcionalidades, secciones y visualizaciones que podemos coger y adaptar a nuestra herramienta. la veo una herramienta muy clara. haz un estudio exhaustivo y plantea el diseño de cara al desarrollo posterior
+
+---
+
+### 🤖 Asistente (2026-10-26 11:32:31)
+
+HTML is noisy; get the raw README.
+
+---
+
+### 🤖 Asistente (2026-10-26 11:33:25)
+
+Ahora redacto el estudio y el diseño.
+
+---
+
+### 👤 Usuario (2026-10-26 11:37:36)
+
+
 
 ---

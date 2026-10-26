@@ -83,7 +83,23 @@ class PositionOut(BaseModel):
     ticker: Optional[str] = None
     domain: Optional[str] = None
     ter: Optional[float] = None
+    irr: Optional[float] = None
 
+
+class UserGoalOut(BaseModel):
+    user_id: str
+    name: str = "Patrimonio neto"
+    target_amount: float
+    target_date: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserGoalUpdate(BaseModel):
+    target_amount: float
+    name: Optional[str] = None
+    target_date: Optional[str] = None
 
 
 class PortfolioSummary(BaseModel):
@@ -93,6 +109,12 @@ class PortfolioSummary(BaseModel):
     total_pnl_pct: float
     num_positions: int
     last_updated: str
+    irr: Optional[float] = None
+    realized_pnl: Optional[float] = None
+    monthly_pace: Optional[float] = None
+    contribution_streak_months: Optional[int] = None
+    total_contributions_count: Optional[int] = None
+
 
 
 class PerformancePoint(BaseModel):

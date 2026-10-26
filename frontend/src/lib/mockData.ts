@@ -21,6 +21,14 @@ export interface Position {
   broker?: string | null
   daily_change?: number | null
   daily_change_pct?: number | null
+  irr?: number | null
+}
+
+export interface UserGoal {
+  user_id: string
+  name: string
+  target_amount: number
+  target_date?: string | null
 }
 
 export interface PortfolioSummary {
@@ -30,12 +38,22 @@ export interface PortfolioSummary {
   total_pnl_pct: number
   num_positions: number
   last_updated: string
+  irr?: number | null
+  realized_pnl?: number | null
+  monthly_pace?: number | null
+  contribution_streak_months?: number | null
+  total_contributions_count?: number | null
 }
 
 export interface Analytics {
   twr: number
   cagr: number
   annualized_return?: number
+  irr?: number | null
+  realized_pnl?: number | null
+  monthly_pace?: number | null
+  contribution_streak_months?: number | null
+  total_contributions_count?: number | null
   net_profit?: number
   net_profit_pct?: number
   total_value?: number

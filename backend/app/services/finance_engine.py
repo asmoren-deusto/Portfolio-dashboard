@@ -601,3 +601,195 @@ def calculate_xirr(
     return round(((low + high) / 2.0) * 100.0, 2)
 
 
+def calculate_position_xirr(
+    pos_transactions: list[dict],
+    current_value: float,
+    as_of_date: Optional[str] = None,
+) -> Optional[float]:
+    """
+    Calculate Money-Weighted Return (TIR / XIRR) for an individual position.
+    Considers all cash flows for this instrument (buys as negative, sells/dividends as positive)
+    with current market value as terminal positive flow.
+    """
+    if not pos_transactions or current_value <= 0:
+        return None
+
+    flows: list[tuple[str, float]] = []
+    for tx in pos_transactions:
+        amt = float(tx.get("amount") or 0.0)
+        if amt <= 0:
+            continue
+        d_str = str(tx.get("date") or "")[:10]
+        if not d_str:
+            continue
+        tx_type = tx.get("type")
+        if tx_type == "buy":
+            flows.append((d_str, -amt))
+        elif tx_type in ("sell", "dividend"):
+            flows.append((d_str, amt))
+
+    if not flows:
+        return None
+
+    flows.sort(key=lambda x: x[0])
+    terminal_date = as_of_date or datetime.now().strftime("%Y-%m-%d")
+    flows.append((terminal_date, float(current_value)))
+
+    if not (any(cf < 0 for _, cf in flows) and any(cf > 0 for _, cf in flows)):
+        return None
+
+    d0 = datetime.fromisoformat(flows[0][0])
+    total_days = (datetime.fromisoformat(terminal_date) - d0).days
+    if total_days < 14:
+        return None
+
+    def npv(rate: float) -> float:
+        total = 0.0
+        for d_str, cf in flows:
+            dt = (datetime.fromisoformat(d_str) - d0).days / 365.25
+            try:
+                denom = (1.0 + rate) ** dt
+                if denom == 0:
+                    return float("inf")
+                total += cf / denom
+            except (OverflowError, ZeroDivisionError):
+                return float("inf")
+        return total
+
+    low, high = -0.95, 5.0
+    val_low = npv(low)
+    val_high = npv(high)
+    if val_low * val_high > 0:
+        low, high = -0.5, 2.0
+        val_low = npv(low)
+        val_high = npv(high)
+        if val_low * val_high > 0:
+            return None
+
+    for _ in range(120):
+        mid = (low + high) / 2.0
+        val_mid = npv(mid)
+        if abs(val_mid) < 1e-4:
+            return round(mid * 100.0, 2)
+        if val_low * val_mid < 0:
+            high = mid
+            val_high = val_mid
+        else:
+            low = mid
+            val_low = val_mid
+
+    return round(((low + high) / 2.0) * 100.0, 2)
+
+
+def calculate_enhanced_kpis(
+    transactions: list[dict],
+    current_value: float,
+    as_of_date: Optional[str] = None,
+) -> dict:
+    """
+    Computes Rumbo-inspired top-level KPIs:
+    - irr: Global money-weighted annualized return (TIR/XIRR).
+    - realized_pnl: Already cashed-in capital gains from external sales (FIFO) + dividends.
+    - monthly_pace: Average monthly gross contributions over the last 12 months with activity.
+    - contribution_streak_months: Number of consecutive months with contributions.
+    - total_contributions_count: Total external buys made.
+    """
+    if not transactions:
+        return {
+            "irr": None,
+            "realized_pnl": 0.0,
+            "monthly_pace": 0.0,
+            "contribution_streak_months": 0,
+            "total_contributions_count": 0,
+        }
+
+    irr = calculate_xirr(transactions, current_value, as_of_date=as_of_date)
+
+    pos_fifo: dict[str, dict[str, float]] = {}
+    realized_pnl = 0.0
+    external_buys_count = 0
+    monthly_inflows: dict[str, float] = {}
+    months_with_buys: set[str] = set()
+
+    for tx in sorted(transactions, key=lambda x: str(x.get("date") or "")):
+        isin = tx.get("isin") or ""
+        if isin.startswith("TR_") or tx.get("broker") in ("trade_republic", "traderepublic"):
+            continue
+
+        is_tr = is_internal_traspaso(tx.get("notes") or "")
+        amt = float(tx.get("amount") or 0.0)
+        shares = float(tx.get("shares") or 0.0)
+        tx_type = tx.get("type")
+        d_str = str(tx.get("date") or "")[:10]
+        ym = d_str[:7] if len(d_str) >= 7 else None
+
+        if isin not in pos_fifo:
+            pos_fifo[isin] = {"shares": 0.0, "total_cost": 0.0}
+        pos = pos_fifo[isin]
+
+        if tx_type == "buy":
+            pos["shares"] += shares
+            pos["total_cost"] += amt
+            if not is_tr:
+                external_buys_count += 1
+                if ym:
+                    months_with_buys.add(ym)
+                    monthly_inflows[ym] = monthly_inflows.get(ym, 0.0) + amt
+        elif tx_type == "sell":
+            sh_before = pos["shares"]
+            cost_before = pos["total_cost"]
+            cost_of_sold = (shares / sh_before * cost_before) if sh_before > 0 else 0.0
+
+            pos["shares"] = max(0.0, sh_before - shares)
+            pos["total_cost"] = max(0.0, cost_before - cost_of_sold)
+
+            if not is_tr:
+                pnl_sale = amt - cost_of_sold
+                realized_pnl += pnl_sale
+                if ym:
+                    monthly_inflows[ym] = monthly_inflows.get(ym, 0.0) - amt
+        elif tx_type == "dividend":
+            realized_pnl += amt
+            if ym and not is_tr:
+                monthly_inflows[ym] = monthly_inflows.get(ym, 0.0) + amt
+
+    sorted_ym = sorted(monthly_inflows.keys())
+    recent_12 = sorted_ym[-12:] if len(sorted_ym) >= 12 else sorted_ym
+    monthly_pace = round(sum(max(0.0, monthly_inflows[m]) for m in recent_12) / len(recent_12), 2) if recent_12 else 0.0
+
+    streak = 0
+    now = datetime.now()
+    curr_m = now.strftime("%Y-%m")
+    check_dt = now
+
+    while True:
+        ym = check_dt.strftime("%Y-%m")
+        if ym in months_with_buys:
+            streak += 1
+            first_day = check_dt.replace(day=1)
+            prev_m_day = first_day.replace(
+                month=first_day.month - 1 if first_day.month > 1 else 12,
+                year=first_day.year if first_day.month > 1 else first_day.year - 1
+            )
+            check_dt = prev_m_day
+        else:
+            if streak == 0 and ym == curr_m:
+                first_day = check_dt.replace(day=1)
+                prev_m_day = first_day.replace(
+                    month=first_day.month - 1 if first_day.month > 1 else 12,
+                    year=first_day.year if first_day.month > 1 else first_day.year - 1
+                )
+                check_dt = prev_m_day
+                continue
+            break
+
+    return {
+        "irr": irr,
+        "realized_pnl": round(realized_pnl, 2),
+        "monthly_pace": monthly_pace,
+        "contribution_streak_months": streak,
+        "total_contributions_count": external_buys_count,
+    }
+
+
+

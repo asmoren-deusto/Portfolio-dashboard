@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   MOCK_SUMMARY,
   MOCK_POSITIONS,
@@ -10,8 +10,9 @@ import {
   type Position,
   type Analytics,
   type Transaction,
+  type UserGoal,
 } from '@/lib/mockData'
-export type { Position, PortfolioSummary, Analytics, Transaction, PricePoint }
+export type { Position, PortfolioSummary, Analytics, Transaction, PricePoint, UserGoal }
 import { useAppStore, type Period } from '@/store/appStore'
 import { apiUrl } from './config'
 
@@ -165,6 +166,58 @@ export function usePortfolioSummary() {
     refetchOnMount: false,
     refetchInterval: 1000 * 60 * 3, // Keep fresh every 3 mins
     refetchIntervalInBackground: false,
+  })
+}
+
+// ── Portfolio Goal ────────────────────────────────────────────────────────────
+export function usePortfolioGoal() {
+  const { currentUser, useMock } = useAppStore()
+  const isDemo = Boolean(useMock || currentUser?.isDemo)
+
+  return useQuery<UserGoal>({
+    queryKey: ['portfolio-goal', currentUser?.id],
+    queryFn: () =>
+      isDemo
+        ? Promise.resolve({
+            user_id: currentUser?.id || 'demo',
+            name: 'Patrimonio neto',
+            target_amount: 100000.0,
+            target_date: null,
+          })
+        : get<UserGoal>('/portfolio/goal'),
+    staleTime: 1000 * 60 * 10,
+    placeholderData: {
+      user_id: currentUser?.id || 'asier',
+      name: 'Patrimonio neto',
+      target_amount: 100000.0,
+      target_date: null,
+    },
+  })
+}
+
+export function useUpdatePortfolioGoal() {
+  const queryClient = useQueryClient()
+  const { currentUser } = useAppStore()
+
+  return useMutation({
+    mutationFn: async (payload: { target_amount: number; name?: string; target_date?: string | null }) => {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      const res = await fetch(apiUrl('/portfolio/goal'), {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      return res.json() as Promise<UserGoal>
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['portfolio-goal', currentUser?.id], data)
+      queryClient.invalidateQueries({ queryKey: ['portfolio-goal'] })
+    },
   })
 }
 

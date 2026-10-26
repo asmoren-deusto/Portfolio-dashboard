@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 import logging
 
 from app.database import get_db
-from app.models import Asset, Transaction, PriceCache
-from app.schemas import PortfolioSummary, PositionOut, PerformancePoint, UpdatePriceRequest
+from app.models import Asset, Transaction, PriceCache, UserGoal
+from app.schemas import PortfolioSummary, PositionOut, PerformancePoint, UpdatePriceRequest, UserGoalOut, UserGoalUpdate
 from app.services.price_service import get_current_price, get_price_with_date, get_price_history, _price_cache, KNOWN_TICKERS
 from app.services.finance_engine import (
     calculate_positions,
@@ -21,6 +21,8 @@ from app.services.finance_engine import (
     calculate_sharpe,
     calculate_period_return,
     calculate_xirr,
+    calculate_position_xirr,
+    calculate_enhanced_kpis,
     is_internal_traspaso,
     calculate_traspaso_balances,
 )
@@ -103,6 +105,8 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
     total_pnl_pct = (total_pnl / total_invested * 100) if total_invested > 0 else 0
     num_pos = len(active_positions) + len(traspaso_balances)
 
+    enhanced = calculate_enhanced_kpis(transactions, total_value)
+
     return PortfolioSummary(
         total_value=round(total_value, 2),
         total_invested=round(total_invested, 2),
@@ -110,7 +114,48 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
         total_pnl_pct=round(total_pnl_pct, 2),
         num_positions=num_pos,
         last_updated=datetime.now().isoformat(),
+        irr=enhanced.get("irr"),
+        realized_pnl=enhanced.get("realized_pnl"),
+        monthly_pace=enhanced.get("monthly_pace"),
+        contribution_streak_months=enhanced.get("contribution_streak_months"),
+        total_contributions_count=enhanced.get("total_contributions_count"),
     )
+
+
+@router.get("/goal", response_model=UserGoalOut)
+def get_user_goal(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """Retrieve user portfolio net worth goal."""
+    goal = db.query(UserGoal).filter(UserGoal.user_id == user_id).first()
+    if not goal:
+        goal = UserGoal(user_id=user_id, name="Patrimonio neto", target_amount=100000.0)
+        db.add(goal)
+        db.commit()
+        db.refresh(goal)
+    return goal
+
+
+@router.put("/goal", response_model=UserGoalOut)
+def update_user_goal(goal_in: UserGoalUpdate, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """Update user portfolio net worth goal."""
+    goal = db.query(UserGoal).filter(UserGoal.user_id == user_id).first()
+    if not goal:
+        goal = UserGoal(
+            user_id=user_id,
+            name=goal_in.name or "Patrimonio neto",
+            target_amount=goal_in.target_amount,
+            target_date=goal_in.target_date,
+        )
+        db.add(goal)
+    else:
+        goal.target_amount = goal_in.target_amount
+        if goal_in.name:
+            goal.name = goal_in.name
+        if goal_in.target_date is not None:
+            goal.target_date = goal_in.target_date
+    db.commit()
+    db.refresh(goal)
+    return goal
+
 
 
 @router.get("/positions", response_model=list[PositionOut])
@@ -230,6 +275,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
 
         from app.services.market_calendar import get_expected_nav_date
         fallback_date = p_prev_date or get_expected_nav_date()
+        pos_irr = calculate_position_xirr(pos.get("transactions", []), current_value, as_of_date=price_date or fallback_date)
 
         return {
             "isin": isin,
@@ -251,6 +297,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             "ter": getattr(asset, "ter", None) if asset else None,
             "last_updated": price_date or fallback_date,
             "price_date": price_date or fallback_date,
+            "irr": pos_irr,
         }
 
     tasks = [_fetch_position_bundle(isin, pos) for isin, pos in active_positions.items()]
@@ -292,6 +339,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
                 "ter": 0.0,
                 "last_updated": today_str,
                 "price_date": today_str,
+                "irr": None,
             }
             total_value += item["current_value"]
             position_data.append(item)
@@ -1052,8 +1100,15 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     portfolio_daily_ret = round(weighted_1d / active_val, 2) if active_val > 0 else None
     ret_1d = portfolio_daily_ret if portfolio_daily_ret is not None else calculate_period_return(series_for_returns, 1)
 
+    enhanced = calculate_enhanced_kpis(transactions, current_val)
+
     res = {
         "annualized_return": annualized_ret,
+        "irr": annualized_ret,
+        "realized_pnl": enhanced.get("realized_pnl"),
+        "monthly_pace": enhanced.get("monthly_pace"),
+        "contribution_streak_months": enhanced.get("contribution_streak_months"),
+        "total_contributions_count": enhanced.get("total_contributions_count"),
         "net_profit": net_profit,
         "net_profit_pct": net_profit_pct,
         "total_value": round(current_val, 2),

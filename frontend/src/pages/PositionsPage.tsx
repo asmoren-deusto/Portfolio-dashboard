@@ -493,6 +493,11 @@ export function PositionsPage() {
                         {/* P&L % */}
                         <td data-private className="px-4 py-3.5 text-right font-mono">
                           <PnlBadge value={p.unrealized_pnl_pct} suffix="%" />
+                          {p.irr !== undefined && p.irr !== null && (
+                            <div className="text-[10px] text-emerald-500 dark:text-emerald-400 font-mono font-semibold mt-0.5" title="TIR anualizada ponderada por flujos">
+                              TIR +{p.irr}%
+                            </div>
+                          )}
                         </td>
 
                         {/* Peso % */}

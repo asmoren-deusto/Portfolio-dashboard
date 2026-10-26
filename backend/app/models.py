@@ -60,3 +60,15 @@ class PriceCache(Base):
     currency = Column(String(3), default="EUR")
     source = Column(String(50))
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+class UserGoal(Base):
+    __tablename__ = "user_goals"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String(50), default="asier")
+    name = Column(String(100), default="Patrimonio neto")
+    target_amount = Column(Float, default=100000.0)
+    target_date = Column(String(10), nullable=True)  # YYYY-MM-DD
+    created_at = Column(DateTime, server_default=func.now())
+

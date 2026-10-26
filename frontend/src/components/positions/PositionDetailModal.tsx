@@ -280,6 +280,12 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                     </span>
                   </div>
 
+                  {position.irr !== undefined && position.irr !== null && (
+                    <span className="text-[11.5px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                      TIR anualizada: +{position.irr}%
+                    </span>
+                  )}
+
                   <span
                     className={`text-[11px] font-semibold tabular-nums ${
                       isPeriodPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
