@@ -28,7 +28,6 @@ import {
 import { Link } from 'react-router-dom'
 
 import { KpiCard } from '@/components/ui/KpiCard'
-import { NetWorthHero } from '@/components/overview/NetWorthHero'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { PerformanceChart, PerformanceChartSkeleton } from '@/components/charts/PerformanceChart'
@@ -644,19 +643,170 @@ export function OverviewPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      {/* 1. Hero de Patrimonio Neto & KPIs Maestros (Inspirado en Rumbo con estética Dark Glass) */}
-      <NetWorthHero
-        summary={displaySummary}
-        analytics={analytics}
-        shortTermMetrics={shortTermMetrics}
-        sessionPct={sessionPct}
-        sessionAmount={sessionAmount}
-        sessionMarketState={sessionMarketState}
-        selectedBrokerName={selectedBroker === 'all' ? 'Total Cartera' : selectedBroker.toUpperCase()}
-        isRefreshing={isGlobalUpdating}
-        updatedPositionsCount={updatedPositionsCount}
-        totalPositionsCount={displaySummary?.num_positions ?? positions.length}
-      />
+      {/* 1. Métricas Globales (Totales Cartera) */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between px-0.5">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <Wallet size={13.5} className="text-blue-500" />
+            <span>Métricas Globales</span>
+            {isGlobalUpdating && <LoadingDot />}
+          </div>
+          <span data-private className="hidden sm:inline text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            Total Cartera
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5">
+          <KpiCard
+            hoverGlow
+            hero
+            label="Valor Total de la Cartera"
+            value={
+              <AnimatedNumber
+                value={displaySummary?.total_value}
+                format={fmt.currency}
+              />
+            }
+            extra={
+              ((shortTermMetrics && shortTermMetrics.dayPct !== undefined) || (sessionPct !== undefined && !isNaN(sessionPct))) && (
+                <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                  {shortTermMetrics?.dayPct !== undefined && (
+                    <span
+                      data-private
+                      title={shortTermMetrics.dayAmount !== undefined ? `Rendimiento Hoy (1D - NAV oficial): ${shortTermMetrics.dayAmount >= 0 ? '+' : ''}${fmt.currency(shortTermMetrics.dayAmount)} (${fmt.pct(shortTermMetrics.dayPct)})` : `Rendimiento Hoy (1D - NAV oficial): ${fmt.pct(shortTermMetrics.dayPct)}`}
+                      className={cn(
+                        'inline-flex items-center font-mono font-semibold border transition-all cursor-default',
+                        isNativePlatform() ? 'px-1.5 py-0.5 text-[10.5px] rounded-md gap-0.5' : 'px-2 py-0.5 text-xs rounded-lg gap-1',
+                        shortTermMetrics.dayPct >= 0
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
+                      )}
+                    >
+                      <Zap className={isNativePlatform() ? "w-2.5 h-2.5 stroke-[2.2]" : "w-3 h-3 stroke-[2.5]"} />
+                      <span>Hoy:</span>
+                      <span className="font-bold">{fmt.pct(shortTermMetrics.dayPct)}</span>
+                    </span>
+                  )}
+
+                  {sessionPct !== undefined && !isNaN(sessionPct) && (
+                    <Link
+                      to="/market"
+                      data-private
+                      title={`Rendimiento Sesión Hoy (Mercado en directo): ${sessionPct >= 0 ? '+' : ''}${fmt.pct(sessionPct)}${sessionAmount !== undefined && !isNaN(sessionAmount) ? ` (${sessionAmount >= 0 ? '+' : ''}${fmt.currency(sessionAmount)})` : ''} • Estimación en EUR con réplica de ETFs líquidos (${sessionMarketState || 'LIVE'}). Clic para abrir Mercado.`}
+                      className={cn(
+                        'inline-flex items-center font-mono font-semibold border transition-all hover:opacity-85 active:scale-95 cursor-pointer',
+                        isNativePlatform() ? 'px-1.5 py-0.5 text-[10.5px] rounded-md gap-0.5' : 'px-2 py-0.5 text-xs rounded-lg gap-1',
+                        sessionPct >= 0
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
+                      )}
+                    >
+                      <Activity className={isNativePlatform() ? "w-2.5 h-2.5 stroke-[2.2]" : "w-3 h-3 stroke-[2.5]"} />
+                      <span>Live:</span>
+                      <span className="font-bold">{fmt.pct(sessionPct)}</span>
+                    </Link>
+                  )}
+                </div>
+              )
+            }
+            sub={displaySummary ? `Aportado: ${fmt.currency(displaySummary.total_invested)}` : undefined}
+            tag={
+              displaySummary
+                ? `${displaySummary.num_positions ?? positions.length} pos. (act. ${updatedPositionsCount}/${displaySummary.num_positions ?? positions.length})`
+                : undefined
+            }
+            tagColor="blue"
+            borderAccent="blue"
+            delay={0}
+            className="lg:col-span-2"
+            icon={<Wallet size={16} className="text-blue-500 dark:text-blue-400" />}
+            iconBg="bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400"
+            loading={isGlobalUpdating}
+          />
+          <KpiCard
+            hoverGlow
+            label="Rendimiento Anualizado"
+            value={
+              analytics?.annualized_return !== undefined ? (
+                <AnimatedNumber value={analytics.annualized_return} format={fmt.pct} />
+              ) : displaySummary ? (
+                <AnimatedNumber value={displaySummary.total_pnl_pct} format={fmt.pct} />
+              ) : (
+                '—'
+              )
+            }
+            valueColor="text-emerald-600 dark:text-emerald-400"
+            tag="TIR Anual"
+            tagColor="emerald"
+            borderAccent="emerald"
+            sub="tasa ponderada por flujos desde inicio"
+            delay={0.05}
+            icon={<TrendingUp size={16} className="text-emerald-500 dark:text-emerald-400" />}
+            iconBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400"
+            loading={isGlobalUpdating || isPeriodUpdating}
+          />
+          <KpiCard
+            hoverGlow
+            label="Plusvalía Acumulada"
+            value={
+              displaySummary ? (
+                <AnimatedNumber
+                  value={displaySummary.total_pnl}
+                  format={(n) => `${n >= 0 ? '+' : ''}${fmt.currency(n)}`}
+                />
+              ) : (
+                '—'
+              )
+            }
+            valueColor={pnlPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
+            tag={pnlPositive ? "+ Ganancia" : "- Pérdida"}
+            tagColor={pnlPositive ? "emerald" : "rose"}
+            borderAccent={pnlPositive ? "emerald" : "rose"}
+            sub={
+              displaySummary?.realized_pnl && displaySummary.realized_pnl > 0
+                ? `latente (+${fmt.currency(displaySummary.realized_pnl)} cobrados)`
+                : "ganancia neta total latente"
+            }
+            delay={0.1}
+            icon={<ArrowUpRight size={16} className={pnlPositive ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"} />}
+            iconBg={pnlPositive ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"}
+            loading={isGlobalUpdating}
+          />
+          <div
+            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card transition-all duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]"
+            title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
+          >
+            <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/[0.12] z-10" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{ backgroundImage: 'radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.05), transparent 58%), linear-gradient(90deg, rgba(99, 102, 241, 0.015), transparent 78%)' }}
+            />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                  <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
+                    Total Invertido
+                  </p>
+                  {isGlobalUpdating && <LoadingDot />}
+                </div>
+                <span data-private className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold shrink-0">
+                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                  {currentUser?.isDemo ? 'DCA 1.200 €/m' : 'DCA 416,66 €/m'}
+                </span>
+              </div>
+
+              <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isRefreshingPrices ? "opacity-65" : "opacity-100")}>
+                <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
+                  <AnimatedNumber value={displaySummary?.total_invested} format={fmt.currency} />
+                </div>
+                <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
+                  {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos. (act. {updatedPositionsCount}/{displaySummary?.num_positions ?? positions.length})
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* 2. Métricas del Periodo Seleccionado */}
       <div className="space-y-1.5 pt-0.5">
