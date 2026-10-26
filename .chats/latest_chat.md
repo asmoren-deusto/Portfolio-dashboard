@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 20:50:06
+- **Fecha de exportación:** 2026-10-26 20:56:33
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 121
+- **Total de interacciones registradas:** 123
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1913,5 +1913,36 @@ Sincronizado y publicado en Git con la versión **v3.4.31**.
 ### 👤 Usuario (2026-10-26 19:35:08)
 
 mira si a la izquierda de los puntos puedes poner un tooltip pequeño con la entidad del color que toque (BBVA, TradeRep, Indexa, etc)
+
+---
+
+### 🤖 Asistente (2026-10-26 19:50:08)
+
+Ya tienes implementados los **tooltips pequeños por entidad junto a los puntos de corte** en [PerformanceChart.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/PerformanceChart.tsx):
+
+### ✨ ¿Cómo funciona?
+1. **Posicionamiento a la izquierda de cada punto:**
+   - Al pasar el cursor sobre el gráfico, se calculan en tiempo real las coordenadas `(x, y)` exactas de cada punto de corte en la línea vertical discontinua.
+   - Justo a la izquierda de cada punto (con gap de 9px) se muestra un tooltip estilizado tipo píldora (`translate(-100%, -50%)`).
+   - Si el cursor se aproxima al borde izquierdo del gráfico, se adaptan automáticamente a la derecha para no salirse del contenedor.
+
+2. **Identificación por entidad y color:**
+   - **Indexa:** Punto y borde ámbar (`#f59e0b`), texto `Indexa` y su importe correspondiente en esa fecha.
+   - **BBVA:** Punto y borde esmeralda (`#10b981`), texto `BBVA` y su importe.
+   - **TradeRep:** Punto y borde violeta (`#8b5cf6`), texto `TradeRep` y su importe.
+   - **Aportado / Invertido:** Punto y borde índigo (`#6366f1`), texto `Aportado` y el capital aportado.
+
+3. **Sistema anticolisión vertical:**
+   - Si dos curvas o puntos están muy próximos en el eje Y en una fecha concreta, un algoritmo de relajación vertical garantiza una separación mínima de `22px` para que todos los tooltips se lean con total claridad y sin solaparse.
+
+---
+
+Sincronizado y publicado en Git con la versión **v3.4.32**.
+
+---
+
+### 👤 Usuario (2026-10-26 19:44:58)
+
+esto de bbva no es correcto, está en 20000 aprox al haber comprado ya el bfg de salud. los consolidados estan bien pero bbva no
 
 ---

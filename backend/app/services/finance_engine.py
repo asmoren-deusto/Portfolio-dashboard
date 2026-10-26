@@ -151,6 +151,8 @@ def calculate_portfolio_value_series(
     transactions: list[dict],
     price_history: dict[str, list[dict]],
     start_date: str | None = None,
+    all_transactions: list[dict] | None = None,
+    broker: str | None = None,
 ) -> list[dict]:
     """
     Reconstruct portfolio value over time.
@@ -233,7 +235,16 @@ def calculate_portfolio_value_series(
             total += pos["shares"] * price
 
         # Account for cash in transit and deferred fiscal cost basis in transit during internal fund transfers
-        tb = calculate_traspaso_balances(current_active_tx)
+        if all_transactions is not None:
+            active_all = [t for t in all_transactions if t["date"] <= d_str]
+            tb_global = calculate_traspaso_balances(active_all)
+            if broker and broker.lower() not in ["all", "todos"]:
+                b_clean = broker.lower().replace("_", "").replace("-", "")
+                tb = {k: v for k, v in tb_global.items() if k.lower().replace("_", "").replace("-", "") == b_clean}
+            else:
+                tb = tb_global
+        else:
+            tb = calculate_traspaso_balances(current_active_tx)
         cash_in_transit = sum(d["market_value"] for d in tb.values())
         cost_in_transit = sum(d["cost_basis"] for d in tb.values())
         total += cash_in_transit
@@ -321,6 +332,8 @@ def calculate_portfolio_value_series(
 def calculate_portfolio_nav_series(
     transactions: list[dict],
     price_history: dict[str, list[dict]],
+    all_transactions: list[dict] | None = None,
+    broker: str | None = None,
 ) -> list[dict]:
     """
     Computes a true time-weighted unit NAV series (starting at 100.0)
@@ -386,7 +399,16 @@ def calculate_portfolio_nav_series(
             cur_total_val += pos["shares"] * price
 
         # Account for cash in transit during internal fund transfers (traspasos)
-        tb = calculate_traspaso_balances(current_active_tx)
+        if all_transactions is not None:
+            active_all = [t for t in all_transactions if t["date"] <= d_str]
+            tb_global = calculate_traspaso_balances(active_all)
+            if broker and broker.lower() not in ["all", "todos"]:
+                b_clean = broker.lower().replace("_", "").replace("-", "")
+                tb = {k: v for k, v in tb_global.items() if k.lower().replace("_", "").replace("-", "") == b_clean}
+            else:
+                tb = tb_global
+        else:
+            tb = calculate_traspaso_balances(current_active_tx)
         cash_in_transit = sum(d["market_value"] for d in tb.values())
         cur_total_val += cash_in_transit
 

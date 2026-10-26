@@ -99,7 +99,14 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
     total_invested = sum(r[1] for r in pos_results if isinstance(r, tuple))
 
     # Account for cash in transit and deferred fiscal cost basis in transit during internal fund transfers (traspasos)
-    traspaso_balances = calculate_traspaso_balances(transactions)
+    all_user_tx = _get_all_transactions(db, user_id, broker=None)
+    global_tb = calculate_traspaso_balances(all_user_tx)
+    if broker and broker.lower() not in ["all", "todos"]:
+        b_clean = broker.lower().replace("_", "").replace("-", "")
+        traspaso_balances = {k: v for k, v in global_tb.items() if k.lower().replace("_", "").replace("-", "") == b_clean}
+    else:
+        traspaso_balances = global_tb
+
     cash_in_transit = sum(d["market_value"] for d in traspaso_balances.values())
     cost_in_transit = sum(d["cost_basis"] for d in traspaso_balances.values())
     total_value += cash_in_transit
@@ -315,7 +322,13 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
 
 
     # Account for cash in transit and deferred fiscal cost basis during internal fund transfers (traspasos)
-    traspaso_balances = calculate_traspaso_balances(transactions)
+    all_user_tx = _get_all_transactions(db, user_id, broker=None)
+    global_tb = calculate_traspaso_balances(all_user_tx)
+    if broker and broker.lower() not in ["all", "todos"]:
+        b_clean = broker.lower().replace("_", "").replace("-", "")
+        traspaso_balances = {k: v for k, v in global_tb.items() if k.lower().replace("_", "").replace("-", "") == b_clean}
+    else:
+        traspaso_balances = global_tb
     for b, b_data in sorted(traspaso_balances.items()):
         b_market = b_data["market_value"]
         b_cost = b_data["cost_basis"]
@@ -639,7 +652,14 @@ async def get_performance(
         elif curr_p is not None and curr_p >= 0:
             price_history[isin] = [{"date": curr_p_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
-    value_series = calculate_portfolio_value_series(transactions, price_history, start_date=effective_start)
+    all_user_tx = _get_all_transactions(db, user_id, broker=None)
+    value_series = calculate_portfolio_value_series(
+        transactions,
+        price_history,
+        start_date=effective_start,
+        all_transactions=all_user_tx,
+        broker=broker,
+    )
 
     # Sync latest point exactly with current portfolio summary to prevent UI discrepancies
     try:
@@ -779,10 +799,22 @@ async def get_benchmark_comparison(
             price_history[isin] = [{"date": datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
     # 1. Compute true unitized Time-Weighted Return (TWR) using True NAV Engine
-    val_series = calculate_portfolio_value_series(transactions, price_history, start_date=effective_start)
+    all_user_tx = _get_all_transactions(db, user_id, broker=None)
+    val_series = calculate_portfolio_value_series(
+        transactions,
+        price_history,
+        start_date=effective_start,
+        all_transactions=all_user_tx,
+        broker=broker,
+    )
     val_map = {p["date"]: p for p in val_series}
 
-    nav_series = calculate_portfolio_nav_series(transactions, price_history)
+    nav_series = calculate_portfolio_nav_series(
+        transactions,
+        price_history,
+        all_transactions=all_user_tx,
+        broker=broker,
+    )
     if effective_start:
         nav_points = [p for p in nav_series if p["date"] >= effective_start and p["date"] in val_map]
     else:
@@ -1030,8 +1062,19 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
         elif curr_p and curr_p > 0:
             price_history[isin] = [{"date": curr_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
-    value_series = calculate_portfolio_value_series(transactions, price_history)
-    nav_series = calculate_portfolio_nav_series(transactions, price_history)
+    all_user_tx = _get_all_transactions(db, user_id, broker=None)
+    value_series = calculate_portfolio_value_series(
+        transactions,
+        price_history,
+        all_transactions=all_user_tx,
+        broker=broker,
+    )
+    nav_series = calculate_portfolio_nav_series(
+        transactions,
+        price_history,
+        all_transactions=all_user_tx,
+        broker=broker,
+    )
 
     current_val = value_series[-1]["value"] if value_series else 0.0
     current_invested = value_series[-1]["invested"] if value_series else 0.0
