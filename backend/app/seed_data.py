@@ -1042,6 +1042,42 @@ PRICES = json.loads(r'''[
     "date": "2026-10-20",
     "price": 180.91,
     "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-21",
+    "price": 8.7389,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-22",
+    "price": 8.5454,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "date": "2026-10-23",
+    "price": 8.5541,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-21",
+    "price": 14.643,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-22",
+    "price": 14.5065,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "date": "2026-10-23",
+    "price": 14.4379,
+    "currency": "EUR"
   }
 ]''')
 
@@ -3121,5 +3157,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-10-20",
     "broker": "bbva",
     "notes": "Venta/Reembolso de valores (Retención fiscal: 167,83 €, Líquido: 6.030,83 €, Orden: 3026288535376785)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5M476",
+    "type": "sell",
+    "shares": 681.684,
+    "price": 8.7389,
+    "amount": 5957.17,
+    "fees": 0.0,
+    "date": "2026-10-21",
+    "broker": "bbva",
+    "notes": "Traspaso fondo en contra (orden 9026289258665061, ref 0232188581103)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BYX5NX33",
+    "type": "sell",
+    "shares": 1389.009,
+    "price": 14.5065,
+    "amount": 20149.66,
+    "fees": 0.0,
+    "date": "2026-10-22",
+    "broker": "bbva",
+    "notes": "Traspaso fondo en contra (orden 9026292258674208, ref 0232188583771)"
   }
 ]''')

@@ -148,9 +148,15 @@ def calculate_portfolio_value_series(
             total += pos["shares"] * price
 
         # Account for cash in transit during internal fund transfers (traspasos internos).
-        traspaso_sells = sum(tx["amount"] for tx in current_active_tx if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
-        traspaso_buys = sum(tx["amount"] for tx in current_active_tx if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
-        cash_in_transit = max(0.0, traspaso_sells - traspaso_buys)
+        distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in current_active_tx)
+        cash_in_transit = 0.0
+        for b in distinct_brokers:
+            if b in ("trade_republic", "traderepublic"):
+                continue
+            b_tx_cit = [tx for tx in current_active_tx if (tx.get("broker") or "myinvestor").lower() == b]
+            b_s = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
+            b_b = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
+            cash_in_transit += max(0.0, b_s - b_b)
         total += cash_in_transit
 
         # Exact active invested capital as of this date (excluding non-fund transfer accounts)
@@ -214,9 +220,11 @@ def calculate_portfolio_value_series(
                 b_val += pos["shares"] * price
                 b_inv += pos["invested_amount"]
 
-            if b == "myinvestor":
-                b_val += cash_in_transit
-                b_inv += cash_in_transit
+            b_traspaso_sells = sum(tx["amount"] for tx in b_tx if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
+            b_traspaso_buys = sum(tx["amount"] for tx in b_tx if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
+            b_cit = max(0.0, b_traspaso_sells - b_traspaso_buys)
+            b_val += b_cit
+            b_inv += b_cit
 
             if b_val > 0 or b_inv > 0:
                 brokers_data[b] = {
@@ -277,6 +285,7 @@ def calculate_portfolio_nav_series(
     nav_series = []
     prev_positions = None
     prev_total_val = None
+    prev_cit = 0.0
 
     current_active_tx = []
     current_positions = {}
@@ -303,6 +312,18 @@ def calculate_portfolio_nav_series(
                 price = pos.get("avg_cost", 0)
             cur_total_val += pos["shares"] * price
 
+        # Account for cash in transit during internal fund transfers (traspasos)
+        distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in current_active_tx)
+        cash_in_transit = 0.0
+        for b in distinct_brokers:
+            if b in ("trade_republic", "traderepublic"):
+                continue
+            b_tx_cit = [tx for tx in current_active_tx if (tx.get("broker") or "myinvestor").lower() == b]
+            b_s = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
+            b_b = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
+            cash_in_transit += max(0.0, b_s - b_b)
+        cur_total_val += cash_in_transit
+
         if cur_total_val <= 0:
             continue
 
@@ -313,6 +334,7 @@ def calculate_portfolio_nav_series(
                 if price is None or (price <= 0 and isin != "TR_TRANSFER"):
                     price = pos.get("avg_cost", 0)
                 val_market_prev += pos["shares"] * price
+            val_market_prev += prev_cit
 
             r_t = (val_market_prev / prev_total_val) - 1.0
             r_t = max(-0.15, min(0.15, r_t))
@@ -323,6 +345,7 @@ def calculate_portfolio_nav_series(
 
         prev_positions = cur_positions
         prev_total_val = cur_total_val
+        prev_cit = cash_in_transit
 
     return nav_series
 

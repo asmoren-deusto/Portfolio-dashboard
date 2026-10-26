@@ -21,6 +21,7 @@ from app.services.finance_engine import (
     calculate_sharpe,
     calculate_period_return,
     calculate_xirr,
+    is_internal_traspaso,
 )
 from app.routers.auth import get_current_user_id
 
@@ -90,15 +91,29 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
     total_value = sum(r[0] for r in pos_results if isinstance(r, tuple))
     total_invested = sum(r[1] for r in pos_results if isinstance(r, tuple))
 
+    # Account for cash in transit during internal fund transfers (traspasos)
+    distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in transactions)
+    cash_in_transit = 0.0
+    for b in distinct_brokers:
+        if b in ("trade_republic", "traderepublic"):
+            continue
+        b_tx_cit = [tx for tx in transactions if (tx.get("broker") or "myinvestor").lower() == b]
+        b_s = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
+        b_b = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
+        cash_in_transit += max(0.0, b_s - b_b)
+    total_value += cash_in_transit
+    total_invested += cash_in_transit
+
     total_pnl = total_value - total_invested
     total_pnl_pct = (total_pnl / total_invested * 100) if total_invested > 0 else 0
+    num_pos = len(active_positions) + (1 if cash_in_transit > 0.01 else 0)
 
     return PortfolioSummary(
         total_value=round(total_value, 2),
         total_invested=round(total_invested, 2),
         total_pnl=round(total_pnl, 2),
         total_pnl_pct=round(total_pnl_pct, 2),
-        num_positions=len(active_positions),
+        num_positions=num_pos,
         last_updated=datetime.now().isoformat(),
     )
 
@@ -252,6 +267,41 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             total_value += item["current_value"]
             position_data.append(item)
 
+
+    # Account for cash in transit during internal fund transfers (traspasos)
+    distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in transactions)
+    for b in sorted(distinct_brokers):
+        if b in ("trade_republic", "traderepublic"):
+            continue
+        b_tx_cit = [tx for tx in transactions if (tx.get("broker") or "myinvestor").lower() == b]
+        b_s = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
+        b_b = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
+        b_cit = max(0.0, b_s - b_b)
+        if b_cit > 0.01:
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            item = {
+                "isin": "CASH_TRASPASO",
+                "name": f"Liquidez en Traspaso ({b.upper()} - En tránsito)",
+                "ticker": "CASH",
+                "domain": f"{b}.es" if b in ("bbva", "myinvestor", "indexa") else None,
+                "asset_type": "fund",
+                "currency": "EUR",
+                "shares": round(b_cit, 2),
+                "avg_cost": 1.0,
+                "current_price": 1.0,
+                "current_value": round(b_cit, 2),
+                "invested_amount": round(b_cit, 2),
+                "unrealized_pnl": 0.0,
+                "unrealized_pnl_pct": 0.0,
+                "daily_change": 0.0,
+                "daily_change_pct": 0.0,
+                "broker": b,
+                "ter": 0.0,
+                "last_updated": today_str,
+                "price_date": today_str,
+            }
+            total_value += item["current_value"]
+            position_data.append(item)
 
     # Add weight
     for p in position_data:
