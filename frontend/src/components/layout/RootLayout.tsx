@@ -271,59 +271,65 @@ export function RootLayout() {
 
         <div className={`flex flex-1 flex-col min-h-screen md:transition-all md:duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
           {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop - Opaque solid background with crisp Retina text) */}
-          <header className={`fixed top-0 left-0 right-0 md:sticky z-40 flex items-center justify-between px-3 sm:px-4 pt-[max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))] h-[calc(max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))+42px)] md:h-auto md:pb-2 bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {/* Only show hamburger button when NOT native (native uses bottom MobileTabBar) */}
-              {!isNativePlatform() && (
+          <header className={`fixed top-0 left-0 right-0 md:sticky z-40 bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+            {/* Safe area inset for mobile notch / status bar */}
+            <div className="h-[max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))] md:hidden" aria-hidden="true" />
+
+            {/* Mobile Header Bar: exactly 44px tall, perfectly centered vertically */}
+            <div className="flex items-center justify-between px-3 sm:px-4 h-[44px] md:h-[50px]">
+              <div className="flex items-center gap-1.5 shrink-0">
+                {/* Only show hamburger button when NOT native (native uses bottom MobileTabBar) */}
+                {!isNativePlatform() && (
+                  <button
+                    onClick={toggleMobileSidebar}
+                    className="p-1.5 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] active:scale-95 transition-all"
+                    aria-label="Abrir menú"
+                    title="Abrir menú lateral"
+                  >
+                    <Menu size={20} />
+                  </button>
+                )}
                 <button
-                  onClick={toggleMobileSidebar}
-                  className="p-1.5 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] active:scale-95 transition-all"
-                  aria-label="Abrir menú"
-                  title="Abrir menú lateral"
+                  type="button"
+                  onClick={() => setUserProfileOpen(true)}
+                  className="flex items-center gap-1.5 py-1 px-1.5 -ml-1 rounded-xl hover:bg-slate-100/80 dark:hover:bg-white/[0.06] active:scale-95 transition-all text-left cursor-pointer"
+                  title="Ver cuenta de inversor y perfil"
+                  aria-label="Cuenta de inversor"
                 >
-                  <Menu size={20} />
+                  <AppLogo size={26} />
+                  <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white">
+                    Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
+                  </span>
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setUserProfileOpen(true)}
-                className="flex items-center gap-1.5 py-1 px-1.5 -ml-1 rounded-xl hover:bg-slate-100/80 dark:hover:bg-white/[0.06] active:scale-95 transition-all text-left cursor-pointer"
-                title="Ver cuenta de inversor y perfil"
-                aria-label="Cuenta de inversor"
-              >
-                <AppLogo size={26} />
-                <span className="font-bold text-sm tracking-tight text-slate-950 dark:text-white">
-                  Portfolio<span className="text-blue-600 dark:text-blue-400">Pro</span>
-                </span>
-              </button>
-            </div>
+              </div>
 
-            {/* Quick pin back button on desktop */}
-            <div className="hidden md:flex items-center gap-2">
-              <button
-                onClick={toggleSidebarCollapsed}
-                className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.08] transition-all"
-                title="Fijar el panel lateral de nuevo"
-              >
-                <PanelLeftOpen size={14} />
-                <span>Fijar panel</span>
-              </button>
-            </div>
+              {/* Quick pin back button on desktop */}
+              <div className="hidden md:flex items-center gap-2">
+                <button
+                  onClick={toggleSidebarCollapsed}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.08] transition-all"
+                  title="Fijar el panel lateral de nuevo"
+                >
+                  <PanelLeftOpen size={14} />
+                  <span>Fijar panel</span>
+                </button>
+              </div>
 
-            {/* Controls on Mobile in top header (Period selector + Actions; Broker moved to logo popup on native) */}
-            <div className="flex md:hidden items-center ml-auto">
-              <HeaderActions
-                compact
-                showPeriod
-                showBroker={!isNativePlatform()}
-                hideUser={isNativePlatform()}
-                hideRefresh={isNativePlatform()}
-              />
+              {/* Controls on Mobile in top header (Period selector + Actions; Broker moved to logo popup on native) */}
+              <div className="flex md:hidden items-center ml-auto">
+                <HeaderActions
+                  compact
+                  showPeriod
+                  showBroker={!isNativePlatform()}
+                  hideUser={isNativePlatform()}
+                  hideRefresh={isNativePlatform()}
+                />
+              </div>
             </div>
           </header>
 
           {/* Spacer to prevent content overlap with fixed mobile header - calibrated 1:1 with header height for 0px gap with ticker */}
-          <div className="h-[calc(max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))+42px)] md:hidden shrink-0" aria-hidden="true" />
+          <div className="h-[calc(max(0.65rem,calc(env(safe-area-inset-top,0px)+4px))+44px)] md:hidden shrink-0" aria-hidden="true" />
 
           {/* Top White Bar with Selectors (Desktop only) - Exactly 60px sticky top bar */}
           <div className="relative z-30 hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 md:sticky md:top-0 shadow-xs">
