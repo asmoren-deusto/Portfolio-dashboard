@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 21:04:31
+- **Fecha de exportación:** 2026-10-26 21:10:36
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 125
+- **Total de interacciones registradas:** 127
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1979,5 +1979,45 @@ Sincronizado y publicado en Git con la versión **v3.4.33**.
 ### 👤 Usuario (2026-10-26 19:53:50)
 
 revisa el Desglose de Fondos y Réplicas para los nuevos fondos/bonos comprados
+
+---
+
+### 🤖 Asistente (2026-10-26 20:04:33)
+
+He revisado y configurado en detalle el módulo **Desglose de Fondos y Réplicas** (cartera simulada intradía y seguimiento en vivo) para incorporar con precisión los dos nuevos activos comprados:
+
+---
+
+### 1. Fondos y Réplicas Asignadas
+
+| Activo en Cartera | Entidad | ISIN | ETF Réplica | Ticker | Categoría / Descripción | Cobertura Divisa (USD FX) | Pre-Market / Futuros Guía |
+| :--- | :---: | :---: | :---: | :---: | :--- | :---: | :---: |
+| **BGF World Healthscience Fund A2** | `MyInvestor` | `LU0171307068` | **iShares Global Healthcare ETF** | `IXJ` | *Sector Salud y Farmacia Global* | 70% USD (~70% pharma/biotech USA: Eli Lilly, UNH, AbbVie, Roche, Novo Nordisk) | `ES=F` (Futuros S&P 500 24h) |
+| **España Gobierno 5,75% Vto 30-Jul-2032** | `TradeRep` | `ES0000012411` | **SPDR International Treasury Bond** | `BWX` | *Renta Fija Soberana / Deuda Pública* | **0% USD** (100% EUR soberano, sin riesgo divisa) | `ZN=F` (Futuros 10-Yr T-Note 24h) |
+
+---
+
+### 2. Cambios Implementados
+
+1. **Backend (`backend/app/routers/market.py`):**
+   - **`PORTFOLIO_ETF_PROXIES`**: Asignado `LU0171307068` $\rightarrow$ `IXJ` (*iShares Global Healthcare ETF*) y `ES0000012411` $\rightarrow$ `BWX` (*SPDR Bloomberg International Treasury Bond*), eliminando el fallback genérico a `URTH` que desvirtuaba las ponderaciones.
+   - **`ETF_PREMARKET_LIVE_PROXIES`**: Conectado `IXJ` a `ES=F` y `BWX` a `ZN=F` (futuros 10 años CME Globex) para mantener cotizaciones indicativas fuera de la sesión regular americana.
+   - **Análisis de Divisa (`USD_EXPOSURE_WEIGHTS`)**: El bono español se calcula con **0% exposición a USD**, respetando que la deuda pública española en euros no sufre volatilidad por fluctuaciones del tipo de cambio EUR/USD.
+   - **Normalización de Broker**: El filtro de broker reconoce `'traderep'`, `'trade'` y `'traderepublic'` para que al filtrar por `TradeRep` en el selector superior la simulación muestre exclusivamente la posición del bono.
+
+2. **Frontend (`SimulatedPortfolioCard.tsx` y `CompanyLogo.tsx`):**
+   - Añadidos `IXJ` y `BWX` a [ETF_INFO_MAP](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx#L84-L95) con sus categorías de mercado correspondientes (*Sector Salud y Farmacia Global* y *Renta Fija Soberana / Deuda Pública*).
+   - Añadido el badge de broker (`BrokerBadge`) junto al ISIN en la columna de fondo en cartera para identificar rápidamente si pertenece a `MyInves`, `TradeRep` o `Indexa`.
+   - Soporte de iconos dinámicos en [CompanyLogo.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx#L55-L65) para `IXJ` e `ISharesLogo` y `BWX`.
+
+3. **Verificación & Release:**
+   - Testeado el endpoint de cartera simulada con `FastAPI TestClient`: 8 posiciones activas valoradas en **54.780,52 €**, con sus pesos individuales (IXJ 10,87% y BWX 7,30%) y cotizaciones intradía en tiempo real.
+   - Build de frontend validado y cambios sincronizados en Git bajo la versión **v3.4.34**.
+
+---
+
+### 👤 Usuario (2026-10-26 19:57:20)
+
+en el donut de distribucion mete una seleccion por geografia de los activos
 
 ---

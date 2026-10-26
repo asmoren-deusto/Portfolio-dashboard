@@ -243,12 +243,26 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'fixed_income',
     currencies: { EUR: 1.0 },
   },
+  // iShares Emerging Markets Index (IE000QAZP7L2)
+  IE000QAZP7L2: {
+    geo: { emerging: 1.0, north_america: 0.0, europe: 0.0, japan: 0.0, pacific: 0.0, other: 0.0 },
+    sectors: { tech: 0.23, financials: 0.22, consumer_disc: 0.13, comms: 0.09, materials: 0.08, industrials: 0.07, consumer_stap: 0.06, health: 0.04, energy: 0.04, utilities: 0.04 },
+    assetClass: 'equity',
+    currencies: { USD: 0.25, Other: 0.75 },
+  },
+  // Indexa Más Rentabilidad Acciones EPSV (0192#0011)
+  '0192#0011': {
+    geo: { north_america: 0.62, europe: 0.18, emerging: 0.10, japan: 0.06, pacific: 0.04 },
+    sectors: { tech: 0.24, financials: 0.16, health: 0.12, industrials: 0.11, consumer_disc: 0.10, comms: 0.08, consumer_stap: 0.06, energy: 0.05, materials: 0.04, utilities: 0.04 },
+    assetClass: 'equity',
+    currencies: { USD: 0.62, EUR: 0.18, Other: 0.20 },
+  },
 }
 
 /**
  * Intelligent heuristic fallback for any arbitrary position or stock
  */
-function resolveAssetTaxonomy(pos: Position): AssetTaxonomy {
+export function resolveAssetTaxonomy(pos: Position): AssetTaxonomy {
   const isin = pos.isin?.toUpperCase() || ''
   if (ASSET_REGISTRY[isin]) {
     return ASSET_REGISTRY[isin]

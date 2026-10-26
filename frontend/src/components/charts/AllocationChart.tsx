@@ -4,10 +4,11 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { PALETTE_LIGHT, PALETTE_DARK, fmt } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
 import type { Position } from '@/lib/mockData'
+import { analyzePortfolioDiversification, resolveAssetTaxonomy } from '@/lib/diversificationEngine'
 
 interface AllocationChartProps {
   positions: Position[]
-  mode?: 'asset' | 'type' | 'broker'
+  mode?: 'asset' | 'type' | 'broker' | 'geo'
   showLegend?: boolean
   hoveredIsin?: string | null
   onHoverIsin?: (isin: string | null) => void
@@ -61,6 +62,7 @@ export function AllocationChart({
     fullName: string
     value: number
     pct: number
+    color?: string
   }[]
 
   if (mode === 'type') {
@@ -94,6 +96,19 @@ export function AllocationChart({
       value: v,
       pct: totalGroup > 0 ? (v / totalGroup) * 100 : 0,
     }))
+  } else if (mode === 'geo') {
+    const diagnosis = analyzePortfolioDiversification(positions)
+    const totalGroup = diagnosis.totalPortfolioValue || positions.reduce((s, p) => s + (p.current_value ?? 0), 0)
+    data = diagnosis.geographicBreakdown
+      .filter((g) => g.portfolioValue > 0.01)
+      .map((g) => ({
+        key: g.region.id,
+        name: g.region.shortName,
+        fullName: `${g.region.flag} ${g.region.name}`,
+        value: g.portfolioValue,
+        pct: totalGroup > 0 ? (g.portfolioValue / totalGroup) * 100 : 0,
+        color: g.region.color,
+      }))
   } else {
     data = positions.map((p) => ({
       isin: p.isin,
@@ -121,6 +136,15 @@ export function AllocationChart({
   if (hoveredIsin) {
     if (mode === 'asset') {
       externalIndex = data.findIndex((d) => d.isin === hoveredIsin)
+    } else if (mode === 'geo') {
+      const pos = positions.find((p) => p.isin === hoveredIsin)
+      if (pos) {
+        const tax = resolveAssetTaxonomy(pos)
+        const topReg = Object.entries(tax.geo).sort((a, b) => b[1] - a[1])[0]
+        if (topReg) {
+          externalIndex = data.findIndex((d) => d.key === topReg[0])
+        }
+      }
     } else {
       const pos = positions.find((p) => p.isin === hoveredIsin)
       const targetType = pos?.asset_type || 'fund'
@@ -169,8 +193,8 @@ export function AllocationChart({
             >
               {data.map((d, i) => (
                 <Cell
-                  key={d.isin || d.name || i}
-                  fill={palette[i % palette.length]}
+                  key={d.key || d.isin || d.name || i}
+                  fill={d.color || palette[i % palette.length]}
                   opacity={activeIndex === null || activeIndex === i ? 1 : 0.4}
                   style={{
                     cursor: 'pointer',
@@ -222,7 +246,7 @@ export function AllocationChart({
                     {fmt.currency(total)}
                   </span>
                   <span data-private className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                    {data.length} {mode === 'asset' ? 'posiciones' : 'tipos'}
+                    {data.length} {mode === 'asset' ? 'posiciones' : mode === 'geo' ? 'regiones' : 'tipos'}
                   </span>
                 </motion.div>
               )}
@@ -259,7 +283,7 @@ export function AllocationChart({
                 <div
                   className="h-2 w-2 flex-shrink-0 rounded-full transition-transform"
                   style={{
-                    background: palette[i % palette.length],
+                    background: d.color || palette[i % palette.length],
                     transform: isHovered ? 'scale(1.25)' : 'scale(1)',
                   }}
                 />
