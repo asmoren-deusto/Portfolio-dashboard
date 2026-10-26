@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-26 20:20:20
+- **Fecha de exportación:** 2026-10-26 20:30:00
 - **ID de Conversación:** `66dd6993-1b90-41d9-87ac-989579a1269b`
-- **Total de interacciones registradas:** 112
+- **Total de interacciones registradas:** 114
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -1806,5 +1806,22 @@ Compilación verificada con éxito (`npm run build`) y cambios sincronizados y s
 ### 👤 Usuario (2026-10-26 19:17:20)
 
 el NAV de LU0171307068 es del dia 26 de octubre
+
+---
+
+### 🤖 Asistente (2026-10-26 19:20:23)
+
+He actualizado la fecha oficial del NAV para **BlackRock Global Funds - World Healthscience Fund A2 (EUR)** (`LU0171307068`):
+
+- **Fecha fijada:** `2026-10-26` (26 de octubre).
+- **Valor Liquidativo (NAV):** `73,44 €`.
+- Se ha purgado cualquier registro posterior en [seed_data.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/seed_data.py) y en la base de datos [portfolio.db](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/data/portfolio.db), de modo que tanto en la tabla de **Posiciones** como en el motor de precios se muestra con fecha exacta del **26 de octubre de 2026**.
+- Cambios compilados y sincronizados con Git (**v3.4.28**).
+
+---
+
+### 👤 Usuario (2026-10-26 19:24:03)
+
+cambia el icono de blackrock por otro, pon icono al bono español. el badge de Trade republic que ponga sólo TRADE y añadelo al selector de entidades superior permitiendo filtrar por el. asegurate de ajustar todo
 
 ---

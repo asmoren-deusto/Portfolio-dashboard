@@ -93,6 +93,72 @@ function getAvatarGradient(str: string): string {
   return gradients[index]
 }
 
+export const SpanishBondLogo: React.FC<{ sizeClasses: string; className?: string; title?: string }> = ({
+  sizeClasses,
+  className = '',
+  title = 'España - Deuda Pública',
+}) => {
+  return (
+    <div
+      className={`${sizeClasses} rounded-full flex items-center justify-center shrink-0 border border-amber-500/40 shadow-xs overflow-hidden select-none relative ${className}`}
+      title={title}
+    >
+      <svg viewBox="0 0 32 32" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        {/* Spanish Flag: 25% red, 50% yellow, 25% red */}
+        <rect width="32" height="8" fill="#AA151B" />
+        <rect y="8" width="32" height="16" fill="#F1BF00" />
+        <rect y="24" width="32" height="8" fill="#AA151B" />
+        {/* Royal Crown / Sovereign Coat of Arms emblem */}
+        <g transform="translate(16, 16) scale(0.92)">
+          <circle r="7.2" fill="#FFFFFF" fillOpacity="0.25" />
+          <path
+            d="M-5.5 -2.5 L-4 -4.5 L-2.5 -2.5 L0 -5 L2.5 -2.5 L4 -4.5 L5.5 -2.5 L4.5 3.5 C4.5 5.5 0 6.5 0 6.5 C0 6.5 -4.5 5.5 -4.5 3.5 Z"
+            fill="#8B1015"
+            stroke="#F1BF00"
+            strokeWidth="0.8"
+            strokeLinejoin="round"
+          />
+          <line x1="0" y1="-1" x2="0" y2="3.2" stroke="#F1BF00" strokeWidth="0.9" />
+          <line x1="-2.2" y1="1" x2="2.2" y2="1" stroke="#F1BF00" strokeWidth="0.9" />
+          <circle cx="-4" cy="-4.8" r="0.6" fill="#FFFFFF" />
+          <circle cx="0" cy="-5.3" r="0.6" fill="#FFFFFF" />
+          <circle cx="4" cy="-4.8" r="0.6" fill="#FFFFFF" />
+        </g>
+      </svg>
+    </div>
+  )
+}
+
+export const BlackRockLogo: React.FC<{ sizeClasses: string; className?: string; title?: string }> = ({
+  sizeClasses,
+  className = '',
+  title = 'BlackRock',
+}) => {
+  return (
+    <div
+      className={`${sizeClasses} rounded-full bg-[#111111] flex items-center justify-center shrink-0 border border-white/20 shadow-xs overflow-hidden select-none ${className}`}
+      title={title}
+    >
+      <svg viewBox="0 0 32 32" className="w-[92%] h-[92%]" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text
+          x="16"
+          y="20.5"
+          textAnchor="middle"
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          fontWeight="900"
+          fontSize="11.5"
+          letterSpacing="0.8"
+          fill="#FFFFFF"
+        >
+          BLK
+        </text>
+        {/* BlackRock signature warm amber brand stripe */}
+        <rect x="7" y="23.5" width="18" height="2" rx="1" fill="#F59E0B" />
+      </svg>
+    </div>
+  )
+}
+
 export const ISharesLogo: React.FC<{ sizeClasses: string; className?: string; title?: string }> = ({
   sizeClasses,
   className = '',
@@ -211,7 +277,8 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     else if (nl.includes('cobas')) targetDomain = 'cobasam.com'
     else if (nl.includes('azvalor')) targetDomain = 'azvalor.com'
     else if (nl.includes('fidelity')) targetDomain = 'fidelity.com'
-    else if (nl.includes('ishares') || nl.includes('blackrock')) targetDomain = 'ishares.com'
+    else if (nl.includes('blackrock')) targetDomain = 'blackrock.com'
+    else if (nl.includes('ishares')) targetDomain = 'ishares.com'
     else if (nl.includes('vanguard')) targetDomain = 'vanguard.com'
     else if (nl.includes('robeco')) targetDomain = 'robeco.com'
     else if (nl.includes('polar')) targetDomain = 'polarcapital.co.uk'
@@ -221,14 +288,26 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     else if (nl.includes('kutxabank') || nl.includes('baskepensiones')) targetDomain = 'kutxabank.es'
     else if (nl.includes('bbva')) targetDomain = 'bbva.es'
     else if (nl.includes('myinvestor')) targetDomain = 'myinvestor.es'
+    else if (nl.includes('españa') || nl.includes('bono')) targetDomain = 'tesoro.es'
   }
   const cleanDomain = targetDomain?.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
 
+  const isSpanishBond =
+    Boolean(isin && isin === 'ES0000012411') ||
+    (name || '').toLowerCase().includes('españa gobierno') ||
+    (name || '').toLowerCase().includes('bonos y obligaciones del estado') ||
+    (name || '').toLowerCase().includes('bono español')
+
+  const isBlackRock =
+    Boolean(isin && isin === 'LU0171307068') ||
+    ((name || '').toLowerCase().includes('blackrock') && !(name || '').toLowerCase().includes('ishares'))
+
   const isIShares =
-    Boolean(cleanDomain?.includes('ishares')) ||
-    (name || '').toLowerCase().includes('ishares') ||
-    Boolean(ticker && ticker.toLowerCase().includes('ishares')) ||
-    Boolean(isin && (isin === 'IE000QAZP7L2' || isin === 'IE000ZYRH0Q7'))
+    !isBlackRock &&
+    (Boolean(cleanDomain?.includes('ishares')) ||
+      (name || '').toLowerCase().includes('ishares') ||
+      Boolean(ticker && ticker.toLowerCase().includes('ishares')) ||
+      Boolean(isin && (isin === 'IE000QAZP7L2' || isin === 'IE000ZYRH0Q7')))
 
   const isAzvalor =
     Boolean(cleanDomain?.includes('azvalor')) ||
@@ -241,6 +320,14 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     Boolean(isin && isin === 'LU1598719752')
 
   // Direct high-fidelity vector rendering for core funds & asset managers
+  if (isSpanishBond) {
+    return <SpanishBondLogo sizeClasses={sizeClasses} className={className} title={`${name} (España)`} />
+  }
+
+  if (isBlackRock) {
+    return <BlackRockLogo sizeClasses={sizeClasses} className={className} title={`${name} (BlackRock)`} />
+  }
+
   if (isIShares) {
     return <ISharesLogo sizeClasses={sizeClasses} className={className} title={`${name} (iShares)`} />
   }

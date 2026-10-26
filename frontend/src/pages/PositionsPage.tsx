@@ -26,7 +26,7 @@ import { isNativePlatform } from '@/api/config'
 import { usePositions, usePortfolioSummary, useAnalytics } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
-type AssetFilter = 'all' | 'fund' | 'epsv' | 'etf' | 'stock'
+type AssetFilter = 'all' | 'fund' | 'epsv' | 'bond' | 'etf' | 'stock'
 type SortField = 'current_value' | 'unrealized_pnl_pct' | 'unrealized_pnl' | 'name' | 'weight'
 type SortDir = 1 | -1
 
@@ -34,6 +34,7 @@ const FILTER_TABS: { id: AssetFilter; label: string }[] = [
   { id: 'all', label: 'Todos los Activos' },
   { id: 'fund', label: 'Fondos Indexados' },
   { id: 'epsv', label: 'Planes EPSV' },
+  { id: 'bond', label: 'Bonos / Renta Fija' },
   { id: 'etf', label: 'ETFs' },
   { id: 'stock', label: 'Acciones' },
 ]
@@ -58,7 +59,7 @@ export function PositionsPage() {
   const stats = useMemo(() => {
     if (positions.length === 0 && !summary) return null
     const validPositions = positions.filter(
-      (p) => p.isin !== 'TR_TRANSFER' && !p.isin.startsWith('TR_') && !p.name?.includes('Trade Republic')
+      (p) => p.isin !== 'TR_TRANSFER' && !p.isin.startsWith('TR_') && p.name !== 'Cartera Trade Republic'
     )
     const posTotal = validPositions.reduce((sum, p) => sum + (p.current_value || 0), 0)
     const posInvested = validPositions.reduce((sum, p) => sum + (p.invested_amount || 0), 0)
@@ -90,7 +91,7 @@ export function PositionsPage() {
     return [...positions]
       .filter((p) => {
         // Never include Cartera Trade Republic or 0-value placeholder transfer positions
-        if (p.isin === 'TR_TRANSFER' || p.isin.startsWith('TR_') || p.name?.includes('Trade Republic')) return false
+        if (p.isin === 'TR_TRANSFER' || p.isin.startsWith('TR_') || p.name === 'Cartera Trade Republic') return false
         // Asset type filter
         if (activeFilter !== 'all' && p.asset_type !== activeFilter) return false
         // Search query

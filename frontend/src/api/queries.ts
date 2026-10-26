@@ -104,7 +104,7 @@ export async function prefetchAllBrokers(
   // Skip 'all' since the active view already queries 'all'
   const brokers = isDemo
     ? ['kutxabank', 'scalable', 'traderepublic']
-    : ['myinvestor', 'bbva', 'indexa']
+    : ['myinvestor', 'bbva', 'indexa', 'traderepublic']
 
   const userSummaryBase = currentUser?.summary ?? MOCK_SUMMARY
   const userPositionsBase = currentUser?.positions ?? MOCK_POSITIONS

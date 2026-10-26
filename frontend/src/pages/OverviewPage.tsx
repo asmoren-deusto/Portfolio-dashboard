@@ -180,7 +180,7 @@ export function OverviewPage() {
   const displaySummary = React.useMemo(() => {
     if (positions.length > 0) {
       const validPositions = positions.filter(
-        (p) => p.isin !== 'TR_TRANSFER' && !p.isin.startsWith('TR_') && !p.name?.includes('Trade Republic')
+        (p) => p.isin !== 'TR_TRANSFER' && !p.isin.startsWith('TR_') && p.name !== 'Cartera Trade Republic'
       )
       const total_value = validPositions.reduce((acc, p) => acc + (p.current_value || 0), 0)
       const total_invested = validPositions.reduce((acc, p) => acc + (p.invested_amount || 0), 0)
