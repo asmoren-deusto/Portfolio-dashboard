@@ -22,6 +22,7 @@ from app.services.finance_engine import (
     calculate_period_return,
     calculate_xirr,
     is_internal_traspaso,
+    calculate_traspaso_balances,
 )
 from app.routers.auth import get_current_user_id
 
@@ -91,22 +92,16 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
     total_value = sum(r[0] for r in pos_results if isinstance(r, tuple))
     total_invested = sum(r[1] for r in pos_results if isinstance(r, tuple))
 
-    # Account for cash in transit during internal fund transfers (traspasos)
-    distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in transactions)
-    cash_in_transit = 0.0
-    for b in distinct_brokers:
-        if b in ("trade_republic", "traderepublic"):
-            continue
-        b_tx_cit = [tx for tx in transactions if (tx.get("broker") or "myinvestor").lower() == b]
-        b_s = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
-        b_b = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
-        cash_in_transit += max(0.0, b_s - b_b)
+    # Account for cash in transit and deferred fiscal cost basis in transit during internal fund transfers (traspasos)
+    traspaso_balances = calculate_traspaso_balances(transactions)
+    cash_in_transit = sum(d["market_value"] for d in traspaso_balances.values())
+    cost_in_transit = sum(d["cost_basis"] for d in traspaso_balances.values())
     total_value += cash_in_transit
-    total_invested += cash_in_transit
+    total_invested += cost_in_transit
 
     total_pnl = total_value - total_invested
     total_pnl_pct = (total_pnl / total_invested * 100) if total_invested > 0 else 0
-    num_pos = len(active_positions) + (1 if cash_in_transit > 0.01 else 0)
+    num_pos = len(active_positions) + len(traspaso_balances)
 
     return PortfolioSummary(
         total_value=round(total_value, 2),
@@ -268,17 +263,15 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             position_data.append(item)
 
 
-    # Account for cash in transit during internal fund transfers (traspasos)
-    distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in transactions)
-    for b in sorted(distinct_brokers):
-        if b in ("trade_republic", "traderepublic"):
-            continue
-        b_tx_cit = [tx for tx in transactions if (tx.get("broker") or "myinvestor").lower() == b]
-        b_s = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
-        b_b = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
-        b_cit = max(0.0, b_s - b_b)
-        if b_cit > 0.01:
+    # Account for cash in transit and deferred fiscal cost basis during internal fund transfers (traspasos)
+    traspaso_balances = calculate_traspaso_balances(transactions)
+    for b, b_data in sorted(traspaso_balances.items()):
+        b_market = b_data["market_value"]
+        b_cost = b_data["cost_basis"]
+        if b_market > 0.01:
             today_str = datetime.now().strftime("%Y-%m-%d")
+            b_pnl = b_market - b_cost
+            b_pnl_pct = (b_pnl / b_cost * 100) if b_cost > 0 else 0.0
             item = {
                 "isin": "CASH_TRASPASO",
                 "name": f"Liquidez en Traspaso ({b.upper()} - En tránsito)",
@@ -286,13 +279,13 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
                 "domain": f"{b}.es" if b in ("bbva", "myinvestor", "indexa") else None,
                 "asset_type": "fund",
                 "currency": "EUR",
-                "shares": round(b_cit, 2),
-                "avg_cost": 1.0,
+                "shares": round(b_market, 2),
+                "avg_cost": round(b_cost / b_market, 4) if b_market > 0 else 1.0,
                 "current_price": 1.0,
-                "current_value": round(b_cit, 2),
-                "invested_amount": round(b_cit, 2),
-                "unrealized_pnl": 0.0,
-                "unrealized_pnl_pct": 0.0,
+                "current_value": round(b_market, 2),
+                "invested_amount": round(b_cost, 2),
+                "unrealized_pnl": round(b_pnl, 2),
+                "unrealized_pnl_pct": round(b_pnl_pct, 2),
                 "daily_change": 0.0,
                 "daily_change_pct": 0.0,
                 "broker": b,

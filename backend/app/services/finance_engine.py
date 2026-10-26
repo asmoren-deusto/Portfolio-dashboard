@@ -28,6 +28,72 @@ def is_internal_traspaso(notes: str) -> bool:
     return True
 
 
+def calculate_traspaso_balances(transactions: list[dict]) -> dict[str, dict[str, float]]:
+    """
+    Computes both market value in transit and deferred fiscal cost basis in transit per broker.
+    Preserves historical fiscal base cost (coste fiscal originario) and accumulated plusvalía
+    during internal transfers with tax deferral (diferimiento fiscal).
+    Returns: {broker: {"market_value": float, "cost_basis": float, "pnl": float}}
+    """
+    positions: dict[str, dict] = {}
+    broker_sells_market: dict[str, float] = {}
+    broker_sells_cost: dict[str, float] = {}
+    broker_buys_market: dict[str, float] = {}
+    broker_buys_cost: dict[str, float] = {}
+
+    for tx in sorted(transactions, key=lambda x: x["date"]):
+        isin = tx["isin"]
+        broker = (tx.get("broker") or "myinvestor").lower()
+        if broker in ("trade_republic", "traderepublic"):
+            continue
+
+        if isin not in positions:
+            positions[isin] = {"shares": 0.0, "total_cost": 0.0}
+        pos = positions[isin]
+
+        is_traspaso = is_internal_traspaso(tx.get("notes") or "")
+
+        if tx["type"] == "buy":
+            pos["shares"] += tx["shares"]
+            pos["total_cost"] += tx["amount"]
+            if is_traspaso:
+                broker_buys_market[broker] = broker_buys_market.get(broker, 0.0) + tx["amount"]
+                broker_buys_cost[broker] = broker_buys_cost.get(broker, 0.0) + tx["amount"]
+        elif tx["type"] == "sell":
+            shares_before = pos["shares"]
+            cost_before = pos["total_cost"]
+            sold_shares = tx["shares"]
+            if shares_before > 0:
+                cost_of_sold_shares = min(cost_before, (sold_shares / shares_before) * cost_before)
+            else:
+                cost_of_sold_shares = 0.0
+
+            pos["shares"] = max(0.0, pos["shares"] - sold_shares)
+            pos["total_cost"] = max(0.0, pos["total_cost"] - cost_of_sold_shares)
+
+            if is_traspaso:
+                broker_sells_market[broker] = broker_sells_market.get(broker, 0.0) + tx["amount"]
+                broker_sells_cost[broker] = broker_sells_cost.get(broker, 0.0) + cost_of_sold_shares
+
+    results = {}
+    all_b = set(broker_sells_market.keys()) | set(broker_buys_market.keys())
+    for b in all_b:
+        m_sell = broker_sells_market.get(b, 0.0)
+        m_buy = broker_buys_market.get(b, 0.0)
+        c_sell = broker_sells_cost.get(b, 0.0)
+        c_buy = broker_buys_cost.get(b, 0.0)
+
+        cit_market = max(0.0, m_sell - m_buy)
+        cit_cost = max(0.0, c_sell - c_buy)
+        if cit_market > 0.001 or cit_cost > 0.001:
+            results[b] = {
+                "market_value": cit_market,
+                "cost_basis": cit_cost,
+                "pnl": cit_market - cit_cost,
+            }
+    return results
+
+
 def calculate_positions(transactions: list[dict]) -> dict[str, dict]:
     """
     Calculate current positions from transaction history.
@@ -147,23 +213,17 @@ def calculate_portfolio_value_series(
                 price = pos.get("avg_cost", 0)
             total += pos["shares"] * price
 
-        # Account for cash in transit during internal fund transfers (traspasos internos).
-        distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in current_active_tx)
-        cash_in_transit = 0.0
-        for b in distinct_brokers:
-            if b in ("trade_republic", "traderepublic"):
-                continue
-            b_tx_cit = [tx for tx in current_active_tx if (tx.get("broker") or "myinvestor").lower() == b]
-            b_s = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
-            b_b = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
-            cash_in_transit += max(0.0, b_s - b_b)
+        # Account for cash in transit and deferred fiscal cost basis in transit during internal fund transfers
+        tb = calculate_traspaso_balances(current_active_tx)
+        cash_in_transit = sum(d["market_value"] for d in tb.values())
+        cost_in_transit = sum(d["cost_basis"] for d in tb.values())
         total += cash_in_transit
 
-        # Exact active invested capital as of this date (excluding non-fund transfer accounts)
+        # Exact active invested capital as of this date (held positions cost basis + deferred cost basis in transit)
         active_invested = sum(
             pos["invested_amount"] for isin, pos in positions.items()
             if pos["shares"] > 0.0001 and isin != "TR_TRANSFER" and not isin.startswith("TR_")
-        ) + cash_in_transit
+        ) + cost_in_transit
 
         # Net external cash inflow on this day (buys add external capital, sells remove capital, traspasos remain inside portfolio)
         day_inflow = 0.0
@@ -220,11 +280,9 @@ def calculate_portfolio_value_series(
                 b_val += pos["shares"] * price
                 b_inv += pos["invested_amount"]
 
-            b_traspaso_sells = sum(tx["amount"] for tx in b_tx if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
-            b_traspaso_buys = sum(tx["amount"] for tx in b_tx if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
-            b_cit = max(0.0, b_traspaso_sells - b_traspaso_buys)
-            b_val += b_cit
-            b_inv += b_cit
+            b_traspaso = tb.get(b, {})
+            b_val += b_traspaso.get("market_value", 0.0)
+            b_inv += b_traspaso.get("cost_basis", 0.0)
 
             if b_val > 0 or b_inv > 0:
                 brokers_data[b] = {
@@ -313,15 +371,8 @@ def calculate_portfolio_nav_series(
             cur_total_val += pos["shares"] * price
 
         # Account for cash in transit during internal fund transfers (traspasos)
-        distinct_brokers = set((tx.get("broker") or "myinvestor").lower() for tx in current_active_tx)
-        cash_in_transit = 0.0
-        for b in distinct_brokers:
-            if b in ("trade_republic", "traderepublic"):
-                continue
-            b_tx_cit = [tx for tx in current_active_tx if (tx.get("broker") or "myinvestor").lower() == b]
-            b_s = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "sell" and is_internal_traspaso(tx.get("notes") or ""))
-            b_b = sum(tx["amount"] for tx in b_tx_cit if tx["type"] == "buy" and is_internal_traspaso(tx.get("notes") or ""))
-            cash_in_transit += max(0.0, b_s - b_b)
+        tb = calculate_traspaso_balances(current_active_tx)
+        cash_in_transit = sum(d["market_value"] for d in tb.values())
         cur_total_val += cash_in_transit
 
         if cur_total_val <= 0:
