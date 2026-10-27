@@ -163,10 +163,25 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Renta Fija Soberana (España)",
     "ter": 0.0
+  },
+  {
+    "isin": "IE00B4ND3602",
+    "name": "iShares Physical Gold ETC",
+    "ticker": "PPFB.DE",
+    "asset_type": "etc",
+    "currency": "EUR",
+    "category": "Materias Primas Metales Preciosos - Oro",
+    "ter": 0.12
   }
 ]''')
 
 PRICES = json.loads(r'''[
+  {
+    "isin": "IE00B4ND3602",
+    "date": "2026-10-27",
+    "price": 69.61,
+    "currency": "EUR"
+  },
   {
     "isin": "0192#0011",
     "date": "2026-08-21",
@@ -3949,5 +3964,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-10-26",
     "broker": "traderepublic",
     "notes": "Compra Bono España 5,75% Jul 2032 en Lang & Schwarz (Nominal: 3.546,79 €, Cotización: 111,36%, Cupón corrido: 50,29 €, Comisión: 1,00 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00B4ND3602",
+    "type": "buy",
+    "shares": 28.72944,
+    "price": 69.61,
+    "amount": 2000.86,
+    "fees": 1.0,
+    "date": "2026-10-27",
+    "broker": "traderepublic",
+    "notes": "Compra iShares Physical Gold USD (Acc) en Lang & Schwarz (Títulos: 28,72944, Precio: 69,61 €, Comisión: 1,00 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00B4ND3602",
+    "type": "buy",
+    "shares": 0.10056,
+    "price": 69.61,
+    "amount": 8.0,
+    "fees": 1.0,
+    "date": "2026-10-27",
+    "broker": "traderepublic",
+    "notes": "Compra iShares Physical Gold USD (Acc) en Lang & Schwarz (Títulos: 0,10056, Precio: 69,61 €, Comisión: 1,00 €)"
   }
 ]''')

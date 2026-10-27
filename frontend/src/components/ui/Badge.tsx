@@ -7,6 +7,7 @@ const configs: Record<string, { label: string; bg: string; text: string; border:
   etf:    { label: 'ETF',     bg: 'bg-amber-500/10 dark:bg-amber-500/15',   text: 'text-amber-700 dark:text-amber-300',   border: 'border-amber-500/20' },
   stock:  { label: 'Acción',  bg: 'bg-emerald-500/10 dark:bg-emerald-500/15', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-500/20' },
   bond:   { label: 'Bono',    bg: 'bg-zinc-500/10 dark:bg-zinc-500/15',     text: 'text-zinc-700 dark:text-zinc-300',     border: 'border-zinc-500/20' },
+  etc:    { label: 'ETC Oro', bg: 'bg-yellow-500/10 dark:bg-yellow-500/15', text: 'text-yellow-700 dark:text-yellow-400', border: 'border-yellow-500/20' },
   crypto: { label: 'Cripto',  bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-500/15', text: 'text-fuchsia-700 dark:text-fuchsia-300', border: 'border-fuchsia-500/20' },
 }
 

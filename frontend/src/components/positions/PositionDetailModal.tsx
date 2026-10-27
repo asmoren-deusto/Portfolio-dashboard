@@ -26,6 +26,7 @@ const PERIODS = [
 type PeriodKey = (typeof PERIODS)[number]['value']
 
 const PRODUCT_GESTORA_URLS: Record<string, string> = {
+  'IE00B4ND3602': 'https://www.ishares.com/es/profesionales/es/productos/258441/ishares-physical-gold-etc-fund',
   'LU0171307068': 'https://www.blackrock.com/es/profesionales/productos/229337/blackrock-world-healthscience-a2-eur-fund',
   'ES0112611001': 'https://www.azvalor.com/fondos/azvalor-internacional-fi/',
   'LU0302296495': 'https://www.dnbam.com/es/fondos/dnb-fund-technology-retail-a',

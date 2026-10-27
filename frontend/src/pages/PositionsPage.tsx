@@ -26,7 +26,7 @@ import { isNativePlatform } from '@/api/config'
 import { usePositions, usePortfolioSummary, useAnalytics } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
-type AssetFilter = 'all' | 'fund' | 'epsv' | 'bond' | 'etf' | 'stock'
+type AssetFilter = 'all' | 'fund' | 'epsv' | 'bond' | 'etc' | 'etf' | 'stock'
 type SortField = 'current_value' | 'unrealized_pnl_pct' | 'unrealized_pnl' | 'name' | 'weight'
 type SortDir = 1 | -1
 
@@ -35,6 +35,7 @@ const FILTER_TABS: { id: AssetFilter; label: string }[] = [
   { id: 'fund', label: 'Fondos Indexados' },
   { id: 'epsv', label: 'Planes EPSV' },
   { id: 'bond', label: 'Bonos / Renta Fija' },
+  { id: 'etc', label: 'ETC / Oro' },
   { id: 'etf', label: 'ETFs' },
   { id: 'stock', label: 'Acciones' },
 ]

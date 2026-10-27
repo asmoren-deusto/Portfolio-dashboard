@@ -18,6 +18,7 @@ interface AllocationChartProps {
 const TYPE_LABELS: Record<string, string> = {
   fund: 'Fondos',
   etf: 'ETFs',
+  etc: 'ETC Oro',
   stock: 'Acciones',
   bond: 'Bonos',
   crypto: 'Cripto',

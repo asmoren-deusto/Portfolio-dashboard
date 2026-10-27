@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-27 13:03:52
+- **Fecha de exportación:** 2026-10-27 14:38:42
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 152
+- **Total de interacciones registradas:** 154
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -3144,5 +3144,26 @@ Ya no volverá a saltarte esa notificación.
 ### 👤 Usuario (2026-10-27 11:55:52)
 
 en su web tienes los datos más actualizados, usalo: https://www.blackrock.com/es/profesionales/productos/229337/blackrock-world-healthscience-a2-eur-fund
+
+---
+
+### 🤖 Asistente (2026-10-27 12:03:56)
+
+Integrado e implementado el enlace oficial de BlackRock como fuente primaria de datos para este fondo:
+
+### 1. Scraper oficial de BlackRock ([price_service.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L676-L775))
+- Se ha conectado directamente con la ficha oficial de BlackRock España:
+  `https://www.blackrock.com/es/profesionales/productos/229337/blackrock-world-healthscience-a2-eur-fund`
+- **Extracción de NAV diario**: Lee el valor liquidativo y la fecha exacta oficial publicada en la cabecera del producto (ej: `73,44 €` a fecha `2026-10-26`), teniendo prioridad absoluta sobre agregadores externos (Financial Times, Quefondos o Finect).
+- **Historial completo**: Utiliza además el endpoint AJAX interno de BlackRock (`tab=chart`) para descargar de forma nativa la serie histórica completa de valores liquidativos diarios (más de 5.800 puntos).
+
+### 2. Acceso directo desde la interfaz ([PositionDetailModal.tsx](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/positions/PositionDetailModal.tsx#L28-L35))
+- Al hacer clic en el fondo *BlackRock World Healthscience* y pulsar en el botón **"Gestora"**, ahora abre directamente la ficha oficial del fondo en la web de BlackRock en lugar de la home genérica.
+
+---
+
+### 👤 Usuario (2026-10-27 13:27:24)
+
+añade estas operaciones de compra de ETC de oro al panel
 
 ---

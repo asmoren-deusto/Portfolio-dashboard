@@ -6,7 +6,7 @@ export interface Position {
   category?: string | null
   ter?: number | null
   geo?: string | null
-  asset_type: 'fund' | 'etf' | 'stock' | 'bond' | 'crypto' | string
+  asset_type: 'fund' | 'etf' | 'stock' | 'bond' | 'etc' | 'crypto' | string
   currency: string
   shares: number
   avg_cost: number

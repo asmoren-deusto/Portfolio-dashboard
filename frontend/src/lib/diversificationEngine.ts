@@ -257,6 +257,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'equity',
     currencies: { USD: 0.62, EUR: 0.18, Other: 0.20 },
   },
+  // iShares Physical Gold ETC (IE00B4ND3602)
+  IE00B4ND3602: {
+    geo: { other: 1.0 },
+    sectors: { materials: 1.0 },
+    assetClass: 'commodity',
+    currencies: { USD: 1.0 },
+  },
 }
 
 /**
@@ -308,6 +315,16 @@ export function resolveAssetTaxonomy(pos: Position): AssetTaxonomy {
       geo: { other: 1.0 },
       sectors: { tech: 1.0 },
       assetClass: 'crypto',
+      currencies: { USD: 1.0 },
+    }
+  }
+
+  // Commodities / Gold / ETC
+  if (assetType === 'etc' || name.includes('gold') || name.includes('oro') || name.includes('commodity') || name.includes('metal')) {
+    return {
+      geo: { other: 1.0 },
+      sectors: { materials: 1.0 },
+      assetClass: 'commodity',
       currencies: { USD: 1.0 },
     }
   }

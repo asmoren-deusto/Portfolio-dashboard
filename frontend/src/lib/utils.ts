@@ -42,6 +42,7 @@ export const ASSET_TYPE_LABELS: Record<string, string> = {
   etf: 'ETF',
   stock: 'Acción',
   bond: 'Bono / Renta Fija',
+  etc: 'ETC (Oro / Materias Primas)',
   crypto: 'Criptomoneda',
   cash: 'Liquidez',
 }
