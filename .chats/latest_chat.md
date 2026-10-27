@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-27 11:11:11
+- **Fecha de exportación:** 2026-10-27 13:03:52
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 150
+- **Total de interacciones registradas:** 152
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -3109,5 +3109,40 @@ Si recargas tu navegador (o pulsas `F5` / `Ctrl+R` en `http://localhost:5173`), 
 ### 👤 Usuario (2026-10-27 10:06:23)
 
 no para de salirme esta actualizacion de nav y creo que no deberia porque es anterior a la ultima que tenemos
+
+---
+
+### 🤖 Asistente (2026-10-27 10:11:13)
+
+Tenías toda la razón: **era una actualización falsa hacia atrás**.
+
+### ¿Qué estaba ocurriendo?
+1. En tu base de datos ya teníamos registrado el valor liquidativo oficial confirmado del **26-10-2026** para el fondo *BlackRock World Healthscience* (`73,44 €`).
+2. Sin embargo, los proveedores web de scraping (Financial Times, Quefondos, Finect) aún no tenían publicado el NAV del lunes 26 y su dato más reciente disponible era el del viernes **23-10-2026** (`73,11 €`).
+3. El comparador de alertas del backend comprobaba si el precio cambiaba (`73,11 != 73,44`), pero **no validaba si la fecha obtenida era más antigua que la que ya teníamos confirmada en la base de datos**. Al ser diferente, creía erróneamente que era un nuevo NAV liquidado, calculaba un falso $-0,45\%$ y disparaba la alerta una y otra vez en bucle.
+
+---
+
+### Correcciones aplicadas:
+1. **Blindaje de fechas en el motor de precios ([price_service.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L223-L238))**:
+   Si cualquier scraper externo devuelve una fecha más antigua que el último NAV ya confirmado en la base de datos, el sistema ignora ese dato antiguo y conserva el NAV más reciente (`73,44 €` del 26-10-2026).
+2. **Detección estricta de actualizaciones ([portfolio.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/routers/portfolio.py#L404-L425))**:
+   Solo se marca un activo como `is_updated` si la fecha de liquidación es **estrictamente posterior** (`p_date > prev_date`) o si a misma fecha hay una corrección de precio. Si es una fecha anterior, se descarta como actualización.
+3. **Limpieza automática de alertas**:
+   Al completarse el escaneo sin activos nuevos reales, la alerta se vacía en lugar de seguir enviándose al cliente.
+
+Comprobado en el escáner periódico:
+```text
+[INFO] Kept existing newer DB NAV 73.44 (2026-10-26) for LU0171307068 over older scraped 2026-10-23
+[INFO] Refreshed prices for 8 assets: 0 updated
+```
+
+Ya no volverá a saltarte esa notificación.
+
+---
+
+### 👤 Usuario (2026-10-27 11:55:52)
+
+en su web tienes los datos más actualizados, usalo: https://www.blackrock.com/es/profesionales/productos/229337/blackrock-world-healthscience-a2-eur-fund
 
 ---

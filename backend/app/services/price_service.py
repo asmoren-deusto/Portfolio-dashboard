@@ -198,6 +198,11 @@ async def get_price_with_date(
             tasks.append(_fetch_cobas_official(isin))
             task_names.append("cobas")
 
+        # For BlackRock funds, query direct official BlackRock gestora endpoint
+        if isin in BLACKROCK_PRODUCT_URLS or isin == "LU0171307068":
+            tasks.append(_fetch_blackrock_official(isin))
+            task_names.append("blackrock")
+
         if ticker:
             tasks.append(_fetch_yahoo_price(ticker))
             task_names.append("yahoo")
@@ -212,7 +217,7 @@ async def get_price_with_date(
                 r_price, r_date = res
                 if r_price is not None and r_date:
                     name = task_names[i]
-                    prec = 6 if name in ("azvalor", "cobas", "quefondos") else (5 if name == "finect" else (4 if name == "yahoo" else (3 if name == "investing" else 2)))
+                    prec = 6 if name in ("azvalor", "cobas", "blackrock", "quefondos") else (5 if name == "finect" else (4 if name == "yahoo" else (3 if name == "investing" else 2)))
                     candidates.append((r_date, prec, r_price, name))
 
         if candidates:
@@ -668,6 +673,109 @@ async def _fetch_cobas_official(isin: str) -> tuple[Optional[float], Optional[st
     return await asyncio.to_thread(_fetch_cobas_official_sync, isin)
 
 
+BLACKROCK_PRODUCT_URLS: dict[str, str] = {
+    "LU0171307068": "https://www.blackrock.com/es/profesionales/productos/229337/blackrock-world-healthscience-a2-eur-fund",
+}
+
+
+def _fetch_blackrock_official_sync(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Fetch official NAV and date directly from BlackRock España official product page.
+    """
+    url = BLACKROCK_PRODUCT_URLS.get(isin)
+    if not url:
+        return None, None
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+    }
+    spanish_months = {
+        "ene": 1, "feb": 2, "mar": 3, "abr": 4, "may": 5, "jun": 6,
+        "jul": 7, "ago": 8, "sep": 9, "sept": 9, "oct": 10, "nov": 11, "dic": 12
+    }
+
+    # 1. Scrape main product page header
+    try:
+        with httpx.Client(timeout=10, follow_redirects=True, headers=headers) as client:
+            resp = client.get(url)
+            if resp.status_code == 200:
+                html = resp.text
+                m_date = re.search(r'Valor liquidativo a\s+(\d{1,2})\s+([a-zA-ZáéíóúÁÉÍÓÚ]+)\s+(\d{4})', html, re.IGNORECASE)
+                nav_block = re.search(r'data-col="fundHeader\.fundNav\.navAmount"[^>]*>.*?<span class="header-nav-data">([^<]+)</span>', html, re.DOTALL)
+                if m_date and nav_block:
+                    day, month_str, year = m_date.groups()
+                    m_clean = month_str.lower()[:3]
+                    m_num = spanish_months.get(m_clean, 10)
+                    iso_date = f"{year}-{m_num:02d}-{int(day):02d}"
+                    raw_val = nav_block.group(1).replace("EUR", "").replace("USD", "").replace(".", "").replace(",", ".").strip()
+                    price = float(raw_val)
+                    if price > 0:
+                        return price, iso_date
+    except Exception as e:
+        logger.debug(f"BlackRock main page scrape error for {isin}: {e}")
+
+    # 2. Scrape official chart AJAX endpoint as fallback
+    try:
+        ajax_url = f"{url.rstrip('/')}/1497267045692.ajax?tab=chart"
+        with httpx.Client(timeout=10, follow_redirects=True, headers=headers) as client:
+            resp = client.get(ajax_url)
+            if resp.status_code == 200:
+                pattern = r'\{x:Date\.UTC\((\d{4}),(\d{1,2}),(\d{1,2})\),y:Number\(\(([0-9.]+)\)\.toFixed\(2\)\)'
+                matches = re.findall(pattern, resp.text)
+                if matches:
+                    y, m, d, p_str = matches[-1]
+                    iso_date = f"{y}-{int(m)+1:02d}-{int(d):02d}"
+                    return float(p_str), iso_date
+    except Exception as e:
+        logger.warning(f"BlackRock chart AJAX scrape error for {isin}: {e}")
+
+    return None, None
+
+
+async def _fetch_blackrock_official(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """Async wrapper for BlackRock official NAV scraper."""
+    return await asyncio.to_thread(_fetch_blackrock_official_sync, isin)
+
+
+def _fetch_blackrock_history_sync(isin: str, period: str = "1y") -> list[dict]:
+    """
+    Fetch full historical NAV series directly from BlackRock official chart data endpoint.
+    """
+    url = BLACKROCK_PRODUCT_URLS.get(isin)
+    if not url:
+        return []
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    }
+    ajax_url = f"{url.rstrip('/')}/1497267045692.ajax?tab=chart"
+    try:
+        with httpx.Client(timeout=12, follow_redirects=True, headers=headers) as client:
+            resp = client.get(ajax_url)
+            if resp.status_code == 200:
+                pattern = r'\{x:Date\.UTC\((\d{4}),(\d{1,2}),(\d{1,2})\),y:Number\(\(([0-9.]+)\)\.toFixed\(2\)\)'
+                matches = re.findall(pattern, resp.text)
+                if matches:
+                    history = []
+                    for y, m, d, p_str in matches:
+                        iso_date = f"{y}-{int(m)+1:02d}-{int(d):02d}"
+                        history.append({"date": iso_date, "price": float(p_str)})
+
+                    cutoff = _get_period_cutoff(period)
+                    if cutoff:
+                        history = [p for p in history if p["date"] >= cutoff]
+                    return history
+    except Exception as e:
+        logger.warning(f"Error fetching BlackRock history for {isin}: {e}")
+    return []
+
+
+async def _fetch_blackrock_history(isin: str, period: str = "1y", db=None) -> list[dict]:
+    """Async wrapper for BlackRock official history fetcher."""
+    return await asyncio.to_thread(_fetch_blackrock_history_sync, isin, period)
+
+
 FINECT_SLUGS: dict[str, str] = {
     "ES0112611001": "ES0112611001-Azvalor_internacional_fi",
     "ES0112609005": "ES0112609005-Azvalor_iberia_fi",
@@ -1067,6 +1175,29 @@ async def get_price_history(
                 pass
             _history_cache[cache_key] = (datetime.now(), az_hist)
             return az_hist
+
+    # 0c. If it's a BlackRock fund, fetch official daily history directly from BlackRock portal
+    if isin in BLACKROCK_PRODUCT_URLS or isin == "LU0171307068":
+        blk_hist = await _fetch_blackrock_history(isin, period=period)
+        if blk_hist:
+            try:
+                from app.database import SessionLocal
+                from app.models import PriceCache
+                db_s = SessionLocal()
+                recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                existing_dates = {h["date"]: idx for idx, h in enumerate(blk_hist)}
+                for rp in recent_prices:
+                    if rp.price is not None and rp.price > 0:
+                        if rp.date in existing_dates:
+                            blk_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                        else:
+                            blk_hist.append({"date": rp.date, "price": round(rp.price, 4)})
+                blk_hist.sort(key=lambda x: x["date"])
+                db_s.close()
+            except Exception:
+                pass
+            _history_cache[cache_key] = (datetime.now(), blk_hist)
+            return blk_hist
 
     # 1. Try Yahoo Finance (works for stocks, ETFs and European funds) offloaded to thread
     if ticker:

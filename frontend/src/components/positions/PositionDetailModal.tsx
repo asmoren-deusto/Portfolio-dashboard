@@ -25,6 +25,13 @@ const PERIODS = [
 
 type PeriodKey = (typeof PERIODS)[number]['value']
 
+const PRODUCT_GESTORA_URLS: Record<string, string> = {
+  'LU0171307068': 'https://www.blackrock.com/es/profesionales/productos/229337/blackrock-world-healthscience-a2-eur-fund',
+  'ES0112611001': 'https://www.azvalor.com/fondos/azvalor-internacional-fi/',
+  'LU0302296495': 'https://www.dnbam.com/es/fondos/dnb-fund-technology-retail-a',
+  '0192#0011': 'https://indexacapital.com/es/esp/planes-pensiones-epsv',
+}
+
 export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ position, onClose }) => {
   const [period, setPeriod] = useState<PeriodKey>('1mo')
 
@@ -466,9 +473,9 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                   Yahoo Finance
                 </a>
               )}
-              {position.domain && (
+              {(PRODUCT_GESTORA_URLS[position.isin] || position.domain) && (
                 <a
-                  href={`https://${position.domain}`}
+                  href={PRODUCT_GESTORA_URLS[position.isin] || `https://${position.domain}`}
                   target="_blank"
                   rel="noreferrer"
                   className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] dark:text-slate-300 dark:hover:text-white font-medium text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
