@@ -179,28 +179,28 @@ async def get_price_with_date(
 
     # Check if this is an Indexa EPSV (e.g. 0192#0011)
     if isin.startswith("0192") or isin == "0192#0011":
-        # 1. First priority: Live Yahoo Finance / Morningstar quote
-        y_ticker = ticker or KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
-        y_price, y_date = await _fetch_yahoo_price(y_ticker)
-        if y_price and y_price > 0:
-            price, price_date = round(y_price, 4), y_date
-
-        # 2. Check official Indexa website dataset
+        # 1. First priority: Check official Indexa website dataset (exact official daily NAV)
         idx_price, idx_date = await _fetch_indexa_epsv_official(isin, db=db)
         if idx_price and idx_price > 0:
-            if not price_date or (idx_date and idx_date > price_date):
-                price, price_date = idx_price, idx_date
+            price, price_date = idx_price, idx_date
 
-        # 3. Check if database PriceCache has a newer or confirmed NAV
+        # 2. Check if database PriceCache has a newer confirmed NAV
         if db is not None and PriceCache is not None:
             try:
                 db_entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
                 if db_entry and db_entry.price > 0:
-                    if not price_date or db_entry.date > price_date or (db_entry.date == price_date and db_entry.source != "live_indexa"):
+                    if not price_date or db_entry.date > price_date:
                         price = db_entry.price
                         price_date = db_entry.date
             except Exception:
                 pass
+
+        # 3. Fallback: Live Yahoo Finance / Morningstar quote if Indexa site was unreachable
+        if price is None:
+            y_ticker = ticker or KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
+            y_price, y_date = await _fetch_yahoo_price(y_ticker)
+            if y_price and y_price > 0:
+                price, price_date = round(y_price, 4), y_date
 
     # For other non-standard ISINs (e.g. Kutxabank 0201G), look up DB PriceCache
     is_standard_isin = len(isin) == 12 and isin.isalnum()
@@ -238,7 +238,7 @@ async def get_price_with_date(
             tasks.append(_fetch_blackrock_official(isin))
             task_names.append("blackrock")
 
-        if ticker:
+        if ticker and not ticker.startswith("0P000"):
             tasks.append(_fetch_yahoo_price(ticker))
             task_names.append("yahoo")
 
@@ -252,7 +252,7 @@ async def get_price_with_date(
                 r_price, r_date = res
                 if r_price is not None and r_date:
                     name = task_names[i]
-                    prec = 6 if name in ("azvalor", "cobas", "blackrock", "quefondos") else (5 if name == "finect" else (4 if name == "yahoo" else (3 if name == "investing" else 2)))
+                    prec = 7 if name in ("azvalor", "cobas", "blackrock", "ft") else (6 if name == "quefondos" else (5 if name == "finect" else (4 if name == "yahoo" else (3 if name == "investing" else 2))))
                     candidates.append((r_date, prec, r_price, name))
 
         if candidates:
@@ -283,9 +283,6 @@ async def get_price_with_date(
         try:
             fallback_dt = get_previous_business_date() if is_standard_isin else datetime.now().strftime("%Y-%m-%d")
             eff_dt = price_date or fallback_dt
-            # Mutual funds never publish official closed NAVs for today before 22:00
-            if is_standard_isin and eff_dt == datetime.now().strftime("%Y-%m-%d") and datetime.now().hour < 22:
-                eff_dt = get_previous_business_date()
             target_date = _normalize_business_date(eff_dt)
             price_date = target_date
             existing = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == target_date).first()
@@ -970,21 +967,22 @@ async def _fetch_ft_official(isin: str) -> tuple[Optional[float], Optional[str]]
 
 
 def _sync_fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]]:
-    """Synchronous worker for Yahoo Finance price fetch with fast chart quote priority."""
-    # 1. Try fast Yahoo chart quote first (<50ms, accurate regular price, timestamp and currency)
-    try:
-        from app.routers.market import _fetch_yahoo_chart_quote
-        cq = _fetch_yahoo_chart_quote(ticker)
-        if cq and cq.get("price") and float(cq["price"]) > 0:
-            price = float(cq["price"])
-            dt_str = cq.get("last_updated", "")[:10]
-            if not dt_str or len(dt_str) < 10:
-                dt_str = datetime.now().strftime("%Y-%m-%d")
-            return price, dt_str
-    except Exception as e:
-        logger.debug(f"Fast chart quote fallback for {ticker}: {e}")
+    """Synchronous worker for Yahoo Finance price fetch with fast chart quote priority for live assets."""
+    is_live_asset = bool(ticker and (ticker.endswith(".DE") or ticker.endswith(".L") or ("." not in ticker and not ticker.startswith("0P000"))))
 
-    # 2. Try yfinance fast_info and history
+    # 1. Try fast Yahoo chart quote first (<50ms, accurate regular price) ONLY for live-traded assets
+    if is_live_asset:
+        try:
+            from app.routers.market import _fetch_yahoo_chart_quote
+            cq = _fetch_yahoo_chart_quote(ticker)
+            if cq and cq.get("price") and float(cq["price"]) > 0:
+                price = float(cq["price"])
+                dt_str = datetime.now().strftime("%Y-%m-%d")
+                return price, dt_str
+        except Exception as e:
+            logger.debug(f"Fast chart quote fallback for {ticker}: {e}")
+
+    # 2. Try yfinance fast_info and history (yields true historical trade date from bar index)
     try:
         t = yf.Ticker(ticker)
         info = getattr(t, "fast_info", None)
@@ -996,7 +994,7 @@ def _sync_fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]
             price = float(live_price) if (live_price is not None and live_price > 0) else float(hist["Close"].iloc[-1])
             return price, last_date
         elif live_price and live_price > 0:
-            return float(live_price), datetime.now().strftime("%Y-%m-%d")
+            return float(live_price), datetime.now().strftime("%Y-%m-%d") if is_live_asset else get_previous_business_date()
     except Exception as e:
         logger.warning(f"Yahoo Finance error for {ticker}: {e}")
 
@@ -1007,7 +1005,7 @@ def _sync_fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]
             cq = _fetch_yahoo_chart_quote("EGLN.L")
             if cq and cq.get("price") and float(cq["price"]) > 0:
                 price = float(cq["price"])
-                dt_str = cq.get("last_updated", "")[:10] or datetime.now().strftime("%Y-%m-%d")
+                dt_str = datetime.now().strftime("%Y-%m-%d")
                 return price, dt_str
         except Exception:
             pass

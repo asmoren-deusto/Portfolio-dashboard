@@ -435,8 +435,16 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
                     is_updated = True
 
             # Base reference for diff
-            ref_p = prev.get("older_price") if (prev_p and is_updated and prev.get("older_price") and p_date and prev_d and p_date > prev_d) else (prev_p if is_updated else prev.get("older_price") or prev_p)
-            ref_d = prev.get("older_date") if (prev_d and is_updated and prev.get("older_date") and p_date and prev_d and p_date > prev_d) else (prev_d if is_updated else prev.get("older_date") or prev_d)
+            if is_updated:
+                if p_date and prev_d and p_date > prev_d:
+                    ref_p = prev_p
+                    ref_d = prev_d
+                else:
+                    ref_p = prev.get("older_price") or prev_p
+                    ref_d = prev.get("older_date") or prev_d
+            else:
+                ref_p = prev.get("older_price") or prev_p
+                ref_d = prev.get("older_date") or prev_d
 
             diff = round(p - ref_p, 4) if (p and ref_p and ref_p > 0) else 0.0
             diff_pct = round((p - ref_p) / ref_p * 100, 2) if (p and ref_p and ref_p > 0) else 0.0
