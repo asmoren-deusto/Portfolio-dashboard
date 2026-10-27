@@ -64,7 +64,11 @@ function getMarketIcon(ticker?: string): React.ReactNode {
     case 'ZN=F':
       return <Landmark className="w-full h-full p-0.5 text-amber-600 dark:text-amber-400" />
     case 'GC=F':
-      return <Coins className="w-full h-full p-0.5 text-amber-600 dark:text-amber-400" />
+    case 'IAU':
+    case 'GLD':
+    case 'PPFB.DE':
+    case '4GLD.DE':
+      return <Coins className="w-full h-full p-0.5 text-amber-500 dark:text-amber-400" />
     case 'SI=F':
       return <Coins className="w-full h-full p-0.5 text-slate-400 dark:text-slate-300" />
     case 'BZ=F':
@@ -326,6 +330,23 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     (name || '').toLowerCase().includes('cobas') ||
     Boolean(isin && isin === 'LU1598719752')
 
+  // Market proxy icons for tickers without an ISIN (e.g. ETF replicas in simulated portfolio)
+  const marketIcon = getMarketIcon(ticker)
+  if (!isin && marketIcon) {
+    return (
+      <div
+        className={cn(
+          sizeClasses,
+          'rounded-full bg-slate-100 flex items-center justify-center shrink-0 dark:bg-slate-800/90 shadow-xs border border-slate-200/60 dark:border-white/[0.08]',
+          className
+        )}
+        title={`${name} (${ticker})`}
+      >
+        {marketIcon}
+      </div>
+    )
+  }
+
   // Direct high-fidelity vector rendering for core funds & asset managers
   if (isSpanishBond) {
     return <SpanishBondLogo sizeClasses={sizeClasses} className={className} title={`${name} (España)`} />
@@ -396,8 +417,6 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
       setAttempt(3) // Switch to initials
     }
   }
-
-  const marketIcon = getMarketIcon(ticker)
 
   if (marketIcon) {
     return (

@@ -1622,9 +1622,15 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
     etfs_summary = []
     for t in etf_tickers_list:
         q = quotes.get(t, {})
+        resolved_name = q.get("name")
+        if not resolved_name or resolved_name == t:
+            for p in PORTFOLIO_ETF_PROXIES.values():
+                if p.get("ticker") == t:
+                    resolved_name = p.get("name")
+                    break
         etfs_summary.append({
             "ticker": t,
-            "name": q.get("name") or t,
+            "name": resolved_name or t,
             "weight": round(etf_weights.get(t, 0.0) * 100, 2),
             "price": q.get("price"),
             "regular_price": q.get("regular_price"),

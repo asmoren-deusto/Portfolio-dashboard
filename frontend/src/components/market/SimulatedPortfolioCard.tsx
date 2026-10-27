@@ -91,6 +91,16 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     shortName: 'Bonos Soberanos',
     category: 'Renta Fija Soberana / Deuda Pública',
   },
+  IAU: {
+    name: 'iShares Gold Trust (Oro Físico)',
+    shortName: 'Oro Físico (IAU)',
+    category: 'Materias Primas / Oro (Metales Preciosos)',
+  },
+  GLD: {
+    name: 'SPDR Gold Shares (Oro Físico)',
+    shortName: 'Oro Físico (GLD)',
+    category: 'Materias Primas / Oro (Metales Preciosos)',
+  },
 }
 
 export interface SimulatedPortfolioCardProps {
@@ -1089,11 +1099,11 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
-                      <th className="py-1.5 px-2 min-w-[150px] max-w-[180px]">Fondo en Cartera</th>
-                      <th className="py-1.5 px-2 min-w-[140px] max-w-[165px]">ETF Réplica</th>
+                      <th className="py-1.5 px-2 min-w-[150px] max-w-[180px]">Fondo / Activo</th>
+                      <th className="py-1.5 px-2 min-w-[140px] max-w-[165px]">ETF / Réplica</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Valor Cartera</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Peso</th>
-                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Cotiz. ETF</th>
+                      <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Cotiz. Réplica</th>
                       <th className="py-1.5 px-2 text-right whitespace-nowrap">Impacto Hoy</th>
                     </tr>
                   </thead>
@@ -1103,7 +1113,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                       ) : (
                         holdings.map((h, i) => {
                           const etfInfo = ETF_INFO_MAP[h.etf_ticker]
-                          const displayName = etfInfo?.name || h.etf_desc || h.etf_name || h.etf_ticker
+                          const displayName = etfInfo?.name || h.etf_name || h.etf_desc || h.etf_ticker
                           const isEtfPos = (h.etf_change_pct ?? 0) >= 0
                           const isGainPos = (h.simulated_gain_amount ?? 0) >= 0
 
@@ -1184,8 +1194,16 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
                           {/* Live ETF Quote Price and Daily % */}
                           <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
-                            <div className={cn('font-mono font-bold text-xs', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-                              {isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%
+                            <div className={cn('font-mono font-bold text-xs flex items-center justify-end gap-1', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                              {h.is_indicative && (
+                                <span
+                                  className="text-[9px] font-sans font-medium px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                  title={`Precio en vivo guiado por futuros ${h.proxy_used || ''}`}
+                                >
+                                  Futuros
+                                </span>
+                              )}
+                              <span>{isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%</span>
                             </div>
                             {h.etf_price && (
                               <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
@@ -1278,16 +1296,26 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               </td>
 
                               <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
-                                <span
-                                  className={cn(
-                                    'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
-                                    isPos
-                                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
-                                  : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                                <div className="flex items-center justify-end gap-1">
+                                  {etf.is_indicative && (
+                                    <span
+                                      className="text-[9px] font-sans font-medium px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                      title={`Precio en vivo guiado por futuros ${etf.proxy_used || ''}`}
+                                    >
+                                      Futuros
+                                    </span>
                                   )}
-                                >
-                                  {isPos ? '+' : ''}{etf.change_pct?.toFixed(2)}%
-                                </span>
+                                  <span
+                                    className={cn(
+                                      'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
+                                      isPos
+                                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                                    : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                                    )}
+                                  >
+                                    {isPos ? '+' : ''}{etf.change_pct?.toFixed(2)}%
+                                  </span>
+                                </div>
                               </td>
 
                               <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
