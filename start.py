@@ -50,6 +50,24 @@ def kill_process_tree(proc):
         except Exception:
             pass
 
+def free_port(port: int):
+    """Libera el puerto si algún proceso residual o huérfano lo está ocupando."""
+    if sys.platform == "win32":
+        try:
+            out = subprocess.check_output(f"netstat -ano | findstr :{port}", shell=True, text=True, stderr=subprocess.DEVNULL)
+            pids = set()
+            for line in out.strip().splitlines():
+                if "LISTENING" in line:
+                    parts = line.strip().split()
+                    if parts and parts[-1].isdigit():
+                        pid = int(parts[-1])
+                        if pid > 0 and pid != os.getpid():
+                            pids.add(pid)
+            for pid in pids:
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
+
 def open_browser():
     """Abrir dashboard una vez que frontend y backend hayan arrancado."""
     wait_for_port(5173, timeout=15.0)
@@ -60,6 +78,9 @@ def open_browser():
         pass
 
 if __name__ == "__main__":
+    # Liberar puertos 8000 y 5173 de sesiones previas o huérfanas
+    free_port(8000)
+    free_port(5173)
     root_dir = os.path.dirname(os.path.abspath(__file__))
     backend_dir = os.path.join(root_dir, "backend")
     frontend_dir = os.path.join(root_dir, "frontend")
