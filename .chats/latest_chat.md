@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-27 15:36:50
+- **Fecha de exportación:** 2026-10-27 16:44:18
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 157
+- **Total de interacciones registradas:** 159
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -3218,5 +3218,37 @@ cambia BlackRock Global Funds por BGF para abreviar. tambien quita el previo Fid
 ### 🤖 Asistente (2026-10-27 14:35:32)
 
 He lanzado la compilación de validación del frontend (`npm run build`) para verificar que todos los tipos y componentes se compilen correctamente. Te avisaré en cuanto finalice.
+
+---
+
+### 🤖 Asistente (2026-10-27 14:36:54)
+
+Se han aplicado todos los cambios solicitados:
+
+1. **Abreviación de BlackRock Global Funds a BGF:**
+   - En la base de datos y semillas ([`seed_data.py`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/seed_data.py)), el activo `LU0171307068` pasa a llamarse `BGF - World Healthscience Fund A2 (EUR)`.
+   - Se asegura que en [`CompanyLogo.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx) se reconozca tanto el ISIN como el término `bgf` para mostrar el logo oficial vectorizado de BlackRock.
+
+2. **Supresión selectiva de prefijos `Fidelity` e `iShares` únicamente donde hay icono:**
+   - Creada la función [`formatAssetDisplayName`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/lib/utils.ts#L161-L174):
+     - **Con icono (`hasIcon = true`):** suprime los prefijos redundantes iniciales `Fidelity ` e `iShares ` (por ejemplo: `MSCI World Index Fund...`, `Developed World Index...`, `Physical Gold ETC`, etc.).
+     - **Sin icono (`hasIcon = false`):** mantiene intactos los nombres completos de las gestoras en selectores y listados planos de texto.
+   - Aplicado en todas las vistas con logo:
+     - Tabla y cuadrícula de posiciones ([`PositionsPage.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/PositionsPage.tsx))
+     - Cabecera del modal de detalle ([`PositionDetailModal.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/positions/PositionDetailModal.tsx))
+     - Tablas y transacciones del resumen ([`OverviewPage.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx))
+     - Tabla de posiciones de analítica ([`AnalyticsPage.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/AnalyticsPage.tsx))
+     - Historial de transacciones ([`TransactionsPage.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/TransactionsPage.tsx))
+     - Cartera simulada de mercado ([`SimulatedPortfolioCard.tsx`](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx))
+
+3. **Release y Sincronización:**
+   - Verificado con `npm run build` (0 errores de compilación y tipos).
+   - Generada y subida la release **v3.4.40**.
+
+---
+
+### 👤 Usuario (2026-10-27 15:38:15)
+
+la actualización del precio del etc del oro no me convence, ahora mismo marca 69.61 y su valor actual es 70.60
 
 ---

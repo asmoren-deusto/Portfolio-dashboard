@@ -36,11 +36,11 @@ _price_cache: dict = {}
 CACHE_TTL_MINUTES = 15
 
 
-def _is_cache_valid(isin: str) -> bool:
+def _is_cache_valid(isin: str, ttl_minutes: int = CACHE_TTL_MINUTES) -> bool:
     if isin not in _price_cache:
         return False
     age = datetime.now() - _price_cache[isin]["ts"]
-    return age.total_seconds() < CACHE_TTL_MINUTES * 60
+    return age.total_seconds() < ttl_minutes * 60
 
 
 def preload_price_cache_from_db():
@@ -127,6 +127,40 @@ async def get_price_with_date(
         return 0.0, datetime.now().strftime("%Y-%m-%d")
 
     ticker = KNOWN_TICKERS.get(isin) or ticker
+
+    # For live exchange-traded assets (ETCs, ETFs, equities, e.g. PPFB.DE), quotes fluctuate in real time
+    # during market sessions. They must be fetched from live market data (Yahoo Finance) with a short 2-minute
+    # in-memory cache, rather than being locked to a static historical/purchase PriceCache in the DB.
+    is_live_traded = bool(
+        ticker
+        and not ticker.startswith("0P000")
+        and not isin.startswith("0192")
+        and not isin.startswith("ES011261")
+        and isin != "ES0000012411"
+    )
+    if is_live_traded:
+        if not force and _is_cache_valid(isin, ttl_minutes=2):
+            return _price_cache[isin]["price"], _price_cache[isin].get("date")
+
+        y_price, y_date = await _fetch_yahoo_price(ticker)
+        if y_price and y_price > 0:
+            price = round(y_price, 4)
+            price_date = y_date or datetime.now().strftime("%Y-%m-%d")
+            _price_cache[isin] = {"price": price, "date": price_date, "ts": datetime.now()}
+            if db is not None and PriceCache is not None:
+                try:
+                    entry = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == price_date).first()
+                    if entry:
+                        entry.price = price
+                        entry.source = "live_yahoo"
+                    else:
+                        db.add(PriceCache(isin=isin, date=price_date, price=price, currency="EUR", source="live_yahoo"))
+                    db.commit()
+                except Exception as e:
+                    logger.debug(f"Failed to update PriceCache for live traded asset {isin}: {e}")
+                    db.rollback()
+            return price, price_date
+
     if not force and _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
@@ -936,15 +970,16 @@ def _sync_fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]
     """Synchronous worker for Yahoo Finance price fetch."""
     try:
         t = yf.Ticker(ticker)
+        info = getattr(t, "fast_info", None)
+        live_price = getattr(info, "last_price", None) or getattr(info, "regular_market_price", None) if info else None
+
         hist = t.history(period="5d")
         if len(hist) > 0:
-            last_price = float(hist["Close"].iloc[-1])
             last_date = str(hist.index[-1].date())
-            return last_price, last_date
-        info = t.fast_info
-        price = getattr(info, "last_price", None) or getattr(info, "regular_market_price", None)
-        if price:
-            return float(price), get_previous_business_date()
+            price = float(live_price) if (live_price is not None and live_price > 0) else float(hist["Close"].iloc[-1])
+            return price, last_date
+        elif live_price and live_price > 0:
+            return float(live_price), get_previous_business_date()
     except Exception as e:
         logger.warning(f"Yahoo Finance error for {ticker}: {e}")
     return None, None
@@ -1213,8 +1248,11 @@ async def get_price_history(
                     db_s = SessionLocal()
                     recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
                     existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
+                    is_live_traded = bool(ticker and not ticker.startswith("0P000") and not isin.startswith("0192"))
                     for rp in recent_prices:
                         if rp.price is not None and rp.price > 0:
+                            if is_live_traded and rp.source not in ("live_yahoo", "history_sync"):
+                                continue
                             if rp.date in existing_dates:
                                 res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
                             else:

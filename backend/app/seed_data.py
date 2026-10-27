@@ -179,7 +179,7 @@ PRICES = json.loads(r'''[
   {
     "isin": "IE00B4ND3602",
     "date": "2026-10-27",
-    "price": 69.61,
+    "price": 70.62,
     "currency": "EUR"
   },
   {
