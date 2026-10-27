@@ -401,21 +401,31 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
         prev_p = prev.get("price")
         prev_d = prev.get("date")
 
-        is_updated = False
-        if p and p > 0:
-            if not prev_d:
-                is_updated = True
-            elif p_date and p_date > prev_d:
-                is_updated = True
-            elif prev_p and abs(p - prev_p) > 0.0001:
-                is_updated = True
+        if p and p_date and prev_d and p_date < prev_d:
+            # Scraped date is strictly older than what we already have in our confirmed price history
+            p = prev_p
+            p_date = prev_d
+            is_updated = False
+            ref_p = prev.get("older_price") or prev_p
+            ref_d = prev.get("older_date") or prev_d
+            diff = 0.0
+            diff_pct = 0.0
+        else:
+            is_updated = False
+            if p and p > 0:
+                if not prev_d:
+                    is_updated = True
+                elif p_date and prev_d and p_date > prev_d:
+                    is_updated = True
+                elif p_date and prev_d and p_date == prev_d and prev_p and abs(p - prev_p) > 0.0001:
+                    is_updated = True
 
-        # Base reference for diff
-        ref_p = prev_p if (prev_p and is_updated) else prev.get("older_price") or prev_p
-        ref_d = prev_d if (prev_d and is_updated) else prev.get("older_date") or prev_d
+            # Base reference for diff
+            ref_p = prev_p if (prev_p and is_updated) else prev.get("older_price") or prev_p
+            ref_d = prev_d if (prev_d and is_updated) else prev.get("older_date") or prev_d
 
-        diff = round(p - ref_p, 4) if (p and ref_p and ref_p > 0) else 0.0
-        diff_pct = round((p - ref_p) / ref_p * 100, 2) if (p and ref_p and ref_p > 0) else 0.0
+            diff = round(p - ref_p, 4) if (p and ref_p and ref_p > 0) else 0.0
+            diff_pct = round((p - ref_p) / ref_p * 100, 2) if (p and ref_p and ref_p > 0) else 0.0
 
         pos_txs = [t for t in transactions if t["isin"] == isin]
         broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
@@ -471,8 +481,10 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
             "items": updated_items,
             "allCheckedItems": all_items,
         }
+    else:
+        _latest_nav_alert = None
 
-    res_payload["alert"] = _latest_nav_alert if len(updated_items) > 0 else None
+    res_payload["alert"] = _latest_nav_alert
     res_payload["alert_id"] = _latest_nav_alert.get("id") if _latest_nav_alert else None
     return res_payload
 

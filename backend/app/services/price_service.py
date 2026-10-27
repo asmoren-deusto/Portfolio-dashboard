@@ -220,8 +220,23 @@ async def get_price_with_date(
             #          2. Precision descending (tie-breaker for same date)
             candidates.sort(key=lambda c: (c[0], c[1]), reverse=True)
             best_date, _, best_price, best_source = candidates[0]
-            price, price_date = best_price, best_date
-            logger.info(f"Selected {isin} NAV {price} ({best_date}) from source: {best_source}")
+
+            # If the database already has a confirmed newer NAV than the scraped date, do not downgrade
+            if db is not None and PriceCache is not None:
+                try:
+                    db_latest = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.price > 0).order_by(PriceCache.date.desc()).first()
+                    if db_latest and db_latest.date and db_latest.date > best_date:
+                        price, price_date = float(db_latest.price), db_latest.date
+                        logger.info(f"Kept existing newer DB NAV {price} ({price_date}) for {isin} over older scraped {best_date}")
+                    else:
+                        price, price_date = best_price, best_date
+                        logger.info(f"Selected {isin} NAV {price} ({best_date}) from source: {best_source}")
+                except Exception:
+                    price, price_date = best_price, best_date
+                    logger.info(f"Selected {isin} NAV {price} ({best_date}) from source: {best_source}")
+            else:
+                price, price_date = best_price, best_date
+                logger.info(f"Selected {isin} NAV {price} ({best_date}) from source: {best_source}")
 
     # If successfully fetched from live provider, persist to DB PriceCache & in-memory cache
     if price is not None and db is not None and PriceCache is not None:
