@@ -150,7 +150,7 @@ function fmtPrice(price: number, ticker?: string): string {
 function fmtUpdated(iso: string | null): string {
   if (!iso) return ''
   const d = new Date(iso)
-  return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
 }
 
 /** Badge for extended-hours state */
@@ -498,11 +498,11 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
               </div>
               {!isNative && lastUpdated && (
                 <span className={cn(
-                  "items-center gap-1 text-[9px] text-slate-400 font-mono shrink-0 pl-1",
+                  "items-center gap-1.5 text-[10.5px] font-medium text-slate-300 font-mono shrink-0 pl-2",
                   sidebarCollapsed ? "hidden xl:flex" : "hidden sm:flex"
                 )}>
-                  <Clock className="w-2.5 h-2.5 text-emerald-400" />
-                  {fmtUpdated(lastUpdated)}
+                  <Clock className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <span>{fmtUpdated(lastUpdated)}</span>
                 </span>
               )}
             </div>

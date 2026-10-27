@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-27 21:17:02
+- **Fecha de exportación:** 2026-10-27 21:18:26
 - **ID de Conversación:** `dcf2d459-d371-4ebd-9ad9-517bd3f7d70e`
-- **Total de interacciones registradas:** 3
+- **Total de interacciones registradas:** 5
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -66,5 +66,39 @@ El problema por el que el **ETC de Oro** (`IE00B4ND3602`, ticker `PPFB.DE`) no s
 ### 👤 Usuario (2026-10-27 19:48:14)
 
 Desglose de Fondos y Réplicas para el oro esta mal
+
+---
+
+### 🤖 Asistente (2026-10-27 20:17:05)
+
+Se ha corregido el desglose de fondos y réplicas para el oro físico en la tarjeta de Cartera Simulada:
+
+### 🛠️ Problemas Detectados y Soluciones Aplicadas
+
+1. **Definición de IAU en el mapa de réplicas ([`SimulatedPortfolioCard.tsx`](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/SimulatedPortfolioCard.tsx)):**
+   - El mapa `ETF_INFO_MAP` no contenía la entrada para `IAU`. Esto provocaba que en la pestaña de **ETFs Agrupados**, la categoría por defecto cayera en `'Renta Variable'` y el nombre se mostrara como el ticker crudo `"IAU"`.
+   - Se añadió la configuración completa para `IAU` y `GLD`:
+     - **Nombre:** *iShares Gold Trust (Oro Físico)*
+     - **Nombre corto:** *Oro Físico (IAU)*
+     - **Categoría:** *Materias Primas / Oro (Metales Preciosos)*
+
+2. **Resolución de nombres en el backend ([`market.py`](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/routers/market.py)):**
+   - En el listado agrupado `etfs_summary`, si las cotizaciones no traían un nombre legible o devolvían únicamente el ticker, se añade la resolución automática del nombre descriptivo desde `PORTFOLIO_ETF_PROXIES` (*iShares Gold Trust*).
+
+3. **Icono y estilo del Oro en [`CompanyLogo.tsx`](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/ui/CompanyLogo.tsx):**
+   - Se añadieron `IAU`, `GLD`, `PPFB.DE` y `4GLD.DE` al manejador `getMarketIcon` para renderizar el icono de monedas de oro dorado (`Coins` en color ámbar).
+   - Se priorizó el renderizado del icono de mercado para réplicas de ETF cuando no se pasa un ISIN, manteniendo el logo oficial de iShares (`ISharesLogo`) para la posición física del fondo/ETC en cartera (`IE00B4ND3602`).
+
+4. **Indicador de Futuros en directo:**
+   - Se añadió el distintivo `Futuros` en las columnas de cotización y variación diaria cuando el valor es proyectado en vivo fuera de horas regulares de contado mediante el futuro continuo del oro `GC=F`.
+
+---
+🚀 Cambios compilados y desplegados en la versión **v3.4.43** sincronizada en el repositorio.
+
+---
+
+### 👤 Usuario (2026-10-27 19:51:03)
+
+elimina los segundos para darle mas espacio y tamaño
 
 ---
