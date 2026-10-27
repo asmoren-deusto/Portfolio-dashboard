@@ -160,13 +160,19 @@ export {
  */
 export function formatAssetDisplayName(name: string | null | undefined, hasIcon: boolean = false): string {
   if (!name) return ''
-  let formatted = name.replace(/\bBlackRock Global Funds\b/gi, 'BGF')
+  // Strip redundant leading "BGF -" or "BFG -" prefix
+  let formatted = name.replace(/^(?:BGF|BFG)\s*[-–—:]?\s*/i, '')
 
   if (hasIcon) {
     // Remove leading "Fidelity" prefix (case insensitive, with optional hyphen/dash/colon/space)
     formatted = formatted.replace(/^Fidelity\s*[-–—:]?\s+/i, '')
     // Remove leading "iShares" prefix (case insensitive, with optional hyphen/dash/colon/space)
     formatted = formatted.replace(/^iShares\s*[-–—:]?\s+/i, '')
+    // Remove leading "BlackRock" or "BlackRock Global Funds" prefix
+    formatted = formatted.replace(/^BlackRock(?:\s+Global\s+Funds)?\s*[-–—:]?\s+/i, '')
+  } else {
+    formatted = formatted.replace(/^BlackRock(?:\s+Global\s+Funds)?\s*[-–—:]?\s*/i, '')
+    formatted = formatted.replace(/\bBlackRock Global Funds\b/gi, 'BGF')
   }
 
   return formatted.trim()

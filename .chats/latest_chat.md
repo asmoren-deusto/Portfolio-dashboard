@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-27 21:18:26
+- **Fecha de exportación:** 2026-10-27 21:20:05
 - **ID de Conversación:** `dcf2d459-d371-4ebd-9ad9-517bd3f7d70e`
-- **Total de interacciones registradas:** 5
+- **Total de interacciones registradas:** 7
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -100,5 +100,26 @@ Se ha corregido el desglose de fondos y réplicas para el oro físico en la tarj
 ### 👤 Usuario (2026-10-27 19:51:03)
 
 elimina los segundos para darle mas espacio y tamaño
+
+---
+
+### 🤖 Asistente (2026-10-27 20:18:28)
+
+Se han eliminado los segundos y ampliado el espacio y tamaño de la hora en el ticker de mercados ([`MarketTicker.tsx`](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/market/MarketTicker.tsx)):
+
+- **Formato sin segundos:** La hora pasa de `HH:mm:ss` (p. ej. `20:50:10`) a `HH:mm` (p. ej. `20:50`), reduciendo 3 caracteres y liberando espacio horizontal.
+- **Mayor tamaño y legibilidad:**
+  - El icono del reloj pasa de `w-2.5 h-2.5` a `w-3 h-3`.
+  - La tipografía aumenta de `text-[9px]` a `text-[10.5px] font-medium text-slate-300`.
+  - Se incrementa la separación respecto a *"MERCADOS EN VIVO"* (`gap-1.5` y `pl-2`) para que respire mejor y no quede comprimido.
+
+---
+🚀 Cambios compilados y desplegados en la versión **v3.4.44** sincronizada con el repositorio.
+
+---
+
+### 👤 Usuario (2026-10-27 19:52:37)
+
+BGF - World Healthscience Fund A2 (EUR), quita BFG - del nombre del fondo
 
 ---
