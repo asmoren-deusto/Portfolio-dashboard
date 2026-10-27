@@ -158,9 +158,15 @@ def _seed_asier_data():
                     PriceCache.date == p_data["date"],
                 ).first()
                 if not entry:
-                    db.add(PriceCache(**p_data))
+                    src = "live_yahoo" if p_data["isin"] == "IE00B4ND3602" and p_data["date"] >= "2026-10-27" else ("history_sync" if p_data["isin"] == "IE00B4ND3602" else None)
+                    row_data = dict(p_data)
+                    if src:
+                        row_data["source"] = src
+                    db.add(PriceCache(**row_data))
                 elif p_data.get("price") is not None and abs(entry.price - p_data["price"]) > 0.0001:
                     entry.price = p_data["price"]
+                    if p_data["isin"] == "IE00B4ND3602":
+                        entry.source = "live_yahoo" if p_data["date"] >= "2026-10-27" else "history_sync"
 
             # 3. Seed transactions — ensure all seed transactions exist even on persistent DB volumes
             existing_txs = {

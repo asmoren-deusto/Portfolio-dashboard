@@ -191,6 +191,7 @@ ETF_PREMARKET_LIVE_PROXIES = {
     "COWZ": "ES=F",       # Futuros S&P 500 24h (guía RV EE.UU.)
     "IXJ":  "ES=F",       # Futuros S&P 500 24h CME Globex (guía RV Sector Salud)
     "BWX":  "ZN=F",       # Futuros 10-Yr T-Note 24h CME Globex (guía Deuda Soberana / Renta Fija)
+    "IAU":  "GC=F",       # Futuros Oro 24h CME Comex (guía Oro físico fuera de horas)
 }
 
 # In-memory cache (shorter TTL for real-time feel)
@@ -1108,6 +1109,7 @@ PORTFOLIO_ETF_PROXIES = {
     "LU1598719752": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE"},
     "LU0171307068": {"ticker": "IXJ",  "name": "iShares Global Healthcare ETF", "desc": "Salud y Biotecnología Global"},
     "ES0000012411": {"ticker": "BWX",  "name": "SPDR International Treasury Bond", "desc": "Deuda Soberana / Bonos España & Global"},
+    "IE00B4ND3602": {"ticker": "IAU",  "name": "iShares Gold Trust", "desc": "Oro Físico (ETC / Metales Preciosos)"},
 }
 
 _sim_portfolio_cache: dict[str, dict] = {}
@@ -1258,6 +1260,7 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
         "EWJ": 0.05,   # Japan ~5% USD
         "IXJ": 0.70,   # Global Healthcare ~70% USD
         "BWX": 0.00,   # Bonos Soberanos España 0% USD (100% EUR)
+        "IAU": 1.00,   # Oro Físico cotizado globalmente en USD (XAU/USD)
     }
     portfolio_usd_exposure = sum(etf_weights.get(t, 0.0) * USD_EXPOSURE_WEIGHTS.get(t, 0.70) for t in etf_tickers_list)
 

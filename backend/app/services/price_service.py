@@ -214,7 +214,7 @@ async def get_price_with_date(
             logger.warning(f"Error querying PriceCache for non-standard ISIN {isin}: {e}")
 
     # 1. Try European & Spanish fund providers (Financial Times, Investing.com, Quefondos, Azvalor, Finect, Yahoo) in parallel
-    if price is None and is_standard_isin:
+    if price is None and is_standard_isin and not is_live_traded and isin != "IE00B4ND3602":
         tasks = [
             _fetch_ft_official(isin),
             _fetch_investing_price(isin),
@@ -938,6 +938,9 @@ async def _fetch_ft_official(isin: str) -> tuple[Optional[float], Optional[str]]
     Fetch latest official NAV and date from Financial Times Markets fund tearsheets.
     FT receives direct daily NAV feeds reported by European fund managers (Fidelity, Blackrock, DNB, etc.).
     """
+    if isin == "IE00B4ND3602":
+        return None, None
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -967,7 +970,21 @@ async def _fetch_ft_official(isin: str) -> tuple[Optional[float], Optional[str]]
 
 
 def _sync_fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]]:
-    """Synchronous worker for Yahoo Finance price fetch."""
+    """Synchronous worker for Yahoo Finance price fetch with fast chart quote priority."""
+    # 1. Try fast Yahoo chart quote first (<50ms, accurate regular price, timestamp and currency)
+    try:
+        from app.routers.market import _fetch_yahoo_chart_quote
+        cq = _fetch_yahoo_chart_quote(ticker)
+        if cq and cq.get("price") and float(cq["price"]) > 0:
+            price = float(cq["price"])
+            dt_str = cq.get("last_updated", "")[:10]
+            if not dt_str or len(dt_str) < 10:
+                dt_str = datetime.now().strftime("%Y-%m-%d")
+            return price, dt_str
+    except Exception as e:
+        logger.debug(f"Fast chart quote fallback for {ticker}: {e}")
+
+    # 2. Try yfinance fast_info and history
     try:
         t = yf.Ticker(ticker)
         info = getattr(t, "fast_info", None)
@@ -979,9 +996,22 @@ def _sync_fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]
             price = float(live_price) if (live_price is not None and live_price > 0) else float(hist["Close"].iloc[-1])
             return price, last_date
         elif live_price and live_price > 0:
-            return float(live_price), get_previous_business_date()
+            return float(live_price), datetime.now().strftime("%Y-%m-%d")
     except Exception as e:
         logger.warning(f"Yahoo Finance error for {ticker}: {e}")
+
+    # 3. If ticker is PPFB.DE, try EGLN.L (same iShares Physical Gold ETC in EUR on London)
+    if ticker == "PPFB.DE":
+        try:
+            from app.routers.market import _fetch_yahoo_chart_quote
+            cq = _fetch_yahoo_chart_quote("EGLN.L")
+            if cq and cq.get("price") and float(cq["price"]) > 0:
+                price = float(cq["price"])
+                dt_str = cq.get("last_updated", "")[:10] or datetime.now().strftime("%Y-%m-%d")
+                return price, dt_str
+        except Exception:
+            pass
+
     return None, None
 
 

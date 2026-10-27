@@ -401,8 +401,17 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
         prev_p = prev.get("price")
         prev_d = prev.get("date")
 
-        if p and p_date and prev_d and p_date < prev_d:
-            # Scraped date is strictly older than what we already have in our confirmed price history
+        eff_ticker = ticker or KNOWN_TICKERS.get(isin)
+        is_live_asset = bool(
+            eff_ticker
+            and not eff_ticker.startswith("0P000")
+            and not isin.startswith("0192")
+            and not isin.startswith("ES011261")
+            and isin != "ES0000012411"
+        )
+
+        if not is_live_asset and p and p_date and prev_d and p_date < prev_d:
+            # Mutual funds: scraped date is strictly older than what we already have in our confirmed price history
             p = prev_p
             p_date = prev_d
             is_updated = False
@@ -415,14 +424,19 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
             if p and p > 0:
                 if not prev_d:
                     is_updated = True
+                elif is_live_asset:
+                    if prev_p and abs(p - prev_p) > 0.0001:
+                        is_updated = True
+                    elif p_date and prev_d and p_date > prev_d:
+                        is_updated = True
                 elif p_date and prev_d and p_date > prev_d:
                     is_updated = True
                 elif p_date and prev_d and p_date == prev_d and prev_p and abs(p - prev_p) > 0.0001:
                     is_updated = True
 
             # Base reference for diff
-            ref_p = prev_p if (prev_p and is_updated) else prev.get("older_price") or prev_p
-            ref_d = prev_d if (prev_d and is_updated) else prev.get("older_date") or prev_d
+            ref_p = prev.get("older_price") if (prev_p and is_updated and prev.get("older_price") and p_date and prev_d and p_date > prev_d) else (prev_p if is_updated else prev.get("older_price") or prev_p)
+            ref_d = prev.get("older_date") if (prev_d and is_updated and prev.get("older_date") and p_date and prev_d and p_date > prev_d) else (prev_d if is_updated else prev.get("older_date") or prev_d)
 
             diff = round(p - ref_p, 4) if (p and ref_p and ref_p > 0) else 0.0
             diff_pct = round((p - ref_p) / ref_p * 100, 2) if (p and ref_p and ref_p > 0) else 0.0
