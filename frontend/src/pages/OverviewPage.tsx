@@ -44,7 +44,7 @@ import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
-import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate } from '@/lib/utils'
+import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
 
@@ -1495,7 +1495,7 @@ export function OverviewPage() {
                                 />
                                 <div className="min-w-0">
                                   <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
-                                    {p.name}
+                                    {formatAssetDisplayName(p.name, true)}
                                   </div>
                                   <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
                                     <span>{p.isin}</span>
@@ -1649,7 +1649,7 @@ export function OverviewPage() {
                                   />
                                   <div className="min-w-0">
                                     <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
-                                      {p.name}
+                                      {formatAssetDisplayName(p.name, true)}
                                     </div>
                                     <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
                                       <span>{p.isin}</span>
@@ -1932,11 +1932,11 @@ export function OverviewPage() {
                           <td className="py-2.5 px-3">
                             <div className="flex items-center gap-2 min-w-[130px]">
                               <div className="w-6 h-6 rounded-md overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/[0.08]">
-                                <CompanyLogo ticker={pos?.ticker || t.isin} name={t.name || ''} domain={pos?.domain} size="sm" />
+                                <CompanyLogo isin={t.isin} ticker={pos?.ticker || t.isin} name={t.name || ''} domain={pos?.domain} size="sm" />
                               </div>
                               <div className="min-w-0">
                                 <div className="font-semibold text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[170px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                  {t.name || t.isin}
+                                  {formatAssetDisplayName(t.name || t.isin, true)}
                                 </div>
                                 <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 truncate">
                                   {pos?.ticker || t.isin}

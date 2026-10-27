@@ -283,7 +283,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     else if (nl.includes('cobas')) targetDomain = 'cobasam.com'
     else if (nl.includes('azvalor')) targetDomain = 'azvalor.com'
     else if (nl.includes('fidelity')) targetDomain = 'fidelity.com'
-    else if (nl.includes('blackrock')) targetDomain = 'blackrock.com'
+    else if (nl.includes('blackrock') || nl.includes('bgf')) targetDomain = 'blackrock.com'
     else if (nl.includes('ishares')) targetDomain = 'ishares.com'
     else if (nl.includes('vanguard')) targetDomain = 'vanguard.com'
     else if (nl.includes('robeco')) targetDomain = 'robeco.com'
@@ -306,14 +306,15 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
 
   const isBlackRock =
     Boolean(isin && isin === 'LU0171307068') ||
-    ((name || '').toLowerCase().includes('blackrock') && !(name || '').toLowerCase().includes('ishares'))
+    (((name || '').toLowerCase().includes('blackrock') || (name || '').toLowerCase().includes('bgf')) &&
+      !(name || '').toLowerCase().includes('ishares'))
 
   const isIShares =
     !isBlackRock &&
     (Boolean(cleanDomain?.includes('ishares')) ||
       (name || '').toLowerCase().includes('ishares') ||
       Boolean(ticker && ticker.toLowerCase().includes('ishares')) ||
-      Boolean(isin && (isin === 'IE000QAZP7L2' || isin === 'IE000ZYRH0Q7')))
+      Boolean(isin && (isin === 'IE000QAZP7L2' || isin === 'IE000ZYRH0Q7' || isin === 'IE00B4ND3602')))
 
   const isAzvalor =
     Boolean(cleanDomain?.includes('azvalor')) ||

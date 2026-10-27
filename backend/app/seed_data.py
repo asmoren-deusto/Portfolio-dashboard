@@ -148,7 +148,7 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "LU0171307068",
-    "name": "BlackRock Global Funds - World Healthscience Fund A2 (EUR)",
+    "name": "BGF - World Healthscience Fund A2 (EUR)",
     "ticker": null,
     "asset_type": "fund",
     "currency": "EUR",

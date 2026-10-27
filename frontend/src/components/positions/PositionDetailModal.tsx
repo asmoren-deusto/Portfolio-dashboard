@@ -5,7 +5,7 @@ import { X, TrendingUp, TrendingDown, ExternalLink, Globe } from 'lucide-react'
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge } from '@/components/ui/Badge'
-import { fmt } from '@/lib/utils'
+import { fmt, formatAssetDisplayName } from '@/lib/utils'
 import { useMarketHistory } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
@@ -204,6 +204,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
             {/* Header: Logo, Name, ISIN, Ticker, AssetType, Category */}
             <div className="flex items-start gap-3.5 sm:gap-4 mb-4">
               <CompanyLogo
+                isin={position.isin}
                 ticker={position.ticker || position.isin.slice(0, 4)}
                 name={position.name}
                 domain={position.domain}
@@ -212,7 +213,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
               <div className="min-w-0 pr-10 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
-                    {position.name}
+                    {formatAssetDisplayName(position.name, true)}
                   </h3>
                   {position.ticker && (
                     <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md">

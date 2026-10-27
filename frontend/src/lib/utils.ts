@@ -151,3 +151,24 @@ export {
   getEffectivePortfolioNavDate as getConsensusNavDate,
 } from './marketCalendar'
 
+/**
+ * Formats an asset name for clean, uncluttered presentation:
+ * 1. Abbreviates "BlackRock Global Funds" to "BGF" unconditionally.
+ * 2. If hasIcon is true (i.e. displayed right next to the fund/brand logo), removes redundant leading
+ *    brand prefixes for Fidelity and iShares (e.g. "Fidelity MSCI World..." -> "MSCI World...",
+ *    "iShares Developed World..." -> "Developed World...", "iShares Physical Gold..." -> "Physical Gold...").
+ */
+export function formatAssetDisplayName(name: string | null | undefined, hasIcon: boolean = false): string {
+  if (!name) return ''
+  let formatted = name.replace(/\bBlackRock Global Funds\b/gi, 'BGF')
+
+  if (hasIcon) {
+    // Remove leading "Fidelity" prefix (case insensitive, with optional hyphen/dash/colon/space)
+    formatted = formatted.replace(/^Fidelity\s*[-–—:]?\s+/i, '')
+    // Remove leading "iShares" prefix (case insensitive, with optional hyphen/dash/colon/space)
+    formatted = formatted.replace(/^iShares\s*[-–—:]?\s+/i, '')
+  }
+
+  return formatted.trim()
+}
+

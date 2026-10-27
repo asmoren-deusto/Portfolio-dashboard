@@ -26,7 +26,7 @@ import {
   type MarketStock,
   type SessionMarker,
 } from '@/api/queries'
-import { fmt, cn } from '@/lib/utils'
+import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
@@ -1117,16 +1117,16 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                             <div className="flex items-center gap-2 min-w-0">
                               <CompanyLogo
                                 isin={h.isin}
-                                name={h.fund_name}
+                                name={formatAssetDisplayName(h.fund_name, true)}
                                 size="xs"
                                 className="shrink-0"
                               />
                               <div className="min-w-0 flex-1">
                                 <div
                                   className="font-bold text-xs text-slate-900 dark:text-white truncate"
-                                  title={h.fund_name}
+                                  title={formatAssetDisplayName(h.fund_name, true)}
                                 >
-                                  {h.fund_name}
+                                  {formatAssetDisplayName(h.fund_name, true)}
                                 </div>
                                 <div className="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5 flex items-center gap-1.5 flex-wrap">
                                   <span>{h.isin}</span>
@@ -1148,9 +1148,9 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               <div className="min-w-0 flex-1">
                                 <div
                                   className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate"
-                                  title={displayName}
+                                  title={formatAssetDisplayName(displayName, true)}
                                 >
-                                  {displayName}
+                                  {formatAssetDisplayName(displayName, true)}
                                 </div>
                                 <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
                                   {etfInfo?.category || h.etf_desc || 'Renta Variable'}
@@ -1260,7 +1260,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                                         className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[140px]"
                                         title={displayName}
                                       >
-                                        {displayName}
+                                        {formatAssetDisplayName(displayName, true)}
                                       </span>
                                       <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
                                         {etf.ticker}

@@ -25,7 +25,7 @@ import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { BrokerBadge } from '@/components/ui/Badge'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
-import { fmt, cn } from '@/lib/utils'
+import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { apiUrl } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
@@ -355,6 +355,7 @@ export function TransactionsPage() {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <CompanyLogo
+                            isin={t.isin}
                             ticker={assetInfo?.ticker || t.isin.slice(0, 4)}
                             name={displayName}
                             domain={assetInfo?.domain}
@@ -362,7 +363,7 @@ export function TransactionsPage() {
                           />
                           <div className="min-w-0">
                             <div className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[260px]">
-                              {displayName}
+                              {formatAssetDisplayName(displayName, true)}
                             </div>
                             <div className="font-mono text-xs text-slate-600 dark:text-slate-400 font-medium">{t.isin}</div>
                           </div>
@@ -674,7 +675,7 @@ function AddTransactionModal({
             >
               {positions.map((p) => (
                 <option key={p.isin} value={p.isin}>
-                  {p.name} ({p.isin})
+                  {formatAssetDisplayName(p.name, false)} ({p.isin})
                 </option>
               ))}
             </select>

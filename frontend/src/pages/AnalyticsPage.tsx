@@ -30,7 +30,7 @@ import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
-import { fmt, cn } from '@/lib/utils'
+import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
 import { useAnalytics, usePositions, useBenchmarkComparison } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
@@ -709,6 +709,7 @@ export function AnalyticsPage() {
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <CompanyLogo
+                          isin={p.isin}
                           ticker={p.ticker || p.isin.slice(0, 4)}
                           name={p.name}
                           domain={p.domain}
@@ -716,7 +717,7 @@ export function AnalyticsPage() {
                         />
                         <div className="min-w-0">
                           <div className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[300px] text-[14.3px]">
-                            {p.name}
+                            {formatAssetDisplayName(p.name, true)}
                           </div>
                           <div className="font-mono text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{p.isin}</div>
                         </div>

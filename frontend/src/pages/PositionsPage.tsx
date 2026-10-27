@@ -21,7 +21,7 @@ import { Card } from '@/components/ui/Card'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
-import { fmt, cn, getConsensusNavDate } from '@/lib/utils'
+import { fmt, cn, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { usePositions, usePortfolioSummary, useAnalytics } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
@@ -417,7 +417,7 @@ export function PositionsPage() {
                             />
                             <div className="min-w-0">
                               <div className="font-semibold text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-white transition-colors truncate max-w-[280px]">
-                                {p.name}
+                                {formatAssetDisplayName(p.name, true)}
                               </div>
                               <div className="flex items-center gap-1.5 font-mono text-xs text-slate-600 dark:text-slate-400 font-medium">
                                 <span>{p.isin}</span>
@@ -578,7 +578,7 @@ export function PositionsPage() {
                       />
                       <div className="min-w-0">
                         <h3 className="font-semibold text-sm text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-white transition-colors truncate">
-                          {p.name}
+                          {formatAssetDisplayName(p.name, true)}
                         </h3>
                         <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
                           <span>{p.isin}</span>
