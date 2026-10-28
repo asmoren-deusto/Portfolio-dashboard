@@ -169,6 +169,13 @@ def _seed_asier_data():
                         entry.source = "live_yahoo" if p_data["date"] >= "2026-10-27" else "history_sync"
 
             # 3. Seed transactions — ensure all seed transactions exist even on persistent DB volumes
+            # Clean up obsolete duplicate Vanguard S&P 500 transaction created during v3.5.3 on persistent volumes
+            db.query(Transaction).filter(
+                Transaction.user_id == "asier",
+                Transaction.isin == "IE0032126645",
+                Transaction.date == "2026-10-28",
+            ).delete()
+
             existing_txs = {
                 (t.user_id, t.isin, t.date, round(float(t.amount), 2), t.type)
                 for t in db.query(Transaction).filter(Transaction.user_id == "asier").all()
