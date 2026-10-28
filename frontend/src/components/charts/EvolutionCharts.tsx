@@ -128,7 +128,7 @@ function formatDateFull(dateStr: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 export function GlowSplineChart({
   data,
-  height = 280,
+  height = 260,
   chartMode = 'currency',
   showInvested = true,
 }: {
@@ -254,46 +254,6 @@ export function GlowSplineChart({
           </AreaChart>
         </ResponsiveContainer>
       </div>
-
-      {/* Floating Bottom Metric Bar */}
-      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            <span className="text-slate-500 dark:text-slate-400 font-medium">Patrimonio Actual:</span>
-            <span className="font-bold text-slate-900 dark:text-white">
-              {fmt.currency(latest?.value || 0)}
-            </span>
-          </div>
-
-          {showInvested && chartMode === 'currency' && (
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-0.5 border-t-2 border-dashed border-indigo-500 dark:border-indigo-400" />
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado:</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
-                {fmt.currency(latest?.invested || 0)}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-slate-500 dark:text-slate-400 font-medium">Plusvalía acumulada:</span>
-          <span
-            className={cn(
-              'font-bold px-2 py-0.5 rounded-md text-[11px] inline-flex items-center gap-1',
-              isPositive
-                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
-            )}
-          >
-            {isPositive ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
-            {isPositive ? '+' : ''}
-            {fmt.currency(latest?.pnl || 0)} ({isPositive ? '+' : ''}
-            {(latest?.pnlPct || 0).toFixed(2)}%)
-          </span>
-        </div>
-      </div>
     </div>
   )
 }
@@ -356,7 +316,7 @@ function GlowChartTooltip({ active, payload, label, chartMode, isDark }: any) {
 // ─────────────────────────────────────────────────────────────────────────────
 export function MultiLineComparisonChart({
   data,
-  height = 280,
+  height = 260,
   breakdown = 'broker',
   chartMode = 'currency',
 }: {
@@ -443,8 +403,37 @@ export function MultiLineComparisonChart({
   return (
     <div className="w-full flex flex-col">
       <div style={{ height }} className="w-full relative">
+        {/* Floating Interactive Legend Pills on Top */}
+        <div className="absolute top-1 left-2 z-10 flex flex-wrap items-center gap-1.5 pointer-events-auto max-w-[85%]">
+          {seriesKeys.map((k) => {
+            const cfg = (palette as any)[k] || { label: k, color: '#3b82f6' }
+            const isVis = visibleSeries[k] !== false
+            const lastVal = chartData[chartData.length - 1]?.[k] || 0
+
+            return (
+              <motion.button
+                key={k}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => toggleSeries(k)}
+                className={cn(
+                  'px-2 py-0.5 rounded-md border text-[11px] font-semibold flex items-center gap-1.5 transition-all shadow-2xs',
+                  isVis
+                    ? 'bg-white/90 dark:bg-[#202022]/90 backdrop-blur-xs border-slate-200/80 dark:border-white/10 text-slate-800 dark:text-slate-100'
+                    : 'bg-slate-100/60 dark:bg-white/[0.03] border-slate-200/40 dark:border-white/[0.05] text-slate-400 line-through opacity-50'
+                )}
+              >
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cfg.color }} />
+                <span>{cfg.label}</span>
+                <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                  {chartMode === 'percent' ? `${lastVal > 0 ? '+' : ''}${lastVal}%` : fmt.currency(lastVal)}
+                </span>
+              </motion.button>
+            )
+          })}
+        </div>
+
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 12, right: 12, left: -16, bottom: 0 }}>
+          <LineChart data={chartData} margin={{ top: 28, right: 12, left: -16, bottom: 0 }}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke={isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)'}
@@ -501,35 +490,6 @@ export function MultiLineComparisonChart({
           </LineChart>
         </ResponsiveContainer>
       </div>
-
-      {/* Interactive Legend Pills below */}
-      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/[0.06] flex flex-wrap items-center gap-2 text-xs">
-        {seriesKeys.map((k) => {
-          const cfg = (palette as any)[k] || { label: k, color: '#3b82f6' }
-          const isVis = visibleSeries[k] !== false
-          const lastVal = chartData[chartData.length - 1]?.[k] || 0
-
-          return (
-            <motion.button
-              key={k}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => toggleSeries(k)}
-              className={cn(
-                'px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs',
-                isVis
-                  ? 'bg-white dark:bg-[#252528] border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-100'
-                  : 'bg-slate-100 dark:bg-white/[0.03] border-slate-200/60 dark:border-white/[0.05] text-slate-400 line-through opacity-50'
-              )}
-            >
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cfg.color }} />
-              <span>{cfg.label}</span>
-              <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                {chartMode === 'percent' ? `${lastVal > 0 ? '+' : ''}${lastVal}%` : fmt.currency(lastVal)}
-              </span>
-            </motion.button>
-          )
-        })}
-      </div>
     </div>
   )
 }
@@ -571,7 +531,7 @@ function MultiLineTooltip({ active, payload, label, palette, chartMode, isDark }
 // ─────────────────────────────────────────────────────────────────────────────
 export function WaterfallGrowthChart({
   data,
-  height = 280,
+  height = 260,
 }: {
   data: PricePoint[]
   height?: number
@@ -642,8 +602,19 @@ export function WaterfallGrowthChart({
   return (
     <div className="w-full flex flex-col">
       <div style={{ height }} className="w-full relative">
+        {/* Floating Top Summary Badge */}
+        <div className="absolute top-1 left-2 z-10 flex items-center gap-3 text-[11px] font-semibold bg-white/90 dark:bg-[#202022]/90 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-slate-200/80 dark:border-white/10 shadow-2xs">
+          <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+            <span className="w-2 h-2 rounded bg-blue-500" /> Aportado: {fmt.currency(totals.totSavings)}
+          </span>
+          <span className="text-slate-300 dark:text-slate-600">•</span>
+          <span className={cn("flex items-center gap-1.5", totals.totGains >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
+            <span className={cn("w-2 h-2 rounded", totals.totGains >= 0 ? "bg-emerald-500" : "bg-rose-500")} /> Mercado: {totals.totGains >= 0 ? '+' : ''}{fmt.currency(totals.totGains)}
+          </span>
+        </div>
+
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={monthlyData} margin={{ top: 12, right: 12, left: -16, bottom: 0 }}>
+          <ComposedChart data={monthlyData} margin={{ top: 28, right: 12, left: -16, bottom: 0 }}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke={isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)'}
@@ -698,28 +669,6 @@ export function WaterfallGrowthChart({
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-
-      {/* Footer Breakdown */}
-      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded bg-blue-500" />
-            <span className="text-slate-500 dark:text-slate-400 font-medium">Aportado en el periodo:</span>
-            <span className="font-bold text-slate-900 dark:text-white">{fmt.currency(totals.totSavings)}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded bg-emerald-500" />
-            <span className="text-slate-500 dark:text-slate-400 font-medium">Ganado por Mercado:</span>
-            <span className={cn('font-bold', totals.totGains >= 0 ? 'text-emerald-500' : 'text-rose-500')}>
-              {totals.totGains >= 0 ? '+' : ''}
-              {fmt.currency(totals.totGains)}
-            </span>
-          </div>
-        </div>
-
-        <div className="text-[11px] text-slate-400">Desglose mensual de contribución neta vs rentabilidad</div>
-      </div>
     </div>
   )
 }
@@ -769,7 +718,7 @@ function WaterfallTooltip({ active, payload, label, isDark }: any) {
 // ─────────────────────────────────────────────────────────────────────────────
 export function AllocationStreamChart({
   data,
-  height = 280,
+  height = 260,
   breakdown = 'broker',
 }: {
   data: PricePoint[]
@@ -827,8 +776,30 @@ export function AllocationStreamChart({
   return (
     <div className="w-full flex flex-col">
       <div style={{ height }} className="w-full relative">
+        {/* Floating Interactive Pills on Top */}
+        <div className="absolute top-1 left-2 z-10 flex flex-wrap items-center gap-1.5 pointer-events-auto max-w-[85%]">
+          {seriesKeys.map((k) => {
+            const cfg = (palette as any)[k] || { label: k, color: '#3b82f6' }
+            const lastPoint = chartData[chartData.length - 1]
+            const pct = lastPoint?.[k] || 0
+            const eur = lastPoint?.[`${k}_eur`] || 0
+
+            return (
+              <div
+                key={k}
+                className="px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#202022]/90 backdrop-blur-xs text-[11px] flex items-center gap-1.5 shadow-2xs"
+              >
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cfg.color }} />
+                <span className="font-semibold text-slate-800 dark:text-slate-100">{cfg.label}:</span>
+                <span className="font-bold text-slate-900 dark:text-white font-mono">{pct.toFixed(1)}%</span>
+                <span className="text-[10px] text-slate-400 font-mono">({fmt.currency(eur)})</span>
+              </div>
+            )
+          })}
+        </div>
+
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 12, right: 12, left: -16, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 28, right: 12, left: -16, bottom: 0 }}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke={isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)'}
@@ -882,28 +853,6 @@ export function AllocationStreamChart({
             })}
           </AreaChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* Legend below with current % weights */}
-      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/[0.06] flex flex-wrap items-center gap-2.5 text-xs">
-        {seriesKeys.map((k) => {
-          const cfg = (palette as any)[k] || { label: k, color: '#3b82f6' }
-          const lastPoint = chartData[chartData.length - 1]
-          const pct = lastPoint?.[k] || 0
-          const eur = lastPoint?.[`${k}_eur`] || 0
-
-          return (
-            <div
-              key={k}
-              className="px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#222225] text-xs flex items-center gap-1.5 shadow-xs"
-            >
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cfg.color }} />
-              <span className="font-semibold text-slate-800 dark:text-slate-100">{cfg.label}:</span>
-              <span className="font-bold text-slate-900 dark:text-white font-mono">{pct.toFixed(1)}%</span>
-              <span className="text-[11px] text-slate-400 font-mono">({fmt.currency(eur)})</span>
-            </div>
-          )
-        })}
       </div>
     </div>
   )

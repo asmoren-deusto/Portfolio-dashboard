@@ -964,22 +964,18 @@ export function OverviewPage() {
       {/* Charts Section: 60% / 20% / 20% */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* 1. Performance Evolution (60% on desktop: lg:col-span-3, md:col-span-2) */}
-        <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between" delay={0.2} loading={isRefreshingPrices}>
-          <CardHeader className="min-h-[58px] py-2 px-3.5 sm:px-6">
-            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+        <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between h-[390px]" delay={0.2} loading={isRefreshingPrices}>
+          <CardHeader className="h-[58px] min-h-[58px] max-h-[58px] py-2 px-3.5 sm:px-6 flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0 shrink-0">
               <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
                 <BarChart3 className="w-4 h-4" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <CardTitle className="text-sm sm:text-[15px] truncate">Evolución Patrimonial</CardTitle>
+                  <CardTitle className="text-sm truncate">Evolución</CardTitle>
                 </div>
-                <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
-                  {chartStyle === 'glow' && 'Trayectoria fluida del valor liquidativo con plusvalía sombreada'}
-                  {chartStyle === 'lines' && `Líneas independientes por ${perfBreakdown === 'broker' ? 'Entidad' : 'Clase de Activo'}`}
-                  {chartStyle === 'waterfall' && 'Aportaciones netas de ahorro vs rentabilidad del mercado mes a mes'}
-                  {chartStyle === 'allocation' && `Evolución de distribución porcentual por ${perfBreakdown === 'broker' ? 'Entidad' : 'Clase de Activo'}`}
-                  {chartStyle === 'heatmap' && 'Rentabilidad neta mes a mes y acumulación anual de la cartera'}
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
+                  Patrimonial
                 </p>
               </div>
             </div>
@@ -1235,12 +1231,12 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className="px-3 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
-            <div data-private className="flex-1 flex flex-col justify-center min-h-0">
+            <div data-private className="h-[260px] min-h-[260px] max-h-[260px] flex-1 flex flex-col justify-center min-h-0 overflow-hidden relative">
               <AnimatePresence mode="wait" initial={false}>
                 {isChartsInitialLoading ? (
-                  <PerformanceChartSkeleton height={280} />
+                  <PerformanceChartSkeleton height={260} />
                 ) : performance.length === 0 ? (
-                  <div className="flex h-[280px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
                     Sin datos de evolución
                   </div>
                 ) : chartStyle === 'glow' ? (
@@ -1250,11 +1246,11 @@ export function OverviewPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.2 }}
-                    className="w-full flex-1 flex flex-col justify-center"
+                    className="w-full h-full flex flex-col justify-center"
                   >
                     <GlowSplineChart
                       data={performance}
-                      height={280}
+                      height={260}
                       chartMode={perfChartMode}
                       showInvested={perfShowInvested}
                     />
@@ -1266,11 +1262,11 @@ export function OverviewPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.2 }}
-                    className="w-full flex-1 flex flex-col justify-center"
+                    className="w-full h-full flex flex-col justify-center"
                   >
                     <MultiLineComparisonChart
                       data={performance}
-                      height={280}
+                      height={260}
                       breakdown={perfBreakdown}
                       chartMode={perfChartMode}
                     />
@@ -1282,11 +1278,11 @@ export function OverviewPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.2 }}
-                    className="w-full flex-1 flex flex-col justify-center"
+                    className="w-full h-full flex flex-col justify-center"
                   >
                     <WaterfallGrowthChart
                       data={performance}
-                      height={280}
+                      height={260}
                     />
                   </motion.div>
                 ) : chartStyle === 'allocation' ? (
@@ -1296,11 +1292,11 @@ export function OverviewPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.2 }}
-                    className="w-full flex-1 flex flex-col justify-center"
+                    className="w-full h-full flex flex-col justify-center"
                   >
                     <AllocationStreamChart
                       data={performance}
-                      height={280}
+                      height={260}
                       breakdown={perfBreakdown}
                     />
                   </motion.div>
@@ -1311,18 +1307,101 @@ export function OverviewPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.2 }}
-                    className="py-0.5 w-full flex-1 flex flex-col justify-center"
+                    className="py-0.5 w-full h-full flex flex-col justify-center"
                   >
-                    <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="280px" />
+                    <MonthlyReturnsHeatmap compact showStats={false} tableMaxHeight="260px" />
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+
+            {/* Card 1 Footer: Perfectly aligned with Card 2 and Card 3 */}
+            <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
+              {/* Box 1: Patrimonio */}
+              <div
+                className="flex items-center justify-between gap-1 px-2 sm:px-2.5 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                title="Patrimonio total actual"
+              >
+                <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                  <div className="w-5 h-5 rounded-md flex items-center justify-center bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                    <TrendingUp size={12} />
+                  </div>
+                  <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap hidden sm:inline">
+                    Patrimonio:
+                  </span>
+                </div>
+                <span
+                  data-private
+                  className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5"
+                >
+                  {fmt.currency(displaySummary?.total_value || 0)}
+                </span>
+              </div>
+
+              {/* Box 2: Aportado */}
+              <div
+                className="flex items-center justify-between gap-1 px-2 sm:px-2.5 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                title="Capital total aportado"
+              >
+                <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                  <div className="w-5 h-5 rounded-md flex items-center justify-center bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
+                    <PiggyBank size={12} />
+                  </div>
+                  <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap hidden sm:inline">
+                    Aportado:
+                  </span>
+                </div>
+                <span
+                  data-private
+                  className="font-mono font-extrabold text-slate-950 dark:text-white text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5"
+                >
+                  {fmt.currency(displaySummary?.total_invested || 0)}
+                </span>
+              </div>
+
+              {/* Box 3: Plusvalía */}
+              <div
+                className="flex items-center justify-between gap-1 px-2 sm:px-2.5 py-1 rounded-xl h-[32px] sm:h-[34px] bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors min-w-0"
+                title="Plusvalía acumulada total"
+              >
+                <div className="flex items-center gap-1.5 min-w-0 shrink-0">
+                  <div
+                    className={cn(
+                      'w-5 h-5 rounded-md flex items-center justify-center shrink-0',
+                      (displaySummary?.total_pnl || 0) >= 0
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    <Sparkles size={12} />
+                  </div>
+                  <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap hidden sm:inline">
+                    Plusvalía:
+                  </span>
+                </div>
+                <span
+                  data-private
+                  className={cn(
+                    'font-mono font-extrabold text-[11px] sm:text-xs whitespace-nowrap shrink-0 pl-0.5',
+                    (displaySummary?.total_pnl || 0) >= 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
+                  )}
+                >
+                  {(displaySummary?.total_pnl || 0) >= 0 ? '+' : ''}
+                  {fmt.currency(displaySummary?.total_pnl || 0)}{' '}
+                  <span className="hidden xl:inline">
+                    ({(displaySummary?.total_pnl || 0) >= 0 ? '+' : ''}
+                    {(displaySummary?.total_pnl_pct || 0).toFixed(2)}%)
+                  </span>
+                </span>
+              </div>
             </div>
           </div>
         </Card>
 
         {/* 2. Asset Allocation Breakdown (20% on desktop: lg:col-span-1, md:col-span-1) */}
-        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.2} loading={isRefreshingPrices}>
+        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between h-[390px]" delay={0.2} loading={isRefreshingPrices}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20 shrink-0">
@@ -1366,7 +1445,7 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
-            <div className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
+            <div className="h-[260px] min-h-[260px] max-h-[260px] flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {isChartsInitialLoading ? (
                 <AllocationChartSkeleton height={260} />
               ) : positions.length > 0 ? (
@@ -1454,7 +1533,7 @@ export function OverviewPage() {
         </Card>
 
         {/* 3. Performance by Period (Global / Semanal 7D) (20% on desktop: lg:col-span-1, md:col-span-1) */}
-        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between" delay={0.2} loading={isRefreshingPrices}>
+        <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between h-[390px]" delay={0.2} loading={isRefreshingPrices}>
           <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
@@ -1515,7 +1594,7 @@ export function OverviewPage() {
           </CardHeader>
 
           <div className="px-3 pb-3 pt-1.5 flex flex-col justify-between flex-1 min-h-0 relative">
-            <div data-private className="flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
+            <div data-private className="h-[260px] min-h-[260px] max-h-[260px] flex flex-col justify-center flex-1 min-h-0 overflow-hidden">
               {isChartsInitialLoading ? (
                 <ReturnsChartSkeleton compact height={260} />
               ) : (
