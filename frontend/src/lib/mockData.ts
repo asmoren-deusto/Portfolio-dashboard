@@ -96,6 +96,7 @@ export interface PricePoint {
   daily_return?: number
   net_inflow?: number
   brokers?: Record<string, { value: number; invested?: number }>
+  asset_classes?: Record<string, { value: number; invested?: number }>
 }
 
 export const MOCK_SUMMARY: PortfolioSummary = {

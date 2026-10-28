@@ -1849,7 +1849,7 @@ PRICES = json.loads(r'''[
   },
   {
     "isin": "IE0032126645",
-    "date": "2026-10-28",
+    "date": "2026-10-27",
     "price": 84.688,
     "currency": "EUR"
   }
@@ -4033,11 +4033,11 @@ TRANSACTIONS = json.loads(r'''[
     "isin": "IE0032126645",
     "type": "buy",
     "shares": 237.92,
-    "price": 84.688,
-    "amount": 20149.66,
+    "price": 72.5644,
+    "amount": 17264.51,
     "fees": 0.0,
-    "date": "2026-10-28",
+    "date": "2026-10-27",
     "broker": "myinvestor",
-    "notes": "Suscripción por Traspaso Externo (desde BBVA, orden 202610270011696)"
+    "notes": "Suscripción por Traspaso Externo (desde BBVA, coste fiscal originario 17.264,51 € de valor 20.149,66 €, orden 202610270011696)"
   }
 ]''')

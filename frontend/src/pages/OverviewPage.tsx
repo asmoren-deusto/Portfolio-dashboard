@@ -31,7 +31,7 @@ import { Link } from 'react-router-dom'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
-import { PerformanceChart, PerformanceChartSkeleton } from '@/components/charts/PerformanceChart'
+import { PerformanceChart, PerformanceChartSkeleton, type PerformanceViewMode } from '@/components/charts/PerformanceChart'
 import { AllocationChart, AllocationChartSkeleton } from '@/components/charts/AllocationChart'
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
@@ -91,6 +91,13 @@ export function OverviewPage() {
   const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
   const [perfChartMode, setPerfChartMode] = useState<'currency' | 'percent'>('currency')
   const [perfShowInvested, setPerfShowInvested] = useState(true)
+  const [perfViewMode, setPerfViewMode] = useState<PerformanceViewMode>(() => {
+    return (localStorage.getItem('overview_perf_view_mode') as PerformanceViewMode) || 'total'
+  })
+  const handleSetPerfViewMode = (mode: PerformanceViewMode) => {
+    setPerfViewMode(mode)
+    localStorage.setItem('overview_perf_view_mode', mode)
+  }
   const [returnsPeriodMode, setReturnsPeriodMode] = useState<'global' | 'weekly'>(() => {
     return (localStorage.getItem('returns_period_mode') as 'global' | 'weekly') || 'weekly'
   })
@@ -946,6 +953,76 @@ export function OverviewPage() {
               {/* Evolution Chart Controls in CardHeader (hidden on mobile) */}
               {chartView === 'evolution' && (
                 <div className="hidden sm:flex items-center gap-1.5">
+                  {/* View Mode Selector: Total (A), Entidad (C), Activo (D) */}
+                  <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => handleSetPerfViewMode('total')}
+                      className={`relative px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${
+                        perfViewMode === 'total'
+                          ? 'text-slate-900 dark:text-white font-bold'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                      }`}
+                      title="Opción A: Curva neta de Patrimonio Total con Aportado"
+                    >
+                      {perfViewMode === 'total' && (
+                        <motion.div
+                          layoutId="perfViewModePill"
+                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                        />
+                      )}
+                      <span className="relative z-10 flex items-center gap-1">
+                        <TrendingUp size={11} className={perfViewMode === 'total' ? 'text-emerald-500' : ''} />
+                        <span>Total</span>
+                      </span>
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => handleSetPerfViewMode('broker')}
+                      className={`relative px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${
+                        perfViewMode === 'broker'
+                          ? 'text-slate-900 dark:text-white font-bold'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                      }`}
+                      title="Opción C: Desglose apilado ordenado por Entidad (Base MyInvestor, Indexa, Trade Republic)"
+                    >
+                      {perfViewMode === 'broker' && (
+                        <motion.div
+                          layoutId="perfViewModePill"
+                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                        />
+                      )}
+                      <span className="relative z-10 flex items-center gap-1">
+                        <Building2 size={11} className={perfViewMode === 'broker' ? 'text-blue-500' : ''} />
+                        <span>Entidad</span>
+                      </span>
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => handleSetPerfViewMode('asset_class')}
+                      className={`relative px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${
+                        perfViewMode === 'asset_class'
+                          ? 'text-slate-900 dark:text-white font-bold'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                      }`}
+                      title="Opción D: Desglose apilado por Clase de Activo (Renta Variable, Renta Fija, Oro, Efectivo)"
+                    >
+                      {perfViewMode === 'asset_class' && (
+                        <motion.div
+                          layoutId="perfViewModePill"
+                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                        />
+                      )}
+                      <span className="relative z-10 flex items-center gap-1">
+                        <Layers size={11} className={perfViewMode === 'asset_class' ? 'text-amber-500' : ''} />
+                        <span>Activo</span>
+                      </span>
+                    </motion.button>
+                  </div>
+
                   {/* Mode Selector (€ vs %) */}
                   <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
                     <motion.button
@@ -1068,6 +1145,7 @@ export function OverviewPage() {
                         showInvested={perfShowInvested}
                         showMilestones={false}
                         showFooterStrip={false}
+                        viewMode={perfViewMode}
                       />
                     ) : (
                       <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">

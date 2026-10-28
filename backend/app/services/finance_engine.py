@@ -2,6 +2,7 @@
 Finance engine — calculates portfolio metrics using pandas/numpy.
 Handles: TWR, MWR/IRR, Sharpe, Max Drawdown, CAGR, volatility.
 """
+import re
 import numpy as np
 import pandas as pd
 from datetime import datetime, date
@@ -70,11 +71,18 @@ def calculate_traspaso_balances(transactions: list[dict]) -> dict[str, dict[str,
             pos["shares"] += tx["shares"]
             pos["total_cost"] += tx["amount"]
             if is_traspaso:
-                broker_buys_market[src_broker] = broker_buys_market.get(src_broker, 0.0) + tx["amount"]
-                pending_market = max(0.0, broker_sells_market.get(src_broker, 0.0) - (broker_buys_market.get(src_broker, 0.0) - tx["amount"]))
+                buy_m_val = tx["amount"]
+                val_m = re.search(r"de valor\s*([\d\.,]+)", notes)
+                if val_m:
+                    try:
+                        buy_m_val = float(val_m.group(1).replace(".", "").replace(",", "."))
+                    except Exception:
+                        pass
+                broker_buys_market[src_broker] = broker_buys_market.get(src_broker, 0.0) + buy_m_val
+                pending_market = max(0.0, broker_sells_market.get(src_broker, 0.0) - (broker_buys_market.get(src_broker, 0.0) - buy_m_val))
                 pending_cost = max(0.0, broker_sells_cost.get(src_broker, 0.0) - broker_buys_cost.get(src_broker, 0.0))
                 if pending_market > 0 and pending_cost > 0:
-                    absorbed_cost = min(pending_cost, (tx["amount"] / pending_market) * pending_cost)
+                    absorbed_cost = min(pending_cost, (buy_m_val / pending_market) * pending_cost)
                 else:
                     absorbed_cost = tx["amount"]
                 broker_buys_cost[src_broker] = broker_buys_cost.get(src_broker, 0.0) + absorbed_cost
@@ -147,12 +155,24 @@ def calculate_positions(transactions: list[dict]) -> dict[str, dict]:
     return {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.001}
 
 
+def classify_asset_type(isin: str, asset_types_map: dict[str, str] | None = None) -> str:
+    isin_u = (isin or '').strip().upper()
+    if isin_u in ('IE00B4ND3602',) or (asset_types_map and asset_types_map.get(isin) == 'etc'):
+        return 'commodity'
+    if isin_u in ('ES0000012411', 'LU1623762843', '0201G') or (asset_types_map and asset_types_map.get(isin) in ('bond', 'fixed_income')):
+        return 'fixed_income'
+    if isin_u.startswith('CASH'):
+        return 'cash'
+    return 'equity'
+
+
 def calculate_portfolio_value_series(
     transactions: list[dict],
     price_history: dict[str, list[dict]],
     start_date: str | None = None,
     all_transactions: list[dict] | None = None,
     broker: str | None = None,
+    asset_types: dict[str, str] | None = None,
 ) -> list[dict]:
     """
     Reconstruct portfolio value over time.
@@ -316,6 +336,36 @@ def calculate_portfolio_value_series(
                     "invested": round(b_inv, 2),
                 }
 
+        # Asset class breakdown
+        asset_classes_data = {
+            "equity": {"value": 0.0, "invested": 0.0},
+            "fixed_income": {"value": 0.0, "invested": 0.0},
+            "commodity": {"value": 0.0, "invested": 0.0},
+            "cash": {"value": 0.0, "invested": 0.0},
+        }
+
+        for isin, pos in positions.items():
+            if isin == "TR_TRANSFER" or isin.startswith("TR_") or pos.get("shares", 0) <= 0.0001:
+                continue
+            price = price_lookup.get(isin, {}).get(d_str)
+            if price is None or price <= 0:
+                price = pos.get("avg_cost", 0)
+            val = pos["shares"] * price
+            inv = pos["invested_amount"]
+            ac = classify_asset_type(isin, asset_types)
+            asset_classes_data[ac]["value"] += val
+            asset_classes_data[ac]["invested"] += inv
+
+        if cash_in_transit > 0 or cost_in_transit > 0:
+            asset_classes_data["cash"]["value"] += cash_in_transit
+            asset_classes_data["cash"]["invested"] += cost_in_transit
+
+        clean_asset_classes = {
+            k: {"value": round(v["value"], 2), "invested": round(v["invested"], 2)}
+            for k, v in asset_classes_data.items()
+            if v["value"] > 0.01 or v["invested"] > 0.01
+        }
+
         if total > 0:
             portfolio_values.append({
                 "date": d_str,
@@ -324,6 +374,7 @@ def calculate_portfolio_value_series(
                 "daily_return": daily_return,
                 "net_inflow": round(day_inflow, 2),
                 "brokers": brokers_data,
+                "asset_classes": clean_asset_classes,
             })
 
     return portfolio_values

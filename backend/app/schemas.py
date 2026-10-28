@@ -125,6 +125,7 @@ class PerformancePoint(BaseModel):
     daily_return: Optional[float] = None
     net_inflow: Optional[float] = None
     brokers: Optional[dict[str, dict[str, float]]] = None
+    asset_classes: Optional[dict[str, dict[str, float]]] = None
 
 
 class PricePoint(BaseModel):

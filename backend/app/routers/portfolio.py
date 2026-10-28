@@ -703,12 +703,15 @@ async def get_performance(
             price_history[isin] = [{"date": curr_p_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
 
     all_user_tx = _get_all_transactions(db, user_id, broker=None)
+    from app.models import Asset
+    asset_types = {a.isin: a.asset_type for a in db.query(Asset).all()}
     value_series = calculate_portfolio_value_series(
         transactions,
         price_history,
         start_date=effective_start,
         all_transactions=all_user_tx,
         broker=broker,
+        asset_types=asset_types,
     )
 
     # Sync latest point exactly with current portfolio summary to prevent UI discrepancies
@@ -735,6 +738,7 @@ async def get_performance(
             "daily_return": 0.0,
             "net_inflow": 0.0,
             "brokers": {b: {"value": 0.0, "invested": 0.0} for b in first_pt.get("brokers", {}).keys()},
+            "asset_classes": {ac: {"value": 0.0, "invested": 0.0} for ac in first_pt.get("asset_classes", {}).keys()},
         }
         value_series.insert(0, base_pt)
 

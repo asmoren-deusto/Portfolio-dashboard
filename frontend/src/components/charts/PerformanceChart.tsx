@@ -20,10 +20,10 @@ import {
   ArrowUpRight,
   Flame,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { triggerChartAnimation, prepareChartForAnimation } from '@/lib/chartAnimation'
 
 export type ChartMode = 'currency' | 'percent'
+export type PerformanceViewMode = 'total' | 'broker' | 'asset_class'
 
 export interface EntityConfig {
   id: string
@@ -41,80 +41,141 @@ export interface EntityConfig {
 export const ENTITY_CONFIGS: Record<string, EntityConfig> = {
   myinvestor: {
     id: 'myinvestor',
-    label: 'MyInves',
+    label: 'MyInvestor',
     color: '#3b82f6', // blue
-    topColorDark: 'rgba(59, 130, 246, 0.32)',
-    topColorLight: 'rgba(37, 99, 235, 0.22)',
-    bottomColorDark: 'rgba(59, 130, 246, 0.00)',
-    bottomColorLight: 'rgba(37, 99, 235, 0.00)',
+    topColorDark: 'rgba(59, 130, 246, 0.40)',
+    topColorLight: 'rgba(37, 99, 235, 0.30)',
+    bottomColorDark: 'rgba(59, 130, 246, 0.05)',
+    bottomColorLight: 'rgba(37, 99, 235, 0.05)',
     textColor: 'text-blue-600 dark:text-blue-400',
     badgeBg: 'bg-blue-500/10 dark:bg-blue-500/20',
     badgeBorder: 'border-blue-500/30',
-  },
-  bbva: {
-    id: 'bbva',
-    label: 'BBVA',
-    color: '#10b981', // emerald
-    topColorDark: 'rgba(16, 185, 129, 0.32)',
-    topColorLight: 'rgba(16, 185, 129, 0.22)',
-    bottomColorDark: 'rgba(16, 185, 129, 0.00)',
-    bottomColorLight: 'rgba(16, 185, 129, 0.00)',
-    textColor: 'text-emerald-600 dark:text-emerald-400',
-    badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
-    badgeBorder: 'border-emerald-500/30',
   },
   indexa: {
     id: 'indexa',
     label: 'Indexa Capital',
     color: '#f59e0b', // amber
-    topColorDark: 'rgba(245, 158, 11, 0.32)',
-    topColorLight: 'rgba(245, 158, 11, 0.22)',
-    bottomColorDark: 'rgba(245, 158, 11, 0.00)',
-    bottomColorLight: 'rgba(245, 158, 11, 0.00)',
+    topColorDark: 'rgba(245, 158, 11, 0.40)',
+    topColorLight: 'rgba(245, 158, 11, 0.30)',
+    bottomColorDark: 'rgba(245, 158, 11, 0.05)',
+    bottomColorLight: 'rgba(245, 158, 11, 0.05)',
     textColor: 'text-amber-600 dark:text-amber-400',
     badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
     badgeBorder: 'border-amber-500/30',
+  },
+  traderepublic: {
+    id: 'traderepublic',
+    label: 'Trade Republic',
+    color: '#8b5cf6', // violet
+    topColorDark: 'rgba(139, 92, 246, 0.40)',
+    topColorLight: 'rgba(139, 92, 246, 0.30)',
+    bottomColorDark: 'rgba(139, 92, 246, 0.05)',
+    bottomColorLight: 'rgba(139, 92, 246, 0.05)',
+    textColor: 'text-violet-600 dark:text-violet-400',
+    badgeBg: 'bg-violet-500/10 dark:bg-violet-500/20',
+    badgeBorder: 'border-violet-500/30',
+  },
+  bbva: {
+    id: 'bbva',
+    label: 'BBVA',
+    color: '#10b981', // emerald
+    topColorDark: 'rgba(16, 185, 129, 0.40)',
+    topColorLight: 'rgba(16, 185, 129, 0.30)',
+    bottomColorDark: 'rgba(16, 185, 129, 0.05)',
+    bottomColorLight: 'rgba(16, 185, 129, 0.05)',
+    textColor: 'text-emerald-600 dark:text-emerald-400',
+    badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+    badgeBorder: 'border-emerald-500/30',
   },
   kutxabank: {
     id: 'kutxabank',
     label: 'Kutxabank',
     color: '#f43f5e', // rose
-    topColorDark: 'rgba(244, 63, 94, 0.32)',
-    topColorLight: 'rgba(244, 63, 94, 0.22)',
-    bottomColorDark: 'rgba(244, 63, 94, 0.00)',
-    bottomColorLight: 'rgba(244, 63, 94, 0.00)',
+    topColorDark: 'rgba(244, 63, 94, 0.40)',
+    topColorLight: 'rgba(244, 63, 94, 0.30)',
+    bottomColorDark: 'rgba(244, 63, 94, 0.05)',
+    bottomColorLight: 'rgba(244, 63, 94, 0.05)',
     textColor: 'text-rose-600 dark:text-rose-400',
     badgeBg: 'bg-rose-500/10 dark:bg-rose-500/20',
     badgeBorder: 'border-rose-500/30',
-  },
-  traderepublic: {
-    id: 'traderepublic',
-    label: 'TradeRep',
-    color: '#8b5cf6', // violet
-    topColorDark: 'rgba(139, 92, 246, 0.32)',
-    topColorLight: 'rgba(139, 92, 246, 0.22)',
-    bottomColorDark: 'rgba(139, 92, 246, 0.00)',
-    bottomColorLight: 'rgba(139, 92, 246, 0.00)',
-    textColor: 'text-violet-600 dark:text-violet-400',
-    badgeBg: 'bg-violet-500/10 dark:bg-violet-500/20',
-    badgeBorder: 'border-violet-500/30',
   },
   scalable: {
     id: 'scalable',
     label: 'Scalable Capital',
     color: '#06b6d4', // cyan
-    topColorDark: 'rgba(6, 182, 212, 0.32)',
-    topColorLight: 'rgba(6, 182, 212, 0.22)',
-    bottomColorDark: 'rgba(6, 182, 212, 0.00)',
-    bottomColorLight: 'rgba(6, 182, 212, 0.00)',
+    topColorDark: 'rgba(6, 182, 212, 0.40)',
+    topColorLight: 'rgba(6, 182, 212, 0.30)',
+    bottomColorDark: 'rgba(6, 182, 212, 0.05)',
+    bottomColorLight: 'rgba(6, 182, 212, 0.05)',
     textColor: 'text-cyan-600 dark:text-cyan-400',
     badgeBg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
     badgeBorder: 'border-cyan-500/30',
   },
 }
 
-// Canonical stacking order from bottom to top
-const CANONICAL_ORDER = ['indexa', 'bbva', 'kutxabank', 'traderepublic', 'scalable', 'myinvestor']
+export interface AssetClassConfig {
+  id: string
+  label: string
+  color: string
+  topColorDark: string
+  topColorLight: string
+  bottomColorDark: string
+  bottomColorLight: string
+  textColor: string
+  badgeBg: string
+  badgeBorder: string
+}
+
+export const ASSET_CLASS_CONFIGS: Record<string, AssetClassConfig> = {
+  equity: {
+    id: 'equity',
+    label: 'Renta Variable',
+    color: '#3b82f6', // blue
+    topColorDark: 'rgba(59, 130, 246, 0.42)',
+    topColorLight: 'rgba(37, 99, 235, 0.32)',
+    bottomColorDark: 'rgba(59, 130, 246, 0.05)',
+    bottomColorLight: 'rgba(37, 99, 235, 0.05)',
+    textColor: 'text-blue-600 dark:text-blue-400',
+    badgeBg: 'bg-blue-500/10 dark:bg-blue-500/20',
+    badgeBorder: 'border-blue-500/30',
+  },
+  fixed_income: {
+    id: 'fixed_income',
+    label: 'Renta Fija / Bonos',
+    color: '#10b981', // emerald
+    topColorDark: 'rgba(16, 185, 129, 0.42)',
+    topColorLight: 'rgba(16, 185, 129, 0.32)',
+    bottomColorDark: 'rgba(16, 185, 129, 0.05)',
+    bottomColorLight: 'rgba(16, 185, 129, 0.05)',
+    textColor: 'text-emerald-600 dark:text-emerald-400',
+    badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+    badgeBorder: 'border-emerald-500/30',
+  },
+  commodity: {
+    id: 'commodity',
+    label: 'Oro / Materias Primas',
+    color: '#f59e0b', // amber
+    topColorDark: 'rgba(245, 158, 11, 0.42)',
+    topColorLight: 'rgba(245, 158, 11, 0.32)',
+    bottomColorDark: 'rgba(245, 158, 11, 0.05)',
+    bottomColorLight: 'rgba(245, 158, 11, 0.05)',
+    textColor: 'text-amber-600 dark:text-amber-400',
+    badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
+    badgeBorder: 'border-amber-500/30',
+  },
+  cash: {
+    id: 'cash',
+    label: 'Efectivo / Traspaso',
+    color: '#06b6d4', // cyan
+    topColorDark: 'rgba(6, 182, 212, 0.42)',
+    topColorLight: 'rgba(6, 182, 212, 0.32)',
+    bottomColorDark: 'rgba(6, 182, 212, 0.05)',
+    bottomColorLight: 'rgba(6, 182, 212, 0.05)',
+    textColor: 'text-cyan-600 dark:text-cyan-400',
+    badgeBg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
+    badgeBorder: 'border-cyan-500/30',
+  },
+}
 
 interface PerformanceChartProps {
   data: PricePoint[]
@@ -123,6 +184,7 @@ interface PerformanceChartProps {
   showInvested?: boolean
   showMilestones?: boolean
   showFooterStrip?: boolean
+  viewMode?: PerformanceViewMode
 }
 
 function formatDateSpanish(dateStr: string): string {
@@ -143,22 +205,19 @@ export function PerformanceChart({
   showInvested = true,
   showMilestones = false,
   showFooterStrip = true,
+  viewMode = 'total',
 }: PerformanceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
 
-  // 3 stacked AreaSeries slots:
-  // slot2 = Top layer (added 1st, drawn at back)
-  // slot1 = Middle layer (added 2nd, drawn above slot2)
-  // slot0 = Bottom layer (added 3rd, drawn in front of slot1)
-  const slot2Ref = useRef<any>(null)
-  const slot1Ref = useRef<any>(null)
-  const slot0Ref = useRef<any>(null)
-
+  // Maximum 5 stacked layer slots for area breakdown
+  // Layer slots are added to chart in order (0 to 4)
+  const layerSlotsRef = useRef<any[]>([])
+  const masterAreaRef = useRef<any>(null)
+  const masterLineRef = useRef<any>(null)
   const investedSeriesRef = useRef<any>(null)
   const markersRef = useRef<any>(null)
   const zeroPriceLineRef = useRef<IPriceLine | null>(null)
-  const entityPriceLinesRef = useRef<IPriceLine[]>([])
   const lastControlKeyRef = useRef<string>('')
   const lastSweepKeyRef = useRef<string>('')
   const animEndTimeRef = useRef<number>(0)
@@ -169,8 +228,6 @@ export function PerformanceChart({
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
 
   const { selectedBroker, period, refreshAnimKey } = useAppStore()
-  // Entity selection: 'stacked' by default when 'all' brokers selected (mantiene el estacado de entidades), o broker individual
-  const selectedEntity = selectedBroker === 'all' ? 'stacked' : selectedBroker.toLowerCase()
 
   // Helper to safely extract broker value and invested
   const getBrokerData = (p: PricePoint | null | undefined, brokerKey: string) => {
@@ -184,23 +241,60 @@ export function PerformanceChart({
     }
   }
 
-  // Dynamically detect available brokers
+  // Helper to safely extract asset class value and invested
+  const getAssetClassData = (p: PricePoint | null | undefined, acKey: string) => {
+    if (!p || !p.asset_classes) return { value: 0, invested: 0 }
+    const entry = p.asset_classes[acKey]
+    return {
+      value: entry?.value ?? 0,
+      invested: entry?.invested ?? 0,
+    }
+  }
+
+  // Dynamically detect active brokers sorted by current value descending (highest at base: MyInvestor -> Indexa -> Trade Republic)
   const availableBrokers = useMemo(() => {
     if (!data || !data.length) return []
     const found = new Set<string>()
     for (const p of data) {
       if (p.brokers) {
         for (const [k, v] of Object.entries(p.brokers)) {
-          if (v && v.value > 0) {
-            const lower = k.toLowerCase().replace(/[^a-z0-9]/g, '')
-            const canonical = CANONICAL_ORDER.find(c => c === lower || c.includes(lower) || lower.includes(c)) || k.toLowerCase()
-            found.add(canonical)
+          if (v && v.value > 0.01) {
+            found.add(k.toLowerCase())
           }
         }
       }
     }
-    // Sort according to canonical order
-    return CANONICAL_ORDER.filter(b => found.has(b))
+    const lastPoint = data[data.length - 1]
+    const list = Array.from(found)
+    list.sort((a, b) => {
+      const valA = getBrokerData(lastPoint, a).value
+      const valB = getBrokerData(lastPoint, b).value
+      return valB - valA
+    })
+    return list
+  }, [data])
+
+  // Dynamically detect active asset classes sorted by current value descending (highest at base: Equity -> Fixed Income -> Commodity -> Cash)
+  const availableAssetClasses = useMemo(() => {
+    if (!data || !data.length) return []
+    const found = new Set<string>()
+    for (const p of data) {
+      if (p.asset_classes) {
+        for (const [k, v] of Object.entries(p.asset_classes)) {
+          if (v && v.value > 0.01) {
+            found.add(k)
+          }
+        }
+      }
+    }
+    const lastPoint = data[data.length - 1]
+    const list = Array.from(found)
+    list.sort((a, b) => {
+      const valA = getAssetClassData(lastPoint, a).value
+      const valB = getAssetClassData(lastPoint, b).value
+      return valB - valA
+    })
+    return list
   }, [data])
 
   const dataRef = useRef<PricePoint[]>(data)
@@ -229,33 +323,22 @@ export function PerformanceChart({
     const sumPoints: { date: string; value: number; invested: number }[] = []
     const seen = new Set<string>()
 
+    const isSingleBroker = selectedBroker !== 'all'
+    const singleBrokerKey = selectedBroker.toLowerCase()
+
     for (const p of valid) {
       if (!seen.has(p.date)) {
         seen.add(p.date)
         let val = 0
         let inv = 0
 
-        if (selectedEntity === 'all') {
-          // Total Portfolio (Single clean curve)
-          val = p.value
-          inv = p.invested ?? 0
-        } else if (selectedEntity === 'stacked') {
-          // Total sum of all brokers
-          if (p.brokers && availableBrokers.length > 0) {
-            for (const b of availableBrokers) {
-              const bd = getBrokerData(p, b)
-              val += bd.value
-              inv += bd.invested
-            }
-          } else {
-            val = p.value
-            inv = p.invested ?? 0
-          }
-        } else {
-          // Individual Broker
-          const bd = getBrokerData(p, selectedEntity)
+        if (isSingleBroker) {
+          const bd = getBrokerData(p, singleBrokerKey)
           val = bd.value > 0 ? bd.value : (p.value ?? 0)
           inv = bd.invested > 0 ? bd.invested : (p.invested ?? 0)
+        } else {
+          val = p.value
+          inv = p.invested ?? 0
         }
 
         sumPoints.push({ date: p.date, value: Math.max(0, val), invested: Math.max(0, inv) })
@@ -265,8 +348,6 @@ export function PerformanceChart({
     if (!sumPoints.length) return null
 
     if (sumPoints.length === 1) {
-      // Lightweight Charts requires at least 2 points for an area/line series timeline.
-      // Prepend previous day baseline at 0 so the chart draws a clean upward curve to the investment.
       const single = sumPoints[0]
       try {
         const d = new Date(single.date + 'T00:00:00')
@@ -309,7 +390,7 @@ export function PerformanceChart({
       periodInflow,
       sumPoints,
     }
-  }, [data, selectedEntity, availableBrokers])
+  }, [data, selectedBroker])
 
   // Active point (crosshair hover or latest)
   const activePoint = hoveredPoint || (data.length ? data[data.length - 1] : null)
@@ -320,24 +401,13 @@ export function PerformanceChart({
     let val = 0
     let inv = 0
 
-    if (selectedEntity === 'all') {
-      val = activePoint.value
-      inv = activePoint.invested ?? 0
-    } else if (selectedEntity === 'stacked') {
-      if (activePoint.brokers && availableBrokers.length > 0) {
-        for (const b of availableBrokers) {
-          const bd = getBrokerData(activePoint, b)
-          val += bd.value
-          inv += bd.invested
-        }
-      } else {
-        val = activePoint.value
-        inv = activePoint.invested ?? 0
-      }
-    } else {
-      const bd = getBrokerData(activePoint, selectedEntity)
+    if (selectedBroker !== 'all') {
+      const bd = getBrokerData(activePoint, selectedBroker.toLowerCase())
       val = bd.value
       inv = bd.invested
+    } else {
+      val = activePoint.value
+      inv = activePoint.invested ?? 0
     }
 
     const diff = inv > 0 ? val - inv : (metrics?.first ? val - metrics.first.value : 0)
@@ -352,7 +422,7 @@ export function PerformanceChart({
     }
 
     return { val, inv, diff, pct, periodPct }
-  }, [activePoint, selectedEntity, availableBrokers, metrics])
+  }, [activePoint, selectedBroker, metrics])
 
   interface PointBadge {
     id: string
@@ -360,9 +430,10 @@ export function PerformanceChart({
     color: string
     y: number
     val?: number
+    pct?: number
   }
 
-  // Small tooltips / badges to the left of the crosshair dots for each entity & invested line
+  // Small tooltips / badges to the left of crosshair dots
   const adjustedBadges = useMemo<PointBadge[]>(() => {
     if (!hoveredPoint || !tooltipPos || !chartRef.current) return []
     const badges: PointBadge[] = []
@@ -371,65 +442,51 @@ export function PerformanceChart({
     const orig = (data || []).find((p) => p.date === hp.date) || hp
 
     if (chartMode === 'currency') {
-      if (selectedEntity === 'stacked' && availableBrokers.length > 1) {
-        const n = availableBrokers.length
-        if (n >= 3) {
-          // Bottom layer: b0 (Indexa)
-          const b0 = availableBrokers[0]
-          const cfg0 = ENTITY_CONFIGS[b0] || { label: b0, color: '#f59e0b' }
-          const v0 = getBrokerData(orig, b0).value
-          const y0 = slot0Ref.current?.priceToCoordinate(v0)
-          if (v0 > 0.01 && y0 !== null && y0 !== undefined && !isNaN(y0) && y0 >= 0 && y0 <= height) {
-            badges.push({ id: b0, label: cfg0.label, color: cfg0.color, y: y0, val: v0 })
+      if (selectedBroker === 'all') {
+        if (viewMode === 'broker' && availableBrokers.length > 1) {
+          // Badges for each broker at its cumulative boundary
+          let runningCumul = 0
+          for (let i = 0; i < availableBrokers.length; i++) {
+            const b = availableBrokers[i]
+            const bVal = getBrokerData(orig, b).value
+            runningCumul += bVal
+            const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#3b82f6' }
+            const y = masterAreaRef.current?.priceToCoordinate(runningCumul)
+            if (bVal > 0.01 && y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
+              const weightPct = hp.value > 0 ? (bVal / hp.value) * 100 : 0
+              badges.push({ id: b, label: cfg.label, color: cfg.color, y, val: bVal, pct: weightPct })
+            }
           }
-
-          // Middle layer: b1 (BBVA)
-          const b1 = availableBrokers[1]
-          const cfg1 = ENTITY_CONFIGS[b1] || { label: b1, color: '#10b981' }
-          const v1 = getBrokerData(orig, b1).value
-          const y1 = slot1Ref.current?.priceToCoordinate(v0 + v1)
-          if (v1 > 0.01 && y1 !== null && y1 !== undefined && !isNaN(y1) && y1 >= 0 && y1 <= height) {
-            badges.push({ id: b1, label: cfg1.label, color: cfg1.color, y: y1, val: v1 })
+        } else if (viewMode === 'asset_class' && availableAssetClasses.length > 1) {
+          // Badges for each asset class at its cumulative boundary
+          let runningCumul = 0
+          for (let i = 0; i < availableAssetClasses.length; i++) {
+            const ac = availableAssetClasses[i]
+            const acVal = getAssetClassData(orig, ac).value
+            runningCumul += acVal
+            const cfg = ASSET_CLASS_CONFIGS[ac] || { label: ac, color: '#3b82f6' }
+            const y = masterAreaRef.current?.priceToCoordinate(runningCumul)
+            if (acVal > 0.01 && y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
+              const weightPct = hp.value > 0 ? (acVal / hp.value) * 100 : 0
+              badges.push({ id: ac, label: cfg.label, color: cfg.color, y, val: acVal, pct: weightPct })
+            }
           }
-
-          // Top layer: b2 (TradeRep / top entity)
-          const b2 = availableBrokers[2]
-          const cfg2 = ENTITY_CONFIGS[b2] || { label: b2, color: '#8b5cf6' }
-          const v2 = getBrokerData(orig, b2).value
-          const totalVal = hp.value ?? (v0 + v1 + v2)
-          const y2 = slot2Ref.current?.priceToCoordinate(totalVal)
-          if (v2 > 0.01 && y2 !== null && y2 !== undefined && !isNaN(y2) && y2 >= 0 && y2 <= height) {
-            badges.push({ id: b2, label: cfg2.label, color: cfg2.color, y: y2, val: v2 })
+        } else {
+          // Total mode: 1 single clean badge for Cartera Total
+          const val = hp.value
+          const y = masterAreaRef.current?.priceToCoordinate(val)
+          if (y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
+            badges.push({ id: 'total', label: 'Patrimonio Total', color: '#10b981', y, val })
           }
-        } else if (n === 2) {
-          const b0 = availableBrokers[0]
-          const cfg0 = ENTITY_CONFIGS[b0] || { label: b0, color: '#f59e0b' }
-          const v0 = getBrokerData(orig, b0).value
-          const y0 = slot0Ref.current?.priceToCoordinate(v0)
-          if (v0 > 0.01 && y0 !== null && y0 !== undefined && !isNaN(y0) && y0 >= 0 && y0 <= height) {
-            badges.push({ id: b0, label: cfg0.label, color: cfg0.color, y: y0, val: v0 })
-          }
-
-          const b1 = availableBrokers[1]
-          const cfg1 = ENTITY_CONFIGS[b1] || { label: b1, color: '#10b981' }
-          const v1 = getBrokerData(orig, b1).value
-          const y2 = slot2Ref.current?.priceToCoordinate(v0 + v1)
-          if (v1 > 0.01 && y2 !== null && y2 !== undefined && !isNaN(y2) && y2 >= 0 && y2 <= height) {
-            badges.push({ id: b1, label: cfg1.label, color: cfg1.color, y: y2, val: v1 })
-          }
-        }
-      } else if (selectedEntity !== 'all' && selectedEntity !== 'stacked') {
-        const cfg = ENTITY_CONFIGS[selectedEntity] || { label: selectedEntity, color: '#10b981' }
-        const val = getBrokerData(orig, selectedEntity).value || hp.value
-        const y = slot2Ref.current?.priceToCoordinate(val)
-        if (y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
-          badges.push({ id: selectedEntity, label: cfg.label, color: cfg.color, y, val })
         }
       } else {
-        const val = hp.value
-        const y = slot2Ref.current?.priceToCoordinate(val)
+        // Single Broker
+        const bKey = selectedBroker.toLowerCase()
+        const cfg = ENTITY_CONFIGS[bKey] || { label: selectedBroker, color: '#10b981' }
+        const val = getBrokerData(orig, bKey).value || hp.value
+        const y = masterAreaRef.current?.priceToCoordinate(val)
         if (y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
-          badges.push({ id: 'total', label: 'Cartera Total', color: '#10b981', y, val })
+          badges.push({ id: bKey, label: cfg.label, color: cfg.color, y, val })
         }
       }
 
@@ -450,13 +507,9 @@ export function PerformanceChart({
     } else {
       // Percent Mode (%)
       const pct = activeSelectedMetrics?.pct ?? 0
-      const y = slot2Ref.current?.priceToCoordinate(pct)
+      const y = masterAreaRef.current?.priceToCoordinate(pct)
       if (y !== null && y !== undefined && !isNaN(y) && y >= 0 && y <= height) {
-        const cfg = ENTITY_CONFIGS[selectedEntity] || {
-          label: selectedEntity === 'stacked' || selectedEntity === 'all' ? 'Rentabilidad' : selectedEntity,
-          color: '#10b981',
-        }
-        badges.push({ id: 'percent', label: cfg.label, color: cfg.color, y })
+        badges.push({ id: 'percent', label: 'Rentabilidad', color: '#10b981', y })
       }
     }
 
@@ -475,8 +528,10 @@ export function PerformanceChart({
     hoveredPoint,
     tooltipPos,
     chartMode,
-    selectedEntity,
+    selectedBroker,
+    viewMode,
     availableBrokers,
+    availableAssetClasses,
     showInvested,
     height,
     isDark,
@@ -536,14 +591,39 @@ export function PerformanceChart({
         handleScale: true,
       })
 
-      // 1. Slot 2: Top Layer AreaSeries (Added FIRST, drawn in background)
-      const slot2 = chart.addSeries(AreaSeries, {
+      // Create 5 AreaSeries layer slots for stacked rendering
+      // In Lightweight Charts, series added first are drawn in the background (higher cumulative values)
+      // Series added later are drawn in front (lower cumulative values)
+      const layers: any[] = []
+      for (let i = 0; i < 5; i++) {
+        const s = chart.addSeries(AreaSeries, {
+          lineColor: '#3b82f6',
+          topColor: 'rgba(59, 130, 246, 0.35)',
+          bottomColor: 'rgba(59, 130, 246, 0.05)',
+          lineWidth: 2,
+          priceLineVisible: false,
+          lastValueVisible: false, // Hidden on axis; master line shows total
+          crosshairMarkerRadius: 4,
+          crosshairMarkerBackgroundColor: '#3b82f6',
+          crosshairMarkerBorderColor: '#ffffff',
+          crosshairMarkerBorderWidth: 1.5,
+          priceFormat: {
+            type: 'custom',
+            formatter: (p: number) => fmt.currency(p),
+          },
+        })
+        layers.push(s)
+      }
+      layerSlotsRef.current = layers
+
+      // Master Area Series (Used in 'total' mode and for auto-scaling reference)
+      const masterArea = chart.addSeries(AreaSeries, {
         lineColor: '#10b981',
         topColor: isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)',
         bottomColor: 'rgba(16, 185, 129, 0.00)',
         lineWidth: 2,
         priceLineVisible: false,
-        lastValueVisible: true, // Only Top layer shows badge on right axis
+        lastValueVisible: true,
         crosshairMarkerRadius: 5.5,
         crosshairMarkerBackgroundColor: '#10b981',
         crosshairMarkerBorderColor: '#ffffff',
@@ -553,50 +633,32 @@ export function PerformanceChart({
           formatter: (p: number) => fmt.currency(p),
         },
       })
+      masterAreaRef.current = masterArea
 
-      // 2. Slot 1: Middle Layer AreaSeries (Added SECOND, drawn above slot 2)
-      const slot1 = chart.addSeries(AreaSeries, {
-        lineColor: '#10b981',
-        topColor: isDark ? 'rgba(16, 185, 129, 0.32)' : 'rgba(16, 185, 129, 0.22)',
-        bottomColor: 'rgba(16, 185, 129, 0.00)',
+      // Master Line Series (Draws a crisp master outline on top of stacked areas in 'broker' and 'asset_class' modes)
+      const masterLine = chart.addSeries(LineSeries, {
+        color: isDark ? '#ffffff' : '#0f172a',
         lineWidth: 2,
         priceLineVisible: false,
-        lastValueVisible: false, // Hidden on right axis
-        crosshairMarkerRadius: 4,
-        crosshairMarkerBackgroundColor: '#10b981',
+        lastValueVisible: true,
+        crosshairMarkerRadius: 5,
+        crosshairMarkerBackgroundColor: isDark ? '#ffffff' : '#0f172a',
         crosshairMarkerBorderColor: '#ffffff',
-        crosshairMarkerBorderWidth: 1.5,
+        crosshairMarkerBorderWidth: 2,
         priceFormat: {
           type: 'custom',
           formatter: (p: number) => fmt.currency(p),
         },
       })
+      masterLineRef.current = masterLine
 
-      // 3. Slot 0: Bottom Layer AreaSeries (Added THIRD, drawn in front of slot 1)
-      const slot0 = chart.addSeries(AreaSeries, {
-        lineColor: '#f59e0b',
-        topColor: isDark ? 'rgba(245, 158, 11, 0.32)' : 'rgba(245, 158, 11, 0.22)',
-        bottomColor: 'rgba(245, 158, 11, 0.00)',
-        lineWidth: 2,
-        priceLineVisible: false,
-        lastValueVisible: false, // Hidden on right axis
-        crosshairMarkerRadius: 4,
-        crosshairMarkerBackgroundColor: '#f59e0b',
-        crosshairMarkerBorderColor: '#ffffff',
-        crosshairMarkerBorderWidth: 1.5,
-        priceFormat: {
-          type: 'custom',
-          formatter: (p: number) => fmt.currency(p),
-        },
-      })
-
-      // 4. Invested Series (Dashed Line) (Added FOURTH, drawn on top of all area fills)
+      // Invested Series (Dashed Line) (Drawn on top of all area fills)
       const investedSeries = chart.addSeries(LineSeries, {
         color: isDark ? '#818cf8' : '#6366f1',
         lineWidth: 1,
         lineStyle: LineStyle.Dashed,
         priceLineVisible: false,
-        lastValueVisible: true, // Visible on right axis
+        lastValueVisible: true,
         crosshairMarkerRadius: 3.5,
         crosshairMarkerBackgroundColor: isDark ? '#818cf8' : '#6366f1',
         crosshairMarkerBorderColor: '#ffffff',
@@ -606,15 +668,12 @@ export function PerformanceChart({
           formatter: (p: number) => fmt.currency(p),
         },
       })
+      investedSeriesRef.current = investedSeries
 
-      const markersPlugin = createSeriesMarkers(slot2, [])
+      const markersPlugin = createSeriesMarkers(masterArea, [])
+      markersRef.current = markersPlugin
 
       chartRef.current = chart
-      slot2Ref.current = slot2
-      slot1Ref.current = slot1
-      slot0Ref.current = slot0
-      investedSeriesRef.current = investedSeries
-      markersRef.current = markersPlugin
 
       // Crosshair inspection listener
       chart.subscribeCrosshairMove(param => {
@@ -681,216 +740,222 @@ export function PerformanceChart({
         } catch {}
       }
       chartRef.current = null
-      slot2Ref.current = null
-      slot1Ref.current = null
-      slot0Ref.current = null
+      layerSlotsRef.current = []
+      masterAreaRef.current = null
+      masterLineRef.current = null
       investedSeriesRef.current = null
       markersRef.current = null
       zeroPriceLineRef.current = null
-      entityPriceLinesRef.current = []
     }
   }, [initChart])
 
-  // Update Stacked Series Data on Changes
+  // Update Series Data on Changes (Supporting Modes A: Total, C: Broker, D: Asset Class)
   useEffect(() => {
     if (!containerRef.current || !data || !metrics) {
       return
     }
 
-    if (!chartRef.current || !slot2Ref.current) {
+    if (!chartRef.current || !masterAreaRef.current) {
       initChart()
     }
-    if (!slot2Ref.current || !chartRef.current) {
+    if (!masterAreaRef.current || !chartRef.current) {
       return
     }
 
     try {
       const chart = chartRef.current
-      const slot2 = slot2Ref.current
-      const slot1 = slot1Ref.current
-      const slot0 = slot0Ref.current
+      const layers = layerSlotsRef.current
+      const masterArea = masterAreaRef.current
+      const masterLine = masterLineRef.current
       const inv = investedSeriesRef.current
 
       const validDates = metrics.sumPoints.map(p => p.date)
+      const isSingleBroker = selectedBroker !== 'all'
 
       if (chartMode === 'currency') {
         // Clean up zero line if was in percent mode
         if (zeroPriceLineRef.current) {
           try {
-            slot2.removePriceLine(zeroPriceLineRef.current)
+            masterArea.removePriceLine(zeroPriceLineRef.current)
           } catch {}
           zeroPriceLineRef.current = null
         }
 
-        // Clean up entity price lines before re-creating
-        if (entityPriceLinesRef.current.length > 0 && slot2) {
-          entityPriceLinesRef.current.forEach(pl => {
-            try {
-              slot2.removePriceLine(pl)
-            } catch {}
+        if (!isSingleBroker && viewMode === 'broker' && availableBrokers.length > 1) {
+          // ── Opción C: Desglose Apilado por Entidad / Broker ─────────────────────────
+          masterArea.applyOptions({ visible: false, lastValueVisible: false })
+
+          const n = Math.min(layers.length, availableBrokers.length)
+
+          // Precompute cumulative values for each date
+          // availableBrokers[0] is the base (e.g. MyInvestor)
+          // availableBrokers[n-1] is the top (e.g. Trade Republic)
+          const cumulValues: number[][] = validDates.map(d => {
+            const orig = data.find(p => p.date === d)
+            const row: number[] = []
+            let running = 0
+            for (let i = 0; i < n; i++) {
+              const b = availableBrokers[i]
+              const v = getBrokerData(orig, b).value
+              running += v
+              row.push(running)
+            }
+            return row
           })
-          entityPriceLinesRef.current = []
-        }
 
-        if (selectedEntity === 'stacked' && availableBrokers.length > 1) {
-          const n = availableBrokers.length
-          if (n >= 3) {
-            // Bottom layer: availableBrokers[0] (Indexa, amber)
-            const b0 = availableBrokers[0]
-            const cfg0 = ENTITY_CONFIGS[b0] || { color: '#f59e0b', topColorDark: 'rgba(245, 158, 11, 0.32)', topColorLight: 'rgba(245, 158, 11, 0.22)', bottomColorDark: 'rgba(245, 158, 11, 0.00)', bottomColorLight: 'rgba(245, 158, 11, 0.00)' }
-            const pts0 = validDates.map(d => {
-              const orig = data.find(p => p.date === d)
-              return { time: d, value: getBrokerData(orig, b0).value }
-            })
-            slot0.setData(pts0)
-            slot0.applyOptions({
-              visible: true,
-              lineColor: cfg0.color,
-              topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
-              bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
-              lastValueVisible: false,
-            })
-
-            // Middle layer: b0 + b1
-            const b1 = availableBrokers[1]
-            const cfg1 = ENTITY_CONFIGS[b1] || { color: '#10b981', topColorDark: 'rgba(16, 185, 129, 0.32)', topColorLight: 'rgba(16, 185, 129, 0.22)', bottomColorDark: 'rgba(16, 185, 129, 0.00)', bottomColorLight: 'rgba(16, 185, 129, 0.00)' }
-            const pts1 = validDates.map(d => {
-              const orig = data.find(p => p.date === d)
-              const v0 = getBrokerData(orig, b0).value
-              const v1 = getBrokerData(orig, b1).value
-              return { time: d, value: v0 + v1 }
-            })
-            slot1.setData(pts1)
-            slot1.applyOptions({
-              visible: true,
-              lineColor: cfg1.color,
-              topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
-              bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
-              lastValueVisible: false,
-            })
-
-            // Top layer: Total sum of all 3
-            const b2 = availableBrokers[2]
-            const cfg2 = ENTITY_CONFIGS[b2] || { color: '#3b82f6', topColorDark: 'rgba(59, 130, 246, 0.32)', topColorLight: 'rgba(59, 130, 246, 0.22)', bottomColorDark: 'rgba(59, 130, 246, 0.00)', bottomColorLight: 'rgba(59, 130, 246, 0.00)' }
-            const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
-            slot2.setData(pts2)
-            slot2.applyOptions({
-              visible: true,
-              lineColor: cfg2.color,
-              topColor: isDark ? cfg2.topColorDark : cfg2.topColorLight,
-              bottomColor: isDark ? cfg2.bottomColorDark : cfg2.bottomColorLight,
-              lastValueVisible: true,
-              autoscaleInfoProvider: (original: any) => {
-                const res = original()
-                if (!res) return null
-                return {
-                  priceRange: {
-                    minValue: 0,
-                    maxValue: res.priceRange.maxValue,
-                  },
-                  margins: res.margins,
-                }
-              },
-            })
-          } else if (n === 2) {
-            const b0 = availableBrokers[0]
-            const cfg0 = ENTITY_CONFIGS[b0]
-            const pts0 = validDates.map(d => {
-              const orig = data.find(p => p.date === d)
-              return { time: d, value: getBrokerData(orig, b0).value }
-            })
-            slot0.setData(pts0)
-            slot0.applyOptions({
-              visible: true,
-              lineColor: cfg0.color,
-              topColor: isDark ? cfg0.topColorDark : cfg0.topColorLight,
-              bottomColor: isDark ? cfg0.bottomColorDark : cfg0.bottomColorLight,
-              lastValueVisible: false,
-            })
-
-            slot1.applyOptions({ visible: false })
-
-            const b1 = availableBrokers[1]
-            const cfg1 = ENTITY_CONFIGS[b1]
-            const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
-            slot2.setData(pts2)
-            slot2.applyOptions({
-              visible: true,
-              lineColor: cfg1.color,
-              topColor: isDark ? cfg1.topColorDark : cfg1.topColorLight,
-              bottomColor: isDark ? cfg1.bottomColorDark : cfg1.bottomColorLight,
-              lastValueVisible: true,
-              autoscaleInfoProvider: (original: any) => {
-                const res = original()
-                if (!res) return null
-                return {
-                  priceRange: {
-                    minValue: 0,
-                    maxValue: res.priceRange.maxValue,
-                  },
-                  margins: res.margins,
-                }
-              },
-            })
-          }
-        } else if (selectedEntity !== 'all' && selectedEntity !== 'stacked') {
-          // Single Selected Broker
-          slot0.applyOptions({ visible: false })
-          slot1.applyOptions({ visible: false })
-
-          const cfg = ENTITY_CONFIGS[selectedEntity] || {
-            label: selectedEntity,
-            color: '#10b981',
-            topColorDark: 'rgba(16, 185, 129, 0.32)',
-            topColorLight: 'rgba(16, 185, 129, 0.22)',
-            bottomColorDark: 'rgba(16, 185, 129, 0.00)',
-            bottomColorLight: 'rgba(16, 185, 129, 0.00)',
-          }
-
-          const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
-          slot2.setData(pts2)
-          slot2.applyOptions({
-            visible: true,
-            lineColor: cfg.color,
-            topColor: isDark ? cfg.topColorDark : cfg.topColorLight,
-            bottomColor: isDark ? cfg.bottomColorDark : cfg.bottomColorLight,
-            lineWidth: 2,
-            crosshairMarkerBackgroundColor: cfg.color,
-            crosshairMarkerBorderColor: '#ffffff',
-            crosshairMarkerBorderWidth: 2.5,
-            crosshairMarkerRadius: 5.5,
-            lastValueVisible: true,
-            autoscaleInfoProvider: (original: any) => {
-              const res = original()
-              if (!res) return null
-              return {
-                priceRange: {
-                  minValue: 0,
-                  maxValue: res.priceRange.maxValue,
-                },
-                margins: res.margins,
+          // Assign each layer slot:
+          // In Lightweight Charts, layer 0 is drawn FIRST (background, largest cumulative)
+          // layer n-1 is drawn LAST (front, lowest cumulative = base)
+          for (let slotIdx = 0; slotIdx < layers.length; slotIdx++) {
+            const layer = layers[slotIdx]
+            if (slotIdx < n) {
+              const catIdx = (n - 1) - slotIdx
+              const bKey = availableBrokers[catIdx]
+              const cfg = ENTITY_CONFIGS[bKey] || {
+                color: '#3b82f6',
+                topColorDark: 'rgba(59, 130, 246, 0.40)',
+                topColorLight: 'rgba(37, 99, 235, 0.30)',
+                bottomColorDark: 'rgba(59, 130, 246, 0.05)',
+                bottomColorLight: 'rgba(37, 99, 235, 0.05)',
               }
-            },
+
+              const pts = validDates.map((d, dIdx) => ({
+                time: d,
+                value: cumulValues[dIdx][catIdx] ?? 0,
+              }))
+
+              layer.setData(pts)
+              layer.applyOptions({
+                visible: true,
+                lineColor: cfg.color,
+                topColor: isDark ? cfg.topColorDark : cfg.topColorLight,
+                bottomColor: isDark ? cfg.bottomColorDark : cfg.bottomColorLight,
+                lastValueVisible: false,
+                crosshairMarkerBackgroundColor: cfg.color,
+              })
+            } else {
+              layer.applyOptions({ visible: false })
+            }
+          }
+
+          // Master Line: Outline on top of the stacked areas at total wealth
+          if (masterLine) {
+            const masterPts = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+            masterLine.setData(masterPts)
+            masterLine.applyOptions({
+              visible: true,
+              color: isDark ? '#f8fafc' : '#1e293b',
+              lineWidth: 2,
+              lastValueVisible: true,
+              autoscaleInfoProvider: (original: any) => {
+                const res = original()
+                if (!res) return null
+                return {
+                  priceRange: {
+                    minValue: 0,
+                    maxValue: res.priceRange.maxValue,
+                  },
+                  margins: res.margins,
+                }
+              },
+            })
+          }
+        } else if (!isSingleBroker && viewMode === 'asset_class' && availableAssetClasses.length > 1) {
+          // ── Opción D: Desglose Apilado por Clase de Activo ──────────────────────────
+          masterArea.applyOptions({ visible: false, lastValueVisible: false })
+
+          const n = Math.min(layers.length, availableAssetClasses.length)
+
+          // Precompute cumulative values for each date
+          // availableAssetClasses[0] is the base (e.g. Equity / Renta Variable)
+          // availableAssetClasses[n-1] is the top (e.g. Cash / Traspaso)
+          const cumulValues: number[][] = validDates.map(d => {
+            const orig = data.find(p => p.date === d)
+            const row: number[] = []
+            let running = 0
+            for (let i = 0; i < n; i++) {
+              const ac = availableAssetClasses[i]
+              const v = getAssetClassData(orig, ac).value
+              running += v
+              row.push(running)
+            }
+            return row
           })
+
+          for (let slotIdx = 0; slotIdx < layers.length; slotIdx++) {
+            const layer = layers[slotIdx]
+            if (slotIdx < n) {
+              const catIdx = (n - 1) - slotIdx
+              const acKey = availableAssetClasses[catIdx]
+              const cfg = ASSET_CLASS_CONFIGS[acKey] || {
+                color: '#3b82f6',
+                topColorDark: 'rgba(59, 130, 246, 0.40)',
+                topColorLight: 'rgba(37, 99, 235, 0.30)',
+                bottomColorDark: 'rgba(59, 130, 246, 0.05)',
+                bottomColorLight: 'rgba(37, 99, 235, 0.05)',
+              }
+
+              const pts = validDates.map((d, dIdx) => ({
+                time: d,
+                value: cumulValues[dIdx][catIdx] ?? 0,
+              }))
+
+              layer.setData(pts)
+              layer.applyOptions({
+                visible: true,
+                lineColor: cfg.color,
+                topColor: isDark ? cfg.topColorDark : cfg.topColorLight,
+                bottomColor: isDark ? cfg.bottomColorDark : cfg.bottomColorLight,
+                lastValueVisible: false,
+                crosshairMarkerBackgroundColor: cfg.color,
+              })
+            } else {
+              layer.applyOptions({ visible: false })
+            }
+          }
+
+          if (masterLine) {
+            const masterPts = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+            masterLine.setData(masterPts)
+            masterLine.applyOptions({
+              visible: true,
+              color: isDark ? '#f8fafc' : '#1e293b',
+              lineWidth: 2,
+              lastValueVisible: true,
+              autoscaleInfoProvider: (original: any) => {
+                const res = original()
+                if (!res) return null
+                return {
+                  priceRange: {
+                    minValue: 0,
+                    maxValue: res.priceRange.maxValue,
+                  },
+                  margins: res.margins,
+                }
+              },
+            })
+          }
         } else {
-          // Cartera Total (Clean Single Area Curve matching HUD Dot)
-          slot0.applyOptions({ visible: false })
-          slot1.applyOptions({ visible: false })
+          // ── Opción A: Cartera Total Limpia (o Broker Individual) ───────────────────
+          layers.forEach(layer => layer.applyOptions({ visible: false }))
+          if (masterLine) {
+            masterLine.applyOptions({ visible: false, lastValueVisible: false })
+          }
 
           const isProfitable = (metrics.periodProfit ?? 0) >= 0
-          const mainLineColor = isProfitable
-            ? (isDark ? '#10b981' : '#059669')
-            : (isDark ? '#f43f5e' : '#e11d48')
-          const mainTopColor = isProfitable
-            ? (isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)')
-            : (isDark ? 'rgba(244, 63, 94, 0.28)' : 'rgba(244, 63, 94, 0.18)')
-          const mainBottomColor = isProfitable
-            ? 'rgba(16, 185, 129, 0.00)'
-            : 'rgba(244, 63, 94, 0.00)'
+          const mainLineColor = isSingleBroker
+            ? (ENTITY_CONFIGS[selectedBroker.toLowerCase()]?.color || '#3b82f6')
+            : (isProfitable ? (isDark ? '#10b981' : '#059669') : (isDark ? '#f43f5e' : '#e11d48'))
+          const mainTopColor = isSingleBroker
+            ? (isDark ? 'rgba(59, 130, 246, 0.32)' : 'rgba(37, 99, 235, 0.22)')
+            : (isProfitable
+                ? (isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)')
+                : (isDark ? 'rgba(244, 63, 94, 0.28)' : 'rgba(244, 63, 94, 0.18)'))
+          const mainBottomColor = 'rgba(0, 0, 0, 0.00)'
 
-          const pts2 = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
-          slot2.setData(pts2)
-          slot2.applyOptions({
+          const pts = metrics.sumPoints.map(p => ({ time: p.date, value: p.value }))
+          masterArea.setData(pts)
+          masterArea.applyOptions({
             visible: true,
             lineColor: mainLineColor,
             topColor: mainTopColor,
@@ -953,18 +1018,10 @@ export function PerformanceChart({
           }
         }
       } else {
-        // Percent Mode
-        slot0.applyOptions({ visible: false })
-        slot1.applyOptions({ visible: false })
-
-        // Clean up entity price lines in percent mode
-        if (entityPriceLinesRef.current.length > 0 && slot2) {
-          entityPriceLinesRef.current.forEach(pl => {
-            try {
-              slot2.removePriceLine(pl)
-            } catch {}
-          })
-          entityPriceLinesRef.current = []
+        // Percent Mode (%)
+        layers.forEach(layer => layer.applyOptions({ visible: false }))
+        if (masterLine) {
+          masterLine.applyOptions({ visible: false, lastValueVisible: false })
         }
 
         const baseVal = metrics.first.value
@@ -985,10 +1042,10 @@ export function PerformanceChart({
         const topGrad = isPositive
           ? (isDark ? 'rgba(16, 185, 129, 0.28)' : 'rgba(16, 185, 129, 0.18)')
           : (isDark ? 'rgba(244, 63, 94, 0.28)' : 'rgba(244, 63, 94, 0.18)')
-        const bottomGrad = isPositive ? 'rgba(16, 185, 129, 0.00)' : 'rgba(244, 63, 94, 0.00)'
+        const bottomGrad = 'rgba(0, 0, 0, 0.00)'
 
-        slot2.setData(pctPoints)
-        slot2.applyOptions({
+        masterArea.setData(pctPoints)
+        masterArea.applyOptions({
           visible: true,
           lineColor: mainColor,
           topColor: topGrad,
@@ -1012,7 +1069,7 @@ export function PerformanceChart({
 
         // 0% Baseline
         if (!zeroPriceLineRef.current) {
-          zeroPriceLineRef.current = slot2.createPriceLine({
+          zeroPriceLineRef.current = masterArea.createPriceLine({
             price: 0,
             color: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.25)',
             lineWidth: 1,
@@ -1029,8 +1086,8 @@ export function PerformanceChart({
 
       chart.timeScale().fitContent()
 
-      // Trigger timeline sweep animation on load & when entity, mode, period, or points change
-      const controlKey = `${selectedEntity}_${chartMode}_${period}_${refreshAnimKey}`
+      // Trigger timeline sweep animation on load & when viewMode, chartMode, period, or points change
+      const controlKey = `${selectedBroker}_${viewMode}_${chartMode}_${period}_${refreshAnimKey}`
       const dataKey = `${metrics.sumPoints.length}_${metrics.sumPoints[0]?.value || 0}_${metrics.sumPoints[metrics.sumPoints.length - 1]?.value || 0}`
       const sweepKey = `${controlKey}_${dataKey}`
 
@@ -1039,9 +1096,6 @@ export function PerformanceChart({
         const now = performance.now()
         const isCurrentlyAnimating = now < animEndTimeRef.current
 
-        // If an animation is already actively running and only the underlying data points settled
-        // (common on initial startup where placeholder/initial data is swiftly replaced by API data),
-        // update the series data seamlessly underneath without restarting the sweep from 0.
         if (isCurrentlyAnimating && !controlChanged) {
           lastSweepKeyRef.current = sweepKey
           lastControlKeyRef.current = controlKey
@@ -1052,8 +1106,8 @@ export function PerformanceChart({
 
           const isProfitable = (metrics.periodProfit ?? 0) >= 0 || (metrics.last && metrics.last.value >= metrics.last.invested)
           const sweepAccentColor =
-            selectedEntity !== 'all' && selectedEntity !== 'stacked' && ENTITY_CONFIGS[selectedEntity]
-              ? ENTITY_CONFIGS[selectedEntity].color
+            isSingleBroker && ENTITY_CONFIGS[selectedBroker.toLowerCase()]
+              ? ENTITY_CONFIGS[selectedBroker.toLowerCase()].color
               : (isProfitable ? (isDark ? '#34d399' : '#10b981') : (isDark ? '#fb7185' : '#f43f5e'))
 
           prepareChartForAnimation(containerRef.current, sweepAccentColor)
@@ -1065,7 +1119,20 @@ export function PerformanceChart({
     } catch (err) {
       console.warn('Error updating chart series:', err)
     }
-  }, [data, chartMode, showInvested, showMilestones, selectedEntity, availableBrokers, isDark, metrics, period, refreshAnimKey])
+  }, [
+    data,
+    chartMode,
+    showInvested,
+    showMilestones,
+    viewMode,
+    selectedBroker,
+    availableBrokers,
+    availableAssetClasses,
+    isDark,
+    metrics,
+    period,
+    refreshAnimKey,
+  ])
 
   return (
     <div
@@ -1118,7 +1185,7 @@ export function PerformanceChart({
         style={{ height }}
         className="w-full relative rounded-lg overflow-hidden"
       >
-        {/* Floating Mini Entity Badges to the Left of Crosshair Dots */}
+        {/* Floating Mini Badges to the Left/Right of Crosshair Dots */}
         {hoveredPoint && tooltipPos && adjustedBadges.length > 0 && (
           <>
             {adjustedBadges.map((b) => {
@@ -1154,7 +1221,7 @@ export function PerformanceChart({
                   </span>
                   {b.val !== undefined && b.val > 0 && chartMode === 'currency' && (
                     <span className="font-mono text-[9.5px] font-medium text-slate-500 dark:text-slate-400 leading-none pl-0.5">
-                      {fmt.currency(b.val)}
+                      {fmt.currency(b.val)}{b.pct !== undefined ? ` (${b.pct.toFixed(1)}%)` : ''}
                     </span>
                   )}
                 </div>
@@ -1163,19 +1230,19 @@ export function PerformanceChart({
           </>
         )}
 
-        {/* Floating Aurora Balloon Tooltip (Image 1) */}
+        {/* Floating Balloon Tooltip */}
         {hoveredPoint && tooltipPos && (
           <div
-            className="pointer-events-none absolute z-30 min-w-[170px] max-w-[240px] px-3.5 py-2.5 rounded-2xl bg-white/98 dark:bg-[#1a1f2b]/98 border border-slate-200/90 dark:border-white/10 shadow-2xl text-xs select-none"
+            className="pointer-events-none absolute z-30 min-w-[190px] max-w-[260px] px-3.5 py-2.5 rounded-2xl bg-white/98 dark:bg-[#1a1f2b]/98 border border-slate-200/90 dark:border-white/10 shadow-2xl text-xs select-none"
             style={{
               left: Math.max(10, Math.min(
-                (containerRef.current?.clientWidth || 300) - 195,
-                tooltipPos.x + 16 > (containerRef.current?.clientWidth || 300) - 195
-                  ? tooltipPos.x - 190
+                (containerRef.current?.clientWidth || 300) - 200,
+                tooltipPos.x + 16 > (containerRef.current?.clientWidth || 300) - 200
+                  ? tooltipPos.x - 205
                   : tooltipPos.x + 16
               )),
               top: Math.max(10, Math.min(
-                height - 110,
+                height - 140,
                 tooltipPos.y - 45
               )),
             }}
@@ -1187,11 +1254,11 @@ export function PerformanceChart({
 
             {/* Metric Rows */}
             <div className="flex flex-col gap-1.5">
-              {/* Valor / Rentabilidad */}
+              {/* Total Value */}
               <div className="flex items-center justify-between gap-3">
                 <span className="text-slate-600 dark:text-slate-300 font-medium text-[11.5px]">
                   {chartMode === 'currency'
-                    ? (selectedEntity === 'all' || selectedEntity === 'stacked' ? 'Valor' : (ENTITY_CONFIGS[selectedEntity]?.label || 'Valor'))
+                    ? (selectedBroker !== 'all' ? (ENTITY_CONFIGS[selectedBroker.toLowerCase()]?.label || selectedBroker) : 'Patrimonio')
                     : 'Rentabilidad'}
                 </span>
                 <span className={cn(
@@ -1205,6 +1272,52 @@ export function PerformanceChart({
                     : `${(activeSelectedMetrics?.pct ?? 0) >= 0 ? '+' : ''}${(activeSelectedMetrics?.pct ?? 0).toFixed(2)}%`}
                 </span>
               </div>
+
+              {/* Breakdown by Broker in Broker mode */}
+              {selectedBroker === 'all' && viewMode === 'broker' && availableBrokers.length > 1 && chartMode === 'currency' && (
+                <div className="flex flex-col gap-1 py-1 border-y border-slate-100 dark:border-white/[0.06] text-[10.5px]">
+                  {availableBrokers.map((b) => {
+                    const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#3b82f6' }
+                    const bVal = getBrokerData(hoveredPoint, b).value
+                    const weightPct = (hoveredPoint.value ?? 0) > 0 ? (bVal / hoveredPoint.value) * 100 : 0
+                    if (bVal <= 0.01) return null
+                    return (
+                      <div key={b} className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 truncate">
+                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
+                          <span className="truncate">{cfg.label}</span>
+                        </span>
+                        <span className="font-mono font-semibold text-slate-800 dark:text-slate-200 shrink-0">
+                          {fmt.currency(bVal)} <span className="text-slate-400 text-[9.5px]">({weightPct.toFixed(1)}%)</span>
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Breakdown by Asset Class in Asset Class mode */}
+              {selectedBroker === 'all' && viewMode === 'asset_class' && availableAssetClasses.length > 1 && chartMode === 'currency' && (
+                <div className="flex flex-col gap-1 py-1 border-y border-slate-100 dark:border-white/[0.06] text-[10.5px]">
+                  {availableAssetClasses.map((ac) => {
+                    const cfg = ASSET_CLASS_CONFIGS[ac] || { label: ac, color: '#3b82f6' }
+                    const acVal = getAssetClassData(hoveredPoint, ac).value
+                    const weightPct = (hoveredPoint.value ?? 0) > 0 ? (acVal / hoveredPoint.value) * 100 : 0
+                    if (acVal <= 0.01) return null
+                    return (
+                      <div key={ac} className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 truncate">
+                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
+                          <span className="truncate">{cfg.label}</span>
+                        </span>
+                        <span className="font-mono font-semibold text-slate-800 dark:text-slate-200 shrink-0">
+                          {fmt.currency(acVal)} <span className="text-slate-400 text-[9.5px]">({weightPct.toFixed(1)}%)</span>
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
 
               {/* Invertido */}
               {showInvested && chartMode === 'currency' && (
@@ -1239,23 +1352,52 @@ export function PerformanceChart({
           </div>
         )}
 
-
-        {/* Floating Small In-Chart Legend (Only shown in Desglose/Stacked mode) */}
-        {availableBrokers.length > 1 && selectedEntity === 'stacked' && (
-          <div className="absolute top-2 left-2.5 z-10 pointer-events-none flex items-center gap-2.5 px-2.5 py-1 rounded-md bg-white/85 dark:bg-[#181818]/85 border border-slate-200/80 dark:border-white/[0.10] backdrop-blur-md text-[10px] text-slate-700 dark:text-slate-200 font-medium shadow-2xs">
+        {/* Floating In-Chart Legend for Broker mode (Opción C) */}
+        {selectedBroker === 'all' && viewMode === 'broker' && availableBrokers.length > 1 && (
+          <div className="absolute top-2 left-2.5 z-10 pointer-events-none flex flex-wrap items-center gap-2.5 px-2.5 py-1 rounded-lg bg-white/90 dark:bg-[#181818]/90 border border-slate-200/80 dark:border-white/[0.10] backdrop-blur-md text-[10.5px] text-slate-700 dark:text-slate-200 font-medium shadow-xs">
             {availableBrokers.map((b) => {
-              const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#64748b' }
+              const cfg = ENTITY_CONFIGS[b] || { label: b, color: '#3b82f6' }
               const bVal = activePoint ? getBrokerData(activePoint, b).value : 0
+              const totalVal = activePoint ? activePoint.value : 0
+              const weightPct = totalVal > 0 ? (bVal / totalVal) * 100 : 0
+              if (bVal <= 0.01) return null
               return (
                 <div key={b} className="flex items-center gap-1.5">
                   <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0 shadow-xs"
+                    className="w-2 h-2 rounded-full shrink-0 shadow-xs"
                     style={{ backgroundColor: cfg.color }}
                   />
                   <span className="font-semibold">{cfg.label}</span>
                   {bVal > 0 && chartMode === 'currency' && (
-                    <span className="font-mono text-[9.5px] text-slate-500 dark:text-slate-400 font-bold">
-                      {fmt.currency(bVal)}
+                    <span className="font-mono text-[10px] text-slate-600 dark:text-slate-300 font-bold">
+                      {fmt.currency(bVal)} <span className="text-slate-400 text-[9px] font-normal">({weightPct.toFixed(1)}%)</span>
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Floating In-Chart Legend for Asset Class mode (Opción D) */}
+        {selectedBroker === 'all' && viewMode === 'asset_class' && availableAssetClasses.length > 1 && (
+          <div className="absolute top-2 left-2.5 z-10 pointer-events-none flex flex-wrap items-center gap-2.5 px-2.5 py-1 rounded-lg bg-white/90 dark:bg-[#181818]/90 border border-slate-200/80 dark:border-white/[0.10] backdrop-blur-md text-[10.5px] text-slate-700 dark:text-slate-200 font-medium shadow-xs">
+            {availableAssetClasses.map((ac) => {
+              const cfg = ASSET_CLASS_CONFIGS[ac] || { label: ac, color: '#3b82f6' }
+              const acVal = activePoint ? getAssetClassData(activePoint, ac).value : 0
+              const totalVal = activePoint ? activePoint.value : 0
+              const weightPct = totalVal > 0 ? (acVal / totalVal) * 100 : 0
+              if (acVal <= 0.01) return null
+              return (
+                <div key={ac} className="flex items-center gap-1.5">
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0 shadow-xs"
+                    style={{ backgroundColor: cfg.color }}
+                  />
+                  <span className="font-semibold">{cfg.label}</span>
+                  {acVal > 0 && chartMode === 'currency' && (
+                    <span className="font-mono text-[10px] text-slate-600 dark:text-slate-300 font-bold">
+                      {fmt.currency(acVal)} <span className="text-slate-400 text-[9px] font-normal">({weightPct.toFixed(1)}%)</span>
                     </span>
                   )}
                 </div>
@@ -1286,24 +1428,34 @@ export function PerformanceChart({
         )}
       </div>
 
-      {/* Bottom HUD Bar: Always Visible Metrics Strip with Matching Separator Line */}
+      {/* Bottom HUD Bar: Always Visible Metrics Strip */}
       <div className="pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
         {!isNativePlatform() && (
           <div className="hidden sm:flex items-center justify-between gap-2 px-3 py-1 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] text-xs h-[32px] sm:h-[34px] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition-colors">
             {/* Left: Patrimonio & Aportado */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <div className="flex items-center gap-1.5">
-                {selectedEntity === 'stacked' && availableBrokers.length > 1 ? (
+                {selectedBroker === 'all' && viewMode === 'broker' && availableBrokers.length > 1 ? (
                   <div className="flex -space-x-1 items-center shrink-0" title="Desglose apilado por entidades">
                     {availableBrokers.map((b) => (
                       <span
                         key={b}
                         className="w-2.5 h-2.5 rounded-full ring-1.5 ring-white dark:ring-[#252526] shrink-0"
-                        style={{ backgroundColor: ENTITY_CONFIGS[b]?.color || '#10b981' }}
+                        style={{ backgroundColor: ENTITY_CONFIGS[b]?.color || '#3b82f6' }}
                       />
                     ))}
                   </div>
-                ) : selectedEntity === 'all' ? (
+                ) : selectedBroker === 'all' && viewMode === 'asset_class' && availableAssetClasses.length > 1 ? (
+                  <div className="flex -space-x-1 items-center shrink-0" title="Desglose apilado por clases de activos">
+                    {availableAssetClasses.map((ac) => (
+                      <span
+                        key={ac}
+                        className="w-2.5 h-2.5 rounded-full ring-1.5 ring-white dark:ring-[#252526] shrink-0"
+                        style={{ backgroundColor: ASSET_CLASS_CONFIGS[ac]?.color || '#3b82f6' }}
+                      />
+                    ))}
+                  </div>
+                ) : selectedBroker === 'all' ? (
                   <span className={cn(
                     "w-2.5 h-2.5 rounded-full ring-2 shrink-0 transition-colors",
                     (activeSelectedMetrics?.diff ?? 0) >= 0
@@ -1314,17 +1466,19 @@ export function PerformanceChart({
                   <span
                     className="w-2.5 h-2.5 rounded-full shrink-0 ring-2"
                     style={{
-                      backgroundColor: ENTITY_CONFIGS[selectedEntity]?.color || '#10b981',
-                      boxShadow: `0 0 0 2px ${(ENTITY_CONFIGS[selectedEntity]?.color || '#10b981')}40`,
+                      backgroundColor: ENTITY_CONFIGS[selectedBroker.toLowerCase()]?.color || '#3b82f6',
+                      boxShadow: `0 0 0 2px ${(ENTITY_CONFIGS[selectedBroker.toLowerCase()]?.color || '#3b82f6')}40`,
                     }}
                   />
                 )}
                 <span className="text-slate-500 dark:text-slate-400 font-medium">
-                  {selectedEntity === 'stacked'
-                    ? 'Patrimonio (Desglose):'
-                    : selectedEntity === 'all'
-                    ? 'Patrimonio Total:'
-                    : `${ENTITY_CONFIGS[selectedEntity]?.label || selectedEntity}:`}
+                  {selectedBroker !== 'all'
+                    ? `${ENTITY_CONFIGS[selectedBroker.toLowerCase()]?.label || selectedBroker}:`
+                    : viewMode === 'broker'
+                    ? 'Patrimonio (Entidad):'
+                    : viewMode === 'asset_class'
+                    ? 'Patrimonio (Activo):'
+                    : 'Patrimonio Total:'}
                 </span>
                 <span data-private className="font-mono font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
                   {chartMode === 'currency'
@@ -1518,7 +1672,6 @@ export function PerformanceChartSkeleton({
 }) {
   return (
     <div className="w-full flex flex-col justify-between flex-1 select-none relative overflow-hidden animate-pulse">
-      {/* Clean Plot Area Skeleton (Authentic loading box with dashed reference lines, NO fake curves) */}
       <div style={{ height }} className="w-full relative mb-0 rounded-xl overflow-hidden bg-slate-100/40 dark:bg-white/[0.015] border border-slate-200/40 dark:border-white/[0.04] flex flex-col justify-between p-4">
         <div className="w-full border-b border-dashed border-slate-200/60 dark:border-white/[0.04]" />
         <div className="w-full border-b border-dashed border-slate-200/60 dark:border-white/[0.04]" />
@@ -1531,7 +1684,6 @@ export function PerformanceChartSkeleton({
         </div>
       </div>
 
-      {/* Bottom HUD Skeleton with Matching Separator Line */}
       <div className="pt-2 border-t border-slate-100 dark:border-white/[0.06] text-xs shrink-0">
         <div className="flex items-center justify-between gap-2 px-3 py-1 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] h-[32px] sm:h-[34px]">
           <div className="flex items-center gap-3">
@@ -1547,7 +1699,7 @@ export function PerformanceChartSkeleton({
           </div>
           <div className="flex items-center gap-2">
             <div className="w-20 h-5 rounded-lg bg-slate-200/70 dark:bg-white/[0.08]" />
-            <div className="w-20 h-4 rounded bg-slate-200/70 dark:bg-white/[0.08]" />
+            <div className="w-20 h-4 rounded bg-slate-200/90 dark:bg-white/[0.12]" />
           </div>
         </div>
       </div>
