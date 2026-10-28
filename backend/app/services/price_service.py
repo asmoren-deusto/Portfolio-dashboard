@@ -129,6 +129,7 @@ KNOWN_TICKERS: dict[str, str] = {
     "IE000QAZP7L2": "0P0001XF3Z.F",  # iShares Emerging Markets Index (IE) S Acc EUR
     "LU0261952682": "0P00006DA4.F",  # Fidelity Euro 50 Index Fund A-ACC-EUR
     "IE00B4ND3602": "PPFB.DE",  # iShares Physical Gold ETC (Lang & Schwarz / Xetra)
+    "IE0032126645": "0P00000SUJ.F",  # Vanguard U.S. 500 Stock Index Fund EUR Acc
 }
 
 

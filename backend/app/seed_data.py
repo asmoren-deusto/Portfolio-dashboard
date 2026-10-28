@@ -172,6 +172,15 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Materias Primas Metales Preciosos - Oro",
     "ter": 0.12
+  },
+  {
+    "isin": "IE0032126645",
+    "name": "Vanguard U.S. 500 Stock Index Fund EUR Acc",
+    "ticker": "0P00000SUJ.F",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "category": "Renta Variable USA - S&P 500",
+    "ter": 0.10
   }
 ]''')
 
@@ -1836,6 +1845,12 @@ PRICES = json.loads(r'''[
     "isin": "ES0000012411",
     "date": "2026-10-26",
     "price": 1.12806,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE0032126645",
+    "date": "2026-10-28",
+    "price": 84.688,
     "currency": "EUR"
   }
 ]''')
@@ -4012,5 +4027,17 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-10-27",
     "broker": "traderepublic",
     "notes": "Compra iShares Physical Gold USD (Acc) en Lang & Schwarz (Títulos: 0,10056, Precio: 69,61 €, Comisión: 1,00 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "buy",
+    "shares": 237.92,
+    "price": 84.688,
+    "amount": 20149.66,
+    "fees": 0.0,
+    "date": "2026-10-28",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Externo (desde BBVA, orden 202610270011696)"
   }
 ]''')
