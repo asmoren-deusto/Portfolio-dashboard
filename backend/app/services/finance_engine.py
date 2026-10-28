@@ -31,18 +31,16 @@ def is_internal_traspaso(notes: str) -> bool:
     return True
 
 
-def calculate_traspaso_balances(transactions: list[dict]) -> dict[str, dict[str, float]]:
+def calculate_traspaso_balances(transactions: list[dict], as_of_date_str: str | None = None) -> dict[str, dict[str, float]]:
     """
     Computes both market value in transit and deferred fiscal cost basis in transit per broker.
     Preserves historical fiscal base cost (coste fiscal originario) and accumulated plusvalía
     during internal transfers with tax deferral (diferimiento fiscal).
+    Matches pending transfers FIFO so completed transfers never pollute future transit states.
     Returns: {broker: {"market_value": float, "cost_basis": float, "pnl": float}}
     """
     positions: dict[str, dict] = {}
-    broker_sells_market: dict[str, float] = {}
-    broker_sells_cost: dict[str, float] = {}
-    broker_buys_market: dict[str, float] = {}
-    broker_buys_cost: dict[str, float] = {}
+    pending_transfers: list[dict] = []
 
     for tx in sorted(transactions, key=lambda x: x["date"]):
         isin = tx["isin"]
@@ -78,14 +76,17 @@ def calculate_traspaso_balances(transactions: list[dict]) -> dict[str, dict[str,
                         buy_m_val = float(val_m.group(1).replace(".", "").replace(",", "."))
                     except Exception:
                         pass
-                broker_buys_market[src_broker] = broker_buys_market.get(src_broker, 0.0) + buy_m_val
-                pending_market = max(0.0, broker_sells_market.get(src_broker, 0.0) - (broker_buys_market.get(src_broker, 0.0) - buy_m_val))
-                pending_cost = max(0.0, broker_sells_cost.get(src_broker, 0.0) - broker_buys_cost.get(src_broker, 0.0))
-                if pending_market > 0 and pending_cost > 0:
-                    absorbed_cost = min(pending_cost, (buy_m_val / pending_market) * pending_cost)
-                else:
-                    absorbed_cost = tx["amount"]
-                broker_buys_cost[src_broker] = broker_buys_cost.get(src_broker, 0.0) + absorbed_cost
+
+                rem = buy_m_val
+                for pt in pending_transfers:
+                    if pt["broker"] == src_broker and pt["market_value"] > 0:
+                        consumed = min(rem, pt["market_value"])
+                        ratio = consumed / pt["market_value"] if pt["market_value"] > 0 else 1.0
+                        pt["market_value"] -= consumed
+                        pt["cost_basis"] = max(0.0, pt["cost_basis"] * (1.0 - ratio))
+                        rem -= consumed
+                        if rem <= 0.01:
+                            break
         elif tx["type"] == "sell":
             shares_before = pos["shares"]
             cost_before = pos["total_cost"]
@@ -99,25 +100,37 @@ def calculate_traspaso_balances(transactions: list[dict]) -> dict[str, dict[str,
             pos["total_cost"] = max(0.0, pos["total_cost"] - cost_of_sold_shares)
 
             if is_traspaso:
-                broker_sells_market[broker] = broker_sells_market.get(broker, 0.0) + tx["amount"]
-                broker_sells_cost[broker] = broker_sells_cost.get(broker, 0.0) + cost_of_sold_shares
+                sell_m_val = tx["amount"]
+                val_s = re.search(r"valor salida\s*([\d\.,]+)", notes) or re.search(r"de valor\s*([\d\.,]+)", notes)
+                if val_s:
+                    try:
+                        sell_m_val = float(val_s.group(1).replace(".", "").replace(",", "."))
+                    except Exception:
+                        pass
+                pending_transfers.append({
+                    "broker": broker,
+                    "market_value": sell_m_val,
+                    "cost_basis": cost_of_sold_shares if cost_of_sold_shares > 0 else sell_m_val,
+                    "date": tx["date"]
+                })
 
+    ref_date = datetime.strptime(as_of_date_str, "%Y-%m-%d") if as_of_date_str else datetime.now()
     results = {}
-    all_b = set(broker_sells_market.keys()) | set(broker_buys_market.keys())
-    for b in all_b:
-        m_sell = broker_sells_market.get(b, 0.0)
-        m_buy = broker_buys_market.get(b, 0.0)
-        c_sell = broker_sells_cost.get(b, 0.0)
-        c_buy = broker_buys_cost.get(b, 0.0)
+    for pt in pending_transfers:
+        if pt["market_value"] > 0.01:
+            try:
+                pt_dt = datetime.strptime(pt["date"], "%Y-%m-%d")
+                if (ref_date - pt_dt).days > 30:
+                    continue
+            except Exception:
+                pass
+            b = pt["broker"]
+            if b not in results:
+                results[b] = {"market_value": 0.0, "cost_basis": 0.0, "pnl": 0.0}
+            results[b]["market_value"] += pt["market_value"]
+            results[b]["cost_basis"] += pt["cost_basis"]
+            results[b]["pnl"] = results[b]["market_value"] - results[b]["cost_basis"]
 
-        cit_market = max(0.0, m_sell - m_buy)
-        cit_cost = max(0.0, c_sell - c_buy)
-        if cit_market > 0.001 or cit_cost > 0.001:
-            results[b] = {
-                "market_value": cit_market,
-                "cost_basis": cit_cost,
-                "pnl": cit_market - cit_cost,
-            }
     return results
 
 
@@ -257,14 +270,14 @@ def calculate_portfolio_value_series(
         # Account for cash in transit and deferred fiscal cost basis in transit during internal fund transfers
         if all_transactions is not None:
             active_all = [t for t in all_transactions if t["date"] <= d_str]
-            tb_global = calculate_traspaso_balances(active_all)
+            tb_global = calculate_traspaso_balances(active_all, as_of_date_str=d_str)
             if broker and broker.lower() not in ["all", "todos"]:
                 b_clean = broker.lower().replace("_", "").replace("-", "")
                 tb = {k: v for k, v in tb_global.items() if k.lower().replace("_", "").replace("-", "") == b_clean}
             else:
                 tb = tb_global
         else:
-            tb = calculate_traspaso_balances(current_active_tx)
+            tb = calculate_traspaso_balances(current_active_tx, as_of_date_str=d_str)
         cash_in_transit = sum(d["market_value"] for d in tb.values())
         cost_in_transit = sum(d["cost_basis"] for d in tb.values())
         total += cash_in_transit
@@ -452,14 +465,14 @@ def calculate_portfolio_nav_series(
         # Account for cash in transit during internal fund transfers (traspasos)
         if all_transactions is not None:
             active_all = [t for t in all_transactions if t["date"] <= d_str]
-            tb_global = calculate_traspaso_balances(active_all)
+            tb_global = calculate_traspaso_balances(active_all, as_of_date_str=d_str)
             if broker and broker.lower() not in ["all", "todos"]:
                 b_clean = broker.lower().replace("_", "").replace("-", "")
                 tb = {k: v for k, v in tb_global.items() if k.lower().replace("_", "").replace("-", "") == b_clean}
             else:
                 tb = tb_global
         else:
-            tb = calculate_traspaso_balances(current_active_tx)
+            tb = calculate_traspaso_balances(current_active_tx, as_of_date_str=d_str)
         cash_in_transit = sum(d["market_value"] for d in tb.values())
         cur_total_val += cash_in_transit
 

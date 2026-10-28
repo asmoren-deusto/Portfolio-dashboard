@@ -589,10 +589,15 @@ export function OverviewPage() {
       const curInvested = cur.invested ?? cur.value
       const netInflow = cur.net_inflow !== undefined && cur.net_inflow !== null ? cur.net_inflow : (curInvested - prevInvested)
 
-      const dayReturnAmount = Math.round(((cur.value - netInflow) - prev.value) * 100) / 100
+      let dayReturnAmount = Math.round(((cur.value - netInflow) - prev.value) * 100) / 100
       let dayReturnPct = 0
       if (cur.daily_return !== undefined && cur.daily_return !== null) {
         dayReturnPct = Number(cur.daily_return.toFixed(2))
+        const expectedAmt = prev.value * (dayReturnPct / 100)
+        // Guard against any external flow distortion: align dollar amount with daily_return
+        if (Math.abs(dayReturnAmount - expectedAmt) > Math.abs(expectedAmt) * 0.5 + 50) {
+          dayReturnAmount = Math.round(expectedAmt * 100) / 100
+        }
       } else if (prev.value > 0) {
         dayReturnPct = Number((((cur.value - netInflow) - prev.value) / prev.value * 100).toFixed(2))
       }

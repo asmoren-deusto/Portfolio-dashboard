@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-28 20:29:08
+- **Fecha de exportación:** 2026-10-28 20:39:12
 - **ID de Conversación:** `dcf2d459-d371-4ebd-9ad9-517bd3f7d70e`
-- **Total de interacciones registradas:** 20
+- **Total de interacciones registradas:** 22
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -461,5 +461,60 @@ Dime cuál te llama más la atención (o si quieres ver una prueba en vivo de la
 ### 👤 Usuario (2026-10-28 19:19:35)
 
 implementa todas y lo vemos, pero hazlo con gusto y cuidado estetico y funcional. También revisa que todos los selectores superiores de esa seccion tengan el mismo estilo y alto, veo botonoes de disitntos tipos
+
+---
+
+### 🤖 Asistente (2026-10-28 19:29:10)
+
+Se han implementado todas las alternativas gráficas y se ha armonizado toda la barra superior de selectores en [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx) y el nuevo componente modular [EvolutionCharts.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/components/charts/EvolutionCharts.tsx).
+
+---
+
+### 🎨 1. Unificación y Armonización de Selectores Superiores
+
+Se han homogeneizado todos los controles del encabezado de la sección **Evolución Patrimonial**:
+* **Altura uniforme:** Todos los contenedores e inputs tienen exactamente `h-8` (32px de alto), eliminando los desfases de altura previos (`px-2 py-0.5` vs `px-2.5 py-1`).
+* **Estilo idéntico:** Misma estética de contenedor segmentado (`bg-slate-100 dark:bg-[#202022] border border-slate-200 dark:border-white/[0.08] rounded-lg p-0.5`).
+* **Píldoras activas:** Fondo blanco limpio en modo claro y fondo elevado `dark:bg-[#2c2c2e]` con sombra suave en modo oscuro.
+* **Tipografía y alineación:** `text-xs font-semibold`, con iconos consistentes (Lucide) y etiquetas adaptables para evitar desbordes en pantallas compactas.
+
+---
+
+### 📊 2. Las 4 Nuevas Alternativas Gráficas Disponibles
+
+En la cabecera ahora puedes alternar instantáneamente entre **5 vistas interactivas**:
+
+1. **Patrimonio (Curva Suave con Resplandor & Halo de Ganancia):**
+   * Curva *spline* (monótona continua) de alta fidelidad con gradiente esmeralda neón y filtro de resplandor suave (`#neonGlow`).
+   * Línea discontinua sutil del capital aportado para ver la divergencia de plusvalía en todo momento.
+   * Tooltip flotante *glassmorphism* que detalla Valor Total, Capital Aportado, Ganancia neta y Rentabilidad porcentual.
+
+2. **Comparativa (Multi-Línea Independiente por Broker o Activo):**
+   * Sustituye las áreas apiladas opacas y escalonadas anteriores por **líneas directas y nítidas** con colores corporativos diferenciados (MyInvestor, Indexa, HeyTrade, BBVA, o por Clases de Activo: Acciones, Fondos, Cripto, etc.).
+   * Badges superiores clicables que muestran el valor actual de cada entidad/activo y permiten ocultar/mostrar series individuales.
+   * Selector contextual contiguo para alternar fácilmente entre **Entidad** o **Activo**, y entre **€** o **%**.
+
+3. **Aporte vs Ganancia (Cascada / Barras Mensuales):**
+   * Gráfico mensual dual que desglosa visualmente cuánto creció tu cartera por **Ahorro/Aportaciones netas** (azul cobalto) frente a cuánto aportó el **Mercado / Plusvalía** (verde esmeralda o rojo carmesí si hubo caída).
+   * Tarjetas resumen en la base con el Capital Neto Total Aportado y la Plusvalía Total acumulada.
+
+4. **Reparto % (Evolución de Pesos 100%):**
+   * Stream de área relativa normalizada al 100% que muestra cómo ha cambiado la ponderación de cada broker o clase de activo a lo largo del tiempo, permitiendo detectar sobreponderaciones históricas de un vistazo.
+
+5. **Matriz (Heatmap de Retornos Mensuales):**
+   * Mantiene accesible la cuadrícula térmica año por año con los rendimientos de cada mes.
+
+---
+
+### 🚀 Despliegue y Versión
+* **Build de producción:** Validado con éxito (0 errores).
+* **Release:** Publicada la versión **`v3.5.6`** con sincronización automática de chat a Git y push a `main`.
+* **Prueba en local:** Puedes interactuar con los selectores directamente en [http://localhost:5173/](http://localhost:5173/) para probar cada una y ver cuál encaja mejor con tus preferencias.
+
+---
+
+### 👤 Usuario (2026-10-28 19:21:40)
+
+revisa
 
 ---
