@@ -25,6 +25,7 @@ import {
   History,
   CheckCircle2,
   Globe,
+  PiggyBank,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -32,6 +33,12 @@ import { KpiCard } from '@/components/ui/KpiCard'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { PerformanceChart, PerformanceChartSkeleton, type PerformanceViewMode } from '@/components/charts/PerformanceChart'
+import {
+  GlowSplineChart,
+  MultiLineComparisonChart,
+  WaterfallGrowthChart,
+  AllocationStreamChart,
+} from '@/components/charts/EvolutionCharts'
 import { AllocationChart, AllocationChartSkeleton } from '@/components/charts/AllocationChart'
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
@@ -89,6 +96,27 @@ export function OverviewPage() {
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
   const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
+  const [chartStyle, setChartStyle] = useState<'glow' | 'lines' | 'waterfall' | 'allocation' | 'heatmap'>(() => {
+    return (localStorage.getItem('overview_portfolio_chart_style') as any) || 'glow'
+  })
+  const handleSetChartStyle = (style: 'glow' | 'lines' | 'waterfall' | 'allocation' | 'heatmap') => {
+    setChartStyle(style)
+    localStorage.setItem('overview_portfolio_chart_style', style)
+    if (style === 'heatmap') {
+      setChartView('heatmap')
+    } else {
+      setChartView('evolution')
+    }
+  }
+
+  const [perfBreakdown, setPerfBreakdown] = useState<'broker' | 'asset_class'>(() => {
+    return (localStorage.getItem('overview_perf_breakdown') as 'broker' | 'asset_class') || 'broker'
+  })
+  const handleSetPerfBreakdown = (b: 'broker' | 'asset_class') => {
+    setPerfBreakdown(b)
+    localStorage.setItem('overview_perf_breakdown', b)
+  }
+
   const [perfChartMode, setPerfChartMode] = useState<'currency' | 'percent'>('currency')
   const [perfShowInvested, setPerfShowInvested] = useState(true)
   const [perfViewMode, setPerfViewMode] = useState<PerformanceViewMode>(() => {
@@ -932,7 +960,7 @@ export function OverviewPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* 1. Performance Evolution (60% on desktop: lg:col-span-3, md:col-span-2) */}
         <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between" delay={0.2} loading={isRefreshingPrices}>
-          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
+          <CardHeader className="min-h-[58px] py-2 px-3.5 sm:px-6">
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
               <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
                 <BarChart3 className="w-4 h-4" />
@@ -942,227 +970,345 @@ export function OverviewPage() {
                   <CardTitle className="text-sm sm:text-[15px] truncate">Evolución Patrimonial</CardTitle>
                 </div>
                 <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
-                  {chartView === 'evolution'
-                    ? 'Trayectoria histórica del valor liquidativo acumulado'
-                    : 'Rentabilidad neta mes a mes y acumulación anual de la cartera'}
+                  {chartStyle === 'glow' && 'Trayectoria fluida del valor liquidativo con plusvalía sombreada'}
+                  {chartStyle === 'lines' && `Líneas independientes por ${perfBreakdown === 'broker' ? 'Entidad' : 'Clase de Activo'}`}
+                  {chartStyle === 'waterfall' && 'Aportaciones netas de ahorro vs rentabilidad del mercado mes a mes'}
+                  {chartStyle === 'allocation' && `Evolución de distribución porcentual por ${perfBreakdown === 'broker' ? 'Entidad' : 'Clase de Activo'}`}
+                  {chartStyle === 'heatmap' && 'Rentabilidad neta mes a mes y acumulación anual de la cartera'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 ml-auto">
-              {/* Evolution Chart Controls in CardHeader (hidden on mobile) */}
-              {chartView === 'evolution' && (
-                <div className="hidden sm:flex items-center gap-1.5">
-                  {/* View Mode Selector: Total (A), Entidad (C), Activo (D) */}
-                  <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => handleSetPerfViewMode('total')}
-                      className={`relative px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${
-                        perfViewMode === 'total'
-                          ? 'text-slate-900 dark:text-white font-bold'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                      }`}
-                      title="Opción A: Curva neta de Patrimonio Total con Aportado"
-                    >
-                      {perfViewMode === 'total' && (
-                        <motion.div
-                          layoutId="perfViewModePill"
-                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                        />
-                      )}
-                      <span className="relative z-10 flex items-center gap-1">
-                        <TrendingUp size={11} className={perfViewMode === 'total' ? 'text-emerald-500' : ''} />
-                        <span>Total</span>
-                      </span>
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => handleSetPerfViewMode('broker')}
-                      className={`relative px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${
-                        perfViewMode === 'broker'
-                          ? 'text-slate-900 dark:text-white font-bold'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                      }`}
-                      title="Opción C: Desglose apilado ordenado por Entidad (Base MyInvestor, Indexa, Trade Republic)"
-                    >
-                      {perfViewMode === 'broker' && (
-                        <motion.div
-                          layoutId="perfViewModePill"
-                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                        />
-                      )}
-                      <span className="relative z-10 flex items-center gap-1">
-                        <Building2 size={11} className={perfViewMode === 'broker' ? 'text-blue-500' : ''} />
-                        <span>Entidad</span>
-                      </span>
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => handleSetPerfViewMode('asset_class')}
-                      className={`relative px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${
-                        perfViewMode === 'asset_class'
-                          ? 'text-slate-900 dark:text-white font-bold'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                      }`}
-                      title="Opción D: Desglose apilado por Clase de Activo (Renta Variable, Renta Fija, Oro, Efectivo)"
-                    >
-                      {perfViewMode === 'asset_class' && (
-                        <motion.div
-                          layoutId="perfViewModePill"
-                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                        />
-                      )}
-                      <span className="relative z-10 flex items-center gap-1">
-                        <Layers size={11} className={perfViewMode === 'asset_class' ? 'text-amber-500' : ''} />
-                        <span>Activo</span>
-                      </span>
-                    </motion.button>
-                  </div>
-
-                  {/* Mode Selector (€ vs %) */}
-                  <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => setPerfChartMode('currency')}
-                      className={`relative min-w-[24px] px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${perfChartMode === 'currency'
-                          ? 'text-slate-900 dark:text-white font-bold'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                        }`}
-                      title="Ver evolución en Euros (€)"
-                    >
-                      {perfChartMode === 'currency' && (
-                        <motion.div
-                          layoutId="perfChartModePill"
-                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                        />
-                      )}
-                      <span className="relative z-10">€</span>
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => setPerfChartMode('percent')}
-                      className={`relative min-w-[24px] px-2 py-0.5 text-xs font-semibold rounded-md transition-colors text-center ${perfChartMode === 'percent'
-                          ? 'text-slate-900 dark:text-white font-bold'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                        }`}
-                      title="Ver rentabilidad acumulada en porcentaje (%)"
-                    >
-                      {perfChartMode === 'percent' && (
-                        <motion.div
-                          layoutId="perfChartModePill"
-                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                          transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                        />
-                      )}
-                      <span className="relative z-10">%</span>
-                    </motion.button>
-                  </div>
-
-                  {/* Toggle Invested Capital (only in € mode) */}
-                  {perfChartMode === 'currency' && (
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => setPerfShowInvested(v => !v)}
-                      className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border transition-all ${perfShowInvested
-                          ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-semibold'
-                          : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/[0.06] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
-                        }`}
-                      title="Mostrar u ocultar aportaciones"
-                    >
-                      <span className={`w-2.5 h-0.5 border-t-2 border-dashed ${perfShowInvested ? 'border-indigo-600 dark:border-indigo-400' : 'border-slate-400'}`} />
-                      <span>Aportado</span>
-                    </motion.button>
-                  )}
-                </div>
-              )}
-
-              {/* Curva / Matriz Mensual ALWAYS on the far right */}
-              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
+            <div className="flex items-center gap-2 ml-auto overflow-x-auto no-scrollbar py-0.5">
+              {/* Main Chart View Selector: All h-8, rounded-lg, same p-0.5 */}
+              <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
                 <motion.button
                   whileTap={{ scale: 0.96 }}
-                  onClick={() => setChartView('evolution')}
-                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'evolution'
+                  onClick={() => handleSetChartStyle('glow')}
+                  className={cn(
+                    'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
+                    chartStyle === 'glow'
                       ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                    }`}
+                  )}
+                  title="Curva fluida de Patrimonio con plusvalía sombreada y halo luminoso"
                 >
-                  {chartView === 'evolution' && (
+                  {chartStyle === 'glow' && (
                     <motion.div
-                      layoutId="overviewChartViewPill"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                      layoutId="overviewChartStylePill"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                     />
                   )}
-                  <span className="relative z-10">Curva</span>
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    <Sparkles size={12} className={chartStyle === 'glow' ? 'text-emerald-500' : ''} />
+                    <span>Patrimonio</span>
+                  </span>
                 </motion.button>
+
                 <motion.button
                   whileTap={{ scale: 0.96 }}
-                  onClick={() => setChartView('heatmap')}
-                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${chartView === 'heatmap'
+                  onClick={() => handleSetChartStyle('lines')}
+                  className={cn(
+                    'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
+                    chartStyle === 'lines'
                       ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                    }`}
+                  )}
+                  title="Líneas independientes nítidas por entidad o activo sin áreas que se tapen"
                 >
-                  {chartView === 'heatmap' && (
+                  {chartStyle === 'lines' && (
                     <motion.div
-                      layoutId="overviewChartViewPill"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                      layoutId="overviewChartStylePill"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                     />
                   )}
-                  <span className="relative z-10">
-                    Matriz<span className="hidden sm:inline"> Mensual</span>
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    <TrendingUp size={12} className={chartStyle === 'lines' ? 'text-blue-500' : ''} />
+                    <span className="hidden xl:inline">Comparativa</span>
+                    <span className="xl:hidden">Líneas</span>
+                  </span>
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => handleSetChartStyle('waterfall')}
+                  className={cn(
+                    'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
+                    chartStyle === 'waterfall'
+                      ? 'text-slate-900 dark:text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  )}
+                  title="Barras mensuales de aportación de ahorro vs rentabilidad del mercado"
+                >
+                  {chartStyle === 'waterfall' && (
+                    <motion.div
+                      layoutId="overviewChartStylePill"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    <PiggyBank size={12} className={chartStyle === 'waterfall' ? 'text-amber-500' : ''} />
+                    <span className="hidden xl:inline">Aporte vs Ganancia</span>
+                    <span className="xl:hidden">Aporte</span>
+                  </span>
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => handleSetChartStyle('allocation')}
+                  className={cn(
+                    'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
+                    chartStyle === 'allocation'
+                      ? 'text-slate-900 dark:text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  )}
+                  title="Evolución de distribución porcentual relativa (100%) en el tiempo"
+                >
+                  {chartStyle === 'allocation' && (
+                    <motion.div
+                      layoutId="overviewChartStylePill"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    <PieChart size={12} className={chartStyle === 'allocation' ? 'text-violet-500' : ''} />
+                    <span>Reparto %</span>
+                  </span>
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => handleSetChartStyle('heatmap')}
+                  className={cn(
+                    'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
+                    chartStyle === 'heatmap'
+                      ? 'text-slate-900 dark:text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  )}
+                  title="Matriz mensual de rendimientos netos y balance anual"
+                >
+                  {chartStyle === 'heatmap' && (
+                    <motion.div
+                      layoutId="overviewChartStylePill"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    <Calendar size={12} className={chartStyle === 'heatmap' ? 'text-rose-500' : ''} />
+                    <span>Matriz</span>
                   </span>
                 </motion.button>
               </div>
+
+              {/* Secondary Sub-Controls - EXACTLY h-8 and same rounded-lg tokens */}
+              {/* 1. Breakdown Selector (Only for 'lines' and 'allocation') */}
+              {(chartStyle === 'lines' || chartStyle === 'allocation') && (
+                <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => handleSetPerfBreakdown('broker')}
+                    className={cn(
+                      'h-7 relative px-2 flex items-center gap-1 text-xs font-semibold rounded-md transition-colors',
+                      perfBreakdown === 'broker'
+                        ? 'text-slate-900 dark:text-white font-bold'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                    )}
+                    title="Desglosar por Entidad / Broker"
+                  >
+                    {perfBreakdown === 'broker' && (
+                      <motion.div
+                        layoutId="perfBreakdownPill"
+                        className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                        transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-1">
+                      <Building2 size={11} className={perfBreakdown === 'broker' ? 'text-blue-500' : ''} />
+                      <span>Entidad</span>
+                    </span>
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => handleSetPerfBreakdown('asset_class')}
+                    className={cn(
+                      'h-7 relative px-2 flex items-center gap-1 text-xs font-semibold rounded-md transition-colors',
+                      perfBreakdown === 'asset_class'
+                        ? 'text-slate-900 dark:text-white font-bold'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                    )}
+                    title="Desglosar por Clase de Activo"
+                  >
+                    {perfBreakdown === 'asset_class' && (
+                      <motion.div
+                        layoutId="perfBreakdownPill"
+                        className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                        transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-1">
+                      <Layers size={11} className={perfBreakdown === 'asset_class' ? 'text-amber-500' : ''} />
+                      <span>Activo</span>
+                    </span>
+                  </motion.button>
+                </div>
+              )}
+
+              {/* 2. Value Mode Selector (€ vs %) (Only for 'glow' and 'lines') */}
+              {(chartStyle === 'glow' || chartStyle === 'lines') && (
+                <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => setPerfChartMode('currency')}
+                    className={cn(
+                      'h-7 min-w-[28px] relative px-2 flex items-center justify-center text-xs font-semibold rounded-md transition-colors',
+                      perfChartMode === 'currency'
+                        ? 'text-slate-900 dark:text-white font-bold'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                    )}
+                    title="Evolución en Euros (€)"
+                  >
+                    {perfChartMode === 'currency' && (
+                      <motion.div
+                        layoutId="perfModePill"
+                        className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                        transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                      />
+                    )}
+                    <span className="relative z-10">€</span>
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => setPerfChartMode('percent')}
+                    className={cn(
+                      'h-7 min-w-[28px] relative px-2 flex items-center justify-center text-xs font-semibold rounded-md transition-colors',
+                      perfChartMode === 'percent'
+                        ? 'text-slate-900 dark:text-white font-bold'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                    )}
+                    title="Rentabilidad acumulada en porcentaje (%)"
+                  >
+                    {perfChartMode === 'percent' && (
+                      <motion.div
+                        layoutId="perfModePill"
+                        className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                        transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                      />
+                    )}
+                    <span className="relative z-10">%</span>
+                  </motion.button>
+                </div>
+              )}
+
+              {/* 3. Aportado Toggle Button (Only for 'glow' in € mode) - exactly h-8, rounded-lg */}
+              {chartStyle === 'glow' && perfChartMode === 'currency' && (
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setPerfShowInvested((v) => !v)}
+                  className={cn(
+                    'h-8 px-2.5 rounded-lg border text-xs font-semibold inline-flex items-center gap-1.5 transition-all shrink-0',
+                    perfShowInvested
+                      ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300'
+                      : 'bg-slate-100 dark:bg-[#202022] border-slate-200 dark:border-white/[0.08] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+                  )}
+                  title="Mostrar u ocultar línea de capital aportado"
+                >
+                  <span
+                    className={cn(
+                      'w-2.5 h-0.5 border-t-2 border-dashed',
+                      perfShowInvested ? 'border-indigo-600 dark:border-indigo-400' : 'border-slate-400'
+                    )}
+                  />
+                  <span>Aportado</span>
+                </motion.button>
+              )}
             </div>
           </CardHeader>
 
           <div className="px-3 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 relative">
             <div data-private className="flex-1 flex flex-col justify-center min-h-0">
               <AnimatePresence mode="wait" initial={false}>
-                {chartView === 'evolution' ? (
+                {isChartsInitialLoading ? (
+                  <PerformanceChartSkeleton height={280} />
+                ) : performance.length === 0 ? (
+                  <div className="flex h-[280px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                    Sin datos de evolución
+                  </div>
+                ) : chartStyle === 'glow' ? (
                   <motion.div
-                    key="evolution"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.18, ease: 'easeOut' }}
-                    className="flex-1 flex flex-col justify-center min-h-0 w-full"
+                    key="glow"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full flex-1 flex flex-col justify-center"
                   >
-                    {isChartsInitialLoading ? (
-                      <PerformanceChartSkeleton height={260} />
-                    ) : performance.length > 0 ? (
-                      <PerformanceChart
-                        data={performance}
-                        height={260}
-                        chartMode={perfChartMode}
-                        showInvested={perfShowInvested}
-                        showMilestones={false}
-                        showFooterStrip={false}
-                        viewMode={perfViewMode}
-                      />
-                    ) : (
-                      <div className="flex h-[260px] items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                        Sin datos de evolución
-                      </div>
-                    )}
+                    <GlowSplineChart
+                      data={performance}
+                      height={280}
+                      chartMode={perfChartMode}
+                      showInvested={perfShowInvested}
+                    />
+                  </motion.div>
+                ) : chartStyle === 'lines' ? (
+                  <motion.div
+                    key={`lines-${perfBreakdown}-${perfChartMode}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full flex-1 flex flex-col justify-center"
+                  >
+                    <MultiLineComparisonChart
+                      data={performance}
+                      height={280}
+                      breakdown={perfBreakdown}
+                      chartMode={perfChartMode}
+                    />
+                  </motion.div>
+                ) : chartStyle === 'waterfall' ? (
+                  <motion.div
+                    key="waterfall"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full flex-1 flex flex-col justify-center"
+                  >
+                    <WaterfallGrowthChart
+                      data={performance}
+                      height={280}
+                    />
+                  </motion.div>
+                ) : chartStyle === 'allocation' ? (
+                  <motion.div
+                    key={`allocation-${perfBreakdown}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full flex-1 flex flex-col justify-center"
+                  >
+                    <AllocationStreamChart
+                      data={performance}
+                      height={280}
+                      breakdown={perfBreakdown}
+                    />
                   </motion.div>
                 ) : (
                   <motion.div
                     key="heatmap"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.18, ease: 'easeOut' }}
-                    className="py-0.5 flex-1 flex flex-col justify-center min-h-0 w-full"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="py-0.5 w-full flex-1 flex flex-col justify-center"
                   >
-                    <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="260px" />
+                    <MonthlyReturnsHeatmap showStats={true} tableMaxHeight="280px" />
                   </motion.div>
                 )}
               </AnimatePresence>
