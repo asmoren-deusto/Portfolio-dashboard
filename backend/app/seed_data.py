@@ -1842,6 +1842,18 @@ PRICES = json.loads(r'''[
     "currency": "EUR"
   },
   {
+    "isin": "LU0171307068",
+    "date": "2026-10-27",
+    "price": 73.68,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0171307068",
+    "date": "2026-10-28",
+    "price": 74.41,
+    "currency": "EUR"
+  },
+  {
     "isin": "ES0000012411",
     "date": "2026-10-26",
     "price": 1.12806,

@@ -312,7 +312,7 @@ async def get_price_with_date(
     if not force and not is_live_traded and db is not None and PriceCache is not None:
         try:
             entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
-            if entry and entry.price is not None and entry.price > 0:
+            if entry and entry.price is not None and entry.price > 0 and (is_nav_current(entry.date) or _recently_scraped(isin)):
                 _price_cache[isin] = {"price": float(entry.price), "date": entry.date, "ts": datetime.now()}
                 return float(entry.price), entry.date
         except Exception as e:

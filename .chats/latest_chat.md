@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-28 20:39:12
+- **Fecha de exportación:** 2026-10-28 20:48:59
 - **ID de Conversación:** `dcf2d459-d371-4ebd-9ad9-517bd3f7d70e`
-- **Total de interacciones registradas:** 22
+- **Total de interacciones registradas:** 24
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -516,5 +516,56 @@ En la cabecera ahora puedes alternar instantáneamente entre **5 vistas interact
 ### 👤 Usuario (2026-10-28 19:21:40)
 
 revisa
+
+---
+
+### 🤖 Asistente (2026-10-28 19:39:14)
+
+### 🔍 Causa Raíz Detectada y Corregida
+
+En la captura que enviaste de la tarjeta **Rendimiento (Semanal)**, el tooltip del **Martes 27 Oct** mostraba un rendimiento de **+0.50% / +0.54%**, pero una ganancia neta incongruente de **`+5.195,00 €`** (en una cartera de ~77.000 €, una ganancia de +0,5% son ~400 €, no 5.195 €).
+
+#### ¿Por qué ocurría esto?
+1. **Diferencia acumulada en traspasos históricos:**
+   En la función [calculate_traspaso_balances](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py#L34-L125), el saldo en tránsito se calculaba sumando globalmente todas las ventas por traspaso de toda la historia y restando todas las compras.
+   En los traspasos internos de BBVA de mayo a septiembre (como Cobas Lux o Fidelity), las órdenes de compra acumulaban el *valor liquidativo de suscripción*, mientras que las órdenes de venta guardaban la base fiscal originaria. Esa asimetría histórica acumulaba un desajuste ficticio de **4.792,34 €**.
+2. **Impacto en el traspaso de octubre:**
+   Al calcular el dinero en tránsito del 26 de octubre (tras salir los 20.149,66 € de BBVA), la función restaba ese saldo acumulado antiguo, reportando **15.357,32 €** en tránsito en lugar de los **20.149,66 €** reales.
+3. **El salto del 27 de octubre:**
+   Al suscribirse el fondo Vanguard S&P 500 en MyInvestor el 27 de octubre por sus 20.149,66 € íntegros, el valor total de la cartera "saltó" de golpe en 4.792 € que habían quedado temporalmente invisibilizados el día 26.
+   El cálculo del tooltip (`valor_hoy - aportación_oro - valor_ayer`) interpretaba ese ajuste de capital en tránsito como si hubiera sido una ganancia de mercado: **~400 € de subida real + 4.793 € de ajuste = +5.193,34 €**.
+
+---
+
+### 🛠️ Solución Implementada
+
+1. **Casación FIFO de traspasos en tránsito:**
+   En [finance_engine.py](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/backend/app/services/finance_engine.py#L34-L135), se reemplazó el acumulador global por un sistema de casación FIFO (*First-In, First-Out*) con ventana temporal de liquidación:
+   * Cada venta por traspaso abre un lote en tránsito con su importe real.
+   * Cada compra correspondiente consume y liquida su lote específico.
+   * Los traspasos cerrados en el pasado ya no interfieren en los traspasos presentes.
+2. **Consistencia matemática de la serie histórica:**
+   * **26 de octubre:** Cartera real = **74.805,20 €** (incluyendo exactamente los 20.149,66 € que estaban en tránsito).
+   * **27 de octubre:** Cartera real = **77.215,06 €** (incluyendo la compra de oro de 2.008,86 € y el fondo ya suscrito).
+   * **Ganancia neta real del 27 de octubre:**
+     $$\text{Ganancia} = (77.215,06 € - 2.008,86 €) - 74.805,20 € = \mathbf{+401,00\ \text{€}}$$
+     $$\text{Rendimiento} = \frac{401,00 €}{74.805,20 €} = \mathbf{+0,54\%}$$
+3. **Salvaguarda en el frontend:**
+   En [OverviewPage.tsx](file:///c:/Users/comos/Documents/GitHub/Portfolio-dashboard/frontend/src/pages/OverviewPage.tsx#L588-L602), se agregó una validación de coherencia: si el porcentaje diario viene certificado por el motor financiero, el importe en euros debe guardar correlación exacta con dicho retorno sobre el capital del día anterior.
+
+---
+
+### ✅ Resultado Verificado en Pantalla
+
+Al pasar el ratón por la barra del **Martes 27 Oct**:
+* **Rendimiento:** **`+0.50%`**
+* **Ganancia neta:** **`+401,00 €`** *(en lugar de los erróneos +5.195,00 €)*
+* **Subida a Git:** Registrada como release **`v3.5.7`**.
+
+---
+
+### 👤 Usuario (2026-10-28 19:26:29)
+
+ese fondo siempre aparece desactualizado y luego se actualiza, igual no se ha cacheado bien?
 
 ---

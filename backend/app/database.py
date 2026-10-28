@@ -148,7 +148,6 @@ def _seed_asier_data():
             try:
                 from sqlalchemy import text
                 db.execute(text("DELETE FROM price_cache WHERE strftime('%w', date) IN ('0', '6')"))
-                db.execute(text("DELETE FROM price_cache WHERE isin = 'LU0171307068' AND date > '2026-10-26'"))
             except Exception:
                 pass
 
