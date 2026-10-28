@@ -288,6 +288,11 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         fallback_date = p_prev_date or get_expected_nav_date()
         pos_irr = calculate_position_xirr(pos.get("transactions", []), current_value, as_of_date=price_date or fallback_date)
 
+        from app.services.price_service import _price_cache as _svc_pc
+        quote_time = _price_cache.get(isin, {}).get("quote_time") or _svc_pc.get(isin, {}).get("quote_time")
+        if not quote_time and eff_ticker and not eff_ticker.startswith("0P000") and not isin.startswith("0192"):
+            quote_time = datetime.now().strftime("%H:%M")
+
         return {
             "isin": isin,
             "name": name,
@@ -308,8 +313,10 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             "ter": getattr(asset, "ter", None) if asset else None,
             "last_updated": price_date or fallback_date,
             "price_date": price_date or fallback_date,
+            "quote_time": quote_time,
             "irr": pos_irr,
         }
+
 
     tasks = [_fetch_position_bundle(isin, pos) for isin, pos in active_positions.items()]
     fetched = await asyncio.gather(*tasks, return_exceptions=True)

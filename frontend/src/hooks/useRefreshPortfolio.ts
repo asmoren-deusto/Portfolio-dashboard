@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAppStore } from '@/store/appStore'
 import { refreshPortfolioPrices, prefetchAllBrokers } from '@/api/queries'
+import { filterUnseenNavUpdates, markNavUpdatesAsSeen } from '@/lib/navAlertTracker'
 
 export function useRefreshPortfolio() {
   const {
@@ -70,21 +71,24 @@ export function useRefreshPortfolio() {
         localStorage.setItem('portfolio_last_manual_refresh', String(nowTs))
       } catch {}
 
-      // Present instant visible outcome of the manual refresh to the user
+      // Present notification ONLY for funds that have actually updated since the user was last alerted
       if (refreshResult) {
-        const updatedCount = refreshResult.updated_count ?? refreshResult.updatedCount ?? 0
-        const items = refreshResult.updated_items || refreshResult.items || []
-        const allItems = refreshResult.all_items || refreshResult.allCheckedItems || []
+        const rawItems = refreshResult.updated_items || refreshResult.items || []
+        const unseenItems = filterUnseenNavUpdates(rawItems)
 
-        setNavAlertNotification({
-          id: alertId,
-          timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-          updatedCount,
-          totalCount: refreshResult.count ?? (allItems.length || 9),
-          items: updatedCount > 0 ? items : allItems.slice(0, 5),
-          allCheckedItems: allItems,
-        })
+        if (unseenItems.length > 0) {
+          markNavUpdatesAsSeen(unseenItems)
+          setNavAlertNotification({
+            id: alertId,
+            timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+            updatedCount: unseenItems.length,
+            totalCount: refreshResult.count ?? 9,
+            items: unseenItems,
+            allCheckedItems: [],
+          })
+        }
       }
+
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['summary'], refetchType: 'active' }),

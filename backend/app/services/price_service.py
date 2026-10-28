@@ -151,6 +151,44 @@ def _normalize_business_date(d_str: str) -> str:
     return d_str
 
 
+async def _fetch_boerse_frankfurt_price(isin: str) -> tuple[Optional[float], Optional[str], Optional[str]]:
+    """
+    Fetch real-time trade price, date, and local quote time from Börse Frankfurt JSON API.
+    Börse Frankfurt is the primary European exchange for German Xetra listings (including Gold ETC IE00B4ND3602).
+    """
+    url = f"https://api.boerse-frankfurt.de/v1/data/quote_box/single?isin={isin}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=4, follow_redirects=True) as client:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 200:
+                data = resp.json()
+                raw_price = data.get("lastPrice") or data.get("retailBid") or data.get("bidLimit")
+                if raw_price is not None and float(raw_price) > 0:
+                    price = round(float(raw_price), 4)
+                    ts_str = data.get("timestampLastPrice") or data.get("timestamp")
+                    quote_time = None
+                    price_date = datetime.now().strftime("%Y-%m-%d")
+                    if ts_str:
+                        try:
+                            dt = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                            import zoneinfo
+                            local_dt = dt.astimezone(zoneinfo.ZoneInfo("Europe/Madrid"))
+                            price_date = local_dt.strftime("%Y-%m-%d")
+                            quote_time = local_dt.strftime("%H:%M")
+                        except Exception:
+                            quote_time = datetime.now().strftime("%H:%M")
+                    else:
+                        quote_time = datetime.now().strftime("%H:%M")
+                    return price, price_date, quote_time
+    except Exception as e:
+        logger.debug(f"Börse Frankfurt quote failed for {isin}: {e}")
+    return None, None, None
+
+
 async def get_price_with_date(
     isin: str,
     ticker: str | None = None,
@@ -171,7 +209,7 @@ async def get_price_with_date(
     ticker = KNOWN_TICKERS.get(isin) or ticker
 
     # For live exchange-traded assets (ETCs, ETFs, equities, e.g. PPFB.DE), quotes fluctuate in real time
-    # during market sessions. They must be fetched from live market data (Yahoo Finance) with a short 2-minute
+    # during market sessions. They must be fetched from live market data (Börse Frankfurt / Yahoo Finance) with a short 30s
     # in-memory cache, rather than being locked to a static historical/purchase PriceCache in the DB.
     is_live_traded = bool(
         ticker
@@ -185,19 +223,36 @@ async def get_price_with_date(
         if not force and _is_cache_valid(isin, ttl_minutes=0.5):
             return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
-        y_price, y_date = await _fetch_yahoo_price(ticker)
-        if y_price and y_price > 0:
-            price = round(y_price, 4)
-            price_date = y_date or datetime.now().strftime("%Y-%m-%d")
-            _price_cache[isin] = {"price": price, "date": price_date, "ts": datetime.now()}
+        live_p, live_d, live_time = None, None, None
+        # Try primary exchange: Börse Frankfurt for European ETCs/ETFs (IE00B4ND3602, etc.)
+        if isin == "IE00B4ND3602" or (ticker and ticker.endswith(".DE")):
+            live_p, live_d, live_time = await _fetch_boerse_frankfurt_price(isin)
+
+        # Fallback to Yahoo Finance live quote if Börse Frankfurt didn't return
+        if live_p is None and ticker:
+            y_price, y_date = await _fetch_yahoo_price(ticker)
+            if y_price and y_price > 0:
+                live_p = round(y_price, 4)
+                live_d = y_date or datetime.now().strftime("%Y-%m-%d")
+                live_time = datetime.now().strftime("%H:%M")
+
+        if live_p and live_p > 0:
+            price = live_p
+            price_date = live_d or datetime.now().strftime("%Y-%m-%d")
+            _price_cache[isin] = {
+                "price": price,
+                "date": price_date,
+                "quote_time": live_time or datetime.now().strftime("%H:%M"),
+                "ts": datetime.now(),
+            }
             if db is not None and PriceCache is not None:
                 try:
                     entry = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == price_date).first()
                     if entry:
                         entry.price = price
-                        entry.source = "live_yahoo"
+                        entry.source = "live_exchange"
                     else:
-                        db.add(PriceCache(isin=isin, date=price_date, price=price, currency="EUR", source="live_yahoo"))
+                        db.add(PriceCache(isin=isin, date=price_date, price=price, currency="EUR", source="live_exchange"))
                     db.commit()
                 except Exception as e:
                     logger.debug(f"Failed to update PriceCache for live traded asset {isin}: {e}")
@@ -221,7 +276,7 @@ async def get_price_with_date(
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
     # Fast DB cache lookup: avoid slow external scrapers on initial load if we already have a valid price
-    if not force and db is not None and PriceCache is not None:
+    if not force and not is_live_traded and db is not None and PriceCache is not None:
         try:
             entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
             if entry and entry.price is not None and entry.price > 0:
@@ -229,6 +284,7 @@ async def get_price_with_date(
                 return float(entry.price), entry.date
         except Exception as e:
             logger.debug(f"DB price check failed for {isin}: {e}")
+
 
     price = None
     price_date = None

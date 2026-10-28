@@ -22,6 +22,7 @@ export interface Position {
   daily_change?: number | null
   daily_change_pct?: number | null
   irr?: number | null
+  quote_time?: string | null
 }
 
 export interface UserGoal {

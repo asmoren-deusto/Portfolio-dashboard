@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { fetchLatestNavAlert, prefetchAllBrokers } from '@/api/queries'
+import { filterUnseenNavUpdates, markNavUpdatesAsSeen } from '@/lib/navAlertTracker'
 import { isNativePlatform } from '@/api/config'
 
 export function RootLayout() {
@@ -110,9 +111,12 @@ export function RootLayout() {
         const res = await fetchLatestNavAlert(lastSeen)
         if (isMounted && res.has_update && res.alert) {
           const alert = res.alert
-          const updatedCount = alert.updatedCount ?? alert.updated_count ?? 0
-          if (alert.id && alert.id !== lastSeen && updatedCount > 0) {
+          const rawItems = alert.items || []
+          const unseenItems = filterUnseenNavUpdates(rawItems)
+
+          if (alert.id && alert.id !== lastSeen && unseenItems.length > 0) {
             localStorage.setItem('portfolio_last_seen_nav_alert_id', alert.id)
+            markNavUpdatesAsSeen(unseenItems)
 
             // Re-check manual refresh timestamp right before acting
             const currentLastManual = parseInt(localStorage.getItem('portfolio_last_manual_refresh') || '0', 10)
@@ -128,14 +132,14 @@ export function RootLayout() {
               queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'active' }),
               queryClient.invalidateQueries({ queryKey: ['benchmark-comparison'], refetchType: 'active' }),
             ])
-            // Show pop-up notification only for background updates
+            // Show pop-up notification only for truly unseen background updates
             setNavAlertNotification({
               id: alert.id,
               timestamp: alert.timestamp || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-              updatedCount,
+              updatedCount: unseenItems.length,
               totalCount: alert.totalCount ?? alert.total_count ?? 0,
-              items: alert.items || [],
-              allCheckedItems: alert.allCheckedItems || alert.all_items || [],
+              items: unseenItems,
+              allCheckedItems: [],
             })
           }
         }

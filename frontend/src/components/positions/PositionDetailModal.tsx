@@ -262,13 +262,17 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                       : 'Precio Liquidativo (NAV)'}
                   </span>
                   <div className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">
-                    {fmt.price(position.current_price, cur)}
+                    {fmt.price(
+                      position.current_price,
+                      cur,
+                      position.current_price && (position.current_price * 100) % 1 !== 0 ? 3 : 2
+                    )}
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 font-medium flex items-center gap-1.5 sm:justify-center">
                     {position.asset_type === 'etc' || position.asset_type === 'etf' || position.asset_type === 'stock' || position.isin === 'IE00B4ND3602' ? (
                       <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Bolsa en directo hoy
+                        Bolsa en directo {position.quote_time ? `(${position.quote_time})` : 'hoy'}
                       </span>
                     ) : (
                       <span>

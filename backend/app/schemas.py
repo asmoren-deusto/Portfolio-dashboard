@@ -84,6 +84,7 @@ class PositionOut(BaseModel):
     domain: Optional[str] = None
     ter: Optional[float] = None
     irr: Optional[float] = None
+    quote_time: Optional[str] = None
 
 
 class UserGoalOut(BaseModel):

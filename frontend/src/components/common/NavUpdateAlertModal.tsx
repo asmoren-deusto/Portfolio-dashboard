@@ -53,12 +53,15 @@ export function NavUpdateAlertModal() {
   }, [notif, isPaused, isPinned, clearNavAlertNotification])
 
   const itemsCount = notif?.items?.length ?? 0
-  const hasUpdates = itemsCount > 0 || (notif?.updatedCount ?? 0) > 0
+  const hasUpdates = itemsCount > 0 && (notif?.updatedCount ?? 0) > 0
   const displayCount = notif?.updatedCount && notif.updatedCount > 0 ? notif.updatedCount : itemsCount
+
+  if (!notif || !hasUpdates) return null
 
   return (
     <AnimatePresence>
       {notif && (
+
         <div className="fixed top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 sm:top-6 sm:right-6 z-[99999] pointer-events-none flex flex-col items-end">
           <motion.div
             key={notif.id}

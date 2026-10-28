@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
@@ -22,6 +22,7 @@ import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
 import { fmt, cn, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
+import { initializeBaselineSeenNavs } from '@/lib/navAlertTracker'
 import { isNativePlatform } from '@/api/config'
 import { usePositions, usePortfolioSummary, useAnalytics } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
@@ -86,7 +87,15 @@ export function PositionsPage() {
     return { totalValue, totalInvested, totalPnl, totalPnlPct, gainers, losers, weightedTer }
   }, [positions, summary])
 
+  // Initialize baseline seen NAVs so opening the app doesn't trigger historic alerts
+  useEffect(() => {
+    if (positions && positions.length > 0) {
+      initializeBaselineSeenNavs(positions)
+    }
+  }, [positions])
+
   // Filter and sort
+
   const filteredPositions = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
     return [...positions]
@@ -357,7 +366,7 @@ export function PositionsPage() {
                     Coste Medio
                   </th>
                   <th className="border-b border-slate-200/90 dark:border-white/[0.05] px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Precio NAV
+                    Precio / NAV
                   </th>
                   <SortHeader field="current_value" label={isNativePlatform() ? 'Valor' : 'Valor Actual'} right />
                   <th className="border-b border-slate-200/90 dark:border-white/[0.05] px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -487,8 +496,23 @@ export function PositionsPage() {
 
                         {/* Precio actual */}
                         <td className="px-4 py-3.5 text-right tabular-nums font-mono text-slate-900 dark:text-slate-100 font-bold">
-                          <div>{fmt.currency(p.current_price)}</div>
+                          <div>
+                            {fmt.price(
+                              p.current_price,
+                              p.currency || 'EUR',
+                              p.current_price && (p.current_price * 100) % 1 !== 0 ? 3 : 2
+                            )}
+                          </div>
                           {(() => {
+                            const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602'
+                            if (isLive) {
+                              return (
+                                <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center justify-end gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  <span>{p.quote_time ? `Hoy ${p.quote_time}` : 'Tiempo real'}</span>
+                                </div>
+                              )
+                            }
                             const raw = p.price_date || p.last_updated
                             if (!raw) return null
                             const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
@@ -645,14 +669,20 @@ export function PositionsPage() {
                       <span className="text-slate-600 dark:text-slate-400 font-medium block">
                         {p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' ? 'Cotización:' : 'Precio NAV:'}
                       </span>
-                      <span className="text-slate-900 dark:text-slate-200 font-bold">{fmt.currency(p.current_price)}</span>
+                      <span className="text-slate-900 dark:text-slate-200 font-bold">
+                        {fmt.price(
+                          p.current_price,
+                          p.currency || 'EUR',
+                          p.current_price && (p.current_price * 100) % 1 !== 0 ? 3 : 2
+                        )}
+                      </span>
                       {(() => {
                         const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602'
                         if (isLive) {
                           return (
                             <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              Tiempo Real
+                              {p.quote_time ? `Hoy ${p.quote_time}` : 'Tiempo Real'}
                             </span>
                           )
                         }
