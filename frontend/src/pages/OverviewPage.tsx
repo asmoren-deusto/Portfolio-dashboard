@@ -1009,6 +1009,30 @@ export function OverviewPage() {
 
                 <motion.button
                   whileTap={{ scale: 0.96 }}
+                  onClick={() => handleSetChartStyle('heatmap')}
+                  className={cn(
+                    'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
+                    chartStyle === 'heatmap'
+                      ? 'text-slate-900 dark:text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  )}
+                  title="Matriz mensual de rendimientos netos y balance anual"
+                >
+                  {chartStyle === 'heatmap' && (
+                    <motion.div
+                      layoutId="overviewChartStylePill"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    <Calendar size={12} className={chartStyle === 'heatmap' ? 'text-rose-500' : ''} />
+                    <span>Matriz</span>
+                  </span>
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => handleSetChartStyle('lines')}
                   className={cn(
                     'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
@@ -1078,30 +1102,6 @@ export function OverviewPage() {
                   <span className="relative z-10 flex items-center gap-1.5">
                     <PieChart size={12} className={chartStyle === 'allocation' ? 'text-violet-500' : ''} />
                     <span>Reparto %</span>
-                  </span>
-                </motion.button>
-
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => handleSetChartStyle('heatmap')}
-                  className={cn(
-                    'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
-                    chartStyle === 'heatmap'
-                      ? 'text-slate-900 dark:text-white font-bold'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  )}
-                  title="Matriz mensual de rendimientos netos y balance anual"
-                >
-                  {chartStyle === 'heatmap' && (
-                    <motion.div
-                      layoutId="overviewChartStylePill"
-                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    <Calendar size={12} className={chartStyle === 'heatmap' ? 'text-rose-500' : ''} />
-                    <span>Matriz</span>
                   </span>
                 </motion.button>
               </div>
@@ -1307,9 +1307,9 @@ export function OverviewPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.2 }}
-                    className="py-0.5 w-full h-full flex flex-col justify-center"
+                    className="w-full h-full overflow-y-auto no-scrollbar py-0.5"
                   >
-                    <MonthlyReturnsHeatmap compact showStats={false} tableMaxHeight="260px" />
+                    <MonthlyReturnsHeatmap showStats={true} />
                   </motion.div>
                 )}
               </AnimatePresence>
