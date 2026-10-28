@@ -151,6 +151,23 @@ def _normalize_business_date(d_str: str) -> str:
     return d_str
 
 
+def _map_morningstar_to_indexa_date(ms_date_str: str) -> str:
+    """
+    Morningstar publishes EPSV valuations under market trade date T (e.g. Monday 26-10),
+    whereas Indexa Capital settles and dates them on the next business day T+1 (e.g. Tuesday 27-10).
+    Maps Morningstar date T to Indexa's official business date T+1 (skipping weekends and TARGET2 holidays).
+    """
+    try:
+        from app.services.market_calendar import is_market_business_day
+        dt = datetime.strptime(ms_date_str, "%Y-%m-%d").date()
+        cand = dt + timedelta(days=1)
+        while not is_market_business_day(cand):
+            cand += timedelta(days=1)
+        return cand.strftime("%Y-%m-%d")
+    except Exception:
+        return ms_date_str
+
+
 async def _fetch_boerse_frankfurt_price(isin: str) -> tuple[Optional[float], Optional[str], Optional[str]]:
     """
     Fetch real-time trade price, date, and local quote time from Börse Frankfurt JSON API.
@@ -291,35 +308,63 @@ async def get_price_with_date(
 
     # Check if this is an Indexa EPSV (e.g. 0192#0011)
     if isin.startswith("0192") or isin == "0192#0011":
-        # 1. Primary: Official Indexa Capital feed — directly matches the investor's Indexa account and settlement dates
-        idx_res = await _with_timeout(_fetch_indexa_epsv_official(isin, db=db))
-        if isinstance(idx_res, tuple) and idx_res[0] and idx_res[0] > 0:
-            price, price_date = idx_res
+        # Indexa EPSV dual-source strategy:
+        # Morningstar (0P0001FTQ7.F) publishes the NAV early in the morning under market trade date T.
+        # Indexa Capital publishes the official CSV later (around midday) under settlement date T+1.
+        # By mapping Morningstar's date T -> T+1 (skipping weekends/holidays), we can anticipate
+        # the official Indexa valuation hours before Indexa uploads its CSV, with 100% correct dating!
+        y_ticker = KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
 
-        # 2. Fallback: Morningstar series via Yahoo (0P0001FTQ7.F) if Indexa site was unreachable
-        if price is None:
-            y_ticker = KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
-            hist = await _with_timeout(asyncio.to_thread(_sync_fetch_yahoo_history, y_ticker, "1mo"))
-            if isinstance(hist, list) and hist:
-                hist = [h for h in hist if h.get("price") and h["price"] > 0]
-            if isinstance(hist, list) and hist:
-                price, price_date = round(hist[-1]["price"], 4), hist[-1]["date"]
-                if db is not None and PriceCache is not None:
-                    try:
-                        for h in hist[-15:]:
-                            p_val = round(h["price"], 4)
-                            row = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == h["date"]).first()
-                            if row:
-                                if abs(row.price - p_val) > 0.0005:
-                                    row.price, row.source = p_val, "morningstar"
-                            else:
-                                db.add(PriceCache(isin=isin, date=h["date"], price=p_val, currency="EUR", source="morningstar"))
-                        db.commit()
-                    except Exception as e:
-                        logger.warning(f"Error persisting Indexa Morningstar history: {e}")
-                        db.rollback()
+        # Query Indexa CSV and Morningstar concurrently
+        idx_res, ms_res = await asyncio.gather(
+            _with_timeout(_fetch_indexa_epsv_official(isin, db=db)),
+            _with_timeout(_fetch_yahoo_price(y_ticker)),
+            return_exceptions=True,
+        )
 
-        # 3. Check if database PriceCache has a newer confirmed NAV
+        idx_price, idx_date = (idx_res if isinstance(idx_res, tuple) and len(idx_res) == 2 else (None, None))
+        ms_price, ms_date = (ms_res if isinstance(ms_res, tuple) and len(ms_res) == 2 else (None, None))
+
+        # If Yahoo price didn't return a date, try recent history points
+        if (ms_price is None or ms_date is None) and y_ticker:
+            try:
+                hist = await _with_timeout(asyncio.to_thread(_sync_fetch_yahoo_history, y_ticker, "5d"))
+                if isinstance(hist, list) and hist:
+                    valid_h = [h for h in hist if h.get("price") and h["price"] > 0]
+                    if valid_h:
+                        ms_price, ms_date = round(valid_h[-1]["price"], 4), valid_h[-1]["date"]
+            except Exception:
+                pass
+
+        # Map Morningstar date T -> T+1 business day (Indexa settlement date)
+        ms_mapped_date = _map_morningstar_to_indexa_date(ms_date) if ms_date else None
+
+        # Compare dates:
+        # If Morningstar has published a new session that Indexa CSV hasn't uploaded yet:
+        if ms_price and ms_price > 0 and ms_mapped_date and (not idx_date or ms_mapped_date > idx_date):
+            price = round(ms_price, 4)
+            price_date = ms_mapped_date
+            logger.info(f"Indexa EPSV: Anticipating NAV via Morningstar: {price} on {price_date} (ahead of Indexa CSV {idx_date})")
+            if db is not None and PriceCache is not None:
+                try:
+                    row = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == price_date).first()
+                    if row:
+                        row.price = price
+                        row.source = "morningstar_early"
+                    else:
+                        db.add(PriceCache(isin=isin, date=price_date, price=price, currency="EUR", source="morningstar_early"))
+                    db.commit()
+                except Exception as e:
+                    logger.warning(f"Error persisting early Morningstar quote for Indexa: {e}")
+                    db.rollback()
+        elif idx_price and idx_price > 0:
+            price = idx_price
+            price_date = idx_date
+        elif ms_price and ms_price > 0:
+            price = round(ms_price, 4)
+            price_date = ms_mapped_date or ms_date
+
+        # Check if database PriceCache has a newer confirmed NAV
         if db is not None and PriceCache is not None:
             try:
                 db_entry = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
@@ -329,13 +374,6 @@ async def get_price_with_date(
                         price_date = db_entry.date
             except Exception:
                 pass
-
-        # 4. Fallback: Live Yahoo Finance / Morningstar quote if Indexa site was unreachable
-        if price is None:
-            y_ticker = ticker or KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
-            y_price, y_date = await _fetch_yahoo_price(y_ticker)
-            if y_price and y_price > 0:
-                price, price_date = round(y_price, 4), y_date
 
 
     # For other non-standard ISINs (e.g. Kutxabank 0201G), look up DB PriceCache
@@ -629,9 +667,8 @@ async def _fetch_indexa_epsv_history(isin: str, period: str = "1y", db=None) -> 
                     except ValueError:
                         continue
             history = [{"date": d, "price": p} for d, p in sorted(by_date.items())]
-            # Trailing row is often a placeholder copy of the previous NAV (not yet published)
-            if len(history) >= 2 and history[-1]["price"] == history[-2]["price"]:
-                history.pop()
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            history = [h for h in history if h["date"] <= today_str]
             return history
     except Exception as e:
         logger.warning(f"Error fetching Indexa EPSV history: {e}")
@@ -1312,14 +1349,41 @@ async def get_price_history(
         _history_cache[cache_key] = (datetime.now(), res)
         return res
 
-    # 0. If it's an Indexa EPSV, query Yahoo Finance (Morningstar Frankfurt feed 0P0001FTQ7.F) first
+    # 0. If it's an Indexa EPSV, query Indexa official CSV first, with fallback to Morningstar mapped to D+1
     if isin.startswith("0192") or isin == "0192#0011":
+        # 1. Primary: Indexa Capital official EPSV dataset (true ledger since 2018)
+        indexa_hist = await _fetch_indexa_epsv_history(isin, period=period)
+        if indexa_hist:
+            try:
+                from app.database import SessionLocal
+                from app.models import PriceCache
+                db_s = SessionLocal()
+                recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                existing_dates = {h["date"]: idx for idx, h in enumerate(indexa_hist)}
+                for rp in recent_prices:
+                    if rp.price is not None and rp.price > 0:
+                        if rp.date in existing_dates:
+                            indexa_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                        else:
+                            indexa_hist.append({"date": rp.date, "price": round(rp.price, 4)})
+                indexa_hist.sort(key=lambda x: x["date"])
+                db_s.close()
+            except Exception:
+                pass
+            _history_cache[cache_key] = (datetime.now(), indexa_hist)
+            return indexa_hist
+
+        # 2. Fallback: Morningstar series via Yahoo, mapping trade date T -> settlement date T+1
         y_ticker = ticker or KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
         try:
             yf_period = "max" if period in ["max", "all", "5y"] else "2y"
             raw_hist = await asyncio.to_thread(_sync_fetch_yahoo_history, y_ticker, yf_period)
             if raw_hist:
-                res = raw_hist
+                res = []
+                for h in raw_hist:
+                    if h.get("price") and h["price"] > 0:
+                        mapped_d = _map_morningstar_to_indexa_date(h["date"])
+                        res.append({"date": mapped_d, "price": round(h["price"], 4)})
                 # Merge any newer points from DB PriceCache
                 try:
                     from app.database import SessionLocal
@@ -1328,10 +1392,11 @@ async def get_price_history(
                     recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
                     existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
                     for rp in recent_prices:
-                        if rp.date in existing_dates:
-                            res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                        else:
-                            res.append({"date": rp.date, "price": round(rp.price, 4)})
+                        if rp.price is not None and rp.price > 0:
+                            if rp.date in existing_dates:
+                                res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                            else:
+                                res.append({"date": rp.date, "price": round(rp.price, 4)})
                     res.sort(key=lambda x: x["date"])
                     db_s.close()
                 except Exception:
@@ -1345,27 +1410,6 @@ async def get_price_history(
                 return res
         except Exception as e:
             logger.debug(f"Yahoo history error for Indexa {y_ticker}: {e}")
-
-        # Fallback to Indexa Capital website dataset
-        indexa_hist = await _fetch_indexa_epsv_history(isin, period=period)
-        if indexa_hist:
-            try:
-                from app.database import SessionLocal
-                from app.models import PriceCache
-                db_s = SessionLocal()
-                recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
-                existing_dates = {h["date"]: idx for idx, h in enumerate(indexa_hist)}
-                for rp in recent_prices:
-                    if rp.date in existing_dates:
-                        indexa_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                    else:
-                        indexa_hist.append({"date": rp.date, "price": round(rp.price, 4)})
-                indexa_hist.sort(key=lambda x: x["date"])
-                db_s.close()
-            except Exception:
-                pass
-            _history_cache[cache_key] = (datetime.now(), indexa_hist)
-            return indexa_hist
 
     # 0b. If it's Azvalor, fetch official daily history directly from Azvalor official client portal
     if isin.startswith("ES011261"):
