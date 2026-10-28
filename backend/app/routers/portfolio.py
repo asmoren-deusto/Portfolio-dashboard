@@ -393,15 +393,18 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
                 "older_date": c_list[1].date if len(c_list) > 1 else None,
             }
 
+    sem = asyncio.Semaphore(6)
+
     async def _fetch_one(isin, pos):
         asset = _get_asset(db, isin)
         ticker = asset.ticker if asset else None
-        p, p_date = await get_price_with_date(isin, ticker, db=db, force=True)
+        async with sem:
+            p, p_date = await get_price_with_date(isin, ticker, db=db, force=True)
         prev = prev_prices.get(isin, {})
         prev_p = prev.get("price")
         prev_d = prev.get("date")
 
-        eff_ticker = ticker or KNOWN_TICKERS.get(isin)
+        eff_ticker = KNOWN_TICKERS.get(isin) or ticker
         is_live_asset = bool(
             eff_ticker
             and not eff_ticker.startswith("0P000")
@@ -461,6 +464,7 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
             "previous_price": ref_p,
             "previous_date": ref_d,
             "is_updated": is_updated,
+            "is_live": is_live_asset,
             "diff": diff,
             "diff_pct": diff_pct,
         }
@@ -475,12 +479,13 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
             isin_key, data = res
             results[isin_key] = data
             all_items.append(data)
-            if data.get("is_updated"):
+            # Live-traded assets (ETC/ETF) tick continuously: they are refreshed via polling,
+            # not announced as "new NAV published" notifications.
+            if data.get("is_updated") and not data.get("is_live"):
                 updated_items.append(data)
 
-    logger.info(f"Refreshed prices for {len(results)} assets: {len(updated_items)} updated")
-    if len(updated_items) > 0:
-        clear_portfolio_caches()
+    logger.info(f"Refreshed prices for {len(results)} assets: {len(updated_items)} new NAVs")
+    clear_portfolio_caches()
     res_payload = {
         "status": "ok",
         "updated_at": datetime.now().isoformat(),
@@ -491,10 +496,11 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
         "all_items": all_items,
     }
 
+    new_alert = None
     if len(updated_items) > 0:
         import time
         now_ts = time.time()
-        _latest_nav_alert = {
+        new_alert = {
             "id": f"nav_{int(now_ts*1000)}",
             "created_at_ts": now_ts,
             "timestamp": datetime.now().strftime("%H:%M"),
@@ -503,11 +509,11 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
             "items": updated_items,
             "allCheckedItems": all_items,
         }
-    else:
-        _latest_nav_alert = None
+        # Keep the previous alert otherwise, so a quiet scan never erases an unseen notification
+        _latest_nav_alert = new_alert
 
-    res_payload["alert"] = _latest_nav_alert
-    res_payload["alert_id"] = _latest_nav_alert.get("id") if _latest_nav_alert else None
+    res_payload["alert"] = new_alert
+    res_payload["alert_id"] = new_alert.get("id") if new_alert else None
     return res_payload
 
 

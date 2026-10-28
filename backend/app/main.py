@@ -124,12 +124,12 @@ async def startup():
                 await check_portfolio_navs(user_id="asier", db=db)
                 db.close()
 
-                # Intelligent interval: Funds publish NAVs weekdays 18:00-23:59 CET.
+                # Intelligent interval: funds publish NAVs on business days mostly 16:00-24:00 CET,
+                # with late publishers (BlackRock, Fidelity IE...) catching up the next morning 07:00-12:00.
                 now = datetime.now()
                 is_weekday = now.weekday() < 5
-                is_evening = 18 <= now.hour <= 23
-                # 15 minutes (900s) during publication window, 30 minutes (1800s) off-hours
-                sleep_sec = 900 if (is_weekday and is_evening) else 1800
+                in_window = (7 <= now.hour < 12) or (16 <= now.hour <= 23)
+                sleep_sec = 600 if (is_weekday and in_window) else 1800
             except asyncio.CancelledError:
                 break
             except Exception as e:

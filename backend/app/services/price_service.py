@@ -34,6 +34,13 @@ except ImportError:
 # Simple in-memory cache: {isin: {"price": float, "date": Optional[str], "ts": datetime}}
 _price_cache: dict = {}
 CACHE_TTL_MINUTES = 15
+# Per-source timeout (seconds) so one slow/blocked website never stalls a refresh
+SOURCE_TIMEOUT_SEC = 12
+# Minimum gap between two forced external scrapes of the same fund
+SCRAPE_THROTTLE_SEC = 300
+# Max plausible daily move for a mutual fund NAV vs last known NAV (rejects bad scrapes)
+MAX_NAV_JUMP = 0.15
+_last_scrape: dict[str, datetime] = {}
 
 
 def _is_cache_valid(isin: str, ttl_minutes: int = CACHE_TTL_MINUTES) -> bool:
@@ -41,6 +48,41 @@ def _is_cache_valid(isin: str, ttl_minutes: int = CACHE_TTL_MINUTES) -> bool:
         return False
     age = datetime.now() - _price_cache[isin]["ts"]
     return age.total_seconds() < ttl_minutes * 60
+
+
+def is_nav_current(latest_date: Optional[str]) -> bool:
+    """
+    True when `latest_date` is already the newest NAV that can possibly be published right now,
+    so scraping external sources again would be pointless.
+      - NAV dated today            -> current.
+      - NAV older than T-1          -> stale (must scrape).
+      - NAV == T-1 (expected date)  -> current until 17:00 on business days, when same-day NAVs
+                                       (dated T) may start being published.
+    """
+    if not latest_date:
+        return False
+    from datetime import date as _date
+    from app.services.market_calendar import get_expected_nav_date, is_market_business_day
+    today = _date.today()
+    if latest_date >= today.strftime("%Y-%m-%d"):
+        return True
+    if latest_date < get_expected_nav_date(today):
+        return False
+    if not is_market_business_day(today):
+        return True
+    return datetime.now().hour < 17
+
+
+def _recently_scraped(isin: str) -> bool:
+    ts = _last_scrape.get(isin)
+    return bool(ts and (datetime.now() - ts).total_seconds() < SCRAPE_THROTTLE_SEC)
+
+
+async def _with_timeout(coro, seconds: int = SOURCE_TIMEOUT_SEC):
+    try:
+        return await asyncio.wait_for(coro, timeout=seconds)
+    except Exception as e:
+        return e
 
 
 def preload_price_cache_from_db():
@@ -161,6 +203,19 @@ async def get_price_with_date(
                     db.rollback()
             return price, price_date
 
+    # Smart force: if the DB already holds the newest NAV that can exist right now (or we scraped
+    # this fund a few minutes ago), skip the slow multi-site scrape and serve the DB value.
+    if force and db is not None and PriceCache is not None:
+        try:
+            latest = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.price > 0).order_by(PriceCache.date.desc()).first()
+            if latest and (is_nav_current(latest.date) or _recently_scraped(isin)):
+                _price_cache[isin] = {"price": float(latest.price), "date": latest.date, "ts": datetime.now()}
+                return float(latest.price), latest.date
+        except Exception as e:
+            logger.debug(f"NAV freshness check failed for {isin}: {e}")
+    if force:
+        _last_scrape[isin] = datetime.now()
+
     if not force and _is_cache_valid(isin):
         return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
@@ -242,7 +297,17 @@ async def get_price_with_date(
             tasks.append(_fetch_yahoo_price(ticker))
             task_names.append("yahoo")
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = await asyncio.gather(*[_with_timeout(t) for t in tasks], return_exceptions=True)
+
+        # Reference NAV for sanity validation of scraped values
+        ref_price = None
+        if db is not None and PriceCache is not None:
+            try:
+                ref_row = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.price > 0).order_by(PriceCache.date.desc()).first()
+                ref_price = float(ref_row.price) if ref_row else None
+            except Exception:
+                ref_price = None
+        today_str = datetime.now().strftime("%Y-%m-%d")
 
         # Candidates with (date, decimal_precision_priority, price, source)
         # Date is strictly priority #1: freshest/most recent liquidation date always wins immediately!
@@ -251,6 +316,12 @@ async def get_price_with_date(
             if isinstance(res, tuple) and len(res) == 2:
                 r_price, r_date = res
                 if r_price is not None and r_date:
+                    # Validation: no future dates, no absurd jumps vs last known NAV
+                    if r_date > today_str or r_price <= 0:
+                        continue
+                    if ref_price and abs(r_price - ref_price) / ref_price > MAX_NAV_JUMP:
+                        logger.warning(f"Rejected implausible NAV {r_price} ({r_date}) for {isin} from {task_names[i]} (ref {ref_price})")
+                        continue
                     name = task_names[i]
                     prec = 7 if name in ("azvalor", "cobas", "blackrock", "ft") else (6 if name == "quefondos" else (5 if name == "finect" else (4 if name == "yahoo" else (3 if name == "investing" else 2))))
                     candidates.append((r_date, prec, r_price, name))
