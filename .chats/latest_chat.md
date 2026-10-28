@@ -1,7 +1,7 @@
 # Historial de Chat - Sesión Antigravity
-- **Fecha de exportación:** 2026-10-28 13:10:10
+- **Fecha de exportación:** 2026-10-28 14:19:01
 - **ID de Conversación:** `991484f1-8900-44cc-a185-e89a30a22c4d`
-- **Total de interacciones registradas:** 181
+- **Total de interacciones registradas:** 185
 
 > [!NOTE]
 > Este archivo fue exportado automáticamente para preservar el contexto entre diferentes PCs.
@@ -3646,5 +3646,68 @@ Por tanto, Indexa acaba de hacer público el dato oficial del **27 de octubre**,
 ### 👤 Usuario (2026-10-28 12:00:49)
 
 y sabiendo que morningstar lo publica antes (aunque con el dia incorrecto) no podemos ajustar esto para tener el dato antes pero con la fecha bien puesta?
+
+---
+
+### 🤖 Asistente (2026-10-28 12:10:13)
+
+**Sí, exactamente eso es lo que acabamos de implementar.**
+
+### ¿Por qué ocurría el desfase?
+1. **Morningstar** (`0P0001FTQ7.F`) publica el NAV temprano por la mañana (08:30–09:30), pero lo etiqueta con la fecha de la sesión bursátil de mercado $T$ (ej. lunes 26).
+2. **Indexa Capital** liquida y etiqueta sus planes de pensiones y EPSVs con la fecha valor de liquidación $T+1$ (ej. martes 27). Su fichero oficial CSV se publica hacia mediodía.
+
+### Cómo lo hemos ajustado
+Hemos implementado en [price_service.py](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L154-L175) y [get_price_with_date](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L310-L365) una estrategia de **doble fuente con mapeo de calendario bursátil ($T \to T+1$)**:
+
+1. **Mapeo automático a día hábil siguiente (`_map_morningstar_to_indexa_date`)**:
+   - Viernes $\to$ Lunes (+3 días, saltando el fin de semana).
+   - Lunes a Jueves $\to$ Día siguiente (+1 día, considerando festivos TARGET2).
+   
+2. **Detección y anticipación matinal**:
+   - Por la mañana, si Morningstar ya tiene el nuevo NAV de la sesión anterior (etiquetado como $T$), el sistema lo proyecta a $T+1$.
+   - Al comparar con el CSV de Indexa (que a esa hora aún está en la fecha anterior), el sistema detecta que la fecha mapeada de Morningstar es más reciente ($T+1 > T$).
+   - **Resultado:** La app toma inmediatamente el valor de Morningstar, pero **con la fecha correcta ($T+1$)**, horas antes de que Indexa suba su CSV.
+
+3. **Consistencia total sin duplicados**:
+   - Cuando Indexa publica su CSV a mediodía con fecha $T+1$, tanto el valor como la fecha coinciden al céntimo con lo que la app ya tenía guardado.
+   - En el histórico ([get_price_history](file:///c:/Users/AsierM/Documents/GitHub/Portfolio-dashboard/backend/app/services/price_service.py#L1352-L1410)), el dataset oficial de Indexa se mantiene como la serie principal completa desde 2018, y si entra una sesión matinal de Morningstar, se enlaza sin desfase de días.
+
+Todo está probado y desplegado en la versión **v3.5.1**.
+
+---
+
+### 👤 Usuario (2026-10-28 12:03:04)
+
+el bono de españa lo actualizas?
+
+---
+
+### 🤖 Asistente (2026-10-28 12:14:38)
+
+Actualmente **no se estaba actualizando**: se mantenía fijo con el precio de compra del 26 de octubre (`1,12806 €` / `4.000,99 €`), porque las fuentes habituales de fondos de inversión no cotizan deuda pública española directa.
+
+Sin embargo, **sí podemos actualizarlo automáticamente en vivo**:
+
+### 1. Fuente en tiempo real
+**Börse Frankfurt** (la bolsa alemana donde cotiza la deuda pública de la UE) ofrece cotización directa para este bono ([ES0000012411](https://api.boerse-frankfurt.de/v1/data/quote_box/single?isin=ES0000012411), *España Gobierno 5,75% 2032*):
+- **Cotización limpia (Clean Price) ahora mismo**: `111,025%` *(Bid: 111,055% / Ask: 111,11%)*.
+- **Último cruce**: Hoy a las 12:20 / 13:20.
+
+### 2. Cómo se traduce a tu cartera (Trade Republic)
+Al haberlo adquirido en Trade Republic con un nominal de `3.546,79 €`:
+- **Cotización de mercado**: `111,025%` $\to$ `1,11025 €` por euro nominal (`3.937,82 €`).
+- **Cupón corrido devengado**: $5,75\%$ anual desde el 30 de julio $\to$ `+50,30 €` (`+0,01418 €` por nominal).
+- **Precio sucio total (Dirty Price)**: `1,12443 €` $\to$ Valor de mercado actual: **`3.988,11 €`** *(refleja con precisión la ligera variación de cotización del bono desde la compra: de 111,36% a 111,025%, con una plusvalía latente de -12,88 €)*.
+
+---
+
+¿Quieres que lo dejemos conectado a Börse Frankfurt para que se actualice en tiempo real (mostrando hora de cotización y punto verde 🟢 como el oro)?
+
+---
+
+### 👤 Usuario (2026-10-28 13:15:18)
+
+no, deja su valor de compra en 4000 fijo pero actualiza siempre la fecha
 
 ---

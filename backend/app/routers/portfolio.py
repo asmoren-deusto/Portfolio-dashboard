@@ -444,6 +444,9 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
                 elif p_date and prev_d and p_date == prev_d and prev_p and abs(p - prev_p) > 0.0001:
                     is_updated = True
 
+            if isin in ("ES0000012411", "TR_TRANSFER") or isin.startswith("TR_"):
+                is_updated = False
+
             # Base reference for diff
             if is_updated:
                 if p_date and prev_d and p_date > prev_d:

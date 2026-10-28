@@ -223,6 +223,21 @@ async def get_price_with_date(
         _price_cache[isin] = {"price": 0.0, "date": datetime.now().strftime("%Y-%m-%d"), "ts": datetime.now()}
         return 0.0, datetime.now().strftime("%Y-%m-%d")
 
+    if isin == "ES0000012411":
+        # Spanish Government Bond 5.75% 2032 (Trade Republic): fixed purchase value (4000.99 EUR) with current date
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        fixed_price = 1.12806
+        _price_cache[isin] = {"price": fixed_price, "date": today_str, "ts": datetime.now()}
+        if db is not None and PriceCache is not None:
+            try:
+                row = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == today_str).first()
+                if not row:
+                    db.add(PriceCache(isin=isin, date=today_str, price=fixed_price, currency="EUR", source="purchase_fixed"))
+                    db.commit()
+            except Exception:
+                db.rollback()
+        return fixed_price, today_str
+
     ticker = KNOWN_TICKERS.get(isin) or ticker
 
     # For live exchange-traded assets (ETCs, ETFs, equities, e.g. PPFB.DE), quotes fluctuate in real time
@@ -1345,6 +1360,16 @@ async def get_price_history(
             {"date": "2026-01-01", "price": 0.0},
             {"date": "2026-01-15", "price": 0.0},
             {"date": datetime.now().strftime("%Y-%m-%d"), "price": 0.0},
+        ]
+        _history_cache[cache_key] = (datetime.now(), res)
+        return res
+
+    if isin == "ES0000012411":
+        fixed_price = 1.12806
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        res = [
+            {"date": "2026-10-26", "price": fixed_price},
+            {"date": today_str, "price": fixed_price},
         ]
         _history_cache[cache_key] = (datetime.now(), res)
         return res
