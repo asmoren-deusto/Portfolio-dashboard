@@ -161,9 +161,9 @@ export function usePortfolioSummary() {
         : get<PortfolioSummary>(`/portfolio/summary${brokerQuery}`),
     initialData: isDemo ? userSummary : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 20, // 20 seconds
     refetchOnMount: true,
-    refetchInterval: 1000 * 60 * 2, // Keep fresh every 2 mins
+    refetchInterval: 1000 * 45, // Keep fresh every 45s (responsive live ETC/stock ticks)
     refetchIntervalInBackground: false,
   })
 }
@@ -185,9 +185,9 @@ export function usePositions() {
         : get<Position[]>(`/portfolio/positions${brokerQuery}`),
     initialData: isDemo ? userPositions : undefined,
     placeholderData: keepSameUser(currentUser?.id),
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 20, // 20 seconds
     refetchOnMount: true,
-    refetchInterval: 1000 * 60 * 2, // Keep fresh every 2 mins
+    refetchInterval: 1000 * 45, // Keep fresh every 45s (responsive live ETC/stock ticks)
     refetchIntervalInBackground: false,
   })
 }

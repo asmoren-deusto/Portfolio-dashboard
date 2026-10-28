@@ -181,7 +181,8 @@ async def get_price_with_date(
         and isin != "ES0000012411"
     )
     if is_live_traded:
-        if not force and _is_cache_valid(isin, ttl_minutes=2):
+        # Live exchange-traded assets (e.g. PPFB.DE / Gold ETC): short 30-second cache TTL for responsive intraday ticks
+        if not force and _is_cache_valid(isin, ttl_minutes=0.5):
             return _price_cache[isin]["price"], _price_cache[isin].get("date")
 
         y_price, y_date = await _fetch_yahoo_price(ticker)
@@ -234,10 +235,33 @@ async def get_price_with_date(
 
     # Check if this is an Indexa EPSV (e.g. 0192#0011)
     if isin.startswith("0192") or isin == "0192#0011":
-        # 1. First priority: Check official Indexa website dataset (exact official daily NAV)
-        idx_price, idx_date = await _fetch_indexa_epsv_official(isin, db=db)
-        if idx_price and idx_price > 0:
-            price, price_date = idx_price, idx_date
+        # 1. Primary: Morningstar series via Yahoo (0P0001FTQ7.F) — correctly dated daily NAVs.
+        #    NOTE: Indexa's own CSV stamps each value one business day late (e.g. its "26-10"
+        #    row holds the 23-10 NAV), so it is only used as fallback.
+        y_ticker = KNOWN_TICKERS.get(isin) or "0P0001FTQ7.F"
+        hist = await _with_timeout(asyncio.to_thread(_sync_fetch_yahoo_history, y_ticker, "1mo"))
+        if isinstance(hist, list) and hist:
+            hist = [h for h in hist if h.get("price") and h["price"] > 0]
+        if isinstance(hist, list) and hist:
+            price, price_date = round(hist[-1]["price"], 4), hist[-1]["date"]
+            if db is not None and PriceCache is not None:
+                try:
+                    for h in hist[-15:]:
+                        p_val = round(h["price"], 4)
+                        row = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == h["date"]).first()
+                        if row:
+                            if abs(row.price - p_val) > 0.0005:
+                                row.price, row.source = p_val, "morningstar"
+                        else:
+                            db.add(PriceCache(isin=isin, date=h["date"], price=p_val, currency="EUR", source="morningstar"))
+                    db.commit()
+                except Exception as e:
+                    logger.warning(f"Error persisting Indexa Morningstar history: {e}")
+                    db.rollback()
+        else:
+            idx_res = await _with_timeout(_fetch_indexa_epsv_official(isin, db=db))
+            if isinstance(idx_res, tuple) and idx_res[0] and idx_res[0] > 0:
+                price, price_date = idx_res
 
         # 2. Check if database PriceCache has a newer confirmed NAV
         if db is not None and PriceCache is not None:
@@ -535,24 +559,23 @@ async def _fetch_indexa_epsv_history(isin: str, period: str = "1y", db=None) -> 
             elif period == "ytd":
                 cutoff_date = f"{now.year}-01-01"
 
-            history = []
+            by_date: dict[str, float] = {}
             for r in reader:
                 if r and len(r) > col_idx and r[0].strip() and r[col_idx].strip():
-                    d_str = r[0].strip()
-                    try:
-                        if datetime.strptime(d_str, "%Y-%m-%d").date().weekday() >= 5:
-                            continue
-                    except ValueError:
-                        pass
+                    d_str = _normalize_business_date(r[0].strip())  # weekend rows hold the real Friday NAV
                     if cutoff_date and d_str < cutoff_date:
                         continue
                     val_str = r[col_idx].strip().replace(',', '.')
                     try:
                         raw_val = float(val_str)
                         if raw_val > 0:
-                            history.append({"date": d_str, "price": round(raw_val / 10.0, 4)})
+                            by_date[d_str] = round(raw_val / 10.0, 4)  # later rows override
                     except ValueError:
                         continue
+            history = [{"date": d, "price": p} for d, p in sorted(by_date.items())]
+            # Trailing row is often a placeholder copy of the previous NAV (not yet published)
+            if len(history) >= 2 and history[-1]["price"] == history[-2]["price"]:
+                history.pop()
             return history
     except Exception as e:
         logger.warning(f"Error fetching Indexa EPSV history: {e}")

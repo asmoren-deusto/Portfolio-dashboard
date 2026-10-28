@@ -10,6 +10,7 @@ export function useRefreshPortfolio() {
     isRefreshingPrices,
     setIsRefreshingPrices,
     triggerRefreshAnimation,
+    setNavAlertNotification,
   } = useAppStore()
   const queryClient = useQueryClient()
   const [refreshSuccess, setRefreshSuccess] = useState(false)
@@ -69,6 +70,22 @@ export function useRefreshPortfolio() {
         localStorage.setItem('portfolio_last_manual_refresh', String(nowTs))
       } catch {}
 
+      // Present instant visible outcome of the manual refresh to the user
+      if (refreshResult) {
+        const updatedCount = refreshResult.updated_count ?? refreshResult.updatedCount ?? 0
+        const items = refreshResult.updated_items || refreshResult.items || []
+        const allItems = refreshResult.all_items || refreshResult.allCheckedItems || []
+
+        setNavAlertNotification({
+          id: alertId,
+          timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+          updatedCount,
+          totalCount: refreshResult.count ?? (allItems.length || 9),
+          items: updatedCount > 0 ? items : allItems.slice(0, 5),
+          allCheckedItems: allItems,
+        })
+      }
+
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['summary'], refetchType: 'active' }),
         queryClient.invalidateQueries({ queryKey: ['positions'], refetchType: 'active' }),
@@ -95,7 +112,7 @@ export function useRefreshPortfolio() {
     } finally {
       setIsRefreshingPrices(false)
     }
-  }, [currentUser, period, isRefreshingPrices, queryClient, setIsRefreshingPrices, triggerRefreshAnimation])
+  }, [currentUser, period, isRefreshingPrices, queryClient, setIsRefreshingPrices, triggerRefreshAnimation, setNavAlertNotification])
 
   return { handleRefresh, isRefreshingPrices, refreshSuccess }
 }

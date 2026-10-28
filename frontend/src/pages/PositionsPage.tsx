@@ -428,19 +428,38 @@ export function PositionsPage() {
                                   </>
                                 )}
                                 <BrokerBadge broker={p.broker} className="ml-1" />
-                                {(p.price_date || p.last_updated) && (
-                                  <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-[10.5px] text-slate-500 dark:text-slate-400 font-mono ml-1">
+                                {(() => {
+                                  const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602'
+                                  if (isLive) {
+                                    return (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10.5px] font-semibold ml-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        Tiempo Real
+                                      </span>
+                                    )
+                                  }
+                                  if (!p.price_date && !p.last_updated) return null
+                                  return (
                                     <span
                                       className={cn(
-                                        'w-1.5 h-1.5 rounded-full',
-                                        Math.floor((Date.now() - new Date(p.price_date || p.last_updated!).getTime()) / 86400000) <= 3
-                                          ? 'bg-emerald-500'
-                                          : 'bg-amber-500'
+                                        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] font-mono ml-1",
+                                        isUpdated
+                                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
+                                          : "bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/[0.06]"
                                       )}
-                                    />
-                                    NAV {new Date(p.price_date || p.last_updated!).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
-                                  </span>
-                                )}
+                                      title={isUpdated ? "Valor liquidativo al día con el último cierre de mercado" : "Pendiente de publicación del nuevo valor liquidativo por la gestora"}
+                                    >
+                                      <span
+                                        className={cn(
+                                          "w-1.5 h-1.5 rounded-full",
+                                          isUpdated ? "bg-emerald-500" : "bg-amber-500"
+                                        )}
+                                      />
+                                      NAV {new Date(p.price_date || p.last_updated!).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                                      {isUpdated ? " · Al día" : " · Pendiente"}
+                                    </span>
+                                  )
+                                })()}
                                 {p.asset_type === 'epsv' && (
                                   <span data-private className="ml-1 px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-violet-100/90 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
                                     DCA 416,66 €/mes (día 7)
@@ -623,13 +642,31 @@ export function PositionsPage() {
                       <span data-private className="text-slate-900 dark:text-slate-200 font-bold">{fmt.num(p.shares)}</span>
                     </div>
                     <div>
-                      <span className="text-slate-600 dark:text-slate-400 font-medium block">Precio NAV:</span>
+                      <span className="text-slate-600 dark:text-slate-400 font-medium block">
+                        {p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' ? 'Cotización:' : 'Precio NAV:'}
+                      </span>
                       <span className="text-slate-900 dark:text-slate-200 font-bold">{fmt.currency(p.current_price)}</span>
                       {(() => {
+                        const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602'
+                        if (isLive) {
+                          return (
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Tiempo Real
+                            </span>
+                          )
+                        }
                         const raw = p.price_date || p.last_updated
                         if (!raw) return null
                         const dateOnly = raw.includes('T') ? raw.split('T')[0] : raw
-                        return <span className="text-[11.5px] text-slate-500 dark:text-slate-400 block font-medium">({dateOnly})</span>
+                        return (
+                          <span className={cn(
+                            "text-[11px] block font-medium mt-0.5",
+                            isUpdated ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"
+                          )}>
+                            ({dateOnly}{isUpdated ? ' · Al día' : ' · Pendiente'})
+                          </span>
+                        )
                       })()}
                     </div>
                     <div>

@@ -257,16 +257,24 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                 {/* Precio Liquidativo */}
                 <div className="sm:text-center">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5">
-                    Precio Liquidativo
+                    {position.asset_type === 'etc' || position.asset_type === 'etf' || position.asset_type === 'stock' || position.isin === 'IE00B4ND3602'
+                      ? 'Cotización en Directo'
+                      : 'Precio Liquidativo (NAV)'}
                   </span>
                   <div className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">
                     {fmt.price(position.current_price, cur)}
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 font-medium">
-                    Coste medio:{' '}
-                    <span data-private className="text-slate-800 dark:text-slate-200 font-bold">
-                      {fmt.currency(position.avg_cost)}
-                    </span>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 font-medium flex items-center gap-1.5 sm:justify-center">
+                    {position.asset_type === 'etc' || position.asset_type === 'etf' || position.asset_type === 'stock' || position.isin === 'IE00B4ND3602' ? (
+                      <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Bolsa en directo hoy
+                      </span>
+                    ) : (
+                      <span>
+                        NAV al {new Date(position.price_date || position.last_updated || Date.now()).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      </span>
+                    )}
                   </div>
                 </div>
 
