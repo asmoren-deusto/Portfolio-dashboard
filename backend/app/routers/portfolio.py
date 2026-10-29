@@ -695,12 +695,12 @@ async def get_performance(
             latest_date = curr_p_date or datetime.now().strftime("%Y-%m-%d")
             if curr_p is not None and curr_p >= 0:
                 if history[-1]["date"] == latest_date:
-                    history[-1]["price"] = round(curr_p, 4)
+                    history[-1]["price"] = round(curr_p, 6)
                 elif history[-1]["date"] < latest_date:
-                    history.append({"date": latest_date, "price": round(curr_p, 4)})
+                    history.append({"date": latest_date, "price": round(curr_p, 6)})
             price_history[isin] = history
         elif curr_p is not None and curr_p >= 0:
-            price_history[isin] = [{"date": curr_p_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 4)}]
+            price_history[isin] = [{"date": curr_p_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 6)}]
 
     all_user_tx = _get_all_transactions(db, user_id, broker=None)
     from app.models import Asset

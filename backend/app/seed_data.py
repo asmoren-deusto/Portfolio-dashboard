@@ -1864,6 +1864,30 @@ PRICES = json.loads(r'''[
     "date": "2026-10-27",
     "price": 84.688,
     "currency": "EUR"
+  },
+  {
+    "isin": "IE0032126645",
+    "date": "2026-10-28",
+    "price": 84.961,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-10-26",
+    "price": 23.587,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-10-27",
+    "price": 23.587,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-10-28",
+    "price": 23.781269,
+    "currency": "EUR"
   }
 ]''')
 

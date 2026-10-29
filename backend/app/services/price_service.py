@@ -358,7 +358,7 @@ async def get_price_with_date(
         # Compare dates:
         # If Morningstar has published a new session that Indexa CSV hasn't uploaded yet:
         if ms_price and ms_price > 0 and ms_mapped_date and (not idx_date or ms_mapped_date > idx_date):
-            price = round(ms_price, 4)
+            price = round(ms_price, 6)
             price_date = ms_mapped_date
             logger.info(f"Indexa EPSV: Anticipating NAV via Morningstar: {price} on {price_date} (ahead of Indexa CSV {idx_date})")
             if db is not None and PriceCache is not None:
@@ -374,10 +374,14 @@ async def get_price_with_date(
                     logger.warning(f"Error persisting early Morningstar quote for Indexa: {e}")
                     db.rollback()
         elif idx_price and idx_price > 0:
-            price = idx_price
+            # If Morningstar provides a full precision quote for the exact same date, prefer the higher precision
+            if ms_price and ms_price > 0 and ms_mapped_date == idx_date:
+                price = round(ms_price, 6)
+            else:
+                price = idx_price
             price_date = idx_date
         elif ms_price and ms_price > 0:
-            price = round(ms_price, 4)
+            price = round(ms_price, 6)
             price_date = ms_mapped_date or ms_date
 
         # Check if database PriceCache has a newer confirmed NAV
@@ -458,7 +462,7 @@ async def get_price_with_date(
                         logger.warning(f"Rejected implausible NAV {r_price} ({r_date}) for {isin} from {task_names[i]} (ref {ref_price})")
                         continue
                     name = task_names[i]
-                    prec = 7 if name in ("azvalor", "cobas", "blackrock", "ft") else (6 if name == "quefondos" else (5 if name == "finect" else (4 if name == "yahoo" else (3 if name == "investing" else 2))))
+                    prec = 7 if name in ("azvalor", "cobas", "blackrock") else (6 if name in ("quefondos", "finect") else (5 if name == "ft" else (4 if name == "yahoo" else (3 if name == "investing" else 2))))
                     candidates.append((r_date, prec, r_price, name))
 
         if candidates:
@@ -1022,6 +1026,7 @@ FINECT_SLUGS: dict[str, str] = {
     "LU2145461757": "LU2145461757-Robeco_smart_energy_d_eur",
     "IE00BM95B621": "IE00BM95B621-Polar_capital_funds_plc_polar_capital_global_technology_fund_r_eur_acc",
     "LU0996182563": "LU0996182563-Amundi_index_msci_world_ae_c",
+    "IE0032126645": "IE0032126645-Vanguard_us_500_stock_index_eur_acc",
     "IE000QAZP7L2": "IE000QAZP7L2-Ishares_emerging_markets_index_ie_s_acc_eur",
     "IE000ZYRH0Q7": "IE000ZYRH0Q7-Ishares_developed_world_index_ie_s_acc_eur",
     "IE00BYX5NX33": "IE00BYX5NX33-Fidelity_msci_world_index_p_acc_eur",
@@ -1194,7 +1199,7 @@ def _sync_fetch_yahoo_price(ticker: str) -> tuple[Optional[float], Optional[str]
         hist = t.history(period="5d")
         if len(hist) > 0:
             last_date = str(hist.index[-1].date())
-            price = float(live_price) if (live_price is not None and live_price > 0) else float(hist["Close"].iloc[-1])
+            price = float(hist["Close"].iloc[-1]) if ticker.startswith("0P000") else (float(live_price) if (live_price is not None and live_price > 0) else float(hist["Close"].iloc[-1]))
             return price, last_date
         elif live_price and live_price > 0:
             return float(live_price), datetime.now().strftime("%Y-%m-%d") if is_live_asset else get_previous_business_date()
