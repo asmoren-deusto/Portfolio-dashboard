@@ -1,2 +1,2 @@
 // Single source of truth for the frontend application version
-export const APP_VERSION = '3.5.19'
+export const APP_VERSION = '3.5.20'

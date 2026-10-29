@@ -1826,14 +1826,14 @@ export function OverviewPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
-                      <col className="w-7 shrink-0" />
-                      <col className="min-w-[170px]" />
-                      <col className="w-[84px] sm:w-[94px]" />
-                      <col className="w-[80px] sm:w-[90px]" />
-                      <col className="w-[102px] sm:w-[116px]" />
-                      <col className="w-[102px] sm:w-[116px]" />
-                      {!isNativePlatform() && <col className="w-[84px] sm:w-[92px]" />}
-                      <col className="w-[74px] sm:w-[82px]" />
+                      <col className="w-6 sm:w-7 shrink-0" />
+                      <col className="w-[31%] min-w-[200px]" />
+                      <col className="w-[11%] min-w-[76px]" />
+                      <col className="w-[10%] min-w-[72px]" />
+                      <col className="w-[13%] min-w-[94px]" />
+                      <col className="w-[14%] min-w-[94px]" />
+                      {!isNativePlatform() && <col className="w-[11%] min-w-[80px]" />}
+                      <col className="w-[10%] min-w-[72px]" />
                     </colgroup>
                   <thead>
                     <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -1898,7 +1898,7 @@ export function OverviewPage() {
                                   size="sm"
                                 />
                                 <div className="min-w-0">
-                                  <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[210px] sm:max-w-[280px] xl:max-w-[250px] 2xl:max-w-[360px] text-[14px]">
+                                  <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[220px] sm:max-w-[270px] xl:max-w-[250px] 2xl:max-w-[320px] text-[14px]">
                                     {formatAssetDisplayName(p.name, true)}
                                   </div>
                                   <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
@@ -1990,14 +1990,14 @@ export function OverviewPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
-                      <col className="w-7 shrink-0" />
-                      <col className="min-w-[170px]" />
-                      <col className="w-[84px] sm:w-[94px]" />
-                      <col className="w-[80px] sm:w-[90px]" />
-                      <col className="w-[102px] sm:w-[116px]" />
-                      <col className="w-[102px] sm:w-[116px]" />
-                      {!isNativePlatform() && <col className="w-[84px] sm:w-[92px]" />}
-                      <col className="w-[74px] sm:w-[82px]" />
+                      <col className="w-6 sm:w-7 shrink-0" />
+                      <col className="w-[31%] min-w-[200px]" />
+                      <col className="w-[11%] min-w-[76px]" />
+                      <col className="w-[10%] min-w-[72px]" />
+                      <col className="w-[13%] min-w-[94px]" />
+                      <col className="w-[14%] min-w-[94px]" />
+                      {!isNativePlatform() && <col className="w-[11%] min-w-[80px]" />}
+                      <col className="w-[10%] min-w-[72px]" />
                     </colgroup>
                     <thead className="hidden xl:table-header-group">
                       <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -2062,7 +2062,7 @@ export function OverviewPage() {
                                     size="sm"
                                   />
                                   <div className="min-w-0">
-                                    <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[210px] sm:max-w-[280px] xl:max-w-[250px] 2xl:max-w-[360px] text-[14px]">
+                                    <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[220px] sm:max-w-[270px] xl:max-w-[250px] 2xl:max-w-[320px] text-[14px]">
                                       {formatAssetDisplayName(p.name, true)}
                                     </div>
                                     <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
