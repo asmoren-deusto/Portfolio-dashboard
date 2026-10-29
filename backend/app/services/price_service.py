@@ -37,7 +37,7 @@ CACHE_TTL_MINUTES = 15
 # Per-source timeout (seconds) so one slow/blocked website never stalls a refresh
 SOURCE_TIMEOUT_SEC = 12
 # Minimum gap between two forced external scrapes of the same fund
-SCRAPE_THROTTLE_SEC = 300
+SCRAPE_THROTTLE_SEC = 30
 # Max plausible daily move for a mutual fund NAV vs last known NAV (rejects bad scrapes)
 MAX_NAV_JUMP = 0.15
 _last_scrape: dict[str, datetime] = {}
@@ -297,7 +297,7 @@ async def get_price_with_date(
     if force and db is not None and PriceCache is not None:
         try:
             latest = db.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.price > 0).order_by(PriceCache.date.desc()).first()
-            if latest and (is_nav_current(latest.date) or _recently_scraped(isin)):
+            if latest and _recently_scraped(isin):
                 _price_cache[isin] = {"price": float(latest.price), "date": latest.date, "ts": datetime.now()}
                 return float(latest.price), latest.date
         except Exception as e:

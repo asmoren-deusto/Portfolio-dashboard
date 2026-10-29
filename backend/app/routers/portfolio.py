@@ -533,6 +533,10 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
     Force re-scraping of all active positions from official gestora websites,
     Financial Times tearsheets, and Quefondos. Clears in-memory price cache.
     """
+    from app.services.price_service import _price_cache, _last_scrape
+    _price_cache.clear()
+    _last_scrape.clear()
+    _perf_cache.clear()
     return await check_portfolio_navs(user_id=user_id, db=db)
 
 
