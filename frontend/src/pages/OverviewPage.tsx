@@ -846,7 +846,7 @@ export function OverviewPage() {
             loading={isGlobalUpdating}
           />
           <div
-            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card transition-[border-color,box-shadow,background-color] duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-indigo-500/40 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-indigo-500/40"
+            className="group relative overflow-hidden rounded-[20px] px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card transition-[border-color,box-shadow,background-color] duration-200 ease-out bg-gradient-to-b from-white via-white/98 to-slate-50/70 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-indigo-500/40 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:border-white/[0.08] dark:hover:border-indigo-500/40"
             title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones"
           >
             <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/35 to-transparent dark:via-white/[0.12] z-10" />

@@ -724,8 +724,10 @@ export const MarketPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="overflow-x-auto rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.07] shadow-sm dark:shadow-xl"
+          className="overflow-x-auto rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all relative"
         >
+          {/* Top subtle shine line */}
+          <div className="pointer-events-none absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-200/80 dark:border-white/[0.06] bg-slate-50/75 dark:bg-white/[0.01] text-xs font-semibold tracking-wider uppercase text-slate-700 dark:text-slate-400">

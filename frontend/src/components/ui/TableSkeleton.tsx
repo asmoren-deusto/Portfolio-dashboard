@@ -80,7 +80,7 @@ export function CardSkeletonGrid({ count = 6, className }: CardSkeletonGridProps
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="rounded-2xl p-4 bg-white/95 dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-sm flex flex-col justify-between space-y-4"
+          className="rounded-[22px] p-4 bg-white/95 dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-sm flex flex-col justify-between space-y-4"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl skeleton-shimmer shrink-0" />

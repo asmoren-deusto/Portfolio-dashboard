@@ -157,7 +157,8 @@ export function PositionsPage() {
       {stats && (
         <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Valor Total */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#1e1e1e]/96 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+            <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <span>Valor Total Cartera</span>
               <Layers className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
@@ -171,7 +172,8 @@ export function PositionsPage() {
           </div>
 
           {/* Plusvalía Latente */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#1e1e1e]/96 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+            <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <span>Ganancia Latente Total</span>
               {stats.totalPnl >= 0 ? (
@@ -202,7 +204,8 @@ export function PositionsPage() {
           </div>
 
           {/* Estado de Activos */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#1e1e1e]/96 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+            <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <span>Distribución Rentabilidad</span>
               <PieChart className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
@@ -217,7 +220,8 @@ export function PositionsPage() {
           </div>
 
           {/* TER Medio Ponderado */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm dark:bg-[#1e1e1e]/96 dark:border-white/[0.07] dark:shadow-lg dark:shadow-black/20 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+            <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <span>Comisión Media (TER)</span>
               <Percent className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
@@ -600,8 +604,10 @@ export function PositionsPage() {
                     transition={{ duration: 0.22, delay: Math.min(i * 0.02, 0.25) }}
                     onClick={() => setSelectedPosition(p)}
                     title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                    className="group relative rounded-2xl bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/20 dark:hover:bg-[#252526] p-5 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden"
+                    className="group relative rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 hover:to-white border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:hover:from-[#26262a] dark:border-white/[0.08] dark:hover:border-white/20 p-5 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden"
                   >
+                    {/* Top subtle shine line */}
+                    <div className="pointer-events-none absolute -top-px inset-x-5 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
                   {isUpdated && (
                     <span
                       aria-hidden="true"

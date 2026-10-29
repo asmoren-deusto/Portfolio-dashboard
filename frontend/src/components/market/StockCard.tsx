@@ -61,10 +61,13 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="group relative rounded-2xl bg-white/95 hover:bg-white border border-slate-200/80 hover:border-blue-400/70 p-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover cursor-pointer flex flex-col justify-between overflow-hidden dark:bg-[#1e1e1e]/96 dark:hover:bg-[#2a2d2e] dark:border-white/[0.08] dark:hover:border-white/20"
+      className="group relative rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 hover:to-white border border-slate-200/80 hover:border-blue-400/70 p-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover cursor-pointer flex flex-col justify-between overflow-hidden dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:hover:from-[#26262a] dark:border-white/[0.08] dark:hover:border-white/20"
     >
+      {/* Top subtle shine line */}
+      <div className="pointer-events-none absolute -top-px inset-x-5 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
+
       {/* Subtle hover gradient reflection */}
-      <div className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-blue-500/[0.04] dark:from-white/[0.06] via-transparent to-transparent" />
+      <div className="pointer-events-none absolute -inset-px rounded-[22px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-blue-500/[0.04] dark:from-white/[0.06] via-transparent to-transparent" />
 
       {/* Top Header: Logo, Name, Badges, Arrow */}
       <div>

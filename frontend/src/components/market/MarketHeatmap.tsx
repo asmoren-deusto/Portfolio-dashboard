@@ -366,12 +366,15 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
 
   return (
     <div
-      className={`flex flex-col rounded-2xl bg-white/95 dark:bg-[#1e1e1e] border border-slate-200/90 dark:border-white/[0.08] shadow-none dark:shadow-2xl transition-all ${
+      className={`flex flex-col border border-slate-200/80 dark:border-white/[0.08] transition-all relative overflow-hidden ${
         isFullscreen
           ? 'fixed inset-0 z-[99999] rounded-none p-5 sm:p-6 bg-slate-100 dark:bg-[#1c1c1c] overflow-hidden'
-          : 'relative p-4 md:p-5'
+          : 'rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] shadow-card hover:shadow-card-hover p-4 md:p-5'
       }`}
     >
+      {!isFullscreen && (
+        <div className="pointer-events-none absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
+      )}
       {/* Heatmap Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 mb-3 border-b border-slate-200/80 dark:border-white/[0.06]">
         <div className="flex items-center gap-2.5">

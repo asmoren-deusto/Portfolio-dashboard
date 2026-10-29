@@ -419,7 +419,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   }, [chartPoints, sessionMarkers, currencyMode, selectedBroker, period, refreshAnimKey])
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-xl dark:shadow-black/20 p-3.5 sm:p-4 transition-all">
+    <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover p-3.5 sm:p-4 transition-all">
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 dark:border-white/[0.06]">
         <div className="flex items-center gap-2.5">
