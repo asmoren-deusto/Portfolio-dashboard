@@ -153,30 +153,47 @@ if __name__ == "__main__":
         threading.Thread(target=open_browser, daemon=True).start()
 
         # 4. Supervisor continuo: resucitar Vite o Backend si se detienen
+        last_interrupt_time = 0.0
+
         while True:
-            time.sleep(1.0)
-            if frontend_proc and frontend_proc.poll() is not None:
-                print(f"\n[WARN] El servidor frontend de Vite se detuvo (código: {frontend_proc.returncode}). Reiniciando frontend...")
+            try:
                 time.sleep(1.0)
-                frontend_proc = subprocess.Popen(
-                    [npm_cmd, "run", "dev"],
-                    cwd=frontend_dir,
-                    stdin=subprocess.DEVNULL,
-                    creationflags=creation_flags
-                )
+                if frontend_proc and frontend_proc.poll() is not None:
+                    print(f"\n[WARN] El servidor frontend de Vite se detuvo (código: {frontend_proc.returncode}). Reiniciando frontend...")
+                    time.sleep(1.0)
+                    frontend_proc = subprocess.Popen(
+                        [npm_cmd, "run", "dev"],
+                        cwd=frontend_dir,
+                        stdin=subprocess.DEVNULL,
+                        creationflags=creation_flags
+                    )
 
-            if backend_proc and backend_proc.poll() is not None:
-                print(f"\n[WARN] El servidor backend de Uvicorn se detuvo (código: {backend_proc.returncode}). Reiniciando backend...")
-                time.sleep(1.0)
-                backend_proc = subprocess.Popen(
-                    backend_cmd,
-                    cwd=backend_dir,
-                    stdin=subprocess.DEVNULL,
-                    creationflags=creation_flags
-                )
+                if backend_proc and backend_proc.poll() is not None:
+                    print(f"\n[WARN] El servidor backend de Uvicorn se detuvo (código: {backend_proc.returncode}). Reiniciando backend...")
+                    time.sleep(1.0)
+                    backend_proc = subprocess.Popen(
+                        backend_cmd,
+                        cwd=backend_dir,
+                        stdin=subprocess.DEVNULL,
+                        creationflags=creation_flags
+                    )
+            except KeyboardInterrupt:
+                now = time.time()
+                # Doble Ctrl+C en menos de 1.5s fuerza el cierre inmediato
+                if now - last_interrupt_time < 1.5:
+                    print("\n[INFO] Deteniendo servicios (Ctrl+C forzado)...")
+                    break
+                last_interrupt_time = now
 
-    except KeyboardInterrupt:
-        print("\n[INFO] Deteniendo servicios...")
+                # En Windows, cuando Uvicorn recarga por cambios de código (WatchFiles), envía os.kill(pid, CTRL_C_EVENT)
+                # a su proceso worker. Windows difunde este evento a toda la consola, generando un KeyboardInterrupt en start.py.
+                # Verificamos si Uvicorn y Vite siguen vivos tras una breve pausa: si siguen vivos, fue una recarga interna (hot-reload).
+                time.sleep(0.5)
+                if backend_proc and backend_proc.poll() is None and frontend_proc and frontend_proc.poll() is None:
+                    continue
+
+                print("\n[INFO] Deteniendo servicios...")
+                break
     finally:
         if frontend_proc:
             kill_process_tree(frontend_proc)
