@@ -432,7 +432,7 @@ async def get_price_with_date(
             tasks.append(_fetch_blackrock_official(isin))
             task_names.append("blackrock")
 
-        if ticker and not ticker.startswith("0P000"):
+        if ticker:
             tasks.append(_fetch_yahoo_price(ticker))
             task_names.append("yahoo")
 
@@ -1033,6 +1033,7 @@ FINECT_SLUGS: dict[str, str] = {
     "IE00BYX5M476": "IE00BYX5M476-Fidelity_msci_emerging_markets_index_p_acc_eur",
     "IE00BYX5NH74": "IE00BYX5NH74-Fidelity_msci_japan_index_p_acc_eur",
     "LU0261952682": "LU0261952682-Fidelity_funds__euro_stoxx_50_tm_aacc_eur",
+    "LU0171307068": "LU0171307068-Bgf_world_healthscience_a2",
 }
 
 

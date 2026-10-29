@@ -126,10 +126,12 @@ async def startup():
 
                 # Intelligent interval: funds publish NAVs on business days mostly 16:00-24:00 CET,
                 # with late publishers (BlackRock, Fidelity IE...) catching up the next morning 07:00-12:00.
+                # Fast daytime scan: on business days 07:00-23:59 CET, scan every 300s (5 min)
+                # to detect any new NAV (from FT, Finect, Morningstar, Quefondos or gestoras) as early as possible.
                 now = datetime.now()
                 is_weekday = now.weekday() < 5
-                in_window = (7 <= now.hour < 12) or (16 <= now.hour <= 23)
-                sleep_sec = 600 if (is_weekday and in_window) else 1800
+                in_window = 7 <= now.hour <= 23
+                sleep_sec = 300 if (is_weekday and in_window) else 1800
             except asyncio.CancelledError:
                 break
             except Exception as e:

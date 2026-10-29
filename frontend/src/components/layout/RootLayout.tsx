@@ -180,7 +180,7 @@ export function RootLayout() {
     }
 
     checkNavAlerts()
-    const timer = setInterval(checkNavAlerts, 30000)
+    const timer = setInterval(checkNavAlerts, 20000)
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('pageshow', handlePageShow)
