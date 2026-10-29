@@ -30,6 +30,7 @@ import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { apiUrl } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
+import { DcaFlowAnalyticsCard } from '@/components/transactions/DcaFlowAnalyticsCard'
 import type { Transaction } from '@/lib/mockData'
 
 type TxType = 'all' | 'buy' | 'sell' | 'dividend' | 'transfer'
@@ -234,6 +235,11 @@ export function TransactionsPage() {
           </div>
         </div>
       </div>
+
+      {/* Analítica de Cadencia DCA y Eficiencia de Entradas */}
+      {transactions.length > 0 && (
+        <DcaFlowAnalyticsCard transactions={transactions} positions={positions} />
+      )}
 
       {/* Control Bar: Type Tabs, Actions & Search */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">

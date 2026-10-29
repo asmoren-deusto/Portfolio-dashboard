@@ -20,6 +20,7 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { Card } from '@/components/ui/Card'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
+import { PortfolioAttributionCard } from '@/components/analytics/PortfolioAttributionCard'
 import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
 import { fmt, cn, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
 import { initializeBaselineSeenNavs } from '@/lib/navAlertTracker'
@@ -234,6 +235,15 @@ export function PositionsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Mapa Cuadrante Peso vs Retorno, Atribución P&L e Impacto TER */}
+      {positions.length > 0 && (
+        <PortfolioAttributionCard
+          positions={positions}
+          onSelectPosition={(p) => setSelectedPosition(p)}
+          defaultTab="quadrant"
+        />
       )}
 
       {/* Control Bar: Asset Tabs, Search, Sort & View Mode */}

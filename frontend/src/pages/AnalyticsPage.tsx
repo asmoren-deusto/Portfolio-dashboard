@@ -30,8 +30,11 @@ import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
+import { UnderwaterRiskCard } from '@/components/analytics/UnderwaterRiskCard'
+import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
 import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
-import { useAnalytics, usePositions, useBenchmarkComparison } from '@/api/queries'
+import { useAnalytics, usePositions, useBenchmarkComparison, usePerformance } from '@/api/queries'
+import { useAppStore } from '@/store/appStore'
 import type { Position } from '@/lib/mockData'
 
 export function AnalyticsPage() {
@@ -57,9 +60,11 @@ export function AnalyticsPage() {
     )
   }
 
+  const { period } = useAppStore()
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: positions = [], isLoading: positionsLoading, isFetching: positionsFetching } = usePositions()
   const { data: benchmarkData, isFetching: benchmarkFetching } = useBenchmarkComparison()
+  const { data: performance = [], isFetching: perfFetching } = usePerformance(period)
   const [benchmarkMode, setBenchmarkMode] = useState<BenchmarkChartMode>('percent')
   const [secondaryView, setSecondaryView] = useState<'returns' | 'distribution'>('returns')
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
@@ -604,58 +609,24 @@ export function AnalyticsPage() {
         </div>
       </Card>
 
-      {/* Risk Metrics Detail */}
-      <Card delay={0.3} loading={analyticsFetching}>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-            <CardTitle>Diagnóstico de Riesgo y Resiliencia</CardTitle>
-          </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400">Evaluación estadística del portfolio</span>
-        </CardHeader>
-        <div data-private className={cn("grid grid-cols-1 md:grid-cols-3 gap-0 md:divide-x divide-y md:divide-y-0 divide-slate-100 dark:divide-white/[0.05] border-t border-slate-100 dark:border-white/[0.05] transition-opacity duration-300", analyticsFetching ? "opacity-65" : "opacity-100")}>
-          {[
-            {
-              label: 'Volatilidad Anualizada',
-              value: analytics && analytics.volatility !== undefined ? fmt.pct(analytics.volatility, false) : '—',
-              desc: 'Desviación estándar anualizada de retornos. Un valor inferior al 15% indica una cartera equilibrada y defensiva.',
-              color: 'text-amber-500 dark:text-amber-400',
-              tag: analytics && analytics.volatility !== undefined && analytics.volatility < 15 ? 'Baja / Moderada' : 'Moderada',
-            },
-            {
-              label: 'Máximo Drawdown Histórico',
-              value: analytics && analytics.max_drawdown !== undefined ? fmt.pct(analytics.max_drawdown) : '—',
-              desc: 'Mayor caída pico a valle registrada. Mide la resistencia patrimonial durante correcciones severas de mercado.',
-              color: 'text-rose-500 dark:text-rose-400',
-              tag: 'Bajo impacto',
-            },
-            {
-              label: 'Ratio de Sharpe',
-              value: analytics && analytics.sharpe_ratio !== undefined ? fmt.ratio(analytics.sharpe_ratio) : '—',
-              desc: 'Rendimiento extra obtenido por unidad de riesgo asumido vs tasa libre de riesgo. > 1.0 se considera óptimo.',
-              color: isSharpeGood ? 'text-emerald-500 dark:text-emerald-400' : 'text-amber-500 dark:text-amber-400',
-              tag: isSharpeGood ? 'Excelente' : 'Aceptable',
-            },
-          ].map((m, i) => (
-            <motion.div
-              key={m.label}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.18, delay: i * 0.04 }}
-              className="p-6"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">{m.label}</p>
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200/90 dark:bg-white/[0.05] dark:text-slate-200 dark:border-white/[0.08]">
-                  {m.tag}
-                </span>
-              </div>
-              <p className={`mt-2 text-3xl font-bold font-mono tabular-nums ${m.color}`}>{m.value}</p>
-              <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400 font-medium">{m.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </Card>
+      {/* Quantitative Underwater Drawdown & Institutional Risk Ratios */}
+      <UnderwaterRiskCard
+        analytics={analytics}
+        performance={performance}
+        totalValue={positions.reduce((acc, p) => acc + (p.current_value || 0), 0)}
+        loading={analyticsFetching || perfFetching}
+      />
+
+      {/* Compound Wealth & Monte Carlo Cone Simulator */}
+      {positions.length > 0 && (
+        <CompoundProjectionCard
+          currentValue={positions.reduce((acc, p) => acc + (p.current_value || 0), 0)}
+          currentInvested={positions.reduce((acc, p) => acc + (p.invested_amount || 0), 0)}
+          defaultMonthlyDca={analytics?.monthly_pace && analytics.monthly_pace > 0 ? analytics.monthly_pace : 416.66}
+          defaultAnnualReturn={analytics?.cagr ?? analytics?.annualized_return ?? 8.5}
+          volatility={analytics?.volatility ?? 10.2}
+        />
+      )}
 
       {/* Position Breakdown Table */}
       <Card delay={0.35} className="overflow-hidden relative">
