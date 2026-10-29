@@ -1209,7 +1209,7 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
         else:
             official_close_pct = q.get("change_pct", 0.0) or 0.0
 
-        official_close_price = reg_p
+        official_close_price = prev_c if (m_state == "REGULAR" and prev_c and prev_c > 0) else reg_p
         quotes[t]["official_close_pct"] = official_close_pct
         quotes[t]["official_close_price"] = official_close_price
         quotes[t]["is_indicative"] = False
@@ -1365,40 +1365,53 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
                     base_dict = {}
                     for t in etf_cols:
                         q_t = quotes.get(t, {})
-                        # In pre-market, official_close_price / regular_price is the close of the completed previous regular session
-                        ref_p = q_t.get("official_close_price") or q_t.get("regular_price") or q_t.get("prev_close")
+                        ref_p = q_t.get("prev_close") or q_t.get("official_close_price") or q_t.get("regular_price")
                         if ref_p and float(ref_p) > 0:
                             base_dict[t] = float(ref_p)
                         else:
-                            base_dict[t] = float(closes_etfs[t].dropna().iloc[-1]) if not closes_etfs[t].dropna().empty else 1.0
+                            base_dict[t] = float(closes_etfs[t].dropna().iloc[0]) if not closes_etfs[t].dropna().empty else 1.0
                     base_s = pd.Series(base_dict)
 
                     if is_weekday and len(today_idxs) >= 2:
-                        # Live trajectory starting with yesterday's close
                         target_idxs = today_idxs
 
-                        # Reconstruct intraday ETF returns using live proxies or active pre-market quotes
+                        # Reconstruct intraday ETF returns
+                        # During pre-market (< 15:30 Madrid), use 24h futures/index proxies (ES=F, NQ=F, etc.)
+                        # Once US regular session opens (>= 15:30 Madrid), use the actual ETF liquid market series
                         norm_dict = {}
                         for t in etf_cols:
+                            b_val = base_dict.get(t, 1.0)
+                            etf_series = closes_etfs[t].loc[target_idxs] if t in closes_etfs.columns else None
+                            etf_ret = ((etf_series - b_val) / b_val) * 100.0 if etf_series is not None and not etf_series.isna().all() else None
+
                             proxy_sym = ETF_PREMARKET_LIVE_PROXIES.get(t)
+                            proxy_ret = None
                             if proxy_sym and proxy_sym in closes_raw.columns:
                                 p_prev = proxy_prev_closes.get(proxy_sym)
-                                proxy_series = closes_raw[proxy_sym].loc[target_idxs].ffill().bfill()
-                                if not p_prev and not proxy_series.empty:
-                                    p_prev = float(proxy_series.iloc[0])
+                                p_series = closes_raw[proxy_sym].loc[target_idxs].ffill().bfill()
+                                if not p_prev and not p_series.empty:
+                                    p_prev = float(p_series.iloc[0])
                                 if p_prev and p_prev > 0:
-                                    norm_dict[t] = ((proxy_series - p_prev) / p_prev) * 100.0
+                                    proxy_ret = ((p_series - p_prev) / p_prev) * 100.0
+
+                            combined_vals = []
+                            for idx in target_idxs:
+                                dt_mad = idx.astimezone(madrid_tz)
+                                is_regular = (dt_mad.hour * 60 + dt_mad.minute >= 15 * 60 + 30)
+
+                                val = None
+                                if is_regular and etf_ret is not None and not pd.isna(etf_ret.loc[idx]):
+                                    val = etf_ret.loc[idx]
+                                elif proxy_ret is not None and not pd.isna(proxy_ret.loc[idx]):
+                                    val = proxy_ret.loc[idx]
+                                elif etf_ret is not None and not pd.isna(etf_ret.loc[idx]):
+                                    val = etf_ret.loc[idx]
                                 else:
-                                    live_chg = quotes.get(t, {}).get("change_pct", 0.0) or 0.0
-                                    norm_dict[t] = pd.Series(live_chg, index=target_idxs)
-                            else:
-                                etf_series = closes_etfs[t].loc[target_idxs]
-                                b_val = base_dict.get(t, 1.0)
-                                if etf_series.dropna().nunique() > 1 and not etf_series.isna().all():
-                                    norm_dict[t] = ((etf_series.ffill().bfill() - b_val) / b_val) * 100.0
-                                else:
-                                    live_chg = quotes.get(t, {}).get("change_pct", 0.0) or 0.0
-                                    norm_dict[t] = pd.Series(live_chg, index=target_idxs)
+                                    val = quotes.get(t, {}).get("change_pct", 0.0) or 0.0
+                                combined_vals.append(val)
+
+                            s_comb = pd.Series(combined_vals, index=target_idxs).ffill().bfill()
+                            norm_dict[t] = s_comb
 
                         norm_df = pd.DataFrame(norm_dict, index=target_idxs)
 
