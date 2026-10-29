@@ -1969,7 +1969,7 @@ export function OverviewPage() {
                                 <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} active={isRowHovered} />
                                 <span
                                   className={cn(
-                                    'font-mono font-bold text-right text-[13px] transition-colors',
+                                    'inline-block w-[44px] shrink-0 font-mono font-bold text-right tabular-nums text-[13px] transition-colors',
                                     isRowHovered ? 'text-slate-950 dark:text-white font-extrabold' : 'text-slate-800 dark:text-slate-200'
                                   )}
                                 >
@@ -2133,7 +2133,7 @@ export function OverviewPage() {
                                   <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} active={isRowHovered} />
                                   <span
                                     className={cn(
-                                      'font-mono font-bold text-right text-[13px] transition-colors',
+                                      'inline-block w-[44px] shrink-0 font-mono font-bold text-right tabular-nums text-[13px] transition-colors',
                                       isRowHovered ? 'text-slate-950 dark:text-white font-extrabold' : 'text-slate-800 dark:text-slate-200'
                                     )}
                                   >
