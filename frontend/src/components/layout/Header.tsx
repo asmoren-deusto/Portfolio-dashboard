@@ -73,14 +73,13 @@ interface HeaderProps {
 
 export function Header({
   title,
-  subtitle,
   badge,
   badgeColor = 'blue',
   showPeriodSelector = true,
   showBrokerSelector = true,
   children,
 }: HeaderProps) {
-  const { period, setPeriod, selectedBroker, setSelectedBroker, useMock, openNavAlertHistory, currentUser } = useAppStore()
+  const { selectedBroker, setSelectedBroker, useMock, openNavAlertHistory } = useAppStore()
   const brokers = useMock ? DEMO_BROKERS : BROKERS
   const { data: positions = [] } = usePositions()
   const { data: analytics } = useAnalytics()
@@ -101,6 +100,10 @@ export function Header({
   )
 
   const navFresh = updated != null && total != null && total > 0 ? updated >= total : true
+  const navPct = total > 0 ? Math.min(100, Math.max(0, (updated / total) * 100)) : 100
+  const ringR = 5.2
+  const ringCirc = 2 * Math.PI * ringR
+  const ringOffset = ringCirc - (navPct / 100) * ringCirc
 
   const syncTimeStr = React.useMemo(() => {
     const raw = summary?.last_updated || positions.find((p) => p.last_updated)?.last_updated
@@ -135,19 +138,17 @@ export function Header({
     violet: 'bg-violet-50 text-violet-600 border-violet-200 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20 dark:shadow-violet-500/10',
   }[badgeColor]
 
-
-
-  const { portalNode, setPortalNode, hasExtra } = useHeaderContext()
+  const { setPortalNode } = useHeaderContext()
 
   return (
     <div className="flex items-center justify-between gap-3 w-full min-w-0 flex-nowrap">
-      {/* Title, NAV Indicator, Font Switcher & Badges */}
+      {/* Title, NAV Indicator & Badges */}
       <div className="flex items-center gap-2.5 min-w-0 flex-nowrap shrink-0">
         <h1 className="text-lg sm:text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-none truncate">
           {title}
         </h1>
 
-        {/* NAVs status badge immediately to the right of Visión General / Title */}
+        {/* Dynamic SVG NAV Progress Pill */}
         {total > 0 && (
           <button
             onClick={openNavAlertHistory}
@@ -158,23 +159,50 @@ export function Header({
                 : `${updated}/${total} NAVs actualizados. Haz clic para ver el historial.`
             }
             className={cn(
-              "inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border text-[11px] transition-all cursor-pointer shrink-0 shadow-2xs hover:opacity-95 active:scale-97",
+              "group/nav inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border text-[11px] transition-all cursor-pointer shrink-0 shadow-2xs hover:scale-[1.02] active:scale-97",
               navFresh
-                ? "bg-[#ecfdf5] border-emerald-300/70 dark:bg-emerald-950/40 dark:border-emerald-700/40"
-                : "bg-amber-50/90 border-amber-300/70 dark:bg-amber-950/40 dark:border-amber-700/40"
+                ? "bg-[#ecfdf5] border-emerald-300/80 hover:border-emerald-400 dark:bg-emerald-950/40 dark:border-emerald-700/50"
+                : "bg-amber-50/90 border-amber-300/80 hover:border-amber-400 dark:bg-amber-950/40 dark:border-amber-700/50"
             )}
           >
-            {/* Vertical capsule dot */}
+            {/* Dynamic SVG Circular Progress Ring */}
+            <svg width="14" height="14" viewBox="0 0 14 14" className="shrink-0">
+              <circle
+                cx="7"
+                cy="7"
+                r={ringR}
+                fill="none"
+                strokeWidth="2.1"
+                className={navFresh ? "stroke-emerald-200 dark:stroke-emerald-900/70" : "stroke-amber-200 dark:stroke-amber-900/70"}
+              />
+              <circle
+                cx="7"
+                cy="7"
+                r={ringR}
+                fill="none"
+                strokeWidth="2.1"
+                strokeDasharray={ringCirc}
+                strokeDashoffset={ringOffset}
+                strokeLinecap="round"
+                transform="rotate(-90 7 7)"
+                style={{ transition: 'stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                className={navFresh ? "stroke-emerald-600 dark:stroke-emerald-400" : "stroke-amber-500 dark:stroke-amber-400"}
+              />
+              <circle
+                cx="7"
+                cy="7"
+                r="1.8"
+                className={cn(
+                  navFresh
+                    ? "fill-emerald-600 dark:fill-emerald-400"
+                    : "fill-amber-500 dark:fill-amber-400 svg-pulse-ring"
+                )}
+              />
+            </svg>
+            {/* Status label */}
             <span
               className={cn(
-                "w-1.5 h-2.5 rounded-full shrink-0",
-                navFresh ? "bg-emerald-600 dark:bg-emerald-400" : "bg-amber-500 animate-pulse"
-              )}
-            />
-            {/* Green label */}
-            <span
-              className={cn(
-                "font-bold leading-none shrink-0",
+                "font-bold leading-none shrink-0 font-mono",
                 navFresh ? "text-emerald-800 dark:text-emerald-300" : "text-amber-800 dark:text-amber-300"
               )}
             >

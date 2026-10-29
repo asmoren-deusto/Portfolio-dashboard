@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useContext, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 
@@ -19,19 +19,36 @@ interface CardProps {
 }
 
 export function Card({ children, className, glass = false, loading = false }: CardProps) {
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    el.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`)
+    el.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`)
+  }, [])
+
   return (
     <CardContext.Provider value={{ loading }}>
       <div
+        onMouseMove={handleMouseMove}
         className={cn(
-          'relative rounded-2xl overflow-hidden transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
+          'group/card relative rounded-2xl overflow-hidden transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
           'bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
-          'dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.15]',
+          'dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]',
           glass && 'backdrop-blur-md',
           className
         )}
       >
+        {/* Interactive zero-rerender cursor spotlight */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
+          style={{
+            background:
+              'radial-gradient(480px circle at var(--mouse-x, 50%) var(--mouse-y, 0%), rgba(59, 130, 246, 0.035), transparent 60%)',
+          }}
+        />
         {/* Subtle shine line at top */}
-        <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.06] to-transparent dark:via-white/[0.12] z-10" />
+        <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-900/[0.07] to-transparent dark:via-white/[0.14] z-10" />
         <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full h-full">
           {children}
         </div>

@@ -539,3 +539,48 @@
   opacity: 0.92;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
 }
+
+
+/* ── Interactive Cursor Spotlight & Compositor Micro-Animations ── */
+.card-interactive-lift {
+  transition:
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease-out,
+    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.card-interactive-lift:hover {
+  transform: translate3d(0, -1.5px, 0);
+}
+
+@keyframes svgPulseNode {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.45);
+    opacity: 0.35;
+  }
+}
+
+.svg-pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: svgPulseNode 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* ── Reduced Motion Accessibility (Compositor-Safe) ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker-marquee,
+  .skeleton-shimmer,
+  .live-dot::after,
+  .svg-pulse-ring {
+    animation: none !important;
+  }
+
+  .card-interactive-lift:hover {
+    transform: none !important;
+  }
+}

@@ -46,6 +46,12 @@ import { BenchmarkEvolutionChart, type BenchmarkChartMode } from '@/components/c
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { MiniDonut } from '@/components/ui/MiniDonut'
+import {
+  HeroSparklineSvg,
+  RiskArcGaugeSvg,
+  DcaCycleRingSvg,
+  InteractiveEntityBar,
+} from '@/components/ui/DynamicSvgIndicators'
 import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
@@ -89,7 +95,7 @@ const PERIOD_LABELS: Record<string, string> = {
 }
 
 export function OverviewPage() {
-  const { currentUser, period, theme, isRefreshingPrices, selectedBroker, refreshAnimKey } = useAppStore()
+  const { currentUser, period, theme, isRefreshingPrices, selectedBroker, setSelectedBroker, refreshAnimKey } = useAppStore()
   const periodLabel = PERIOD_LABELS[period] || 'Periodo'
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
@@ -142,14 +148,25 @@ export function OverviewPage() {
     })
     return map
   }, [positions, palette])
+  const [positionsSortBy, setPositionsSortBy] = useState<'broker' | 'value' | 'pnl' | 'day'>('broker')
+
   const sortedPositions = useMemo(
     () =>
       [...positions].sort((a, b) => {
+        if (positionsSortBy === 'value') {
+          return (b.current_value ?? 0) - (a.current_value ?? 0)
+        }
+        if (positionsSortBy === 'pnl') {
+          return (b.unrealized_pnl ?? 0) - (a.unrealized_pnl ?? 0)
+        }
+        if (positionsSortBy === 'day') {
+          return (b.daily_change_pct ?? -999) - (a.daily_change_pct ?? -999)
+        }
         const brokerCompare = brokerRank(a.broker) - brokerRank(b.broker)
         if (brokerCompare !== 0) return brokerCompare
         return (b.current_value ?? 0) - (a.current_value ?? 0)
       }),
-    [positions]
+    [positions, positionsSortBy]
   )
 
   const { data: performance = [], isFetching: perfFetching } = usePerformance()
@@ -764,6 +781,7 @@ export function OverviewPage() {
                 </div>
               )
             }
+            svgDecoration={<HeroSparklineSvg points={performance} positive={pnlPositive} />}
             sub={displaySummary ? `Aportado: ${fmt.currency(displaySummary.total_invested)}` : undefined}
             tag={
               displaySummary
@@ -828,14 +846,14 @@ export function OverviewPage() {
             loading={isGlobalUpdating}
           />
           <div
-            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card transition-all duration-200 ease-out bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]"
-            title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones. Próxima: 07/10/2026"
+            className="group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 cursor-card card-interactive-lift bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-indigo-500/40 dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-indigo-500/40"
+            title="Aportación programada (DCA): 416,66 € / mes cada día 7 en Indexa EPSV Más Rentabilidad Acciones"
           >
-            <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent dark:via-white/[0.12] z-10" />
+            <div className="pointer-events-none absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/35 to-transparent dark:via-white/[0.12] z-10" />
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              style={{ backgroundImage: 'radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.05), transparent 58%), linear-gradient(90deg, rgba(99, 102, 241, 0.015), transparent 78%)' }}
+              style={{ backgroundImage: 'radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.06), transparent 58%), linear-gradient(90deg, rgba(99, 102, 241, 0.02), transparent 78%)' }}
             />
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-1">
@@ -851,17 +869,27 @@ export function OverviewPage() {
                 </span>
               </div>
 
-              <div className={cn("flex items-baseline justify-between gap-2 min-w-0 transition-opacity duration-300", isRefreshingPrices ? "opacity-65" : "opacity-100")}>
-                <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
-                  <AnimatedNumber value={displaySummary?.total_invested} format={fmt.currency} />
+              <div className={cn("flex items-center justify-between gap-2 min-w-0 transition-opacity duration-300", isRefreshingPrices ? "opacity-65" : "opacity-100")}>
+                <div className="flex items-baseline gap-2 min-w-0 flex-1">
+                  <div data-private className="text-lg sm:text-[21px] font-bold font-mono tracking-tight text-slate-950 dark:text-white leading-tight shrink-0">
+                    <AnimatedNumber value={displaySummary?.total_invested} format={fmt.currency} />
+                  </div>
+                  <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
+                    {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'}
+                  </span>
                 </div>
-                <span data-private className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-                  {currentUser?.isDemo ? 'Scalable día 5' : 'Indexa día 7'} • {displaySummary?.num_positions ?? positions.length} pos. (act. {updatedPositionsCount}/{displaySummary?.num_positions ?? positions.length})
-                </span>
+                <DcaCycleRingSvg targetDay={currentUser?.isDemo ? 5 : 7} />
               </div>
             </div>
           </div>
         </div>
+
+        {/* Interactive Entity Allocation Pulse Bar (Quick Broker Filter) */}
+        <InteractiveEntityBar
+          positions={positions}
+          selectedBroker={selectedBroker}
+          onSelectBroker={setSelectedBroker}
+        />
       </div>
 
       {/* 2. Métricas del Periodo Seleccionado */}
@@ -936,7 +964,16 @@ export function OverviewPage() {
             tag={volTag}
             tagColor="amber"
             borderAccent="amber"
-            sub="fluctuación anualizada de mercado (σ)"
+            sub="fluctuación anualizada (σ)"
+            svgDecoration={
+              volVal !== null ? (
+                <RiskArcGaugeSvg
+                  ratio={Math.min(100, (volVal / 28) * 100)}
+                  tone="amber"
+                  title={`Nivel de volatilidad anualizada: ${volVal.toFixed(2)}%`}
+                />
+              ) : undefined
+            }
             delay={0.16}
             icon={<Activity size={15} className="text-amber-500 dark:text-amber-400" />}
             iconBg="bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400"
@@ -952,6 +989,15 @@ export function OverviewPage() {
             tagColor="rose"
             borderAccent="rose"
             sub={`peor caída en ${periodLabel}`}
+            svgDecoration={
+              ddVal !== null ? (
+                <RiskArcGaugeSvg
+                  ratio={Math.min(100, (Math.abs(ddVal) / 25) * 100)}
+                  tone="rose"
+                  title={`Máxima caída desde pico (Drawdown): ${ddVal.toFixed(2)}%`}
+                />
+              ) : undefined
+            }
             changePositive={false}
             delay={0.18}
             icon={<TrendingDown size={15} className="text-rose-500 dark:text-rose-400" />}
@@ -1699,26 +1745,66 @@ export function OverviewPage() {
       {/* Posiciones en Cartera (Full Width with 2 Parallel Columns) */}
       <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 500px' }}>
         <Card className="w-full relative overflow-hidden" delay={0.3} loading={isRefreshingPrices}>
-        <CardHeader>
+        <CardHeader className="flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
               <Layers className="w-4 h-4" />
             </div>
             <div className="flex items-baseline gap-2">
               <CardTitle>Posiciones en Cartera</CardTitle>
-              <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden sm:inline">
+              <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden md:inline">
                 • Indicador azul = NAV actualizado
               </span>
             </div>
           </div>
 
-          <Link
-            to="/positions"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08]"
-          >
-            <span>Ver todas ({positions.length})</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Interactive Quick-Sort Pills */}
+            <div className="hidden sm:flex items-center h-7.5 rounded-lg border border-slate-200/90 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#202022] p-0.5">
+              {(
+                [
+                  { id: 'broker', label: 'Entidad', title: 'Agrupar por entidad y valor' },
+                  { id: 'value', label: 'Valor €', title: 'Ordenar de mayor a menor valor actual' },
+                  { id: 'pnl', label: 'Plusvalía', title: 'Ordenar por mayor ganancia acumulada' },
+                  { id: 'day', label: 'Día 1D%', title: 'Ordenar por mejor rendimiento diario' },
+                ] as const
+              ).map((opt) => {
+                const active = positionsSortBy === opt.id
+                return (
+                  <motion.button
+                    key={opt.id}
+                    type="button"
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => setPositionsSortBy(opt.id)}
+                    title={opt.title}
+                    className={cn(
+                      'relative h-6 px-2 text-[11px] font-semibold rounded-md transition-colors cursor-pointer',
+                      active
+                        ? 'text-slate-900 dark:text-white font-bold'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                    )}
+                  >
+                    {active && (
+                      <motion.div
+                        layoutId="overviewPosSortPill"
+                        className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-2xs"
+                        transition={{ type: 'spring', bounce: 0.15, duration: 0.28 }}
+                      />
+                    )}
+                    <span className="relative z-10">{opt.label}</span>
+                  </motion.button>
+                )
+              })}
+            </div>
+
+            <Link
+              to="/positions"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08]"
+            >
+              <span>Ver todas ({positions.length})</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </CardHeader>
 
         {/* Dynamic Parallel Columns Grid (switches cleanly to full-width if <= 5 positions to avoid empty column) */}
@@ -1870,7 +1956,7 @@ export function OverviewPage() {
                             )}
                             <td className="py-2.5 pr-3 pl-1.5 text-right">
                               <div className="flex items-center justify-end gap-1.5">
-                                <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
+                                <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} active={isRowHovered} />
                                 <span
                                   className={cn(
                                     'font-mono font-bold text-right text-[13px] transition-colors',
@@ -2024,7 +2110,7 @@ export function OverviewPage() {
                               )}
                               <td className="py-2.5 pr-3 pl-1.5 text-right">
                                 <div className="flex items-center justify-end gap-1.5">
-                                  <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} />
+                                  <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} active={isRowHovered} />
                                   <span
                                     className={cn(
                                       'font-mono font-bold text-right text-[13px] transition-colors',

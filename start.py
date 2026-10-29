@@ -70,7 +70,7 @@ def free_port(port: int):
 
 def open_browser():
     """Abrir dashboard una vez que frontend y backend hayan arrancado."""
-    wait_for_port(5173, timeout=15.0)
+    wait_for_port(5173, timeout=5.0)
     time.sleep(0.5)
     try:
         webbrowser.open("http://localhost:5173")
