@@ -1825,6 +1825,16 @@ export function OverviewPage() {
               {/* Column 1: Top Positions */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
+                    <colgroup>
+                      <col className="w-7 shrink-0" />
+                      <col className="min-w-[170px]" />
+                      <col className="w-[84px] sm:w-[94px]" />
+                      <col className="w-[80px] sm:w-[90px]" />
+                      <col className="w-[102px] sm:w-[116px]" />
+                      <col className="w-[102px] sm:w-[116px]" />
+                      {!isNativePlatform() && <col className="w-[84px] sm:w-[92px]" />}
+                      <col className="w-[74px] sm:w-[82px]" />
+                    </colgroup>
                   <thead>
                     <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
@@ -1888,7 +1898,7 @@ export function OverviewPage() {
                                   size="sm"
                                 />
                                 <div className="min-w-0">
-                                  <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
+                                  <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[210px] sm:max-w-[280px] xl:max-w-[250px] 2xl:max-w-[360px] text-[14px]">
                                     {formatAssetDisplayName(p.name, true)}
                                   </div>
                                   <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
@@ -1979,6 +1989,16 @@ export function OverviewPage() {
               {hasSecondColumn && (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
+                    <colgroup>
+                      <col className="w-7 shrink-0" />
+                      <col className="min-w-[170px]" />
+                      <col className="w-[84px] sm:w-[94px]" />
+                      <col className="w-[80px] sm:w-[90px]" />
+                      <col className="w-[102px] sm:w-[116px]" />
+                      <col className="w-[102px] sm:w-[116px]" />
+                      {!isNativePlatform() && <col className="w-[84px] sm:w-[92px]" />}
+                      <col className="w-[74px] sm:w-[82px]" />
+                    </colgroup>
                     <thead className="hidden xl:table-header-group">
                       <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
@@ -2042,7 +2062,7 @@ export function OverviewPage() {
                                     size="sm"
                                   />
                                   <div className="min-w-0">
-                                    <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[110px] sm:max-w-[130px] 2xl:max-w-[160px] text-[14px]">
+                                    <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[210px] sm:max-w-[280px] xl:max-w-[250px] 2xl:max-w-[360px] text-[14px]">
                                       {formatAssetDisplayName(p.name, true)}
                                     </div>
                                     <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
