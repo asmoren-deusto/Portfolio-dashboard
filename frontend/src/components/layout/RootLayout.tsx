@@ -132,15 +132,17 @@ export function RootLayout() {
               queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'active' }),
               queryClient.invalidateQueries({ queryKey: ['benchmark-comparison'], refetchType: 'active' }),
             ])
-            // Show pop-up notification only for truly unseen background updates
-            setNavAlertNotification({
-              id: alert.id,
-              timestamp: alert.timestamp || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-              updatedCount: unseenItems.length,
-              totalCount: alert.totalCount ?? alert.total_count ?? 0,
-              items: unseenItems,
-              allCheckedItems: [],
-            })
+            // Show pop-up notification only for fresh background updates (avoid popups for old updates)
+            if (!res.is_stale) {
+              setNavAlertNotification({
+                id: alert.id,
+                timestamp: alert.timestamp || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                updatedCount: unseenItems.length,
+                totalCount: alert.totalCount ?? alert.total_count ?? 0,
+                items: unseenItems,
+                allCheckedItems: [],
+              })
+            }
           }
         }
       } catch {
@@ -161,6 +163,7 @@ export function RootLayout() {
         queryClient.invalidateQueries({ queryKey: ['simulated-portfolio'], refetchType: 'active' })
         queryClient.invalidateQueries({ queryKey: ['summary'], refetchType: 'active' })
         queryClient.invalidateQueries({ queryKey: ['positions'], refetchType: 'active' })
+        queryClient.invalidateQueries({ queryKey: ['performance'], refetchType: 'active' })
       }
     }
 

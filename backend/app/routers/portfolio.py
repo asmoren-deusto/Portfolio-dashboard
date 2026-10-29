@@ -403,10 +403,15 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
     sem = asyncio.Semaphore(6)
 
     async def _fetch_one(isin, pos):
-        asset = _get_asset(db, isin)
-        ticker = asset.ticker if asset else None
-        async with sem:
-            p, p_date = await get_price_with_date(isin, ticker, db=db, force=True)
+        from app.database import SessionLocal
+        task_db = SessionLocal()
+        try:
+            asset = _get_asset(task_db, isin)
+            ticker = asset.ticker if asset else None
+            async with sem:
+                p, p_date = await get_price_with_date(isin, ticker, db=task_db, force=True)
+        finally:
+            task_db.close()
         prev = prev_prices.get(isin, {})
         prev_p = prev.get("price")
         prev_d = prev.get("date")
@@ -568,12 +573,13 @@ def get_latest_nav_alert(since: str | None = None):
     # and must NOT trigger automatic invasive popups upon opening the app.
     import time
     created_at = _latest_nav_alert.get("created_at_ts")
+    is_stale = False
     if created_at:
         age_seconds = time.time() - created_at
         if age_seconds > 1800:
-            return {"has_update": False, "alert": _latest_nav_alert, "is_stale": True}
+            is_stale = True
 
-    return {"has_update": True, "alert": _latest_nav_alert}
+    return {"has_update": True, "alert": _latest_nav_alert, "is_stale": is_stale}
 
 
 @router.post("/update-price")

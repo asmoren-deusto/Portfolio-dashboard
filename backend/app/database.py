@@ -11,6 +11,19 @@ engine = create_engine(
     f"sqlite:///{DB_PATH}",
     connect_args={"check_same_thread": False},
 )
+
+from sqlalchemy import event
+
+
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA journal_mode = WAL")
+    cursor.execute("PRAGMA busy_timeout = 10000")
+    cursor.execute("PRAGMA synchronous = NORMAL")
+    cursor.close()
+
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

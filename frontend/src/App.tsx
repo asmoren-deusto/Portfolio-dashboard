@@ -42,7 +42,7 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      refetchOnMount: false,
+      refetchOnMount: true, // Auto-refresh views if data is older than staleTime
       staleTime: 1000 * 60 * 5, // 5 minutes cache freshness
       gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
     },

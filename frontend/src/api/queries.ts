@@ -90,7 +90,7 @@ export async function refreshPortfolioPrices(userId = 'asier') {
 
 export async function fetchLatestNavAlert(since?: string | null) {
   const query = since ? `?since=${encodeURIComponent(since)}` : ''
-  return get<{ has_update: boolean; alert: any }>(`/portfolio/latest-nav-alert${query}`)
+  return get<{ has_update: boolean; alert: any; is_stale?: boolean }>(`/portfolio/latest-nav-alert${query}`)
 }
 
 export async function prefetchAllBrokers(
