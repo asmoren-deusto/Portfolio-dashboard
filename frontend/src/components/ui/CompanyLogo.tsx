@@ -305,6 +305,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   const isSpanishBond =
     Boolean(isin && isin === 'ES0000012411') ||
     (name || '').toLowerCase().includes('españa gobierno') ||
+    (name || '').toLowerCase().includes('bonos gob. españa') ||
     (name || '').toLowerCase().includes('bonos y obligaciones del estado') ||
     (name || '').toLowerCase().includes('bono español')
 

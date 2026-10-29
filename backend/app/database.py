@@ -144,6 +144,7 @@ def _seed_asier_data():
                 else:
                     existing = db.query(Asset).filter(Asset.isin == a_data["isin"]).first()
                     if existing:
+                        existing.name = a_data["name"]
                         if a_data.get("ticker"):
                             existing.ticker = a_data["ticker"]
                         if a_data.get("morningstar_id"):

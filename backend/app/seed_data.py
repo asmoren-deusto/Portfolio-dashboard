@@ -157,7 +157,7 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "ES0000012411",
-    "name": "España Gobierno 5,75% Vto 30-Jul-2032 (Bonos y Obligaciones del Estado)",
+    "name": "Bonos Gob. España 5,75% Jul-2032",
     "ticker": null,
     "asset_type": "bond",
     "currency": "EUR",
