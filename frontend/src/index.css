@@ -541,19 +541,7 @@
 }
 
 
-/* ── Interactive Cursor Spotlight & Compositor Micro-Animations ── */
-.card-interactive-lift {
-  transition:
-    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.2s ease-out,
-    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
-}
-
-.card-interactive-lift:hover {
-  transform: translate3d(0, -1.5px, 0);
-}
-
+/* ── Dynamic SVG Pulse Node & Reduced Motion ── */
 @keyframes svgPulseNode {
   0%, 100% {
     transform: scale(1);
@@ -580,7 +568,4 @@
     animation: none !important;
   }
 
-  .card-interactive-lift:hover {
-    transform: none !important;
-  }
 }

@@ -107,7 +107,7 @@ function KpiCardComponent({
       tabIndex={onClick ? 0 : undefined}
       title={title}
       className={cn(
-        'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 card-interactive-lift',
+        'group relative overflow-hidden rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 transition-[border-color,box-shadow,background-color] duration-200 ease-out',
         onClick ? 'cursor-pointer active:scale-[0.99]' : 'cursor-card',
         'bg-white/95 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
         'dark:bg-[#1e1e1e]/96 dark:border-white/[0.08] dark:hover:border-white/[0.16]',
