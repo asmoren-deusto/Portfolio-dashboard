@@ -397,24 +397,8 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           </div>
         </div>
 
-        {/* Controls: Sector Filter, Height Toggle, Legend & Fullscreen */}
+        {/* Controls: Legend, Fullscreen & View Market */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          {/* Sector Selector */}
-          <div className="relative">
-            <select
-              value={activeSector}
-              onChange={(e) => setSector(e.target.value)}
-              className="appearance-none max-w-[120px] sm:max-w-none pl-2.5 pr-6 py-1.5 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500/50 cursor-pointer truncate"
-            >
-              {sectors.map((sec) => (
-                <option key={sec} value={sec}>
-                  {sec === 'Todos' ? 'Todos los Sectores' : sec}
-                </option>
-              ))}
-            </select>
-            <Filter className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
-          </div>
-
           {/* Color Scale Legend */}
           <div
             className="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.06] text-xs font-mono font-medium"
@@ -436,37 +420,6 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               {isIndicesMode ? '+1%' : '+3%'}
             </span>
           </div>
-
-          {/* Height Adjuster Button (Toggle between Standard and Expanded) */}
-          {!isFullscreen && (
-            <button
-              onClick={() =>
-                setHeightMode((prev) => (prev === 'expanded' ? 'standard' : 'expanded'))
-              }
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all shrink-0 ${
-                heightMode === 'expanded'
-                  ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-white/[0.08] dark:text-white dark:border-white/20'
-                  : 'bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 dark:bg-[#252526] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08]'
-              }`}
-              title={
-                heightMode === 'expanded'
-                  ? 'Altura ampliada (clic para altura estándar)'
-                  : 'Altura estándar (clic para ampliar hacia abajo)'
-              }
-            >
-              {heightMode === 'expanded' ? (
-                <>
-                  <ChevronsUp className="w-3.5 h-3.5 text-blue-600 dark:text-white" />
-                  <span className="hidden lg:inline">Ajustar</span>
-                </>
-              ) : (
-                <>
-                  <ChevronsDown className="w-3.5 h-3.5" />
-                  <span className="hidden lg:inline">Ampliar</span>
-                </>
-              )}
-            </button>
-          )}
 
           {/* Fullscreen Button */}
           <button
