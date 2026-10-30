@@ -74,14 +74,14 @@ export function Sidebar({ }: SidebarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setMobileSidebarOpen(false)}
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs cursor-pointer"
+            className="fixed inset-0 z-[65] bg-black/50 backdrop-blur-xs cursor-pointer"
           />
         )}
       </AnimatePresence>
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#1c1c1c] transition-transform duration-300 ease-in-out shadow-lg',
+          'fixed inset-y-0 left-0 z-[70] md:z-50 flex w-[230px] flex-col border-r border-slate-200/90 bg-white dark:border-white/[0.08] dark:bg-[#1c1c1c] transition-transform duration-300 ease-in-out shadow-lg',
           sidebarCollapsed
             ? mobileSidebarOpen
               ? 'translate-x-0'

@@ -798,7 +798,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
             {/* Dotted Vertical Session & Phase Markers: overflow-visible para que salgan libremente del marco de la gráfica si quedan en el borde sin cortarse */}
             {period === '1d' && (
-              <div className="absolute inset-0 pointer-events-none z-30 overflow-visible">
+              <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
                 {markerPositions.map(({ marker, x }, index) => {
                   const isCierre = marker.type === 'cierre_ayer'
                   const isTokyo = marker.type === 'tokyo'
