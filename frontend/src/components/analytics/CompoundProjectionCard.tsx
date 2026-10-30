@@ -357,8 +357,9 @@ export function CompoundProjectionCard({
             </div>
           </div>
 
-          <div className="h-[180px] min-h-[175px] flex-1 w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="relative h-[220px] min-h-[200px] flex-1 w-full">
+            <div className="absolute inset-0">
+              <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={simulation.points}
                 margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
@@ -462,6 +463,7 @@ export function CompoundProjectionCard({
                 />
               </AreaChart>
             </ResponsiveContainer>
+            </div>
           </div>
         </div>
 

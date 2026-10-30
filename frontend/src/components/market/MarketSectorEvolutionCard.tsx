@@ -719,3 +719,4 @@ export const MarketSectorEvolutionCard: React.FC<MarketSectorEvolutionCardProps>
     </Card>
   )
 }
+
