@@ -609,3 +609,31 @@ export function useSimulatedPortfolio(period: string = '1d') {
 }
 
 
+// ── Market Sector Evolution & Rotation History ────────────────────────────────
+export interface SectorHistoryMeta {
+  key: string
+  sector: string
+  ticker: string
+  color: string
+  return_pct: number
+  step_change_pct: number
+  high_pct: number
+  low_pct: number
+}
+
+export interface SectorHistoryResponse {
+  period: string
+  points: Array<Record<string, number | string>>
+  sectors: SectorHistoryMeta[]
+  cache_timestamp: string
+}
+
+export function useMarketSectorHistory(period: string = '3mo') {
+  return useQuery<SectorHistoryResponse>({
+    queryKey: ['market-sector-history', period],
+    queryFn: () => get<SectorHistoryResponse>(`/market/sector-history?period=${period}`),
+    placeholderData: (prev) => prev,
+    staleTime: 1000 * 60 * 5, // 5 min
+    refetchIntervalInBackground: false,
+  })
+}

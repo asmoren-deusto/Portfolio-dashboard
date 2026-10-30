@@ -31,6 +31,7 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { SimulatedPortfolioCard } from '@/components/market/SimulatedPortfolioCard'
+import { MarketSectorEvolutionCard } from '@/components/market/MarketSectorEvolutionCard'
 import { fmt } from '@/lib/utils'
 
 const INDEX_TABS = [
@@ -302,6 +303,18 @@ export const MarketPage: React.FC = () => {
         worstStock={worstStock}
         totalStocks={data?.stocks.length}
         onSelectStock={setSelectedStock}
+      />
+
+      {/* Sector Evolution & Relative Strength Rotation */}
+      <MarketSectorEvolutionCard
+        stocks={quoteData?.stocks ?? data?.stocks ?? []}
+        selectedSector={selectedSector}
+        onSelectSector={(sector) => {
+          if (selectedIndex === 'TICKER' && sector !== 'Todos') {
+            setSelectedIndex('Todos')
+          }
+          setSelectedSector(sector)
+        }}
       />
 
       {/* Controls & Filter Bar (Single Unified Row) */}

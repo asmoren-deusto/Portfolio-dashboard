@@ -1745,3 +1745,123 @@ async def get_simulated_portfolio(
 
 
 # ── Curated stock universe with metadata ───────────────────────────────────────
+
+
+# ── Sector Evolution & Rotation History (SPDR Sector ETFs) ─────────────────────
+SECTOR_ETFS = [
+    {"key": "tecnologia",   "sector": "Tecnología",      "ticker": "XLK", "color": "#3b82f6"},
+    {"key": "consumo",      "sector": "Consumo",         "ticker": "XLY", "color": "#f59e0b"},
+    {"key": "financiero",   "sector": "Financiero",      "ticker": "XLF", "color": "#10b981"},
+    {"key": "salud",        "sector": "Salud",           "ticker": "XLV", "color": "#ec4899"},
+    {"key": "industrial",   "sector": "Industrial",      "ticker": "XLI", "color": "#8b5cf6"},
+    {"key": "comunicacion", "sector": "Comunicación",    "ticker": "XLC", "color": "#06b6d4"},
+    {"key": "energia",      "sector": "Energía",         "ticker": "XLE", "color": "#ef4444"},
+    {"key": "materias",     "sector": "Materias Primas", "ticker": "GLD", "color": "#eab308"},
+]
+
+_sector_history_cache: dict[str, dict] = {}
+SECTOR_HISTORY_CACHE_TTL = 300  # 5 minutes
+
+
+def _fetch_sector_history_sync(period: str = "3mo") -> dict:
+    import yfinance as yf
+    import pandas as pd
+
+    valid_periods = {"5d", "1mo", "3mo", "6mo", "1y"}
+    if period not in valid_periods:
+        period = "3mo"
+
+    interval = "1h" if period == "5d" else "1d"
+    tickers = [s["ticker"] for s in SECTOR_ETFS]
+
+    points = []
+    sectors_summary = []
+
+    try:
+        df = yf.download(
+            tickers,
+            period=period,
+            interval=interval,
+            progress=False,
+            threads=True,
+            auto_adjust=True,
+        )
+
+        if not df.empty and "Close" in df:
+            closes = df["Close"]
+            if isinstance(closes, pd.Series):
+                closes = closes.to_frame(name=tickers[0])
+            closes = closes.ffill().bfill().dropna(how="all")
+
+            if not closes.empty and len(closes) >= 2:
+                base_row = closes.iloc[0]
+                norm_df = ((closes - base_row) / base_row) * 100.0
+
+                for idx, row in norm_df.iterrows():
+                    dt = idx.to_pydatetime() if hasattr(idx, "to_pydatetime") else idx
+                    if period == "5d":
+                        label = dt.strftime("%d %b %H:%M")
+                        date_str = dt.strftime("%Y-%m-%d %H:%M")
+                    elif period in ("1mo", "3mo"):
+                        label = dt.strftime("%d %b")
+                        date_str = dt.strftime("%Y-%m-%d")
+                    else:
+                        label = dt.strftime("%d %b %y")
+                        date_str = dt.strftime("%Y-%m-%d")
+
+                    pt: dict = {"date": date_str, "label": label}
+                    for s in SECTOR_ETFS:
+                        tk = s["ticker"]
+                        val = row.get(tk)
+                        pt[s["key"]] = round(float(val), 2) if (val is not None and not pd.isna(val)) else 0.0
+                    points.append(pt)
+
+                last_row = norm_df.iloc[-1]
+                prev_row = norm_df.iloc[-2] if len(norm_df) >= 2 else base_row * 0.0
+
+                for s in SECTOR_ETFS:
+                    tk = s["ticker"]
+                    cum_ret = round(float(last_row.get(tk, 0.0)), 2) if not pd.isna(last_row.get(tk)) else 0.0
+                    prev_ret = float(prev_row.get(tk, 0.0)) if not pd.isna(prev_row.get(tk)) else 0.0
+                    step_chg = round(cum_ret - prev_ret, 2)
+
+                    series_vals = norm_df[tk].dropna().tolist() if tk in norm_df else [0.0]
+                    max_ret = round(float(max(series_vals)), 2) if series_vals else cum_ret
+                    min_ret = round(float(min(series_vals)), 2) if series_vals else cum_ret
+
+                    sectors_summary.append({
+                        "key": s["key"],
+                        "sector": s["sector"],
+                        "ticker": tk,
+                        "color": s["color"],
+                        "return_pct": cum_ret,
+                        "step_change_pct": step_chg,
+                        "high_pct": max_ret,
+                        "low_pct": min_ret,
+                    })
+    except Exception as e:
+        logger.warning(f"Error fetching sector evolution history ({period}): {e}")
+
+    sectors_summary.sort(key=lambda x: x["return_pct"], reverse=True)
+
+    return _sanitize_for_json({
+        "period": period,
+        "points": points,
+        "sectors": sectors_summary,
+        "cache_timestamp": _now_iso(),
+    })
+
+
+@router.get("/sector-history")
+async def get_sector_history(period: str = "3mo"):
+    """Historical percentage evolution by market sector (SPDR Sector ETFs)."""
+    now = time.time()
+    if period in _sector_history_cache:
+        entry = _sector_history_cache[period]
+        if now - entry["ts"] < SECTOR_HISTORY_CACHE_TTL:
+            return entry["data"]
+
+    data = await asyncio.to_thread(_fetch_sector_history_sync, period)
+    if data.get("points"):
+        _sector_history_cache[period] = {"data": data, "ts": now}
+    return data
