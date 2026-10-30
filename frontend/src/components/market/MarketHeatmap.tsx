@@ -34,6 +34,7 @@ interface MarketHeatmapProps {
   showViewAllLink?: boolean
   isIndices?: boolean
   defaultExpanded?: boolean
+  compact?: boolean
 }
 
 const HEADER_HEIGHT = 24
@@ -230,9 +231,10 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
   showViewAllLink = false,
   isIndices: propIsIndices,
   defaultExpanded = true,
+  compact = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [dimensions, setDimensions] = useState({ width: 0, height: 760 })
+  const [dimensions, setDimensions] = useState({ width: 0, height: compact ? 400 : 760 })
   const [heightMode, setHeightMode] = useState<'standard' | 'expanded'>(
     defaultExpanded ? 'expanded' : 'standard'
   )
@@ -255,6 +257,8 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
         let computedHeight = 720
         if (isFullscreen) {
           computedHeight = Math.max(500, window.innerHeight - 130)
+        } else if (compact) {
+          computedHeight = heightMode === 'expanded' ? 540 : 400
         } else if (clientWidth < 640) {
           // Responsive compact mobile height to prevent DOM overload
           computedHeight = heightMode === 'expanded' ? 520 : 420
@@ -278,7 +282,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
     observer.observe(containerRef.current)
 
     return () => observer.disconnect()
-  }, [isFullscreen, heightMode])
+  }, [isFullscreen, heightMode, compact])
 
   // Fullscreen escape key
   useEffect(() => {

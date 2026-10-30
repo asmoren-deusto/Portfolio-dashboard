@@ -335,215 +335,212 @@ export function CompoundProjectionCard({
           </div>
         </div>
 
-        {/* Main Monte Carlo Cone Chart + 4 KPI Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 items-stretch flex-1">
-          {/* Cone Chart */}
-          <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-3.5 sm:p-4 flex flex-col justify-between h-full">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                Curva de Crecimiento Exponencial a {horizonYears} Años ({new Date().getFullYear() + horizonYears})
+        {/* Main Monte Carlo Cone Chart (Full Width, Compact Height) */}
+        <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 flex flex-col justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Curva de Crecimiento Exponencial a {horizonYears} Años ({new Date().getFullYear() + horizonYears})
+            </span>
+            <div className="flex items-center gap-3 text-[11px] font-mono">
+              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                Optimista P85
               </span>
-              <div className="flex items-center gap-3 text-[11px] font-mono">
-                <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  Optimista P85
-                </span>
-                <span className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-bold">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />
-                  Base P50
-                </span>
-                <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400">
-                  <span className="w-2 h-0.5 bg-indigo-400" />
-                  Aportado
-                </span>
-              </div>
-            </div>
-
-            <div className="h-[245px] min-h-[235px] flex-1 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={simulation.points}
-                  margin={{ top: 10, right: 8, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="projOptGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.16} />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
-                    </linearGradient>
-                    <linearGradient id="projBaseGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.32} />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.04} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="rgba(148, 163, 184, 0.12)"
-                  />
-                  <XAxis
-                    dataKey="yearLabel"
-                    tick={{ fontSize: 10.5, fill: '#94a3b8' }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10.5, fill: '#94a3b8' }}
-                    tickLine={false}
-                    axisLine={false}
-                    width={62}
-                    tickFormatter={(v: number) =>
-                      v >= 1000000
-                        ? `${(v / 1000000).toFixed(1)}M€`
-                        : `${Math.round(v / 1000)}k€`
-                    }
-                  />
-                  <RechartsTooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload || !payload.length) return null
-                      const pt = payload[0].payload as (typeof simulation.points)[0]
-                      const gain = pt.base - pt.invested
-                      return (
-                        <div className="px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1e1e24]/95 border border-slate-200 dark:border-white/10 shadow-xl text-xs font-mono space-y-1">
-                          <div className="font-sans font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/10 pb-1">
-                            Año {pt.yearLabel} ({pt.yearOffset === 0 ? 'Actual' : `+${pt.yearOffset} años`})
-                          </div>
-                          <div className="flex justify-between gap-4 text-emerald-600 dark:text-emerald-400">
-                            <span>Optimista (P85):</span>
-                            <span className="font-bold">{fmt.currency(pt.optimistic)}</span>
-                          </div>
-                          <div className="flex justify-between gap-4 text-blue-600 dark:text-blue-400">
-                            <span>Escenario Base:</span>
-                            <span className="font-bold">{fmt.currency(pt.base)}</span>
-                          </div>
-                          <div className="flex justify-between gap-4 text-amber-600 dark:text-amber-400">
-                            <span>Conservador (P15):</span>
-                            <span className="font-bold">{fmt.currency(pt.conservative)}</span>
-                          </div>
-                          <div className="flex justify-between gap-4 text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-white/10">
-                            <span>Capital Aportado:</span>
-                            <span>{fmt.currency(pt.invested)}</span>
-                          </div>
-                          <div className="flex justify-between gap-4 text-indigo-600 dark:text-indigo-400 font-bold">
-                            <span>Interés Compuesto:</span>
-                            <span>+{fmt.currency(gain)}</span>
-                          </div>
-                        </div>
-                      )
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="optimistic"
-                    stroke="#10b981"
-                    strokeWidth={1.5}
-                    strokeDasharray="3 3"
-                    fill="url(#projOptGrad)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="base"
-                    stroke="#3b82f6"
-                    strokeWidth={2.5}
-                    fill="url(#projBaseGrad)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="conservative"
-                    stroke="#f59e0b"
-                    strokeWidth={1.5}
-                    strokeDasharray="2 2"
-                    fill="none"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="invested"
-                    stroke="#6366f1"
-                    strokeWidth={1.8}
-                    strokeDasharray="5 4"
-                    fill="none"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <span className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-bold">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                Base P50
+              </span>
+              <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                <span className="w-2 h-0.5 bg-indigo-400" />
+                Aportado
+              </span>
             </div>
           </div>
 
-          {/* Right Insights Column */}
-          <div className="flex flex-col justify-between gap-2.5">
-            {/* Final Expected Capital */}
-            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/25">
-              <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 block">
-                Patrimonio Estimado ({horizonYears} Años)
+          <div className="h-[175px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={simulation.points}
+                margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="projOptGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.16} />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="projBaseGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.32} />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.04} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="rgba(148, 163, 184, 0.12)"
+                />
+                <XAxis
+                  dataKey="yearLabel"
+                  tick={{ fontSize: 10.5, fill: '#94a3b8' }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 10.5, fill: '#94a3b8' }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={56}
+                  tickFormatter={(v: number) =>
+                    v >= 1000000
+                      ? `${(v / 1000000).toFixed(1)}M€`
+                      : `${Math.round(v / 1000)}k€`
+                  }
+                />
+                <RechartsTooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload || !payload.length) return null
+                    const pt = payload[0].payload as (typeof simulation.points)[0]
+                    const gain = pt.base - pt.invested
+                    return (
+                      <div className="px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-[#1e1e24]/95 border border-slate-200 dark:border-white/10 shadow-xl text-xs font-mono space-y-1">
+                        <div className="font-sans font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/10 pb-1">
+                          Año {pt.yearLabel} ({pt.yearOffset === 0 ? 'Actual' : `+${pt.yearOffset} años`})
+                        </div>
+                        <div className="flex justify-between gap-4 text-emerald-600 dark:text-emerald-400">
+                          <span>Optimista (P85):</span>
+                          <span className="font-bold">{fmt.currency(pt.optimistic)}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 text-blue-600 dark:text-blue-400">
+                          <span>Escenario Base:</span>
+                          <span className="font-bold">{fmt.currency(pt.base)}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 text-amber-600 dark:text-amber-400">
+                          <span>Conservador (P15):</span>
+                          <span className="font-bold">{fmt.currency(pt.conservative)}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-white/10">
+                          <span>Capital Aportado:</span>
+                          <span>{fmt.currency(pt.invested)}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 text-indigo-600 dark:text-indigo-400 font-bold">
+                          <span>Interés Compuesto:</span>
+                          <span>+{fmt.currency(gain)}</span>
+                        </div>
+                      </div>
+                    )
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="optimistic"
+                  stroke="#10b981"
+                  strokeWidth={1.5}
+                  strokeDasharray="3 3"
+                  fill="url(#projOptGrad)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="base"
+                  stroke="#3b82f6"
+                  strokeWidth={2.5}
+                  fill="url(#projBaseGrad)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="conservative"
+                  stroke="#f59e0b"
+                  strokeWidth={1.5}
+                  strokeDasharray="2 2"
+                  fill="none"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="invested"
+                  stroke="#6366f1"
+                  strokeWidth={1.8}
+                  strokeDasharray="5 4"
+                  fill="none"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Bottom Insights Row (Horizontal 3 Columns Below Chart) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
+          {/* Final Expected Capital */}
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/25 flex flex-col justify-between">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 block">
+              Patrimonio Estimado ({horizonYears} Años)
+            </span>
+            <div className="text-xl sm:text-2xl font-bold font-mono text-slate-950 dark:text-white mt-0.5">
+              {fmt.currency(simulation.finalPoint.base)}
+            </div>
+            <div className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
+              +{fmt.currency(simulation.totalCompoundGain)} ganancia ({simulation.compoundSharePct.toFixed(0)}% del total)
+            </div>
+          </div>
+
+          {/* Snowball Crossover Insight */}
+          <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] flex flex-col justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+              <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span>Efecto Bola de Nieve</span>
+            </div>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
+              {simulation.snowballCrossoverYear === 0 ? (
+                <>
+                  ¡Alcanzado! Tu cartera ya genera{' '}
+                  <strong className="font-mono text-emerald-600 dark:text-emerald-400">
+                    {fmt.currency(simulation.points[0].annualGain)}/año
+                  </strong>
+                  , superando tu aportación anual de{' '}
+                  <strong className="font-mono">{fmt.currency(monthlyDca * 12)}</strong>.
+                </>
+              ) : simulation.snowballCrossoverYear !== null ? (
+                <>
+                  En{' '}
+                  <strong className="font-mono text-amber-600 dark:text-amber-400">
+                    {new Date().getFullYear() + simulation.snowballCrossoverYear} (+
+                    {simulation.snowballCrossoverYear} años)
+                  </strong>{' '}
+                  el retorno anual de tu cartera superará lo que aportas de tu bolsillo.
+                </>
+              ) : (
+                <>
+                  Al final del año {horizonYears}, tu cartera generará{' '}
+                  <strong className="font-mono text-emerald-600 dark:text-emerald-400">
+                    {fmt.currency(simulation.finalPoint.annualGain)}/año
+                  </strong>{' '}
+                  de forma autónoma.
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* Safe Withdrawal Rate (4% Rule) */}
+          <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                Renta Perpetua (Regla 4% SWR)
               </span>
-              <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-0.5">
-                {fmt.currency(simulation.finalPoint.base)}
-              </div>
-              <div className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
-                +{fmt.currency(simulation.totalCompoundGain)} ganancia ({simulation.compoundSharePct.toFixed(0)}% del total)
-              </div>
             </div>
-
-            {/* Snowball Crossover Insight */}
-            <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06]">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span>Efecto Bola de Nieve</span>
-              </div>
-              <p className="text-[11.5px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
-                {simulation.snowballCrossoverYear === 0 ? (
-                  <>
-                    ¡Alcanzado! Tu cartera ya genera{' '}
-                    <strong className="font-mono text-emerald-600 dark:text-emerald-400">
-                      {fmt.currency(simulation.points[0].annualGain)}/año
-                    </strong>
-                    , superando tu aportación anual de{' '}
-                    <strong className="font-mono">{fmt.currency(monthlyDca * 12)}</strong>.
-                  </>
-                ) : simulation.snowballCrossoverYear !== null ? (
-                  <>
-                    En{' '}
-                    <strong className="font-mono text-amber-600 dark:text-amber-400">
-                      {new Date().getFullYear() + simulation.snowballCrossoverYear} (+
-                      {simulation.snowballCrossoverYear} años)
-                    </strong>{' '}
-                    el retorno anual de tu cartera superará lo que aportas de tu bolsillo.
-                  </>
-                ) : (
-                  <>
-                    Al final del año {horizonYears}, tu cartera generará{' '}
-                    <strong className="font-mono text-emerald-600 dark:text-emerald-400">
-                      {fmt.currency(simulation.finalPoint.annualGain)}/año
-                    </strong>{' '}
-                    de forma autónoma.
-                  </>
-                )}
-              </p>
-            </div>
-
-            {/* Safe Withdrawal Rate (4% Rule) */}
-            <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06]">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
-                <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-                  Renta Perpetua (Regla 4% SWR)
+            <div className="grid grid-cols-2 gap-2 mt-1.5 text-xs font-mono">
+              <div className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#222225] border border-slate-200/70 dark:border-white/[0.05]">
+                <span className="text-[10px] font-sans text-slate-500 dark:text-slate-400 block">
+                  Renta Hoy
+                </span>
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {fmt.currency(simulation.swrMonthlyNow)}/m
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 mt-2 text-xs font-mono">
-                <div className="p-2 rounded-xl bg-white dark:bg-[#222225] border border-slate-200/70 dark:border-white/[0.05]">
-                  <span className="text-[10px] font-sans text-slate-500 dark:text-slate-400 block">
-                    Renta Hoy
-                  </span>
-                  <span className="font-bold text-slate-900 dark:text-white">
-                    {fmt.currency(simulation.swrMonthlyNow)}/m
-                  </span>
-                </div>
-                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                  <span className="text-[10px] font-sans text-emerald-700 dark:text-emerald-300 block">
-                    En {horizonYears} Años
-                  </span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {fmt.currency(simulation.swrMonthlyFuture)}/m
-                  </span>
-                </div>
+              <div className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <span className="text-[10px] font-sans text-emerald-700 dark:text-emerald-300 block">
+                  En {horizonYears} Años
+                </span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                  {fmt.currency(simulation.swrMonthlyFuture)}/m
+                </span>
               </div>
             </div>
           </div>

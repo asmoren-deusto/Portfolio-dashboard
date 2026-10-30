@@ -2204,13 +2204,13 @@ export function OverviewPage() {
       </Card>
     </div>
 
-      {/* ── Proyección Patrimonial (66%) y Mapa de Calor del Mercado (33%) ── */}
+      {/* ── Proyección Patrimonial (60%) y Mapa de Calor del Mercado (40%) ── */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch"
+        className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch"
         style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 480px' }}
       >
-        {/* Columna Izquierda (66%): Proyección de Interés Compuesto, Cono Monte Carlo y Bola de Nieve */}
-        <div className="w-full h-full lg:col-span-2 flex flex-col">
+        {/* Columna Izquierda (60%): Proyección de Interés Compuesto, Cono Monte Carlo y Bola de Nieve */}
+        <div className="w-full h-full lg:col-span-3 flex flex-col">
           {displaySummary ? (
             <CompoundProjectionCard
               currentValue={displaySummary.total_value}
@@ -2226,14 +2226,15 @@ export function OverviewPage() {
           )}
         </div>
 
-        {/* Columna Derecha (33%): Mapa de Calor del Mercado */}
-        <div className="w-full h-full lg:col-span-1 flex flex-col">
+        {/* Columna Derecha (40%): Mapa de Calor del Mercado */}
+        <div className="w-full h-full lg:col-span-2 flex flex-col">
           {marketData?.stocks && marketData.stocks.length > 0 ? (
             <MarketHeatmap
               stocks={marketData.stocks}
               onSelectStock={(s) => setSelectedStock(s)}
               showViewAllLink
               defaultExpanded={false}
+              compact
             />
           ) : (
             <div className="h-64 rounded-[22px] bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
