@@ -357,7 +357,7 @@ export function CompoundProjectionCard({
             </div>
           </div>
 
-          <div className="relative h-[220px] min-h-[200px] flex-1 w-full">
+          <div className="relative h-[220px] min-h-[220px] grow w-full">
             <div className="absolute inset-0">
               <ResponsiveContainer width="100%" height="100%">
               <AreaChart

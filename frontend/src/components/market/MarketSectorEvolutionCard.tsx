@@ -412,7 +412,8 @@ export const MarketSectorEvolutionCard: React.FC<MarketSectorEvolutionCardProps>
               </span>
             </div>
 
-            <div className="h-[285px] w-full">
+            <div className="relative h-[285px] min-h-[285px] grow w-full">
+              <div className="absolute inset-0">
               {chartMode === 'lines' ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={points} margin={{ top: 8, right: 12, left: -6, bottom: 2 }}>
@@ -573,6 +574,7 @@ export const MarketSectorEvolutionCard: React.FC<MarketSectorEvolutionCardProps>
                   </BarChart>
                 </ResponsiveContainer>
               )}
+              </div>
             </div>
           </div>
 

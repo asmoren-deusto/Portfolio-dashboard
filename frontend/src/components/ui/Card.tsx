@@ -31,7 +31,7 @@ export function Card({ children, className, glass = false, loading = false }: Ca
       <div
         onMouseMove={handleMouseMove}
         className={cn(
-          'group/card relative rounded-[22px] overflow-hidden transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
+          'group/card relative shrink-0 rounded-[22px] overflow-hidden transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
           'bg-gradient-to-b from-white via-white/98 to-slate-50/70 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
           'dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:border-white/[0.08] dark:hover:border-white/[0.16]',
           glass && 'backdrop-blur-md',
