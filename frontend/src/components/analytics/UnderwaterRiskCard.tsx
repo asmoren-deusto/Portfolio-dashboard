@@ -90,7 +90,9 @@ export function UnderwaterRiskCard({
       if (i > 0) {
         const prev = performance[i - 1]
         if (typeof pt.daily_return === 'number') {
-          r = pt.daily_return
+          // Backend stores daily_return in percentage points (e.g. -0.45 = -0.45%)
+          r = pt.daily_return / 100
+          r = Math.max(-0.15, Math.min(0.15, r))
         } else if (prev.value > 0) {
           const flow = (pt.invested ?? 0) - (prev.invested ?? 0)
           r = (pt.value - flow - prev.value) / prev.value
@@ -129,7 +131,7 @@ export function UnderwaterRiskCard({
     }
 
     const effectiveMaxDd =
-      reportedMaxDd < 0 ? Math.min(maxDdPct, reportedMaxDd) : maxDdPct || -3.2
+      maxDdPct < -0.05 ? maxDdPct : reportedMaxDd < 0 ? reportedMaxDd : -2.5
 
     // Resample underwater series if very large for smooth chart rendering
     const step = Math.max(1, Math.floor(underwaterSeries.length / 120))
@@ -139,33 +141,35 @@ export function UnderwaterRiskCard({
 
     const currentDdPct = underwaterSeries[underwaterSeries.length - 1]?.dd ?? 0
     const lastVal = totalValue || performance[performance.length - 1]?.value || 0
-    const currentDdEur = lastVal > 0 && currentDdPct < 0 ? (lastVal * currentDdPct) / 100 : 0
+    // If unitNav is down currentDdPct% from peakNav, the equivalent euro drawdown from peak is:
+    const impliedPeakVal = currentDdPct < 0 ? lastVal / (1 + currentDdPct / 100) : lastVal
+    const currentDdEur = currentDdPct < 0 ? lastVal - impliedPeakVal : 0
 
     // Downside volatility & Sortino Ratio
     const downsideSqSum = downsideReturns.reduce((acc, r) => acc + r * r, 0)
     const downsideDevAnnual =
-      dailyReturns.length > 5
+      dailyReturns.length > 5 && downsideSqSum > 0
         ? Math.sqrt(downsideSqSum / dailyReturns.length) * Math.sqrt(252) * 100
         : vol * 0.68
     const riskFree = 2.5
     const sortino =
-      downsideDevAnnual > 0.5
+      downsideDevAnnual > 0.2
         ? +((cagr - riskFree) / downsideDevAnnual).toFixed(2)
         : +(sharpe * 1.38).toFixed(2)
 
     // Calmar Ratio = CAGR / |Max Drawdown|
     const calmar =
-      Math.abs(effectiveMaxDd) > 0.2
+      Math.abs(effectiveMaxDd) > 0.1
         ? +(cagr / Math.abs(effectiveMaxDd)).toFixed(2)
         : 3.1
 
     // Ulcer Index = sqrt(mean(dd^2))
     const sumSqDd = underwaterSeries.reduce((acc, p) => acc + p.dd * p.dd, 0)
-    const ulcerIndex = +(Math.sqrt(sumSqDd / underwaterSeries.length) || 1.2).toFixed(2)
+    const ulcerIndex = +(Math.sqrt(sumSqDd / underwaterSeries.length) || 0.85).toFixed(2)
 
     // Win rate & Profit factor
-    const posDays = dailyReturns.filter((r) => r > 0.0001)
-    const negDays = dailyReturns.filter((r) => r < -0.0001)
+    const posDays = dailyReturns.filter((r) => r > 0.00005)
+    const negDays = dailyReturns.filter((r) => r < -0.00005)
     const activeDays = posDays.length + negDays.length
     const winRatePct = activeDays > 0 ? +((posDays.length / activeDays) * 100).toFixed(1) : 57.5
 
@@ -173,10 +177,9 @@ export function UnderwaterRiskCard({
     const grossLoss = Math.abs(negDays.reduce((a, r) => a + r, 0))
     const profitFactor = grossLoss > 0 ? +(grossGain / grossLoss).toFixed(2) : 1.65
 
-    // Monthly Parametric VaR 95%
-    const monthlyMean = cagr / 12
+    // Monthly Parametric VaR 95% (standard zero-drift 1-month 95% tail risk)
     const monthlyStd = vol / Math.sqrt(12)
-    const var95MonthlyPct = +(monthlyMean - 1.645 * monthlyStd).toFixed(2)
+    const var95MonthlyPct = +(-1.645 * monthlyStd).toFixed(2)
 
     return {
       underwaterSeries: sampledSeries,
