@@ -552,3 +552,4 @@ export function CompoundProjectionCard({
     </Card>
   )
 }
+

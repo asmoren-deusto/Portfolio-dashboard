@@ -344,15 +344,15 @@ export function PortfolioAttributionCard({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.18 }}
-              className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 items-stretch"
+              className="grid grid-cols-1 lg:grid-cols-[1fr_310px] gap-4 items-stretch"
             >
-              {/* SVG Quadrant Scatter Plot */}
+              {/* SVG Quadrant Scatter Plot — Locked height to prevent layout shifts */}
               <div
                 data-private
-                className="relative rounded-2xl bg-slate-50/70 dark:bg-[#19191c] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-4 min-h-[300px] flex flex-col justify-between overflow-hidden"
+                className="relative rounded-2xl bg-slate-50/70 dark:bg-[#19191c] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-4 h-[340px] min-h-[340px] max-h-[340px] flex flex-col justify-between overflow-hidden"
               >
                 {/* Quadrant Corner Watermarks */}
-                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold uppercase tracking-wider pointer-events-none z-10">
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold uppercase tracking-wider pointer-events-none z-10 shrink-0">
                   <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md w-fit">
                     <span>💎 Semillas de Alfa (Bajo Peso / Alto Retorno)</span>
                   </div>
@@ -361,7 +361,7 @@ export function PortfolioAttributionCard({
                   </div>
                 </div>
 
-                {/* SVG Plot Area */}
+                {/* Plot Area */}
                 {(() => {
                   const maxW = Math.max(...positions.map((p) => p.weight), 20) * 1.12
                   const returns = positions.map((p) => p.unrealized_pnl_pct || 0)
@@ -369,16 +369,16 @@ export function PortfolioAttributionCard({
                   const maxR = Math.max(...returns, 15) + 4
                   const rangeR = Math.max(maxR - minR, 10)
 
-                  const xPct = (w: number) => Math.min(94, Math.max(6, (w / maxW) * 100))
+                  const xPct = (w: number) => Math.min(93, Math.max(7, (w / maxW) * 100))
                   const yPct = (r: number) =>
-                    Math.min(92, Math.max(8, 100 - ((r - minR) / rangeR) * 100))
+                    Math.min(90, Math.max(10, 100 - ((r - minR) / rangeR) * 100))
 
                   const midX = xPct(metrics.avgWeight)
                   const midY = yPct(metrics.avgReturnPct)
                   const zeroY = yPct(0)
 
                   return (
-                    <div className="relative flex-1 my-2 min-h-[220px]">
+                    <div className="relative flex-1 my-2 min-h-0">
                       {/* Crosshair Reference Lines */}
                       <div
                         className="absolute top-0 bottom-0 border-l border-dashed border-slate-300 dark:border-white/15 pointer-events-none"
@@ -403,26 +403,20 @@ export function PortfolioAttributionCard({
                         />
                       )}
 
-                      {/* Asset Nodes */}
+                      {/* Asset Nodes — Outer hit-box is 100% stationary; inner circle scales smoothly */}
                       {positions.map((p, idx) => {
                         const cx = xPct(p.weight)
                         const cy = yPct(p.unrealized_pnl_pct || 0)
                         const size = Math.max(
-                          28,
-                          Math.min(52, 22 + Math.sqrt(p.weight) * 4.8)
+                          30,
+                          Math.min(50, 22 + Math.sqrt(p.weight) * 4.6)
                         )
                         const color = PALETTE[idx % PALETTE.length]
                         const isHovered = hoveredIsin === p.isin
 
                         return (
-                          <motion.div
+                          <div
                             key={p.isin}
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{
-                              scale: isHovered ? 1.18 : 1,
-                              opacity: 1,
-                            }}
-                            transition={{ type: 'spring', stiffness: 320, damping: 22 }}
                             onMouseEnter={() => setHoveredIsin(p.isin)}
                             onMouseLeave={() => setHoveredIsin(null)}
                             onClick={() => onSelectPosition?.(p)}
@@ -431,23 +425,31 @@ export function PortfolioAttributionCard({
                               top: `${cy}%`,
                               width: `${size}px`,
                               height: `${size}px`,
-                              transform: 'translate(-50%, -50%)',
-                              borderColor: color,
-                              boxShadow: isHovered
-                                ? `0 0 0 4px ${color}33, 0 8px 20px -2px rgba(0,0,0,0.35)`
-                                : `0 2px 8px -1px rgba(0,0,0,0.2)`,
                             }}
-                            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white dark:bg-[#252528] flex items-center justify-center cursor-pointer z-20 hover:z-30 transition-shadow"
+                            className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer z-20 hover:z-30"
                             title={`${formatAssetDisplayName(p.name, true)} — Peso: ${p.weight.toFixed(1)}% | P&L: ${fmt.pct(p.unrealized_pnl_pct)}`}
                           >
-                            <CompanyLogo
-                              isin={p.isin}
-                              ticker={p.ticker || p.isin.slice(0, 4)}
-                              name={p.name}
-                              domain={p.domain}
-                              size="sm"
-                            />
-                          </motion.div>
+                            <div
+                              style={{
+                                borderColor: color,
+                                boxShadow: isHovered
+                                  ? `0 0 0 4px ${color}33, 0 8px 20px -2px rgba(0,0,0,0.35)`
+                                  : `0 2px 8px -1px rgba(0,0,0,0.2)`,
+                              }}
+                              className={cn(
+                                'w-full h-full rounded-full border-2 bg-white dark:bg-[#252528] flex items-center justify-center transition-transform duration-150 ease-out pointer-events-none',
+                                isHovered ? 'scale-115' : 'scale-100'
+                              )}
+                            >
+                              <CompanyLogo
+                                isin={p.isin}
+                                ticker={p.ticker || p.isin.slice(0, 4)}
+                                name={p.name}
+                                domain={p.domain}
+                                size="sm"
+                              />
+                            </div>
+                          </div>
                         )
                       })}
                     </div>
@@ -455,7 +457,7 @@ export function PortfolioAttributionCard({
                 })()}
 
                 {/* Bottom Quadrant Labels */}
-                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold uppercase tracking-wider pointer-events-none z-10">
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold uppercase tracking-wider pointer-events-none z-10 shrink-0">
                   <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 bg-slate-200/60 dark:bg-white/[0.04] px-2 py-0.5 rounded-md w-fit">
                     <span>🔎 En Observación (Bajo Peso / Menor Retorno)</span>
                   </div>
@@ -465,14 +467,14 @@ export function PortfolioAttributionCard({
                 </div>
               </div>
 
-              {/* Right Side Inspector / Quadrant Classification */}
+              {/* Right Side Inspector / Quadrant Classification — Locked exact same height h-[340px] */}
               <div
                 data-private
-                className="flex flex-col justify-between rounded-2xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3.5"
+                className="flex flex-col justify-between rounded-2xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3.5 h-[340px] min-h-[340px] max-h-[340px] overflow-hidden"
               >
                 {hoveredPos ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+                  <div className="space-y-2.5 flex-1 flex flex-col justify-between min-h-0">
+                    <div className="flex items-center gap-2.5 pb-2 border-b border-slate-200/70 dark:border-white/[0.06] shrink-0">
                       <CompanyLogo
                         isin={hoveredPos.isin}
                         ticker={hoveredPos.ticker || hoveredPos.isin.slice(0, 4)}
@@ -480,12 +482,15 @@ export function PortfolioAttributionCard({
                         domain={hoveredPos.domain}
                         size="md"
                       />
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
                           {formatAssetDisplayName(hoveredPos.name, true)}
                         </div>
-                        <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                          {hoveredPos.isin}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                            {hoveredPos.isin}
+                          </span>
+                          <BrokerBadge broker={hoveredPos.broker} />
                         </div>
                       </div>
                     </div>
@@ -539,17 +544,37 @@ export function PortfolioAttributionCard({
                         </span>
                       </div>
                     </div>
+
+                    {/* Quadrant Tag Summary */}
+                    <div className="p-2.5 rounded-xl bg-indigo-500/[0.06] border border-indigo-500/20 text-[11px] flex items-center justify-between">
+                      <span className="text-slate-600 dark:text-slate-300 font-medium">
+                        Cuadrante estratégico:
+                      </span>
+                      <span className="font-bold text-indigo-700 dark:text-indigo-300">
+                        {hoveredPos.weight >= metrics.avgWeight &&
+                        hoveredPos.unrealized_pnl_pct >= metrics.avgReturnPct
+                          ? '🚀 Locomotora Core'
+                          : hoveredPos.weight < metrics.avgWeight &&
+                            hoveredPos.unrealized_pnl_pct >= metrics.avgReturnPct
+                          ? '💎 Semilla de Alfa'
+                          : hoveredPos.weight >= metrics.avgWeight
+                          ? '⚓ Ancla Estable'
+                          : '🔎 En Observación'}
+                      </span>
+                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-2.5">
-                    <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                      <Target className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Clasificación por Cuadrante</span>
+                  <div className="space-y-2 flex-1 flex flex-col justify-between min-h-0">
+                    <div>
+                      <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                        <Target className="w-3.5 h-3.5 text-blue-500" />
+                        <span>Clasificación por Cuadrante</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug mt-0.5">
+                        Pasa el cursor sobre cualquier burbuja o haz clic para inspeccionar su eficiencia.
+                      </p>
                     </div>
-                    <p className="text-[11.5px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                      Pasa el cursor sobre cualquier burbuja o haz clic para inspeccionar su eficiencia relativa en cartera.
-                    </p>
-                    <div className="space-y-1.5 pt-1">
+                    <div className="space-y-1.5">
                       {[
                         {
                           title: '🚀 Locomotoras Core',
@@ -590,13 +615,13 @@ export function PortfolioAttributionCard({
                       ].map((q) => (
                         <div
                           key={q.title}
-                          className="flex items-center justify-between p-2 rounded-xl bg-white/80 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.05] text-xs"
+                          className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-white/80 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.05] text-xs"
                         >
                           <div>
-                            <div className="font-bold text-slate-800 dark:text-slate-200">
+                            <div className="font-bold text-slate-800 dark:text-slate-200 text-[11.5px]">
                               {q.title}
                             </div>
-                            <div className="text-[10.5px] text-slate-500 dark:text-slate-400">
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400">
                               {q.desc}
                             </div>
                           </div>
@@ -609,7 +634,7 @@ export function PortfolioAttributionCard({
                   </div>
                 )}
 
-                <div className="pt-2.5 mt-2.5 border-t border-slate-200/70 dark:border-white/[0.06] text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                <div className="pt-2 mt-2 border-t border-slate-200/70 dark:border-white/[0.06] text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between shrink-0">
                   <span>Tamaño burbuja = Capital (€)</span>
                   <span className="font-mono font-semibold">{positions.length} activos</span>
                 </div>
@@ -756,3 +781,4 @@ export function PortfolioAttributionCard({
     </Card>
   )
 }
+
