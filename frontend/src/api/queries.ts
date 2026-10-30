@@ -623,12 +623,13 @@ export interface SectorHistoryMeta {
 
 export interface SectorHistoryResponse {
   period: string
+  benchmark_return_pct?: number
   points: Array<Record<string, number | string>>
   sectors: SectorHistoryMeta[]
   cache_timestamp: string
 }
 
-export function useMarketSectorHistory(period: string = '3mo') {
+export function useMarketSectorHistory(period: string = '5y') {
   return useQuery<SectorHistoryResponse>({
     queryKey: ['market-sector-history', period],
     queryFn: () => get<SectorHistoryResponse>(`/market/sector-history?period=${period}`),

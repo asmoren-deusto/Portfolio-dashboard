@@ -1763,19 +1763,21 @@ _sector_history_cache: dict[str, dict] = {}
 SECTOR_HISTORY_CACHE_TTL = 300  # 5 minutes
 
 
-def _fetch_sector_history_sync(period: str = "3mo") -> dict:
+def _fetch_sector_history_sync(period: str = "5y") -> dict:
     import yfinance as yf
     import pandas as pd
 
-    valid_periods = {"5d", "1mo", "3mo", "6mo", "1y"}
+    valid_periods = {"5d", "1mo", "3mo", "6mo", "1y", "2y", "3y", "5y"}
     if period not in valid_periods:
-        period = "3mo"
+        period = "5y"
 
-    interval = "1h" if period == "5d" else "1d"
-    tickers = [s["ticker"] for s in SECTOR_ETFS]
+    interval = "1h" if period == "5d" else ("1wk" if period in ("2y", "3y", "5y") else "1d")
+    tickers = [s["ticker"] for s in SECTOR_ETFS] + ["SPY"]
+    months_es = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
     points = []
     sectors_summary = []
+    benchmark_return_pct = 0.0
 
     try:
         df = yf.download(
@@ -1799,17 +1801,28 @@ def _fetch_sector_history_sync(period: str = "3mo") -> dict:
 
                 for idx, row in norm_df.iterrows():
                     dt = idx.to_pydatetime() if hasattr(idx, "to_pydatetime") else idx
+                    m_es = months_es[dt.month - 1]
                     if period == "5d":
-                        label = dt.strftime("%d %b %H:%M")
-                        date_str = dt.strftime("%Y-%m-%d %H:%M")
+                        label = f"{dt.day:02d} {m_es} {dt.strftime('%H:%M')}"
+                        date_str = f"{dt.day:02d} {m_es} {dt.year} {dt.strftime('%H:%M')}"
                     elif period in ("1mo", "3mo"):
-                        label = dt.strftime("%d %b")
-                        date_str = dt.strftime("%Y-%m-%d")
+                        label = f"{dt.day:02d} {m_es}"
+                        date_str = f"{dt.day:02d} {m_es} {dt.year}"
+                    elif period in ("6mo", "1y"):
+                        label = f"{dt.day:02d} {m_es} {str(dt.year)[2:]}"
+                        date_str = f"{dt.day:02d} {m_es} {dt.year}"
                     else:
-                        label = dt.strftime("%d %b %y")
-                        date_str = dt.strftime("%Y-%m-%d")
+                        label = f"{m_es} {dt.year}"
+                        date_str = f"{dt.day:02d} {m_es} {dt.year}"
 
-                    pt: dict = {"date": date_str, "label": label}
+                    spy_val = row.get("SPY")
+                    pt: dict = {
+                        "date": date_str,
+                        "iso_date": dt.strftime("%Y-%m-%d"),
+                        "year": dt.year,
+                        "label": label,
+                        "benchmark": round(float(spy_val), 2) if (spy_val is not None and not pd.isna(spy_val)) else 0.0,
+                    }
                     for s in SECTOR_ETFS:
                         tk = s["ticker"]
                         val = row.get(tk)
@@ -1818,6 +1831,8 @@ def _fetch_sector_history_sync(period: str = "3mo") -> dict:
 
                 last_row = norm_df.iloc[-1]
                 prev_row = norm_df.iloc[-2] if len(norm_df) >= 2 else base_row * 0.0
+                if "SPY" in last_row and not pd.isna(last_row.get("SPY")):
+                    benchmark_return_pct = round(float(last_row.get("SPY", 0.0)), 2)
 
                 for s in SECTOR_ETFS:
                     tk = s["ticker"]
@@ -1846,6 +1861,7 @@ def _fetch_sector_history_sync(period: str = "3mo") -> dict:
 
     return _sanitize_for_json({
         "period": period,
+        "benchmark_return_pct": benchmark_return_pct,
         "points": points,
         "sectors": sectors_summary,
         "cache_timestamp": _now_iso(),
@@ -1853,7 +1869,7 @@ def _fetch_sector_history_sync(period: str = "3mo") -> dict:
 
 
 @router.get("/sector-history")
-async def get_sector_history(period: str = "3mo"):
+async def get_sector_history(period: str = "5y"):
     """Historical percentage evolution by market sector (SPDR Sector ETFs)."""
     now = time.time()
     if period in _sector_history_cache:
