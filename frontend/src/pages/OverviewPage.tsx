@@ -2215,7 +2215,7 @@ export function OverviewPage() {
             <CompoundProjectionCard
               currentValue={displaySummary.total_value}
               currentInvested={displaySummary.total_invested}
-              defaultMonthlyDca={currentUser?.isDemo ? 1200 : 416.66}
+              defaultMonthlyDca={1250}
               defaultAnnualReturn={analytics?.annualized_return ?? analytics?.cagr ?? 8.5}
               volatility={analytics?.volatility ?? 10.2}
             />
@@ -2233,7 +2233,7 @@ export function OverviewPage() {
               stocks={marketData.stocks}
               onSelectStock={(s) => setSelectedStock(s)}
               showViewAllLink
-              defaultExpanded={false}
+              defaultExpanded={true}
               compact
             />
           ) : (

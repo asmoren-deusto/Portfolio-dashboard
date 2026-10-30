@@ -622,7 +622,7 @@ export function AnalyticsPage() {
         <CompoundProjectionCard
           currentValue={positions.reduce((acc, p) => acc + (p.current_value || 0), 0)}
           currentInvested={positions.reduce((acc, p) => acc + (p.invested_amount || 0), 0)}
-          defaultMonthlyDca={analytics?.monthly_pace && analytics.monthly_pace > 0 ? analytics.monthly_pace : 416.66}
+          defaultMonthlyDca={1250}
           defaultAnnualReturn={analytics?.cagr ?? analytics?.annualized_return ?? 8.5}
           volatility={analytics?.volatility ?? 10.2}
         />

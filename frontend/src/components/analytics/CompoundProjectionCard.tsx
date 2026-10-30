@@ -36,7 +36,7 @@ const MILESTONES = [50000, 100000, 150000, 250000, 500000, 1000000]
 export function CompoundProjectionCard({
   currentValue,
   currentInvested,
-  defaultMonthlyDca = 416.66,
+  defaultMonthlyDca = 1250,
   defaultAnnualReturn = 8.5,
   volatility = 10.5,
 }: CompoundProjectionCardProps) {
@@ -46,7 +46,7 @@ export function CompoundProjectionCard({
   }, [defaultAnnualReturn])
 
   const safeBaseDca = useMemo(() => {
-    if (!defaultMonthlyDca || Number.isNaN(defaultMonthlyDca) || defaultMonthlyDca <= 0) return 416.66
+    if (!defaultMonthlyDca || Number.isNaN(defaultMonthlyDca) || defaultMonthlyDca <= 0) return 1250
     return Math.round(defaultMonthlyDca)
   }, [defaultMonthlyDca])
 
@@ -263,7 +263,7 @@ export function CompoundProjectionCard({
             <input
               type="range"
               min={0}
-              max={1250}
+              max={2500}
               step={25}
               value={monthlyDca}
               onChange={(e) => setMonthlyDca(Number(e.target.value))}
@@ -272,7 +272,7 @@ export function CompoundProjectionCard({
             <div className="flex justify-between text-[10.5px] font-mono text-slate-500 dark:text-slate-400">
               <span>0 €/m</span>
               <span>Anual: {fmt.currency(monthlyDca * 12)}/año</span>
-              <span>1.250 €/m</span>
+              <span>2.500 €/m</span>
             </div>
           </div>
 
