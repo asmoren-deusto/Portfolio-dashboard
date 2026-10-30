@@ -246,9 +246,9 @@ export function CompoundProjectionCard({
         </div>
       </CardHeader>
 
-      <div data-private className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col justify-between">
+      <div data-private className="p-3.5 sm:p-4 flex-1 flex flex-col gap-3">
         {/* Top Interactive Sliders + Next Milestone Tracker */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 shrink-0">
           {/* Control 1: DCA Monthly Slider */}
           <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] flex flex-col justify-between">
             <div className="flex items-center justify-between text-xs">
@@ -263,7 +263,7 @@ export function CompoundProjectionCard({
             <input
               type="range"
               min={0}
-              max={2500}
+              max={1250}
               step={25}
               value={monthlyDca}
               onChange={(e) => setMonthlyDca(Number(e.target.value))}
@@ -272,7 +272,7 @@ export function CompoundProjectionCard({
             <div className="flex justify-between text-[10.5px] font-mono text-slate-500 dark:text-slate-400">
               <span>0 €/m</span>
               <span>Anual: {fmt.currency(monthlyDca * 12)}/año</span>
-              <span>2.500 €/m</span>
+              <span>1.250 €/m</span>
             </div>
           </div>
 
@@ -336,7 +336,7 @@ export function CompoundProjectionCard({
         </div>
 
         {/* Main Monte Carlo Cone Chart (Full Width, Compact Height) */}
-        <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 flex flex-col justify-between">
+        <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
               Curva de Crecimiento Exponencial a {horizonYears} Años ({new Date().getFullYear() + horizonYears})
@@ -357,7 +357,7 @@ export function CompoundProjectionCard({
             </div>
           </div>
 
-          <div className="h-[175px] w-full">
+          <div className="h-[180px] min-h-[175px] flex-1 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={simulation.points}
@@ -466,27 +466,27 @@ export function CompoundProjectionCard({
         </div>
 
         {/* Bottom Insights Row (Horizontal 3 Columns Below Chart) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch shrink-0">
           {/* Final Expected Capital */}
           <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/25 flex flex-col justify-between">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 block">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 block">
               Patrimonio Estimado ({horizonYears} Años)
             </span>
             <div className="text-xl sm:text-2xl font-bold font-mono text-slate-950 dark:text-white mt-0.5">
               {fmt.currency(simulation.finalPoint.base)}
             </div>
-            <div className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
+            <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
               +{fmt.currency(simulation.totalCompoundGain)} ganancia ({simulation.compoundSharePct.toFixed(0)}% del total)
             </div>
           </div>
 
           {/* Snowball Crossover Insight */}
           <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] flex flex-col justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+            <div className="flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-slate-900 dark:text-white">
               <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span>Efecto Bola de Nieve</span>
             </div>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
+            <p className="text-xs sm:text-[13px] text-slate-600 dark:text-slate-300 mt-1 leading-snug">
               {simulation.snowballCrossoverYear === 0 ? (
                 <>
                   ¡Alcanzado! Tu cartera ya genera{' '}
@@ -494,7 +494,7 @@ export function CompoundProjectionCard({
                     {fmt.currency(simulation.points[0].annualGain)}/año
                   </strong>
                   , superando tu aportación anual de{' '}
-                  <strong className="font-mono">{fmt.currency(monthlyDca * 12)}</strong>.
+                  <strong className="font-mono text-slate-900 dark:text-white">{fmt.currency(monthlyDca * 12)}</strong>.
                 </>
               ) : simulation.snowballCrossoverYear !== null ? (
                 <>
@@ -519,15 +519,15 @@ export function CompoundProjectionCard({
 
           {/* Safe Withdrawal Rate (4% Rule) */}
           <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] flex flex-col justify-between">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
+            <div className="flex items-center justify-between text-xs sm:text-[13px] font-bold text-slate-900 dark:text-white">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
                 Renta Perpetua (Regla 4% SWR)
               </span>
             </div>
-            <div className="grid grid-cols-2 gap-2 mt-1.5 text-xs font-mono">
+            <div className="grid grid-cols-2 gap-2 mt-1.5 text-xs sm:text-[13px] font-mono">
               <div className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#222225] border border-slate-200/70 dark:border-white/[0.05]">
-                <span className="text-[10px] font-sans text-slate-500 dark:text-slate-400 block">
+                <span className="text-[10.5px] font-sans text-slate-500 dark:text-slate-400 block">
                   Renta Hoy
                 </span>
                 <span className="font-bold text-slate-900 dark:text-white">
@@ -535,7 +535,7 @@ export function CompoundProjectionCard({
                 </span>
               </div>
               <div className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                <span className="text-[10px] font-sans text-emerald-700 dark:text-emerald-300 block">
+                <span className="text-[10.5px] font-sans text-emerald-700 dark:text-emerald-300 block">
                   En {horizonYears} Años
                 </span>
                 <span className="font-bold text-emerald-600 dark:text-emerald-400">

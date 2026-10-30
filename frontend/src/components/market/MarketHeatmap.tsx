@@ -234,7 +234,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
   compact = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [dimensions, setDimensions] = useState({ width: 0, height: compact ? 400 : 760 })
+  const [dimensions, setDimensions] = useState({ width: 0, height: compact ? 365 : 760 })
   const [heightMode, setHeightMode] = useState<'standard' | 'expanded'>(
     defaultExpanded ? 'expanded' : 'standard'
   )
@@ -258,7 +258,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
         if (isFullscreen) {
           computedHeight = Math.max(500, window.innerHeight - 130)
         } else if (compact) {
-          computedHeight = heightMode === 'expanded' ? 540 : 400
+          computedHeight = 365
         } else if (clientWidth < 640) {
           // Responsive compact mobile height to prevent DOM overload
           computedHeight = heightMode === 'expanded' ? 520 : 420
@@ -438,7 +438,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           </div>
 
           {/* Height Adjuster Button (Toggle between Standard and Expanded) */}
-          {!isFullscreen && (
+          {!isFullscreen && !compact && (
             <button
               onClick={() =>
                 setHeightMode((prev) => (prev === 'expanded' ? 'standard' : 'expanded'))
