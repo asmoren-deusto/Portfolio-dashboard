@@ -37,7 +37,7 @@ interface MarketHeatmapProps {
   compact?: boolean
 }
 
-const HEADER_HEIGHT = 24
+const HEADER_HEIGHT = 14
 
 function getHeatmapColor(
   changePct: number | null | undefined,
@@ -518,11 +518,11 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               {/* Sector Header Bar */}
               <div
                 style={{ height: `${HEADER_HEIGHT}px` }}
-                className="px-2.5 flex items-center justify-between bg-slate-200/90 dark:bg-[#1e1e1e] border-b border-slate-300/90 dark:border-black/80 text-xs font-bold text-slate-900 dark:text-slate-300 tracking-wide uppercase select-none"
+                className="px-1.5 flex items-center justify-between bg-slate-200/90 dark:bg-[#1e1e1e] border-b border-slate-300/90 dark:border-black/80 text-[8.5px] leading-none font-bold text-slate-900 dark:text-slate-300 tracking-wide uppercase select-none"
               >
                 <span className="truncate">{sectorNode.sector}</span>
-                {width > 140 && (
-                  <span className="text-xs font-mono text-slate-700 dark:text-slate-400 font-medium shrink-0 ml-1">
+                {width > 120 && (
+                  <span className="text-[8.5px] leading-none font-mono text-slate-700 dark:text-slate-400 font-medium shrink-0 ml-1">
                     {formatMarketCap(sectorNode.totalValue)}
                   </span>
                 )}
