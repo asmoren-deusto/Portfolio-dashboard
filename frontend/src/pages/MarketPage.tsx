@@ -693,6 +693,7 @@ export const MarketPage: React.FC = () => {
               selectedSector={selectedSector}
               onSectorChange={setSelectedSector}
               isIndices={isTickerUniverse || selectedSector === 'Índices'}
+              defaultExpanded={false}
             />
           </div>
         </div>
@@ -708,6 +709,7 @@ export const MarketPage: React.FC = () => {
             selectedSector={selectedSector}
             onSectorChange={setSelectedSector}
             isIndices={isTickerUniverse || selectedSector === 'Índices'}
+            defaultExpanded={false}
           />
         </motion.div>
       ) : viewMode === 'grid' ? (
