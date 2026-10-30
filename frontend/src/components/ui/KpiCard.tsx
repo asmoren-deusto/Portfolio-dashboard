@@ -140,27 +140,9 @@ function KpiCardComponent({
           <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-blue-500/10 blur-2xl dark:bg-blue-500/15" />
         )}
 
-        {/* Label, Tag, and Icon Header */}
+        {/* Icon, Label, and Tag Header */}
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-1.5 min-w-0 pr-2">
-            <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
-              {label}
-            </p>
-            {loading && <LoadingDot />}
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {tag && (
-              <span
-                data-private={/\d/.test(tag) ? true : undefined}
-                className={cn(
-                  'items-center px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors',
-                  hideTagOnMobile ? 'hidden sm:inline-flex' : 'inline-flex',
-                  TAG_STYLES[tagColor]
-                )}
-              >
-                {tag}
-              </span>
-            )}
             {icon && (
               <div
                 className={cn(
@@ -172,7 +154,25 @@ function KpiCardComponent({
                 {icon}
               </div>
             )}
+            <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
+              {label}
+            </p>
+            {loading && <LoadingDot />}
           </div>
+          {tag && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span
+                data-private={/\d/.test(tag) ? true : undefined}
+                className={cn(
+                  'items-center px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors',
+                  hideTagOnMobile ? 'hidden sm:inline-flex' : 'inline-flex',
+                  TAG_STYLES[tagColor]
+                )}
+              >
+                {tag}
+              </span>
+            </div>
+          )}
         </div>
 
         {hero ? (

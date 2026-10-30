@@ -833,6 +833,9 @@ export function OverviewPage() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                  <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border transition-transform duration-200 group-hover:scale-105 bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400">
+                    <Coins size={15} className="text-indigo-500 dark:text-indigo-400" />
+                  </div>
                   <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 truncate">
                     Total Invertido
                   </p>

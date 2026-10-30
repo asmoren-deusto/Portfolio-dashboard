@@ -160,9 +160,11 @@ export function PositionsPage() {
           {/* Valor Total */}
           <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
             <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-            <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400">
+                <Layers className="w-3.5 h-3.5" />
+              </div>
               <span>Valor Total Cartera</span>
-              <Layers className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
               {fmt.currency(stats.totalValue)}
@@ -175,13 +177,15 @@ export function PositionsPage() {
           {/* Plusvalía Latente */}
           <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
             <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-            <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              <div className={`flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border ${stats.totalPnl >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'}`}>
+                {stats.totalPnl >= 0 ? (
+                  <TrendingUp className="w-3.5 h-3.5" />
+                ) : (
+                  <TrendingDown className="w-3.5 h-3.5" />
+                )}
+              </div>
               <span>Ganancia Latente Total</span>
-              {stats.totalPnl >= 0 ? (
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              ) : (
-                <TrendingDown className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-              )}
             </div>
             <div
               className={`text-2xl font-bold font-mono mt-1 ${
@@ -207,9 +211,11 @@ export function PositionsPage() {
           {/* Estado de Activos */}
           <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
             <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-            <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400">
+                <PieChart className="w-3.5 h-3.5" />
+              </div>
               <span>Distribución Rentabilidad</span>
-              <PieChart className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
               {positions.length} <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">posiciones</span>
@@ -223,9 +229,11 @@ export function PositionsPage() {
           {/* TER Medio Ponderado */}
           <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
             <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-            <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400">
+                <Percent className="w-3.5 h-3.5" />
+              </div>
               <span>Comisión Media (TER)</span>
-              <Percent className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
             </div>
             <div className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1">
               {stats.weightedTer !== null ? `${stats.weightedTer.toFixed(2)}%` : '—'}
