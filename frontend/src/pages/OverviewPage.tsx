@@ -57,6 +57,7 @@ import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
+import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
 import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
@@ -66,7 +67,6 @@ import {
   usePositions,
   usePerformance,
   useAnalytics,
-  useTransactions,
   useMarketQuotes,
   useSimulatedPortfolio,
   useBenchmarkComparison,
@@ -172,7 +172,6 @@ export function OverviewPage() {
   const { data: performance = [], isFetching: perfFetching } = usePerformance()
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
   const { data: benchmarkData, isFetching: benchmarkFetching } = useBenchmarkComparison()
-  const { data: transactions = [], isLoading: txLoading, isFetching: txFetching } = useTransactions()
   const { data: marketData } = useMarketQuotes('Todos')
   const { data: simPortfolioData, isFetching: simPortfolioFetching } = useSimulatedPortfolio('1d')
 
@@ -182,8 +181,6 @@ export function OverviewPage() {
     (performance.length === 0 && perfFetching) ||
     (positions.length === 0 && positionsFetching) ||
     (!analytics && analyticsFetching)
-
-  const [txFilterType, setTxFilterType] = useState<'all' | 'buy' | 'dividend' | 'sell'>('all')
 
   const alphaSp = useMemo(() => {
     if (benchmarkData?.summary?.alpha_sp500 !== undefined && benchmarkData?.summary?.alpha_sp500 !== null) {
@@ -197,28 +194,6 @@ export function OverviewPage() {
     }
     return null
   }, [benchmarkData])
-
-  const filteredTransactions = useMemo(() => {
-    return transactions.filter((t) => {
-      if (txFilterType !== 'all' && t.type !== txFilterType) return false
-      return true
-    })
-  }, [transactions, txFilterType])
-
-  const txStats = useMemo(() => {
-    const buys = transactions.filter((t) => t.type === 'buy')
-    const divs = transactions.filter((t) => t.type === 'dividend')
-    const sells = transactions.filter((t) => t.type === 'sell')
-    const totalBought = buys.reduce((acc, t) => acc + (t.amount || 0), 0)
-    const totalDivs = divs.reduce((acc, t) => acc + (t.amount || 0), 0)
-    return {
-      buysCount: buys.length,
-      divsCount: divs.length,
-      sellsCount: sells.length,
-      totalBought,
-      totalDivs,
-    }
-  }, [transactions])
 
   const simSummary = simPortfolioData?.summary
   const sessionPct = simSummary?.fx_info?.simulated_eur_pct ?? simSummary?.simulated_daily_pct
@@ -2226,202 +2201,39 @@ export function OverviewPage() {
       </Card>
     </div>
 
-      {/* ── Últimos Movimientos y Mapa de Calor del Mercado (Uno a cada lado) ── */}
+      {/* ── Proyección Patrimonial (66%) y Mapa de Calor del Mercado (33%) ── */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch"
         style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 480px' }}
       >
-        {/* Columna Izquierda: Tabla de Últimos Movimientos */}
-        <Card className="w-full flex flex-col h-full relative overflow-hidden" delay={0.35}>
-          <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
-                <Calendar className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
-                    Últimos Movimientos
-                  </CardTitle>
-                  <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-white/[0.08]">
-                    {filteredTransactions.length} {filteredTransactions.length === 1 ? 'operación' : 'operaciones'}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                  Historial reciente de operaciones
-                </p>
-              </div>
+        {/* Columna Izquierda (66%): Proyección de Interés Compuesto, Cono Monte Carlo y Bola de Nieve */}
+        <div className="w-full h-full lg:col-span-2 flex flex-col">
+          {displaySummary ? (
+            <CompoundProjectionCard
+              currentValue={displaySummary.total_value}
+              currentInvested={displaySummary.total_invested}
+              defaultMonthlyDca={currentUser?.isDemo ? 1200 : 416.66}
+              defaultAnnualReturn={analytics?.annualized_return ?? analytics?.cagr ?? 8.5}
+              volatility={analytics?.volatility ?? 10.2}
+            />
+          ) : (
+            <div className="h-64 rounded-[22px] bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
+              Cargando proyección patrimonial...
             </div>
+          )}
+        </div>
 
-            <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
-              {/* Filter Pills */}
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.06]">
-                {(['all', 'buy', 'dividend', 'sell'] as const).map((type) => {
-                  const label = type === 'all' ? 'Todos' : type === 'buy' ? 'Compras' : type === 'dividend' ? 'Div.' : 'Ventas'
-                  const count = type === 'all' ? transactions.length : type === 'buy' ? txStats.buysCount : type === 'dividend' ? txStats.divsCount : txStats.sellsCount
-                  const active = txFilterType === type
-                  return (
-                    <button
-                      key={type}
-                      onClick={() => setTxFilterType(type)}
-                      className={cn(
-                        "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
-                        active
-                          ? "bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm"
-                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                      )}
-                    >
-                      {label} <span className="opacity-60 text-[10.5px]">({count})</span>
-                    </button>
-                  )
-                })}
-              </div>
-
-              <Link
-                to="/transactions"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
-              >
-                <span>Ver todas</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </CardHeader>
-
-          {/* Quick summary strip */}
-          <div className="px-4 py-2 bg-slate-50/50 dark:bg-white/[0.01] border-b border-slate-100 dark:border-white/[0.04] flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">
-                Compras: <strong className="text-slate-900 dark:text-white font-mono">{fmt.currency(txStats.totalBought)}</strong>
-              </span>
-              <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
-              <span className="text-slate-500 dark:text-slate-400 font-medium">
-                Dividendos: <strong className="text-emerald-600 dark:text-emerald-400 font-mono">+{fmt.currency(txStats.totalDivs)}</strong>
-              </span>
-            </div>
-          </div>
-
-          {/* Transactions Table */}
-          <div data-private className="overflow-x-auto flex-1">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-slate-200/80 dark:border-white/[0.06] text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider bg-slate-50/50 dark:bg-white/[0.01]">
-                  <th className="py-2.5 px-3 font-semibold">Fecha</th>
-                  <th className="py-2.5 px-3 font-semibold">Activo</th>
-                  <th className="py-2.5 px-2 font-semibold text-center">Tipo</th>
-                  <th className="py-2.5 px-2 font-semibold text-center hidden xl:table-cell">Entidad</th>
-                  <th className="py-2.5 px-2 font-semibold text-right hidden 2xl:table-cell">Títulos</th>
-                  <th className="py-2.5 px-3 font-semibold text-right">Importe</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                {txLoading && transactions.length === 0 ? (
-                  <TableSkeletonRows rows={5} cols={6} />
-                ) : !filteredTransactions.length ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
-                      No se han encontrado movimientos con los filtros seleccionados.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredTransactions.slice(0, 10).map((t) => {
-                    const isBuy = t.type === 'buy'
-                    const isDiv = t.type === 'dividend'
-                    const isSell = t.type === 'sell'
-                    const pos = positions.find((p) => p.isin === t.isin)
-
-                    return (
-                      <tr
-                        key={t.id}
-                        onClick={() => {
-                            if (pos) setSelectedPosition(pos)
-                          }}
-                          className="hover:bg-slate-50/90 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
-                        >
-                          {/* Fecha */}
-                          <td className="py-2.5 px-3 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                            {fmt.date(t.date)}
-                          </td>
-
-                          {/* Activo con logo */}
-                          <td className="py-2.5 px-3">
-                            <div className="flex items-center gap-2 min-w-[130px]">
-                              <div className="w-6 h-6 rounded-md overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/[0.08]">
-                                <CompanyLogo isin={t.isin} ticker={pos?.ticker || t.isin} name={t.name || ''} domain={pos?.domain} size="sm" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[170px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                  {formatAssetDisplayName(t.name || t.isin, true)}
-                                </div>
-                                <div className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400 truncate">
-                                  {pos?.ticker || t.isin}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Tipo badge */}
-                          <td className="py-2.5 px-2 text-center whitespace-nowrap">
-                            <span className={cn(
-                              "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold",
-                              isBuy && "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20",
-                              isDiv && "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20",
-                              isSell && "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20"
-                            )}>
-                              {isBuy ? 'Compra' : isDiv ? 'Dividendo' : isSell ? 'Venta' : 'Traspaso'}
-                            </span>
-                          </td>
-
-                          {/* Broker badge */}
-                          <td className="py-2.5 px-2 text-center whitespace-nowrap hidden xl:table-cell">
-                            <BrokerBadge broker={t.broker} />
-                          </td>
-
-                          {/* Títulos / participaciones */}
-                          <td className="py-2.5 px-2 text-right font-mono text-slate-700 dark:text-slate-300 whitespace-nowrap hidden 2xl:table-cell">
-                            {t.shares > 0 ? `${fmt.num(t.shares)} part.` : '—'}
-                          </td>
-
-                          {/* Importe Total */}
-                          <td className="py-2.5 px-3 text-right font-mono font-bold whitespace-nowrap">
-                            <span className={cn(
-                              "text-[12.5px]",
-                              isDiv ? "text-emerald-600 dark:text-emerald-400" : isSell ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"
-                            )}>
-                              {isDiv ? `+${fmt.currency(t.amount)}` : fmt.currency(t.amount)}
-                            </span>
-                          </td>
-                        </tr>
-                      )
-                    })
-                  )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Footer link */}
-          <div className="p-3 border-t border-slate-100 dark:border-white/[0.04] bg-slate-50/30 dark:bg-white/[0.01] flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-            <span>{Math.min(10, filteredTransactions.length)} de {filteredTransactions.length} movs</span>
-            <Link
-              to="/transactions"
-              className="inline-flex items-center gap-1.5 font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-            >
-              <span>Historial completo</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </Card>
-
-        {/* Columna Derecha: Mapa de Calor del Mercado */}
-        <div className="w-full h-full">
+        {/* Columna Derecha (33%): Mapa de Calor del Mercado */}
+        <div className="w-full h-full lg:col-span-1 flex flex-col">
           {marketData?.stocks && marketData.stocks.length > 0 ? (
             <MarketHeatmap
               stocks={marketData.stocks}
               onSelectStock={(s) => setSelectedStock(s)}
               showViewAllLink
-              defaultExpanded={true}
+              defaultExpanded={false}
             />
           ) : (
-            <div className="h-64 rounded-2xl bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
+            <div className="h-64 rounded-[22px] bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
               Cargando mapa de calor del mercado...
             </div>
           )}

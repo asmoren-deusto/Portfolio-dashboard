@@ -187,7 +187,7 @@ export function CompoundProjectionCard({
   }
 
   return (
-    <Card className="w-full overflow-hidden" delay={0.31}>
+    <Card className="w-full h-full flex flex-col justify-between overflow-hidden" delay={0.31}>
       <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-4 sm:px-6">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500/15 via-indigo-500/10 to-blue-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 shrink-0">
@@ -246,7 +246,7 @@ export function CompoundProjectionCard({
         </div>
       </CardHeader>
 
-      <div data-private className="p-4 sm:p-5 space-y-4">
+      <div data-private className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col justify-between">
         {/* Top Interactive Sliders + Next Milestone Tracker */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {/* Control 1: DCA Monthly Slider */}
@@ -336,9 +336,9 @@ export function CompoundProjectionCard({
         </div>
 
         {/* Main Monte Carlo Cone Chart + 4 KPI Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_290px] gap-4 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 items-stretch flex-1">
           {/* Cone Chart */}
-          <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-3.5 sm:p-4 flex flex-col justify-between">
+          <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-3.5 sm:p-4 flex flex-col justify-between h-full">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 Curva de Crecimiento Exponencial a {horizonYears} Años ({new Date().getFullYear() + horizonYears})
@@ -359,7 +359,7 @@ export function CompoundProjectionCard({
               </div>
             </div>
 
-            <div className="h-[235px] w-full">
+            <div className="h-[245px] min-h-[235px] flex-1 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={simulation.points}
