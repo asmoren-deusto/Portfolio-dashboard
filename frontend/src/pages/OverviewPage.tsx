@@ -57,8 +57,6 @@ import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
-import { PortfolioAttributionCard } from '@/components/analytics/PortfolioAttributionCard'
-import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
 import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
@@ -2157,16 +2155,6 @@ export function OverviewPage() {
         </Card>
       </div>
 
-      {/* ── Radiografía de Atribución P&L, Mapa Cuadrante y Costes TER ────────── */}
-      {positions.length > 0 && (
-        <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 420px' }}>
-          <PortfolioAttributionCard
-            positions={positions}
-            onSelectPosition={(p) => setSelectedPosition(p)}
-          />
-        </div>
-      )}
-
       {/* ── Comparativa de Rendimiento vs Benchmarks (Analítica) ─────────────── */}
       <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 420px' }}>
         <Card className="w-full" delay={0.32} loading={benchmarkFetching}>
@@ -2237,19 +2225,6 @@ export function OverviewPage() {
         </div>
       </Card>
     </div>
-
-      {/* ── Proyección de Interés Compuesto, Cono Monte Carlo y Bola de Nieve ── */}
-      {displaySummary && (
-        <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 440px' }}>
-          <CompoundProjectionCard
-            currentValue={displaySummary.total_value}
-            currentInvested={displaySummary.total_invested}
-            defaultMonthlyDca={currentUser?.isDemo ? 1200 : 416.66}
-            defaultAnnualReturn={analytics?.annualized_return ?? analytics?.cagr ?? 8.5}
-            volatility={analytics?.volatility ?? 10.2}
-          />
-        </div>
-      )}
 
       {/* ── Últimos Movimientos y Mapa de Calor del Mercado (Uno a cada lado) ── */}
       <div

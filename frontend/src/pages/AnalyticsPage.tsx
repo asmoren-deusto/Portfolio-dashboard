@@ -32,6 +32,7 @@ import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
 import { UnderwaterRiskCard } from '@/components/analytics/UnderwaterRiskCard'
 import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
+import { PortfolioAttributionCard } from '@/components/analytics/PortfolioAttributionCard'
 import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
 import { useAnalytics, usePositions, useBenchmarkComparison, usePerformance } from '@/api/queries'
 import { useAppStore } from '@/store/appStore'
@@ -616,6 +617,15 @@ export function AnalyticsPage() {
         totalValue={positions.reduce((acc, p) => acc + (p.current_value || 0), 0)}
         loading={analyticsFetching || perfFetching}
       />
+
+      {/* Radiografía de Atribución P&L, Mapa Cuadrante y Costes TER */}
+      {positions.length > 0 && (
+        <PortfolioAttributionCard
+          positions={positions}
+          onSelectPosition={(p) => setSelectedPosition(p)}
+          defaultTab="attribution"
+        />
+      )}
 
       {/* Compound Wealth & Monte Carlo Cone Simulator */}
       {positions.length > 0 && (
