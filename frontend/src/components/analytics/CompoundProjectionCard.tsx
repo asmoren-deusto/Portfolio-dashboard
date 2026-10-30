@@ -187,7 +187,7 @@ export function CompoundProjectionCard({
   }
 
   return (
-    <Card className="w-full h-full flex flex-col justify-between overflow-hidden" delay={0.31}>
+    <Card className="w-full overflow-hidden" delay={0.31}>
       <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-4 sm:px-6">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500/15 via-indigo-500/10 to-blue-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 shrink-0">
@@ -246,9 +246,9 @@ export function CompoundProjectionCard({
         </div>
       </CardHeader>
 
-      <div data-private className="p-3.5 sm:p-4 flex-1 flex flex-col gap-3">
+      <div data-private className="p-3.5 sm:p-4 space-y-3">
         {/* Top Interactive Sliders + Next Milestone Tracker */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 shrink-0">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {/* Control 1: DCA Monthly Slider */}
           <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-white/[0.025] border border-slate-200/80 dark:border-white/[0.06] flex flex-col justify-between">
             <div className="flex items-center justify-between text-xs">
@@ -336,7 +336,7 @@ export function CompoundProjectionCard({
         </div>
 
         {/* Main Monte Carlo Cone Chart (Full Width, Compact Height) */}
-        <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
+        <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
               Curva de Crecimiento Exponencial a {horizonYears} Años ({new Date().getFullYear() + horizonYears})
@@ -357,9 +357,8 @@ export function CompoundProjectionCard({
             </div>
           </div>
 
-          <div className="relative h-[220px] min-h-[220px] grow w-full">
-            <div className="absolute inset-0">
-              <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[240px] max-h-[240px] w-full">
+            <ResponsiveContainer width="100%" height={240}>
               <AreaChart
                 data={simulation.points}
                 margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
@@ -463,7 +462,6 @@ export function CompoundProjectionCard({
                 />
               </AreaChart>
             </ResponsiveContainer>
-            </div>
           </div>
         </div>
 

@@ -49,7 +49,7 @@ export function Card({ children, className, glass = false, loading = false }: Ca
         />
         {/* Subtle shine line at top */}
         <div className="pointer-events-none absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-        <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full h-full">
+        <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full">
           {children}
         </div>
       </div>

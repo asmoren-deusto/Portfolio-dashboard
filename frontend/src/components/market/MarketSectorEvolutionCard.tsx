@@ -696,7 +696,7 @@ export const MarketSectorEvolutionCard: React.FC<MarketSectorEvolutionCardProps>
               )}
             </div>
 
-            <div className="relative h-[295px] min-h-[295px] grow w-full">
+            <div className="relative h-[305px] max-h-[305px] w-full">
               <div className="absolute inset-0">
                 {chartMode === 'lines' ? (
                   <ResponsiveContainer width="100%" height="100%">
