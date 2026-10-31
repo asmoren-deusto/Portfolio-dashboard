@@ -1056,12 +1056,15 @@ def _fetch_benchmarks_sync(period: str) -> dict:
 
     closes: dict[str, dict[str, float]] = {}
     for key, ticker in BENCHMARK_TICKERS.items():
-        hist = yf.Ticker(ticker).history(period=period, interval="1d")
-        closes[key] = {
-            str(idx.date()): float(row["Close"])
-            for idx, row in hist.iterrows()
-            if row["Close"] == row["Close"] and row["Close"] > 0
-        }
+        try:
+            hist = yf.Ticker(ticker).history(period=period, interval="1d")
+            closes[key] = {
+                str(idx.date()): float(row["Close"])
+                for idx, row in hist.iterrows()
+                if row["Close"] == row["Close"] and row["Close"] > 0
+            }
+        except Exception as e:
+            logger.debug(f"Error fetching benchmark {key} ({ticker}): {e}")
 
     dates = sorted({d for series in closes.values() for d in series})
     if not dates:
@@ -1126,21 +1129,10 @@ _sim_portfolio_cache: dict[str, dict] = {}
 SIM_PORTFOLIO_CACHE_TTL = 45  # 45 seconds for responsive live feel
 
 
-def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, broker: Optional[str] = None) -> dict:
+def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset_meta: dict) -> dict:
     import yfinance as yf
     import pandas as pd
 
-    target_user = user_id if user_id and user_id != "demo" else "asier"
-    txs = _get_all_transactions(db, user_id=target_user)
-    if not txs:
-        txs = _get_all_transactions(db, user_id="asier")
-    if broker and broker != "all":
-        b_clean = broker.lower().replace("-", "").replace("_", "")
-        if b_clean in ("traderep", "trade", "tr"):
-            b_clean = "traderepublic"
-        txs = [t for t in txs if t.get("broker", "").lower().replace("-", "").replace("_", "") == b_clean]
-    positions = calculate_positions(txs)
-    active = {k: v for k, v in positions.items() if v.get("shares", 0) > 0.0001 and not k.startswith("TR_")}
     if not active:
         return {
             "summary": {
@@ -1156,13 +1148,7 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
             "chart_points": [],
         }
 
-    # Latest NAVs for active positions
-    navs = {}
-    for isin in active.keys():
-        cp = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
-        navs[isin] = cp.price if cp and cp.price and cp.price > 0 else active[isin].get("avg_cost", 0)
-
-    fund_values = {isin: active[isin]["shares"] * navs[isin] for isin in active.keys()}
+    fund_values = {isin: active[isin]["shares"] * navs.get(isin, active[isin].get("avg_cost", 0)) for isin in active.keys()}
     total_val = sum(fund_values.values())
 
     etf_weights = {}
@@ -1179,14 +1165,11 @@ def _fetch_simulated_portfolio_sync(period: str, user_id: str, db: Session, brok
         w = (f_val / total_val) if total_val > 0 else 0
         etf_weights[etf_ticker] = etf_weights.get(etf_ticker, 0.0) + w
 
-        asset = _get_asset(db, isin)
-        pos_txs = [t for t in txs if t["isin"] == isin]
-        broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
-
+        meta = asset_meta.get(isin, {})
         holdings.append({
             "isin": isin,
-            "fund_name": asset.name if asset else isin,
-            "broker": broker,
+            "fund_name": meta.get("name", isin),
+            "broker": meta.get("broker", "myinvestor"),
             "shares": round(active[isin]["shares"], 4),
             "nav": round(navs[isin], 4),
             "fund_value": round(f_val, 2),
@@ -1747,7 +1730,34 @@ async def get_simulated_portfolio(
         if now - entry["ts"] < SIM_PORTFOLIO_CACHE_TTL:
             return entry["data"]
 
-    data = await asyncio.to_thread(_fetch_simulated_portfolio_sync, period, user_id or "asier", db, broker)
+    target_user = user_id if user_id and user_id != "demo" else "asier"
+    txs = _get_all_transactions(db, user_id=target_user)
+    if not txs:
+        txs = _get_all_transactions(db, user_id="asier")
+    if broker and broker != "all":
+        b_clean = broker.lower().replace("-", "").replace("_", "")
+        if b_clean in ("traderep", "trade", "tr"):
+            b_clean = "traderepublic"
+        txs = [t for t in txs if t.get("broker", "").lower().replace("-", "").replace("_", "") == b_clean]
+    positions = calculate_positions(txs)
+    active = {k: v for k, v in positions.items() if v.get("shares", 0) > 0.0001 and not k.startswith("TR_")}
+
+    from app.models import Asset
+    all_assets = {a.isin: a for a in db.query(Asset).all()}
+    navs = {}
+    asset_meta = {}
+    for isin in active.keys():
+        cp = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+        navs[isin] = cp.price if cp and cp.price and cp.price > 0 else active[isin].get("avg_cost", 0)
+        pos_txs = [t for t in txs if t["isin"] == isin]
+        pos_broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
+        asset_obj = all_assets.get(isin)
+        asset_meta[isin] = {
+            "name": asset_obj.name if asset_obj else isin,
+            "broker": pos_broker,
+        }
+
+    data = await asyncio.to_thread(_fetch_simulated_portfolio_sync, period, active, navs, asset_meta)
     _sim_portfolio_cache[cache_key] = {"data": data, "ts": now}
     return data
 

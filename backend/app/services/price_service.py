@@ -105,19 +105,21 @@ def preload_price_cache_from_db():
         from app.database import SessionLocal
         from app.models import PriceCache
         db = SessionLocal()
-        rows = db.query(PriceCache).order_by(PriceCache.date.desc()).all()
-        loaded = 0
-        for r in rows:
-            if r.isin and (r.isin == "TR_TRANSFER" or r.isin.startswith("TR_")):
-                continue
-            if r.isin and r.price is not None and r.price > 0 and r.isin not in _price_cache:
-                _price_cache[r.isin] = {
-                    "price": float(r.price),
-                    "date": r.date,
-                    "ts": datetime.now()
-                }
-                loaded += 1
-        db.close()
+        try:
+            rows = db.query(PriceCache).order_by(PriceCache.date.desc()).all()
+            loaded = 0
+            for r in rows:
+                if r.isin and (r.isin == "TR_TRANSFER" or r.isin.startswith("TR_")):
+                    continue
+                if r.isin and r.price is not None and r.price > 0 and r.isin not in _price_cache:
+                    _price_cache[r.isin] = {
+                        "price": float(r.price),
+                        "date": r.date,
+                        "ts": datetime.now()
+                    }
+                    loaded += 1
+        finally:
+            db.close()
         logger.info(f"Preloaded {loaded} assets from SQLite PriceCache table into memory cache.")
     except Exception as e:
         logger.warning(f"Error preloading price cache from DB: {e}")

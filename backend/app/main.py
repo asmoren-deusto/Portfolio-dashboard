@@ -135,9 +135,11 @@ async def startup():
                 from app.database import SessionLocal
                 from app.routers.portfolio import check_portfolio_navs
                 db = SessionLocal()
-                logger.info("Executing periodic NAV scanner...")
-                await check_portfolio_navs(user_id="asier", db=db)
-                db.close()
+                try:
+                    logger.info("Executing periodic NAV scanner...")
+                    await check_portfolio_navs(user_id="asier", db=db)
+                finally:
+                    db.close()
 
                 # Intelligent interval: funds publish NAVs on business days mostly 16:00-24:00 CET,
                 # with late publishers (BlackRock, Fidelity IE...) catching up the next morning 07:00-12:00.

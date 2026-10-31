@@ -121,6 +121,7 @@ async def import_csv(file: UploadFile = File(...), user_id: str = Depends(get_cu
         imported += 1
 
     db.commit()
+    clear_portfolio_caches()
     return {
         "imported": imported,
         "skipped": skipped,
@@ -193,6 +194,7 @@ def import_text(req: ImportTextRequest, user_id: str = Depends(get_current_user_
         imported += 1
 
     db.commit()
+    clear_portfolio_caches()
     return {
         "imported": imported,
         "skipped": skipped,
