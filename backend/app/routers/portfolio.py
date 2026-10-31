@@ -100,12 +100,7 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
     async def _fetch_pos_val(isin, pos):
         asset = all_assets.get(isin)
         ticker = asset.ticker if asset else None
-        from app.database import SessionLocal
-        task_db = SessionLocal()
-        try:
-            price = await get_current_price(isin, ticker, db=task_db)
-        finally:
-            task_db.close()
+        price = await get_current_price(isin, ticker)
         effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
         return round(pos["shares"] * effective_price, 2), round(pos["invested_amount"], 2)
 
@@ -209,21 +204,20 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         pos_txs = [t for t in transactions if t["isin"] == isin]
         pos_broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
 
-        from app.database import SessionLocal
+        price, price_date = await get_price_with_date(isin, ticker, force=refresh)
+
+        effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
+        current_value = pos["shares"] * effective_price
+        pnl = current_value - pos["invested_amount"]
+        pnl_pct = (pnl / pos["invested_amount"] * 100) if pos["invested_amount"] > 0 else 0.0
+
+        daily_change = None
+        daily_change_pct = None
+        p_prev = None
+        p_prev_date = None
+
         task_db = SessionLocal()
         try:
-            price, price_date = await get_price_with_date(isin, ticker, db=task_db, force=refresh)
-
-            effective_price = price if (price is not None and price >= 0) else pos["avg_cost"]
-            current_value = pos["shares"] * effective_price
-            pnl = current_value - pos["invested_amount"]
-            pnl_pct = (pnl / pos["invested_amount"] * 100) if pos["invested_amount"] > 0 else 0.0
-
-            daily_change = None
-            daily_change_pct = None
-            p_prev = None
-            p_prev_date = None
-
             query = task_db.query(PriceCache).filter(
                 PriceCache.isin == isin,
                 PriceCache.price > 0,
@@ -242,62 +236,65 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
                 if len(all_cps) >= 2:
                     p_prev = all_cps[1].price
                     p_prev_date = all_cps[1].date
-
-            # Detectar si hay un hueco temporal con respecto a la sesión anterior
-            expected_prev_date = None
-            if price_date:
-                try:
-                    dt_curr = datetime.strptime(price_date, "%Y-%m-%d").date()
-                    if dt_curr.weekday() == 0:  # Lunes -> Viernes anterior (-3 días)
-                        expected_prev_date = (dt_curr - timedelta(days=3)).strftime("%Y-%m-%d")
-                    elif dt_curr.weekday() == 6:  # Domingo -> Viernes anterior (-2 días)
-                        expected_prev_date = (dt_curr - timedelta(days=2)).strftime("%Y-%m-%d")
-                    elif dt_curr.weekday() == 5:  # Sábado -> Viernes anterior (-1 día)
-                        expected_prev_date = (dt_curr - timedelta(days=1)).strftime("%Y-%m-%d")
-                    else:
-                        expected_prev_date = (dt_curr - timedelta(days=1)).strftime("%Y-%m-%d")
-                except Exception:
-                    pass
-
-            has_gap = (p_prev is None or p_prev <= 0) or (p_prev_date and expected_prev_date and p_prev_date < expected_prev_date)
-            eff_ticker = ticker or KNOWN_TICKERS.get(isin)
-
-            if has_gap:
-                try:
-                    h = []
-                    if isin == "ES0112611001" or isin.startswith("ES011261"):
-                        from app.services.price_service import _fetch_azvalor_history
-                        h = await _fetch_azvalor_history(isin, "1m")
-                    elif eff_ticker:
-                        h = await get_price_history(isin, eff_ticker, "5d")
-
-                    if h:
-                        prev_points = [
-                            pt for pt in h
-                            if pt.get("date") and (not price_date or pt["date"] < price_date) and pt.get("price", 0) > 0
-                        ]
-                        if prev_points:
-                            latest_h = prev_points[-1]
-                            if not p_prev_date or latest_h["date"] > p_prev_date:
-                                p_prev = latest_h["price"]
-                                p_prev_date = latest_h["date"]
-                                try:
-                                    task_db.add(PriceCache(
-                                        isin=isin,
-                                        date=p_prev_date,
-                                        price=p_prev,
-                                        currency="EUR",
-                                        source="history_sync"
-                                    ))
-                                    task_db.commit()
-                                except Exception:
-                                    task_db.rollback()
-                        elif (p_prev is None or p_prev <= 0) and len(h) >= 2 and h[-2].get("price", 0) > 0:
-                            p_prev = h[-2]["price"]
-                except Exception:
-                    pass
         finally:
             task_db.close()
+
+        # Detectar si hay un hueco temporal con respecto a la sesión anterior
+        expected_prev_date = None
+        if price_date:
+            try:
+                dt_curr = datetime.strptime(price_date, "%Y-%m-%d").date()
+                if dt_curr.weekday() == 0:  # Lunes -> Viernes anterior (-3 días)
+                    expected_prev_date = (dt_curr - timedelta(days=3)).strftime("%Y-%m-%d")
+                elif dt_curr.weekday() == 6:  # Domingo -> Viernes anterior (-2 días)
+                    expected_prev_date = (dt_curr - timedelta(days=2)).strftime("%Y-%m-%d")
+                elif dt_curr.weekday() == 5:  # Sábado -> Viernes anterior (-1 día)
+                    expected_prev_date = (dt_curr - timedelta(days=1)).strftime("%Y-%m-%d")
+                else:
+                    expected_prev_date = (dt_curr - timedelta(days=1)).strftime("%Y-%m-%d")
+            except Exception:
+                pass
+
+        has_gap = (p_prev is None or p_prev <= 0) or (p_prev_date and expected_prev_date and p_prev_date < expected_prev_date)
+        eff_ticker = ticker or KNOWN_TICKERS.get(isin)
+
+        if has_gap:
+            try:
+                h = []
+                if isin == "ES0112611001" or isin.startswith("ES011261"):
+                    from app.services.price_service import _fetch_azvalor_history
+                    h = await _fetch_azvalor_history(isin, "1m")
+                elif eff_ticker:
+                    h = await get_price_history(isin, eff_ticker, "5d")
+
+                if h:
+                    prev_points = [
+                        pt for pt in h
+                        if pt.get("date") and (not price_date or pt["date"] < price_date) and pt.get("price", 0) > 0
+                    ]
+                    if prev_points:
+                        latest_h = prev_points[-1]
+                        if not p_prev_date or latest_h["date"] > p_prev_date:
+                            p_prev = latest_h["price"]
+                            p_prev_date = latest_h["date"]
+                            sync_db = SessionLocal()
+                            try:
+                                sync_db.add(PriceCache(
+                                    isin=isin,
+                                    date=p_prev_date,
+                                    price=p_prev,
+                                    currency="EUR",
+                                    source="history_sync"
+                                ))
+                                sync_db.commit()
+                            except Exception:
+                                sync_db.rollback()
+                            finally:
+                                sync_db.close()
+                    elif (p_prev is None or p_prev <= 0) and len(h) >= 2 and h[-2].get("price", 0) > 0:
+                        p_prev = h[-2]["price"]
+            except Exception:
+                pass
 
         if p_prev and p_prev > 0 and effective_price and effective_price > 0:
             daily_change = round(effective_price - p_prev, 4)
@@ -705,16 +702,11 @@ async def get_performance(
     async def _fetch_perf_bundle(isin):
         asset = all_assets.get(isin)
         ticker = asset.ticker if asset else None
-        from app.database import SessionLocal
-        task_db = SessionLocal()
-        try:
-            (history_res, price_res) = await asyncio.gather(
-                get_price_history(isin, ticker, period),
-                get_price_with_date(isin, ticker, db=task_db),
-                return_exceptions=True
-            )
-        finally:
-            task_db.close()
+        (history_res, price_res) = await asyncio.gather(
+            get_price_history(isin, ticker, period),
+            get_price_with_date(isin, ticker),
+            return_exceptions=True
+        )
         history = [dict(h) for h in history_res] if isinstance(history_res, list) else []
         curr_p, curr_p_date = price_res if isinstance(price_res, tuple) else (None, None)
         return isin, history, curr_p, curr_p_date
@@ -867,16 +859,11 @@ async def get_benchmark_comparison(
     async def _fetch_bench_asset(isin):
         asset = all_assets.get(isin)
         ticker = asset.ticker if asset else None
-        from app.database import SessionLocal
-        task_db = SessionLocal()
-        try:
-            (history_res, price_res) = await asyncio.gather(
-                get_price_history(isin, ticker, period),
-                get_current_price(isin, ticker, db=task_db),
-                return_exceptions=True
-            )
-        finally:
-            task_db.close()
+        (history_res, price_res) = await asyncio.gather(
+            get_price_history(isin, ticker, period),
+            get_current_price(isin, ticker),
+            return_exceptions=True
+        )
         history = [dict(h) for h in history_res] if isinstance(history_res, list) else []
         curr_p = price_res if isinstance(price_res, (int, float)) else None
         return isin, history, curr_p
@@ -1130,16 +1117,11 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     async def _fetch_analytics_bundle(isin):
         asset = all_assets.get(isin)
         ticker = asset.ticker if asset else None
-        from app.database import SessionLocal
-        task_db = SessionLocal()
-        try:
-            (history_res, price_res) = await asyncio.gather(
-                get_price_history(isin, ticker, history_period),
-                get_price_with_date(isin, ticker, db=task_db),
-                return_exceptions=True
-            )
-        finally:
-            task_db.close()
+        (history_res, price_res) = await asyncio.gather(
+            get_price_history(isin, ticker, history_period),
+            get_price_with_date(isin, ticker),
+            return_exceptions=True
+        )
         history = [dict(h) for h in history_res] if isinstance(history_res, list) else []
         curr_p, curr_date = price_res if isinstance(price_res, tuple) else (None, None)
         return isin, history, curr_p, curr_date

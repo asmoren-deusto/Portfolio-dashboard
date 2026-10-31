@@ -1,6 +1,7 @@
 """Database setup — SQLite via SQLAlchemy."""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.pool import NullPool
 import os
 
 DEFAULT_DB = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "portfolio.db"))
@@ -9,7 +10,8 @@ os.makedirs(os.path.dirname(DB_PATH) if os.path.dirname(DB_PATH) else ".", exist
 
 engine = create_engine(
     f"sqlite:///{DB_PATH}",
-    connect_args={"check_same_thread": False},
+    connect_args={"check_same_thread": False, "timeout": 30},
+    poolclass=NullPool,
 )
 
 from sqlalchemy import event

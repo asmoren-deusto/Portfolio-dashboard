@@ -217,6 +217,53 @@ async def _fetch_boerse_frankfurt_price(isin: str) -> tuple[Optional[float], Opt
     return None, None, None
 
 
+
+def _get_latest_cached_price(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """Safely fetch latest PriceCache entry with a short-lived, self-closing session."""
+    if not SessionLocal or not PriceCache:
+        return None, None
+    s = SessionLocal()
+    try:
+        entry = s.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.price > 0).order_by(PriceCache.date.desc()).first()
+        if entry and entry.price is not None and entry.price > 0:
+            return float(entry.price), entry.date
+        return None, None
+    except Exception as e:
+        logger.debug(f"Error checking PriceCache for {isin}: {e}")
+        return None, None
+    finally:
+        s.close()
+
+
+def _save_cached_price(isin: str, date: str, price: float, source: str = "live"):
+    """Safely persist a NAV quote to PriceCache with a short-lived, self-closing session."""
+    if not SessionLocal or not PriceCache or not price or price <= 0:
+        return
+    s = SessionLocal()
+    try:
+        existing = s.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == date).first()
+        if existing:
+            existing_str = f"{existing.price:.6f}".rstrip("0")
+            new_str = f"{price:.6f}".rstrip("0")
+            existing_decs = len(existing_str.split(".")[1]) if "." in existing_str else 0
+            new_decs = len(new_str.split(".")[1]) if "." in new_str else 0
+            is_same_quote = (abs(existing.price - price) / price < 0.005)
+            if not (is_same_quote and existing_decs > new_decs):
+                existing.price = price
+                existing.source = source
+        else:
+            s.add(PriceCache(isin=isin, date=date, price=price, currency="EUR", source=source))
+        s.commit()
+    except Exception as e:
+        try:
+            s.rollback()
+        except Exception:
+            pass
+        logger.debug(f"Error saving PriceCache for {isin}: {e}")
+    finally:
+        s.close()
+
+
 async def get_price_with_date(
     isin: str,
     ticker: str | None = None,
@@ -1433,16 +1480,18 @@ async def get_price_history(
                     from app.database import SessionLocal
                     from app.models import PriceCache
                     db_s = SessionLocal()
-                    recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
-                    existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
-                    for rp in recent_prices:
-                        if rp.price is not None and rp.price > 0:
-                            if rp.date in existing_dates:
-                                res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                            else:
-                                res.append({"date": rp.date, "price": round(rp.price, 4)})
-                    res.sort(key=lambda x: x["date"])
-                    db_s.close()
+                    try:
+                        recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                        existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
+                        for rp in recent_prices:
+                            if rp.price is not None and rp.price > 0:
+                                if rp.date in existing_dates:
+                                    res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                                else:
+                                    res.append({"date": rp.date, "price": round(rp.price, 4)})
+                        res.sort(key=lambda x: x["date"])
+                    finally:
+                        db_s.close()
                 except Exception:
                     pass
                 _history_cache[f"{isin}:{ticker}:{yf_period}"] = (datetime.now(), res)
@@ -1516,19 +1565,21 @@ async def get_price_history(
                     from app.database import SessionLocal
                     from app.models import PriceCache
                     db_s = SessionLocal()
-                    recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
-                    existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
-                    is_live_traded = bool(ticker and not ticker.startswith("0P000") and not isin.startswith("0192"))
-                    for rp in recent_prices:
-                        if rp.price is not None and rp.price > 0:
-                            if is_live_traded and rp.source not in ("live_yahoo", "history_sync"):
-                                continue
-                            if rp.date in existing_dates:
-                                res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                            else:
-                                res.append({"date": rp.date, "price": round(rp.price, 4)})
-                    res.sort(key=lambda x: x["date"])
-                    db_s.close()
+                    try:
+                        recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                        existing_dates = {h["date"]: idx for idx, h in enumerate(res)}
+                        is_live_traded = bool(ticker and not ticker.startswith("0P000") and not isin.startswith("0192"))
+                        for rp in recent_prices:
+                            if rp.price is not None and rp.price > 0:
+                                if is_live_traded and rp.source not in ("live_yahoo", "history_sync"):
+                                    continue
+                                if rp.date in existing_dates:
+                                    res[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                                else:
+                                    res.append({"date": rp.date, "price": round(rp.price, 4)})
+                        res.sort(key=lambda x: x["date"])
+                    finally:
+                        db_s.close()
                 except Exception:
                     pass
                 _history_cache[f"{isin}:{ticker}:{yf_period}"] = (datetime.now(), res)
@@ -1545,9 +1596,9 @@ async def get_price_history(
     try:
         from app.database import SessionLocal
         from app.models import PriceCache, Transaction
+        points_dict = {}
         db = SessionLocal()
         try:
-            points_dict = {}
             # Real execution prices from transactions (excluding traspasos which carry historical fiscal base costs)
             txs = db.query(Transaction).filter(Transaction.isin == isin).order_by(Transaction.date.asc()).all()
             for tx in txs:
@@ -1564,21 +1615,21 @@ async def get_price_history(
             for row in cached_rows:
                 if row.price is not None and row.price >= 0:
                     points_dict[row.date] = round(float(row.price), 4)
-
-            # Latest live price from cache/db
-            current, current_date = await get_price_with_date(isin, ticker, db=db)
-            if current is not None and current >= 0:
-                t_date = current_date or datetime.now().strftime("%Y-%m-%d")
-                points_dict[t_date] = round(float(current), 4)
-
-            if points_dict:
-                sorted_pts = [{"date": d, "price": p} for d, p in sorted(points_dict.items())]
-                if cutoff:
-                    sorted_pts = [p for p in sorted_pts if p["date"] >= cutoff]
-                _history_cache[cache_key] = (datetime.now(), sorted_pts)
-                return sorted_pts
         finally:
             db.close()
+
+        # Latest live price from cache/db fetched outside open DB session
+        current, current_date = await get_price_with_date(isin, ticker)
+        if current is not None and current >= 0:
+            t_date = current_date or datetime.now().strftime("%Y-%m-%d")
+            points_dict[t_date] = round(float(current), 4)
+
+        if points_dict:
+            sorted_pts = [{"date": d, "price": p} for d, p in sorted(points_dict.items())]
+            if cutoff:
+                sorted_pts = [p for p in sorted_pts if p["date"] >= cutoff]
+            _history_cache[cache_key] = (datetime.now(), sorted_pts)
+            return sorted_pts
     except Exception as e:
         logger.warning(f"Error querying historical records for {isin}: {e}")
 
