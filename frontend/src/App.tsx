@@ -1,14 +1,15 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { RootLayout } from '@/components/layout/RootLayout'
 import { OverviewPage } from '@/pages/OverviewPage'
+import { lazyWithRetry } from '@/utils/lazyWithRetry'
 
-const MarketPage = lazy(() => import('@/pages/MarketPage').then(m => ({ default: m.MarketPage })))
-const PositionsPage = lazy(() => import('@/pages/PositionsPage').then(m => ({ default: m.PositionsPage })))
-const AnalyticsPage = lazy(() => import('@/pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })))
-const TransactionsPage = lazy(() => import('@/pages/TransactionsPage').then(m => ({ default: m.TransactionsPage })))
-const LoginPage = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const MarketPage = lazyWithRetry(() => import('@/pages/MarketPage'), 'MarketPage')
+const PositionsPage = lazyWithRetry(() => import('@/pages/PositionsPage'), 'PositionsPage')
+const AnalyticsPage = lazyWithRetry(() => import('@/pages/AnalyticsPage'), 'AnalyticsPage')
+const TransactionsPage = lazyWithRetry(() => import('@/pages/TransactionsPage'), 'TransactionsPage')
+const LoginPage = lazyWithRetry(() => import('@/pages/LoginPage'), 'LoginPage')
 
 function PageLoadingFallback() {
   return (

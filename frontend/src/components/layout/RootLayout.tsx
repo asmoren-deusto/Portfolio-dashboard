@@ -53,10 +53,10 @@ export function RootLayout() {
   // Pre-fetch lazy page chunks on idle so navigation between tabs is instantaneous without skeleton flicker
   useEffect(() => {
     const prefetchRoutes = () => {
-      import('@/pages/MarketPage')
-      import('@/pages/PositionsPage')
-      import('@/pages/AnalyticsPage')
-      import('@/pages/TransactionsPage')
+      import('@/pages/MarketPage').catch(() => {})
+      import('@/pages/PositionsPage').catch(() => {})
+      import('@/pages/AnalyticsPage').catch(() => {})
+      import('@/pages/TransactionsPage').catch(() => {})
     }
     if ('requestIdleCallback' in window) {
       ;(window as any).requestIdleCallback(prefetchRoutes)
