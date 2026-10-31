@@ -1196,6 +1196,14 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
     needed_proxy_tickers = list(set(ETF_PREMARKET_LIVE_PROXIES.values()))
     proxy_quotes = _fetch_quotes_extended(needed_proxy_tickers)
 
+    from zoneinfo import ZoneInfo
+    madrid_tz = ZoneInfo("Europe/Madrid")
+    ny_tz = ZoneInfo("America/New_York")
+    now_madrid = datetime.now(madrid_tz)
+    now_ny = datetime.now(ny_tz)
+    mins_ny_now = now_ny.hour * 60 + now_ny.minute
+    is_pre_market_window = (now_ny.weekday() < 5) and (mins_ny_now < 9 * 60 + 30)
+
     for t in etf_tickers_list:
         q = quotes.get(t, {})
         m_state = q.get("market_state")
@@ -1209,15 +1217,15 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
         else:
             official_close_pct = q.get("change_pct", 0.0) or 0.0
 
-        official_close_price = prev_c if (m_state == "REGULAR" and prev_c and prev_c > 0) else reg_p
+        official_close_price = reg_p if is_pre_market_window else (prev_c if (prev_c and prev_c > 0) else reg_p)
         quotes[t]["official_close_pct"] = official_close_pct
         quotes[t]["official_close_price"] = official_close_price
         quotes[t]["is_indicative"] = False
         quotes[t]["proxy_used"] = None
 
-        # When cash equity market is outside regular session (PRE, POST, CLOSED, or FUTURES),
-        # project live movements using the active underlying futures/index proxy
-        if m_state != "REGULAR":
+        # Only project with 24h futures/index proxies on weekdays BEFORE Wall Street opens (09:30 NY).
+        # Once Wall Street opens (REGULAR, POST, or CLOSED after regular session), use the ETF's actual session performance.
+        if is_pre_market_window:
             p_tick = ETF_PREMARKET_LIVE_PROXIES.get(t)
             if p_tick:
                 pq = proxy_quotes.get(p_tick, {})
@@ -1228,10 +1236,19 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
                     quotes[t]["is_indicative"] = True
                     if official_close_price:
                         quotes[t]["price"] = round(official_close_price * (1.0 + p_chg / 100.0), 2)
-            elif m_state in ("PRE", "POST") and q.get("change_pct") is not None:
-                # Direct pre/post market quote (e.g. EEM with active liquid US pre-market trades)
+            elif m_state == "PRE" and q.get("change_pct") is not None:
                 quotes[t]["is_indicative"] = False
                 quotes[t]["proxy_used"] = None
+        else:
+            post_p = q.get("post_market_price")
+            if m_state in ("POST", "POSTPOST") and post_p and prev_c and prev_c > 0:
+                quotes[t]["price"] = post_p
+                quotes[t]["change"] = round(post_p - prev_c, 4)
+                quotes[t]["change_pct"] = round((post_p - prev_c) / prev_c * 100.0, 2)
+            else:
+                quotes[t]["change_pct"] = official_close_pct
+                if reg_p:
+                    quotes[t]["price"] = reg_p
 
     # Attach live ETF quote info & simulated gain to each holding
     for h in holdings:
@@ -1384,8 +1401,8 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
                         target_idxs = today_idxs
 
                         # Reconstruct intraday ETF returns
-                        # During pre-market (< 15:30 Madrid), use 24h futures/index proxies (ES=F, NQ=F, etc.)
-                        # Once US regular session opens (>= 15:30 Madrid), use the actual ETF liquid market series
+                        # During pre-market (< 09:30 NY), use 24h futures/index proxies (ES=F, NQ=F, etc.)
+                        # Once US regular session opens (>= 09:30 NY) or during post-market, use the actual ETF liquid market series
                         norm_dict = {}
                         for t in etf_cols:
                             b_val = base_dict.get(t, 1.0)
@@ -1404,11 +1421,11 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
 
                             combined_vals = []
                             for idx in target_idxs:
-                                dt_mad = idx.astimezone(madrid_tz)
-                                is_regular = (dt_mad.hour * 60 + dt_mad.minute >= 15 * 60 + 30)
+                                dt_ny_bar = idx.astimezone(ny_tz)
+                                is_regular_or_post = (dt_ny_bar.hour * 60 + dt_ny_bar.minute >= 9 * 60 + 30)
 
                                 val = None
-                                if is_regular and etf_ret is not None and not pd.isna(etf_ret.loc[idx]):
+                                if is_regular_or_post and etf_ret is not None and not pd.isna(etf_ret.loc[idx]):
                                     val = etf_ret.loc[idx]
                                 elif proxy_ret is not None and not pd.isna(proxy_ret.loc[idx]):
                                     val = proxy_ret.loc[idx]
@@ -1479,30 +1496,34 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
                                 "phase": "PRE",
                             })
 
-                        # 5. Apertura Regular Wall Street (15:30 Madrid / 09:30 NY)
-                        t_ny = int(now_madrid.replace(hour=15, minute=30, second=0, microsecond=0).timestamp())
+                        # 5. Apertura Regular Wall Street (09:30 NY convertido a hora Madrid exacta)
+                        dt_today_ny_open = datetime.combine(today_ny_date, datetime.min.time().replace(hour=9, minute=30)).replace(tzinfo=ny_tz)
+                        dt_mad_open = dt_today_ny_open.astimezone(madrid_tz)
+                        t_ny = int(dt_mad_open.timestamp())
                         if now_unix >= t_ny - 300:
                             session_markers.append({
                                 "time_unix": t_ny,
-                                "label": "15:30 • Wall Street",
+                                "label": f"{dt_mad_open.strftime('%H:%M')} • Wall Street",
                                 "type": "regular_open",
                                 "color": "#10b981",
                                 "phase": "REGULAR",
                             })
 
-                        # 6. Cierre / After-Hours Wall Street (22:00 Madrid / 16:00 NY)
-                        t_post = int(now_madrid.replace(hour=22, minute=0, second=0, microsecond=0).timestamp())
+                        # 6. Cierre / After-Hours Wall Street (16:00 NY convertido a hora Madrid exacta)
+                        dt_today_ny_close = datetime.combine(today_ny_date, datetime.min.time().replace(hour=16, minute=0)).replace(tzinfo=ny_tz)
+                        dt_mad_close = dt_today_ny_close.astimezone(madrid_tz)
+                        t_post = int(dt_mad_close.timestamp())
                         if now_unix >= t_post - 300:
                             session_markers.append({
                                 "time_unix": t_post,
-                                "label": "22:00 • After-Hours",
+                                "label": f"{dt_mad_close.strftime('%H:%M')} • After-Hours",
                                 "type": "post_market",
                                 "color": "#f59e0b",
                                 "phase": "POST",
                             })
 
                     else:
-                        # Display the LAST COMPLETED REGULAR SESSION (e.g. Friday) from 15:30 to 22:00 Madrid
+                        # Display the LAST COMPLETED REGULAR SESSION (e.g. Friday) from 09:30 to 20:00 NY
                         last_session = unique_sessions[-1]
                         target_idxs = [
                             idx for idx, d in zip(closes_raw.index, session_dates)
@@ -1529,21 +1550,24 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
                         weights_aligned = weights_series.reindex(norm_df.columns).fillna(0.0)
                         sim_pct = norm_df.dot(weights_aligned)
 
-                        # Session markers for that regular session
+                        # Session markers for that regular session (converted accurately to Madrid time)
                         if target_idxs:
-                            dt_first = target_idxs[0].astimezone(madrid_tz)
-                            m_1530 = int(dt_first.replace(hour=15, minute=30, second=0, microsecond=0).timestamp())
-                            m_2200 = int(dt_first.replace(hour=22, minute=0, second=0, microsecond=0).timestamp())
+                            dt_sess_open_ny = datetime.combine(last_session, datetime.min.time().replace(hour=9, minute=30)).replace(tzinfo=ny_tz)
+                            dt_sess_close_ny = datetime.combine(last_session, datetime.min.time().replace(hour=16, minute=0)).replace(tzinfo=ny_tz)
+                            dt_sess_open_mad = dt_sess_open_ny.astimezone(madrid_tz)
+                            dt_sess_close_mad = dt_sess_close_ny.astimezone(madrid_tz)
+                            m_open = int(dt_sess_open_mad.timestamp())
+                            m_close = int(dt_sess_close_mad.timestamp())
                             session_markers.append({
-                                "time_unix": m_1530,
-                                "label": "15:30 • Apertura Regular",
+                                "time_unix": m_open,
+                                "label": f"{dt_sess_open_mad.strftime('%H:%M')} • Apertura Regular",
                                 "type": "regular_open",
                                 "color": "#10b981",
                                 "phase": "REGULAR",
                             })
                             session_markers.append({
-                                "time_unix": m_2200,
-                                "label": "22:00 • Post-Market",
+                                "time_unix": m_close,
+                                "label": f"{dt_sess_close_mad.strftime('%H:%M')} • Post-Market",
                                 "type": "post_market",
                                 "color": "#f59e0b",
                                 "phase": "POST",
@@ -1608,12 +1632,14 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
         logger.warning(f"Error fetching ETF history download: {e}")
 
     # Sincronizar el último punto en tiempo real con la estimación viva de summary
+    # Para period == '1d', chart_points y summary DEBEN ser 100% idénticos y sin picos artificiales.
     if chart_points and fetch_period == "1d":
         last_pt = chart_points[-1]
         now_unix = int(now_madrid.timestamp())
-        is_today = (last_pt["date"] == now_madrid.strftime("%Y-%m-%d"))
+        is_today_live = (now_ny.weekday() < 5) and (last_pt.get("session_date") == now_ny.date().isoformat())
 
-        if is_today:
+        if is_today_live:
+            # Durante una sesión activa de hoy (lunes a viernes), mantener coherencia perfecta
             effective_sim_pct = simulated_daily_pct
             effective_eur_pct = simulated_eur_pct
 
@@ -1638,6 +1664,13 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
                 last_pt["simulated_eur_pct"] = effective_eur_pct
                 last_pt["simulated_eur_amount"] = simulated_eur_amount
                 last_pt["usd_strength_pct"] = usd_strength_pct
+        else:
+            # Cuando el mercado está CERRADO o en fin de semana, el summary DEBE reflejar exactamente
+            # el cierre final de la serie histórica (chart_points[-1]), evitando cualquier salto o pico
+            simulated_daily_pct = last_pt["simulated_pct"]
+            simulated_daily_amount = last_pt["simulated_amount"]
+            simulated_eur_pct = last_pt["simulated_eur_pct"]
+            simulated_eur_amount = last_pt["simulated_eur_amount"]
 
     # ETFs summary list
     etfs_summary = []
@@ -1665,9 +1698,9 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
             "currency": q.get("currency", "USD"),
         })
 
-    # Session dates & human-readable labels
-    latest_date_str = chart_points[-1]["date"] if chart_points else now_madrid.strftime("%Y-%m-%d")
-    is_session_today = (latest_date_str == now_madrid.strftime("%Y-%m-%d"))
+    # Session dates & human-readable labels: usar la fecha de sesión bursátil real de Wall Street
+    latest_date_str = chart_points[-1].get("session_date") if (chart_points and "session_date" in chart_points[-1]) else (chart_points[-1]["date"] if chart_points else now_madrid.strftime("%Y-%m-%d"))
+    is_session_today = (latest_date_str == now_ny.date().isoformat()) and (now_ny.weekday() < 5)
     try:
         ld = datetime.strptime(latest_date_str, "%Y-%m-%d")
         session_display = f"{DIAS_ES[ld.weekday()]}, {ld.day} {MESES_ES[ld.month]}."
