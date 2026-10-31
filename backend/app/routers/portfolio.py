@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import logging
 
-from app.database import get_db
+from app.database import get_db, SessionLocal
 from app.models import Asset, Transaction, PriceCache, UserGoal
 from app.schemas import PortfolioSummary, PositionOut, PerformancePoint, UpdatePriceRequest, UserGoalOut, UserGoalUpdate
 from app.services.price_service import get_current_price, get_price_with_date, get_price_history, _price_cache, KNOWN_TICKERS
@@ -739,8 +739,7 @@ async def get_performance(
             price_history[isin] = [{"date": curr_p_date or datetime.now().strftime("%Y-%m-%d"), "price": round(curr_p, 6)}]
 
     all_user_tx = _get_all_transactions(db, user_id, broker=None)
-    from app.models import Asset
-    asset_types = {a.isin: a.asset_type for a in db.query(Asset).all()}
+    asset_types = {isin: a.asset_type for isin, a in all_assets.items()}
     value_series = calculate_portfolio_value_series(
         transactions,
         price_history,
