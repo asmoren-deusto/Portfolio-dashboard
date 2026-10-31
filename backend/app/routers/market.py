@@ -351,18 +351,24 @@ def get_market_session_for_ticker(ticker: str, dt_utc: datetime | None = None) -
         return "CLOSED"
 
 
-def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
-    """Fallback quote fetch through Yahoo's chart endpoint when yfinance is rate-limited."""
-    import httpx
-    from urllib.parse import quote
+import httpx as _httpx
+from urllib.parse import quote as _url_quote
 
+_SHARED_HTTP_CLIENT = _httpx.Client(
+    timeout=6.0,
+    follow_redirects=True,
+    headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+    limits=_httpx.Limits(max_connections=35, max_keepalive_connections=25, keepalive_expiry=60.0),
+)
+
+
+def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
+    """Fast quote fetch through Yahoo's v8 chart endpoint using persistent keep-alive connection pool."""
     try:
-        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(ticker, safe='')}"
-        response = httpx.get(
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{_url_quote(ticker, safe='')}"
+        response = _SHARED_HTTP_CLIENT.get(
             url,
             params={"range": "1d", "interval": "1m", "includePrePost": "true"},
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=6.0,
         )
         response.raise_for_status()
         chart = response.json().get("chart", {})
@@ -409,7 +415,13 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
             else regular_price
         )
 
-        reference = previous_close or regular_price
+        if market_state == "PRE" and pre_price is not None and regular_price is not None:
+            reference = regular_price
+        elif market_state in ("POST", "POSTPOST") and post_price is not None and regular_price is not None:
+            reference = regular_price
+        else:
+            reference = previous_close or regular_price
+
         change = round(display_price - reference, 4) if (display_price is not None and reference is not None) else 0.0
         change_pct = round(change / reference * 100, 2) if (reference and reference > 0 and change is not None) else 0.0
 
@@ -475,10 +487,16 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
 
 
 def _fetch_ticker_extended(ticker: str) -> dict:
-    """Fetch a single ticker with pre/post market and market state via yfinance."""
+    """Fetch a single ticker with pre/post market and market state, prioritizing fast chart endpoint."""
     cached = _get_cached_ticker(ticker)
     if cached:
         return cached
+
+    # Fast path: single keep-alive HTTP request to Yahoo v8 chart API (~40ms, includes pre/post + regular + prev_close)
+    fast_q = _fetch_yahoo_chart_quote(ticker)
+    if fast_q and fast_q.get("price") is not None and fast_q.get("prev_close") is not None:
+        _set_cached_ticker(ticker, fast_q)
+        return fast_q
 
     import yfinance as yf
     try:
@@ -490,9 +508,6 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         reg_prev_close = _clean_float(getattr(fi, "regular_market_previous_close", None))
         fi_prev_close  = _clean_float(getattr(fi, "previous_close", None))
 
-        # For futures ('GC=F', 'BZ=F', 'CL=F', etc.), fast_info.previous_close reflects
-        # the overnight electronic session pause tick rather than the official previous daily settlement.
-        # regular_market_previous_close provides the true official previous daily close.
         if quote_type == "FUTURE" or ticker.endswith("=F"):
             prev_close = reg_prev_close or fi_prev_close
         else:
@@ -504,39 +519,35 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         market_cap    = _clean_float(getattr(fi, "market_cap", None))
         currency      = getattr(fi, "currency", "USD")
 
-        # Extended hours prices & fallback via fast chart quote
         pre_price  = None
         post_price = None
         pre_chg_pct  = None
         post_chg_pct = None
         market_state = get_market_session_for_ticker(ticker)
 
-        # If regular price is missing, market is PRE/POST, or futures lack valid prev_close, use fast chart quote fallback
-        if regular_price is None or market_state in ("PRE", "POST", "POSTPOST") or ((quote_type == "FUTURE" or ticker.endswith("=F")) and not prev_close):
-            chart_q = _fetch_yahoo_chart_quote(ticker)
-            if chart_q:
-                if regular_price is None:
-                    regular_price = _clean_float(chart_q.get("regular_price"))
-                if not prev_close:
-                    prev_close = _clean_float(chart_q.get("prev_close"))
-                if not day_high:
-                    day_high = _clean_float(chart_q.get("day_high"))
-                if not day_low:
-                    day_low = _clean_float(chart_q.get("day_low"))
-                if not volume:
-                    volume = _clean_float(chart_q.get("volume"))
-                if not market_cap:
-                    market_cap = _clean_float(chart_q.get("market_cap"))
-                if not currency:
-                    currency = chart_q.get("currency")
-                if market_state == "PRE":
-                    pre_price = _clean_float(chart_q.get("pre_market_price"))
-                    pre_chg_pct = _clean_float(chart_q.get("pre_market_change_pct"))
-                elif market_state in ("POST", "POSTPOST"):
-                    post_price = _clean_float(chart_q.get("post_market_price"))
-                    post_chg_pct = _clean_float(chart_q.get("post_market_change_pct"))
+        chart_q = fast_q
+        if chart_q:
+            if regular_price is None:
+                regular_price = _clean_float(chart_q.get("regular_price"))
+            if not prev_close:
+                prev_close = _clean_float(chart_q.get("prev_close"))
+            if not day_high:
+                day_high = _clean_float(chart_q.get("day_high"))
+            if not day_low:
+                day_low = _clean_float(chart_q.get("day_low"))
+            if not volume:
+                volume = _clean_float(chart_q.get("volume"))
+            if not market_cap:
+                market_cap = _clean_float(chart_q.get("market_cap"))
+            if not currency:
+                currency = chart_q.get("currency")
+            if market_state == "PRE":
+                pre_price = _clean_float(chart_q.get("pre_market_price"))
+                pre_chg_pct = _clean_float(chart_q.get("pre_market_change_pct"))
+            elif market_state in ("POST", "POSTPOST"):
+                post_price = _clean_float(chart_q.get("post_market_price"))
+                post_chg_pct = _clean_float(chart_q.get("post_market_change_pct"))
 
-        # Choose the most current price based on the active physical market state
         if market_state == "PRE":
             post_price = None
             post_chg_pct = None
@@ -553,14 +564,11 @@ def _fetch_ticker_extended(ticker: str) -> dict:
             display_price = regular_price
 
         if display_price is None:
-            fallback = _fetch_yahoo_chart_quote(ticker)
-            if fallback:
-                return _sanitize_for_json(fallback)
+            if fast_q:
+                _set_cached_ticker(ticker, fast_q)
+                return _sanitize_for_json(fast_q)
             return {"ticker": ticker, "error": "no_price"}
 
-        # ── Change calculation ──────────────────────────────────────────────────
-        # For regular/closed: compare regular_price vs prev_close (yesterday)
-        # For pre/post market: compare extended price vs regular_price (today's/yesterday's close)
         if market_state == "PRE":
             if pre_price is not None and regular_price is not None and abs(pre_price - regular_price) > 0.0001:
                 ref = regular_price
@@ -588,7 +596,6 @@ def _fetch_ticker_extended(ticker: str) -> dict:
                 chg = 0.0
                 chg_pct = 0.0
         else:
-            # REGULAR or CLOSED: change vs previous close
             ref = prev_close or regular_price or display_price
             chg = round(display_price - ref, 4) if (display_price is not None and ref is not None) else 0.0
             chg_pct = round((display_price - ref) / ref * 100, 2) if (ref and ref > 0 and display_price is not None) else 0.0
@@ -644,10 +651,9 @@ def _fetch_ticker_extended(ticker: str) -> dict:
         return res
     except Exception as e:
         logger.debug(f"Error fetching {ticker}: {e}")
-        fallback = _fetch_yahoo_chart_quote(ticker)
-        if fallback:
-            _set_cached_ticker(ticker, fallback)
-            return fallback
+        if fast_q:
+            _set_cached_ticker(ticker, fast_q)
+            return fast_q
         return {"ticker": ticker, "error": str(e)}
 
 
@@ -656,7 +662,7 @@ def _fetch_quotes_extended(tickers: list[str]) -> dict:
     if not tickers:
         return {}
     result = {}
-    max_workers = max(1, min(10, len(tickers)))
+    max_workers = max(1, min(20, len(tickers)))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(_fetch_ticker_extended, t): t for t in tickers}
         for future in as_completed(futures, timeout=25):
@@ -688,15 +694,11 @@ async def _refresh_quotes_in_background(cache_key: str, tickers: list[str]):
 
 @router.get("/quotes")
 async def get_quotes(index: Optional[str] = None):
-    """Return quotes for the full stock universe, optionally filtered by index."""
-    universe = STOCK_UNIVERSE
-    if index and index != "Todos":
-        universe = [s for s in STOCK_UNIVERSE if index in s["index"]]
+    """Return quotes for the full stock universe, optionally filtered by index in-memory."""
+    all_tickers = [s["ticker"] for s in STOCK_UNIVERSE]
+    cache_key = "quotes_all"
 
-    tickers = [s["ticker"] for s in universe]
-
-    # Check cache (stale-while-revalidate for instantaneous responses)
-    cache_key = ",".join(sorted(tickers))
+    # Always cache the full universe under 'quotes_all' so switching index tabs is 0ms
     if _is_fresh(cache_key):
         cached_data = _quote_cache[cache_key]
         quotes = cached_data["data"]
@@ -705,11 +707,15 @@ async def get_quotes(index: Optional[str] = None):
         cached_data = _quote_cache[cache_key]
         quotes = cached_data["data"]
         cache_ts = cached_data["ts"]
-        asyncio.create_task(_refresh_quotes_in_background(cache_key, tickers))
+        asyncio.create_task(_refresh_quotes_in_background(cache_key, all_tickers))
     else:
-        quotes = await asyncio.to_thread(_fetch_quotes_extended, tickers)
+        quotes = await asyncio.to_thread(_fetch_quotes_extended, all_tickers)
         cache_ts = time.time()
         _quote_cache[cache_key] = {"data": quotes, "ts": cache_ts}
+
+    universe = STOCK_UNIVERSE
+    if index and index != "Todos":
+        universe = [s for s in STOCK_UNIVERSE if index in s["index"]]
 
     result = []
     for stock in universe:
@@ -1126,6 +1132,7 @@ PORTFOLIO_ETF_PROXIES = {
 }
 
 _sim_portfolio_cache: dict[str, dict] = {}
+_etf_intraday_cache: dict[str, dict] = {}
 SIM_PORTFOLIO_CACHE_TTL = 45  # 45 seconds for responsive live feel
 
 
@@ -1306,11 +1313,19 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
         download_period = "2d" if fetch_period == "1d" else fetch_period
         include_prepost = fetch_period in ("1d", "5d")
 
-        # Download cash ETFs, all futures/index proxies and EURUSD
+        # Download cash ETFs, all futures/index proxies and EURUSD (cached across brokers for 45s)
         all_proxy_symbols = list(set(ETF_PREMARKET_LIVE_PROXIES.values()))
-        download_tickers = list(set(etf_tickers_list + all_proxy_symbols + ["ES=F", "NQ=F", "EURUSD=X"]))
+        all_known_etfs = list(set([p["ticker"] for p in PORTFOLIO_ETF_PROXIES.values()] + etf_tickers_list))
+        download_tickers = sorted(list(set(all_known_etfs + all_proxy_symbols + ["ES=F", "NQ=F", "EURUSD=X"])))
 
-        df = yf.download(download_tickers, period=download_period, interval=interval, prepost=include_prepost, progress=False)
+        df = None
+        cached_df_entry = _etf_intraday_cache.get(fetch_period)
+        if cached_df_entry and (time.time() - cached_df_entry["ts"] < 45):
+            df = cached_df_entry["df"]
+        else:
+            df = yf.download(download_tickers, period=download_period, interval=interval, prepost=include_prepost, progress=False)
+            if df is not None and not df.empty:
+                _etf_intraday_cache[fetch_period] = {"df": df, "ts": time.time()}
         if df is not None and not df.empty:
             closes_raw = df["Close"] if "Close" in df else df
             if isinstance(closes_raw, pd.DataFrame):
@@ -1712,6 +1727,20 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
     })
 
 
+async def _refresh_simulated_portfolio_in_background(cache_key: str, period: str, active: dict, navs: dict, asset_meta: dict):
+    bg_key = f"sim_{cache_key}"
+    if bg_key in _refreshing_keys:
+        return
+    _refreshing_keys.add(bg_key)
+    try:
+        data = await asyncio.to_thread(_fetch_simulated_portfolio_sync, period, active, navs, asset_meta)
+        _sim_portfolio_cache[cache_key] = {"data": data, "ts": time.time()}
+    except Exception as e:
+        logger.debug(f"Background simulated portfolio refresh error: {e}")
+    finally:
+        _refreshing_keys.discard(bg_key)
+
+
 @router.get("/simulated-portfolio")
 async def get_simulated_portfolio(
     period: str = "1d",
@@ -1743,12 +1772,17 @@ async def get_simulated_portfolio(
     active = {k: v for k, v in positions.items() if v.get("shares", 0) > 0.0001 and not k.startswith("TR_")}
 
     from app.models import Asset
+    from app.services.price_service import _price_cache as _svc_price_cache
     all_assets = {a.isin: a for a in db.query(Asset).all()}
     navs = {}
     asset_meta = {}
     for isin in active.keys():
-        cp = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
-        navs[isin] = cp.price if cp and cp.price and cp.price > 0 else active[isin].get("avg_cost", 0)
+        mem_cp = _svc_price_cache.get(isin)
+        if mem_cp and mem_cp.get("price") and mem_cp["price"] > 0:
+            navs[isin] = mem_cp["price"]
+        else:
+            cp = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).first()
+            navs[isin] = cp.price if cp and cp.price and cp.price > 0 else active[isin].get("avg_cost", 0)
         pos_txs = [t for t in txs if t["isin"] == isin]
         pos_broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
         asset_obj = all_assets.get(isin)
@@ -1756,6 +1790,11 @@ async def get_simulated_portfolio(
             "name": asset_obj.name if asset_obj else isin,
             "broker": pos_broker,
         }
+
+    # Stale-While-Revalidate: if we have stale data and _etf_intraday_cache is also expired, return stale immediately & refresh in background
+    if cache_key in _sim_portfolio_cache and not (_etf_intraday_cache.get(period) and (now - _etf_intraday_cache[period]["ts"] < 45)):
+        asyncio.create_task(_refresh_simulated_portfolio_in_background(cache_key, period, active, navs, asset_meta))
+        return _sim_portfolio_cache[cache_key]["data"]
 
     data = await asyncio.to_thread(_fetch_simulated_portfolio_sync, period, active, navs, asset_meta)
     _sim_portfolio_cache[cache_key] = {"data": data, "ts": now}
@@ -1888,6 +1927,21 @@ def _fetch_sector_history_sync(period: str = "5y") -> dict:
     })
 
 
+async def _refresh_sector_history_in_background(period: str):
+    bg_key = f"sector_{period}"
+    if bg_key in _refreshing_keys:
+        return
+    _refreshing_keys.add(bg_key)
+    try:
+        data = await asyncio.to_thread(_fetch_sector_history_sync, period)
+        if data.get("points"):
+            _sector_history_cache[period] = {"data": data, "ts": time.time()}
+    except Exception as e:
+        logger.debug(f"Background sector history refresh error: {e}")
+    finally:
+        _refreshing_keys.discard(bg_key)
+
+
 @router.get("/sector-history")
 async def get_sector_history(period: str = "5y"):
     """Historical percentage evolution by market sector (SPDR Sector ETFs)."""
@@ -1896,6 +1950,8 @@ async def get_sector_history(period: str = "5y"):
         entry = _sector_history_cache[period]
         if now - entry["ts"] < SECTOR_HISTORY_CACHE_TTL:
             return entry["data"]
+        asyncio.create_task(_refresh_sector_history_in_background(period))
+        return entry["data"]
 
     data = await asyncio.to_thread(_fetch_sector_history_sync, period)
     if data.get("points"):

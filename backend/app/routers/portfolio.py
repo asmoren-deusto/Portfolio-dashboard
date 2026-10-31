@@ -73,9 +73,20 @@ def _get_asset(db: Session, isin: str) -> Asset | None:
     return db.query(Asset).filter(Asset.isin == isin).first()
 
 
+_summary_cache: dict[str, tuple[datetime, PortfolioSummary]] = {}
+_positions_cache: dict[str, tuple[datetime, list[PositionOut]]] = {}
+_gap_checked_isins: set[str] = set()
+
+
 @router.get("/summary", response_model=PortfolioSummary)
 async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), broker: str | None = None, db: Session = Depends(get_db)):
     """Return overall portfolio KPIs."""
+    cache_key = f"{user_id}:{broker or 'all'}"
+    if cache_key in _summary_cache:
+        ts, cached_summary = _summary_cache[cache_key]
+        if (datetime.now() - ts).total_seconds() < 20:
+            return cached_summary
+
     transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
         return PortfolioSummary(
@@ -109,7 +120,7 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
     total_invested = sum(r[1] for r in pos_results if isinstance(r, tuple))
 
     # Account for cash in transit and deferred fiscal cost basis in transit during internal fund transfers (traspasos)
-    all_user_tx = _get_all_transactions(db, user_id, broker=None)
+    all_user_tx = transactions if not broker or broker.lower() in ["all", "todos"] else _get_all_transactions(db, user_id, broker=None)
     global_tb = calculate_traspaso_balances(all_user_tx)
     if broker and broker.lower() not in ["all", "todos"]:
         b_clean = broker.lower().replace("_", "").replace("-", "")
@@ -128,7 +139,7 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
 
     enhanced = calculate_enhanced_kpis(transactions, total_value)
 
-    return PortfolioSummary(
+    summary_out = PortfolioSummary(
         total_value=round(total_value, 2),
         total_invested=round(total_invested, 2),
         total_pnl=round(total_pnl, 2),
@@ -141,6 +152,8 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
         contribution_streak_months=enhanced.get("contribution_streak_months"),
         total_contributions_count=enhanced.get("total_contributions_count"),
     )
+    _summary_cache[cache_key] = (datetime.now(), summary_out)
+    return summary_out
 
 
 @router.get("/goal", response_model=UserGoalOut)
@@ -182,8 +195,15 @@ def update_user_goal(goal_in: UserGoalUpdate, user_id: str = Depends(get_current
 @router.get("/positions", response_model=list[PositionOut])
 async def get_positions(user_id: str = Depends(get_current_user_id), broker: str | None = None, refresh: bool = False, db: Session = Depends(get_db)):
     """Return all current positions with live prices, valuation dates, and broker tags."""
+    cache_key = f"{user_id}:{broker or 'all'}"
     if refresh:
         _price_cache.clear()
+        _positions_cache.clear()
+        _summary_cache.clear()
+    elif cache_key in _positions_cache:
+        ts, cached_positions = _positions_cache[cache_key]
+        if (datetime.now() - ts).total_seconds() < 20:
+            return cached_positions
 
     transactions = _get_all_transactions(db, user_id, broker=broker)
     if not transactions:
@@ -192,6 +212,21 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
     positions = calculate_positions(transactions)
     active_positions = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001}
     all_assets = {a.isin: a for a in db.query(Asset).all()}
+
+    # Batch-load recent PriceCache rows for all active ISINs in a single DB query (avoids 15+ SessionLocal calls)
+    cached_by_isin: dict[str, list[PriceCache]] = {}
+    if active_positions:
+        all_cached_rows = (
+            db.query(PriceCache)
+            .filter(PriceCache.isin.in_(list(active_positions.keys())), PriceCache.price > 0)
+            .order_by(PriceCache.isin, PriceCache.date.desc())
+            .all()
+        )
+        for row in all_cached_rows:
+            lst = cached_by_isin.setdefault(row.isin, [])
+            if len(lst) < 5:
+                lst.append(row)
+
     result = []
     total_value = 0.0
 
@@ -216,28 +251,16 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         p_prev = None
         p_prev_date = None
 
-        task_db = SessionLocal()
-        try:
-            query = task_db.query(PriceCache).filter(
-                PriceCache.isin == isin,
-                PriceCache.price > 0,
-            )
-            if price_date:
-                query = query.filter(PriceCache.date < price_date)
-            prev_cp = query.order_by(PriceCache.date.desc()).first()
-            if prev_cp:
-                p_prev = prev_cp.price
-                p_prev_date = prev_cp.date
-            else:
-                all_cps = task_db.query(PriceCache).filter(
-                    PriceCache.isin == isin,
-                    PriceCache.price > 0
-                ).order_by(PriceCache.date.desc()).limit(2).all()
-                if len(all_cps) >= 2:
-                    p_prev = all_cps[1].price
-                    p_prev_date = all_cps[1].date
-        finally:
-            task_db.close()
+        isin_cps = cached_by_isin.get(isin, [])
+        if price_date:
+            for cp in isin_cps:
+                if cp.date < price_date:
+                    p_prev = cp.price
+                    p_prev_date = cp.date
+                    break
+        if p_prev is None and len(isin_cps) >= 2:
+            p_prev = isin_cps[1].price
+            p_prev_date = isin_cps[1].date
 
         # Detectar si hay un hueco temporal con respecto a la sesión anterior
         expected_prev_date = None
@@ -258,7 +281,8 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         has_gap = (p_prev is None or p_prev <= 0) or (p_prev_date and expected_prev_date and p_prev_date < expected_prev_date)
         eff_ticker = ticker or KNOWN_TICKERS.get(isin)
 
-        if has_gap:
+        if has_gap and isin not in _gap_checked_isins:
+            _gap_checked_isins.add(isin)
             try:
                 h = []
                 if isin == "ES0112611001" or isin.startswith("ES011261"):
@@ -345,7 +369,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
 
 
     # Account for cash in transit and deferred fiscal cost basis during internal fund transfers (traspasos)
-    all_user_tx = _get_all_transactions(db, user_id, broker=None)
+    all_user_tx = transactions if not broker or broker.lower() in ["all", "todos"] else _get_all_transactions(db, user_id, broker=None)
     global_tb = calculate_traspaso_balances(all_user_tx)
     if broker and broker.lower() not in ["all", "todos"]:
         b_clean = broker.lower().replace("_", "").replace("-", "")
@@ -392,7 +416,9 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             p["weight"] = 0.0
         result.append(PositionOut(**p))
 
-    return sorted(result, key=lambda x: x.current_value or 0, reverse=True)
+    sorted_out = sorted(result, key=lambda x: x.current_value or 0, reverse=True)
+    _positions_cache[cache_key] = (datetime.now(), sorted_out)
+    return sorted_out
 
 
 _latest_nav_alert: dict | None = None
@@ -516,7 +542,7 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
                 updated_items.append(data)
 
     logger.info(f"Refreshed prices for {len(results)} assets: {len(updated_items)} new NAVs")
-    clear_portfolio_caches()
+    invalidate_computed_portfolio_caches()
     res_payload = {
         "status": "ok",
         "updated_at": datetime.now().isoformat(),
@@ -557,7 +583,7 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
     from app.services.price_service import _price_cache, _last_scrape
     _price_cache.clear()
     _last_scrape.clear()
-    _perf_cache.clear()
+    invalidate_computed_portfolio_caches()
     return await check_portfolio_navs(user_id=user_id, db=db)
 
 
@@ -610,7 +636,9 @@ async def update_price(req: UpdatePriceRequest, user_id: str = Depends(get_curre
     db.commit()
 
     _price_cache[req.isin] = {"price": req.price, "date": target_date, "ts": datetime.now()}
-    _perf_cache.clear()
+    from app.services.price_service import _sync_latest_price_into_history_cache
+    _sync_latest_price_into_history_cache(req.isin, req.price, target_date)
+    invalidate_computed_portfolio_caches()
 
     global _latest_nav_alert
     asset = _get_asset(db, req.isin)
@@ -640,14 +668,22 @@ _bench_cache: dict[str, tuple[datetime, dict]] = {}
 _analytics_cache: dict[str, tuple[datetime, dict]] = {}
 
 
-def clear_portfolio_caches():
+def invalidate_computed_portfolio_caches():
+    """Clear derived portfolio response caches while keeping freshly scraped asset prices warm in memory."""
+    _summary_cache.clear()
+    _positions_cache.clear()
     _perf_cache.clear()
     _bench_cache.clear()
     _analytics_cache.clear()
-    _price_cache.clear()
+
+
+def clear_portfolio_caches():
+    """Clear all portfolio caches (e.g., on transaction mutation) and reload known prices from SQLite."""
+    invalidate_computed_portfolio_caches()
+    _gap_checked_isins.clear()
     try:
-        from app.services.price_service import _price_cache as _svc_price_cache
-        _svc_price_cache.clear()
+        from app.services.price_service import preload_price_cache_from_db
+        preload_price_cache_from_db()
     except Exception:
         pass
 
@@ -661,18 +697,22 @@ async def get_performance(
     db: Session = Depends(get_db),
 ):
     effective_start = start_date
-    if not effective_start and period != "all":
+    if not effective_start and period not in ("all", "max"):
         now = datetime.now()
-        if period == "1mo":
+        if period in ("1m", "1mo"):
             effective_start = (now - timedelta(days=30)).strftime("%Y-%m-%d")
-        elif period == "3mo":
+        elif period in ("3m", "3mo"):
             effective_start = (now - timedelta(days=90)).strftime("%Y-%m-%d")
-        elif period == "6mo":
+        elif period in ("6m", "6mo"):
             effective_start = (now - timedelta(days=180)).strftime("%Y-%m-%d")
-        elif period == "1y":
+        elif period == "ytd":
+            effective_start = f"{now.year}-01-01"
+        elif period in ("1y", "12mo"):
             effective_start = (now - timedelta(days=365)).strftime("%Y-%m-%d")
         elif period == "2y":
             effective_start = (now - timedelta(days=730)).strftime("%Y-%m-%d")
+        elif period == "3y":
+            effective_start = (now - timedelta(days=1095)).strftime("%Y-%m-%d")
         elif period == "5y":
             effective_start = (now - timedelta(days=1825)).strftime("%Y-%m-%d")
 

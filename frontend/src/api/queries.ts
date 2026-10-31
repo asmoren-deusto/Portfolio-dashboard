@@ -108,16 +108,28 @@ export async function prefetchAllBrokers(
 
   const userSummaryBase = currentUser?.summary ?? MOCK_SUMMARY
   const userPositionsBase = currentUser?.positions ?? MOCK_POSITIONS
+  const userPerf = currentUser?.performance ?? MOCK_PERFORMANCE
+  const userAnalytics = currentUser?.analytics ?? MOCK_ANALYTICS
 
   const lightPromises: Promise<any>[] = []
 
+  // Pre-warm full market quotes in cache so opening /market is instantaneous
+  lightPromises.push(
+    queryClient.prefetchQuery({
+      queryKey: ['market-quotes', 'Todos'],
+      queryFn: () => get<{ stocks: MarketStock[]; count: number; cached: boolean; cache_timestamp: string }>('/market/quotes'),
+      staleTime: 1000 * 55,
+    })
+  )
+
   for (const broker of brokers) {
     const brokerQuery = `?broker=${broker}`
+    const brokerAmp = `&broker=${broker}`
 
     // 1. Summary
     lightPromises.push(
       queryClient.prefetchQuery({
-        queryKey: ['summary', currentUser.id, period, broker],
+        queryKey: ['summary', currentUser.id, broker],
         queryFn: () =>
           isDemo
             ? Promise.resolve(demoSummary(userSummaryBase, userPositionsBase, broker))
@@ -137,6 +149,30 @@ export async function prefetchAllBrokers(
         staleTime: 1000 * 60 * 5,
       })
     )
+
+    // 3. Performance for active period
+    lightPromises.push(
+      queryClient.prefetchQuery({
+        queryKey: ['performance', currentUser.id, period, broker, undefined],
+        queryFn: () =>
+          isDemo
+            ? Promise.resolve(demoScale(userPerf[period] ?? userPerf['1y'] ?? [], userPositionsBase, broker))
+            : get<PricePoint[]>(`/portfolio/performance?period=${period}${brokerAmp}`),
+        staleTime: 1000 * 60 * 5,
+      })
+    )
+
+    // 4. Analytics
+    lightPromises.push(
+      queryClient.prefetchQuery({
+        queryKey: ['analytics', currentUser.id, broker],
+        queryFn: () =>
+          isDemo
+            ? Promise.resolve(userAnalytics)
+            : get<Analytics>(`/portfolio/analytics?period=2y${brokerAmp}`),
+        staleTime: 1000 * 60 * 5,
+      })
+    )
   }
 
   try {
@@ -148,13 +184,13 @@ export async function prefetchAllBrokers(
 
 // ── Summary ────────────────────────────────────────────────────────────────────
 export function usePortfolioSummary() {
-  const { useMock, period, selectedBroker, currentUser } = useAppStore()
+  const { useMock, selectedBroker, currentUser } = useAppStore()
   const isDemo = Boolean(useMock || currentUser?.isDemo)
   const userSummary = demoSummary(currentUser?.summary ?? MOCK_SUMMARY, currentUser?.positions ?? MOCK_POSITIONS, selectedBroker)
   const brokerQuery = selectedBroker !== 'all' ? `?broker=${selectedBroker}` : ''
 
   return useQuery<PortfolioSummary>({
-    queryKey: ['summary', currentUser?.id, period, selectedBroker],
+    queryKey: ['summary', currentUser?.id, selectedBroker],
     queryFn: () =>
       isDemo
         ? Promise.resolve(userSummary)
@@ -432,10 +468,14 @@ export interface MarketStock {
 export type MarketIndex = MarketStock
 
 export function useMarketQuotes(index?: string, enabled = true) {
-  const queryParam = index && index !== 'Todos' ? `?index=${encodeURIComponent(index)}` : ''
   return useQuery({
-    queryKey: ['market-quotes', index],
-    queryFn: () => get<{ stocks: MarketStock[]; count: number; cached: boolean; cache_timestamp: string }>(`/market/quotes${queryParam}`),
+    queryKey: ['market-quotes', 'Todos'],
+    queryFn: () => get<{ stocks: MarketStock[]; count: number; cached: boolean; cache_timestamp: string }>('/market/quotes'),
+    select: (data) => {
+      if (!index || index === 'Todos') return data
+      const filtered = data.stocks.filter((s) => Array.isArray(s.index) && s.index.includes(index))
+      return { ...data, stocks: filtered, count: filtered.length }
+    },
     enabled,
     placeholderData: (prev) => prev,
     staleTime: 1000 * 55,        // 55 s — just under cache TTL

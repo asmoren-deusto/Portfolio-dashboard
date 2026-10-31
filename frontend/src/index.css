@@ -559,6 +559,12 @@
   animation: svgPulseNode 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
+/* ── Below-the-fold Rendering Optimization (content-visibility) ── */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 420px;
+}
+
 /* ── Reduced Motion Accessibility (Compositor-Safe) ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-ticker-marquee,

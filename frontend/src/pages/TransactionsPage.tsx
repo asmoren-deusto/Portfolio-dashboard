@@ -131,6 +131,16 @@ export function TransactionsPage() {
     queryClient.invalidateQueries({ queryKey: ['summary'] })
     queryClient.invalidateQueries({ queryKey: ['performance'] })
     queryClient.invalidateQueries({ queryKey: ['analytics'] })
+    queryClient.invalidateQueries({ queryKey: ['benchmark-comparison'] })
+    queryClient.invalidateQueries({ queryKey: ['simulated-portfolio'] })
+  }
+
+  const getAuthHeaders = (extra?: Record<string, string>): Record<string, string> => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
+    return {
+      ...(extra || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    }
   }
 
   // Handle manual addition
@@ -138,7 +148,7 @@ export function TransactionsPage() {
     try {
       const res = await fetch(apiUrl('/transactions'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ ...newTx, user_id: userId }),
       })
       if (res.ok) {
@@ -160,7 +170,10 @@ export function TransactionsPage() {
     if (!window.confirm('¿Deseas eliminar esta transacción de tu cartera?')) return
     setIsDeleting(txId)
     try {
-      const res = await fetch(apiUrl(`/transactions/${txId}`), { method: 'DELETE' })
+      const res = await fetch(apiUrl(`/transactions/${txId}`), {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      })
       if (res.ok) {
         notify('Operación eliminada.')
         invalidateAll()
@@ -831,9 +844,13 @@ function ImportExtractoModal({
 
     setIsProcessing(true)
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
       const res = await fetch(apiUrl('/transactions/import-text'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ text: pastedText, user_id: userId }),
       })
       const data = await res.json()
@@ -856,10 +873,12 @@ function ImportExtractoModal({
 
     setIsProcessing(true)
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
       const formData = new FormData()
       formData.append('file', file)
       const res = await fetch(apiUrl(`/transactions/import-csv?user_id=${userId}`), {
         method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: formData,
       })
       const data = await res.json()

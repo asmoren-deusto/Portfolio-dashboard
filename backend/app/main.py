@@ -12,6 +12,7 @@ except Exception:
     pass
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 import os
@@ -54,6 +55,9 @@ app = FastAPI(
     default_response_class=SafeJSONResponse,
 )
 
+# GZip compression for JSON API payloads and static bundles (>500 bytes)
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
 # CORS — allow frontend dev server, mobile apps and production domain
 app.add_middleware(
     CORSMiddleware,
@@ -77,7 +81,10 @@ app.add_middleware(
 async def add_no_cache_headers(request, call_next):
     response = await call_next(request)
     path = request.url.path
-    if path.startswith("/api") or path == "/" or path.endswith(".html") or "." not in path.split("/")[-1]:
+    if path.startswith("/assets/"):
+        # Vite content-hashed assets are immutable and safe to cache long-term
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif path.startswith("/api") or path == "/" or path.endswith(".html") or "." not in path.split("/")[-1]:
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
@@ -102,23 +109,47 @@ async def startup():
         preload_price_cache_from_db()
     except Exception as e:
         logger.warning(f"Failed to preload price cache: {e}")
+
     async def _warm_cache():
         try:
-            import asyncio
-            # Give Uvicorn 2 seconds to bind port and answer initial healthchecks cleanly
-            await asyncio.sleep(2)
+            # Give Uvicorn 1.5 seconds to bind port and answer initial healthchecks cleanly
+            await asyncio.sleep(1.5)
             from app.database import SessionLocal
-            from app.routers.portfolio import get_performance
-            from app.routers.market import get_indices
+            from app.routers.portfolio import (
+                get_portfolio_summary,
+                get_positions,
+                get_performance,
+                get_analytics,
+                get_benchmark_comparison,
+            )
+            from app.routers.market import get_indices, get_quotes, get_simulated_portfolio
+
             db = SessionLocal()
             try:
-                for p in ["1y", "all"]:
-                    await get_performance(period=p, user_id="asier", broker=None, db=db)
+                await asyncio.gather(
+                    get_portfolio_summary(user_id="asier", broker=None, db=db),
+                    get_positions(user_id="asier", broker=None, refresh=False, db=db),
+                    get_performance(period="1y", user_id="asier", broker=None, db=db),
+                    get_performance(period="all", user_id="asier", broker=None, db=db),
+                    get_analytics(period="2y", user_id="asier", broker=None, db=db),
+                    get_benchmark_comparison(period="1y", user_id="asier", broker=None, db=db),
+                    return_exceptions=True,
+                )
             finally:
                 db.close()
-            # Pre-calentar caché de índices para el Ticker superior
-            await get_indices()
-            logger.info("Caches pre-warmed successfully (performance & market indices).")
+
+            db_sim = SessionLocal()
+            try:
+                await asyncio.gather(
+                    get_indices(),
+                    get_quotes(index=None),
+                    get_simulated_portfolio(period="1d", user_id="asier", broker=None, db=db_sim),
+                    return_exceptions=True,
+                )
+            finally:
+                db_sim.close()
+
+            logger.info("Caches pre-warmed successfully (portfolio, analytics, benchmarks & market).")
         except Exception as e:
             logger.warning(f"Error pre-warming cache: {e}")
 
