@@ -1,4 +1,15 @@
 """FastAPI application entry point."""
+import warnings
+# Suppress noisy third-party deprecation warnings (e.g. Pandas4Warning from yfinance internal inplace methods)
+warnings.filterwarnings("ignore")
+try:
+    import pandas as pd
+    warnings.filterwarnings("ignore", category=FutureWarning)
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    if hasattr(pd.errors, "Pandas4Warning"):
+        warnings.filterwarnings("ignore", category=pd.errors.Pandas4Warning)
+except Exception:
+    pass
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -94,13 +105,17 @@ async def startup():
     async def _warm_cache():
         try:
             import asyncio
+            # Give Uvicorn 2 seconds to bind port and answer initial healthchecks cleanly
+            await asyncio.sleep(2)
             from app.database import SessionLocal
             from app.routers.portfolio import get_performance
             from app.routers.market import get_indices
             db = SessionLocal()
-            for p in ["1y", "all"]:
-                await get_performance(period=p, user_id="asier", broker=None, db=db)
-            db.close()
+            try:
+                for p in ["1y", "all"]:
+                    await get_performance(period=p, user_id="asier", broker=None, db=db)
+            finally:
+                db.close()
             # Pre-calentar caché de índices para el Ticker superior
             await get_indices()
             logger.info("Caches pre-warmed successfully (performance & market indices).")

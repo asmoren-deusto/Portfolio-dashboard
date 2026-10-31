@@ -20,6 +20,7 @@ FROM python:3.11-slim AS runner
 # Optimizaciones de Python para contenedores
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    PYTHONWARNINGS="ignore" \
     DB_PATH=/app/data/portfolio.db \
     ENVIRONMENT=production
 
@@ -47,7 +48,7 @@ RUN mkdir -p /app/data
 EXPOSE 8000
 
 # Healthcheck de contenedor para Portainer / Docker
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
 # Iniciar Uvicorn desde el directorio backend

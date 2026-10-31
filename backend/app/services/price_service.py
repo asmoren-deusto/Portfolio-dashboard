@@ -1,4 +1,14 @@
 """Price service — fetches NAV/prices from Yahoo Finance, FT, Azvalor, Indexa Capital and Morningstar."""
+import warnings
+warnings.filterwarnings("ignore")
+try:
+    import pandas as pd
+    warnings.filterwarnings("ignore", category=FutureWarning)
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    if hasattr(pd.errors, "Pandas4Warning"):
+        warnings.filterwarnings("ignore", category=pd.errors.Pandas4Warning)
+except Exception:
+    pass
 import asyncio
 import re
 import csv
@@ -1390,16 +1400,18 @@ async def get_price_history(
                 from app.database import SessionLocal
                 from app.models import PriceCache
                 db_s = SessionLocal()
-                recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
-                existing_dates = {h["date"]: idx for idx, h in enumerate(indexa_hist)}
-                for rp in recent_prices:
-                    if rp.price is not None and rp.price > 0:
-                        if rp.date in existing_dates:
-                            indexa_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                        else:
-                            indexa_hist.append({"date": rp.date, "price": round(rp.price, 4)})
-                indexa_hist.sort(key=lambda x: x["date"])
-                db_s.close()
+                try:
+                    recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                    existing_dates = {h["date"]: idx for idx, h in enumerate(indexa_hist)}
+                    for rp in recent_prices:
+                        if rp.price is not None and rp.price > 0:
+                            if rp.date in existing_dates:
+                                indexa_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                            else:
+                                indexa_hist.append({"date": rp.date, "price": round(rp.price, 4)})
+                    indexa_hist.sort(key=lambda x: x["date"])
+                finally:
+                    db_s.close()
             except Exception:
                 pass
             _history_cache[cache_key] = (datetime.now(), indexa_hist)
@@ -1451,16 +1463,18 @@ async def get_price_history(
                 from app.database import SessionLocal
                 from app.models import PriceCache
                 db_s = SessionLocal()
-                recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
-                existing_dates = {h["date"]: idx for idx, h in enumerate(az_hist)}
-                for rp in recent_prices:
-                    if rp.price is not None and rp.price > 0:
-                        if rp.date in existing_dates:
-                            az_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                        else:
-                            az_hist.append({"date": rp.date, "price": round(rp.price, 4)})
-                az_hist.sort(key=lambda x: x["date"])
-                db_s.close()
+                try:
+                    recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                    existing_dates = {h["date"]: idx for idx, h in enumerate(az_hist)}
+                    for rp in recent_prices:
+                        if rp.price is not None and rp.price > 0:
+                            if rp.date in existing_dates:
+                                az_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                            else:
+                                az_hist.append({"date": rp.date, "price": round(rp.price, 4)})
+                    az_hist.sort(key=lambda x: x["date"])
+                finally:
+                    db_s.close()
             except Exception:
                 pass
             _history_cache[cache_key] = (datetime.now(), az_hist)
@@ -1474,16 +1488,18 @@ async def get_price_history(
                 from app.database import SessionLocal
                 from app.models import PriceCache
                 db_s = SessionLocal()
-                recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
-                existing_dates = {h["date"]: idx for idx, h in enumerate(blk_hist)}
-                for rp in recent_prices:
-                    if rp.price is not None and rp.price > 0:
-                        if rp.date in existing_dates:
-                            blk_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
-                        else:
-                            blk_hist.append({"date": rp.date, "price": round(rp.price, 4)})
-                blk_hist.sort(key=lambda x: x["date"])
-                db_s.close()
+                try:
+                    recent_prices = db_s.query(PriceCache).filter(PriceCache.isin == isin).all()
+                    existing_dates = {h["date"]: idx for idx, h in enumerate(blk_hist)}
+                    for rp in recent_prices:
+                        if rp.price is not None and rp.price > 0:
+                            if rp.date in existing_dates:
+                                blk_hist[existing_dates[rp.date]]["price"] = round(rp.price, 4)
+                            else:
+                                blk_hist.append({"date": rp.date, "price": round(rp.price, 4)})
+                    blk_hist.sort(key=lambda x: x["date"])
+                finally:
+                    db_s.close()
             except Exception:
                 pass
             _history_cache[cache_key] = (datetime.now(), blk_hist)

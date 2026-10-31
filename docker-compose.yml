@@ -6,12 +6,18 @@ services:
       dockerfile: Dockerfile
     container_name: portfolio-dashboard
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
     ports:
       # Puerto 8050 en el host (evita conflicto con el puerto 8000 usado por Portainer)
       - "${PORT:-8050}:8000"
     environment:
       - TZ=Europe/Madrid
       - ENVIRONMENT=production
+      - PYTHONWARNINGS=ignore
       - DB_PATH=/app/data/portfolio.db
       - ALPHA_VANTAGE_KEY=${ALPHA_VANTAGE_KEY:-}
     volumes:
@@ -22,9 +28,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 30s
 
 volumes:
   portfolio_data:

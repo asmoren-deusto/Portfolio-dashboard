@@ -2,6 +2,16 @@
 Market data router — real-time stock quotes via Yahoo Finance.
 Includes pre/post market prices, market state, and data freshness timestamps.
 """
+import warnings
+warnings.filterwarnings("ignore")
+try:
+    import pandas as pd
+    warnings.filterwarnings("ignore", category=FutureWarning)
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    if hasattr(pd.errors, "Pandas4Warning"):
+        warnings.filterwarnings("ignore", category=pd.errors.Pandas4Warning)
+except Exception:
+    pass
 from fastapi import APIRouter, Depends
 from typing import Optional
 import asyncio
@@ -352,7 +362,7 @@ def _fetch_yahoo_chart_quote(ticker: str) -> dict | None:
             url,
             params={"range": "1d", "interval": "1m", "includePrePost": "true"},
             headers={"User-Agent": "Mozilla/5.0"},
-            timeout=12,
+            timeout=6.0,
         )
         response.raise_for_status()
         chart = response.json().get("chart", {})
@@ -646,7 +656,7 @@ def _fetch_quotes_extended(tickers: list[str]) -> dict:
     if not tickers:
         return {}
     result = {}
-    max_workers = max(1, min(20, len(tickers)))
+    max_workers = max(1, min(10, len(tickers)))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(_fetch_ticker_extended, t): t for t in tickers}
         for future in as_completed(futures, timeout=25):
