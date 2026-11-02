@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSearchParams, NavLink } from 'react-router-dom'
+
 import {
   TrendingUp,
   History,
@@ -30,7 +30,6 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
-import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
 import { UnderwaterRiskCard } from '@/components/analytics/UnderwaterRiskCard'
 import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
 import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
@@ -39,27 +38,7 @@ import { useAppStore } from '@/store/appStore'
 import type { Position } from '@/lib/mockData'
 
 export function AnalyticsPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const activeTabParam = searchParams.get('tab')
-  const [mainTab, setMainTab] = useState<'performance' | 'diversification'>(
-    activeTabParam === 'diversification' ? 'diversification' : 'performance'
-  )
 
-  const handleTabChange = (tab: 'performance' | 'diversification') => {
-    setMainTab(tab)
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        if (tab === 'diversification') {
-          next.set('tab', 'diversification')
-        } else {
-          next.delete('tab')
-        }
-        return next
-      },
-      { replace: true }
-    )
-  }
 
   const { period } = useAppStore()
   const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
@@ -97,111 +76,24 @@ export function AnalyticsPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      {/* Top Header Switcher: Performance vs Global Diversification */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/80 dark:bg-[#1e1e1e]/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-3 sm:p-3.5 rounded-2xl shadow-sm">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/80 dark:bg-[#1e1e1e]/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-3.5 sm:p-4 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
-            {mainTab === 'performance' ? <BarChart3 size={20} /> : <Globe size={20} />}
+            <BarChart3 size={20} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white leading-tight">
-                {mainTab === 'performance' ? 'Métricas de Rentabilidad y Benchmarks' : 'Diagnóstico de Diversificación vs Mundo'}
-              </h1>
-              {mainTab === 'diversification' && (
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  MSCI ACWI Benchmark
-                </span>
-              )}
-            </div>
+            <h1 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white leading-tight">
+              Métricas Cuantitativas y Rendimiento
+            </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {mainTab === 'performance'
-                ? 'Rendimiento ponderado por tiempo (TWR), ratios de riesgo y comparativa histórica'
-                : 'Ponderación geográfica vs capitalización global, sectores, exposición a divisas y salud de cartera'}
+              Rendimiento ponderado por tiempo (TWR), ratios de riesgo (Sharpe, Sortino), volatilidad anualizada y proyecciones
             </p>
           </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start sm:self-auto border border-slate-200/60 dark:border-white/5">
-          <NavLink
-            to="/backtest"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/60 dark:hover:bg-white/5 transition-colors"
-          >
-            <History size={14} />
-            <span>Simulación & Crisis</span>
-          </NavLink>
-          <motion.button
-            whileTap={{ scale: 0.96 }}
-            onClick={() => handleTabChange('performance')}
-            className={cn(
-              'relative flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150',
-              mainTab === 'performance'
-                ? 'text-blue-600 dark:text-blue-400 font-bold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            )}
-          >
-            {mainTab === 'performance' && (
-              <motion.div
-                layoutId="analyticsMainTabPill"
-                className="absolute inset-0 rounded-lg bg-white dark:bg-slate-700 shadow-sm"
-                transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-              />
-            )}
-            <span className="relative z-10 flex items-center gap-2">
-              <TrendingUp size={14} />
-              <span>Rentabilidad & Riesgo</span>
-            </span>
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.96 }}
-            onClick={() => handleTabChange('diversification')}
-            className={cn(
-              'relative flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150',
-              mainTab === 'diversification'
-                ? 'text-blue-600 dark:text-blue-400 font-bold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            )}
-          >
-            {mainTab === 'diversification' && (
-              <motion.div
-                layoutId="analyticsMainTabPill"
-                className="absolute inset-0 rounded-lg bg-white dark:bg-slate-700 shadow-sm"
-                transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-              />
-            )}
-            <span className="relative z-10 flex items-center gap-2">
-              <Globe size={14} />
-              <span>Diversificación vs Mundo</span>
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-            </span>
-          </motion.button>
-        </div>
       </div>
 
-      <AnimatePresence mode="wait" initial={false}>
-        {mainTab === 'diversification' ? (
-          <motion.div
-            key="diversification"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="w-full flex flex-col gap-4"
-          >
-            <DiversificationDashboard positions={positions} isLoading={positionsFetching} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="performance"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="w-full flex flex-col gap-4"
-          >
+      <div className="w-full flex flex-col gap-4">
             {/* KPI grid with luxury styling */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
               <KpiCard
@@ -736,9 +628,7 @@ export function AnalyticsPage() {
           </table>
         </div>
       </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </div>
 
       {/* Position Detail Modal */}
       <PositionDetailModal
