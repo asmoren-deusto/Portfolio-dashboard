@@ -510,12 +510,13 @@ async def _scrape_price_with_date_impl(
     # 1. Try European & Spanish fund providers (Financial Times, Investing.com, Quefondos, Azvalor, Finect, Yahoo) in parallel
     if price is None and is_standard_isin and not is_live_traded and isin != "IE00B4ND3602":
         tasks = [
+            _fetch_myinvestor_price(isin),
             _fetch_ft_official(isin),
             _fetch_investing_price(isin),
             _fetch_quefondos_price(isin),
             _fetch_finect_price(isin),
         ]
-        task_names = ["ft", "investing", "quefondos", "finect"]
+        task_names = ["myinvestor", "ft", "investing", "quefondos", "finect"]
 
         # For Azvalor funds, query direct official gestora endpoint
         if isin.startswith("ES011261"):
@@ -556,7 +557,7 @@ async def _scrape_price_with_date_impl(
                         logger.warning(f"Rejected implausible NAV {r_price} ({r_date}) for {isin} from {task_names[i]} (ref {ref_price})")
                         continue
                     name = task_names[i]
-                    prec = 7 if name in ("azvalor", "cobas", "blackrock") else (6 if name in ("quefondos", "finect") else (5 if name == "ft" else (4 if name == "yahoo" else (3 if name == "investing" else 2))))
+                    prec = 8 if name == "myinvestor" else (7 if name in ("azvalor", "cobas", "blackrock") else (6 if name in ("quefondos", "finect") else (5 if name == "ft" else (4 if name == "yahoo" else (3 if name == "investing" else 2)))))
                     candidates.append((r_date, prec, r_price, name))
 
         if candidates:
@@ -1069,6 +1070,45 @@ FINECT_SLUGS: dict[str, str] = {
     "LU0261952682": "LU0261952682-Fidelity_funds__euro_stoxx_50_tm_aacc_eur",
     "LU0171307068": "LU0171307068-Bgf_world_healthscience_a2",
 }
+
+
+MYINVESTOR_API_TOKEN = "a2e8e18ad26a079c576038f0ad4fa18ce0d9e415f5bf6f43f89cf3831a0e4685__"
+
+
+async def _fetch_myinvestor_price(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Fetch official mutual fund NAV and valuation date directly from MyInvestor's public REST API.
+    Endpoint: https://api.myinvestor.es/myinvestor-server/rest/public/fondos/find-fondos
+    """
+    if not (len(isin) == 12 and isin.isalnum()):
+        return None, None
+    try:
+        client = _get_async_client()
+        headers = {
+            "Accept": "application/json, text/plain, */*",
+            "x-origin-b2b": "myinvestor.es",
+            "Origin": "https://myinvestor.es",
+            "Referer": "https://myinvestor.es/",
+        }
+        url = "https://api.myinvestor.es/myinvestor-server/rest/public/fondos/find-fondos"
+        params = {
+            "tipo": "TODOS",
+            "codigo": isin,
+            "token": MYINVESTOR_API_TOKEN,
+        }
+        resp = await client.get(url, params=params, headers=headers, timeout=10.0)
+        if resp.status_code == 200:
+            data = resp.json()
+            if isinstance(data, list) and data:
+                fund = data[0]
+                nav = fund.get("valorLiquidativo")
+                dt_str = fund.get("fechaValorLiquidativo")
+                if nav is not None and float(nav) > 0:
+                    date_val = dt_str[:10] if dt_str else None
+                    return round(float(nav), 6), date_val
+    except Exception as e:
+        logger.warning(f"MyInvestor API error for {isin}: {e}")
+    return None, None
 
 
 async def _fetch_finect_price(isin: str) -> tuple[Optional[float], Optional[str]]:
