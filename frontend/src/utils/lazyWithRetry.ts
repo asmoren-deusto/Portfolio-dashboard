@@ -39,7 +39,7 @@ export function lazyWithRetry<T extends ComponentType<any>>(
         // Safe fallback in restricted environments
       }
       const component = namedExport
-        ? (module as Record<string, any>)[namedExport]
+        ? ((module as Record<string, any>)[namedExport] || (module as { default?: T }).default)
         : ((module as { default?: T }).default || module)
       return { default: component as T }
     } catch (error: unknown) {

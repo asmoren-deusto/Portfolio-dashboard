@@ -3,7 +3,7 @@ import { Globe, PieChart, Sparkles, ShieldCheck } from 'lucide-react'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
 import { usePositions } from '@/api/queries'
 
-export default function DiversificationPage() {
+export function DiversificationPage() {
   const { data: positions = [], isLoading, isFetching } = usePositions()
 
   return (
@@ -36,3 +36,5 @@ export default function DiversificationPage() {
   )
 }
 
+
+export default DiversificationPage

@@ -39,7 +39,7 @@ import { useAppStore } from '@/store/appStore'
 
 type ChartViewMode = 'growth' | 'cumulative' | 'drawdown' | 'annual'
 
-export default function BacktestPage() {
+export function BacktestPage() {
   const { theme } = useAppStore()
   const isDark = theme === 'dark'
 
@@ -824,3 +824,5 @@ export default function BacktestPage() {
     </div>
   )
 }
+
+export default BacktestPage
