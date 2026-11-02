@@ -175,7 +175,7 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "IE0032126645",
-    "name": "Vanguard U.S. 500 Stock Index Fund EUR Acc",
+    "name": "Vanguard U.S. 500 Index EUR Acc",
     "ticker": "0P00000SUJ.F",
     "asset_type": "fund",
     "currency": "EUR",

@@ -52,7 +52,7 @@ const FINECT_SLUGS: Record<string, string> = {
  * Enlaces específicos directos a la ficha oficial de cada producto o gestora.
  */
 const PRODUCT_GESTORA_URLS: Record<string, string> = {
-  // Vanguard U.S. 500 Stock Index Fund EUR Acc
+  // Vanguard U.S. 500 Index EUR Acc
   'IE0032126645': 'https://www.vanguardinvestor.co.uk/investments/vanguard-us-500-stock-index-fund-eur-acc/overview',
   // iShares Physical Gold ETC
   'IE00B4ND3602': 'https://www.ishares.com/es/profesionales/es/productos/258441/ishares-physical-gold-etc-fund',

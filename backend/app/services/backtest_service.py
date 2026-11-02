@@ -99,7 +99,7 @@ def calculate_portfolio_backtest(
     and computes the comprehensive trackback & stress-test report.
     """
     DEFAULT_POS = [
-        {"isin": "IE0032126645", "name": "Vanguard U.S. 500 Stock Index Fund EUR Acc", "current_value": 19745.39, "asset_type": "fund"},
+        {"isin": "IE0032126645", "name": "Vanguard U.S. 500 Index EUR Acc", "current_value": 19745.39, "asset_type": "fund"},
         {"isin": "0192#0011", "name": "Indexa EPSV Más Rentabilidad Acciones", "current_value": 11525.12, "asset_type": "epsv"},
         {"isin": "LU0302296495", "name": "DNB Fund - Technology", "current_value": 7352.65, "asset_type": "fund"},
         {"isin": "ES0112611001", "name": "Azvalor Internacional FI", "current_value": 7205.35, "asset_type": "fund"},
