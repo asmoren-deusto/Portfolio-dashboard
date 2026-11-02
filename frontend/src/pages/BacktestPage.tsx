@@ -337,16 +337,11 @@ export default function BacktestPage() {
                         key={row.year}
                         className={cn(
                           'hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-colors',
-                          row.is_crisis_year && 'bg-amber-500/[0.04] dark:bg-amber-500/[0.06]'
+                          
                         )}
                       >
-                        <td className="py-3 px-3 font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <td className="py-3 px-3 font-bold text-slate-900 dark:text-white">
                           {row.year}
-                          {row.is_crisis_year && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                              Año de Crisis
-                            </span>
-                          )}
                         </td>
                         <td
                           className={cn(
@@ -765,7 +760,7 @@ export default function BacktestPage() {
                 <th className="py-3 px-3">Rol Estratégico</th>
                 <th className="py-3 px-3 text-right">CAGR 5A</th>
                 <th className="py-3 px-3 text-right">CAGR 10A</th>
-                <th className="py-3 px-3 text-right">Crisis 2022</th>
+                <th className="py-3 px-3 text-right">Año 2022</th>
                 <th className="py-3 px-3 text-right">Covid 2020</th>
                 <th className="py-3 px-3 text-right">Max Drawdown</th>
               </tr>

@@ -747,28 +747,28 @@ export function MarketSectorEvolutionCard({
             {/* Full-width Annual Calendar Matrix Table */}
             <div className="w-full overflow-x-auto rounded-xl border border-slate-200/80 dark:border-white/[0.06] bg-white/90 dark:bg-[#1e1e22]">
               <table className="w-full text-xs border-collapse">
-                <thead className="bg-slate-100/95 dark:bg-[#252529] border-b border-slate-200/80 dark:border-white/[0.08]">
-                  <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    <th className="py-2.5 px-3 text-left">Sector / Ticker</th>
-                    <th className="py-2.5 px-3 text-left">Fondo de Referencia en Cartera</th>
+                <thead className="bg-slate-50/90 dark:bg-white/[0.03] backdrop-blur-xs border-b border-slate-200/80 dark:border-white/[0.08]">
+                  <tr className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
+                    <th className="py-3 px-3.5 text-left font-semibold">Sector / Ticker</th>
+                    <th className="py-3 px-3 text-left font-semibold">Fondo de Referencia en Cartera</th>
                     {calendarYears.map((yr) => (
                       <th
                         key={yr}
-                        className={cn(
-                          'py-2.5 px-2 text-right font-mono',
-                          yr === 2018 || yr === 2022
-                            ? 'bg-rose-500/10 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border-x border-rose-500/20'
-                            : ''
-                        )}
-                        title={yr === 2018 || yr === 2022 ? `Año de caída general del mercado (${yr}): observa qué sectores resistieron en verde o con mínimas pérdidas` : undefined}
+                        className="py-3 px-2.5 text-right font-mono font-medium text-slate-600 dark:text-slate-300"
                       >
-                        {yr === 2026 ? '2026 YTD' : yr}
-                        {(yr === 2018 || yr === 2022) && (
-                          <span className="block text-[9px] font-sans font-bold text-rose-600 dark:text-rose-400">CRISIS</span>
+                        {yr === 2026 ? (
+                          <span className="inline-flex items-center gap-1">
+                            <span>2026</span>
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
+                              YTD
+                            </span>
+                          </span>
+                        ) : (
+                          yr
                         )}
                       </th>
                     ))}
-                    <th className="py-2.5 px-3 text-right font-mono text-indigo-600 dark:text-indigo-400">
+                    <th className="py-3 px-3.5 text-right font-mono font-semibold text-indigo-600 dark:text-indigo-400">
                       Media TAE ({calendarYears.length}A)
                     </th>
                   </tr>
@@ -789,9 +789,8 @@ export function MarketSectorEvolutionCard({
                         <td
                           key={yr}
                           className={cn(
-                            'py-2.5 px-2 text-right',
-                            v >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400',
-                            (yr === 2018 || yr === 2022) && 'bg-rose-500/5 font-extrabold'
+                            'py-2.5 px-2 text-right font-bold',
+                            v >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                           )}
                         >
                           {v >= 0 ? '+' : ''}
@@ -861,8 +860,7 @@ export function MarketSectorEvolutionCard({
                                 v >= 0
                                   ? 'text-emerald-600 dark:text-emerald-400'
                                   : 'text-rose-600 dark:text-rose-400',
-                                beatsSpy && 'font-bold',
-                                isCrisisYear && v > 0 && 'bg-emerald-500/10 dark:bg-emerald-500/15 font-black text-emerald-700 dark:text-emerald-300'
+                                beatsSpy && 'font-bold'
                               )}
                               title={`Rendimiento ${cfg.sector} en ${yr}: ${v >= 0 ? '+' : ''}${v}%. Spread vs S&P 500: ${v - spyV >= 0 ? '+' : ''}${(v - spyV).toFixed(1)} pp`}
                             >

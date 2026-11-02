@@ -476,3 +476,4 @@ def calculate_portfolio_backtest(
         "crises": crises,
         "asset_attribution": attribution,
     }
+
