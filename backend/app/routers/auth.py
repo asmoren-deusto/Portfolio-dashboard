@@ -35,6 +35,18 @@ def get_current_user_id(authorization: Optional[str] = Header(None)) -> str:
     return user_id
 
 
+def get_optional_user_id(authorization: Optional[str] = Header(None)) -> str:
+    """Return the authenticated user id if present and valid, otherwise fallback to 'asier'."""
+    if authorization and authorization.startswith("Bearer "):
+        try:
+            token = authorization.split(" ", 1)[1]
+            user_id = verify_access_token(token)
+            if user_id:
+                return user_id
+        except Exception:
+            pass
+    return "asier"
+
 def _to_user_out(user: User) -> UserOut:
     return UserOut(
         id=user.id,

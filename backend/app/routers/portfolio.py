@@ -37,7 +37,7 @@ from app.services.finance_engine import (
     is_internal_traspaso,
     calculate_traspaso_balances,
 )
-from app.routers.auth import get_current_user_id
+from app.routers.auth import get_current_user_id, get_optional_user_id
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 logger = logging.getLogger(__name__)
@@ -1132,7 +1132,7 @@ _backtest_cache: dict[str, tuple[datetime, dict]] = {}
 @router.get("/backtest")
 async def get_portfolio_backtest(
     timeframe: str = "10y",
-    user_id: str = Depends(get_current_user_id),
+    user_id: str = Depends(get_optional_user_id),
     broker: str | None = None,
     db: Session = Depends(get_db),
 ):

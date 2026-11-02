@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Flame,
   LineChart,
+  Activity,
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -421,7 +422,25 @@ export function BacktestPage() {
           ) : (
             /* Recharts Line/Area Chart */
             <div className="h-[380px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+              {isLoading ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+                  <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    Calculando simulación cuantitativa de cartera ({timeframe.toUpperCase()})...
+                  </span>
+                </div>
+              ) : curves.length === 0 ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-2.5 text-center p-6">
+                  <Activity className="w-8 h-8 text-blue-500/60 animate-pulse" />
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    Cargando curvas de simulación histórica...
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm">
+                    Sincronizando series temporales con el motor financiero.
+                  </p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={curves} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gradPortfolio" x1="0" y1="0" x2="0" y2="1">
@@ -562,6 +581,7 @@ export function BacktestPage() {
                   )}
                 </AreaChart>
               </ResponsiveContainer>
+              )}
             </div>
           )}
         </div>

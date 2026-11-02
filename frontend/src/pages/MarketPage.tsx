@@ -777,3 +777,5 @@ export const MarketPage: React.FC = () => {
     </div>
   )
 }
+
+export default MarketPage

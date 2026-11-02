@@ -762,3 +762,5 @@ export function PositionsPage() {
     </div>
   )
 }
+
+export default PositionsPage

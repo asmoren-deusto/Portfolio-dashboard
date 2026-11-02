@@ -38,9 +38,38 @@ export function lazyWithRetry<T extends ComponentType<any>>(
       } catch {
         // Safe fallback in restricted environments
       }
-      const component = namedExport
-        ? ((module as Record<string, any>)[namedExport] || (module as { default?: T }).default)
-        : ((module as { default?: T }).default || module)
+
+      let component: any = undefined
+
+      if (namedExport && (module as Record<string, any>)?.[namedExport]) {
+        component = (module as Record<string, any>)[namedExport]
+      } else if ((module as { default?: any })?.default) {
+        const def = (module as { default?: any }).default
+        if (namedExport && def && typeof def === 'object' && def[namedExport]) {
+          component = def[namedExport]
+        } else if (def && typeof def === 'object' && def.default) {
+          component = def.default
+        } else {
+          component = def
+        }
+      } else if (typeof module === 'function') {
+        component = module
+      } else if (module && typeof module === 'object') {
+        // Fallback: search for first exported component function in the module
+        for (const key of Object.keys(module)) {
+          if (typeof (module as Record<string, any>)[key] === 'function') {
+            component = (module as Record<string, any>)[key]
+            break
+          }
+        }
+      }
+
+      if (!component || (typeof component !== 'function' && typeof component !== 'object')) {
+        throw new Error(
+          `[lazyWithRetry] Could not resolve React component for namedExport="${namedExport}". Module keys: [${Object.keys(module || {}).join(', ')}]`
+        )
+      }
+
       return { default: component as T }
     } catch (error: unknown) {
       if (isChunkLoadError(error)) {
@@ -67,4 +96,3 @@ export function lazyWithRetry<T extends ComponentType<any>>(
     }
   })
 }
-

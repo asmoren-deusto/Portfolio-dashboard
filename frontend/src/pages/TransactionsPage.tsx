@@ -1075,3 +1075,5 @@ function ImportExtractoModal({
     document.body
   )
 }
+
+export default TransactionsPage
