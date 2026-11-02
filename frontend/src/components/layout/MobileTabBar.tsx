@@ -2,6 +2,8 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
+  History,
+  PieChart,
   Globe,
   Layers,
   TrendingUp,
@@ -34,10 +36,10 @@ export const MobileTabBar: React.FC = () => {
 
   const TABS: TabItem[] = [
     { to: '/', icon: LayoutDashboard, label: 'Resumen' },
-    { to: '/market', icon: Globe, label: 'Mercado' },
     { to: '/positions', icon: Layers, label: 'Cartera' },
-    { to: '/analytics', icon: TrendingUp, label: 'Analítica' },
-    { to: '/transactions', icon: List, label: 'Órdenes' },
+    { to: '/market', icon: Globe, label: 'Mercado' },
+    { to: '/backtest', icon: History, label: 'Backtest' },
+    { to: '/diversification', icon: PieChart, label: 'Diversif.' },
   ]
 
   return (

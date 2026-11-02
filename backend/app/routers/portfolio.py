@@ -1,3 +1,4 @@
+from app.services.backtest_service import get_historical_market_monthly_df, calculate_portfolio_backtest
 """Portfolio router — summary, positions, performance."""
 import warnings
 warnings.filterwarnings("ignore")
@@ -1123,6 +1124,31 @@ async def get_benchmark_comparison(
     }
     _bench_cache[cache_key] = (datetime.now(), result)
     return result
+
+
+
+_backtest_cache: dict[str, tuple[datetime, dict]] = {}
+
+@router.get("/backtest")
+async def get_portfolio_backtest(
+    timeframe: str = "10y",
+    user_id: str = Depends(get_current_user_id),
+    broker: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """Historical portfolio backtest and stress-testing."""
+    cache_key = f"{user_id}:{broker}:{timeframe}"
+    if cache_key in _backtest_cache:
+        ts, cached = _backtest_cache[cache_key]
+        if (datetime.now() - ts).total_seconds() < 1800:
+            return cached
+
+    pos_objs = await get_positions(user_id=user_id, broker=broker, db=db)
+    pos_dicts = [p.model_dump() for p in pos_objs]
+    df = await get_historical_market_monthly_df()
+    res = calculate_portfolio_backtest(pos_dicts, df, timeframe=timeframe)
+    _backtest_cache[cache_key] = (datetime.now(), res)
+    return res
 
 
 @router.get("/analytics")

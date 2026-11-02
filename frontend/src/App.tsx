@@ -8,6 +8,8 @@ import { lazyWithRetry } from '@/utils/lazyWithRetry'
 const MarketPage = lazyWithRetry(() => import('@/pages/MarketPage'), 'MarketPage')
 const PositionsPage = lazyWithRetry(() => import('@/pages/PositionsPage'), 'PositionsPage')
 const AnalyticsPage = lazyWithRetry(() => import('@/pages/AnalyticsPage'), 'AnalyticsPage')
+const BacktestPage = lazyWithRetry(() => import('@/pages/BacktestPage'), 'BacktestPage')
+const DiversificationPage = lazyWithRetry(() => import('@/pages/DiversificationPage'), 'DiversificationPage')
 const TransactionsPage = lazyWithRetry(() => import('@/pages/TransactionsPage'), 'TransactionsPage')
 const LoginPage = lazyWithRetry(() => import('@/pages/LoginPage'), 'LoginPage')
 
@@ -55,13 +57,15 @@ const router = createBrowserRouter([
     path: '/',
     element: <RootLayout />,
     children: [
-      { index: true,          element: <OverviewPage /> },
-      { path: 'market',       element: <Suspense fallback={<PageLoadingFallback />}><MarketPage /></Suspense> },
-      { path: 'positions',    element: <Suspense fallback={<PageLoadingFallback />}><PositionsPage /></Suspense> },
-      { path: 'analytics',    element: <Suspense fallback={<PageLoadingFallback />}><AnalyticsPage /></Suspense> },
-      { path: 'transactions', element: <Suspense fallback={<PageLoadingFallback />}><TransactionsPage /></Suspense> },
-      { path: 'assets',       element: <Suspense fallback={<PageLoadingFallback />}><MarketPage /></Suspense> },
-      { path: '*',            element: <Navigate to="/" /> },
+      { index: true,              element: <OverviewPage /> },
+      { path: 'positions',        element: <Suspense fallback={<PageLoadingFallback />}><PositionsPage /></Suspense> },
+      { path: 'market',           element: <Suspense fallback={<PageLoadingFallback />}><MarketPage /></Suspense> },
+      { path: 'backtest',         element: <Suspense fallback={<PageLoadingFallback />}><BacktestPage /></Suspense> },
+      { path: 'diversification',  element: <Suspense fallback={<PageLoadingFallback />}><DiversificationPage /></Suspense> },
+      { path: 'analytics',        element: <Suspense fallback={<PageLoadingFallback />}><AnalyticsPage /></Suspense> },
+      { path: 'transactions',     element: <Suspense fallback={<PageLoadingFallback />}><TransactionsPage /></Suspense> },
+      { path: 'assets',           element: <Suspense fallback={<PageLoadingFallback />}><MarketPage /></Suspense> },
+      { path: '*',                element: <Navigate to="/" /> },
     ],
   },
   {

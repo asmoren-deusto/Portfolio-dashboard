@@ -1,6 +1,8 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
+  History,
+  PieChart,
   TrendingUp,
   List,
   Layers,
@@ -23,8 +25,10 @@ import { isNativePlatform } from '@/api/config'
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Visión General' },
-  { to: '/market', icon: Globe, label: 'Mercado' },
   { to: '/positions', icon: Layers, label: 'Posiciones' },
+  { to: '/market', icon: Globe, label: 'Mercado' },
+  { to: '/backtest', icon: History, label: 'Backtest & Crisis' },
+  { to: '/diversification', icon: PieChart, label: 'Diversificación' },
   { to: '/analytics', icon: TrendingUp, label: 'Analítica' },
   { to: '/transactions', icon: List, label: 'Operaciones' },
 ]

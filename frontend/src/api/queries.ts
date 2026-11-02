@@ -678,3 +678,120 @@ export function useMarketSectorHistory(period: string = '5y') {
     refetchIntervalInBackground: false,
   })
 }
+
+
+// ---------------------------------------------------------------------------
+// Historical Portfolio Backtest & Stress-Testing
+// ---------------------------------------------------------------------------
+
+export interface BacktestSummary {
+  timeframe: string
+  n_years: number
+  portfolio_cum: number
+  portfolio_cagr: number
+  sp500_cum: number
+  sp500_cagr: number
+  msci_cum: number
+  msci_cagr: number
+  b6040_cum: number
+  b6040_cagr: number
+  growth_10k_portfolio: number
+  growth_10k_sp500: number
+  growth_10k_msci: number
+  growth_10k_b6040: number
+  max_drawdown_portfolio: number
+  max_drawdown_sp500: number
+  max_drawdown_msci: number
+  crisis_drop_avoided_pp: number
+  downside_capture_ratio: number
+  upside_capture_ratio: number
+  volatility_portfolio: number
+  volatility_sp500: number
+  sharpe_ratio_portfolio: number
+  sharpe_ratio_sp500: number
+}
+
+export interface BacktestCurvePoint {
+  date: string
+  portfolio_cum: number
+  portfolio_val: number
+  portfolio_drawdown: number
+  sp500_cum: number
+  sp500_val: number
+  sp500_drawdown: number
+  msci_cum: number
+  msci_val: number
+  msci_drawdown: number
+  b6040_cum: number
+  b6040_val: number
+  b6040_drawdown: number
+}
+
+export interface BacktestAnnualRow {
+  year: number
+  portfolio_return: number
+  sp500_return: number
+  msci_return: number
+  b6040_return: number
+  alpha_vs_sp500: number
+  alpha_vs_msci: number
+  is_crisis_year: boolean
+  protection_label: string
+}
+
+export interface BacktestCrisisHeroAsset {
+  name: string
+  ret: string
+  desc: string
+}
+
+export interface BacktestCrisis {
+  id: string
+  title: string
+  period_label: string
+  severity: string
+  color: string
+  portfolio_return: number
+  sp500_return: number
+  msci_return: number
+  b6040_return: number
+  max_drawdown: number
+  alpha_vs_sp500: number
+  recovery_months: number
+  hero_assets: BacktestCrisisHeroAsset[]
+  vulnerable_assets: BacktestCrisisHeroAsset[]
+  conclusion: string
+}
+
+export interface BacktestAssetAttribution {
+  isin: string
+  name: string
+  weight: number
+  current_value: number
+  role: string
+  proxy_sym: string
+  cagr_10y: number
+  cagr_5y: number
+  ret_2022: number
+  ret_2020: number
+  max_drawdown: number
+}
+
+export interface BacktestData {
+  summary: BacktestSummary
+  curves: BacktestCurvePoint[]
+  annual_matrix: BacktestAnnualRow[]
+  crises: BacktestCrisis[]
+  asset_attribution: BacktestAssetAttribution[]
+  error?: string
+}
+
+export function usePortfolioBacktest(timeframe: '5y' | '10y' = '10y') {
+  return useQuery<BacktestData>({
+    queryKey: ['portfolio-backtest', timeframe],
+    queryFn: () => get<BacktestData>(`/portfolio/backtest?timeframe=${timeframe}`),
+    placeholderData: (prev) => prev,
+    staleTime: 1000 * 60 * 15,
+    refetchIntervalInBackground: false,
+  })
+}

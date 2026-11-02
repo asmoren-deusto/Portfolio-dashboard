@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, NavLink } from 'react-router-dom'
 import {
   TrendingUp,
+  History,
   Activity,
   ShieldCheck,
   BarChart3,
@@ -121,7 +122,14 @@ export function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start sm:self-auto border border-slate-200/60 dark:border-white/5">
+        <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start sm:self-auto border border-slate-200/60 dark:border-white/5">
+          <NavLink
+            to="/backtest"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/60 dark:hover:bg-white/5 transition-colors"
+          >
+            <History size={14} />
+            <span>Simulación & Crisis</span>
+          </NavLink>
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={() => handleTabChange('performance')}
