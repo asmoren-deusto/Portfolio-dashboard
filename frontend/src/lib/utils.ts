@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from 'clsx'
+import { getAssetCleanName } from './assetMetadata'
 
 export function cn(...inputs: ClassValue[]) {
   return clsx(inputs)
@@ -151,17 +152,34 @@ export {
   getEffectivePortfolioNavDate as getConsensusNavDate,
 } from './marketCalendar'
 
+export {
+  getAssetCleanName,
+  getAssetOfficialDetails,
+  ASSET_METADATA_BY_ISIN,
+  type AssetMetaInfo,
+} from './assetMetadata'
+
 /**
  * Formats an asset name for clean, uncluttered presentation:
- * 1. Abbreviates "BlackRock Global Funds" to "BGF" unconditionally.
- * 2. If hasIcon is true (i.e. displayed right next to the fund/brand logo), removes redundant leading
- *    brand prefixes for Fidelity and iShares (e.g. "Fidelity MSCI World..." -> "MSCI World...",
- *    "iShares Developed World..." -> "Developed World...", "iShares Physical Gold..." -> "Physical Gold...").
+ * 1. Checks configured clean name mappings (user requested portfolio names).
+ * 2. Abbreviates "BlackRock Global Funds" to "BGF" unconditionally.
+ * 3. If hasIcon is true (i.e. displayed right next to the fund/brand logo), removes redundant leading
+ *    brand prefixes for Fidelity and iShares.
  */
-export function formatAssetDisplayName(name: string | null | undefined, hasIcon: boolean = false): string {
-  if (!name) return ''
+export function formatAssetDisplayName(
+  name: string | null | undefined,
+  hasIcon: boolean = false,
+  isin?: string
+): string {
+  if (!name && !isin) return ''
+
+  const cleanMapped = getAssetCleanName(isin, name)
+  if (cleanMapped && cleanMapped !== name) {
+    return cleanMapped
+  }
+
   // Strip redundant leading "BGF -" or "BFG -" prefix
-  let formatted = name.replace(/^(?:BGF|BFG)\s*[-–—:]?\s*/i, '')
+  let formatted = (name || '').replace(/^(?:BGF|BFG)\s*[-–—:]?\s*/i, '')
 
   if (hasIcon) {
     // Remove leading "Fidelity" prefix (case insensitive, with optional hyphen/dash/colon/space)
@@ -177,4 +195,3 @@ export function formatAssetDisplayName(name: string | null | undefined, hasIcon:
 
   return formatted.trim()
 }
-

@@ -5,7 +5,7 @@ import { X, TrendingUp, TrendingDown, ExternalLink, Globe } from 'lucide-react'
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge } from '@/components/ui/Badge'
-import { fmt, formatAssetDisplayName } from '@/lib/utils'
+import { fmt, cn, formatAssetDisplayName, getAssetOfficialDetails } from '@/lib/utils'
 import { useMarketHistory } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
@@ -218,6 +218,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
 
   const isPos = (position?.unrealized_pnl ?? 0) >= 0
   const cur = position?.currency || 'EUR'
+  const meta = position ? getAssetOfficialDetails(position.isin, position.name, position.currency) : null
 
   // Chart data and dynamic color
   const chartData = histData?.points && histData.points.length > 2 ? histData.points : fallbackPoints
@@ -307,14 +308,14 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
               <CompanyLogo
                 isin={position.isin}
                 ticker={position.ticker || position.isin.slice(0, 4)}
-                name={position.name}
+                name={meta?.cleanName || position.name}
                 domain={position.domain}
                 size="xl"
               />
               <div className="min-w-0 pr-10 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
-                    {formatAssetDisplayName(position.name, true)}
+                    {meta?.officialName || position.name}
                   </h3>
                   {position.ticker && (
                     <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md">
@@ -327,6 +328,33 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                     {position.isin}
                   </span>
                   <AssetBadge type={position.asset_type} />
+
+                  {/* Badge de Moneda */}
+                  <span
+                    className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 px-2 py-0.5 rounded-md"
+                    title={`Divisa base de cotización: ${meta?.currency || cur}`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {meta?.currency || cur}
+                  </span>
+
+                  {/* Badge de Clase de Acción (ACC / DIST / ETC) */}
+                  {meta?.shareClass && (
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1 font-mono text-[11px] font-bold px-2 py-0.5 rounded-md border',
+                        meta.shareClass === 'ACC'
+                          ? 'text-blue-700 dark:text-blue-300 bg-blue-500/10 dark:bg-blue-500/15 border-blue-500/25'
+                          : meta.shareClass === 'DIST'
+                          ? 'text-amber-700 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/25'
+                          : 'text-purple-700 dark:text-purple-300 bg-purple-500/10 dark:bg-purple-500/15 border-purple-500/25'
+                      )}
+                      title={`Clase: ${meta.shareClassLabel}`}
+                    >
+                      {meta.shareClass}
+                    </span>
+                  )}
+
                   {position.category && (
                     <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
                       {position.category}

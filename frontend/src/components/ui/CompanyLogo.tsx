@@ -31,6 +31,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'LU0171307068': 'blackrock.com',
   'ES0000012411': 'tesoro.es',
   'IE00B4ND3602': 'ishares.com',
+  'IE0032126645': 'vanguard.com',
 }
 
 function getMarketIcon(ticker?: string): React.ReactNode {

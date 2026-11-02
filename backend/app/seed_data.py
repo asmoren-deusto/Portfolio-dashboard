@@ -12,12 +12,12 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "LU0261952682",
-    "name": "Fidelity Euro 50 Index Fund A-ACC-EUR",
+    "name": "Euro 50 Index Fund",
     "ticker": "0P00006DA4.F",
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": 0.30
+    "ter": 0.3
   },
   {
     "isin": "IE000ZYRH0Q7",
@@ -30,12 +30,12 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "IE000QAZP7L2",
-    "name": "iShares Emerging Markets Index (IE) S Acc EUR",
+    "name": "Emerging Markets Index",
     "ticker": "0P0001XF3Z.F",
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": 0.20
+    "ter": 0.2
   },
   {
     "isin": "LU2145461757",
@@ -44,7 +44,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": 1.50
+    "ter": 1.5
   },
   {
     "isin": "IE00BM95B621",
@@ -57,7 +57,7 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "IE00BYX5NH74",
-    "name": "Fidelity MSCI Japan Index Fund",
+    "name": "MSCI Japan Index (Hedged)",
     "ticker": "FEPB.MU",
     "asset_type": "fund",
     "currency": "EUR",
@@ -66,12 +66,12 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "LU0302296495",
-    "name": "DNB Fund - Technology",
+    "name": "DNB Fund Technology",
     "ticker": "CFPM.F",
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": 1.50
+    "ter": 1.5
   },
   {
     "isin": "LU1623762843",
@@ -98,7 +98,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": 0.20
+    "ter": 0.2
   },
   {
     "isin": "LU1598719752",
@@ -116,11 +116,11 @@ ASSETS = json.loads(r'''[
     "asset_type": "fund",
     "currency": "EUR",
     "category": null,
-    "ter": 0.30
+    "ter": 0.3
   },
   {
     "isin": "0192#0011",
-    "name": "Indexa EPSV Más Rentabilidad Acciones",
+    "name": "Indexa Más Rentabilidad Acciones",
     "ticker": "0P0001FTQ7.F",
     "morningstar_id": "0P0001FTQ7",
     "asset_type": "epsv",
@@ -135,7 +135,7 @@ ASSETS = json.loads(r'''[
     "asset_type": "epsv",
     "currency": "EUR",
     "category": "Renta Variable Mixta (EPSV)",
-    "ter": 1.20
+    "ter": 1.2
   },
   {
     "isin": "TR_TRANSFER",
@@ -148,7 +148,7 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "LU0171307068",
-    "name": "World Healthscience Fund A2 (EUR)",
+    "name": "BGF World Healthscience",
     "ticker": null,
     "asset_type": "fund",
     "currency": "EUR",
@@ -157,7 +157,7 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "ES0000012411",
-    "name": "Bonos Gob. España 5,75% Jul-2032",
+    "name": "Bonos Gobierno España Jul 32",
     "ticker": null,
     "asset_type": "bond",
     "currency": "EUR",
@@ -175,12 +175,12 @@ ASSETS = json.loads(r'''[
   },
   {
     "isin": "IE0032126645",
-    "name": "Vanguard U.S. 500 Index EUR Acc",
+    "name": "Vanguard U.S. SP500 Index",
     "ticker": "0P00000SUJ.F",
     "asset_type": "fund",
     "currency": "EUR",
     "category": "Renta Variable USA - S&P 500",
-    "ter": 0.10
+    "ter": 0.1
   }
 ]''')
 
