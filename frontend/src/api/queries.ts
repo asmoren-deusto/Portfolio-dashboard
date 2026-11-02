@@ -787,9 +787,11 @@ export interface BacktestData {
 }
 
 export function usePortfolioBacktest(timeframe: '5y' | '10y' = '10y') {
+  const { currentUser, selectedBroker } = useAppStore()
+  const brokerQuery = selectedBroker && selectedBroker !== 'all' ? `&broker=${selectedBroker}` : ''
   return useQuery<BacktestData>({
-    queryKey: ['portfolio-backtest', timeframe],
-    queryFn: () => get<BacktestData>(`/portfolio/backtest?timeframe=${timeframe}`),
+    queryKey: ['portfolio-backtest', currentUser?.id, timeframe, selectedBroker],
+    queryFn: () => get<BacktestData>(`/portfolio/backtest?timeframe=${timeframe}${brokerQuery}`),
     placeholderData: (prev) => prev,
     staleTime: 1000 * 60 * 15,
     refetchIntervalInBackground: false,

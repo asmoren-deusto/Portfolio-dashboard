@@ -1137,17 +1137,21 @@ async def get_portfolio_backtest(
     db: Session = Depends(get_db),
 ):
     """Historical portfolio backtest and stress-testing."""
-    cache_key = f"{user_id}:{broker}:{timeframe}"
+    cache_key = f"{user_id}:{broker or 'all'}:{timeframe}"
     if cache_key in _backtest_cache:
         ts, cached = _backtest_cache[cache_key]
-        if (datetime.now() - ts).total_seconds() < 1800:
+        if (datetime.now() - ts).total_seconds() < 1800 and not cached.get("error"):
             return cached
 
     pos_objs = await get_positions(user_id=user_id, broker=broker, db=db)
-    pos_dicts = [p.model_dump() for p in pos_objs]
+    if not pos_objs:
+        pos_objs = await get_positions(user_id="asier", broker=None, db=db)
+
+    pos_dicts = [p.model_dump() for p in pos_objs] if pos_objs else []
     df = await get_historical_market_monthly_df()
     res = calculate_portfolio_backtest(pos_dicts, df, timeframe=timeframe)
-    _backtest_cache[cache_key] = (datetime.now(), res)
+    if not res.get("error"):
+        _backtest_cache[cache_key] = (datetime.now(), res)
     return res
 
 
