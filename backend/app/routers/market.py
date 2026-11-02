@@ -1841,14 +1841,16 @@ async def get_simulated_portfolio(
 
 # ── Sector Evolution & Rotation History (SPDR Sector ETFs) ─────────────────────
 SECTOR_ETFS = [
-    {"key": "tecnologia",   "sector": "Tecnología",      "ticker": "XLK", "color": "#3b82f6"},
-    {"key": "consumo",      "sector": "Consumo",         "ticker": "XLY", "color": "#f59e0b"},
-    {"key": "financiero",   "sector": "Financiero",      "ticker": "XLF", "color": "#10b981"},
-    {"key": "salud",        "sector": "Salud",           "ticker": "XLV", "color": "#ec4899"},
-    {"key": "industrial",   "sector": "Industrial",      "ticker": "XLI", "color": "#8b5cf6"},
-    {"key": "comunicacion", "sector": "Comunicación",    "ticker": "XLC", "color": "#06b6d4"},
-    {"key": "energia",      "sector": "Energía",         "ticker": "XLE", "color": "#ef4444"},
-    {"key": "materias",     "sector": "Materias Primas", "ticker": "GLD", "color": "#eab308"},
+    {"key": "tecnologia",   "sector": "Tecnología",          "ticker": "XLK", "color": "#3b82f6"},
+    {"key": "consumo",      "sector": "Consumo Discrecional", "ticker": "XLY", "color": "#f59e0b"},
+    {"key": "consumo_def",  "sector": "Consumo Defensivo",    "ticker": "XLP", "color": "#14b8a6"},
+    {"key": "salud",        "sector": "Salud",               "ticker": "XLV", "color": "#ec4899"},
+    {"key": "utilities",    "sector": "Utilities / Suministros", "ticker": "XLU", "color": "#6366f1"},
+    {"key": "financiero",   "sector": "Financiero",          "ticker": "XLF", "color": "#10b981"},
+    {"key": "industrial",   "sector": "Industrial",          "ticker": "XLI", "color": "#8b5cf6"},
+    {"key": "comunicacion", "sector": "Comunicación",        "ticker": "XLC", "color": "#06b6d4"},
+    {"key": "energia",      "sector": "Energía",             "ticker": "XLE", "color": "#ef4444"},
+    {"key": "materias",     "sector": "Materias Primas",     "ticker": "GLD", "color": "#eab308"},
 ]
 
 _sector_history_cache: dict[str, dict] = {}
@@ -1859,11 +1861,11 @@ def _fetch_sector_history_sync(period: str = "5y") -> dict:
     import yfinance as yf
     import pandas as pd
 
-    valid_periods = {"5d", "1mo", "3mo", "6mo", "1y", "2y", "3y", "5y"}
+    valid_periods = {"5d", "1mo", "3mo", "6mo", "1y", "2y", "3y", "5y", "10y"}
     if period not in valid_periods:
         period = "5y"
 
-    interval = "1h" if period == "5d" else ("1wk" if period in ("2y", "3y", "5y") else "1d")
+    interval = "1h" if period == "5d" else ("1mo" if period == "10y" else ("1wk" if period in ("2y", "3y", "5y") else "1d"))
     tickers = [s["ticker"] for s in SECTOR_ETFS] + ["SPY"]
     months_es = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
