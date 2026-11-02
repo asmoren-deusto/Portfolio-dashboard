@@ -1854,10 +1854,10 @@ SECTOR_ETFS = [
 ]
 
 _sector_history_cache: dict[str, dict] = {}
-SECTOR_HISTORY_CACHE_TTL = 300  # 5 minutes
+SECTOR_HISTORY_CACHE_TTL = 43200  # 5 minutes
 
 
-def _fetch_sector_history_sync(period: str = "5y") -> dict:
+def _fetch_sector_history_sync(period: str = "10y") -> dict:
     import yfinance as yf
     import pandas as pd
 
@@ -1978,7 +1978,7 @@ async def _refresh_sector_history_in_background(period: str):
 
 
 @router.get("/sector-history")
-async def get_sector_history(period: str = "5y"):
+async def get_sector_history(period: str = "10y"):
     """Historical percentage evolution by market sector (SPDR Sector ETFs)."""
     now = time.time()
     if period in _sector_history_cache:

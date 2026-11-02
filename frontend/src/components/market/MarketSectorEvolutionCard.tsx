@@ -247,7 +247,7 @@ function buildRealisticHistoricalSeries(
   startDateLabel: string
   endDateLabel: string
 } {
-  const opt = PERIOD_OPTIONS.find((p) => p.id === periodId) ?? PERIOD_OPTIONS[PERIOD_OPTIONS.length - 2]
+  const opt = PERIOD_OPTIONS.find((p) => p.id === periodId) ?? PERIOD_OPTIONS[PERIOD_OPTIONS.length - 1]
   const now = new Date()
   const start = new Date(now.getTime() - opt.days * 24 * 60 * 60 * 1000)
 
@@ -355,7 +355,7 @@ export function MarketSectorEvolutionCard({
   selectedSector,
   onSelectSector,
 }: MarketSectorEvolutionCardProps) {
-  const [period, setPeriod] = useState<string>('5y')
+  const [period, setPeriod] = useState<string>('10y')
   const [chartMode, setChartMode] = useState<'lines' | 'annual' | 'bars'>('annual')
   const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set())
   const [hoveredKey, setHoveredKey] = useState<string | null>(null)
@@ -363,7 +363,7 @@ export function MarketSectorEvolutionCard({
   const [showAnticyclicalFilter, setShowAnticyclicalFilter] = useState<boolean>(false)
 
   const activePeriodMeta = useMemo(() => {
-    return PERIOD_OPTIONS.find((p) => p.id === period) ?? PERIOD_OPTIONS[PERIOD_OPTIONS.length - 2]
+    return PERIOD_OPTIONS.find((p) => p.id === period) ?? PERIOD_OPTIONS[PERIOD_OPTIONS.length - 1]
   }, [period])
 
   const { data, isFetching } = useMarketSectorHistory(period)
@@ -387,7 +387,7 @@ export function MarketSectorEvolutionCard({
   const { sectors, points, benchmarkReturnPct, benchmarkCagrPct, startDateLabel, endDateLabel } = useMemo(() => {
     const fallback = buildRealisticHistoricalSeries(period, liveSectorDayMap)
 
-    if (data?.sectors && data.sectors.length > 0 && data.points && data.points.length > 2) {
+    if (data?.period === period && data?.sectors && data.sectors.length > 0 && data.points && data.points.length > 2) {
       const apiSpyRet = data.benchmark_return_pct ?? fallback.benchmarkReturnPct
       const spyCagr = computeCagr(apiSpyRet, activePeriodMeta.years)
 
@@ -459,13 +459,10 @@ export function MarketSectorEvolutionCard({
     return Math.max(10, Math.abs(benchmarkReturnPct), ...sectors.map((s) => Math.abs(s.return_pct)))
   }, [sectors, benchmarkReturnPct])
 
-  // Calendar years for matrix (up to 10 years when 10A selected: 2017 to 2026)
+  // Calendar years for matrix (always full 10 years: 2017 to 2026)
   const calendarYears = useMemo(() => {
-    if (period === '10y') {
-      return [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
-    }
-    return [2022, 2023, 2024, 2025, 2026]
-  }, [period])
+    return [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+  }, [])
 
   const isTableFullWidth = chartMode === 'annual'
 
@@ -751,23 +748,36 @@ export function MarketSectorEvolutionCard({
                   <tr className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
                     <th className="py-3 px-3.5 text-left font-semibold">Sector / Ticker</th>
                     <th className="py-3 px-3 text-left font-semibold">Fondo de Referencia en Cartera</th>
-                    {calendarYears.map((yr) => (
-                      <th
-                        key={yr}
-                        className="py-3 px-2.5 text-right font-mono font-medium text-slate-600 dark:text-slate-300"
-                      >
-                        {yr === 2026 ? (
-                          <span className="inline-flex items-center gap-1">
-                            <span>2026</span>
-                            <span className="text-[9px] px-1 py-0.2 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
-                              YTD
+                    {calendarYears.map((yr) => {
+                      const isCrisisYear = yr === 2018 || yr === 2022
+                      return (
+                        <th
+                          key={yr}
+                          className={cn(
+                            'py-3 px-2.5 text-right font-mono font-medium',
+                            isCrisisYear
+                              ? 'text-rose-600 dark:text-rose-400 font-bold'
+                              : 'text-slate-600 dark:text-slate-300'
+                          )}
+                          title={isCrisisYear ? `Año bajista / crisis de mercado (${yr})` : undefined}
+                        >
+                          {yr === 2026 ? (
+                            <span className="inline-flex items-center gap-1">
+                              <span>2026</span>
+                              <span className="text-[9px] px-1 py-0.2 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
+                                YTD
+                              </span>
                             </span>
-                          </span>
-                        ) : (
-                          yr
-                        )}
-                      </th>
-                    ))}
+                          ) : isCrisisYear ? (
+                            <span className="text-rose-600 dark:text-rose-400 font-bold">
+                              {yr}
+                            </span>
+                          ) : (
+                            yr
+                          )}
+                        </th>
+                      )
+                    })}
                     <th className="py-3 px-3.5 text-right font-mono font-semibold text-indigo-600 dark:text-indigo-400">
                       Media TAE ({calendarYears.length}A)
                     </th>

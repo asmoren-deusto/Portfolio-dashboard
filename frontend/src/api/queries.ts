@@ -669,12 +669,12 @@ export interface SectorHistoryResponse {
   cache_timestamp: string
 }
 
-export function useMarketSectorHistory(period: string = '5y') {
+export function useMarketSectorHistory(period: string = '10y') {
   return useQuery<SectorHistoryResponse>({
     queryKey: ['market-sector-history', period],
     queryFn: () => get<SectorHistoryResponse>(`/market/sector-history?period=${period}`),
-    placeholderData: (prev) => prev,
-    staleTime: 1000 * 60 * 5, // 5 min
+    placeholderData: (prev) => (prev?.period === period ? prev : undefined),
+    staleTime: 1000 * 60 * 30, // 30 min
     refetchIntervalInBackground: false,
   })
 }
