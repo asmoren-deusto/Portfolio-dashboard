@@ -25,12 +25,107 @@ const PERIODS = [
 
 type PeriodKey = (typeof PERIODS)[number]['value']
 
+/**
+ * Slugs y URLs oficiales de Finect (fondos de inversión, planes de pensiones y ETFs).
+ */
+const FINECT_SLUGS: Record<string, string> = {
+  'ES0112611001': 'https://www.finect.com/fondos-inversion/ES0112611001-Azvalor_internacional_fi',
+  'LU0261952682': 'https://www.finect.com/fondos-inversion/LU0261952682-Fidelity_funds__euro_stoxx_50_tm_aacc_eur',
+  'IE000ZYRH0Q7': 'https://www.finect.com/fondos-inversion/IE000ZYRH0Q7-Ishares_developed_world_index_ie_s_acc_eur',
+  'IE000QAZP7L2': 'https://www.finect.com/fondos-inversion/IE000QAZP7L2-Ishares_emerging_markets_index_ie_s_acc_eur',
+  'LU2145461757': 'https://www.finect.com/fondos-inversion/LU2145461757-Robeco_smart_energy_d_eur',
+  'IE00BM95B621': 'https://www.finect.com/fondos-inversion/IE00BM95B621-Polar_capital_funds_plc_polar_capital_global_technology_fund_r_eur_acc',
+  'IE00BYX5NH74': 'https://www.finect.com/fondos-inversion/IE00BYX5NH74-Fidelity_msci_japan_index_p_acc_eur',
+  'LU0302296495': 'https://www.finect.com/fondos-inversion/LU0302296495-Dnb_fund_technology_a_eur',
+  'LU1623762843': 'https://www.finect.com/fondos-inversion/LU1623762843-Carmignac_portfolio_credit_a_eur_acc',
+  'IE00BYX5NX33': 'https://www.finect.com/fondos-inversion/IE00BYX5NX33-Fidelity_msci_world_index_p_acc_eur',
+  'IE00BYX5M476': 'https://www.finect.com/fondos-inversion/IE00BYX5M476-Fidelity_msci_emerging_markets_index_p_acc_eur',
+  'LU1598719752': 'https://www.finect.com/fondos-inversion/LU1598719752-Cobas_international_fund_p_eur_acc',
+  'LU0996182563': 'https://www.finect.com/fondos-inversion/LU0996182563-Amundi_index_msci_world_ae_c',
+  '0192#0011': 'https://www.finect.com/planes-pensiones/indexa-mas-rentabilidad-acciones-epsv',
+  'LU0171307068': 'https://www.finect.com/fondos-inversion/LU0171307068-Bgf_world_healthscience_a2',
+  'IE00B4ND3602': 'https://www.finect.com/etfs/ishares-physical-gold-etc',
+  'IE0032126645': 'https://www.finect.com/fondos-inversion/IE0032126645-Vanguard_us_500_stock_index_eur_acc',
+}
+
+/**
+ * Enlaces específicos directos a la ficha oficial de cada producto o gestora.
+ */
 const PRODUCT_GESTORA_URLS: Record<string, string> = {
+  // Vanguard U.S. 500 Stock Index Fund EUR Acc
+  'IE0032126645': 'https://www.vanguardinvestor.co.uk/investments/vanguard-us-500-stock-index-fund-eur-acc/overview',
+  // iShares Physical Gold ETC
   'IE00B4ND3602': 'https://www.ishares.com/es/profesionales/es/productos/258441/ishares-physical-gold-etc-fund',
+  // BlackRock World Healthscience Fund
   'LU0171307068': 'https://www.blackrock.com/es/profesionales/productos/229337/blackrock-world-healthscience-a2-eur-fund',
-  'ES0112611001': 'https://www.azvalor.com/fondos/azvalor-internacional-fi/',
-  'LU0302296495': 'https://www.dnbam.com/es/fondos/dnb-fund-technology-retail-a',
-  '0192#0011': 'https://indexacapital.com/es/esp/planes-pensiones-epsv',
+  // Azvalor Internacional FI
+  'ES0112611001': 'https://www.azvalor.com/fondos/internacional-fi/',
+  // DNB Fund Technology
+  'LU0302296495': 'https://dnbam.com/',
+  // Indexa EPSV Más Rentabilidad Acciones
+  '0192#0011': 'https://indexacapital.com/es/esp/',
+  // Kutxabank Baskepensiones EPSV
+  '0201G': 'https://portal.kutxabank.es/cs/Satellite/kb/es/particulares',
+  // iShares Developed World
+  'IE000ZYRH0Q7': 'https://www.ishares.com/es/profesionales/es/productos/307474/ishares-developed-world-index-fund-ie-class-s-acc-eur',
+  // iShares Emerging Markets
+  'IE000QAZP7L2': 'https://www.ishares.com/es/profesionales/es/productos/314115/ishares-emerging-markets-index-fund-ie-s-acc-eur',
+  // Amundi MSCI World
+  'LU0996182563': 'https://www.amundi.es/retail/product/view/LU0996182563',
+  // Polar Capital Global Technology
+  'IE00BM95B621': 'https://www.polarcapitalfunds.com/',
+  // Robeco Smart Energy
+  'LU2145461757': 'https://www.robeco.com/es-es/',
+  // Cobas International
+  'LU1598719752': 'https://www.cobasam.com/',
+  // Carmignac Portfolio Credit
+  'LU1623762843': 'https://www.carmignac.es/',
+  // Fidelity Funds
+  'IE00BYX5NX33': 'https://www.fondosfidelity.es/',
+  'IE00BYX5M476': 'https://www.fondosfidelity.es/',
+  'IE00BYX5NH74': 'https://www.fondosfidelity.es/',
+  'LU0261952682': 'https://www.fondosfidelity.es/',
+}
+
+/**
+ * Obtiene la URL de Morningstar adecuada para cada activo.
+ */
+function getMorningstarUrl(position: Position): string {
+  // Para Indexa EPSV el identificador Morningstar es 0P0001FTQ7
+  if (position.isin === '0192#0011') {
+    return 'https://global.morningstar.com/es/inversiones/fondos/0P0001FTQ7/cotizacion'
+  }
+  const cleanIsin = position.isin.replace(/#/g, '')
+  return `https://global.morningstar.com/es/inversiones/fondos/${cleanIsin}/cotizacion`
+}
+
+/**
+ * Obtiene la URL de Finect adecuada para cada activo.
+ */
+function getFinectUrl(position: Position): string | null {
+  if (FINECT_SLUGS[position.isin]) {
+    return FINECT_SLUGS[position.isin]
+  }
+  if (position.asset_type === 'etc' || position.asset_type === 'etf') {
+    return `https://www.finect.com/etfs/${position.isin}`
+  }
+  if (position.asset_type === 'epsv') {
+    return 'https://www.finect.com/planes-pensiones'
+  }
+  return `https://www.finect.com/fondos-inversion/${position.isin}`
+}
+
+/**
+ * Obtiene la URL del propio producto o gestora.
+ */
+function getOfficialProductUrl(position: Position): string | null {
+  if (PRODUCT_GESTORA_URLS[position.isin]) {
+    return PRODUCT_GESTORA_URLS[position.isin]
+  }
+  if (position.domain) {
+    return `https://${position.domain}`
+  }
+  return null
 }
 
 export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ position, onClose }) => {
@@ -103,6 +198,8 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
       const lbl =
         period === '1d'
           ? d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+          : period === '5y'
+          ? d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })
           : d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
 
       points.push({
@@ -161,6 +258,10 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
     }
     return null
   }
+
+  const morningstarUrl = position ? getMorningstarUrl(position) : null
+  const finectUrl = position ? getFinectUrl(position) : null
+  const officialProductUrl = position ? getOfficialProductUrl(position) : null
 
   return createPortal(
     <AnimatePresence>
@@ -466,36 +567,56 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
             </div>
 
             {/* External Links */}
-            <div className="flex gap-2">
-              <a
-                href={`https://www.morningstar.es/es/funds/snapshot/snapshot.aspx?id=${position.isin}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white font-medium text-xs transition-all shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-95"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Ficha en Morningstar
-              </a>
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Botón principal azul: Ficha / Web del propio Fondo */}
+              {officialProductUrl ? (
+                <a
+                  href={officialProductUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 min-w-[150px] flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white font-medium text-xs transition-all shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-95"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Ficha del Fondo (Gestora)</span>
+                </a>
+              ) : null}
+
+              {/* Enlace Morningstar (formato pequeño como Yahoo) */}
+              {morningstarUrl && (
+                <a
+                  href={morningstarUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] dark:text-slate-300 dark:hover:text-white font-medium text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Morningstar</span>
+                </a>
+              )}
+
+              {/* Enlace Finect (formato pequeño) */}
+              {finectUrl && (
+                <a
+                  href={finectUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] dark:text-slate-300 dark:hover:text-white font-medium text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Finect</span>
+                </a>
+              )}
+
+              {/* Enlace Yahoo Finance (formato pequeño) */}
               {position.ticker && (
                 <a
                   href={`https://finance.yahoo.com/quote/${position.ticker}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] dark:text-slate-300 dark:hover:text-white font-medium text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
+                  className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] dark:text-slate-300 dark:hover:text-white font-medium text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  Yahoo Finance
-                </a>
-              )}
-              {(PRODUCT_GESTORA_URLS[position.isin] || position.domain) && (
-                <a
-                  href={PRODUCT_GESTORA_URLS[position.isin] || `https://${position.domain}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] dark:text-slate-300 dark:hover:text-white font-medium text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  Gestora
+                  <span>Yahoo Finance</span>
                 </a>
               )}
             </div>

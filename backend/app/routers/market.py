@@ -976,9 +976,9 @@ def _fetch_history_sync(ticker: str, period: str) -> dict:
             if period == "1d":
                 lbl = idx.strftime("%H:%M")
                 d_str = idx.strftime("%d %b, %H:%M")
-            elif period in ("5d", "1mo"):
+            elif period in ("5d", "1mo", "6mo"):
                 lbl = idx.strftime("%d %b")
-                d_str = idx.strftime("%d %b, %H:%M")
+                d_str = idx.strftime("%d %b %Y") if period == "6mo" else idx.strftime("%d %b, %H:%M")
             else:
                 lbl = idx.strftime("%b %y")
                 d_str = idx.strftime("%d %b %Y")
