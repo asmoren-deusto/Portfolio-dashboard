@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, TrendingUp, TrendingDown, ExternalLink, Globe } from 'lucide-react'
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
-import { AssetBadge } from '@/components/ui/Badge'
+import { AssetBadge, BrokerBadge } from '@/components/ui/Badge'
 import { fmt, cn, formatAssetDisplayName, getAssetOfficialDetails } from '@/lib/utils'
 import { useMarketHistory } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
@@ -317,37 +317,42 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                   <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
                     {meta?.officialName || position.name}
                   </h3>
-                  {position.ticker && (
-                    <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md">
-                      {position.ticker}
-                    </span>
-                  )}
                 </div>
-                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                  <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 rounded-md">
+
+                {/* Harmonized Badges Strip */}
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  {/* ISIN */}
+                  <span
+                    className="inline-flex items-center h-6 px-2.5 rounded-lg border border-slate-200/90 dark:border-white/10 bg-slate-100/90 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 font-mono text-[11px] font-bold tracking-wider shadow-2xs"
+                    title={`ISIN: ${position.isin}`}
+                  >
                     {position.isin}
                   </span>
-                  <AssetBadge type={position.asset_type} />
 
-                  {/* Badge de Moneda */}
+                  {/* Tipo de Activo */}
+                  <AssetBadge
+                    type={position.asset_type}
+                    className="h-6 px-2.5 rounded-lg text-[11px] font-bold tracking-wider border shadow-2xs"
+                  />
+
+                  {/* Divisa */}
                   <span
-                    className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 px-2 py-0.5 rounded-md"
-                    title={`Divisa base de cotización: ${meta?.currency || cur}`}
+                    className="inline-flex items-center h-6 px-2.5 rounded-lg border border-emerald-500/25 bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-mono text-[11px] font-bold tracking-wider shadow-2xs"
+                    title={`Divisa base: ${meta?.currency || cur}`}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     {meta?.currency || cur}
                   </span>
 
-                  {/* Badge de Clase de Acción (ACC / DIST / ETC) */}
+                  {/* Clase ACC / DIST / ETC */}
                   {meta?.shareClass && (
                     <span
                       className={cn(
-                        'inline-flex items-center gap-1 font-mono text-[11px] font-bold px-2 py-0.5 rounded-md border',
+                        'inline-flex items-center h-6 px-2.5 rounded-lg border font-mono text-[11px] font-bold tracking-wider shadow-2xs',
                         meta.shareClass === 'ACC'
-                          ? 'text-blue-700 dark:text-blue-300 bg-blue-500/10 dark:bg-blue-500/15 border-blue-500/25'
+                          ? 'border-blue-500/25 bg-blue-500/10 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300'
                           : meta.shareClass === 'DIST'
-                          ? 'text-amber-700 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/25'
-                          : 'text-purple-700 dark:text-purple-300 bg-purple-500/10 dark:bg-purple-500/15 border-purple-500/25'
+                          ? 'border-amber-500/25 bg-amber-500/10 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                          : 'border-purple-500/25 bg-purple-500/10 dark:bg-purple-500/15 text-purple-700 dark:text-purple-300'
                       )}
                       title={`Clase: ${meta.shareClassLabel}`}
                     >
@@ -355,8 +360,30 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                     </span>
                   )}
 
+                  {/* Ticker */}
+                  {position.ticker && (
+                    <span
+                      className="inline-flex items-center h-6 px-2.5 rounded-lg border border-sky-500/25 bg-sky-500/10 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 font-mono text-[11px] font-bold tracking-wider shadow-2xs"
+                      title={`Ticker cotización: ${position.ticker}`}
+                    >
+                      {position.ticker}
+                    </span>
+                  )}
+
+                  {/* Broker */}
+                  {position.broker && (
+                    <BrokerBadge
+                      broker={position.broker}
+                      className="h-6 px-2.5 rounded-lg text-[11px] font-bold tracking-wider border shadow-2xs"
+                    />
+                  )}
+
+                  {/* Categoría */}
                   {position.category && (
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
+                    <span
+                      className="inline-flex items-center h-6 px-2.5 rounded-lg border border-slate-200/90 dark:border-white/10 bg-slate-100/80 dark:bg-white/[0.04] text-slate-700 dark:text-slate-300 text-[11px] font-medium tracking-normal shadow-2xs"
+                      title={`Categoría: ${position.category}`}
+                    >
                       {position.category}
                     </span>
                   )}
