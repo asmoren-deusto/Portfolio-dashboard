@@ -357,11 +357,11 @@ export function CompoundProjectionCard({
             </div>
           </div>
 
-          <div className="h-[240px] max-h-[240px] w-full">
-            <ResponsiveContainer width="100%" height={240}>
+          <div className="h-[250px] min-h-[250px] max-h-[250px] w-full relative overflow-hidden">
+            <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={simulation.points}
-                margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                margin={{ top: 8, right: 8, left: -6, bottom: 0 }}
               >
                 <defs>
                   <linearGradient id="projOptGrad" x1="0" y1="0" x2="0" y2="1">
@@ -385,6 +385,7 @@ export function CompoundProjectionCard({
                   axisLine={false}
                 />
                 <YAxis
+                  domain={[0, 'auto']}
                   tick={{ fontSize: 10.5, fill: '#94a3b8' }}
                   tickLine={false}
                   axisLine={false}

@@ -337,7 +337,7 @@ export function RootLayout() {
           <div className="h-[calc(env(safe-area-inset-top,0px)+44px)] md:hidden shrink-0" aria-hidden="true" />
 
           {/* Top White Bar with Selectors (Desktop only) - Exactly 60px sticky top bar */}
-          <div className="relative z-[60] hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 md:sticky md:top-0 shadow-xs">
+          <div className="relative z-[90] hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 md:sticky md:top-0 shadow-xs">
             <Header
               title={pageMeta.title}
               subtitle={pageMeta.subtitle}
@@ -348,7 +348,7 @@ export function RootLayout() {
               - Desktop: Fixed full-width ribbon across the entire viewport (0 to 100vw), including the lateral menu
               - Mobile: In-flow right under the mobile header spacer
           */}
-          <div className="relative z-40 md:fixed md:top-[60px] md:left-0 md:right-0 md:z-[55] shadow-xs">
+          <div className="relative z-40 md:fixed md:top-[60px] md:left-0 md:right-0 md:z-[60] shadow-xs">
             <MarketTicker fullWidth />
           </div>
 

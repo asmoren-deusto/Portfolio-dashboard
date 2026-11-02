@@ -1055,7 +1055,7 @@ FINECT_SLUGS: dict[str, str] = {
     "ES0112612009": "ES0112612009-Azvalor_capital_fi",
     "ES0112613007": "ES0112613007-Azvalor_blue_chips_fi",
     "LU1598719752": "LU1598719752-Cobas_international_fund_p_eur_acc",
-    "LU0302296495": "LU0302296495-Dnb_fund_technology_a_eur",
+    "LU0302296495": "LU0302296495-Dnb_fund_technology_retail_a",
     "LU1623762843": "LU1623762843-Carmignac_portfolio_credit_a_eur_acc",
     "LU2145461757": "LU2145461757-Robeco_smart_energy_d_eur",
     "IE00BM95B621": "IE00BM95B621-Polar_capital_funds_plc_polar_capital_global_technology_fund_r_eur_acc",
