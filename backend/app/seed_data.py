@@ -181,6 +181,15 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Renta Variable USA - S&P 500",
     "ter": 0.1
+  },
+  {
+    "isin": "FR0000989626",
+    "name": "Groupama Trésorerie IC",
+    "ticker": "0P00000LRT.F",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "category": "Monetario EUR",
+    "ter": 0.06
   }
 ]''')
 
@@ -206,7 +215,7 @@ PRICES = json.loads(r'''[
   {
     "isin": "IE00B4ND3602",
     "date": "2026-10-22",
-    "price": 70.20,
+    "price": 70.2,
     "currency": "EUR"
   },
   {
@@ -1887,6 +1896,30 @@ PRICES = json.loads(r'''[
     "isin": "0192#0011",
     "date": "2026-10-28",
     "price": 23.781269,
+    "currency": "EUR"
+  },
+  {
+    "isin": "FR0000989626",
+    "date": "2026-10-27",
+    "price": 44797.3333,
+    "currency": "EUR"
+  },
+  {
+    "isin": "FR0000989626",
+    "date": "2026-10-28",
+    "price": 44699.2109,
+    "currency": "EUR"
+  },
+  {
+    "isin": "FR0000989626",
+    "date": "2026-10-29",
+    "price": 44702.2383,
+    "currency": "EUR"
+  },
+  {
+    "isin": "FR0000989626",
+    "date": "2026-11-02",
+    "price": 44716.25,
     "currency": "EUR"
   }
 ]''')
@@ -4022,7 +4055,7 @@ TRANSACTIONS = json.loads(r'''[
     "type": "buy",
     "shares": 0.14,
     "price": 73.44,
-    "amount": 10.30,
+    "amount": 10.3,
     "fees": 0.0,
     "date": "2026-10-26",
     "broker": "myinvestor",
@@ -4075,5 +4108,27 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-10-27",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Externo (desde BBVA, coste fiscal originario 17.264,51 € de valor 20.149,66 €, orden 202610270011696)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0171307068",
+    "type": "sell",
+    "shares": 27.36,
+    "price": 73.1099,
+    "amount": 2000.29,
+    "date": "2026-10-26",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Groupama Trésorerie, orden 202610270131144)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "FR0000989626",
+    "type": "buy",
+    "shares": 0.045,
+    "price": 44797.3333,
+    "amount": 2015.88,
+    "date": "2026-10-27",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde BGF World Healthscience, ref 202610270131144)"
   }
 ]''')

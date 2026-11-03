@@ -46,6 +46,7 @@ const FINECT_SLUGS: Record<string, string> = {
   'LU0171307068': 'https://www.finect.com/fondos-inversion/LU0171307068-Bgf_world_healthscience_a2',
   'IE00B4ND3602': 'https://www.finect.com/etfs/ishares-physical-gold-etc',
   'IE0032126645': 'https://www.finect.com/fondos-inversion/IE0032126645-Vanguard_us_500_stock_index_eur_acc',
+  'FR0000989626': 'https://www.finect.com/fondos-inversion/FR0000989626-Groupama_tresorerie_ic',
 }
 
 /**
@@ -54,6 +55,8 @@ const FINECT_SLUGS: Record<string, string> = {
 const PRODUCT_GESTORA_URLS: Record<string, string> = {
   // Vanguard U.S. 500 Index EUR Acc
   'IE0032126645': 'https://www.vanguardinvestor.co.uk/investments/vanguard-us-500-stock-index-fund-eur-acc/overview',
+  // Groupama Trésorerie IC
+  'FR0000989626': 'https://www.groupama-am.com/es/es/institutional/funds/groupama-tresorerie-ic/',
   // iShares Physical Gold ETC
   'IE00B4ND3602': 'https://www.ishares.com/es/profesionales/es/productos/258441/ishares-physical-gold-etc-fund',
   // BlackRock World Healthscience Fund

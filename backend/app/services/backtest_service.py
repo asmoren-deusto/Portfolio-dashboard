@@ -23,6 +23,7 @@ DEFAULT_PROXIES = {
     "LU0171307068": ("XLV", "World Healthscience (Salud)", "Sector Defensivo Anticíclico"),
     "ES0000012411": ("IEF", "Bonos Soberanos 7-10Y", "Renta Fija / Estabilidad"),
     "IE00B4ND3602": ("GLD", "Oro Físico (ETC)", "Activo Refugio / Descorrelación"),
+    "FR0000989626": ("SHV", "Monetario / Liquidez (Groupama)", "Fondo Monetario Ultra-Corto Plazo"),
 }
 
 def resolve_asset_proxy(isin: str, name: str, asset_type: str) -> tuple[str, str, str]:

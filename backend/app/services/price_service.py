@@ -159,6 +159,7 @@ KNOWN_TICKERS: dict[str, str] = {
     "LU0261952682": "0P00006DA4.F",  # Fidelity Euro 50 Index Fund A-ACC-EUR
     "IE00B4ND3602": "PPFB.DE",  # iShares Physical Gold ETC (Lang & Schwarz / Xetra)
     "IE0032126645": "0P00000SUJ.F",  # Vanguard U.S. 500 Index EUR Acc
+    "FR0000989626": "0P00000LRT.F",  # Groupama Trésorerie IC
 }
 
 
@@ -1062,6 +1063,7 @@ FINECT_SLUGS: dict[str, str] = {
     "IE00BM95B621": "IE00BM95B621-Polar_capital_funds_plc_polar_capital_global_technology_fund_r_eur_acc",
     "LU0996182563": "LU0996182563-Amundi_index_msci_world_ae_c",
     "IE0032126645": "IE0032126645-Vanguard_us_500_stock_index_eur_acc",
+    "FR0000989626": "FR0000989626-Groupama_tresorerie_ic",
     "IE000QAZP7L2": "IE000QAZP7L2-Ishares_emerging_markets_index_ie_s_acc_eur",
     "IE000ZYRH0Q7": "IE000ZYRH0Q7-Ishares_developed_world_index_ie_s_acc_eur",
     "IE00BYX5NX33": "IE00BYX5NX33-Fidelity_msci_world_index_p_acc_eur",
