@@ -255,6 +255,35 @@ export const CobasLogo: React.FC<{ sizeClasses: string; className?: string; titl
   )
 }
 
+export const GroupamaLogo: React.FC<{ sizeClasses: string; className?: string; title?: string }> = ({
+  sizeClasses,
+  className = '',
+  title = 'Groupama Asset Management',
+}) => {
+  return (
+    <div
+      className={`${sizeClasses} rounded-full bg-[#2A6654] flex items-center justify-center shrink-0 border border-emerald-400/30 shadow-xs overflow-hidden select-none ${className}`}
+      title={title}
+    >
+      <svg viewBox="4 4 40 40" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 4h40v40H4z" fill="#2A6654" />
+        <path
+          d="m28.4 27.2 7.7 2.7c.5-.8.9-1.7 1.1-2.7h-8.8zm6.5 4.5-9-4.5 6.3 7c.9-.8 1.9-1.6 2.7-2.5zm-10.4-4.5 1.7 9.6c1.1-.3 2.3-.7 3.3-1.1l-5-8.5zM23 37.3l.6-10.1-4.5 9.8c1 .2 2 .3 3 .3h.9zm-7.1-1.4 6.5-8.7-9.9 6c.9 1.1 2 2 3.4 2.7zm-5.3-8.7c-.1 1.2 0 2.4.4 3.4l9.5-3.4h-9.9z"
+          fill="#C4D600"
+        />
+        <path
+          d="m19.1 25.7.7-1.5h2.8l.9 1.5zm6.1-.9 1.2-1.5h2.8l1.2 1.5zm-2.5-.6 1.4-4.2 1.4 4.2z"
+          fill="#FFFFFF"
+        />
+        <path
+          d="M36.9 10.4c-1.8-.1-3.4-.2-5.5-.1-5 .2-9.6 2-13.4 5-3.6 2.9-6.1 6.4-7 10.4h.2c1.7-5.4 6.6-9.6 13.6-10.8 2.2-.3 5.2-.2 7.3.2l4.8-4.7z"
+          fill="#CB521C"
+        />
+      </svg>
+    </div>
+  )
+}
+
 export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   ticker,
   isin,
@@ -333,6 +362,11 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     (name || '').toLowerCase().includes('cobas') ||
     Boolean(isin && isin === 'LU1598719752')
 
+  const isGroupama =
+    Boolean(cleanDomain?.includes('groupama')) ||
+    (name || '').toLowerCase().includes('groupama') ||
+    Boolean(isin && isin === 'FR0000989626')
+
   // Market proxy icons for tickers without an ISIN (e.g. ETF replicas in simulated portfolio)
   const marketIcon = getMarketIcon(ticker)
   if (!isin && marketIcon) {
@@ -369,6 +403,10 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
 
   if (isCobas) {
     return <CobasLogo sizeClasses={sizeClasses} className={className} title={`${name} (Cobas)`} />
+  }
+
+  if (isGroupama) {
+    return <GroupamaLogo sizeClasses={sizeClasses} className={className} title={`${name} (Groupama)`} />
   }
 
   const roundedClass = 'rounded-full'
