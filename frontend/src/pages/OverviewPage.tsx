@@ -37,7 +37,6 @@ import {
   GlowSplineChart,
   MultiLineComparisonChart,
   WaterfallGrowthChart,
-  AllocationStreamChart,
 } from '@/components/charts/EvolutionCharts'
 import { AllocationChart, AllocationChartSkeleton } from '@/components/charts/AllocationChart'
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
@@ -102,10 +101,11 @@ export function OverviewPage() {
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
   const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
-  const [chartStyle, setChartStyle] = useState<'glow' | 'lines' | 'waterfall' | 'allocation' | 'heatmap'>(() => {
-    return (localStorage.getItem('overview_portfolio_chart_style') as any) || 'glow'
+  const [chartStyle, setChartStyle] = useState<'glow' | 'lines' | 'waterfall' | 'heatmap'>(() => {
+    const saved = localStorage.getItem('overview_portfolio_chart_style')
+    return (saved && saved !== 'allocation') ? (saved as any) : 'glow'
   })
-  const handleSetChartStyle = (style: 'glow' | 'lines' | 'waterfall' | 'allocation' | 'heatmap') => {
+  const handleSetChartStyle = (style: 'glow' | 'lines' | 'waterfall' | 'heatmap') => {
     setChartStyle(style)
     localStorage.setItem('overview_portfolio_chart_style', style)
     if (style === 'heatmap') {
@@ -1105,34 +1105,11 @@ export function OverviewPage() {
                   </span>
                 </motion.button>
 
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => handleSetChartStyle('allocation')}
-                  className={cn(
-                    'h-7 relative px-2 sm:px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-md transition-colors text-center shrink-0',
-                    chartStyle === 'allocation'
-                      ? 'text-slate-900 dark:text-white font-bold'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  )}
-                  title="Evolución de distribución porcentual relativa (100%) en el tiempo"
-                >
-                  {chartStyle === 'allocation' && (
-                    <motion.div
-                      layoutId="overviewChartStylePill"
-                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    <PieChart size={12} className={chartStyle === 'allocation' ? 'text-violet-500' : ''} />
-                    <span>Reparto %</span>
-                  </span>
-                </motion.button>
               </div>
 
               {/* Secondary Sub-Controls - EXACTLY h-8 and same rounded-lg tokens */}
               {/* 1. Breakdown Selector (Only for 'lines' and 'allocation') */}
-              {(chartStyle === 'lines' || chartStyle === 'allocation') && (
+              {chartStyle === 'lines' && (
                 <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
                   <motion.button
                     whileTap={{ scale: 0.96 }}
@@ -1309,21 +1286,7 @@ export function OverviewPage() {
                       height={260}
                     />
                   </motion.div>
-                ) : chartStyle === 'allocation' ? (
-                  <motion.div
-                    key={`allocation-${perfBreakdown}`}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.2 }}
-                    className="w-full h-full flex flex-col justify-center"
-                  >
-                    <AllocationStreamChart
-                      data={performance}
-                      height={260}
-                      breakdown={perfBreakdown}
-                    />
-                  </motion.div>
+                
                 ) : (
                   <motion.div
                     key="heatmap"
