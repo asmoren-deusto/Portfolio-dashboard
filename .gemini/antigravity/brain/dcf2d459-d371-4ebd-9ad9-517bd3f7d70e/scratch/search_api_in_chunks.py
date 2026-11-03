@@ -22,3 +22,4 @@ for c in chunk_urls:
                 print('Endpoints in this chunk:', [e for e in endpoints if len(e) < 100][:20])
     except Exception as e:
         print('ERR on', c, e)
+

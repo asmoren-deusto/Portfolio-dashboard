@@ -9,3 +9,4 @@ with urllib.request.urlopen(req, timeout=5) as r:
 
 idx = js.find('["cmsResponse",0,s,"paginate')
 print(js[idx:idx+2500])
+

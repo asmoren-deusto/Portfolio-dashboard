@@ -6,3 +6,4 @@ headers = {'User-Agent': 'Mozilla/5.0'}
 req = urllib.request.Request(url, headers=headers)
 with urllib.request.urlopen(req, timeout=10) as r:
     print('Final URL:', r.geturl())
+

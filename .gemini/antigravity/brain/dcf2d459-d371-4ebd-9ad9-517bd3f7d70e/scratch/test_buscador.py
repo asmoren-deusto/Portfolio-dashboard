@@ -10,3 +10,4 @@ with urllib.request.urlopen(req, timeout=10) as r:
     # Look for API calls, fetch or axios in the html or scripts
     fetch_calls = re.findall(r'(?:https?://[^"\']+|/[^"\']+(?:api|funds|search|v1|v2)[^"\']*)', html)
     print('Fetch/API candidates:', [f for f in fetch_calls if 'static' not in f and 'font' not in f and 'img' not in f][:15])
+

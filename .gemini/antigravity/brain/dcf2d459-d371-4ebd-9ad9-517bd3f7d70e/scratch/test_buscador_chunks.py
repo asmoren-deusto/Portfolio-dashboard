@@ -12,3 +12,4 @@ chunks = re.findall(r'/_next/static/chunks/pages/[^"\']+\.js', html)
 print('Page chunks:', chunks)
 chunks_all = re.findall(r'/_next/static/chunks/[^"\']+\.js', html)
 print('All chunks count:', len(chunks_all))
+

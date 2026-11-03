@@ -10,3 +10,4 @@ with urllib.request.urlopen(req, timeout=5) as r:
 idx = js.find('665747')
 # let's see imports in 665747
 print(js[idx:idx+1000])
+

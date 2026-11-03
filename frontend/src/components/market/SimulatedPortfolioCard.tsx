@@ -41,6 +41,21 @@ export interface EtfInfo {
 }
 
 export const ETF_INFO_MAP: Record<string, EtfInfo> = {
+  SPY: {
+    name: 'S&P 500 (EE.UU. Large Cap)',
+    shortName: 'S&P 500',
+    category: 'Renta Variable EE.UU. (S&P 500)',
+  },
+  VOO: {
+    name: 'Vanguard S&P 500 ETF',
+    shortName: 'S&P 500',
+    category: 'Renta Variable EE.UU. (S&P 500)',
+  },
+  IVV: {
+    name: 'iShares Core S&P 500 ETF',
+    shortName: 'S&P 500',
+    category: 'Renta Variable EE.UU. (S&P 500)',
+  },
   URTH: {
     name: 'MSCI World (Acciones Globales)',
     shortName: 'MSCI World',
@@ -55,6 +70,11 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     name: 'Tecnología EE.UU. (Big Tech)',
     shortName: 'Tecnología EE.UU.',
     category: 'Sector Tecnológico Global',
+  },
+  QQQ: {
+    name: 'Invesco QQQ (Nasdaq-100)',
+    shortName: 'Nasdaq-100',
+    category: 'Tecnología y Crecimiento EE.UU.',
   },
   COWZ: {
     name: 'Alto Cash Flow & Value EE.UU.',
@@ -86,10 +106,25 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     shortName: 'Global Healthcare',
     category: 'Sector Salud y Farmacia Global',
   },
+  ICLN: {
+    name: 'iShares Global Clean Energy',
+    shortName: 'Energía Limpia',
+    category: 'Energía Limpia y Smart Energy',
+  },
   BWX: {
     name: 'SPDR Int. Treasury (Deuda Soberana)',
     shortName: 'Bonos Soberanos',
     category: 'Renta Fija Soberana / Deuda Pública',
+  },
+  HYG: {
+    name: 'iShares High Yield Corporate Bond',
+    shortName: 'Crédito Corporativo',
+    category: 'Renta Fija Privada / High Yield',
+  },
+  LQD: {
+    name: 'iShares Investment Grade Corporate Bond',
+    shortName: 'Bonos Corporativos IG',
+    category: 'Renta Fija Privada Investment Grade',
   },
   IAU: {
     name: 'iShares Gold Trust (Oro Físico)',

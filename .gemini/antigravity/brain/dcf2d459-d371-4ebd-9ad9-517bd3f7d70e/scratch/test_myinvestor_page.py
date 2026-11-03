@@ -16,3 +16,4 @@ with urllib.request.urlopen(req, timeout=10) as r:
     # Look for script src
     scripts = re.findall(r'src=[\'"]([^\'"]*main[^\'"]*\.js|[^\'"]*app[^\'"]*\.js|[^\'"]*funds[^\'"]*\.js)[\'"]', html)
     print('Scripts found:', scripts[:5])
+

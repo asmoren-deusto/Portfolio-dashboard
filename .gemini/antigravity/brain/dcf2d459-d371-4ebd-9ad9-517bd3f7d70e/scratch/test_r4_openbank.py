@@ -34,3 +34,4 @@ for u in ob_urls:
             print(f'OB OK {u}: status={r.status}, len={len(html)}')
     except Exception as e:
         print(f'OB ERR {u}: {e}')
+

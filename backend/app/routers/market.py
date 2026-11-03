@@ -146,6 +146,7 @@ STOCK_UNIVERSE = [
     {"ticker": "REP.MC", "name": "Repsol",             "domain": "repsol.com",         "sector": "Energía",       "index": ["IBEX35"],            "default_market_cap": 20000000000},
 
     # ── ETFs Cartera (Réplicas de Fondos) ──────────────────────
+    {"ticker": "SPY",    "name": "SPDR S&P 500 ETF Trust",            "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs", "SP500"],      "default_market_cap": 580000000000},
     {"ticker": "URTH",   "name": "iShares MSCI World ETF",            "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "MSCI World"], "default_market_cap": 4500000000},
     {"ticker": "ACWI",   "name": "iShares MSCI ACWI ETF",             "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "MSCI World"], "default_market_cap": 22000000000},
     {"ticker": "XLK",    "name": "Technology Select Sector SPDR",     "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs", "SP500"],      "default_market_cap": 72000000000},
@@ -154,6 +155,9 @@ STOCK_UNIVERSE = [
     {"ticker": "EWJ",    "name": "iShares MSCI Japan ETF",            "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 14000000000},
     {"ticker": "FEZ",    "name": "SPDR EURO STOXX 50 ETF",            "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs", "EUROSTOXX", "Euro 50"], "default_market_cap": 4000000000},
     {"ticker": "EFV",    "name": "iShares MSCI EAFE Value ETF",       "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 17000000000},
+    {"ticker": "IXJ",    "name": "iShares Global Healthcare ETF",     "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 4000000000},
+    {"ticker": "BWX",    "name": "SPDR International Treasury Bond",  "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 1200000000},
+    {"ticker": "IAU",    "name": "iShares Gold Trust",                "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "Materias Primas"], "default_market_cap": 32000000000},
 
     # ── Materias Primas, Cripto & Divisas ──────────────────────
     {"ticker": "GC=F",     "name": "Oro (Futuros)",           "domain": "gold.org",       "sector": "Materias Primas", "index": ["COMMODITIES", "Materias Primas"], "default_market_cap": None},
@@ -192,15 +196,18 @@ INDEX_PROXY_MAP = {
 # Proxy mapping for portfolio ETF replicas outside regular cash sessions (09:30-16:00 ET)
 # to keep replicas in sync with live 24h CME futures or European cash sessions
 ETF_PREMARKET_LIVE_PROXIES = {
+    "SPY":  "ES=F",       # Futuros S&P 500 24h CME Globex (réplica exacta para S&P 500)
     "FEZ":  "^STOXX50E",  # Euro Stoxx 50 cash index (sesión europea 09:00 - 17:30 CET)
     "EFV":  "^STOXX50E",  # RV Internacional EAFE Value (sesión europea)
     "EWJ":  "NIY=F",      # Futuros Nikkei 225 24h CME Globex (guía RV Japón fuera de horas de Tokio)
     "URTH": "ES=F",       # Futuros S&P 500 24h CME Globex (guía RV global antes de apertura NY)
     "ACWI": "ES=F",       # Futuros S&P 500 24h
-    "XLK":  "NQ=F",       # Futuros Nasdaq 100 24h CME Globex (guía tecnológica para DNB Fund)
+    "XLK":  "NQ=F",       # Futuros Nasdaq 100 24h CME Globex (guía tecnológica para DNB y Polar)
     "COWZ": "ES=F",       # Futuros S&P 500 24h (guía RV EE.UU.)
     "IXJ":  "ES=F",       # Futuros S&P 500 24h CME Globex (guía RV Sector Salud)
+    "ICLN": "NQ=F",       # Futuros Nasdaq 100 24h (guía Smart Energy)
     "BWX":  "ZN=F",       # Futuros 10-Yr T-Note 24h CME Globex (guía Deuda Soberana / Renta Fija)
+    "HYG":  "ZN=F",       # Futuros 10-Yr T-Note 24h (guía Crédito / Renta Fija Privada)
     "IAU":  "GC=F",       # Futuros Oro 24h CME Comex (guía Oro físico fuera de horas)
 }
 
@@ -1117,17 +1124,37 @@ async def get_benchmarks(period: str = "1y"):
 
 # ── Simulated Fund Portfolio via Equivalent Proxy ETFs ──────────────────────────
 PORTFOLIO_ETF_PROXIES = {
+    # S&P 500 (Vanguard U.S. 500 Stock Index):
+    "IE0032126645": {"ticker": "SPY",  "name": "SPDR S&P 500 ETF Trust", "desc": "S&P 500 (EE.UU.)"},
+    # MSCI World Desarrollado:
     "IE00BYX5NX33": {"ticker": "URTH", "name": "iShares MSCI World ETF", "desc": "MSCI World (Acciones Globales)"},
+    "IE000ZYRH0Q7": {"ticker": "URTH", "name": "iShares MSCI World ETF", "desc": "MSCI World Desarrollado"},
+    "LU0996182563": {"ticker": "URTH", "name": "iShares MSCI World ETF", "desc": "MSCI World (Amundi)"},
+    # Global ACWI / EPSVs:
     "0192#0011":    {"ticker": "ACWI", "name": "iShares MSCI ACWI ETF", "desc": "MSCI ACWI (Indexa Acciones)"},
-    "LU0302296495": {"ticker": "XLK",  "name": "Technology Select SPDR", "desc": "Tecnología Global"},
+    "01920011":     {"ticker": "ACWI", "name": "iShares MSCI ACWI ETF", "desc": "MSCI ACWI (Indexa Acciones)"},
+    "0201G":         {"ticker": "ACWI", "name": "iShares MSCI ACWI ETF", "desc": "RV Mixta Global (Kutxabank EPSV)"},
+    # Sector Tecnología:
+    "LU0302296495": {"ticker": "XLK",  "name": "Technology Select SPDR", "desc": "Tecnología Global (DNB)"},
+    "IE00BM95B621": {"ticker": "XLK",  "name": "Technology Select SPDR", "desc": "Tecnología Global (Polar)"},
+    # Clean Energy / Smart Energy:
+    "LU2145461757": {"ticker": "ICLN", "name": "iShares Global Clean Energy", "desc": "Energía Limpia / Smart Energy"},
+    # Value Internacional:
     "ES0112611001": {"ticker": "COWZ", "name": "Pacer US Cash Cows 100", "desc": "Value Internacional & Cash Flow"},
+    "LU1598719752": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE"},
+    # Mercados Emergentes:
     "IE000QAZP7L2": {"ticker": "EEM",  "name": "iShares MSCI Emerging Markets", "desc": "Mercados Emergentes"},
     "IE00BYX5M476": {"ticker": "EEM",  "name": "iShares MSCI Emerging Markets", "desc": "Mercados Emergentes"},
+    # Japón:
     "IE00BYX5NH74": {"ticker": "EWJ",  "name": "iShares MSCI Japan ETF", "desc": "Renta Variable Japón"},
+    # Europa:
     "LU0261952682": {"ticker": "FEZ",  "name": "SPDR EURO STOXX 50 ETF", "desc": "Euro Stoxx 50 (Europa)"},
-    "LU1598719752": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE"},
+    # Salud:
     "LU0171307068": {"ticker": "IXJ",  "name": "iShares Global Healthcare ETF", "desc": "Salud y Biotecnología Global"},
+    # Renta Fija / Bonos / Crédito:
     "ES0000012411": {"ticker": "BWX",  "name": "SPDR International Treasury Bond", "desc": "Deuda Soberana / Bonos España & Global"},
+    "LU1623762843": {"ticker": "HYG",  "name": "iShares iBoxx $ High Yield Corporate Bond", "desc": "Crédito y Renta Fija Privada"},
+    # Oro Físico:
     "IE00B4ND3602": {"ticker": "IAU",  "name": "iShares Gold Trust", "desc": "Oro Físico (ETC / Metales Preciosos)"},
 }
 

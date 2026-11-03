@@ -9,3 +9,4 @@ with urllib.request.urlopen(req, timeout=5) as r:
 
 idx = js.find('FundsFinder')
 print(js[max(0, idx-1500):idx-600])
+

@@ -9,3 +9,4 @@ with urllib.request.urlopen(req, timeout=10) as r:
 
 idx = html.find('id="name"')
 print(html[max(0, idx-400):idx+800])
+

@@ -10,3 +10,4 @@ with urllib.request.urlopen(req, timeout=5) as r:
 idx = js.find('tl({tipo:')
 print('Found tl({tipo: at', idx)
 print(js[max(0, idx-400):idx+400])
+

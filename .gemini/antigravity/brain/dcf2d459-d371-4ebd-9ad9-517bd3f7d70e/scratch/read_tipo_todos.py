@@ -9,3 +9,4 @@ with urllib.request.urlopen(req, timeout=5) as r:
 
 idx = js.find('tipo:"TODOS"')
 print(js[max(0, idx-600):idx+600])
+

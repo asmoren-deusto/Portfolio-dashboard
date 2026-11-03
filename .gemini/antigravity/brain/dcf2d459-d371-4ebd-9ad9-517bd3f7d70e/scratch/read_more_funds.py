@@ -9,3 +9,4 @@ with urllib.request.urlopen(req, timeout=5) as r:
 
 idx = js.find('return{id:(0,d.toStr)(e),title:n,')
 print(js[idx:idx+4000])
+

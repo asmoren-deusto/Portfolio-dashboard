@@ -9,3 +9,4 @@ with urllib.request.urlopen(req, timeout=5) as r:
 
 idx = js.find('665747')
 print(js[max(0, idx-1500):idx+500])
+

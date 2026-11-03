@@ -271,6 +271,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'commodity',
     currencies: { USD: 1.0 },
   },
+  // Vanguard U.S. 500 Stock Index Fund EUR Acc (IE0032126645) - S&P 500
+  IE0032126645: {
+    geo: { north_america: 1.0, europe: 0.0, japan: 0.0, pacific: 0.0, emerging: 0.0, other: 0.0 },
+    sectors: { tech: 0.32, financials: 0.13, health: 0.12, consumer_disc: 0.10, comms: 0.09, industrials: 0.08, consumer_stap: 0.06, energy: 0.04, utilities: 0.03, materials: 0.02 },
+    assetClass: 'equity',
+    currencies: { USD: 1.0 },
+  },
 }
 
 /**
@@ -377,7 +384,7 @@ export function resolveAssetTaxonomy(pos: Position): AssetTaxonomy {
   }
 
   // US Stocks / Funds
-  if (name.includes('s&p') || name.includes('nasdaq') || name.includes('ee.uu') || name.includes('america') || isinPrefix === 'US') {
+  if (name.includes('s&p') || name.includes('sp500') || name.includes('sp 500') || name.includes('500 index') || name.includes('nasdaq') || name.includes('ee.uu') || name.includes('america') || isinPrefix === 'US') {
     return {
       geo: { north_america: 1.0 },
       sectors: { tech: 0.32, financials: 0.13, health: 0.12, consumer_disc: 0.11, comms: 0.09, industrials: 0.08, consumer_stap: 0.06, energy: 0.04, materials: 0.02, utilities: 0.03 },

@@ -12,3 +12,4 @@ with urllib.request.urlopen(req, timeout=5) as r:
     print('Fund pages found in build manifest:')
     for p in fund_pages:
         print('  ', p)
+

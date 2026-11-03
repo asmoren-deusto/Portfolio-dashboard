@@ -23,3 +23,4 @@ for p in paths:
             print('Contains DNB?', 'DNB' in s)
     except Exception as e:
         print('ERR', p, ':', e)
+

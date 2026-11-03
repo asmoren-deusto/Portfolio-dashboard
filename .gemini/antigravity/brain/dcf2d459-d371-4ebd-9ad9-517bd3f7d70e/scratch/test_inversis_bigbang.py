@@ -13,3 +13,4 @@ with urllib.request.urlopen(req, timeout=10) as r:
     # look for servlets
     servlets = set(re.findall(r'/servlet/[a-zA-Z0-9_\?=&]+', html))
     print('Servlets found:', list(servlets)[:10])
+

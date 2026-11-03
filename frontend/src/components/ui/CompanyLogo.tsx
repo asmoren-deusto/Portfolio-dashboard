@@ -39,10 +39,14 @@ function getMarketIcon(ticker?: string): React.ReactNode {
   switch (ticker) {
     case '^GSPC':
     case 'ES=F':
+    case 'SPY':
+    case 'VOO':
+    case 'IVV':
       return <TrendingUp className="w-full h-full p-0.5 text-blue-600 dark:text-blue-400" />
     case '^IXIC':
     case 'NQ=F':
     case 'XLK':
+    case 'QQQ':
       return <BarChart3 className="w-full h-full p-0.5 text-cyan-600 dark:text-cyan-400" />
     case 'URTH':
     case 'ACWI':
@@ -64,7 +68,12 @@ function getMarketIcon(ticker?: string): React.ReactNode {
       return <Activity className="w-full h-full p-0.5 text-rose-500 dark:text-rose-400" />
     case 'BWX':
     case 'ZN=F':
+    case 'HYG':
+    case 'LQD':
       return <Landmark className="w-full h-full p-0.5 text-amber-600 dark:text-amber-400" />
+    case 'ICLN':
+    case 'QCLN':
+      return <Droplets className="w-full h-full p-0.5 text-emerald-500 dark:text-emerald-400" />
     case 'GC=F':
     case 'IAU':
     case 'GLD':

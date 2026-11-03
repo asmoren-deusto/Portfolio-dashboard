@@ -12,3 +12,4 @@ print('All scripts:', len(scripts))
 for s in scripts:
     if 'myinvestor' in s or s.startswith('/'):
         print('  Script:', s)
+

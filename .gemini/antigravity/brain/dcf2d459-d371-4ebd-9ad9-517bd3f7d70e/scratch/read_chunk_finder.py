@@ -13,3 +13,4 @@ print('URLs in chunk:')
 for u in urls:
     if 'api' in u or 'fund' in u or 'search' in u or 'invers' in u:
         print('  ', u)
+

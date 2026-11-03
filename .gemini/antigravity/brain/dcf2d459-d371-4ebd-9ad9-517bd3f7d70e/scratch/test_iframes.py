@@ -21,3 +21,4 @@ print('Inputs found:', len(inputs))
 for inp in inputs:
     if 'busc' in inp.lower() or 'isin' in inp.lower() or 'placeholder' in inp.lower():
         print('  Input:', inp)
+
