@@ -4116,6 +4116,7 @@ TRANSACTIONS = json.loads(r'''[
     "shares": 27.36,
     "price": 73.1099,
     "amount": 2000.29,
+    "fees": 0.0,
     "date": "2026-10-26",
     "broker": "myinvestor",
     "notes": "Reembolso por Traspaso Interno (a Groupama Trésorerie, orden 202610270131144)"
@@ -4127,6 +4128,7 @@ TRANSACTIONS = json.loads(r'''[
     "shares": 0.045,
     "price": 44797.3333,
     "amount": 2015.88,
+    "fees": 0.0,
     "date": "2026-10-27",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde BGF World Healthscience, ref 202610270131144)"

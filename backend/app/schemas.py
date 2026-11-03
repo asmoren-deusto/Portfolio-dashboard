@@ -33,7 +33,7 @@ class TransactionBase(BaseModel):
     shares: float
     price: float
     amount: float
-    fees: float = 0.0
+    fees: Optional[float] = 0.0
     date: str          # YYYY-MM-DD
     broker: str = "myinvestor"
     notes: Optional[str] = None

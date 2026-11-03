@@ -36,13 +36,17 @@ def calculate_traspaso_balances(transactions: list[dict], as_of_date_str: str | 
     Computes both market value in transit and deferred fiscal cost basis in transit per broker.
     Preserves historical fiscal base cost (coste fiscal originario) and accumulated plusvalía
     during internal transfers with tax deferral (diferimiento fiscal).
-    Matches pending transfers FIFO so completed transfers never pollute future transit states.
+    Matches pending transfers by order reference and FIFO within 30 days so completed transfers
+    never pollute future transit states.
     Returns: {broker: {"market_value": float, "cost_basis": float, "pnl": float}}
     """
     positions: dict[str, dict] = {}
     pending_transfers: list[dict] = []
 
-    for tx in sorted(transactions, key=lambda x: x["date"]):
+    # Process sells before buys on the same day so funds in transit can be matched immediately
+    sorted_txs = sorted(transactions, key=lambda x: (x["date"], 0 if x["type"] == "sell" else 1))
+
+    for tx in sorted_txs:
         isin = tx["isin"]
         broker = (tx.get("broker") or "myinvestor").lower()
         if broker in ("trade_republic", "traderepublic"):
@@ -65,6 +69,10 @@ def calculate_traspaso_balances(transactions: list[dict], as_of_date_str: str | 
             elif "desde indexa" in notes:
                 src_broker = "indexa"
 
+        # Extract order reference or operation ID if present
+        ref_match = re.search(r"(?:orden|ref)\s*([a-zA-Z0-9]+)", notes)
+        order_ref = ref_match.group(1).lower() if ref_match else None
+
         if tx["type"] == "buy":
             pos["shares"] += tx["shares"]
             pos["total_cost"] += tx["amount"]
@@ -78,15 +86,37 @@ def calculate_traspaso_balances(transactions: list[dict], as_of_date_str: str | 
                         pass
 
                 rem = buy_m_val
-                for pt in pending_transfers:
-                    if pt["broker"] == src_broker and pt["market_value"] > 0:
-                        consumed = min(rem, pt["market_value"])
-                        ratio = consumed / pt["market_value"] if pt["market_value"] > 0 else 1.0
-                        pt["market_value"] -= consumed
-                        pt["cost_basis"] = max(0.0, pt["cost_basis"] * (1.0 - ratio))
-                        rem -= consumed
-                        if rem <= 0.01:
+                tx_date_clean = tx["date"][:10]
+                tx_dt = datetime.strptime(tx_date_clean, "%Y-%m-%d")
+
+                # 1. Match exact order reference first if available
+                if order_ref:
+                    for pt in pending_transfers:
+                        if pt.get("order_ref") == order_ref and pt["market_value"] > 0:
+                            consumed = min(rem, pt["market_value"])
+                            pt["market_value"] = 0.0
+                            pt["cost_basis"] = 0.0
+                            rem -= consumed
                             break
+
+                # 2. Match FIFO within the same broker and only for recent transfers (<= 30 days)
+                if rem > 0.01:
+                    for pt in pending_transfers:
+                        if pt["broker"] == src_broker and pt["market_value"] > 0:
+                            pt_dt = datetime.strptime(pt["date"][:10], "%Y-%m-%d")
+                            diff_days = (tx_dt - pt_dt).days
+                            if 0 <= diff_days <= 30:
+                                consumed = min(rem, pt["market_value"])
+                                ratio = consumed / pt["market_value"] if pt["market_value"] > 0 else 1.0
+                                pt["market_value"] -= consumed
+                                pt["cost_basis"] = max(0.0, pt["cost_basis"] * (1.0 - ratio))
+                                rem -= consumed
+                                # Absorb minor NAV difference/slippage between refund and subscription dates
+                                if pt["market_value"] <= 35.0 or pt["market_value"] <= buy_m_val * 0.05:
+                                    pt["market_value"] = 0.0
+                                    pt["cost_basis"] = 0.0
+                                if rem <= 0.01:
+                                    break
         elif tx["type"] == "sell":
             shares_before = pos["shares"]
             cost_before = pos["total_cost"]
@@ -111,15 +141,16 @@ def calculate_traspaso_balances(transactions: list[dict], as_of_date_str: str | 
                     "broker": broker,
                     "market_value": sell_m_val,
                     "cost_basis": cost_of_sold_shares if cost_of_sold_shares > 0 else sell_m_val,
-                    "date": tx["date"]
+                    "date": tx["date"],
+                    "order_ref": order_ref,
                 })
 
-    ref_date = datetime.strptime(as_of_date_str, "%Y-%m-%d") if as_of_date_str else datetime.now()
+    ref_date = datetime.strptime(as_of_date_str[:10], "%Y-%m-%d") if as_of_date_str else datetime.now()
     results = {}
     for pt in pending_transfers:
         if pt["market_value"] > 0.01:
             try:
-                pt_dt = datetime.strptime(pt["date"], "%Y-%m-%d")
+                pt_dt = datetime.strptime(pt["date"][:10], "%Y-%m-%d")
                 if (ref_date - pt_dt).days > 30:
                     continue
             except Exception:
