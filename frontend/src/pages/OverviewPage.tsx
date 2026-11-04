@@ -1792,13 +1792,13 @@ export function OverviewPage() {
 
           return (
             <div className={cn(
-              "overflow-hidden transition-all duration-200 pb-3",
+              "overflow-hidden transition-all duration-200 pb-1.5",
               hasSecondColumn
                 ? "grid grid-cols-1 xl:grid-cols-2 divide-y xl:divide-y-0 xl:divide-x divide-slate-200/80 dark:divide-white/[0.04]"
                 : "w-full"
             )}>
               {/* Column 1: Top Positions */}
-              <div className="overflow-x-auto pb-2 xl:pb-0">
+              <div className="overflow-x-auto pb-1 xl:pb-0">
                 <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
