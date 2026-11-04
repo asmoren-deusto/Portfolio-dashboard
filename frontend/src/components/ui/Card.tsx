@@ -32,7 +32,7 @@ export function Card({ children, className, glass = false, loading = false }: Ca
         onMouseMove={handleMouseMove}
         className={cn(
           'group/card relative shrink-0 rounded-2xl overflow-hidden transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
-          'bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-200/75 dark:border-white/[0.07] shadow-2xs hover:shadow-xs hover:border-slate-300/80 dark:hover:border-white/[0.12]',
+          'bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-300/80 dark:border-white/[0.12] shadow-2xs hover:shadow-xs hover:border-slate-400/80 dark:hover:border-white/[0.20]',
           glass && 'backdrop-blur-md',
           className
         )}

@@ -192,7 +192,7 @@ export function TransactionsPage() {
 
       {/* Summary KPI Highlights */}
       <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="relative overflow-hidden p-4 rounded-xl sm:rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-200/75 dark:border-white/[0.07] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-xl sm:rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-300/80 dark:border-white/[0.12] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-card">
           <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400">
@@ -208,7 +208,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-xl sm:rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-200/75 dark:border-white/[0.07] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-xl sm:rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-300/80 dark:border-white/[0.12] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-card">
           <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400">
@@ -224,7 +224,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-xl sm:rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-200/75 dark:border-white/[0.07] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-xl sm:rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-300/80 dark:border-white/[0.12] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-card">
           <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400">
@@ -240,7 +240,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-xl sm:rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-200/75 dark:border-white/[0.07] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-xl sm:rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-300/80 dark:border-white/[0.12] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-card">
           <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400">
@@ -265,7 +265,7 @@ export function TransactionsPage() {
       {/* Control Bar: Type Tabs, Actions & Search */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
         {/* Type tabs with sliding pill */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.07] shadow-sm overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.12] shadow-sm overflow-x-auto">
           {TYPE_TABS.map((tab) => {
             const active = activeType === tab.id
             return (
@@ -294,7 +294,7 @@ export function TransactionsPage() {
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300 dark:hover:text-white dark:border-white/[0.07] dark:hover:border-white/20 text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300 dark:hover:text-white dark:border-white/[0.12] dark:hover:border-white/20 text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
           >
             <Upload className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
             <span>Importar Extracto</span>
@@ -313,7 +313,7 @@ export function TransactionsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por activo, ISIN o broker..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-white dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.07] focus:border-blue-500/50 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-white dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.12] focus:border-blue-500/50 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all shadow-sm"
             />
           </div>
         </div>
@@ -494,7 +494,7 @@ export function TransactionsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="p-1.5 rounded-lg border border-slate-200/75 dark:border-white/[0.07] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-all"
+                    className="p-1.5 rounded-lg border border-slate-300/80 dark:border-white/[0.12] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-all"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                   </button>
@@ -506,7 +506,7 @@ export function TransactionsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="p-1.5 rounded-lg border border-slate-200/75 dark:border-white/[0.07] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-all"
+                    className="p-1.5 rounded-lg border border-slate-300/80 dark:border-white/[0.12] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-all"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
@@ -643,7 +643,7 @@ function AddTransactionModal({
         className="relative z-10 w-full max-w-lg my-auto rounded-3xl bg-white dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/[0.07]">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/[0.12]">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
               <Plus className="w-5 h-5" />
@@ -681,7 +681,7 @@ function AddTransactionModal({
                   className={`py-2 text-center rounded-xl font-semibold transition-all border ${
                     type === t.id
                       ? 'bg-slate-900 text-white border-slate-900 dark:bg-[#333333] dark:text-white dark:border-white/15 shadow-xs'
-                      : 'bg-slate-50 dark:bg-[#252526] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/20'
+                      : 'bg-slate-50 dark:bg-[#252526] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/[0.12] hover:border-slate-400/80 dark:hover:border-white/20'
                   }`}
                 >
                   {t.label}
@@ -702,7 +702,7 @@ function AddTransactionModal({
                 const found = positions.find((p) => p.isin === e.target.value)
                 if (found && found.current_price) setPrice(String(found.current_price))
               }}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.07] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.12] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
             >
               {positions.map((p) => (
                 <option key={p.isin} value={p.isin}>
@@ -722,7 +722,7 @@ function AddTransactionModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.07] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.12] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
               />
             </div>
             <div>
@@ -732,7 +732,7 @@ function AddTransactionModal({
               <select
                 value={broker}
                 onChange={(e) => setBroker(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.07] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.12] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
               >
                 <option value="MyInvestor">MyInvestor</option>
                 <option value="Degiro">Degiro</option>
@@ -754,7 +754,7 @@ function AddTransactionModal({
                 step="any"
                 value={shares}
                 onChange={(e) => setShares(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.07] font-mono text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.12] font-mono text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
               />
             </div>
             <div>
@@ -766,13 +766,13 @@ function AddTransactionModal({
                 step="any"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.07] font-mono text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.12] font-mono text-slate-900 dark:text-white focus:outline-none focus:border-blue-500/50"
               />
             </div>
           </div>
 
           {/* Total calculado */}
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/75 dark:border-white/[0.06] flex items-center justify-between">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-300/80 dark:border-white/[0.06] flex items-center justify-between">
             <span className="text-slate-500 dark:text-slate-400 font-medium">Importe Total Calculado:</span>
             <span className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">
               {fmt.currency(calcAmount)}
@@ -915,7 +915,7 @@ function ImportExtractoModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/[0.07]">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/[0.12]">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
               <FileSpreadsheet className="w-5 h-5" />
@@ -937,7 +937,7 @@ function ImportExtractoModal({
         </div>
 
         {/* Tab Selection */}
-        <div className="flex items-center gap-2 mt-4 p-1 rounded-2xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/75 dark:border-white/[0.06]">
+        <div className="flex items-center gap-2 mt-4 p-1 rounded-2xl bg-slate-100 dark:bg-white/[0.04] border border-slate-300/80 dark:border-white/[0.06]">
           <button
             type="button"
             onClick={() => setTab('text')}
@@ -988,7 +988,7 @@ function ImportExtractoModal({
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
                 placeholder="Ejemplo:&#10;10/07/2026&#10;Suscripción por Traspaso Interno&#10;116,72 €&#10;Azvalor Internacional FI&#10;Finalizada&#10;0,345743 participaciones..."
-                className="w-full p-3 font-mono text-xs rounded-2xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.07] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500/50 resize-none shadow-inner"
+                className="w-full p-3 font-mono text-xs rounded-2xl bg-slate-50 dark:bg-[#252526] border border-slate-200 dark:border-white/[0.12] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500/50 resize-none shadow-inner"
               />
             </div>
 
@@ -1046,7 +1046,7 @@ function ImportExtractoModal({
               />
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/75 dark:border-white/[0.05] space-y-1.5">
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-300/80 dark:border-white/[0.05] space-y-1.5">
               <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold">
                 <AlertCircle className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                 <span>Formatos compatibles:</span>

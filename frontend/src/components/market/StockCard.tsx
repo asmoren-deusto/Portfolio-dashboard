@@ -61,7 +61,7 @@ export const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="group relative rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 hover:to-white border border-slate-200/75 hover:border-blue-400/70 p-5 transition-all duration-200 ease-out shadow-2xs hover:shadow-xs cursor-pointer flex flex-col justify-between overflow-hidden dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:hover:from-[#26262a] dark:border-white/[0.07] dark:hover:border-white/20"
+      className="group relative rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 hover:to-white border border-slate-300/80 hover:border-blue-400/70 p-5 transition-all duration-200 ease-out shadow-2xs hover:shadow-xs cursor-pointer flex flex-col justify-between overflow-hidden dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:hover:from-[#26262a] dark:border-white/[0.12] dark:hover:border-white/20"
     >
       {/* Top subtle shine line */}
       <div className="pointer-events-none absolute -top-px inset-x-5 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
