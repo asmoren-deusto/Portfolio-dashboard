@@ -1929,8 +1929,18 @@ export function OverviewPage() {
                                 </span>
                               </div>
                             </td>
-                            <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
-                              {fmt.currency(p.current_value)}
+                            <td data-private className="py-2.5 px-2 text-right">
+                              <div className="flex flex-col items-end">
+                                <span className="font-mono font-bold text-slate-900 dark:text-white text-[14px]">
+                                  {fmt.currency(p.current_value)}
+                                </span>
+                                <span
+                                  title={`Coste de compra: ${fmt.currency(p.invested_amount)} (Coste medio: ${fmt.price(p.avg_cost, p.currency)})`}
+                                  className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap"
+                                >
+                                  {fmt.currency(p.invested_amount)}
+                                </span>
+                              </div>
                             </td>
                             <td data-private className="py-2.5 px-2 text-right">
                               <div className="flex flex-col items-end">
@@ -2095,8 +2105,18 @@ export function OverviewPage() {
                                   </span>
                                 </div>
                               </td>
-                              <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
-                                {fmt.currency(p.current_value)}
+                              <td data-private className="py-2.5 px-2 text-right">
+                                <div className="flex flex-col items-end">
+                                  <span className="font-mono font-bold text-slate-900 dark:text-white text-[14px]">
+                                    {fmt.currency(p.current_value)}
+                                  </span>
+                                  <span
+                                    title={`Coste de compra: ${fmt.currency(p.invested_amount)} (Coste medio: ${fmt.price(p.avg_cost, p.currency)})`}
+                                    className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap"
+                                  >
+                                    {fmt.currency(p.invested_amount)}
+                                  </span>
+                                </div>
                               </td>
                               <td data-private className="py-2.5 px-2 text-right">
                                 <div className="flex flex-col items-end">
