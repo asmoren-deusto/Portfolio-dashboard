@@ -98,32 +98,32 @@ function getBrokerStripeClasses(broker?: string | null, isUpdated = false): stri
   const raw = (broker || '').toLowerCase().replace(/[^a-z0-9]/g, '')
   if (raw.includes('indexa')) {
     return isUpdated
-      ? 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.45)]'
+      ? 'bg-amber-500 shadow-[0_0_2.5px_rgba(245,158,11,0.25)]'
       : 'bg-amber-300/60 dark:bg-amber-500/30'
   }
   if (raw.includes('traderepublic') || raw.includes('trade_republic') || raw.includes('tr')) {
     return isUpdated
-      ? 'bg-violet-500 shadow-[0_0_6px_rgba(139,92,246,0.45)]'
+      ? 'bg-violet-500 shadow-[0_0_2.5px_rgba(139,92,246,0.25)]'
       : 'bg-violet-300/60 dark:bg-violet-500/30'
   }
   if (raw.includes('bbva')) {
     return isUpdated
-      ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.45)]'
+      ? 'bg-emerald-500 shadow-[0_0_2.5px_rgba(16,185,129,0.25)]'
       : 'bg-emerald-300/60 dark:bg-emerald-500/30'
   }
   if (raw.includes('kutxa')) {
     return isUpdated
-      ? 'bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.45)]'
+      ? 'bg-rose-500 shadow-[0_0_2.5px_rgba(244,63,94,0.25)]'
       : 'bg-rose-300/60 dark:bg-rose-500/30'
   }
   if (raw.includes('scalable')) {
     return isUpdated
-      ? 'bg-cyan-500 shadow-[0_0_6px_rgba(6,182,212,0.45)]'
+      ? 'bg-cyan-500 shadow-[0_0_2.5px_rgba(6,182,212,0.25)]'
       : 'bg-cyan-300/60 dark:bg-cyan-500/30'
   }
   // Default to MyInvestor (Blue)
   return isUpdated
-    ? 'bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.45)]'
+    ? 'bg-blue-500 shadow-[0_0_2.5px_rgba(59,130,246,0.25)]'
     : 'bg-blue-300/60 dark:bg-blue-500/30'
 }
 
@@ -1792,13 +1792,13 @@ export function OverviewPage() {
 
           return (
             <div className={cn(
-              "overflow-hidden transition-all duration-200",
+              "overflow-hidden transition-all duration-200 pb-3",
               hasSecondColumn
                 ? "grid grid-cols-1 xl:grid-cols-2 divide-y xl:divide-y-0 xl:divide-x divide-slate-200/80 dark:divide-white/[0.04]"
                 : "w-full"
             )}>
               {/* Column 1: Top Positions */}
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto pb-2 xl:pb-0">
                 <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
