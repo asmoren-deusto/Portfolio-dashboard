@@ -225,7 +225,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
         )
         for row in all_cached_rows:
             lst = cached_by_isin.setdefault(row.isin, [])
-            if len(lst) < 5:
+            if len(lst) < 15:
                 lst.append(row)
 
     result = []
@@ -325,6 +325,27 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             daily_change = round(effective_price - p_prev, 4)
             daily_change_pct = round((effective_price - p_prev) / p_prev * 100, 2)
 
+        weekly_change = None
+        weekly_change_pct = None
+        p_week = None
+        if price_date:
+            try:
+                dt_curr = datetime.strptime(price_date, "%Y-%m-%d").date()
+                target_week_date = (dt_curr - timedelta(days=7)).strftime("%Y-%m-%d")
+                candidates = [cp for cp in isin_cps if cp.date <= target_week_date and cp.price > 0]
+                if candidates:
+                    p_week = candidates[0].price
+                elif len(isin_cps) >= 2:
+                    p_week = isin_cps[-1].price
+            except Exception:
+                pass
+        if p_week is None and len(isin_cps) >= 2:
+            p_week = isin_cps[-1].price
+
+        if p_week and p_week > 0 and effective_price and effective_price > 0:
+            weekly_change = round(effective_price - p_week, 4)
+            weekly_change_pct = round((effective_price - p_week) / p_week * 100, 2)
+
         from app.services.market_calendar import get_expected_nav_date
         fallback_date = p_prev_date or get_expected_nav_date()
         pos_irr = calculate_position_xirr(pos.get("transactions", []), current_value, as_of_date=price_date or fallback_date)
@@ -350,6 +371,8 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             "unrealized_pnl_pct": round(pnl_pct, 2),
             "daily_change": daily_change,
             "daily_change_pct": daily_change_pct,
+            "weekly_change": weekly_change,
+            "weekly_change_pct": weekly_change_pct,
             "broker": pos_broker,
             "ter": getattr(asset, "ter", None) if asset else None,
             "last_updated": price_date or fallback_date,

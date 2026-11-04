@@ -1814,7 +1814,7 @@ export function OverviewPage() {
                       <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                       <th className="py-2 px-2.5">Activo / Fondo</th>
                       <th className="py-2 px-2 text-right">NAV</th>
-                      <th className="py-2 px-2 text-right">Rend. Día</th>
+                      <th className="py-2 px-2 text-right">Rend. Dia/Sem</th>
                       <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
                       <th className="py-2 px-2 text-right">Ganancia</th>
                       <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
@@ -1900,27 +1900,34 @@ export function OverviewPage() {
                               </div>
                             </td>
                             <td className="py-2.5 px-2 text-right">
-                              {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
-                                <span
-                                  className={cn(
-                                    'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
-                                    p.daily_change_pct > 0
-                                      ? 'text-emerald-600 dark:text-emerald-400'
-                                      : p.daily_change_pct < 0
-                                        ? 'text-rose-600 dark:text-rose-400'
-                                        : 'text-slate-500 dark:text-slate-400'
-                                  )}
-                                >
-                                  {p.daily_change_pct > 0 ? (
-                                    <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
-                                  ) : p.daily_change_pct < 0 ? (
-                                    <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
-                                  ) : null}
-                                  <span>{fmt.pct(p.daily_change_pct)}</span>
+                              <div className="flex flex-col items-end">
+                                {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
+                                  <span
+                                    className={cn(
+                                      'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
+                                      p.daily_change_pct > 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : p.daily_change_pct < 0
+                                          ? 'text-rose-600 dark:text-rose-400'
+                                          : 'text-slate-500 dark:text-slate-400'
+                                    )}
+                                  >
+                                    {p.daily_change_pct > 0 ? (
+                                      <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    ) : p.daily_change_pct < 0 ? (
+                                      <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    ) : null}
+                                    <span>{fmt.pct(p.daily_change_pct)}</span>
+                                  </span>
+                                ) : (
+                                  <span className="font-mono text-xs text-slate-400">—</span>
+                                )}
+                                <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                                  {typeof p.weekly_change_pct === 'number'
+                                    ? fmt.pct(p.weekly_change_pct)
+                                    : '—'}
                                 </span>
-                              ) : (
-                                <span className="font-mono text-xs text-slate-400">—</span>
-                              )}
+                              </div>
                             </td>
                             <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
                               {fmt.currency(p.current_value)}
@@ -1973,7 +1980,7 @@ export function OverviewPage() {
                         <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                         <th className="py-2 px-2.5">Activo / Fondo</th>
                         <th className="py-2 px-2 text-right">NAV</th>
-                        <th className="py-2 px-2 text-right">Rend. Día</th>
+                        <th className="py-2 px-2 text-right">Rend. Dia/Sem</th>
                         <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
                         <th className="py-2 px-2 text-right">Ganancia</th>
                         <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
@@ -2059,27 +2066,34 @@ export function OverviewPage() {
                                 </div>
                               </td>
                               <td className="py-2.5 px-2 text-right">
-                                {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
-                                  <span
-                                    className={cn(
-                                      'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
-                                      p.daily_change_pct > 0
-                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                        : p.daily_change_pct < 0
-                                          ? 'text-rose-600 dark:text-rose-400'
-                                          : 'text-slate-500 dark:text-slate-400'
-                                    )}
-                                  >
-                                    {p.daily_change_pct > 0 ? (
-                                      <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
-                                    ) : p.daily_change_pct < 0 ? (
-                                      <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
-                                    ) : null}
-                                    <span>{fmt.pct(p.daily_change_pct)}</span>
+                                <div className="flex flex-col items-end">
+                                  {p.daily_change_pct !== null && p.daily_change_pct !== undefined ? (
+                                    <span
+                                      className={cn(
+                                        'inline-flex items-center gap-0.5 font-mono text-[13px] font-bold',
+                                        p.daily_change_pct > 0
+                                          ? 'text-emerald-600 dark:text-emerald-400'
+                                          : p.daily_change_pct < 0
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-slate-500 dark:text-slate-400'
+                                      )}
+                                    >
+                                      {p.daily_change_pct > 0 ? (
+                                        <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                                      ) : p.daily_change_pct < 0 ? (
+                                        <TrendingDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                                      ) : null}
+                                      <span>{fmt.pct(p.daily_change_pct)}</span>
+                                    </span>
+                                  ) : (
+                                    <span className="font-mono text-xs text-slate-400">—</span>
+                                  )}
+                                  <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                                    {typeof p.weekly_change_pct === 'number'
+                                      ? fmt.pct(p.weekly_change_pct)
+                                      : '—'}
                                   </span>
-                                ) : (
-                                  <span className="font-mono text-xs text-slate-400">—</span>
-                                )}
+                                </div>
                               </td>
                               <td data-private className="py-2.5 px-2 text-right font-mono font-bold text-slate-900 dark:text-white text-[14px]">
                                 {fmt.currency(p.current_value)}

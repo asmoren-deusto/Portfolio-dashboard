@@ -80,6 +80,8 @@ class PositionOut(BaseModel):
     price_date: Optional[str] = None
     daily_change: Optional[float] = None
     daily_change_pct: Optional[float] = None
+    weekly_change: Optional[float] = None
+    weekly_change_pct: Optional[float] = None
     ticker: Optional[str] = None
     domain: Optional[str] = None
     ter: Optional[float] = None

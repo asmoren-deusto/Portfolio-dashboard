@@ -21,6 +21,8 @@ export interface Position {
   broker?: string | null
   daily_change?: number | null
   daily_change_pct?: number | null
+  weekly_change?: number | null
+  weekly_change_pct?: number | null
   irr?: number | null
   quote_time?: string | null
 }
