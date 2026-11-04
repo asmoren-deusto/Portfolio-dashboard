@@ -366,9 +366,19 @@ export const InteractiveEntityBar = React.memo(function InteractiveEntityBar({
   if (segments.length <= 1 && selectedBroker === 'all') return null
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2 px-3 py-1.5 rounded-xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-200/75 dark:border-white/[0.07] shadow-2xs">
-      {/* Interactive Segmented SVG/CSS Progress Bar */}
-      <div className="flex items-center gap-1 flex-1 min-w-0">
+    <div
+      className={cn(
+        'group relative overflow-hidden rounded-[20px] px-3.5 sm:px-4 py-2 sm:py-2.5 transition-[border-color,box-shadow,background-color] duration-200 ease-out',
+        'bg-gradient-to-b from-white via-white/98 to-slate-50/70 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
+        'dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:border-white/[0.08] dark:hover:border-white/[0.16]'
+      )}
+    >
+      {/* Top subtle light reflection line matching KpiCard & Card */}
+      <div className="pointer-events-none absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
+
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-2 w-full">
+        {/* Interactive Segmented SVG/CSS Progress Bar */}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
         <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 shrink-0 mr-1.5 hidden md:inline">
           Entidades
         </span>
@@ -432,6 +442,7 @@ export const InteractiveEntityBar = React.memo(function InteractiveEntityBar({
             <span>Ver Todo</span>
           </button>
         )}
+        </div>
       </div>
     </div>
   )
