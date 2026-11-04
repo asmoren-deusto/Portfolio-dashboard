@@ -132,12 +132,12 @@ function getOfficialProductUrl(position: Position): string | null {
 }
 
 export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ position, onClose }) => {
-  const [period, setPeriod] = useState<PeriodKey>('1mo')
+  const [period, setPeriod] = useState<PeriodKey>('6mo')
 
-  // Reset period to 1mo whenever position changes
+  // Reset period to 6mo whenever position changes
   useEffect(() => {
     if (position) {
-      setPeriod('1mo')
+      setPeriod('6mo')
     }
   }, [position?.isin])
 

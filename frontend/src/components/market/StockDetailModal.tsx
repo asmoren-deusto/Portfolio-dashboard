@@ -24,12 +24,12 @@ const PERIODS = [
 type PeriodKey = (typeof PERIODS)[number]['value']
 
 export const StockDetailModal: React.FC<StockDetailModalProps> = ({ stock, onClose }) => {
-  const [period, setPeriod] = useState<PeriodKey>('1mo')
+  const [period, setPeriod] = useState<PeriodKey>('6mo')
 
-  // Reset period to 1mo whenever stock changes
+  // Reset period to 6mo whenever stock changes
   useEffect(() => {
     if (stock) {
-      setPeriod('1mo')
+      setPeriod('6mo')
     }
   }, [stock?.ticker])
 
