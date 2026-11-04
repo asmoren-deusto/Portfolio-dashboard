@@ -1802,12 +1802,12 @@ export function OverviewPage() {
                 <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[35%] min-w-[200px]" />
-                      <col className="w-[12%] min-w-[76px]" />
-                      <col className="w-[11%] min-w-[72px]" />
-                      <col className="w-[14%] min-w-[94px]" />
-                      <col className="w-[16%] min-w-[94px]" />
-                      <col className="w-[12%] min-w-[76px]" />
+                      <col className="w-[37%] min-w-[200px]" />
+                      <col className="w-[12%] min-w-[74px]" />
+                      <col className="w-[11%] min-w-[70px]" />
+                      <col className="w-[15%] min-w-[88px]" />
+                      <col className="w-[12%] min-w-[72px]" />
+                      <col className="w-[13%] min-w-[72px]" />
                     </colgroup>
                   <thead>
                     <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -1873,7 +1873,7 @@ export function OverviewPage() {
                                 />
                                 <div className="min-w-0">
                                   <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[220px] sm:max-w-[270px] xl:max-w-[250px] 2xl:max-w-[320px] text-[14px]">
-                                    {formatAssetDisplayName(p.name, true)}
+                                    {formatAssetDisplayName(p.name, true, p.isin)}
                                   </div>
                                   <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                     <span>{p.isin}</span>
@@ -1931,12 +1931,12 @@ export function OverviewPage() {
                             </td>
                             <td data-private className="py-2.5 px-2 text-right">
                               <div className="flex flex-col items-end">
-                                <span className="font-mono font-bold text-slate-900 dark:text-white text-[14px]">
+                                <span className="font-mono font-bold text-slate-900 dark:text-white text-[14px] leading-tight">
                                   {fmt.currency(p.current_value)}
                                 </span>
                                 <span
                                   title={`Coste de compra: ${fmt.currency(p.invested_amount)} (Coste medio: ${fmt.price(p.avg_cost, p.currency)})`}
-                                  className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap"
+                                  className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-[1px] whitespace-nowrap"
                                 >
                                   {fmt.currency(p.invested_amount)}
                                 </span>
@@ -1950,7 +1950,7 @@ export function OverviewPage() {
                                 )}>
                                   {fmt.pct(p.unrealized_pnl_pct)}
                                 </span>
-                                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap tabular-nums">
+                                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-[1px] whitespace-nowrap tabular-nums">
                                   {typeof p.unrealized_pnl === 'number'
                                     ? `${p.unrealized_pnl > 0 ? '+' : ''}${fmt.currency(p.unrealized_pnl)}`
                                     : '—'}
@@ -1985,12 +1985,12 @@ export function OverviewPage() {
                   <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[35%] min-w-[200px]" />
-                      <col className="w-[12%] min-w-[76px]" />
-                      <col className="w-[11%] min-w-[72px]" />
-                      <col className="w-[14%] min-w-[94px]" />
-                      <col className="w-[16%] min-w-[94px]" />
-                      <col className="w-[12%] min-w-[76px]" />
+                      <col className="w-[37%] min-w-[200px]" />
+                      <col className="w-[12%] min-w-[74px]" />
+                      <col className="w-[11%] min-w-[70px]" />
+                      <col className="w-[15%] min-w-[88px]" />
+                      <col className="w-[12%] min-w-[72px]" />
+                      <col className="w-[13%] min-w-[72px]" />
                     </colgroup>
                     <thead className="hidden xl:table-header-group">
                       <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -2056,7 +2056,7 @@ export function OverviewPage() {
                                   />
                                   <div className="min-w-0">
                                     <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[220px] sm:max-w-[270px] xl:max-w-[250px] 2xl:max-w-[320px] text-[14px]">
-                                      {formatAssetDisplayName(p.name, true)}
+                                      {formatAssetDisplayName(p.name, true, p.isin)}
                                     </div>
                                     <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                       <span>{p.isin}</span>
@@ -2114,12 +2114,12 @@ export function OverviewPage() {
                               </td>
                               <td data-private className="py-2.5 px-2 text-right">
                                 <div className="flex flex-col items-end">
-                                  <span className="font-mono font-bold text-slate-900 dark:text-white text-[14px]">
+                                  <span className="font-mono font-bold text-slate-900 dark:text-white text-[14px] leading-tight">
                                     {fmt.currency(p.current_value)}
                                   </span>
                                   <span
                                     title={`Coste de compra: ${fmt.currency(p.invested_amount)} (Coste medio: ${fmt.price(p.avg_cost, p.currency)})`}
-                                    className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap"
+                                    className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-[1px] whitespace-nowrap"
                                   >
                                     {fmt.currency(p.invested_amount)}
                                   </span>
@@ -2133,7 +2133,7 @@ export function OverviewPage() {
                                   )}>
                                     {fmt.pct(p.unrealized_pnl_pct)}
                                   </span>
-                                  <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap tabular-nums">
+                                  <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-[1px] whitespace-nowrap tabular-nums">
                                     {typeof p.unrealized_pnl === 'number'
                                       ? `${p.unrealized_pnl > 0 ? '+' : ''}${fmt.currency(p.unrealized_pnl)}`
                                       : '—'}

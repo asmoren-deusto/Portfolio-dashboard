@@ -69,7 +69,7 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
   },
   // 8. Indexa Más Rentabilidad Acciones
   '0192#0011': {
-    cleanName: 'Indexa Más Rentabilidad Acciones',
+    cleanName: 'Indexa Más Rentabilidad EPSV',
     officialName: 'Indexa Más Rentabilidad Acciones EPSV',
     currency: 'EUR',
     shareClass: 'ACC',
@@ -207,7 +207,7 @@ export function getAssetCleanName(isin?: string | null, rawName?: string | null)
     return 'BGF World Healthscience'
   }
   if (nLower.includes('indexa') && (nLower.includes('acciones') || nLower.includes('rentabilidad'))) {
-    return 'Indexa Más Rentabilidad Acciones'
+    return 'Indexa Más Rentabilidad EPSV'
   }
   if (nLower.includes('bonos') && (nLower.includes('gob') || nLower.includes('españa') || nLower.includes('2032') || nLower.includes('jul 32'))) {
     return 'Bonos Gobierno España Jul 32'

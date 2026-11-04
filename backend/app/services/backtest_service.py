@@ -101,7 +101,7 @@ def calculate_portfolio_backtest(
     """
     DEFAULT_POS = [
         {"isin": "IE0032126645", "name": "Vanguard U.S. SP500 Index", "current_value": 19745.39, "asset_type": "fund"},
-        {"isin": "0192#0011", "name": "Indexa Más Rentabilidad Acciones", "current_value": 11525.12, "asset_type": "epsv"},
+        {"isin": "0192#0011", "name": "Indexa Más Rentabilidad EPSV", "current_value": 11525.12, "asset_type": "epsv"},
         {"isin": "LU0302296495", "name": "DNB Fund Technology", "current_value": 7352.65, "asset_type": "fund"},
         {"isin": "ES0112611001", "name": "Azvalor Internacional FI", "current_value": 7205.35, "asset_type": "fund"},
         {"isin": "IE000QAZP7L2", "name": "Emerging Markets Index", "current_value": 6358.52, "asset_type": "fund"},
