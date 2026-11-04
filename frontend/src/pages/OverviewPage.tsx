@@ -1802,9 +1802,9 @@ export function OverviewPage() {
                 <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[34%] min-w-[190px]" />
+                      <col className="w-[32%] min-w-[180px]" />
                       <col className="w-[12%] min-w-[76px]" />
-                      <col className="w-[12%] min-w-[84px]" />
+                      <col className="w-[14%] min-w-[100px]" />
                       <col className="w-[14%] min-w-[90px]" />
                       <col className="w-[16%] min-w-[94px]" />
                       <col className="w-[12%] min-w-[70px]" />
@@ -1968,9 +1968,9 @@ export function OverviewPage() {
                   <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[34%] min-w-[190px]" />
+                      <col className="w-[32%] min-w-[180px]" />
                       <col className="w-[12%] min-w-[76px]" />
-                      <col className="w-[12%] min-w-[84px]" />
+                      <col className="w-[14%] min-w-[100px]" />
                       <col className="w-[14%] min-w-[90px]" />
                       <col className="w-[16%] min-w-[94px]" />
                       <col className="w-[12%] min-w-[70px]" />
