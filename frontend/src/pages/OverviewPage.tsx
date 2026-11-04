@@ -1792,7 +1792,7 @@ export function OverviewPage() {
 
           return (
             <div className={cn(
-              "overflow-hidden transition-all duration-200 pb-2.5",
+              "overflow-hidden transition-all duration-200 rounded-b-[21px] pb-[11px]",
               hasSecondColumn
                 ? "grid grid-cols-1 xl:grid-cols-2 divide-y xl:divide-y-0 xl:divide-x divide-slate-200/80 dark:divide-white/[0.04]"
                 : "w-full"
