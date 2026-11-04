@@ -93,6 +93,40 @@ const PERIOD_LABELS: Record<string, string> = {
   '5y': 'Todo',
 }
 
+
+function getBrokerStripeClasses(broker?: string | null, isUpdated = false): string {
+  const raw = (broker || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  if (raw.includes('indexa')) {
+    return isUpdated
+      ? 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.45)]'
+      : 'bg-amber-300/60 dark:bg-amber-500/30'
+  }
+  if (raw.includes('traderepublic') || raw.includes('trade_republic') || raw.includes('tr')) {
+    return isUpdated
+      ? 'bg-violet-500 shadow-[0_0_6px_rgba(139,92,246,0.45)]'
+      : 'bg-violet-300/60 dark:bg-violet-500/30'
+  }
+  if (raw.includes('bbva')) {
+    return isUpdated
+      ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.45)]'
+      : 'bg-emerald-300/60 dark:bg-emerald-500/30'
+  }
+  if (raw.includes('kutxa')) {
+    return isUpdated
+      ? 'bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.45)]'
+      : 'bg-rose-300/60 dark:bg-rose-500/30'
+  }
+  if (raw.includes('scalable')) {
+    return isUpdated
+      ? 'bg-cyan-500 shadow-[0_0_6px_rgba(6,182,212,0.45)]'
+      : 'bg-cyan-300/60 dark:bg-cyan-500/30'
+  }
+  // Default to MyInvestor (Blue)
+  return isUpdated
+    ? 'bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.45)]'
+    : 'bg-blue-300/60 dark:bg-blue-500/30'
+}
+
 export function OverviewPage() {
   const { currentUser, period, theme, isRefreshingPrices, selectedBroker, setSelectedBroker, refreshAnimKey } = useAppStore()
   const periodLabel = PERIOD_LABELS[period] || 'Periodo'
@@ -1693,8 +1727,8 @@ export function OverviewPage() {
             </div>
             <div className="flex items-baseline gap-2">
               <CardTitle>Posiciones en Cartera</CardTitle>
-              <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden md:inline">
-                • Indicador azul = NAV actualizado
+              <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden lg:inline">
+                • Color lateral = Entidad (tono vivo: NAV al día · claro: pendiente)
               </span>
             </div>
           </div>
@@ -1768,13 +1802,12 @@ export function OverviewPage() {
                 <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[31%] min-w-[200px]" />
-                      <col className="w-[11%] min-w-[76px]" />
-                      <col className="w-[10%] min-w-[72px]" />
-                      <col className="w-[13%] min-w-[94px]" />
+                      <col className="w-[35%] min-w-[200px]" />
+                      <col className="w-[12%] min-w-[76px]" />
+                      <col className="w-[11%] min-w-[72px]" />
                       <col className="w-[14%] min-w-[94px]" />
-                      {!isNativePlatform() && <col className="w-[11%] min-w-[80px]" />}
-                      <col className="w-[10%] min-w-[72px]" />
+                      <col className="w-[16%] min-w-[94px]" />
+                      <col className="w-[12%] min-w-[76px]" />
                     </colgroup>
                   <thead>
                     <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -1784,13 +1817,12 @@ export function OverviewPage() {
                       <th className="py-2 px-2 text-right">Rend. Día</th>
                       <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
                       <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
-                      {!isNativePlatform() && <th className="py-2 px-2 text-center">Banco</th>}
                       <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
                     {positionsLoading && positions.length === 0 ? (
-                      <TableSkeletonRows rows={5} cols={8} />
+                      <TableSkeletonRows rows={5} cols={7} />
                     ) : (
                       col1Positions.map((p) => {
                         const isRowHovered = hoveredIsin === p.isin
@@ -1813,12 +1845,13 @@ export function OverviewPage() {
                             )}
                           >
                             <td className="py-2.5 pl-3 pr-1 text-center relative">
-                              {isUpdated && (
-                                <span
-                                  aria-hidden="true"
-                                  className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
-                                />
-                              )}
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  'absolute left-0 top-1.5 bottom-1.5 w-[3.5px] rounded-r-full pointer-events-none transition-all duration-200',
+                                  getBrokerStripeClasses(p.broker, isUpdated)
+                                )}
+                              />
                               <div className="flex items-center justify-center">
                                 <div
                                   className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
@@ -1900,11 +1933,7 @@ export function OverviewPage() {
                                 </span>
                               </div>
                             </td>
-                            {!isNativePlatform() && (
-                              <td className="py-2.5 px-2 text-center">
-                                <BrokerBadge broker={p.broker} />
-                              </td>
-                            )}
+
                             <td className="py-2.5 pr-3 pl-1.5 text-right">
                               <div className="flex items-center justify-end gap-1.5">
                                 <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} active={isRowHovered} />
@@ -1932,13 +1961,12 @@ export function OverviewPage() {
                   <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[31%] min-w-[200px]" />
-                      <col className="w-[11%] min-w-[76px]" />
-                      <col className="w-[10%] min-w-[72px]" />
-                      <col className="w-[13%] min-w-[94px]" />
+                      <col className="w-[35%] min-w-[200px]" />
+                      <col className="w-[12%] min-w-[76px]" />
+                      <col className="w-[11%] min-w-[72px]" />
                       <col className="w-[14%] min-w-[94px]" />
-                      {!isNativePlatform() && <col className="w-[11%] min-w-[80px]" />}
-                      <col className="w-[10%] min-w-[72px]" />
+                      <col className="w-[16%] min-w-[94px]" />
+                      <col className="w-[12%] min-w-[76px]" />
                     </colgroup>
                     <thead className="hidden xl:table-header-group">
                       <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -1948,13 +1976,12 @@ export function OverviewPage() {
                         <th className="py-2 px-2 text-right">Rend. Día</th>
                         <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
                         <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
-                        {!isNativePlatform() && <th className="py-2 px-2 text-center">Banco</th>}
                         <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
                       {positionsLoading && positions.length === 0 ? (
-                        <TableSkeletonRows rows={5} cols={8} />
+                        <TableSkeletonRows rows={5} cols={7} />
                       ) : (
                         col2Positions.map((p) => {
                           const isRowHovered = hoveredIsin === p.isin
@@ -1977,12 +2004,13 @@ export function OverviewPage() {
                               )}
                             >
                               <td className="py-2.5 pl-3 pr-1 text-center relative">
-                                {isUpdated && (
-                                  <span
-                                    aria-hidden="true"
-                                    className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-blue-500/80 dark:bg-blue-400/80 pointer-events-none"
-                                  />
-                                )}
+                                <span
+                                  aria-hidden="true"
+                                  className={cn(
+                                    'absolute left-0 top-1.5 bottom-1.5 w-[3.5px] rounded-r-full pointer-events-none transition-all duration-200',
+                                    getBrokerStripeClasses(p.broker, isUpdated)
+                                  )}
+                                />
                                 <div className="flex items-center justify-center">
                                   <div
                                     className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-150"
@@ -2064,11 +2092,7 @@ export function OverviewPage() {
                                   </span>
                                 </div>
                               </td>
-                              {!isNativePlatform() && (
-                                <td className="py-2.5 px-2 text-center">
-                                  <BrokerBadge broker={p.broker} />
-                                </td>
-                              )}
+
                               <td className="py-2.5 pr-3 pl-1.5 text-right">
                                 <div className="flex items-center justify-end gap-1.5">
                                   <MiniDonut value={p.weight} size={22} strokeWidth={3} color={assetColor} active={isRowHovered} />
