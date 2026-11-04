@@ -140,7 +140,7 @@ export function RootLayout() {
                 updatedCount: unseenItems.length,
                 totalCount: alert.totalCount ?? alert.total_count ?? 0,
                 items: unseenItems,
-                allCheckedItems: [],
+                allCheckedItems: alert.allCheckedItems || alert.all_items || [],
               })
             }
           }

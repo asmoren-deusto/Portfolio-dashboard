@@ -75,6 +75,7 @@ export function useRefreshPortfolio() {
       if (refreshResult) {
         const rawItems = refreshResult.updated_items || refreshResult.items || []
         const unseenItems = filterUnseenNavUpdates(rawItems)
+        const allItems = refreshResult.all_items || []
 
         if (unseenItems.length > 0) {
           markNavUpdatesAsSeen(unseenItems)
@@ -82,10 +83,26 @@ export function useRefreshPortfolio() {
             id: alertId,
             timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
             updatedCount: unseenItems.length,
-            totalCount: refreshResult.count ?? 9,
+            totalCount: refreshResult.count ?? allItems.length,
             items: unseenItems,
-            allCheckedItems: [],
+            allCheckedItems: allItems,
           })
+        } else if (allItems.length > 0) {
+          // Keep last history fresh for the bell without popping up an automatic toast
+          const store = useAppStore.getState()
+          const currentHist = store.lastNavAlertHistory
+          const updatedHistory = {
+            id: alertId,
+            timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+            updatedCount: 0,
+            totalCount: allItems.length,
+            items: currentHist?.items?.length ? currentHist.items : allItems,
+            allCheckedItems: allItems,
+          }
+          try {
+            localStorage.setItem('portfolio_last_nav_alert', JSON.stringify(updatedHistory))
+          } catch {}
+          useAppStore.setState({ lastNavAlertHistory: updatedHistory })
         }
       }
 

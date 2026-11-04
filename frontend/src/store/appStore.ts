@@ -32,6 +32,7 @@ export interface NavAlertNotification {
   totalCount: number
   items: NavAlertItem[]
   allCheckedItems?: NavAlertItem[]
+  isManual?: boolean
 }
 
 interface AppState {
@@ -300,33 +301,72 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ navAlertNotification: null })
     }
   },
-  openNavAlertHistory: () => {
-    let history = get().lastNavAlertHistory
-    if (!history) {
-      history = {
+  openNavAlertHistory: async () => {
+    // 1. Immediately display current local history if available so UI opens instantly (0ms delay)
+    const currentHistory = get().lastNavAlertHistory
+    if (currentHistory) {
+      const displayItems = (currentHistory.items && currentHistory.items.length > 0)
+        ? currentHistory.items
+        : (currentHistory.allCheckedItems || [])
+      const initialManual: NavAlertNotification = {
+        ...currentHistory,
+        items: displayItems,
+        allCheckedItems: currentHistory.allCheckedItems || displayItems,
+        isManual: true,
+      }
+      set({
+        navAlertNotification: initialManual,
+        lastNavAlertHistory: { ...currentHistory, updatedCount: 0 },
+      })
+    }
+
+    // 2. Fetch latest-nav-alert from backend to ensure data is 100% fresh and populated
+    try {
+      const res = await fetch(apiUrl('/portfolio/latest-nav-alert'))
+      if (res.ok) {
+        const data = await res.json()
+        if (data?.alert) {
+          const alert = data.alert
+          const items = (alert.items && alert.items.length > 0)
+            ? alert.items
+            : (alert.allCheckedItems || [])
+          const freshHistory: NavAlertNotification = {
+            id: alert.id,
+            timestamp: alert.timestamp || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+            updatedCount: 0,
+            totalCount: alert.totalCount ?? alert.allCheckedItems?.length ?? items.length,
+            items: items,
+            allCheckedItems: alert.allCheckedItems || items,
+            isManual: true,
+          }
+          try {
+            localStorage.setItem('portfolio_last_seen_nav_alert_id', alert.id)
+            localStorage.setItem('portfolio_last_nav_alert', JSON.stringify(freshHistory))
+          } catch {}
+          set({
+            navAlertNotification: freshHistory,
+            lastNavAlertHistory: freshHistory,
+          })
+          return
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch latest NAV alert from server:', e)
+    }
+
+    // 3. Fallback if no server alert and no local history
+    if (!currentHistory) {
+      const fallback: NavAlertNotification = {
         id: 'latest',
         timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
         updatedCount: 0,
         totalCount: 0,
         items: [],
         allCheckedItems: [],
+        isManual: true,
       }
+      set({ navAlertNotification: fallback, lastNavAlertHistory: fallback })
     }
-
-    // Persist as seen so background scanner and page reloads never pop it up again
-    if (history.id) {
-      try {
-        localStorage.setItem('portfolio_last_seen_nav_alert_id', history.id)
-      } catch {}
-    }
-
-    const readHistory = { ...history, updatedCount: 0 }
-    try {
-      localStorage.setItem('portfolio_last_nav_alert', JSON.stringify(readHistory))
-    } catch {}
-
-    // Show modal with the details and clear the badge counter
-    set({ navAlertNotification: history, lastNavAlertHistory: readHistory })
   },
 
   // Auth State

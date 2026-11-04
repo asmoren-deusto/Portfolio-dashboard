@@ -567,8 +567,23 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
             "items": updated_items,
             "allCheckedItems": all_items,
         }
-        # Keep the previous alert otherwise, so a quiet scan never erases an unseen notification
         _latest_nav_alert = new_alert
+    elif not _latest_nav_alert and len(all_items) > 0:
+        import time
+        now_ts = time.time()
+        new_alert = {
+            "id": f"nav_{int(now_ts*1000)}",
+            "created_at_ts": now_ts,
+            "timestamp": datetime.now().strftime("%H:%M"),
+            "updatedCount": 0,
+            "totalCount": len(all_items),
+            "items": all_items,
+            "allCheckedItems": all_items,
+        }
+        _latest_nav_alert = new_alert
+    elif _latest_nav_alert and len(all_items) > 0:
+        _latest_nav_alert["allCheckedItems"] = all_items
+        _latest_nav_alert["totalCount"] = len(all_items)
 
     res_payload["alert"] = new_alert
     res_payload["alert_id"] = new_alert.get("id") if new_alert else None
@@ -589,12 +604,60 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
 
 
 @router.get("/latest-nav-alert")
-def get_latest_nav_alert(since: str | None = None):
+def get_latest_nav_alert(since: str | None = None, db: Session = Depends(get_db)):
     """
     Return latest detected NAV update notification if newer than 'since' and fresh.
     Prevents popping up stale alerts when opening the app hours after a background scan.
     """
     global _latest_nav_alert
+    if not _latest_nav_alert:
+        try:
+            transactions = _get_all_transactions(db, "asier")
+            positions = calculate_positions(transactions)
+            active = {isin: pos for isin, pos in positions.items() if pos["shares"] > 0.0001 and not isin.startswith("TR_")}
+            all_assets = {a.isin: a for a in db.query(Asset).all()}
+            items = []
+            for isin, pos in active.items():
+                c_list = db.query(PriceCache).filter(PriceCache.isin == isin).order_by(PriceCache.date.desc()).limit(2).all()
+                if c_list:
+                    p = c_list[0].price
+                    p_date = c_list[0].date
+                    prev_p = c_list[1].price if len(c_list) > 1 else None
+                    prev_d = c_list[1].date if len(c_list) > 1 else None
+                    diff = round(p - prev_p, 4) if prev_p else 0.0
+                    diff_pct = round((p - prev_p) / prev_p * 100, 2) if (prev_p and prev_p > 0) else 0.0
+                    pos_txs = [t for t in transactions if t["isin"] == isin]
+                    broker = pos_txs[-1].get("broker", "myinvestor") if pos_txs else "myinvestor"
+                    asset = all_assets.get(isin)
+                    items.append({
+                        "isin": isin,
+                        "name": asset.name if asset else isin,
+                        "broker": broker,
+                        "price": p,
+                        "price_date": p_date,
+                        "previous_price": prev_p,
+                        "previous_date": prev_d,
+                        "is_updated": False,
+                        "is_live": False,
+                        "diff": diff,
+                        "diff_pct": diff_pct,
+                    })
+            if items:
+                items.sort(key=lambda x: (x.get("price_date") or "", abs(x.get("diff_pct") or 0)), reverse=True)
+                import time
+                now_ts = time.time()
+                _latest_nav_alert = {
+                    "id": f"nav_{int(now_ts*1000)}",
+                    "created_at_ts": now_ts,
+                    "timestamp": datetime.now().strftime("%H:%M"),
+                    "updatedCount": len(items),
+                    "totalCount": len(items),
+                    "items": items,
+                    "allCheckedItems": items,
+                }
+        except Exception as e:
+            logger.warning(f"Could not build fallback NAV alert: {e}")
+
     if not _latest_nav_alert:
         return {"has_update": False, "alert": None}
 
