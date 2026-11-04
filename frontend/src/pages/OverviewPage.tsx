@@ -1399,7 +1399,7 @@ export function OverviewPage() {
                   <CardTitle className="text-sm">Distribución</CardTitle>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 truncate">
-                  Desglose de cartera
+                  Desglose
                 </p>
               </div>
             </div>
@@ -1424,7 +1424,7 @@ export function OverviewPage() {
                     />
                   )}
                   <span className="relative z-10 text-[11px]">
-                    {m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geografía'}
+                    {m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}
                   </span>
                 </motion.button>
               ))}
