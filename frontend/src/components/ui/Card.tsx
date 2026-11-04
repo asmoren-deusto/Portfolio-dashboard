@@ -59,7 +59,7 @@ export function Card({ children, className, glass = false, loading = false }: Ca
 
 export function CardHeader({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn('flex items-center justify-between px-5 sm:px-6 pt-3.5 pb-2.5 border-b border-slate-100 dark:border-white/[0.05]', className)}>
+    <div className={cn('flex items-center justify-between px-2.5 sm:px-3 pt-3.5 pb-2.5 border-b border-slate-100 dark:border-white/[0.05]', className)}>
       {children}
     </div>
   )

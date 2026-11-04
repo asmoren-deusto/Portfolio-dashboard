@@ -241,7 +241,7 @@ export function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-3.5">
         {/* 1. Main Benchmark Evolution (65% width) */}
         <Card className="flex flex-col justify-between" delay={0.2} loading={benchmarkFetching}>
-          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
+          <CardHeader className="h-[58px] min-h-[58px] py-2 px-2 sm:px-3">
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
               <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-500 dark:text-blue-400 border border-blue-500/20 shrink-0">
                 <BarChart3 className="w-4 h-4" />
@@ -305,7 +305,7 @@ export function AnalyticsPage() {
 
         {/* 2. Combined Right Panel: Distribution or Returns by Period (35% width) */}
         <Card className="flex flex-col justify-between" delay={0.24} loading={secondaryView === 'returns' ? analyticsFetching : positionsFetching}>
-          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
+          <CardHeader className="h-[58px] min-h-[58px] py-2 px-2 sm:px-3">
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
               <div className={cn(
                 "p-1.5 rounded-lg border shrink-0 transition-colors",

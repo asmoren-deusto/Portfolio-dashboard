@@ -188,7 +188,7 @@ export function CompoundProjectionCard({
 
   return (
     <Card className="w-full overflow-hidden" delay={0.31}>
-      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-4 sm:px-6">
+      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-2 sm:px-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500/15 via-indigo-500/10 to-blue-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 shrink-0">
             <Rocket className="w-4 h-4" />

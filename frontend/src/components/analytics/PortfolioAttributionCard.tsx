@@ -120,7 +120,7 @@ export function PortfolioAttributionCard({
 
   return (
     <Card className="w-full overflow-hidden" delay={0.28}>
-      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-4 sm:px-6">
+      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-2 sm:px-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500/15 via-blue-500/10 to-indigo-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
             <Compass className="w-4 h-4" />

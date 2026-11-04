@@ -468,7 +468,7 @@ export function MarketSectorEvolutionCard({
 
   return (
     <Card className="w-full overflow-hidden" delay={0.12}>
-      <CardHeader className="flex-col lg:flex-row items-start lg:items-center justify-between gap-3 py-3 px-4 sm:px-5">
+      <CardHeader className="flex-col lg:flex-row items-start lg:items-center justify-between gap-3 py-3 px-2 sm:px-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-emerald-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
             <Activity className="w-4 h-4" />

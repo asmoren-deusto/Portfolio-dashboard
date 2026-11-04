@@ -989,7 +989,7 @@ export function OverviewPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* 1. Performance Evolution (60% on desktop: lg:col-span-3, md:col-span-2) */}
         <Card className="lg:col-span-3 md:col-span-2 flex flex-col justify-between h-[390px]" delay={0.2} loading={isRefreshingPrices}>
-          <CardHeader className="h-[58px] min-h-[58px] max-h-[58px] py-2 px-3.5 sm:px-6 flex items-center justify-between">
+          <CardHeader className="h-[58px] min-h-[58px] max-h-[58px] py-2 px-2 sm:px-3 flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0 shrink-0">
               <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
                 <BarChart3 className="w-4 h-4" />
@@ -1389,7 +1389,7 @@ export function OverviewPage() {
 
         {/* 2. Asset Allocation Breakdown (20% on desktop: lg:col-span-1, md:col-span-1) */}
         <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between h-[390px]" delay={0.2} loading={isRefreshingPrices}>
-          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
+          <CardHeader className="h-[58px] min-h-[58px] py-2 px-2 sm:px-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 border border-violet-500/20 shrink-0">
                 <PieChart className="w-4 h-4" />
@@ -1521,7 +1521,7 @@ export function OverviewPage() {
 
         {/* 3. Performance by Period (Global / Semanal 7D) (20% on desktop: lg:col-span-1, md:col-span-1) */}
         <Card className="lg:col-span-1 md:col-span-1 flex flex-col justify-between h-[390px]" delay={0.2} loading={isRefreshingPrices}>
-          <CardHeader className="h-[58px] min-h-[58px] py-2 px-3.5 sm:px-6">
+          <CardHeader className="h-[58px] min-h-[58px] py-2 px-2 sm:px-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                 <BarChart3 className="w-4 h-4" />

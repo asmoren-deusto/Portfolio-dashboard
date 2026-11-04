@@ -202,7 +202,7 @@ export function UnderwaterRiskCard({
 
   return (
     <Card delay={0.3} loading={loading} className="overflow-hidden">
-      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-4 sm:px-6">
+      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-2 sm:px-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
             <ShieldCheck className="w-4 h-4" />

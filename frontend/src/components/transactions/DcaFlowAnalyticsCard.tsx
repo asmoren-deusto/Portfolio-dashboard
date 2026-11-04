@@ -174,7 +174,7 @@ export function DcaFlowAnalyticsCard({
 
   return (
     <Card className="w-full overflow-hidden" delay={0.12}>
-      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-2 py-3 px-4 sm:px-6">
+      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-2 py-3 px-2 sm:px-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
             <BarChart3 className="w-4 h-4" />
