@@ -454,7 +454,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   }, [chartPoints, sessionMarkers, currencyMode, selectedBroker, period, refreshAnimKey])
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-300/80 dark:border-white/[0.12] shadow-2xs hover:shadow-xs p-3.5 sm:p-4 transition-all">
+    <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover p-3.5 sm:p-4 transition-all">
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 dark:border-white/[0.06]">
         <div className="flex items-center gap-2.5">
@@ -523,7 +523,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           </span>
 
           {/* Currency display toggle: EUR (Neto) vs USD (Réplicas) */}
-          <div className="flex items-center h-8 rounded-lg border border-slate-200 dark:border-white/[0.12] bg-slate-100 dark:bg-[#252526] p-0.5">
+          <div className="flex items-center h-8 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             <button
               onClick={() => setCurrencyMode('eur')}
               className={cn(
@@ -553,7 +553,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           {/* Conversión actual EUR/USD */}
           {fxInfo && (
             <div
-              className="inline-flex items-center h-8 gap-2 px-2.5 rounded-lg text-xs border border-slate-200/90 dark:border-white/[0.12] bg-white/90 dark:bg-[#252526] shadow-2xs select-none"
+              className="inline-flex items-center h-8 gap-2 px-2.5 rounded-lg text-xs border border-slate-200/90 dark:border-white/[0.08] bg-white/90 dark:bg-[#252526] shadow-2xs select-none"
               title={`Tipo de cambio EUR/USD: 1 € = ${fxInfo.eur_usd_rate.toFixed(4)} $. Variación de hoy frente al cierre anterior.`}
             >
               <div className="flex items-center gap-1 font-mono">
@@ -576,7 +576,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           )}
 
           {/* Period selector */}
-          <div className="flex items-center h-8 rounded-lg border border-slate-200 dark:border-white/[0.12] bg-slate-100 dark:bg-[#252526] p-0.5">
+          <div className="flex items-center h-8 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             {[
               { id: '1d', label: '1D' },
               { id: '5d', label: '5D' },
@@ -603,7 +603,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-3 items-stretch">
         
         {/* Left Column (lg:col-span-5): Official TradingView Chart (Zero Distortion, 100% Adaptive) */}
-        <div className="lg:col-span-5 flex flex-col rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-300/80 dark:border-white/[0.06] p-3 sm:p-3.5 gap-2.5">
+        <div className="lg:col-span-5 flex flex-col rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 gap-2.5">
           {/* KPI Summary Header (Investing.com Style: Dual Official Close vs Live Pre-Market) */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2.5 pb-2.5 border-b border-slate-200/60 dark:border-white/[0.06]">
             {hoveredPoint ? (
@@ -665,7 +665,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               /* DUAL DISPLAY (Investing.com Style): Official Close + Live Pre-Market */
               <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 {/* 1. Official Session Close (Previous Day Base Reference) */}
-                <div className="pr-3 sm:pr-4 border-r border-slate-200/70 dark:border-white/[0.12]">
+                <div className="pr-3 sm:pr-4 border-r border-slate-200/70 dark:border-white/[0.08]">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1">
                     <span>Cierre Oficial • {summary.official_session_date || 'Sesión anterior'}</span>
                   </div>
@@ -802,7 +802,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 </AnimatePresence>
               </div>
               {chartPoints.length > 0 && (
-                <div className="flex items-center gap-2 text-xs sm:text-[13px] font-mono text-slate-600 dark:text-slate-400 bg-white/90 dark:bg-white/[0.06] px-2.5 py-1 rounded-lg border border-slate-300/80 dark:border-white/[0.12] shadow-2xs">
+                <div className="flex items-center gap-2 text-xs sm:text-[13px] font-mono text-slate-600 dark:text-slate-400 bg-white/90 dark:bg-white/[0.06] px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-white/[0.08] shadow-2xs">
                   <span className={minPct >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold'}>
                     {minPct >= 0 ? '+' : ''}{minPct.toFixed(2)}%
                   </span>
@@ -950,7 +950,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-300/80 dark:border-white/[0.06] shadow-2xs" />
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs" />
               )}
 
               {/* 2. Mayor Caída */}
@@ -976,11 +976,11 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-300/80 dark:border-white/[0.06] shadow-2xs" />
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs" />
               )}
 
               {/* 3. Amplitud de Mercado & Seguimiento */}
-              <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-300/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
                 <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <span>Amplitud Mercado</span>
                   <Layers className="w-4 h-4 text-blue-500 shrink-0" />
@@ -1022,7 +1022,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   const eurUsdChange = summary.fx_info.eur_usd_change_pct ?? -(summary.fx_info.usd_strength_pct ?? 0)
                   const isEurUsdPos = eurUsdChange >= 0
                   return (
-                    <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-300/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
                       <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         <span>Divisa EUR / USD</span>
                         <ArrowLeftRight className="w-4 h-4 text-teal-500 shrink-0" />
@@ -1064,7 +1064,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   )
                 })()
               ) : (
-                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-300/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs flex flex-col justify-between">
                   <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <span>Rango Sesión</span>
                     <Activity className="w-4 h-4 text-indigo-500 shrink-0" />
@@ -1088,7 +1088,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         </div>
 
         {/* Right Column (lg:col-span-7): Combined Breakdown Table & Live Proxies */}
-        <div className="lg:col-span-7 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-300/80 dark:border-white/[0.06] p-3 sm:p-3.5">
+        <div className="lg:col-span-7 flex flex-col justify-between rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5">
           <div>
             {/* Top Toolbar: View Switcher & Title */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
@@ -1132,7 +1132,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             {activeTab === 'funds' && (
               <div className="overflow-x-auto overflow-y-auto max-h-[480px] sm:max-h-[520px] rounded-lg border border-slate-200/60 dark:border-white/[0.06] relative">
                 <table className="w-full text-left text-xs border-collapse">
-                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-300/80 dark:border-white/[0.12] z-10 select-none">
+                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
                       <th className="py-1.5 px-2 min-w-[150px] max-w-[180px]">Fondo / Activo</th>
                       <th className="py-1.5 px-2 min-w-[140px] max-w-[165px]">ETF / Réplica</th>
@@ -1272,7 +1272,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
             {activeTab === 'etfs' && (
               <div className="overflow-x-auto overflow-y-auto max-h-[460px] sm:max-h-[500px] rounded-lg border border-slate-200/60 dark:border-white/[0.06] relative">
                 <table className="w-full text-left text-xs border-collapse">
-                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-300/80 dark:border-white/[0.12] z-10 select-none">
+                  <thead className="sticky top-0 bg-slate-100/95 dark:bg-[#252526]/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200/80 dark:border-white/[0.08] z-10 select-none">
                     <tr>
                       <th className="py-1.5 px-2 min-w-[155px] max-w-[190px]">ETF Réplica / Mercado</th>
                       <th className="py-1.5 px-1.5 text-right whitespace-nowrap">Cotiz. en Vivo</th>
@@ -1315,7 +1315,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                                       >
                                         {formatAssetDisplayName(displayName, true)}
                                       </span>
-                                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.12]">
+                                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 font-semibold border border-slate-300/60 dark:border-white/[0.08]">
                                         {etf.ticker}
                                       </span>
                                     </div>

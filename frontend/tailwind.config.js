@@ -18,8 +18,7 @@ export default {
       },
       boxShadow: {
         'blue-glow': '0 0 40px rgba(79,142,247,0.1)',
-        'card': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
-        'card-hover': '0 3px 8px 0 rgba(0, 0, 0, 0.04)',
+        'card': '0 4px 24px rgba(0,0,0,0.4)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease',

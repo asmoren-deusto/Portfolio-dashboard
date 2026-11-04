@@ -34,7 +34,7 @@ const TAG_STYLES = {
   rose: 'bg-rose-500/10 border-rose-500/25 text-rose-700 dark:text-rose-300',
   blue: 'bg-blue-500/10 border-blue-500/25 text-blue-700 dark:text-blue-300',
   indigo: 'bg-indigo-500/10 border-indigo-500/25 text-indigo-700 dark:text-indigo-300',
-  slate: 'bg-slate-100 dark:bg-white/[0.05] border-slate-200/90 dark:border-white/[0.12] text-slate-700 dark:text-slate-300',
+  slate: 'bg-slate-100 dark:bg-white/[0.05] border-slate-200/90 dark:border-white/[0.08] text-slate-700 dark:text-slate-300',
 }
 
 const ACCENT_BORDERS = {
@@ -86,7 +86,7 @@ function KpiCardComponent({
 }: KpiCardProps) {
   const changeClass =
     changePositive === undefined
-      ? 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.04] border-slate-200 dark:border-white/[0.12]'
+      ? 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.04] border-slate-200 dark:border-white/[0.08]'
       : changePositive
       ? 'text-emerald-700 bg-emerald-500/10 border-emerald-500/20 dark:text-emerald-400 dark:bg-emerald-500/15 dark:border-emerald-500/25'
       : 'text-rose-700 bg-rose-500/10 border-rose-500/20 dark:text-rose-400 dark:bg-rose-500/15 dark:border-rose-500/25'
@@ -107,12 +107,13 @@ function KpiCardComponent({
       tabIndex={onClick ? 0 : undefined}
       title={title}
       className={cn(
-        'group relative overflow-hidden rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 transition-[border-color,box-shadow,background-color] duration-200 ease-out',
+        'group relative overflow-hidden rounded-[20px] px-3.5 sm:px-4 py-2.5 sm:py-3 transition-[border-color,box-shadow,background-color] duration-200 ease-out',
         onClick ? 'cursor-pointer active:scale-[0.99]' : 'cursor-card',
-        'bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-300/80 dark:border-white/[0.12] shadow-2xs hover:shadow-xs hover:border-slate-400/80 dark:hover:border-white/[0.20]',
+        'bg-gradient-to-b from-white via-white/98 to-slate-50/70 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
+        'dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:border-white/[0.08] dark:hover:border-white/[0.16]',
         borderAccent && ACCENT_BORDERS[borderAccent],
         hero &&
-          'bg-gradient-to-br from-blue-50/50 via-white/90 to-indigo-50/30 dark:bg-gradient-to-br dark:from-[#222226]/90 dark:via-[#1e1e1e]/85 dark:to-[#1a1a1d]/90 border-blue-200/75 dark:border-blue-500/20 shadow-2xs hover:shadow-xs',
+          'bg-gradient-to-br from-blue-50/90 via-white to-indigo-50/50 border-blue-200/90 shadow-hero hover:shadow-[0_10px_32px_-4px_rgba(37,99,235,0.18)] dark:bg-gradient-to-br dark:from-[#252526]/95 dark:via-[#1e1e1e]/90 dark:to-[#1e1e1e]/95 dark:border-white/[0.12] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]',
         className
       )}
     >
