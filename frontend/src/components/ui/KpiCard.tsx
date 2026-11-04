@@ -107,13 +107,12 @@ function KpiCardComponent({
       tabIndex={onClick ? 0 : undefined}
       title={title}
       className={cn(
-        'group relative overflow-hidden rounded-[20px] px-3.5 sm:px-4 py-2.5 sm:py-3 transition-[border-color,box-shadow,background-color] duration-200 ease-out',
+        'group relative overflow-hidden rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 transition-[border-color,box-shadow,background-color] duration-200 ease-out',
         onClick ? 'cursor-pointer active:scale-[0.99]' : 'cursor-card',
-        'bg-gradient-to-b from-white via-white/98 to-slate-50/70 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
-        'dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:border-white/[0.08] dark:hover:border-white/[0.16]',
+        'bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-200/75 dark:border-white/[0.07] shadow-2xs hover:shadow-xs hover:border-slate-300/80 dark:hover:border-white/[0.12]',
         borderAccent && ACCENT_BORDERS[borderAccent],
         hero &&
-          'bg-gradient-to-br from-blue-50/90 via-white to-indigo-50/50 border-blue-200/90 shadow-hero hover:shadow-[0_10px_32px_-4px_rgba(37,99,235,0.18)] dark:bg-gradient-to-br dark:from-[#252526]/95 dark:via-[#1e1e1e]/90 dark:to-[#1e1e1e]/95 dark:border-white/[0.12] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]',
+          'bg-gradient-to-br from-blue-50/50 via-white/90 to-indigo-50/30 dark:bg-gradient-to-br dark:from-[#222226]/90 dark:via-[#1e1e1e]/85 dark:to-[#1a1a1d]/90 border-blue-200/75 dark:border-blue-500/20 shadow-2xs hover:shadow-xs',
         className
       )}
     >

@@ -31,9 +31,8 @@ export function Card({ children, className, glass = false, loading = false }: Ca
       <div
         onMouseMove={handleMouseMove}
         className={cn(
-          'group/card relative shrink-0 rounded-[22px] overflow-hidden transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
-          'bg-gradient-to-b from-white via-white/98 to-slate-50/70 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-slate-300/90',
-          'dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:border-white/[0.08] dark:hover:border-white/[0.16]',
+          'group/card relative shrink-0 rounded-2xl overflow-hidden transition-[border-color,box-shadow,background-color] duration-200 ease-out cursor-card',
+          'bg-white/85 dark:bg-[#1e1e1e]/85 border border-slate-200/75 dark:border-white/[0.07] shadow-2xs hover:shadow-xs hover:border-slate-300/80 dark:hover:border-white/[0.12]',
           glass && 'backdrop-blur-md',
           className
         )}
@@ -48,7 +47,8 @@ export function Card({ children, className, glass = false, loading = false }: Ca
           }}
         />
         {/* Subtle shine line at top */}
-        <div className="pointer-events-none absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
+        {/* Minimal hairline top */} 
+        <div className="pointer-events-none absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-slate-900/[0.03] dark:via-white/[0.05] to-transparent z-10" />
         <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full">
           {children}
         </div>

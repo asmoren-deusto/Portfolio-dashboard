@@ -374,17 +374,17 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
 
   return (
     <div
-      className={`h-full flex flex-col justify-between border border-slate-200/80 dark:border-white/[0.08] transition-all relative overflow-hidden ${
+      className={`h-full flex flex-col justify-between border border-slate-200/75 dark:border-white/[0.07] transition-all relative overflow-hidden ${
         isFullscreen
           ? 'fixed inset-0 z-[99999] rounded-none p-5 sm:p-6 bg-slate-100 dark:bg-[#1c1c1c] overflow-hidden'
-          : 'rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] shadow-card hover:shadow-card-hover p-4 md:p-5'
+          : 'rounded-2xl bg-white/85 dark:bg-[#1e1e1e]/85 shadow-2xs hover:shadow-xs p-4 md:p-5'
       }`}
     >
       {!isFullscreen && (
         <div className="pointer-events-none absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
       )}
       {/* Heatmap Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 mb-3 border-b border-slate-200/80 dark:border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 mb-3 border-b border-slate-200/75 dark:border-white/[0.06]">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
             <Layers className="w-4 h-4" />
@@ -428,7 +428,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           {/* Fullscreen Button */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08] transition-colors shrink-0"
+            className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.07] transition-colors shrink-0"
             title={isFullscreen ? 'Salir de pantalla completa (Esc)' : 'Pantalla completa'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -438,7 +438,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           {showViewAllLink && !isFullscreen && (
             <Link
               to="/market"
-              className="inline-flex items-center gap-1.5 p-1.5 lg:px-3 lg:py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
+              className="inline-flex items-center gap-1.5 p-1.5 lg:px-3 lg:py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/75 dark:border-white/[0.07] shrink-0"
               title="Ver mercado"
             >
               <span className="hidden lg:inline">Ver mercado</span>
@@ -596,7 +596,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
             className="pointer-events-none z-50 w-64 rounded-2xl bg-white/95 dark:bg-[#181818]/95 border border-slate-200/90 dark:border-white/15 p-4 shadow-2xl"
           >
             {/* Header with Logo */}
-            <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-200/80 dark:border-white/[0.08]">
+            <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-200/75 dark:border-white/[0.07]">
               <CompanyLogo
                 ticker={hoveredStock.ticker}
                 name={hoveredStock.name}
@@ -659,7 +659,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
               </div>
             </div>
 
-            <div className="mt-3 pt-2 border-t border-slate-200/80 dark:border-white/[0.06] text-xs text-slate-700 dark:text-slate-400 font-medium flex items-center justify-between">
+            <div className="mt-3 pt-2 border-t border-slate-200/75 dark:border-white/[0.06] text-xs text-slate-700 dark:text-slate-400 font-medium flex items-center justify-between">
               <span>Haz clic para ver gráfico y ficha</span>
               <ArrowUpRight className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             </div>
