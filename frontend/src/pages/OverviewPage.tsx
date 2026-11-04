@@ -1875,7 +1875,7 @@ export function OverviewPage() {
                                   <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[220px] sm:max-w-[270px] xl:max-w-[250px] 2xl:max-w-[320px] text-[14px]">
                                     {formatAssetDisplayName(p.name, true)}
                                   </div>
-                                  <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
+                                  <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                     <span>{p.isin}</span>
                                     {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
                                   </div>
@@ -1886,7 +1886,7 @@ export function OverviewPage() {
                               <div className="font-mono font-bold text-slate-900 dark:text-white text-[13px] sm:text-[14px] leading-tight whitespace-nowrap">
                                 {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                               </div>
-                              <div className="text-[11.5px] font-mono font-medium text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                              <div className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap">
                                 {(() => {
                                   const raw = p.price_date || p.last_updated
                                   if (!raw) return '—'
@@ -1922,7 +1922,7 @@ export function OverviewPage() {
                                 ) : (
                                   <span className="font-mono text-xs text-slate-400">—</span>
                                 )}
-                                <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap">
                                   {typeof p.weekly_change_pct === 'number'
                                     ? fmt.pct(p.weekly_change_pct)
                                     : '—'}
@@ -1936,7 +1936,7 @@ export function OverviewPage() {
                                 </span>
                                 <span
                                   title={`Coste de compra: ${fmt.currency(p.invested_amount)} (Coste medio: ${fmt.price(p.avg_cost, p.currency)})`}
-                                  className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap"
+                                  className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap"
                                 >
                                   {fmt.currency(p.invested_amount)}
                                 </span>
@@ -1944,9 +1944,16 @@ export function OverviewPage() {
                             </td>
                             <td data-private className="py-2.5 px-2 text-right">
                               <div className="flex flex-col items-end">
-                                <PnlBadge value={p.unrealized_pnl} />
-                                <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                                <span className={cn(
+                                  'font-mono font-bold text-[13px] sm:text-[14px] tabular-nums leading-tight',
+                                  (p.unrealized_pnl_pct ?? 0) >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'
+                                )}>
                                   {fmt.pct(p.unrealized_pnl_pct)}
+                                </span>
+                                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap tabular-nums">
+                                  {typeof p.unrealized_pnl === 'number'
+                                    ? `${p.unrealized_pnl > 0 ? '+' : ''}${fmt.currency(p.unrealized_pnl)}`
+                                    : '—'}
                                 </span>
                               </div>
                             </td>
@@ -2051,7 +2058,7 @@ export function OverviewPage() {
                                     <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[220px] sm:max-w-[270px] xl:max-w-[250px] 2xl:max-w-[320px] text-[14px]">
                                       {formatAssetDisplayName(p.name, true)}
                                     </div>
-                                    <div className="flex items-center gap-1.5 font-mono text-[12.5px] font-semibold text-slate-600 dark:text-slate-400">
+                                    <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                       <span>{p.isin}</span>
                                       {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
                                     </div>
@@ -2062,7 +2069,7 @@ export function OverviewPage() {
                                 <div className="font-mono font-bold text-slate-900 dark:text-white text-[13px] sm:text-[14px] leading-tight whitespace-nowrap">
                                   {p.current_price ? fmt.price(p.current_price, p.currency) : '—'}
                                 </div>
-                                <div className="text-[11.5px] font-mono font-medium text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                                <div className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap">
                                   {(() => {
                                     const raw = p.price_date || p.last_updated
                                     if (!raw) return '—'
@@ -2098,7 +2105,7 @@ export function OverviewPage() {
                                   ) : (
                                     <span className="font-mono text-xs text-slate-400">—</span>
                                   )}
-                                  <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                                  <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap">
                                     {typeof p.weekly_change_pct === 'number'
                                       ? fmt.pct(p.weekly_change_pct)
                                       : '—'}
@@ -2112,7 +2119,7 @@ export function OverviewPage() {
                                   </span>
                                   <span
                                     title={`Coste de compra: ${fmt.currency(p.invested_amount)} (Coste medio: ${fmt.price(p.avg_cost, p.currency)})`}
-                                    className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5 whitespace-nowrap"
+                                    className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap"
                                   >
                                     {fmt.currency(p.invested_amount)}
                                   </span>
@@ -2120,9 +2127,16 @@ export function OverviewPage() {
                               </td>
                               <td data-private className="py-2.5 px-2 text-right">
                                 <div className="flex flex-col items-end">
-                                  <PnlBadge value={p.unrealized_pnl} />
-                                  <span className="text-[12px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-0.5">
+                                  <span className={cn(
+                                    'font-mono font-bold text-[13px] sm:text-[14px] tabular-nums leading-tight',
+                                    (p.unrealized_pnl_pct ?? 0) >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'
+                                  )}>
                                     {fmt.pct(p.unrealized_pnl_pct)}
+                                  </span>
+                                  <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap tabular-nums">
+                                    {typeof p.unrealized_pnl === 'number'
+                                      ? `${p.unrealized_pnl > 0 ? '+' : ''}${fmt.currency(p.unrealized_pnl)}`
+                                      : '—'}
                                   </span>
                                 </div>
                               </td>
