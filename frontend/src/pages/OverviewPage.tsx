@@ -1802,19 +1802,19 @@ export function OverviewPage() {
                 <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[35%] min-w-[200px]" />
+                      <col className="w-[34%] min-w-[190px]" />
                       <col className="w-[12%] min-w-[76px]" />
-                      <col className="w-[11%] min-w-[72px]" />
-                      <col className="w-[14%] min-w-[94px]" />
+                      <col className="w-[12%] min-w-[84px]" />
+                      <col className="w-[14%] min-w-[90px]" />
                       <col className="w-[16%] min-w-[94px]" />
-                      <col className="w-[12%] min-w-[76px]" />
+                      <col className="w-[12%] min-w-[70px]" />
                     </colgroup>
                   <thead>
                     <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                       <th className="py-2 px-2.5">Activo / Fondo</th>
                       <th className="py-2 px-2 text-right">NAV</th>
-                      <th className="py-2 px-2 text-right">Rend. Dia/Sem</th>
+                      <th className="py-2 px-2 text-right whitespace-nowrap">Rend. Dia/Sem</th>
                       <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
                       <th className="py-2 px-2 text-right">Ganancia</th>
                       <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
@@ -1968,19 +1968,19 @@ export function OverviewPage() {
                   <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[35%] min-w-[200px]" />
+                      <col className="w-[34%] min-w-[190px]" />
                       <col className="w-[12%] min-w-[76px]" />
-                      <col className="w-[11%] min-w-[72px]" />
-                      <col className="w-[14%] min-w-[94px]" />
+                      <col className="w-[12%] min-w-[84px]" />
+                      <col className="w-[14%] min-w-[90px]" />
                       <col className="w-[16%] min-w-[94px]" />
-                      <col className="w-[12%] min-w-[76px]" />
+                      <col className="w-[12%] min-w-[70px]" />
                     </colgroup>
                     <thead className="hidden xl:table-header-group">
                       <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
                         <th className="py-2 px-2.5">Activo / Fondo</th>
                         <th className="py-2 px-2 text-right">NAV</th>
-                        <th className="py-2 px-2 text-right">Rend. Dia/Sem</th>
+                        <th className="py-2 px-2 text-right whitespace-nowrap">Rend. Dia/Sem</th>
                         <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
                         <th className="py-2 px-2 text-right">Ganancia</th>
                         <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
