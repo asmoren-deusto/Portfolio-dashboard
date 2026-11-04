@@ -1816,7 +1816,7 @@ export function OverviewPage() {
                       <th className="py-2 px-2 text-right">NAV</th>
                       <th className="py-2 px-2 text-right">Rend. Día</th>
                       <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
-                      <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
+                      <th className="py-2 px-2 text-right">Ganancia</th>
                       <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
                     </tr>
                   </thead>
@@ -1975,7 +1975,7 @@ export function OverviewPage() {
                         <th className="py-2 px-2 text-right">NAV</th>
                         <th className="py-2 px-2 text-right">Rend. Día</th>
                         <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
-                        <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Ganancia' : 'Ganancia (P&L)'}</th>
+                        <th className="py-2 px-2 text-right">Ganancia</th>
                         <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
                       </tr>
                     </thead>
