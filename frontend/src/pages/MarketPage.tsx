@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useMarketIndices, useMarketQuotes, type MarketStock } from '@/api/queries'
 import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketSessionsBar } from '@/components/market/MarketSessionsBar'
+import { WorldMarketsRegionalCard } from '@/components/market/WorldMarketsRegionalCard'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockCard } from '@/components/market/StockCard'
 import { StockTableRow } from '@/components/market/StockTableRow'
@@ -293,6 +294,18 @@ export const MarketPage: React.FC = () => {
           } else if (sessionId === 'tokyo') {
             setSelectedIndex('Todos')
           }
+        }}
+      />
+
+      {/* Bolsas del Mundo & Cotizaciones Regionales (Europa, América, Asia/Global, FX/Commodities) */}
+      <WorldMarketsRegionalCard
+        indices={tickerData?.indices ?? []}
+        isLoading={tickerLoading}
+        onSelectIndex={(index) => {
+          setSelectedStock(index)
+        }}
+        onFilterUniverse={(tabId) => {
+          setSelectedIndex(tabId)
         }}
       />
 
