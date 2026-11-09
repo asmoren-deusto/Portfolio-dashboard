@@ -57,6 +57,7 @@ import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
+import { PortfolioAgendaCard } from '@/components/agenda/PortfolioAgendaCard'
 import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
@@ -2166,6 +2167,11 @@ export function OverviewPage() {
           )
         })()}
         </Card>
+      </div>
+
+      {/* ── Agenda Financiera & Próximos Eventos (DCA, Cupones, Citas Macro) ── */}
+      <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 250px' }}>
+        <PortfolioAgendaCard defaultCollapsed={false} />
       </div>
 
       {/* ── Comparativa de Rendimiento vs Benchmarks (Analítica) ─────────────── */}
