@@ -1,0 +1,26 @@
+{
+  "name": "portfolio-dashboard",
+  "version": "1.0.0",
+  "description": "Un cuadro de mando financiero integral y moderno para el seguimiento de carteras de inversión multiactivo (fondos de inversión, ETFs, acciones y liquidez) con datos de mercado en tiempo real, mapas de calor interactivos y análisis avanzado de rentabilidad y riesgo.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asmoren-deusto/Portfolio-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/asmoren-deusto/Portfolio-dashboard/issues"
+  },
+  "homepage": "https://github.com/asmoren-deusto/Portfolio-dashboard#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.6"
+  }
+}
