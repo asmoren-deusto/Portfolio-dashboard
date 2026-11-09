@@ -52,11 +52,10 @@ import {
   InteractiveEntityBar,
 } from '@/components/ui/DynamicSvgIndicators'
 import { MarketTicker } from '@/components/market/MarketTicker'
-import { MarketHeatmap } from '@/components/market/MarketHeatmap'
+import { PortfolioDailyContributorsCard } from '@/components/portfolio/PortfolioDailyContributorsCard'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
-import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
 import { PortfolioAgendaCard } from '@/components/agenda/PortfolioAgendaCard'
 import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
@@ -2247,49 +2246,24 @@ export function OverviewPage() {
       </Card>
     </div>
 
-      {/* ── Proyección Patrimonial (60%) y Mapa de Calor del Mercado (40%) ── */}
+      {/* ── Agenda Financiera (60%) e Impacto en Euros / Contribuidores (40%) ── */}
       <div
         className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch"
         style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 480px' }}
       >
-        {/* Columna Izquierda (60%): Proyección de Interés Compuesto, Cono Monte Carlo y Bola de Nieve */}
+        {/* Columna Izquierda (60%): Agenda Financiera & Próximos Eventos */}
         <div className="w-full h-full lg:col-span-3 flex flex-col">
-          {displaySummary ? (
-            <CompoundProjectionCard
-              currentValue={displaySummary.total_value}
-              currentInvested={displaySummary.total_invested}
-              defaultMonthlyDca={1250}
-              defaultAnnualReturn={analytics?.annualized_return ?? analytics?.cagr ?? 8.5}
-              volatility={analytics?.volatility ?? 10.2}
-            />
-          ) : (
-            <div className="h-64 rounded-[22px] bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
-              Cargando proyección patrimonial...
-            </div>
-          )}
+          <PortfolioAgendaCard defaultCollapsed={false} className="h-full flex flex-col" />
         </div>
 
-        {/* Columna Derecha (40%): Mapa de Calor del Mercado */}
+        {/* Columna Derecha (40%): Impacto en Euros Hoy & Contribuidores */}
         <div className="w-full h-full lg:col-span-2 flex flex-col">
-          {marketData?.stocks && marketData.stocks.length > 0 ? (
-            <MarketHeatmap
-              stocks={marketData.stocks}
-              onSelectStock={(s) => setSelectedStock(s)}
-              showViewAllLink
-              defaultExpanded={true}
-              compact
-            />
-          ) : (
-            <div className="h-64 rounded-[22px] bg-slate-100 dark:bg-[#1e1e1e] border border-slate-200 dark:border-white/[0.08] animate-pulse flex items-center justify-center text-slate-600 dark:text-slate-400 text-xs font-medium">
-              Cargando mapa de calor del mercado...
-            </div>
-          )}
+          <PortfolioDailyContributorsCard
+            positions={positions}
+            onSelectPosition={(pos) => setSelectedPosition(pos)}
+            className="h-full flex flex-col"
+          />
         </div>
-      </div>
-
-      {/* ── Agenda Financiera & Próximos Eventos (DCA, Cupones, Citas Macro) ── */}
-      <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 280px' }}>
-        <PortfolioAgendaCard defaultCollapsed={false} />
       </div>
 
       {/* Stock Detail Modal */}

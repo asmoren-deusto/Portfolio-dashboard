@@ -34,8 +34,16 @@ import { KpiCard } from '@/components/ui/KpiCard'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { AssetBadge } from '@/components/ui/Badge'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
+import { UnderwaterRiskCard } from '@/components/analytics/UnderwaterRiskCard'
+import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
 import { fmt, cn } from '@/lib/utils'
-import { usePortfolioBacktest, type BacktestCurvePoint } from '@/api/queries'
+import {
+  usePortfolioBacktest,
+  useAnalytics,
+  usePerformance,
+  usePositions,
+  type BacktestCurvePoint,
+} from '@/api/queries'
 import { useAppStore } from '@/store/appStore'
 
 type ChartViewMode = 'growth' | 'cumulative' | 'drawdown' | 'annual'
@@ -61,6 +69,13 @@ export function BacktestPage() {
   }
 
   const { data: backtestData, isLoading, isFetching } = usePortfolioBacktest(timeframe)
+  const { data: analytics, isFetching: analyticsFetching } = useAnalytics()
+  const { data: performance = [], isFetching: perfFetching } = usePerformance('5y')
+  const { data: positions = [] } = usePositions()
+
+  const totalValue = useMemo(() => positions.reduce((acc, p) => acc + (p.current_value || 0), 0), [positions])
+  const totalInvested = useMemo(() => positions.reduce((acc, p) => acc + (p.invested_amount || 0), 0), [positions])
+
   const summary = backtestData?.summary
   const curves = backtestData?.curves || []
   const annualMatrix = backtestData?.annual_matrix || []
@@ -841,6 +856,29 @@ export function BacktestPage() {
           </table>
         </div>
       </Card>
+
+      {/* ── Curva de Caídas desde Máximos (Drawdown Histórico) & Tiempo Bajo el Agua ── */}
+      <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 420px' }}>
+        <UnderwaterRiskCard
+          analytics={analytics}
+          performance={performance}
+          totalValue={totalValue}
+          loading={analyticsFetching || perfFetching}
+        />
+      </div>
+
+      {/* ── Proyección Hacia el Futuro: Interés Compuesto & Cono Monte Carlo ── */}
+      {totalValue > 0 && (
+        <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 480px' }}>
+          <CompoundProjectionCard
+            currentValue={totalValue}
+            currentInvested={totalInvested}
+            defaultMonthlyDca={1250}
+            defaultAnnualReturn={analytics?.cagr ?? analytics?.annualized_return ?? 8.5}
+            volatility={analytics?.volatility ?? 10.2}
+          />
+        </div>
+      )}
     </div>
   )
 }
