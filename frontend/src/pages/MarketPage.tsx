@@ -32,7 +32,6 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { SimulatedPortfolioCard } from '@/components/market/SimulatedPortfolioCard'
-import { MarketSectorEvolutionCard } from '@/components/market/MarketSectorEvolutionCard'
 import { fmt } from '@/lib/utils'
 
 const INDEX_TABS = [
@@ -297,18 +296,6 @@ export const MarketPage: React.FC = () => {
         }}
       />
 
-      {/* Bolsas del Mundo & Cotizaciones Regionales (Europa, América, Asia/Global, FX/Commodities) */}
-      <WorldMarketsRegionalCard
-        indices={tickerData?.indices ?? []}
-        isLoading={tickerLoading}
-        onSelectIndex={(index) => {
-          setSelectedStock(index)
-        }}
-        onFilterUniverse={(tabId) => {
-          setSelectedIndex(tabId)
-        }}
-      />
-
       {/* Simulated Live Portfolio Performance via Proxy ETFs */}
       <SimulatedPortfolioCard
         marketStats={stats}
@@ -318,15 +305,15 @@ export const MarketPage: React.FC = () => {
         onSelectStock={setSelectedStock}
       />
 
-      {/* Sector Evolution & Relative Strength Rotation */}
-      <MarketSectorEvolutionCard
-        stocks={quoteData?.stocks ?? data?.stocks ?? []}
-        selectedSector={selectedSector}
-        onSelectSector={(sector) => {
-          if (selectedIndex === 'TICKER' && sector !== 'Todos') {
-            setSelectedIndex('Todos')
-          }
-          setSelectedSector(sector)
+      {/* Bolsas del Mundo & Cotizaciones Regionales (Europa, América, Asia/Global, FX/Commodities) */}
+      <WorldMarketsRegionalCard
+        indices={tickerData?.indices ?? []}
+        isLoading={tickerLoading}
+        onSelectIndex={(index) => {
+          setSelectedStock(index)
+        }}
+        onFilterUniverse={(tabId) => {
+          setSelectedIndex(tabId)
         }}
       />
 

@@ -1,10 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Globe, PieChart, Sparkles, ShieldCheck } from 'lucide-react'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
-import { usePositions } from '@/api/queries'
+import { MarketSectorEvolutionCard } from '@/components/market/MarketSectorEvolutionCard'
+import { usePositions, useMarketQuotes } from '@/api/queries'
 
 export function DiversificationPage() {
   const { data: positions = [], isLoading, isFetching } = usePositions()
+  const { data: quoteData } = useMarketQuotes()
+  const [selectedSector, setSelectedSector] = useState<string>('Todos')
 
   return (
     <div className="flex flex-col gap-5 pb-10">
@@ -32,9 +35,17 @@ export function DiversificationPage() {
 
       {/* Main Diversification Dashboard Component */}
       <DiversificationDashboard positions={positions} isLoading={isLoading} />
+
+      {/* Evolución y Rotación Histórica del Mercado por Sectores */}
+      <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 520px' }}>
+        <MarketSectorEvolutionCard
+          stocks={quoteData?.stocks ?? []}
+          selectedSector={selectedSector}
+          onSelectSector={setSelectedSector}
+        />
+      </div>
     </div>
   )
 }
-
 
 export default DiversificationPage
