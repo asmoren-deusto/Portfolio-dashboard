@@ -2248,20 +2248,20 @@ export function OverviewPage() {
 
       {/* ── Agenda Financiera (60%) e Impacto en Euros / Contribuidores (40%) ── */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch"
-        style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 480px' }}
+        className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch lg:h-[390px]"
+        style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 390px' }}
       >
         {/* Columna Izquierda (60%): Agenda Financiera & Próximos Eventos */}
-        <div className="w-full h-full lg:col-span-3 flex flex-col">
-          <PortfolioAgendaCard defaultCollapsed={false} className="h-full flex flex-col" />
+        <div className="w-full h-full lg:col-span-3 flex flex-col min-h-0">
+          <PortfolioAgendaCard defaultCollapsed={false} className="h-full max-h-[390px] flex flex-col min-h-0" />
         </div>
 
         {/* Columna Derecha (40%): Impacto en Euros Hoy & Contribuidores */}
-        <div className="w-full h-full lg:col-span-2 flex flex-col">
+        <div className="w-full h-full lg:col-span-2 flex flex-col min-h-0">
           <PortfolioDailyContributorsCard
             positions={positions}
             onSelectPosition={(pos) => setSelectedPosition(pos)}
-            className="h-full flex flex-col"
+            className="h-full max-h-[390px] flex flex-col min-h-0"
           />
         </div>
       </div>

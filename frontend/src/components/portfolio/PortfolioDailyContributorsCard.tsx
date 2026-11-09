@@ -87,16 +87,16 @@ export function PortfolioDailyContributorsCard({
       else unchanged++
     })
 
-    // Sort for top gainers and top losers
+    // Sort for top gainers and top losers (top 2 each for compact fit)
     const gainers = items
       .filter((item) => item.euro > 0)
       .sort((a, b) => b.euro - a.euro)
-      .slice(0, 3)
+      .slice(0, 2)
 
     const losers = items
       .filter((item) => item.euro < 0)
       .sort((a, b) => a.euro - b.euro)
-      .slice(0, 3)
+      .slice(0, 2)
 
     return {
       netEuro,
@@ -173,11 +173,11 @@ export function PortfolioDailyContributorsCard({
         </div>
       </CardHeader>
 
-      <div className="p-3.5 sm:p-4 pt-1 flex flex-col flex-1 justify-between gap-3 min-h-0">
+      <div className="p-2.5 sm:p-3 pt-1 flex flex-col flex-1 justify-between gap-2.5 min-h-0">
         {/* Net Impact Banner */}
         <div
           className={cn(
-            'p-3 rounded-2xl border flex items-center justify-between gap-3 transition-colors',
+            'py-2 px-3 rounded-xl border flex items-center justify-between gap-3 transition-colors',
             stats.netEuro >= 0
               ? 'bg-emerald-500/[0.05] border-emerald-500/20 dark:bg-emerald-500/[0.08]'
               : 'bg-rose-500/[0.05] border-rose-500/20 dark:bg-rose-500/[0.08]'
@@ -244,25 +244,25 @@ export function PortfolioDailyContributorsCard({
             {stats.gainers.length === 0 ? (
               <p className="text-xs text-slate-400 italic py-1">Sin activos en positivo en este periodo</p>
             ) : (
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {stats.gainers.map(({ pos, euro, pct }) => (
                   <div
                     key={pos.isin}
                     onClick={() => onSelectPosition?.(pos)}
-                    className="p-2 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100/90 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.05] flex items-center justify-between gap-2 cursor-pointer transition-all group"
+                    className="py-1.5 px-2 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100/90 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.05] flex items-center justify-between gap-2 cursor-pointer transition-all group"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <CompanyLogo
                         name={pos.name}
                         isin={pos.isin}
                         ticker={pos.ticker ?? undefined}
-                        className="w-6 h-6 rounded-lg text-[9px] shrink-0"
+                        className="w-5 h-5 rounded-md text-[8px] shrink-0"
                       />
                       <div className="min-w-0">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white truncate block group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        <span className="text-[11.5px] font-bold text-slate-900 dark:text-white truncate block group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                           {formatAssetDisplayName(pos.name)}
                         </span>
-                        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
+                        <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-mono">
                           {pos.broker || pos.asset_type}
                         </span>
                       </div>
@@ -271,11 +271,11 @@ export function PortfolioDailyContributorsCard({
                     <div className="text-right shrink-0">
                       <span
                         data-private
-                        className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 block"
+                        className="text-[11.5px] font-mono font-bold text-emerald-600 dark:text-emerald-400 block"
                       >
                         +{fmt.currency(euro)}
                       </span>
-                      <span className="text-[10px] font-mono text-emerald-500/80 block">
+                      <span className="text-[9.5px] font-mono text-emerald-500/80 block">
                         +{pct.toFixed(2)}%
                       </span>
                     </div>
@@ -297,25 +297,25 @@ export function PortfolioDailyContributorsCard({
             {stats.losers.length === 0 ? (
               <p className="text-xs text-slate-400 italic py-1">Sin activos en negativo en este periodo</p>
             ) : (
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {stats.losers.map(({ pos, euro, pct }) => (
                   <div
                     key={pos.isin}
                     onClick={() => onSelectPosition?.(pos)}
-                    className="p-2 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100/90 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.05] flex items-center justify-between gap-2 cursor-pointer transition-all group"
+                    className="py-1.5 px-2 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100/90 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.05] flex items-center justify-between gap-2 cursor-pointer transition-all group"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <CompanyLogo
                         name={pos.name}
                         isin={pos.isin}
                         ticker={pos.ticker ?? undefined}
-                        className="w-6 h-6 rounded-lg text-[9px] shrink-0"
+                        className="w-5 h-5 rounded-md text-[8px] shrink-0"
                       />
                       <div className="min-w-0">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white truncate block group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                        <span className="text-[11.5px] font-bold text-slate-900 dark:text-white truncate block group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
                           {formatAssetDisplayName(pos.name)}
                         </span>
-                        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
+                        <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-mono">
                           {pos.broker || pos.asset_type}
                         </span>
                       </div>
@@ -324,11 +324,11 @@ export function PortfolioDailyContributorsCard({
                     <div className="text-right shrink-0">
                       <span
                         data-private
-                        className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 block"
+                        className="text-[11.5px] font-mono font-bold text-rose-600 dark:text-rose-400 block"
                       >
                         {fmt.currency(euro)}
                       </span>
-                      <span className="text-[10px] font-mono text-rose-500/80 block">
+                      <span className="text-[9.5px] font-mono text-rose-500/80 block">
                         {pct.toFixed(2)}%
                       </span>
                     </div>

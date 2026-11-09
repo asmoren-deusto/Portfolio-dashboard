@@ -345,40 +345,40 @@ export const PortfolioAgendaCard: React.FC<{
 
   return (
     <Card className={cn('w-full overflow-hidden transition-all duration-300', className)}>
-      <CardHeader className="py-3 px-3.5 sm:px-4 border-b border-slate-200/80 dark:border-white/[0.05] flex flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
-            <CalendarIcon className="w-4 h-4" />
+      <CardHeader className="py-2.5 px-3 sm:px-4 border-b border-slate-200/80 dark:border-white/[0.05] flex flex-row items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-1.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
+            <CalendarIcon className="w-3.5 h-3.5" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <CardTitle className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <CardTitle className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                 Agenda Financiera & Próximos Eventos
               </CardTitle>
-              <span className="text-[10.5px] font-mono font-semibold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/20">
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/20">
                 {activeEvents.length} citas
               </span>
               {portfolioCount > 0 && (
-                <span className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-500/20">
-                  {portfolioCount} en tu cartera
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-500/20">
+                  {portfolioCount} en cartera
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-              Aportaciones DCA programadas, cupones de bonos y citas clave de política monetaria (BCE / Fed)
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+              Aportaciones DCA programadas, cupones y citas de política monetaria (BCE / Fed)
             </p>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             onClick={() => setShowAddModal(true)}
             title="Añadir recordatorio o evento personalizado"
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/80 dark:bg-white/[0.04] hover:bg-slate-200/70 dark:hover:bg-white/[0.08] transition-colors"
+            className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/80 dark:bg-white/[0.04] hover:bg-slate-200/70 dark:hover:bg-white/[0.08] transition-colors"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3 h-3" />
             <span>Añadir</span>
           </button>
 
@@ -386,7 +386,7 @@ export const PortfolioAgendaCard: React.FC<{
             type="button"
             onClick={toggleCollapse}
             aria-label={isCollapsed ? 'Desplegar agenda' : 'Colapsar agenda'}
-            className="p-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
+            className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
           >
             {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
           </button>
@@ -427,14 +427,14 @@ export const PortfolioAgendaCard: React.FC<{
             className="flex-1 flex flex-col min-h-0"
           >
             {/* Filter Tabs Header */}
-            <div className="p-3 bg-slate-50/70 dark:bg-white/[0.015] border-b border-slate-200/70 dark:border-white/[0.04] flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+            <div className="py-1.5 px-3 bg-slate-50/70 dark:bg-white/[0.015] border-b border-slate-200/70 dark:border-white/[0.04] flex flex-wrap items-center justify-between gap-2 shrink-0">
               {/* Category pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+              <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
                 <button
                   type="button"
                   onClick={() => setActiveCategory('all')}
                   className={cn(
-                    'px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all',
+                    'px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all',
                     activeCategory === 'all'
                       ? 'bg-white dark:bg-[#2e2e30] text-slate-950 dark:text-white shadow-xs border border-slate-200/90 dark:border-white/10'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -447,13 +447,13 @@ export const PortfolioAgendaCard: React.FC<{
                   type="button"
                   onClick={() => setActiveCategory('portfolio')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all',
+                    'flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all',
                     activeCategory === 'portfolio'
                       ? 'bg-emerald-500 text-white shadow-xs font-bold'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   )}
                 >
-                  <Wallet className="w-3.5 h-3.5" />
+                  <Wallet className="w-3 h-3" />
                   <span>Mi Cartera ({portfolioCount})</span>
                 </button>
 
@@ -461,13 +461,13 @@ export const PortfolioAgendaCard: React.FC<{
                   type="button"
                   onClick={() => setActiveCategory('macro')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all',
+                    'flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all',
                     activeCategory === 'macro'
                       ? 'bg-indigo-600 text-white shadow-xs font-bold'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   )}
                 >
-                  <Landmark className="w-3.5 h-3.5" />
+                  <Landmark className="w-3 h-3" />
                   <span>Macro & Tipos ({macroCount})</span>
                 </button>
 
@@ -475,21 +475,21 @@ export const PortfolioAgendaCard: React.FC<{
                   type="button"
                   onClick={() => setActiveCategory('dividends')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all',
+                    'flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all',
                     activeCategory === 'dividends'
                       ? 'bg-amber-500 text-white shadow-xs font-bold'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   )}
                 >
-                  <Coins className="w-3.5 h-3.5" />
+                  <Coins className="w-3 h-3" />
                   <span>Cupones ({dividendCount})</span>
                 </button>
               </div>
 
               {/* Time reference note */}
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-400/80 font-mono">
+              <div className="flex items-center gap-1 text-[10.5px] text-slate-400 dark:text-slate-400/80 font-mono">
                 <Clock className="w-3 h-3" />
-                <span>Hora peninsular (CET / Madrid)</span>
+                <span>CET (Madrid)</span>
               </div>
             </div>
 
@@ -511,7 +511,7 @@ export const PortfolioAgendaCard: React.FC<{
                     <div
                       key={event.id}
                       className={cn(
-                        'p-3.5 sm:p-4 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 group relative',
+                        'py-2 px-3 sm:px-3.5 transition-colors flex items-center justify-between gap-2.5 group relative',
                         isPortfolio
                           ? 'bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05] dark:bg-emerald-500/[0.03] dark:hover:bg-emerald-500/[0.06]'
                           : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
@@ -521,15 +521,15 @@ export const PortfolioAgendaCard: React.FC<{
                       {isPortfolio && (
                         <span
                           aria-hidden="true"
-                          className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-emerald-500"
+                          className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-emerald-500"
                         />
                       )}
 
                       {/* Left: Date & Countdown badge */}
-                      <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <div
                           className={cn(
-                            'w-14 sm:w-16 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 border transition-all text-center select-none shadow-xs',
+                            'w-11 sm:w-12 h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center shrink-0 border transition-all text-center select-none shadow-xs',
                             days === 0
                               ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
                               : days === 1
@@ -541,28 +541,28 @@ export const PortfolioAgendaCard: React.FC<{
                               : 'bg-slate-100/80 dark:bg-white/[0.04] border-slate-200/90 dark:border-white/[0.08] text-slate-800 dark:text-slate-200'
                           )}
                         >
-                          <span className="text-[10px] uppercase font-bold tracking-wider leading-none opacity-75">
+                          <span className="text-[9px] uppercase font-bold tracking-wider leading-none opacity-75">
                             {weekday}
                           </span>
-                          <span className="text-base sm:text-lg font-black font-mono leading-tight my-0.5">
+                          <span className="text-sm sm:text-base font-black font-mono leading-none my-0.5">
                             {day}
                           </span>
-                          <span className="text-[9px] uppercase font-extrabold tracking-wider leading-none opacity-85">
+                          <span className="text-[8.5px] uppercase font-extrabold tracking-wider leading-none opacity-85">
                             {month}{isDifferentYear ? ` '${String(year).slice(2)}` : ''}
                           </span>
                         </div>
 
                         {/* Title & Description */}
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors truncate max-w-xs sm:max-w-md">
                               {event.title}
                             </h4>
 
                             {/* Impact / Category Badges */}
                             <span
                               className={cn(
-                                'text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider',
+                                'text-[9px] font-bold px-1.5 py-0.2 rounded-full border uppercase tracking-wider',
                                 isPortfolio
                                   ? 'bg-emerald-100/80 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30'
                                   : isDividend
@@ -576,23 +576,23 @@ export const PortfolioAgendaCard: React.FC<{
                             </span>
 
                             {event.assetTag && (
-                              <span className="text-[10px] font-mono font-medium text-slate-500 dark:text-slate-400 bg-slate-100/90 dark:bg-white/[0.04] px-1.5 py-0.5 rounded-md border border-slate-200/80 dark:border-white/[0.05]">
+                              <span className="text-[9px] font-mono font-medium text-slate-500 dark:text-slate-400 bg-slate-100/90 dark:bg-white/[0.04] px-1.5 py-0.2 rounded-md border border-slate-200/80 dark:border-white/[0.05] truncate max-w-[130px]">
                                 {event.assetTag}
                               </span>
                             )}
                           </div>
 
-                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed max-w-2xl">
+                          <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-tight truncate max-w-xs sm:max-w-lg">
                             {event.description}
                           </p>
                         </div>
                       </div>
 
                       {/* Right: Time & Countdown pill */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between shrink-0 pl-14 sm:pl-0">
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between shrink-0 pl-11 sm:pl-0">
                         <span
                           className={cn(
-                            'text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg border',
+                            'text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border',
                             days === 0
                               ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40'
                               : days === 1
@@ -603,7 +603,7 @@ export const PortfolioAgendaCard: React.FC<{
                           {countdownLabel}
                         </span>
 
-                        <span className="text-[11px] font-mono text-slate-400 dark:text-slate-400/80 mt-1">
+                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-400/80 mt-0.5">
                           {event.time}
                         </span>
 
