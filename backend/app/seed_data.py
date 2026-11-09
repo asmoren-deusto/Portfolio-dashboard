@@ -1899,6 +1899,48 @@ PRICES = json.loads(r'''[
     "currency": "EUR"
   },
   {
+    "isin": "0192#0011",
+    "date": "2026-10-29",
+    "price": 23.871,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-10-30",
+    "price": 23.870689,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-11-02",
+    "price": 23.871,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-11-03",
+    "price": 23.37834,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-11-04",
+    "price": 23.39571,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-11-05",
+    "price": 23.027,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-11-06",
+    "price": 23.026739,
+    "currency": "EUR"
+  },
+  {
     "isin": "FR0000989626",
     "date": "2026-10-27",
     "price": 44797.3333,
@@ -4132,5 +4174,17 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-10-27",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde BGF World Healthscience, ref 202610270131144)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "0192#0011",
+    "type": "buy",
+    "shares": 18.094617,
+    "price": 23.02674,
+    "amount": 416.66,
+    "fees": 0.0,
+    "date": "2026-11-06",
+    "broker": "indexa",
+    "notes": "Aportación periódica mensual DCA (416,66 € cada día 7)"
   }
 ]''')
