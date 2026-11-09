@@ -2169,11 +2169,6 @@ export function OverviewPage() {
         </Card>
       </div>
 
-      {/* ── Agenda Financiera & Próximos Eventos (DCA, Cupones, Citas Macro) ── */}
-      <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 250px' }}>
-        <PortfolioAgendaCard defaultCollapsed={false} />
-      </div>
-
       {/* ── Comparativa de Rendimiento vs Benchmarks (Analítica) ─────────────── */}
       <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 420px' }}>
         <Card className="w-full" delay={0.32} loading={benchmarkFetching}>
@@ -2290,6 +2285,11 @@ export function OverviewPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Agenda Financiera & Próximos Eventos (DCA, Cupones, Citas Macro) ── */}
+      <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 280px' }}>
+        <PortfolioAgendaCard defaultCollapsed={false} />
       </div>
 
       {/* Stock Detail Modal */}

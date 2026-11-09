@@ -193,19 +193,44 @@ function getDaysRemaining(targetDateStr: string): { days: number; label: string;
   if (days < 0) return { days, label: `Hace ${Math.abs(days)}d`, isPast: true }
   if (days === 0) return { days, label: 'HOY', isPast: false }
   if (days === 1) return { days, label: 'Mañana', isPast: false }
-  if (days <= 6) return { days, label: `En ${days} días`, isPast: false }
-  if (days <= 30) return { days, label: `En ${Math.round(days / 7)} sem`, isPast: false }
-  return { days, label: `En ${Math.round(days / 30)} meses`, isPast: false }
+  if (days <= 6) return { days, label: `En ${days}d`, isPast: false }
+  if (days <= 28) {
+    const weeks = Math.round(days / 7)
+    return { days, label: weeks === 1 ? 'En 1 sem' : `En ${weeks} sem`, isPast: false }
+  }
+  const months = Math.max(1, Math.round(days / 30.4))
+  return { days, label: months === 1 ? 'En 1 mes' : `En ${months} meses`, isPast: false }
 }
 
-function formatDateSpanish(dateStr: string): string {
+interface ParsedEventDate {
+  day: number
+  weekday: string
+  month: string
+  year: number
+  isDifferentYear: boolean
+  formattedFull: string
+}
+
+function parseEventDate(dateStr: string): ParsedEventDate {
   const [y, m, d] = dateStr.split('-').map(Number)
   const date = new Date(y, m - 1, d)
-  return date.toLocaleDateString('es-ES', {
+  const now = new Date()
+  const isDifferentYear = y !== now.getFullYear()
+
+  const rawWeekday = date.toLocaleDateString('es-ES', { weekday: 'short' })
+  const weekday = rawWeekday.replace(/\./g, '').trim().toUpperCase()
+
+  const rawMonth = date.toLocaleDateString('es-ES', { month: 'short' })
+  const month = rawMonth.replace(/\./g, '').trim().toUpperCase()
+
+  const formattedFull = date.toLocaleDateString('es-ES', {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
+    year: isDifferentYear ? 'numeric' : undefined,
   })
+
+  return { day: d, weekday, month, year: y, isDifferentYear, formattedFull }
 }
 
 export const PortfolioAgendaCard: React.FC<{
@@ -382,7 +407,7 @@ export const PortfolioAgendaCard: React.FC<{
               {nextEvent.title}
             </span>
             <span className="text-slate-500 dark:text-slate-400 shrink-0">
-              ({formatDateSpanish(nextEvent.date)})
+              ({parseEventDate(nextEvent.date).formattedFull})
             </span>
           </div>
           <span className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 flex items-center gap-1 shrink-0">
@@ -477,6 +502,7 @@ export const PortfolioAgendaCard: React.FC<{
               ) : (
                 filteredEvents.map((event) => {
                   const { days, label: countdownLabel, isPast } = getDaysRemaining(event.date)
+                  const { day, weekday, month, year, isDifferentYear } = parseEventDate(event.date)
                   const isPortfolio = event.category === 'portfolio'
                   const isDividend = event.category === 'dividends'
 
@@ -502,7 +528,7 @@ export const PortfolioAgendaCard: React.FC<{
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div
                           className={cn(
-                            'w-14 sm:w-16 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 border transition-all text-center',
+                            'w-14 sm:w-16 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 border transition-all text-center select-none shadow-xs',
                             days === 0
                               ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
                               : days === 1
@@ -514,11 +540,14 @@ export const PortfolioAgendaCard: React.FC<{
                               : 'bg-slate-100/80 dark:bg-white/[0.04] border-slate-200/90 dark:border-white/[0.08] text-slate-800 dark:text-slate-200'
                           )}
                         >
-                          <span className="text-[10px] uppercase font-bold tracking-wider leading-none">
-                            {formatDateSpanish(event.date).split(',')[0]}
+                          <span className="text-[10px] uppercase font-bold tracking-wider leading-none opacity-75">
+                            {weekday}
                           </span>
-                          <span className="text-sm font-extrabold font-mono leading-tight">
-                            {event.date.split('-')[2]} {formatDateSpanish(event.date).split(' ')[1]}
+                          <span className="text-base sm:text-lg font-black font-mono leading-tight my-0.5">
+                            {day}
+                          </span>
+                          <span className="text-[9px] uppercase font-extrabold tracking-wider leading-none opacity-85">
+                            {month}{isDifferentYear ? ` '${String(year).slice(2)}` : ''}
                           </span>
                         </div>
 
@@ -723,3 +752,4 @@ export const PortfolioAgendaCard: React.FC<{
     </Card>
   )
 }
+
