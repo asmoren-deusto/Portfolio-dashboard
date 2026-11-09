@@ -420,13 +420,14 @@ export const PortfolioAgendaCard: React.FC<{
       <AnimatePresence initial={false}>
         {!isCollapsed && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.24, ease: 'easeOut' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex-1 flex flex-col min-h-0"
           >
             {/* Filter Tabs Header */}
-            <div className="p-3 bg-slate-50/70 dark:bg-white/[0.015] border-b border-slate-200/70 dark:border-white/[0.04] flex flex-wrap items-center justify-between gap-2.5">
+            <div className="p-3 bg-slate-50/70 dark:bg-white/[0.015] border-b border-slate-200/70 dark:border-white/[0.04] flex flex-wrap items-center justify-between gap-2.5 shrink-0">
               {/* Category pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                 <button
@@ -493,7 +494,7 @@ export const PortfolioAgendaCard: React.FC<{
             </div>
 
             {/* Event List Timeline */}
-            <div className="divide-y divide-slate-100 dark:divide-white/[0.03] max-h-[460px] overflow-y-auto scrollbar-thin">
+            <div className="divide-y divide-slate-100 dark:divide-white/[0.03] flex-1 overflow-y-auto scrollbar-thin min-h-0">
               {filteredEvents.length === 0 ? (
                 <div className="py-12 text-center text-slate-400">
                   <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-40" />
@@ -621,6 +622,21 @@ export const PortfolioAgendaCard: React.FC<{
                   )
                 })
               )}
+            </div>
+
+            {/* Bottom Footer Action Bar */}
+            <div className="p-2.5 px-4 bg-slate-50/70 dark:bg-white/[0.015] border-t border-slate-200/70 dark:border-white/[0.04] flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-auto shrink-0">
+              <span className="font-mono text-[10px]">
+                {filteredEvents.length} {filteredEvents.length === 1 ? 'evento visible' : 'eventos programados'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(true)}
+                className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Añadir recordatorio</span>
+              </button>
             </div>
           </motion.div>
         )}
