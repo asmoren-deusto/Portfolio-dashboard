@@ -173,7 +173,7 @@ export function PortfolioDailyContributorsCard({
         </div>
       </CardHeader>
 
-      <div className="p-2.5 sm:p-3 pt-1 flex flex-col flex-1 justify-between gap-2.5 min-h-0">
+      <div className="p-3 sm:p-3.5 pt-1 flex flex-col flex-1 justify-between gap-3 min-h-0">
         {/* Net Impact Banner */}
         <div
           className={cn(
