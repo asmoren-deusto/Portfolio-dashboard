@@ -19,14 +19,14 @@ import { cn } from '@/lib/utils'
 
 const INDEX_TABS = [
   {
-    id: 'TICKER',
-    label: 'Ticker superior',
-    icon: <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />,
-  },
-  {
     id: 'Todos',
     label: 'Todos los Mercados',
     icon: <Globe className="w-3.5 h-3.5 text-blue-500 shrink-0" />,
+  },
+  {
+    id: 'TICKER',
+    label: 'Ticker superior',
+    icon: <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />,
   },
   {
     id: 'ETFs',
@@ -111,7 +111,7 @@ type MarketSectionView = 'all' | 'markets' | 'heatmap'
 
 export const MarketPage: React.FC = () => {
   const [viewSection, setViewSection] = useState<MarketSectionView>('all')
-  const [selectedIndex, setSelectedIndex] = useState<string>('TICKER')
+  const [selectedIndex, setSelectedIndex] = useState<string>('Todos')
   const [selectedSector, setSelectedSector] = useState<string>('Todos')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
