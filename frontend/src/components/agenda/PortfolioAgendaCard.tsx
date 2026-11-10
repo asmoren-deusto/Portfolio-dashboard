@@ -211,24 +211,19 @@ interface ParsedEventDate {
   formattedFull: string
 }
 
+const SPANISH_MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
+const SPANISH_WEEKDAYS = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB']
+
 function parseEventDate(dateStr: string): ParsedEventDate {
   const [y, m, d] = dateStr.split('-').map(Number)
   const date = new Date(y, m - 1, d)
   const now = new Date()
   const isDifferentYear = y !== now.getFullYear()
 
-  const rawWeekday = date.toLocaleDateString('es-ES', { weekday: 'short' })
-  const weekday = rawWeekday.replace(/\./g, '').trim().toUpperCase()
+  const weekday = SPANISH_WEEKDAYS[date.getDay()] ?? 'DÍA'
+  const month = SPANISH_MONTHS[m - 1] ?? 'MES'
 
-  const rawMonth = date.toLocaleDateString('es-ES', { month: 'short' })
-  const month = rawMonth.replace(/\./g, '').trim().toUpperCase()
-
-  const formattedFull = date.toLocaleDateString('es-ES', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: isDifferentYear ? 'numeric' : undefined,
-  })
+  const formattedFull = `${weekday.toLowerCase()}, ${d} ${month.toLowerCase()}${isDifferentYear ? ` ${y}` : ''}`
 
   return { day: d, weekday, month, year: y, isDifferentYear, formattedFull }
 }
