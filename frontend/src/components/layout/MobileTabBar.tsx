@@ -36,9 +36,9 @@ export const MobileTabBar: React.FC = () => {
 
   const TABS: TabItem[] = [
     { to: '/', icon: LayoutDashboard, label: 'Resumen' },
-    { to: '/positions', icon: Layers, label: 'Cartera' },
     { to: '/market', icon: Globe, label: 'Mercado' },
     { to: '/backtest', icon: History, label: 'Backtest' },
+    { to: '/positions', icon: Layers, label: 'Cartera' },
     { to: '/diversification', icon: PieChart, label: 'Diversif.' },
   ]
 
