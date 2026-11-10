@@ -5,6 +5,8 @@ import {
   Zap,
   PieChart,
   Cpu,
+  Layers,
+  LayoutGrid,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useMarketIndices, useMarketQuotes, type MarketStock } from '@/api/queries'
@@ -13,6 +15,7 @@ import { WorldMarketsRegionalCard } from '@/components/market/WorldMarketsRegion
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { SimulatedPortfolioCard } from '@/components/market/SimulatedPortfolioCard'
+import { cn } from '@/lib/utils'
 
 const INDEX_TABS = [
   {
@@ -104,7 +107,10 @@ function getTickerOrder(stock: { ticker: string; name?: string }): number {
   return 999
 }
 
+type MarketSectionView = 'all' | 'markets' | 'heatmap'
+
 export const MarketPage: React.FC = () => {
+  const [viewSection, setViewSection] = useState<MarketSectionView>('all')
   const [selectedIndex, setSelectedIndex] = useState<string>('TICKER')
   const [selectedSector, setSelectedSector] = useState<string>('Todos')
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -245,56 +251,61 @@ export const MarketPage: React.FC = () => {
         onSelectStock={setSelectedStock}
       />
 
-      {/* Controls & Filter Bar (Pestañas de Índices + Buscador) */}
-      <div className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-xl dark:shadow-black/20">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          {/* Left: Index Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 relative">
-            {INDEX_TABS.map((tab) => {
-              const active = selectedIndex === tab.id
-              return (
-                <motion.button
-                  key={tab.id}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => {
-                    setSelectedIndex(tab.id)
-                    setSelectedSector('Todos')
-                  }}
-                  className={`relative px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors z-10 flex items-center gap-1.5 ${
-                    active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.03]'
-                  }`}
-                >
-                  {active && (
-                    <motion.div
-                      layoutId="activeMarketTabPill"
-                      className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm -z-10"
-                      transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
-                    />
-                  )}
-                  <span className="flex items-center shrink-0">{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </motion.button>
-              )
-            })}
-          </div>
-
-          {/* Right: Search Bar */}
-          <div className="relative w-60 sm:w-72 lg:w-80">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Buscar por empresa, ticker..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-            />
-          </div>
+      {/* Selector de Modo de Visualización */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-1.5 sm:p-2 rounded-2xl bg-white/90 dark:bg-[#1e1e1e]/90 border border-slate-200/80 dark:border-white/[0.06] shadow-xs">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setViewSection('all')}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all',
+              viewSection === 'all'
+                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+            )}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Vista Completa</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewSection('markets')}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all',
+              viewSection === 'markets'
+                ? 'bg-blue-600 text-white font-bold shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+            )}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Bolsas del Mundo</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewSection('heatmap')}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all',
+              viewSection === 'heatmap'
+                ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+            )}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Mapa de Calor</span>
+          </button>
         </div>
+
+        <span className="hidden md:inline text-[11px] font-mono text-slate-400 dark:text-slate-500 pr-2">
+          {viewSection === 'all'
+            ? 'Bolsas globales + Mapa de calor sectorial'
+            : viewSection === 'markets'
+            ? '17 índices globales por regiones'
+            : `${filteredStocks.length} valores en mapa de calor`}
+        </span>
       </div>
 
-      {/* Bolsas del Mundo & Mapa de Calor lado a lado */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-stretch">
-        {/* Columna Izquierda: Bolsas del Mundo */}
+      {/* 1. Bolsas del Mundo & Cotizaciones Regionales (Ancho Completo) */}
+      {(viewSection === 'all' || viewSection === 'markets') && (
         <WorldMarketsRegionalCard
           indices={tickerData?.indices ?? []}
           isLoading={tickerLoading}
@@ -305,19 +316,71 @@ export const MarketPage: React.FC = () => {
             setSelectedIndex(tabId)
           }}
         />
+      )}
 
-        {/* Columna Derecha: Mapa de Calor del Mercado */}
-        <div className="w-full min-w-0">
-          <MarketHeatmap
-            stocks={filteredStocks}
-            onSelectStock={(stock) => setSelectedStock(stock)}
-            selectedSector={selectedSector}
-            onSectorChange={setSelectedSector}
-            isIndices={isTickerUniverse || selectedSector === 'Índices'}
-            defaultExpanded={false}
-          />
+      {/* 2. Mapa de Calor del Mercado con Barra de Filtros (Ancho Completo) */}
+      {(viewSection === 'all' || viewSection === 'heatmap') && (
+        <div className="space-y-3.5">
+          {/* Controls & Filter Bar (Pestañas de Índices + Buscador) */}
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-xl dark:shadow-black/20">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              {/* Left: Index Tabs */}
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 relative">
+                {INDEX_TABS.map((tab) => {
+                  const active = selectedIndex === tab.id
+                  return (
+                    <motion.button
+                      key={tab.id}
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => {
+                        setSelectedIndex(tab.id)
+                        setSelectedSector('Todos')
+                      }}
+                      className={`relative px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors z-10 flex items-center gap-1.5 ${
+                        active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      {active && (
+                        <motion.div
+                          layoutId="activeMarketTabPill"
+                          className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm -z-10"
+                          transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
+                        />
+                      )}
+                      <span className="flex items-center shrink-0">{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </motion.button>
+                  )
+                })}
+              </div>
+
+              {/* Right: Search Bar */}
+              <div className="relative w-60 sm:w-72 lg:w-80">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por empresa, ticker..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Mapa de Calor a Ancho Completo */}
+          <div className="w-full min-w-0">
+            <MarketHeatmap
+              stocks={filteredStocks}
+              onSelectStock={(stock) => setSelectedStock(stock)}
+              selectedSector={selectedSector}
+              onSectorChange={setSelectedSector}
+              isIndices={isTickerUniverse || selectedSector === 'Índices'}
+              defaultExpanded={false}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Stock Detail Modal */}
       <StockDetailModal
