@@ -4186,5 +4186,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-06",
     "broker": "indexa",
     "notes": "Aportación periódica mensual DCA (416,66 € cada día 7)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "FR0000989626",
+    "type": "sell",
+    "shares": 0.045,
+    "price": 44724.2222,
+    "amount": 2012.59,
+    "fees": 0.0,
+    "date": "2026-11-10",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Vanguard US 500 Stock, orden 20261110001)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "buy",
+    "shares": 24.41,
+    "price": 82.4274,
+    "amount": 2012.59,
+    "fees": 0.0,
+    "date": "2026-11-10",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde Groupama Trésorerie, orden 20261110001)"
   }
 ]''')

@@ -82,7 +82,7 @@ const BASE_EVENTS: AgendaEvent[] = [
     impact: 'high',
     impactLabel: 'Alto Impacto',
     description: 'Lectura adelantada de la inflación en la zona euro, crucial para la decisión de política monetaria del BCE de diciembre.',
-    assetTag: 'Euro 50 / Groupama',
+    assetTag: 'Euro 50 / Bonos',
   },
   {
     id: 'month-close-nov-26',
@@ -92,7 +92,7 @@ const BASE_EVENTS: AgendaEvent[] = [
     category: 'portfolio',
     impact: 'portfolio',
     impactLabel: 'Mi Cartera',
-    description: 'Último cálculo de valor liquidativo de noviembre para los fondos internacionales (Vanguard, Azvalor, DNB, Groupama).',
+    description: 'Último cálculo de valor liquidativo de noviembre para los fondos internacionales (Vanguard, Azvalor, DNB, Euro 50).',
     assetTag: 'Todos los Fondos',
   },
   {
@@ -126,9 +126,9 @@ const BASE_EVENTS: AgendaEvent[] = [
     category: 'macro',
     impact: 'high',
     impactLabel: 'Alto Impacto',
-    description: 'El Banco Central Europeo anuncia tipos de interés de la facilidad de depósito. Afecta directamente al rendimiento del monetario Groupama Trésorerie y curva de bonos.',
-    assetTag: 'Groupama / Bonos Estado',
-    assetIsin: 'FR0000989626',
+    description: 'El Banco Central Europeo anuncia tipos de interés de la facilidad de depósito. Afecta directamente a la curva de rentabilidad de la renta fija y bonos soberanos.',
+    assetTag: 'Bonos España / Renta Fija',
+    assetIsin: 'ES0000012411',
   },
   {
     id: 'fed-rate-dec-26',
