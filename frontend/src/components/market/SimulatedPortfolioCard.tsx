@@ -22,6 +22,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   useSimulatedPortfolio,
+  usePositions,
   type SimulatedChartPoint,
   type MarketStock,
   type SessionMarker,
@@ -166,10 +167,166 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   const isDark = theme === 'dark'
 
   const { data, isLoading, isFetching } = useSimulatedPortfolio(period)
+  const { data: positions = [] } = usePositions()
 
   const summary = data?.summary
   const fxInfo = summary?.fx_info
   const holdings = data?.holdings ?? []
+
+  // Best and worst performing assets from user's portfolio
+  const { bestPortfolioAsset, worstPortfolioAsset } = useMemo(() => {
+    // 1. Prioritize simulated holdings (real-time ETF proxy prices)
+    const validHoldings = (holdings || []).filter(
+      (h) => h.etf_change_pct !== undefined && h.etf_change_pct !== null
+    )
+
+    if (validHoldings.length > 0) {
+      const sorted = [...validHoldings].sort(
+        (a, b) => (b.etf_change_pct ?? 0) - (a.etf_change_pct ?? 0)
+      )
+      const best = sorted[0]
+      const worst = sorted.length > 1 ? sorted[sorted.length - 1] : sorted[0]
+
+      return {
+        bestPortfolioAsset: best
+          ? {
+              name: formatAssetDisplayName(best.fund_name, true, best.isin),
+              ticker: best.etf_ticker || '',
+              isin: best.isin,
+              price: best.nav,
+              currency: 'EUR',
+              change_pct: best.etf_change_pct ?? 0,
+              change: best.etf_change,
+              broker: best.broker,
+              gainAmount: best.simulated_gain_amount,
+              marketStock: {
+                ticker: best.etf_ticker || best.isin,
+                name: formatAssetDisplayName(best.fund_name, true, best.isin),
+                price: best.nav,
+                currency: 'EUR',
+                change_pct: best.etf_change_pct ?? 0,
+                change: best.etf_change,
+                sector: 'Cartera',
+              } as MarketStock,
+            }
+          : null,
+        worstPortfolioAsset: worst
+          ? {
+              name: formatAssetDisplayName(worst.fund_name, true, worst.isin),
+              ticker: worst.etf_ticker || '',
+              isin: worst.isin,
+              price: worst.nav,
+              currency: 'EUR',
+              change_pct: worst.etf_change_pct ?? 0,
+              change: worst.etf_change,
+              broker: worst.broker,
+              gainAmount: worst.simulated_gain_amount,
+              marketStock: {
+                ticker: worst.etf_ticker || worst.isin,
+                name: formatAssetDisplayName(worst.fund_name, true, worst.isin),
+                price: worst.nav,
+                currency: 'EUR',
+                change_pct: worst.etf_change_pct ?? 0,
+                change: worst.etf_change,
+                sector: 'Cartera',
+              } as MarketStock,
+            }
+          : null,
+      }
+    }
+
+    // 2. Fallback to user positions
+    const validPositions = (positions || []).filter(
+      (p) => p.daily_change_pct !== undefined && p.daily_change_pct !== null
+    )
+
+    if (validPositions.length > 0) {
+      const sorted = [...validPositions].sort(
+        (a, b) => (b.daily_change_pct ?? 0) - (a.daily_change_pct ?? 0)
+      )
+      const best = sorted[0]
+      const worst = sorted.length > 1 ? sorted[sorted.length - 1] : sorted[0]
+
+      return {
+        bestPortfolioAsset: best
+          ? {
+              name: formatAssetDisplayName(best.name, true, best.isin),
+              ticker: best.ticker || '',
+              isin: best.isin,
+              price: best.current_price ?? 0,
+              currency: best.currency || 'EUR',
+              change_pct: best.daily_change_pct ?? 0,
+              change: best.daily_change ?? undefined,
+              broker: best.broker ?? null,
+              gainAmount: undefined,
+              marketStock: {
+                ticker: best.ticker || best.isin,
+                name: formatAssetDisplayName(best.name, true, best.isin),
+                price: best.current_price ?? 0,
+                currency: best.currency || 'EUR',
+                change_pct: best.daily_change_pct ?? 0,
+                change: best.daily_change ?? undefined,
+                sector: 'Cartera',
+              } as MarketStock,
+            }
+          : null,
+        worstPortfolioAsset: worst
+          ? {
+              name: formatAssetDisplayName(worst.name, true, worst.isin),
+              ticker: worst.ticker || '',
+              isin: worst.isin,
+              price: worst.current_price ?? 0,
+              currency: worst.currency || 'EUR',
+              change_pct: worst.daily_change_pct ?? 0,
+              change: worst.daily_change ?? undefined,
+              broker: worst.broker ?? null,
+              gainAmount: undefined,
+              marketStock: {
+                ticker: worst.ticker || worst.isin,
+                name: formatAssetDisplayName(worst.name, true, worst.isin),
+                price: worst.current_price ?? 0,
+                currency: worst.currency || 'EUR',
+                change_pct: worst.daily_change_pct ?? 0,
+                change: worst.daily_change ?? undefined,
+                sector: 'Cartera',
+              } as MarketStock,
+            }
+          : null,
+      }
+    }
+
+    // 3. Fallback to broad market stock prop if no portfolio data at all
+    return {
+      bestPortfolioAsset: bestStock
+        ? {
+            name: bestStock.name,
+            ticker: bestStock.ticker,
+            isin: undefined,
+            price: bestStock.price,
+            currency: bestStock.currency || 'EUR',
+            change_pct: bestStock.change_pct ?? 0,
+            change: bestStock.change,
+            broker: null,
+            gainAmount: undefined,
+            marketStock: bestStock,
+          }
+        : null,
+      worstPortfolioAsset: worstStock
+        ? {
+            name: worstStock.name,
+            ticker: worstStock.ticker,
+            isin: undefined,
+            price: worstStock.price,
+            currency: worstStock.currency || 'EUR',
+            change_pct: worstStock.change_pct ?? 0,
+            change: worstStock.change,
+            broker: null,
+            gainAmount: undefined,
+            marketStock: worstStock,
+          }
+        : null,
+    }
+  }, [holdings, positions, bestStock, worstStock])
   const etfs = data?.etfs_summary ?? []
   const chartPoints = data?.chart_points ?? []
   const sessionMarkers = useMemo(() => {
@@ -925,12 +1082,16 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
           </div>
 
           {/* Market Overview Highlights (Cuadrícula 2x2 equilibrada sin huecos) */}
-          {marketStats && (
+          {(marketStats || bestPortfolioAsset || worstPortfolioAsset) && (
             <div className="grid grid-cols-2 gap-2 mt-0.5 pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
               {/* 1. Mayor Ganancia */}
-              {bestStock ? (
+              {bestPortfolioAsset ? (
                 <div
-                  onClick={() => onSelectStock?.(bestStock)}
+                  onClick={() => {
+                    if (bestPortfolioAsset.marketStock) {
+                      onSelectStock?.(bestPortfolioAsset.marketStock)
+                    }
+                  }}
                   className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5 border border-emerald-500/25 hover:border-emerald-500/40 cursor-pointer transition-all shadow-2xs group flex flex-col justify-between"
                 >
                   <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -938,15 +1099,37 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     <Flame className="w-4 h-4 text-emerald-500 shrink-0" />
                   </div>
                   <div className="flex items-baseline justify-between mt-1 gap-1.5">
-                    <span className="text-[14.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate" title={bestStock.name}>
-                      {bestStock.name}
+                    <span
+                      className="text-[14.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate"
+                      title={bestPortfolioAsset.name}
+                    >
+                      {bestPortfolioAsset.name}
                     </span>
-                    <span className="text-xs sm:text-[13.5px] font-bold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-lg border border-emerald-500/30 shadow-2xs shrink-0">
-                      +{bestStock.change_pct?.toFixed(2)}%
+                    <span
+                      className={cn(
+                        "text-xs sm:text-[13.5px] font-bold font-mono px-2.5 py-0.5 rounded-lg border shadow-2xs shrink-0",
+                        bestPortfolioAsset.change_pct >= 0
+                          ? "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30"
+                          : "text-rose-700 dark:text-rose-300 bg-rose-500/15 border-rose-500/30"
+                      )}
+                    >
+                      {bestPortfolioAsset.change_pct >= 0 ? '+' : ''}
+                      {bestPortfolioAsset.change_pct.toFixed(2)}%
                     </span>
                   </div>
-                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">{bestStock.ticker}</span> • {fmt.price(bestStock.price, bestStock.currency)}
+                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5 flex items-center gap-1.5">
+                    {bestPortfolioAsset.broker && (
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                        {bestPortfolioAsset.broker.toUpperCase()}
+                      </span>
+                    )}
+                    {bestPortfolioAsset.ticker && (
+                      <span className="text-slate-400 dark:text-slate-500">
+                        {bestPortfolioAsset.broker ? '· ' : ''}{bestPortfolioAsset.ticker}
+                      </span>
+                    )}
+                    <span>•</span>
+                    <span>{fmt.price(bestPortfolioAsset.price, bestPortfolioAsset.currency)}</span>
                   </div>
                 </div>
               ) : (
@@ -954,9 +1137,13 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               )}
 
               {/* 2. Mayor Caída */}
-              {worstStock ? (
+              {worstPortfolioAsset ? (
                 <div
-                  onClick={() => onSelectStock?.(worstStock)}
+                  onClick={() => {
+                    if (worstPortfolioAsset.marketStock) {
+                      onSelectStock?.(worstPortfolioAsset.marketStock)
+                    }
+                  }}
                   className="p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] hover:bg-rose-50/50 dark:hover:bg-rose-500/5 border border-rose-500/25 hover:border-rose-500/40 cursor-pointer transition-all shadow-2xs group flex flex-col justify-between"
                 >
                   <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -964,15 +1151,37 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                     <TrendingDown className="w-4 h-4 text-rose-500 shrink-0" />
                   </div>
                   <div className="flex items-baseline justify-between mt-1 gap-1.5">
-                    <span className="text-[14.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate" title={worstStock.name}>
-                      {worstStock.name}
+                    <span
+                      className="text-[14.5px] sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate"
+                      title={worstPortfolioAsset.name}
+                    >
+                      {worstPortfolioAsset.name}
                     </span>
-                    <span className="text-xs sm:text-[13.5px] font-bold font-mono text-rose-700 dark:text-rose-300 bg-rose-500/15 px-2.5 py-0.5 rounded-lg border border-rose-500/30 shadow-2xs shrink-0">
-                      {worstStock.change_pct?.toFixed(2)}%
+                    <span
+                      className={cn(
+                        "text-xs sm:text-[13.5px] font-bold font-mono px-2.5 py-0.5 rounded-lg border shadow-2xs shrink-0",
+                        worstPortfolioAsset.change_pct >= 0
+                          ? "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30"
+                          : "text-rose-700 dark:text-rose-300 bg-rose-500/15 border-rose-500/30"
+                      )}
+                    >
+                      {worstPortfolioAsset.change_pct >= 0 ? '+' : ''}
+                      {worstPortfolioAsset.change_pct.toFixed(2)}%
                     </span>
                   </div>
-                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">{worstStock.ticker}</span> • {fmt.price(worstStock.price, worstStock.currency)}
+                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5 flex items-center gap-1.5">
+                    {worstPortfolioAsset.broker && (
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                        {worstPortfolioAsset.broker.toUpperCase()}
+                      </span>
+                    )}
+                    {worstPortfolioAsset.ticker && (
+                      <span className="text-slate-400 dark:text-slate-500">
+                        {worstPortfolioAsset.broker ? '· ' : ''}{worstPortfolioAsset.ticker}
+                      </span>
+                    )}
+                    <span>•</span>
+                    <span>{fmt.price(worstPortfolioAsset.price, worstPortfolioAsset.currency)}</span>
                   </div>
                 </div>
               ) : (
@@ -991,10 +1200,10 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="px-2 py-0.5 rounded-md font-mono font-bold text-xs sm:text-[12.5px] bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
-                      {marketStats.advancing} ↑
+                      {marketStats?.advancing ?? 0} ↑
                     </span>
                     <span className="px-2 py-0.5 rounded-md font-mono font-bold text-xs sm:text-[12.5px] bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25">
-                      {marketStats.declining} ↓
+                      {marketStats?.declining ?? 0} ↓
                     </span>
                   </div>
                 </div>
@@ -1002,13 +1211,13 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                 <div className="w-full h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden flex mt-1.5">
                   <div
                     style={{
-                      width: `${((marketStats.advancing || 0) / Math.max(1, (marketStats.advancing || 0) + (marketStats.declining || 0))) * 100}%`,
+                      width: `${(((marketStats?.advancing ?? 0)) / Math.max(1, (marketStats?.advancing ?? 0) + (marketStats?.declining ?? 0))) * 100}%`,
                     }}
                     className="h-full bg-emerald-500 transition-all duration-300"
                   />
                   <div
                     style={{
-                      width: `${((marketStats.declining || 0) / Math.max(1, (marketStats.advancing || 0) + (marketStats.declining || 0))) * 100}%`,
+                      width: `${(((marketStats?.declining ?? 0)) / Math.max(1, (marketStats?.advancing ?? 0) + (marketStats?.declining ?? 0))) * 100}%`,
                     }}
                     className="h-full bg-rose-500 transition-all duration-300"
                   />
