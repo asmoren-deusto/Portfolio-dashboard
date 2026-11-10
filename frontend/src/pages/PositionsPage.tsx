@@ -22,7 +22,7 @@ import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { PortfolioAttributionCard } from '@/components/analytics/PortfolioAttributionCard'
 import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
-import { fmt, cn, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
+import { fmt, cn, getConsensusNavDate, formatAssetDisplayName, getExpectedNavHour, isPositionPendingNavUpdate } from '@/lib/utils'
 import { initializeBaselineSeenNavs } from '@/lib/navAlertTracker'
 import { isNativePlatform } from '@/api/config'
 import { usePositions, usePortfolioSummary, useAnalytics } from '@/api/queries'
@@ -423,6 +423,8 @@ export function PositionsPage() {
                   filteredPositions.map((p) => {
                     const pDate = p.price_date || p.last_updated
                     const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
+                    const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
+                    const expectedNavHour = getExpectedNavHour(p.isin, p.asset_type)
                     return (
                       <tr
                         key={p.isin}
@@ -503,7 +505,17 @@ export function PositionsPage() {
 
                         {/* Tipo */}
                         <td className="px-4 py-3.5">
-                          <AssetBadge type={p.asset_type} />
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <AssetBadge type={p.asset_type} />
+                            {isPendingNav && expectedNavHour && (
+                              <span
+                                className="font-mono text-xs text-slate-400 dark:text-slate-400/80"
+                                title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
+                              >
+                                ~{expectedNavHour}
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Participaciones */}
@@ -613,6 +625,8 @@ export function PositionsPage() {
               {filteredPositions.map((p, i) => {
                 const pDate = p.price_date || p.last_updated
                 const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
+                const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
+                const expectedNavHour = getExpectedNavHour(p.isin, p.asset_type)
                 return (
                   <motion.div
                     key={p.isin}
@@ -658,7 +672,17 @@ export function PositionsPage() {
                         </div>
                       </div>
                     </div>
-                    <AssetBadge type={p.asset_type} />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <AssetBadge type={p.asset_type} />
+                      {isPendingNav && expectedNavHour && (
+                        <span
+                          className="font-mono text-xs text-slate-400 dark:text-slate-400/80"
+                          title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
+                        >
+                          ~{expectedNavHour}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Main Value and Gain */}

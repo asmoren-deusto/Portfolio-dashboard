@@ -255,3 +255,95 @@ export function getAssetOfficialDetails(
   }
 }
 
+/**
+ * Approximate official NAV publication hours for funds (CET / Madrid time).
+ * Used to indicate to users when an updated NAV is expected for pending assets.
+ */
+export const NAV_UPDATE_SCHEDULE_BY_ISIN: Record<string, string> = {
+  // 1. Vanguard U.S. 500 Stock Index EUR (tras cierre Wall Street 22:00 CET)
+  'IE0032126645': '23:00',
+  // 2. Azvalor Internacional FI (cierre diario gestora ~21:30 - 22:30 CET)
+  'ES0112611001': '22:00',
+  // 3. DNB Fund Technology (DNB Asset Management Lux ~20:30 - 21:30 CET)
+  'LU0302296495': '21:00',
+  // 4. Euro 50 Index Fund (Fidelity Euro 50 tras cierre europeo 17:30 CET)
+  'LU0261952682': '20:30',
+  // 5. MSCI Japan Index (Hedged) (Fidelity divisa cubierta)
+  'IE00BYX5NH74': '21:30',
+  // 6. Emerging Markets Index (iShares Dublin)
+  'IE000QAZP7L2': '22:30',
+  // 7. BGF World Healthscience (BlackRock Global Funds Lux)
+  'LU0171307068': '21:30',
+  // 8. Indexa Más Rentabilidad EPSV (Caser Pensiones por la tarde)
+  '0192#0011': '16:00',
+  // 9. Bonos Gobierno España Jul 32 (cierre mercado deuda)
+  'ES0000012411': '17:30',
+  // 10. iShares Physical Gold ETC (cierre fixing bolsa)
+  'IE00B4ND3602': '17:30',
+  // Otros fondos históricos y de seguimiento
+  'IE000ZYRH0Q7': '22:00',
+  'IE00BYX5NX33': '21:00',
+  'IE00BYX5M476': '22:30',
+  'LU1598719752': '22:00',
+  'LU0996182563': '21:00',
+  'LU1623762843': '20:30',
+  'LU2145461757': '21:00',
+  'IE00BM95B621': '21:30',
+  '0201G': '16:00',
+}
+
+/**
+ * Returns the estimated NAV publication hour for an asset, or a default for funds if not explicitly mapped.
+ */
+export function getExpectedNavHour(isin?: string | null, assetType?: string | null): string | null {
+  if (!isin || isin === 'TR_TRANSFER' || isin.startsWith('TR_')) return null
+  if (NAV_UPDATE_SCHEDULE_BY_ISIN[isin]) {
+    return NAV_UPDATE_SCHEDULE_BY_ISIN[isin]
+  }
+  // Generic fallback for mutual funds or pension plans
+  if (assetType === 'fund' || assetType === 'epsv') {
+    return '22:00'
+  }
+  return null
+}
+
+/**
+ * Determines whether an asset is pending its latest official NAV update.
+ * If today is a business day and the asset's price_date is older than today,
+ * it is pending today's NAV update.
+ * On weekends/holidays, it is pending if older than the latest expected closed session.
+ */
+export function isPositionPendingNavUpdate(
+  pos: { price_date?: string | null; last_updated?: string | null; asset_type?: string | null; isin?: string },
+  latestNavDate?: string | null,
+  asOfDate?: Date
+): boolean {
+  if (!pos || pos.isin === 'TR_TRANSFER' || pos.isin?.startsWith('TR_')) return false
+
+  const pDate = (pos.price_date || pos.last_updated)?.slice(0, 10)
+  if (!pDate) return true
+
+  const now = asOfDate || new Date()
+  const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+  // If already at or past today's date, it is definitely updated for today
+  if (pDate >= todayYmd) {
+    return false
+  }
+
+  // If any other position or consensus has advanced to today (or latestNavDate), and this position is behind:
+  if (latestNavDate && pDate < latestNavDate) {
+    return true
+  }
+
+  // If today is a business day (Monday=1..Friday=5), today's session NAV is expected today
+  const dayOfWeek = now.getDay()
+  if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+    return pDate < todayYmd
+  }
+
+  // On weekends/holidays, compare against latest closed session
+  return latestNavDate ? pDate < latestNavDate : false
+}
+
+

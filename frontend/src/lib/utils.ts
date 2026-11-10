@@ -156,6 +156,9 @@ export {
   getAssetCleanName,
   getAssetOfficialDetails,
   ASSET_METADATA_BY_ISIN,
+  NAV_UPDATE_SCHEDULE_BY_ISIN,
+  getExpectedNavHour,
+  isPositionPendingNavUpdate,
   type AssetMetaInfo,
 } from './assetMetadata'
 

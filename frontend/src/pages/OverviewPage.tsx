@@ -57,7 +57,7 @@ import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { PortfolioAgendaCard } from '@/components/agenda/PortfolioAgendaCard'
-import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate, formatAssetDisplayName } from '@/lib/utils'
+import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate, formatAssetDisplayName, getExpectedNavHour, isPositionPendingNavUpdate } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
 
@@ -1829,6 +1829,8 @@ export function OverviewPage() {
                         const assetColor = assetColorMap[p.isin]
                         const pDate = p.price_date || p.last_updated
                         const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
+                        const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
+                        const expectedNavHour = getExpectedNavHour(p.isin, p.asset_type)
 
                         return (
                           <tr
@@ -1878,6 +1880,14 @@ export function OverviewPage() {
                                   <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                     <span>{p.isin}</span>
                                     {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
+                                    {isPendingNav && expectedNavHour && (
+                                      <span
+                                        className="text-slate-400 dark:text-slate-400/80 font-mono text-[11.5px]"
+                                        title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
+                                      >
+                                        ~{expectedNavHour}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -2012,6 +2022,8 @@ export function OverviewPage() {
                           const assetColor = assetColorMap[p.isin]
                           const pDate = p.price_date || p.last_updated
                           const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
+                          const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
+                          const expectedNavHour = getExpectedNavHour(p.isin, p.asset_type)
 
                           return (
                             <tr
@@ -2061,6 +2073,14 @@ export function OverviewPage() {
                                     <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                       <span>{p.isin}</span>
                                       {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
+                                      {isPendingNav && expectedNavHour && (
+                                        <span
+                                          className="text-slate-400 dark:text-slate-400/80 font-mono text-[11.5px]"
+                                          title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
+                                        >
+                                          ~{expectedNavHour}
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
