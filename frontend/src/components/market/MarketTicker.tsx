@@ -13,6 +13,21 @@ interface MarketTickerProps {
   className?: string
 }
 
+const TICKER_BAR_SYMBOLS = [
+  '^GSPC',      // S&P 500
+  '^IXIC',      // NASDAQ
+  'URTH',       // MSCI World
+  'EEM',        // Emergentes
+  '^IBEX',      // IBEX 35
+  '^STOXX50E',  // Euro 50
+  '^N225',      // Nikkei 225
+  'GC=F',       // Oro
+  'BZ=F',       // Petróleo
+  'BTC-EUR',    // BTC/EUR
+  'EURUSD=X',   // EUR/USD
+  'EURJPY=X',   // EUR/JPY
+]
+
 function formatTickerName(name: string): string {
   if (name === 'MSCI Emergentes' || name === 'Emegentes') return 'Emergentes'
   if (name === 'Euro Stoxx 50') return 'Euro 50'
@@ -227,7 +242,36 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({ onSelectStock, fullW
   const utcHour = nowUTC.getUTCHours() + nowUTC.getUTCMinutes() / 60
   const isWeekend = utcDay === 6 || (utcDay === 0 && utcHour < 22) || (utcDay === 5 && utcHour >= 21)
 
-  const rawList = data?.indices && data.indices.length > 0 ? data.indices : defaultIndices
+  const sourceList = data?.indices && data.indices.length > 0 ? data.indices : defaultIndices
+  const rawList = sourceList
+    .filter((idx: any) => {
+      if (idx.is_ticker === false) return false
+      return (
+        TICKER_BAR_SYMBOLS.includes(idx.ticker) ||
+        (idx.name && [
+          'S&P 500',
+          'NASDAQ',
+          'MSCI World',
+          'Emergentes',
+          'MSCI Emergentes',
+          'IBEX 35',
+          'Euro 50',
+          'Euro Stoxx 50',
+          'Nikkei 225',
+          'Oro',
+          'Petróleo',
+          'Petróleo Brent',
+          'BTC/EUR',
+          'EUR/USD',
+          'EUR/JPY',
+        ].includes(idx.name))
+      )
+    })
+    .sort((a: any, b: any) => {
+      const idxA = TICKER_BAR_SYMBOLS.indexOf(a.ticker)
+      const idxB = TICKER_BAR_SYMBOLS.indexOf(b.ticker)
+      return (idxA !== -1 ? idxA : 999) - (idxB !== -1 ? idxB : 999)
+    })
   const rawIndices = rawList.map((idx: any) => {
     const isCrypto = idx.ticker?.includes('BTC') || idx.name?.includes('BTC')
     let state = idx.market_state

@@ -461,6 +461,7 @@ export interface MarketStock {
   currency: string
   day_high: number | null
   day_low: number | null
+  is_ticker?: boolean
   logo_url: string
   last_updated: string | null
 }

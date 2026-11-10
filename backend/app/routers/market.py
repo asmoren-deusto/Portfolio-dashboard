@@ -170,6 +170,11 @@ STOCK_UNIVERSE = [
 ]
 
 # Index quotes for ticker bar
+ROTATING_TICKER_SYMBOLS = {
+    "^GSPC", "^IXIC", "URTH", "EEM", "^IBEX", "^STOXX50E",
+    "^N225", "GC=F", "BZ=F", "BTC-EUR", "EURUSD=X", "EURJPY=X"
+}
+
 INDEX_TICKERS = {
     "S&P 500":         "^GSPC",
     "NASDAQ":          "^IXIC",
@@ -947,6 +952,7 @@ async def _fetch_indices_fresh():
             "proxy_used":        q.get("proxy_used"),
             "last_updated":      q.get("last_updated", _now_iso()),
             "logo_url":          "",
+            "is_ticker":         ticker in ROTATING_TICKER_SYMBOLS,
         })
 
     data = _sanitize_for_json({

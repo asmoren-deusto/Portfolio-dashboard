@@ -116,27 +116,33 @@ export const MarketPage: React.FC = () => {
   )
   const { data: tickerData, isLoading: tickerLoading, isFetching: tickerFetching } = useMarketIndices()
   const isTickerUniverse = selectedIndex === 'TICKER'
-  const tickerStocks = useMemo(() => (tickerData?.indices ?? []).map((stock) => {
-    const rawName = stock.name || ''
-    const cleanName =
-      rawName === 'MSCI Emergentes' || rawName === 'Emegentes'
-        ? 'Emergentes'
-        : rawName === 'Euro Stoxx 50'
-        ? 'Euro 50'
-        : rawName === 'Petróleo Brent' || rawName.startsWith('Petróleo')
-        ? 'Petróleo'
-        : rawName
+  const tickerStocks = useMemo(() => {
+    const raw = tickerData?.indices ?? []
+    const filtered = isTickerUniverse
+      ? raw.filter((stock) => TICKER_ORDER.includes(stock.ticker))
+      : raw
+    return filtered.map((stock) => {
+      const rawName = stock.name || ''
+      const cleanName =
+        rawName === 'MSCI Emergentes' || rawName === 'Emegentes'
+          ? 'Emergentes'
+          : rawName === 'Euro Stoxx 50'
+          ? 'Euro 50'
+          : rawName === 'Petróleo Brent' || rawName.startsWith('Petróleo')
+          ? 'Petróleo'
+          : rawName
 
-    return {
-      ...stock,
-      name: cleanName,
-      sector: stock.sector?.startsWith('Índice')
-        ? 'Índices'
-        : stock.sector?.startsWith('Materia Prima')
-        ? 'Materias primas'
-        : stock.sector || 'Índices',
-    }
-  }), [tickerData?.indices])
+      return {
+        ...stock,
+        name: cleanName,
+        sector: stock.sector?.startsWith('Índice')
+          ? 'Índices'
+          : stock.sector?.startsWith('Materia Prima')
+          ? 'Materias primas'
+          : stock.sector || 'Índices',
+      }
+    })
+  }, [tickerData?.indices, isTickerUniverse])
   const data = isTickerUniverse
     ? { stocks: tickerStocks }
     : quoteData
