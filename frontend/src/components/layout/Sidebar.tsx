@@ -26,9 +26,9 @@ import { isNativePlatform } from '@/api/config'
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Visión General' },
   { to: '/market', icon: Globe, label: 'Mercado' },
+  { to: '/analytics', icon: TrendingUp, label: 'Analítica' },
   { to: '/backtest', icon: History, label: 'Backtest & Crisis' },
   { to: '/diversification', icon: PieChart, label: 'Diversificación' },
-  { to: '/analytics', icon: TrendingUp, label: 'Analítica' },
   { to: '/positions', icon: Layers, label: 'Posiciones' },
   { to: '/transactions', icon: List, label: 'Operaciones' },
 ]
