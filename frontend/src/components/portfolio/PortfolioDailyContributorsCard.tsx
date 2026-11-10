@@ -177,7 +177,7 @@ export function PortfolioDailyContributorsCard({
         {/* Net Impact Banner */}
         <div
           className={cn(
-            'py-2 px-3 rounded-xl border flex items-center justify-between gap-3 transition-colors',
+            'py-2 px-3 rounded-xl border flex items-center justify-between gap-3 transition-colors shrink-0',
             stats.netEuro >= 0
               ? 'bg-emerald-500/[0.05] border-emerald-500/20 dark:bg-emerald-500/[0.08]'
               : 'bg-rose-500/[0.05] border-rose-500/20 dark:bg-rose-500/[0.08]'
@@ -231,10 +231,10 @@ export function PortfolioDailyContributorsCard({
         </div>
 
         {/* Top Movers: Lista Vertical (Impulsores encima de Detractores) */}
-        <div className="flex flex-col gap-2.5 flex-1 min-h-0 justify-between">
+        <div className="flex flex-col gap-3 flex-1 min-h-0 justify-between">
           {/* Top Impulsores */}
-          <div className="flex flex-col min-h-0">
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1 shrink-0">
+          <div className="flex flex-col shrink-0">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5 shrink-0">
               <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 truncate">
                 <TrendingUp className="w-3.5 h-3.5 shrink-0" />
                 Mayores Impulsores (+€)
@@ -246,12 +246,12 @@ export function PortfolioDailyContributorsCard({
                 <p className="text-[11px] text-slate-400 italic text-center">Sin activos en positivo</p>
               </div>
             ) : (
-              <div className="space-y-1.5 flex-1 min-h-0">
+              <div className="space-y-1.5 shrink-0">
                 {stats.gainers.map(({ pos, euro, pct }) => (
                   <div
                     key={pos.isin}
                     onClick={() => onSelectPosition?.(pos)}
-                    className="py-1.5 px-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100/90 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.05] flex items-center justify-between gap-2 cursor-pointer transition-all group"
+                    className="py-1.5 px-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100/90 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.05] flex items-center justify-between gap-2 cursor-pointer transition-all group shrink-0"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <CompanyLogo
@@ -288,8 +288,8 @@ export function PortfolioDailyContributorsCard({
           </div>
 
           {/* Top Detractores */}
-          <div className="flex flex-col min-h-0">
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1 shrink-0">
+          <div className="flex flex-col shrink-0">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5 shrink-0">
               <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 truncate">
                 <TrendingDown className="w-3.5 h-3.5 shrink-0" />
                 Mayores Detractores (-€)
@@ -301,12 +301,12 @@ export function PortfolioDailyContributorsCard({
                 <p className="text-[11px] text-slate-400 italic text-center">Sin activos en negativo</p>
               </div>
             ) : (
-              <div className="space-y-1.5 flex-1 min-h-0">
+              <div className="space-y-1.5 shrink-0">
                 {stats.losers.map(({ pos, euro, pct }) => (
                   <div
                     key={pos.isin}
                     onClick={() => onSelectPosition?.(pos)}
-                    className="py-1.5 px-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100/90 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.05] flex items-center justify-between gap-2 cursor-pointer transition-all group"
+                    className="py-1.5 px-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100/90 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.05] flex items-center justify-between gap-2 cursor-pointer transition-all group shrink-0"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <CompanyLogo
@@ -344,7 +344,7 @@ export function PortfolioDailyContributorsCard({
         </div>
 
         {/* Footer Link */}
-        <div className="pt-2 border-t border-slate-100 dark:border-white/[0.04] flex items-center justify-between text-[11px]">
+        <div className="pt-2 border-t border-slate-100 dark:border-white/[0.04] flex items-center justify-between text-[11px] shrink-0">
           <Link
             to="/positions"
             className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
