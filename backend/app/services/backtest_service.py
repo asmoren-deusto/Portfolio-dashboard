@@ -100,14 +100,13 @@ def calculate_portfolio_backtest(
     and computes the comprehensive trackback & stress-test report.
     """
     DEFAULT_POS = [
-        {"isin": "IE0032126645", "name": "Vanguard U.S. SP500 Index", "current_value": 19745.39, "asset_type": "fund"},
+        {"isin": "IE0032126645", "name": "Vanguard U.S. SP500 Index", "current_value": 25799.44, "asset_type": "fund"},
         {"isin": "0192#0011", "name": "Indexa Más Rentabilidad EPSV", "current_value": 11525.12, "asset_type": "epsv"},
         {"isin": "LU0302296495", "name": "DNB Fund Technology", "current_value": 7352.65, "asset_type": "fund"},
         {"isin": "ES0112611001", "name": "Azvalor Internacional FI", "current_value": 7205.35, "asset_type": "fund"},
         {"isin": "IE000QAZP7L2", "name": "Emerging Markets Index", "current_value": 6358.52, "asset_type": "fund"},
         {"isin": "IE00BYX5NH74", "name": "MSCI Japan Index (Hedged)", "current_value": 6328.15, "asset_type": "fund"},
         {"isin": "LU0261952682", "name": "Euro 50 Index Fund", "current_value": 6253.87, "asset_type": "fund"},
-        {"isin": "LU0171307068", "name": "BGF World Healthscience", "current_value": 6198.43, "asset_type": "fund"},
         {"isin": "ES0000012411", "name": "Bonos Gobierno España Jul 32", "current_value": 4000.99, "asset_type": "bond"},
         {"isin": "IE00B4ND3602", "name": "iShares Physical Gold ETC", "current_value": 1941.84, "asset_type": "etc"},
     ]

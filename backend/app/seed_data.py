@@ -4210,5 +4210,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-10",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde Groupama Trésorerie, orden 20261110001)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0171307068",
+    "type": "sell",
+    "shares": 53.75,
+    "price": 75.189953,
+    "amount": 4041.46,
+    "fees": 0.0,
+    "date": "2026-11-11",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Vanguard US 500 Stock, orden 20261111001)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "buy",
+    "shares": 49.05,
+    "price": 82.3818,
+    "amount": 4041.46,
+    "fees": 0.0,
+    "date": "2026-11-11",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde BGF World Healthscience, orden 20261111001)"
   }
 ]''')
