@@ -52,7 +52,7 @@ import {
   InteractiveEntityBar,
 } from '@/components/ui/DynamicSvgIndicators'
 import { MarketTicker } from '@/components/market/MarketTicker'
-import { PortfolioDailyContributorsCard } from '@/components/portfolio/PortfolioDailyContributorsCard'
+import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
@@ -2266,7 +2266,7 @@ export function OverviewPage() {
       </Card>
     </div>
 
-      {/* ── Agenda Financiera (60%) e Impacto en Euros / Contribuidores (40%) ── */}
+      {/* ── Agenda Financiera (60%) y Mapa de Calor del Mercado (40%) ── */}
       <div
         className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch lg:min-h-[460px] lg:h-[470px]"
         style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 470px' }}
@@ -2279,11 +2279,14 @@ export function OverviewPage() {
           />
         </div>
 
-        {/* Columna Derecha (40%): Impacto en Euros Hoy & Contribuidores */}
+        {/* Columna Derecha (40%): Mapa de Calor del Mercado */}
         <div className="w-full h-full lg:col-span-2 flex flex-col min-h-0">
-          <PortfolioDailyContributorsCard
-            positions={positions}
-            onSelectPosition={(pos) => setSelectedPosition(pos)}
+          <MarketHeatmap
+            stocks={marketData?.stocks ?? []}
+            onSelectStock={(stock) => setSelectedStock(stock)}
+            showViewAllLink={true}
+            compact={true}
+            fitParent={true}
             className="h-full max-h-[470px] flex flex-col min-h-0"
           />
         </div>
