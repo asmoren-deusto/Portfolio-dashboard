@@ -223,7 +223,6 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
   const cur = position?.currency || 'EUR'
   const meta = position ? getAssetOfficialDetails(position.isin, position.name, position.currency) : null
   const isPendingNav = position ? isPositionPendingNavUpdate(position) : false
-  const expectedNavHour = position ? getExpectedNavHour(position.isin, position.asset_type) : null
 
   // Chart data and dynamic color
   const chartData = histData?.points && histData.points.length > 2 ? histData.points : fallbackPoints
@@ -339,14 +338,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ positi
                     type={position.asset_type}
                     className="h-6 px-2.5 rounded-lg text-[11px] font-bold tracking-wider border shadow-2xs"
                   />
-                  {isPendingNav && expectedNavHour && (
-                    <span
-                      className="font-mono text-[11px] text-slate-400 dark:text-slate-400/80"
-                      title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
-                    >
-                      ~{expectedNavHour}
-                    </span>
-                  )}
+
 
                   {/* Divisa */}
                   <span

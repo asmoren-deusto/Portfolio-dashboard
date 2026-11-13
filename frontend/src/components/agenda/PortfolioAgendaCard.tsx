@@ -481,11 +481,7 @@ export const PortfolioAgendaCard: React.FC<{
                 </button>
               </div>
 
-              {/* Time reference note */}
-              <div className="flex items-center gap-1 text-[10.5px] text-slate-400 dark:text-slate-400/80 font-mono">
-                <Clock className="w-3 h-3" />
-                <span>CET (Madrid)</span>
-              </div>
+
             </div>
 
             {/* Event List Timeline */}
@@ -598,9 +594,7 @@ export const PortfolioAgendaCard: React.FC<{
                           {countdownLabel}
                         </span>
 
-                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-400/80 mt-0.5">
-                          {event.time}
-                        </span>
+
 
                         {event.isCustom && (
                           <button

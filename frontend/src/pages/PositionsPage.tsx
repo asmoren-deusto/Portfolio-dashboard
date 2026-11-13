@@ -424,7 +424,6 @@ export function PositionsPage() {
                     const pDate = p.price_date || p.last_updated
                     const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
                     const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
-                    const expectedNavHour = getExpectedNavHour(p.isin, p.asset_type)
                     return (
                       <tr
                         key={p.isin}
@@ -507,14 +506,7 @@ export function PositionsPage() {
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-1.5 shrink-0">
                             <AssetBadge type={p.asset_type} />
-                            {isPendingNav && expectedNavHour && (
-                              <span
-                                className="font-mono text-xs text-slate-400 dark:text-slate-400/80"
-                                title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
-                              >
-                                ~{expectedNavHour}
-                              </span>
-                            )}
+
                           </div>
                         </td>
 
@@ -626,7 +618,6 @@ export function PositionsPage() {
                 const pDate = p.price_date || p.last_updated
                 const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
                 const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
-                const expectedNavHour = getExpectedNavHour(p.isin, p.asset_type)
                 return (
                   <motion.div
                     key={p.isin}
@@ -674,14 +665,7 @@ export function PositionsPage() {
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <AssetBadge type={p.asset_type} />
-                      {isPendingNav && expectedNavHour && (
-                        <span
-                          className="font-mono text-xs text-slate-400 dark:text-slate-400/80"
-                          title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
-                        >
-                          ~{expectedNavHour}
-                        </span>
-                      )}
+
                     </div>
                   </div>
 

@@ -1830,7 +1830,6 @@ export function OverviewPage() {
                         const pDate = p.price_date || p.last_updated
                         const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
                         const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
-                        const expectedNavHour = getExpectedNavHour(p.isin, p.asset_type)
 
                         return (
                           <tr
@@ -1880,14 +1879,7 @@ export function OverviewPage() {
                                   <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                     <span>{p.isin}</span>
                                     {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
-                                    {isPendingNav && expectedNavHour && (
-                                      <span
-                                        className="text-slate-400 dark:text-slate-400/80 font-mono text-[11.5px]"
-                                        title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
-                                      >
-                                        ~{expectedNavHour}
-                                      </span>
-                                    )}
+
                                   </div>
                                 </div>
                               </div>
@@ -2023,7 +2015,6 @@ export function OverviewPage() {
                           const pDate = p.price_date || p.last_updated
                           const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
                           const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
-                          const expectedNavHour = getExpectedNavHour(p.isin, p.asset_type)
 
                           return (
                             <tr
@@ -2073,14 +2064,7 @@ export function OverviewPage() {
                                     <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                       <span>{p.isin}</span>
                                       {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
-                                      {isPendingNav && expectedNavHour && (
-                                        <span
-                                          className="text-slate-400 dark:text-slate-400/80 font-mono text-[11.5px]"
-                                          title={`NAV pendiente de actualización hoy. Hora habitual de publicación: ~${expectedNavHour} CET`}
-                                        >
-                                          ~{expectedNavHour}
-                                        </span>
-                                      )}
+
                                     </div>
                                   </div>
                                 </div>
