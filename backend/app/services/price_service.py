@@ -516,8 +516,9 @@ async def _scrape_price_with_date_impl(
             _fetch_investing_price(isin),
             _fetch_quefondos_price(isin),
             _fetch_finect_price(isin),
+            _fetch_ariva_price(isin),
         ]
-        task_names = ["myinvestor", "ft", "investing", "quefondos", "finect"]
+        task_names = ["myinvestor", "ft", "investing", "quefondos", "finect", "ariva"]
 
         # For Azvalor funds, query direct official gestora endpoint
         if isin.startswith("ES011261"):
@@ -558,7 +559,7 @@ async def _scrape_price_with_date_impl(
                         logger.warning(f"Rejected implausible NAV {r_price} ({r_date}) for {isin} from {task_names[i]} (ref {ref_price})")
                         continue
                     name = task_names[i]
-                    prec = 8 if name == "myinvestor" else (7 if name in ("azvalor", "cobas", "blackrock") else (6 if name in ("quefondos", "finect") else (5 if name == "ft" else (4 if name == "yahoo" else (3 if name == "investing" else 2)))))
+                    prec = 8 if name == "myinvestor" else (7 if name in ("azvalor", "cobas", "blackrock") else (6 if name in ("quefondos", "finect") else (5 if name == "ft" else (4 if name == "yahoo" else (3 if name == "investing" else (1 if name == "ariva" else 2))))))
                     candidates.append((r_date, prec, r_price, name))
 
         if candidates:
@@ -1110,6 +1111,53 @@ async def _fetch_myinvestor_price(isin: str) -> tuple[Optional[float], Optional[
                     return round(float(nav), 6), date_val
     except Exception as e:
         logger.warning(f"MyInvestor API error for {isin}: {e}")
+    return None, None
+
+
+async def _fetch_ariva_price(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Early NAV from ARIVA.DE (fund-company quote "Fondsgesellschaft").
+    Usually 12-24h ahead of FT / Finect / QueFondos / MyInvestor public feeds.
+    Marked as lowest precision so any official source for the SAME date overrides it.
+    The 4-decimal NAV is rebuilt as previous close + absolute change when consistent with the rounded quote.
+    """
+    if not (len(isin) == 12 and isin.isalnum()):
+        return None, None
+    try:
+        client = _get_async_client()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept-Language": "de-DE,de;q=0.9,en;q=0.8",
+        }
+        resp = await client.get(
+            f"https://www.ariva.de/search/search.m?searchname={isin}",
+            headers=headers, timeout=8.0, follow_redirects=True,
+        )
+        if resp.status_code != 200:
+            return None, None
+        t = resp.text
+        # Guard: must be the instrument page of this very ISIN (not a search/login page)
+        if f"copyButton(this, '{isin}')" not in t:
+            return None, None
+        m_q = re.search(r'instrument-header-quote">\s*([\d\.]+(?:,\d+)?)', t)
+        m_d = re.search(r'instrument-header-last-time">\s*<span>(\d{2})\.(\d{2})\.(\d{2})</span>', t)
+        if not m_q or not m_d:
+            return None, None
+        quote_raw = m_q.group(1)
+        quote = float(quote_raw.replace(".", "").replace(",", "."))
+        decimals = len(quote_raw.split(",")[1]) if "," in quote_raw else 0
+        date_iso = f"20{m_d.group(3)}-{m_d.group(2)}-{m_d.group(1)}"
+        price = quote
+        m_close = re.search(r'id="close_for_push_[^"]+">\s*([\d\.]+)\s*<', t)
+        m_chg = re.search(r'instrument-header-abs-change">\s*<span[^>]*>\s*([\-\+]?[\d\.]*,?\d+)', t)
+        if m_close and m_chg:
+            rebuilt = float(m_close.group(1)) + float(m_chg.group(1).replace(".", "").replace(",", "."))
+            if abs(rebuilt - quote) <= 0.5 * (10 ** -decimals) + 1e-6:
+                price = round(rebuilt, 4)
+        if price > 0:
+            return price, date_iso
+    except Exception as e:
+        logger.debug(f"ARIVA fetch error for {isin}: {e}")
     return None, None
 
 

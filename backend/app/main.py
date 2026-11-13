@@ -110,6 +110,54 @@ async def startup():
     except Exception as e:
         logger.warning(f"Failed to preload price cache: {e}")
 
+    async def _nav_poller():
+        """
+        Background NAV poller: checks every held fund as new NAVs get published,
+        without needing the UI to be open.
+          - funds whose NAV is not yet current  -> every 10 min
+          - full sweep (corrects indicative -> official values) -> every 60 min
+        """
+        await asyncio.sleep(20)
+        last_full = 0.0
+        while True:
+            try:
+                import time as _time
+                from app.database import SessionLocal
+                from app.models import Transaction, Asset
+                from app.services.price_service import get_price_with_date, is_nav_current
+                from app.routers.portfolio import invalidate_computed_portfolio_caches
+
+                db = SessionLocal()
+                try:
+                    isins = sorted({t.isin for t in db.query(Transaction).all() if t.isin and not t.isin.startswith("TR_")})
+                    tickers = {a.isin: a.ticker for a in db.query(Asset).all()}
+                finally:
+                    db.close()
+
+                full = (_time.time() - last_full) > 3600
+                changed = False
+                for isin in isins:
+                    try:
+                        from app.services.price_service import _get_latest_cached_price
+                        old_p, old_d = _get_latest_cached_price(isin)
+                        if not full and old_d and is_nav_current(old_d):
+                            continue
+                        new_p, new_d = await get_price_with_date(isin, tickers.get(isin), force=True)
+                        if new_p and (new_p != old_p or new_d != old_d):
+                            changed = True
+                            logger.info(f"NAV poller: {isin} {old_p} ({old_d}) -> {new_p} ({new_d})")
+                    except Exception as e:
+                        logger.debug(f"NAV poller error for {isin}: {e}")
+                if full:
+                    last_full = _time.time()
+                if changed:
+                    invalidate_computed_portfolio_caches()
+            except Exception as e:
+                logger.warning(f"NAV poller cycle failed: {e}")
+            await asyncio.sleep(600)
+
+    asyncio.create_task(_nav_poller())
+
     async def _warm_cache():
         try:
             # Give Uvicorn 1.5 seconds to bind port and answer initial healthchecks cleanly
