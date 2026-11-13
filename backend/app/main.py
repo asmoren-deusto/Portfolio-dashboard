@@ -238,7 +238,6 @@ async def startup():
             except asyncio.CancelledError:
                 break
 
-    import asyncio
     asyncio.create_task(_warm_cache())
     asyncio.create_task(_periodic_nav_scanner())
 
