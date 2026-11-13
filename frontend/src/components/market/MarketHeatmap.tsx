@@ -242,7 +242,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({
     width: 0,
-    height: fitParent ? 370 : compact ? (isDefaultExpanded ? 520 : 420) : isDefaultExpanded ? 760 : 640,
+    height: fitParent ? 520 : compact ? (isDefaultExpanded ? 520 : 420) : isDefaultExpanded ? 760 : 640,
   })
   const [heightMode, setHeightMode] = useState<'standard' | 'expanded'>(
     isDefaultExpanded ? 'expanded' : 'standard'

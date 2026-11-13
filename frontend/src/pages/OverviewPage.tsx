@@ -2268,14 +2268,14 @@ export function OverviewPage() {
 
       {/* ── Agenda Financiera (60%) y Mapa de Calor del Mercado (40%) ── */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch lg:min-h-[460px] lg:h-[470px]"
-        style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 470px' }}
+        className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch lg:min-h-[612px] lg:h-[625px]"
+        style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 625px' }}
       >
         {/* Columna Izquierda (60%): Agenda Financiera & Próximos Eventos */}
         <div className="w-full h-full lg:col-span-3 flex flex-col min-h-0">
           <PortfolioAgendaCard
             defaultCollapsed={false}
-            className="h-full max-h-[470px] flex flex-col min-h-0"
+            className="h-full max-h-[625px] flex flex-col min-h-0"
           />
         </div>
 
@@ -2287,7 +2287,7 @@ export function OverviewPage() {
             showViewAllLink={true}
             compact={true}
             fitParent={true}
-            className="h-full max-h-[470px] flex flex-col min-h-0"
+            className="h-full max-h-[625px] flex flex-col min-h-0"
           />
         </div>
       </div>
