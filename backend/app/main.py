@@ -114,7 +114,7 @@ async def startup():
         """
         Background NAV poller: checks every held fund as new NAVs get published,
         without needing the UI to be open.
-          - funds whose NAV is not yet current  -> every 10 min
+          - funds whose NAV is not yet current  -> every 5 min
           - full sweep (corrects indicative -> official values) -> every 60 min
         """
         await asyncio.sleep(20)
@@ -154,7 +154,7 @@ async def startup():
                     invalidate_computed_portfolio_caches()
             except Exception as e:
                 logger.warning(f"NAV poller cycle failed: {e}")
-            await asyncio.sleep(600)
+            await asyncio.sleep(300)
 
     asyncio.create_task(_nav_poller())
 

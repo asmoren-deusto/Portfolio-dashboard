@@ -508,36 +508,10 @@ async def _scrape_price_with_date_impl(
             _price_cache[isin] = {"price": db_p, "date": db_d, "ts": datetime.now()}
             return db_p, db_d
 
+    win_source = "live"
     # 1. Try European & Spanish fund providers (Financial Times, Investing.com, Quefondos, Azvalor, Finect, Yahoo) in parallel
     if price is None and is_standard_isin and not is_live_traded and isin != "IE00B4ND3602":
-        tasks = [
-            _fetch_myinvestor_price(isin),
-            _fetch_ft_official(isin),
-            _fetch_investing_price(isin),
-            _fetch_quefondos_price(isin),
-            _fetch_finect_price(isin),
-            _fetch_ariva_price(isin),
-        ]
-        task_names = ["myinvestor", "ft", "investing", "quefondos", "finect", "ariva"]
-
-        # For Azvalor funds, query direct official gestora endpoint
-        if isin.startswith("ES011261"):
-            tasks.append(_fetch_azvalor_official(isin))
-            task_names.append("azvalor")
-
-        # For Cobas funds, query direct official Cobas AM gestora endpoint
-        if isin in COBAS_PRODUCT_SLUGS or isin.startswith("ES011919") or isin == "LU1598719752":
-            tasks.append(_fetch_cobas_official(isin))
-            task_names.append("cobas")
-
-        # For BlackRock funds, query direct official BlackRock gestora endpoint
-        if isin in BLACKROCK_PRODUCT_URLS or isin == "LU0171307068":
-            tasks.append(_fetch_blackrock_official(isin))
-            task_names.append("blackrock")
-
-        if ticker:
-            tasks.append(_fetch_yahoo_price(ticker))
-            task_names.append("yahoo")
+        task_names, tasks = _build_nav_fetch_tasks(isin, ticker)
 
         results = await asyncio.gather(*[_with_timeout(t) for t in tasks], return_exceptions=True)
 
@@ -559,7 +533,7 @@ async def _scrape_price_with_date_impl(
                         logger.warning(f"Rejected implausible NAV {r_price} ({r_date}) for {isin} from {task_names[i]} (ref {ref_price})")
                         continue
                     name = task_names[i]
-                    prec = 8 if name == "myinvestor" else (7 if name in ("azvalor", "cobas", "blackrock") else (6 if name in ("quefondos", "finect") else (5 if name == "ft" else (4 if name == "yahoo" else (3 if name == "investing" else (1 if name == "ariva" else 2))))))
+                    prec = NAV_SOURCE_PRIORITY.get(name, 2)
                     candidates.append((r_date, prec, r_price, name))
 
         if candidates:
@@ -573,6 +547,7 @@ async def _scrape_price_with_date_impl(
             else:
                 price, price_date = best_price, best_date
                 logger.info(f"Selected {isin} NAV {price} ({best_date}) from source: {best_source}")
+                win_source = f"live_{best_source}"
 
     # If successfully fetched from live provider, persist to DB PriceCache & in-memory cache
     if price is not None:
@@ -580,7 +555,7 @@ async def _scrape_price_with_date_impl(
         eff_dt = price_date or fallback_dt
         target_date = _normalize_business_date(eff_dt)
         price_date = target_date
-        price = _save_cached_price(isin, target_date, price, source="live")
+        price = _save_cached_price(isin, target_date, price, source=win_source)
 
     # 5. Fallback to DB PriceCache if live fetch failed
     if price is None:
@@ -1139,6 +1114,10 @@ async def _fetch_ariva_price(isin: str) -> tuple[Optional[float], Optional[str]]
         # Guard: must be the instrument page of this very ISIN (not a search/login page)
         if f"copyButton(this, '{isin}')" not in t:
             return None, None
+        # Only the fund-company quote is a real NAV. Exchange quotes (Stuttgart, gettex, L&S...) are indicative.
+        m_mk = re.search(r'id="market-dropdown"[^>]*>\s*([^<]+)', t)
+        if not m_mk or not m_mk.group(1).strip().lower().startswith("fondsgesellschaft"):
+            return None, None
         m_q = re.search(r'instrument-header-quote">\s*([\d\.]+(?:,\d+)?)', t)
         m_d = re.search(r'instrument-header-last-time">\s*<span>(\d{2})\.(\d{2})\.(\d{2})</span>', t)
         if not m_q or not m_d:
@@ -1159,6 +1138,145 @@ async def _fetch_ariva_price(isin: str) -> tuple[Optional[float], Optional[str]]
     except Exception as e:
         logger.debug(f"ARIVA fetch error for {isin}: {e}")
     return None, None
+
+
+_ONVISTA_IDS: dict[str, str] = {}
+
+
+async def _fetch_onvista_nav(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Official fund-company NAV ("KVG" market, WM Datenservice) from onvista's open JSON API.
+    Typically published the same evening, often 12-24h before FT / Morningstar / MyInvestor feeds.
+    Exchange quotes (gettex, Stuttgart...) in the same payload are indicative and are ignored on purpose.
+    A fund can expose several KVG notations (share classes / legacy): the newest date wins and, on a tie,
+    the value closest to the last known NAV. If still ambiguous without a reference, the source abstains.
+    """
+    if not (len(isin) == 12 and isin.isalnum()):
+        return None, None
+    try:
+        client = _get_async_client()
+        headers = {"Accept": "application/json", "Accept-Language": "de-DE,de;q=0.9,en;q=0.8"}
+        ent = _ONVISTA_IDS.get(isin)
+        if not ent:
+            r = await client.get(
+                "https://api.onvista.de/api/v1/instruments/search",
+                params={"searchValue": isin, "limit": 5}, headers=headers, timeout=8.0,
+            )
+            if r.status_code != 200:
+                return None, None
+            hit = next(
+                (e for e in r.json().get("list", [])
+                 if str(e.get("isin") or "").upper() == isin and e.get("entityType") == "FUND"),
+                None,
+            )
+            if not hit:
+                return None, None
+            ent = str(hit["entityValue"])
+            _ONVISTA_IDS[isin] = ent
+        r = await client.get(f"https://api.onvista.de/api/v1/funds/{ent}/snapshot", headers=headers, timeout=10.0)
+        if r.status_code != 200:
+            return None, None
+        points = []
+        for it in (r.json().get("quoteList") or {}).get("list", []):
+            m = it.get("market") or {}
+            q = it.get("quote") or {}
+            if m.get("codeMarket") != "@_WM" and str(m.get("nameContributor") or "") != "KVG":
+                continue
+            last, dt = q.get("last"), q.get("datetimeLast")
+            if last is None or not dt or float(last) <= 0:
+                continue
+            points.append((str(dt)[:10], float(last)))
+        if not points:
+            return None, None
+        newest = max(d for d, _ in points)
+        vals = sorted({round(v, 6) for d, v in points if d == newest})
+        if len(vals) == 1:
+            return vals[0], newest
+        ref, _ = _get_latest_cached_price(isin)
+        if not ref:
+            return None, None
+        return min(vals, key=lambda v: abs(v - ref)), newest
+    except Exception as e:
+        logger.debug(f"onvista NAV fetch error for {isin}: {e}")
+    return None, None
+
+
+async def _fetch_morningstar_nav(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """Official NAV + valuation date from Morningstar's open screener endpoint (all UCITS universes)."""
+    if not (len(isin) == 12 and isin.isalnum()):
+        return None, None
+    try:
+        client = _get_async_client()
+        r = await client.get(
+            "https://lt.morningstar.com/api/rest.svc/klr5zyak8x/security/screener",
+            params={
+                "outputType": "json", "version": "1", "languageId": "es-ES", "currencyId": "EUR",
+                "universeIds": "FOALL$$ALL",
+                "securityDataPoints": "SecId|Name|ISIN|ClosePrice|ClosePriceDate",
+                "filters": f"ISIN:IN:{isin}", "page": "1", "pageSize": "5",
+            },
+            headers={"Accept": "application/json"}, timeout=8.0,
+        )
+        if r.status_code != 200:
+            return None, None
+        for row in r.json().get("rows", []):
+            if str(row.get("ISIN") or "").upper() == isin and row.get("ClosePrice") and row.get("ClosePriceDate"):
+                return float(row["ClosePrice"]), str(row["ClosePriceDate"])[:10]
+    except Exception as e:
+        logger.debug(f"Morningstar NAV fetch error for {isin}: {e}")
+    return None, None
+
+
+# Tie-break priority between sources reporting the SAME date (the date itself always wins first).
+NAV_SOURCE_PRIORITY: dict[str, float] = {
+    "myinvestor": 8, "azvalor": 7, "cobas": 7, "blackrock": 7,
+    "onvista": 6.5, "quefondos": 6, "finect": 6, "morningstar": 5.5,
+    "ft": 5, "yahoo": 4, "investing": 3, "ariva": 1,
+}
+
+
+def _build_nav_fetch_tasks(isin: str, ticker: str | None) -> tuple[list[str], list]:
+    """Every NAV source that applies to `isin`, as (names, coroutines) to be awaited together."""
+    pairs = [
+        ("myinvestor", _fetch_myinvestor_price(isin)),
+        ("ft", _fetch_ft_official(isin)),
+        ("investing", _fetch_investing_price(isin)),
+        ("quefondos", _fetch_quefondos_price(isin)),
+        ("finect", _fetch_finect_price(isin)),
+        ("onvista", _fetch_onvista_nav(isin)),
+        ("morningstar", _fetch_morningstar_nav(isin)),
+        ("ariva", _fetch_ariva_price(isin)),
+    ]
+    if isin.startswith("ES011261"):
+        pairs.append(("azvalor", _fetch_azvalor_official(isin)))
+    if isin in COBAS_PRODUCT_SLUGS or isin.startswith("ES011919") or isin == "LU1598719752":
+        pairs.append(("cobas", _fetch_cobas_official(isin)))
+    if isin in BLACKROCK_PRODUCT_URLS or isin == "LU0171307068":
+        pairs.append(("blackrock", _fetch_blackrock_official(isin)))
+    if ticker:
+        pairs.append(("yahoo", _fetch_yahoo_price(ticker)))
+    return [n for n, _ in pairs], [c for _, c in pairs]
+
+
+async def get_nav_source_report(isin: str, ticker: str | None = None) -> dict:
+    """Diagnostics: what each NAV source reports right now for `isin`, and which one the pipeline would pick."""
+    ticker = KNOWN_TICKERS.get(isin) or ticker
+    names, tasks = _build_nav_fetch_tasks(isin, ticker)
+    results = await asyncio.gather(*[_with_timeout(t) for t in tasks], return_exceptions=True)
+    ref_price, ref_date = _get_latest_cached_price(isin)
+    rows = []
+    for name, res in zip(names, results):
+        price, date = res if isinstance(res, tuple) and len(res) == 2 else (None, None)
+        plausible = bool(price) and (not ref_price or abs(price - ref_price) / ref_price <= MAX_NAV_JUMP)
+        rows.append({"source": name, "price": price, "date": date, "plausible": plausible,
+                     "priority": NAV_SOURCE_PRIORITY.get(name, 2)})
+    valid = [r for r in rows if r["price"] and r["date"] and r["plausible"]]
+    valid.sort(key=lambda r: (r["date"], r["priority"]), reverse=True)
+    return {
+        "isin": isin, "stored": {"price": ref_price, "date": ref_date},
+        "selected": valid[0] if valid else None,
+        "sources": sorted(rows, key=lambda r: (r["date"] or "", r["priority"]), reverse=True),
+    }
 
 
 async def _fetch_finect_price(isin: str) -> tuple[Optional[float], Optional[str]]:

@@ -626,6 +626,14 @@ async def refresh_portfolio_prices(user_id: str = Depends(get_current_user_id), 
     return await check_portfolio_navs(user_id=user_id, db=db)
 
 
+@router.get("/nav-sources")
+async def get_nav_sources(isin: str, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """Diagnostics: NAV/date reported by every source for an ISIN and which one the pipeline selects."""
+    from app.services.price_service import get_nav_source_report
+    asset = db.query(Asset).filter(Asset.isin == isin).first()
+    return await get_nav_source_report(isin, asset.ticker if asset else None)
+
+
 @router.get("/latest-nav-alert")
 def get_latest_nav_alert(since: str | None = None, db: Session = Depends(get_db)):
     """
