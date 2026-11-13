@@ -259,18 +259,24 @@ def _save_cached_price(isin: str, date: str, price: float, source: str = "live")
     """Safely persist a NAV quote to PriceCache with a short-lived, self-closing session. Returns effective price."""
     if not SessionLocal or not PriceCache or not price or price <= 0:
         return price
+    price = round(float(price), 6)
     s = SessionLocal()
     eff_price = price
     try:
         existing = s.query(PriceCache).filter(PriceCache.isin == isin, PriceCache.date == date).first()
         if existing:
-            existing_str = f"{existing.price:.6f}".rstrip("0")
+            existing_val = round(float(existing.price), 6)
+            existing_str = f"{existing_val:.6f}".rstrip("0")
             new_str = f"{price:.6f}".rstrip("0")
             existing_decs = len(existing_str.split(".")[1]) if "." in existing_str else 0
             new_decs = len(new_str.split(".")[1]) if "." in new_str else 0
-            is_same_quote = (abs(existing.price - price) / price < 0.005)
-            if is_same_quote and existing_decs > new_decs:
-                eff_price = float(existing.price)
+            # Only preserve existing.price if `price` is a strictly rounded version of `existing_val` (e.g. 2-dec FT vs 4-dec NAV)
+            is_rounded_same = (
+                new_decs < existing_decs <= 5
+                and abs(existing_val - price) <= 0.5 * (10 ** -new_decs) + 1e-6
+            )
+            if is_rounded_same:
+                eff_price = existing_val
             else:
                 existing.price = price
                 existing.source = source
@@ -1115,7 +1121,7 @@ async def _fetch_ariva_price(isin: str) -> tuple[Optional[float], Optional[str]]
         if f"copyButton(this, '{isin}')" not in t:
             return None, None
         # Only the fund-company quote is a real NAV. Exchange quotes (Stuttgart, gettex, L&S...) are indicative.
-        m_mk = re.search(r'id="market-dropdown"[^>]*>\s*([^<]+)', t)
+        m_mk = re.search(r'id="market-dropdown"[\s\S]{0,800}?class="app-dropdown--state">\s*([^<]+)', t)
         if not m_mk or not m_mk.group(1).strip().lower().startswith("fondsgesellschaft"):
             return None, None
         m_q = re.search(r'instrument-header-quote">\s*([\d\.]+(?:,\d+)?)', t)
@@ -1140,12 +1146,19 @@ async def _fetch_ariva_price(isin: str) -> tuple[Optional[float], Optional[str]]
     return None, None
 
 
-_ONVISTA_IDS: dict[str, str] = {}
+_ONVISTA_IDS: dict[str, str] = {
+    "IE0032126645": "7871243",
+    "LU0261952682": "25573432",
+    "IE00BYX5NH74": "134056262",
+    "LU0171307068": "16536325",
+    "LU0302296495": "29370671",
+    "IE000QAZP7L2": "214954797",
+}
 
 
 async def _fetch_onvista_nav(isin: str) -> tuple[Optional[float], Optional[str]]:
     """
-    Official fund-company NAV ("KVG" market, WM Datenservice) from onvista's open JSON API.
+    Official fund-company NAV ("KVG" market, WM Datenservice) from onvista.
     Typically published the same evening, often 12-24h before FT / Morningstar / MyInvestor feeds.
     Exchange quotes (gettex, Stuttgart...) in the same payload are indicative and are ignored on purpose.
     A fund can expose several KVG notations (share classes / legacy): the newest date wins and, on a tie,
@@ -1154,33 +1167,61 @@ async def _fetch_onvista_nav(isin: str) -> tuple[Optional[float], Optional[str]]
     if not (len(isin) == 12 and isin.isalnum()):
         return None, None
     try:
+        import json as _json
         client = _get_async_client()
-        headers = {"Accept": "application/json", "Accept-Language": "de-DE,de;q=0.9,en;q=0.8"}
-        ent = _ONVISTA_IDS.get(isin)
-        if not ent:
-            r = await client.get(
-                "https://api.onvista.de/api/v1/instruments/search",
-                params={"searchValue": isin, "limit": 5}, headers=headers, timeout=8.0,
-            )
-            if r.status_code != 200:
-                return None, None
-            hit = next(
-                (e for e in r.json().get("list", [])
-                 if str(e.get("isin") or "").upper() == isin and e.get("entityType") == "FUND"),
-                None,
-            )
-            if not hit:
-                return None, None
-            ent = str(hit["entityValue"])
-            _ONVISTA_IDS[isin] = ent
-        r = await client.get(f"https://api.onvista.de/api/v1/funds/{ent}/snapshot", headers=headers, timeout=10.0)
-        if r.status_code != 200:
-            return None, None
+        web_headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "de-DE,de;q=0.9,en;q=0.8",
+        }
+        quote_list = []
+        # 1. Primary: single HTTP GET to www.onvista.de/fonds/Fonds-{isin} (__NEXT_DATA__ JSON, no API rate limit)
+        r_web = await client.get(
+            f"https://www.onvista.de/fonds/Fonds-{isin}",
+            headers=web_headers, timeout=10.0, follow_redirects=True,
+        )
+        if r_web.status_code == 200 and "__NEXT_DATA__" in r_web.text:
+            m_nd = re.search(r'<script id="__NEXT_DATA__" type="application/json">([\s\S]*?)</script>', r_web.text)
+            if m_nd:
+                nd = _json.loads(m_nd.group(1))
+                pp = (nd.get("props") or {}).get("pageProps") or {}
+                snap = (pp.get("data") or {}).get("snapshot") or {}
+                quote_list = (snap.get("quoteList") or {}).get("list") or []
+
+        # 2. Fallback: api.onvista.de snapshot endpoint
+        if not quote_list:
+            api_headers = {
+                "User-Agent": web_headers["User-Agent"],
+                "Accept": "application/json",
+                "Accept-Language": "de-DE,de;q=0.9,en;q=0.8",
+            }
+            ent = _ONVISTA_IDS.get(isin)
+            if not ent:
+                r = await client.get(
+                    "https://api.onvista.de/api/v1/instruments/search",
+                    params={"searchValue": isin, "limit": 5}, headers=api_headers, timeout=8.0,
+                )
+                if r.status_code == 200:
+                    hit = next(
+                        (e for e in r.json().get("list", [])
+                         if str(e.get("isin") or "").upper() == isin and e.get("entityType") == "FUND"),
+                        None,
+                    )
+                    if hit:
+                        ent = str(hit["entityValue"])
+                        _ONVISTA_IDS[isin] = ent
+            if ent:
+                r = await client.get(f"https://api.onvista.de/api/v1/funds/{ent}/snapshot", headers=api_headers, timeout=10.0)
+                if r.status_code == 200:
+                    quote_list = (r.json().get("quoteList") or {}).get("list") or []
+
         points = []
-        for it in (r.json().get("quoteList") or {}).get("list", []):
+        for it in quote_list:
             m = it.get("market") or {}
-            q = it.get("quote") or {}
+            q = it.get("quote") or it
             if m.get("codeMarket") != "@_WM" and str(m.get("nameContributor") or "") != "KVG":
+                continue
+            if q.get("isoCurrency") not in (None, "EUR"):
                 continue
             last, dt = q.get("last"), q.get("datetimeLast")
             if last is None or not dt or float(last) <= 0:

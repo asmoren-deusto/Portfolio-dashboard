@@ -1963,6 +1963,42 @@ PRICES = json.loads(r'''[
     "date": "2026-11-02",
     "price": 44716.25,
     "currency": "EUR"
+  },
+  {
+    "isin": "IE0032126645",
+    "date": "2026-11-11",
+    "price": 83.9335,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE0032126645",
+    "date": "2026-11-12",
+    "price": 83.8676,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0261952682",
+    "date": "2026-11-12",
+    "price": 29.77,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BYX5NH74",
+    "date": "2026-11-12",
+    "price": 14.0517,
+    "currency": "EUR"
+  },
+  {
+    "isin": "LU0171307068",
+    "date": "2026-11-12",
+    "price": 77.37,
+    "currency": "EUR"
+  },
+  {
+    "isin": "0192#0011",
+    "date": "2026-11-12",
+    "price": 23.84379,
+    "currency": "EUR"
   }
 ]''')
 
