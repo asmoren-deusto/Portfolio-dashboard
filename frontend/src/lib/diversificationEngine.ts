@@ -121,9 +121,9 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
   // DNB Fund - Technology (LU0302296495)
   LU0302296495: {
     geo: { north_america: 0.84, europe: 0.12, japan: 0.02, pacific: 0.01, emerging: 0.01, other: 0.0 },
-    sectors: { tech: 0.88, comms: 0.10, consumer_disc: 0.02 },
+    sectors: { tech: 0.85, comms: 0.12, consumer_disc: 0.03 },
     assetClass: 'equity',
-    currencies: { USD: 0.84, EUR: 0.12, Other: 0.04 },
+    currencies: { USD: 0.84, EUR: 0.12, JPY: 0.02, Other: 0.02 },
   },
   // Polar Capital Global Technology (IE00BM95B621)
   IE00BM95B621: {
@@ -135,9 +135,55 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
   // Azvalor Internacional FI (ES0112611001)
   ES0112611001: {
     geo: { europe: 0.44, north_america: 0.32, emerging: 0.18, japan: 0.0, pacific: 0.02, other: 0.04 },
-    sectors: { energy: 0.52, materials: 0.24, industrials: 0.14, consumer_disc: 0.06, other: 0.04 },
+    sectors: { energy: 0.52, materials: 0.26, industrials: 0.16, consumer_disc: 0.06 },
     assetClass: 'equity',
     currencies: { EUR: 0.44, USD: 0.32, Other: 0.24 },
+  },
+  // Cobas Selección FI (ES0124037005 / ES0124037039)
+  ES0124037005: {
+    geo: { europe: 0.56, north_america: 0.18, emerging: 0.14, japan: 0.06, pacific: 0.03, other: 0.03 },
+    sectors: { energy: 0.28, industrials: 0.24, consumer_disc: 0.18, materials: 0.14, financials: 0.08, health: 0.05, comms: 0.03 },
+    assetClass: 'equity',
+    currencies: { EUR: 0.48, USD: 0.26, JPY: 0.06, Other: 0.20 },
+  },
+  ES0124037039: {
+    geo: { europe: 0.56, north_america: 0.18, emerging: 0.14, japan: 0.06, pacific: 0.03, other: 0.03 },
+    sectors: { energy: 0.28, industrials: 0.24, consumer_disc: 0.18, materials: 0.14, financials: 0.08, health: 0.05, comms: 0.03 },
+    assetClass: 'equity',
+    currencies: { EUR: 0.48, USD: 0.26, JPY: 0.06, Other: 0.20 },
+  },
+  // Horos Value Internacional FI (ES0146309002)
+  ES0146309002: {
+    geo: { europe: 0.52, emerging: 0.20, north_america: 0.16, pacific: 0.06, japan: 0.03, other: 0.03 },
+    sectors: { financials: 0.22, industrials: 0.22, materials: 0.18, energy: 0.15, consumer_disc: 0.13, comms: 0.06, tech: 0.04 },
+    assetClass: 'equity',
+    currencies: { EUR: 0.48, USD: 0.20, Other: 0.32 },
+  },
+  // Storm Fund II - Storm Bond Fund (LU0840158819 / LU0840158496 / LU1915698069)
+  LU0840158819: {
+    geo: { europe: 0.90, north_america: 0.05, other: 0.05 },
+    sectors: { financials: 0.35, energy: 0.25, industrials: 0.25, utilities: 0.15 },
+    assetClass: 'fixed_income',
+    currencies: { EUR: 1.0 },
+  },
+  LU0840158496: {
+    geo: { europe: 0.90, north_america: 0.05, other: 0.05 },
+    sectors: { financials: 0.35, energy: 0.25, industrials: 0.25, utilities: 0.15 },
+    assetClass: 'fixed_income',
+    currencies: { EUR: 1.0 },
+  },
+  LU1915698069: {
+    geo: { europe: 0.90, north_america: 0.05, other: 0.05 },
+    sectors: { financials: 0.35, energy: 0.25, industrials: 0.25, utilities: 0.15 },
+    assetClass: 'fixed_income',
+    currencies: { EUR: 1.0 },
+  },
+  // Gamma Global FI (ES0140794001)
+  ES0140794001: {
+    geo: { europe: 0.65, north_america: 0.25, other: 0.10 },
+    sectors: { financials: 0.50, industrials: 0.20, utilities: 0.15, energy: 0.10, tech: 0.05 },
+    assetClass: 'fixed_income',
+    currencies: { EUR: 0.85, USD: 0.15 },
   },
   // iShares Emerging Markets Index (IE00QAZP7L2)
   IE00QAZP7L2: {
@@ -153,12 +199,12 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'equity',
     currencies: { USD: 0.25, Other: 0.75 },
   },
-  // Fidelity MSCI Japan Index Fund (IE00BYX5NH74)
+  // Fidelity MSCI Japan Index Fund P-ACC-EUR Hedged (IE00BYX5NH74)
   IE00BYX5NH74: {
     geo: { japan: 1.0, north_america: 0.0, europe: 0.0, emerging: 0.0, pacific: 0.0, other: 0.0 },
-    sectors: { industrials: 0.22, consumer_disc: 0.19, tech: 0.15, financials: 0.13, health: 0.09, comms: 0.07, consumer_stap: 0.06, materials: 0.05, utilities: 0.04 },
+    sectors: { industrials: 0.23, consumer_disc: 0.19, tech: 0.15, financials: 0.13, health: 0.09, comms: 0.07, consumer_stap: 0.06, materials: 0.05, utilities: 0.03 },
     assetClass: 'equity',
-    currencies: { JPY: 1.0 },
+    currencies: { EUR: 1.0 }, // Clase cubierta a EUR (Hedged)
   },
   // Fidelity Euro 50 Index Fund (LU0261952682)
   LU0261952682: {
@@ -259,10 +305,10 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
   },
   // Indexa Más Rentabilidad Acciones EPSV (0192#0011)
   '0192#0011': {
-    geo: { north_america: 0.62, europe: 0.18, emerging: 0.10, japan: 0.06, pacific: 0.04 },
+    geo: { north_america: 0.60, europe: 0.20, emerging: 0.12, japan: 0.08, pacific: 0.0 },
     sectors: { tech: 0.24, financials: 0.16, health: 0.12, industrials: 0.11, consumer_disc: 0.10, comms: 0.08, consumer_stap: 0.06, energy: 0.05, materials: 0.04, utilities: 0.04 },
     assetClass: 'equity',
-    currencies: { USD: 0.62, EUR: 0.18, Other: 0.20 },
+    currencies: { USD: 0.60, EUR: 0.20, JPY: 0.08, Other: 0.12 },
   },
   // iShares Physical Gold ETC (IE00B4ND3602)
   IE00B4ND3602: {
@@ -281,7 +327,7 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
   // Vanguard U.S. 500 Stock Index Fund EUR Acc (IE0032126645) - S&P 500
   IE0032126645: {
     geo: { north_america: 1.0, europe: 0.0, japan: 0.0, pacific: 0.0, emerging: 0.0, other: 0.0 },
-    sectors: { tech: 0.32, financials: 0.13, health: 0.12, consumer_disc: 0.10, comms: 0.09, industrials: 0.08, consumer_stap: 0.06, energy: 0.04, utilities: 0.03, materials: 0.02 },
+    sectors: { tech: 0.32, financials: 0.135, health: 0.12, consumer_disc: 0.105, comms: 0.09, industrials: 0.08, consumer_stap: 0.06, energy: 0.04, utilities: 0.03, materials: 0.02 },
     assetClass: 'equity',
     currencies: { USD: 1.0 },
   },
@@ -300,13 +346,30 @@ export function resolveAssetTaxonomy(pos: Position): AssetTaxonomy {
   const isinPrefix = isin.slice(0, 2)
   const assetType = pos.asset_type || 'fund'
 
+  // Value Funds: Cobas / Horos / Azvalor
+  if (name.includes('cobas')) {
+    return ASSET_REGISTRY['ES0124037005']
+  }
+  if (name.includes('horos')) {
+    return ASSET_REGISTRY['ES0146309002']
+  }
+  if (name.includes('azvalor')) {
+    return ASSET_REGISTRY['ES0112611001']
+  }
+  if (name.includes('storm') && name.includes('bond')) {
+    return ASSET_REGISTRY['LU0840158819']
+  }
+  if (name.includes('gamma') && name.includes('global')) {
+    return ASSET_REGISTRY['ES0140794001']
+  }
+
   // Indexa fund / EPSV Global Equity
   if (name.includes('indexa') || name.includes('epsv')) {
     return {
-      geo: { north_america: 0.62, europe: 0.18, emerging: 0.10, japan: 0.06, pacific: 0.04 },
+      geo: { north_america: 0.60, europe: 0.20, emerging: 0.12, japan: 0.08, pacific: 0.0 },
       sectors: { tech: 0.24, financials: 0.16, health: 0.12, industrials: 0.11, consumer_disc: 0.10, comms: 0.08, consumer_stap: 0.06, energy: 0.05, materials: 0.04, utilities: 0.04 },
       assetClass: 'equity',
-      currencies: { USD: 0.62, EUR: 0.18, Other: 0.20 },
+      currencies: { USD: 0.60, EUR: 0.20, JPY: 0.08, Other: 0.12 },
     }
   }
 
@@ -1142,17 +1205,19 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
 
   // Pillar 3: Megacap Big Tech Concentration ('Magnificent 7')
   const actualTechWeight = sectorBreakdown.find((s) => s.sector.id === 'tech')?.portfolioWeight || 0
-  if (usExposurePct > 60 && actualTechWeight > 22) {
+  const hasNvidiaDirect = validPositions.some((p) => p.isin === 'US67066G1040' || (p.name || '').toLowerCase().includes('nvidia'))
+  const mag7EstimatedWeight = Math.min(actualTechWeight * 0.68, 35)
+  if (actualTechWeight > 25 || hasNvidiaDirect) {
     auditAdvice.push({
       id: 'megacap_concentration',
       category: 'megacap',
-      severity: 'warning',
+      severity: actualTechWeight > 28 ? 'warning' : 'info',
       iconName: 'Cpu',
-      title: 'Exposición Concentrada en Big Tech (Magnificent 7)',
-      subtitle: 'Apple, Microsoft, Nvidia, Alphabet, Amazon, Meta representan ~18% de tu cartera',
-      description: 'A través de tus fondos indexados globales y de renta variable estadounidense ya mantienes una posición muy relevante en los gigantes tecnológicos. Añadir acciones individuales de estas mismas compañías aumentaría el riesgo no compensado de un solo sector.',
-      actionableStep: 'Evitar comprar acciones individuales de las Magnificent 7 para no duplicar ni concentrar el riesgo idiosincrático del sector tecnológico.',
-      badgeText: 'Riesgo de Concentración',
+      title: `Exposición Relevante en Big Tech (Tecnología: ${actualTechWeight.toFixed(1)}%)`,
+      subtitle: `Solapamiento en Magnificent 7 (~${mag7EstimatedWeight.toFixed(1)}% estimado entre S&P 500, Indexa, DNB Tech${hasNvidiaDirect ? ' y NVIDIA directa' : ''})`,
+      description: `A través de tus fondos de S&P 500, Indexa EPSV y DNB Technology${hasNvidiaDirect ? ' junto con tu posición directa en NVIDIA Corporation' : ''}, mantienes una fuerte ponderación en semiconductores y megacaps tecnológicas (+${(actualTechWeight - 25.2).toFixed(1)} pp vs MSCI World).`,
+      actionableStep: 'Vigilar el peso conjunto de S&P 500 + DNB Technology + NVIDIA para no exceder el 30%-35% de exposición tecnológica total.',
+      badgeText: 'Solapamiento Tech',
     })
   }
 
