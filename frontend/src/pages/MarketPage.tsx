@@ -252,7 +252,7 @@ export const MarketPage: React.FC = () => {
       />
 
       {/* Selector de Modo de Visualización */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-1.5 sm:p-2 rounded-2xl bg-white/90 dark:bg-[#1e1e1e]/90 border border-slate-200/80 dark:border-white/[0.06] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-1.5 sm:p-2 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card">
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -322,7 +322,7 @@ export const MarketPage: React.FC = () => {
       {(viewSection === 'all' || viewSection === 'heatmap') && (
         <div className="space-y-3.5">
           {/* Controls & Filter Bar (Pestañas de Índices + Buscador) */}
-          <div className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-[#1e1e1e]/96 border border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-xl dark:shadow-black/20">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               {/* Left: Index Tabs */}
               <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 relative">

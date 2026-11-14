@@ -78,7 +78,7 @@ export function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-4 pb-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/80 dark:bg-[#1e1e1e]/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-3.5 sm:p-4 rounded-2xl shadow-sm">
+      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
             <BarChart3 size={20} />
@@ -92,7 +92,7 @@ export function AnalyticsPage() {
             </p>
           </div>
         </div>
-      </div>
+      </Card>
 
       <div className="w-full flex flex-col gap-4">
             {/* KPI grid with luxury styling */}
@@ -181,7 +181,7 @@ export function AnalyticsPage() {
             <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Flujos neutralizados</span>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+          <div className="px-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
             <div className="flex items-center justify-between">
               <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold block">S&P 500 (^GSPC)</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
@@ -194,7 +194,7 @@ export function AnalyticsPage() {
             <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Índice EE.UU.</span>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+          <div className="px-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
             <div className="flex items-center justify-between">
               <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block">Tasa BCE / Depósito</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
@@ -207,7 +207,7 @@ export function AnalyticsPage() {
             <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Tipo libre de riesgo</span>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+          <div className="px-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
             <div className="flex items-center justify-between">
               <span className="text-xs text-purple-700 dark:text-purple-400 font-semibold block">MSCI World (URTH)</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
@@ -220,7 +220,7 @@ export function AnalyticsPage() {
             <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Mercados Desarrollados</span>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05]">
+          <div className="px-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
             <div className="flex items-center justify-between">
               <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold block">Alfa vs S&P 500</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}

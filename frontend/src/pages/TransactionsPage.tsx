@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/Card'
+import { KpiCard } from '@/components/ui/KpiCard'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { BrokerBadge } from '@/components/ui/Badge'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
@@ -192,70 +193,55 @@ export function TransactionsPage() {
     <div className="flex flex-col gap-4 pb-8">
 
       {/* Summary KPI Highlights */}
-      <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
-          <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400">
-              <Layers className="w-3.5 h-3.5" />
-            </div>
-            <span>Total Operaciones</span>
-          </div>
-          <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
-            {stats.totalOps} <span className="text-xs font-normal text-slate-600 dark:text-slate-400">registradas</span>
-          </div>
-          <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-            Frecuencia continua y DCA
-          </div>
-        </div>
+      <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        <KpiCard
+          hoverGlow
+          label="Total Operaciones"
+          value={<>{stats.totalOps} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">reg.</span></>}
+          sub="Frecuencia continua y DCA"
+          tag="Historial"
+          tagColor="blue"
+          borderAccent="blue"
+          icon={<Layers size={15} className="text-blue-500 dark:text-blue-400" />}
+          iconBg="bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400"
+        />
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
-          <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400">
-              <TrendingUp className="w-3.5 h-3.5" />
-            </div>
-            <span>Inversión Neta Total</span>
-          </div>
-          <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
-            {fmt.currency(stats.netInvested)}
-          </div>
-          <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-            Compras: <span className="text-emerald-700 dark:text-emerald-400 font-mono font-bold">{fmt.currency(stats.totalBought)}</span>
-          </div>
-        </div>
+        <KpiCard
+          hoverGlow
+          label="Inversión Neta Total"
+          value={fmt.currency(stats.netInvested)}
+          sub={`Compras: ${fmt.currency(stats.totalBought)}`}
+          tag="Compras netas"
+          tagColor="emerald"
+          borderAccent="emerald"
+          icon={<TrendingUp size={15} className="text-emerald-500 dark:text-emerald-400" />}
+          iconBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400"
+        />
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
-          <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400">
-              <DollarSign className="w-3.5 h-3.5" />
-            </div>
-            <span>Dividendos Percibidos</span>
-          </div>
-          <div className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1">
-            {fmt.currency(stats.totalDivs)}
-          </div>
-          <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-            Rentas pasivas acumuladas
-          </div>
-        </div>
+        <KpiCard
+          hoverGlow
+          label="Dividendos Percibidos"
+          value={fmt.currency(stats.totalDivs)}
+          valueColor="text-amber-500 dark:text-amber-400"
+          sub="Rentas pasivas acumuladas"
+          tag="Rentas"
+          tagColor="amber"
+          borderAccent="amber"
+          icon={<DollarSign size={15} className="text-amber-500 dark:text-amber-400" />}
+          iconBg="bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400"
+        />
 
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
-          <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400">
-              <TrendingDown className="w-3.5 h-3.5" />
-            </div>
-            <span>Reembolsos / Ventas</span>
-          </div>
-          <div className="text-2xl font-bold font-mono text-slate-950 dark:text-slate-200 mt-1">
-            {fmt.currency(stats.totalSold)}
-          </div>
-          <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-            Liquidez recuperada
-          </div>
-        </div>
+        <KpiCard
+          hoverGlow
+          label="Reembolsos / Ventas"
+          value={fmt.currency(stats.totalSold)}
+          sub="Liquidez recuperada"
+          tag="Ventas"
+          tagColor="indigo"
+          borderAccent="indigo"
+          icon={<TrendingDown size={15} className="text-indigo-500 dark:text-indigo-400" />}
+          iconBg="bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400"
+        />
       </div>
 
       {/* Analítica de Cadencia DCA y Eficiencia de Entradas */}
@@ -266,7 +252,7 @@ export function TransactionsPage() {
       {/* Control Bar: Type Tabs, Actions & Search */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
         {/* Type tabs with sliding pill */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.07] shadow-sm overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card overflow-x-auto">
           {TYPE_TABS.map((tab) => {
             const active = activeType === tab.id
             return (

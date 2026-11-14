@@ -160,7 +160,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
   return (
     <div className="flex flex-col gap-4">
       {/* ── 1. Hero Card: Global Health Score & Executive Summary ─────────────── */}
-      <Card delay={0.1} className="overflow-hidden border-indigo-500/20 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-blue-500/[0.02]">
+      <Card delay={0.1} className="overflow-hidden border-indigo-500/20">
         <div className="p-3.5 sm:p-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/[0.06]">
             {/* Left: Title & Purpose */}
@@ -631,7 +631,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
           </div>
 
           {/* Executive Verdict / Narrative Diagnosis */}
-          <Card delay={0.15} className="p-5 sm:p-6 bg-gradient-to-r from-blue-500/[0.04] via-indigo-500/[0.02] to-transparent border-blue-500/25">
+          <Card delay={0.15} className="p-5 sm:p-6 border-blue-500/25">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
                 <Sparkles className="w-5 h-5" />
@@ -741,7 +741,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
           </div>
 
           {/* Concentration KPI Strip */}
-          <Card className="p-4 sm:p-5 bg-slate-50/70 dark:bg-white/[0.02]">
+          <Card className="p-4 sm:p-5">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/80 dark:divide-white/[0.08]">
               <div className="px-2 py-1">
                 <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">
@@ -981,7 +981,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </Card>
 
             {/* Hedging Drag & Long-Term Strategy */}
-            <Card className="p-5 sm:p-6 bg-gradient-to-br from-blue-500/[0.03] to-transparent border-blue-500/20">
+            <Card className="p-5 sm:p-6 border-blue-500/20">
               <div className="flex items-center gap-2 pb-2.5 mb-2.5 border-b border-slate-100 dark:border-white/[0.06]">
                 <ShieldCheck className="w-4 h-4 text-blue-500" />
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
@@ -1001,7 +1001,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
 
           {/* Right Column: FX Sensitivity Simulator (lg:col-span-5) */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            <Card className="p-5 sm:p-6 flex flex-col justify-between border-amber-500/25 bg-gradient-to-br from-amber-500/[0.03] via-transparent to-orange-500/[0.02]">
+            <Card className="p-5 sm:p-6 flex flex-col justify-between border-amber-500/25">
               <div>
                 <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
                   <div>
@@ -1105,7 +1105,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
       {activeTab === 'assets' && (
         <div className="flex flex-col gap-4">
           {/* Top Hero: Inferred Risk Profile Scanner */}
-          <Card className="p-5 sm:p-6 border-indigo-500/25 bg-gradient-to-br from-indigo-500/[0.04] via-blue-500/[0.02] to-transparent">
+          <Card className="p-5 sm:p-6 border-indigo-500/25">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
@@ -1247,7 +1247,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
       {activeTab === 'rebalance' && (
         <div className="flex flex-col gap-4">
           {/* Smart Cash-Flow Rebalancing Calculator (Zero-Tax via New Inflows) */}
-          <Card className="p-5 sm:p-6 border-blue-500/25 bg-gradient-to-br from-blue-500/[0.03] via-transparent to-indigo-500/[0.02]">
+          <Card className="p-5 sm:p-6 border-blue-500/25">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-white/[0.06]">
               <div>
                 <div className="flex items-center gap-2">

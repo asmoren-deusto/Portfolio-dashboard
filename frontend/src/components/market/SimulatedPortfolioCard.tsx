@@ -31,6 +31,7 @@ import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
 import { LoadingDot } from '@/components/ui/LoadingDot'
 import { BrokerBadge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/Card'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { triggerChartAnimation, prepareChartForAnimation } from '@/lib/chartAnimation'
@@ -626,7 +627,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   }, [chartPoints, sessionMarkers, currencyMode, selectedBroker, period, refreshAnimKey])
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover p-3.5 sm:p-4 transition-all">
+    <Card className="w-full overflow-hidden p-3.5 sm:p-4 transition-all" loading={isFetching}>
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 dark:border-white/[0.06]">
         <div className="flex items-center gap-2.5">
@@ -1655,6 +1656,6 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
         </div>
 
       </div>
-    </div>
+    </Card>
   )
 }

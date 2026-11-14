@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { Card } from '@/components/ui/Card'
+import { KpiCard } from '@/components/ui/KpiCard'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { PortfolioAttributionCard } from '@/components/analytics/PortfolioAttributionCard'
@@ -158,91 +159,55 @@ export function PositionsPage() {
       {/* Summary KPI Highlights */}
       {stats && (
         <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-          {/* Valor Total */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
-            <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400">
-                <Layers className="w-3.5 h-3.5" />
-              </div>
-              <span>Valor Total Cartera</span>
-            </div>
-            <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
-              {fmt.currency(stats.totalValue)}
-            </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-              Coste invertido: <span className="text-slate-900 dark:text-slate-200 font-mono font-bold">{fmt.currency(stats.totalInvested)}</span>
-            </div>
-          </div>
+          <KpiCard
+            hoverGlow
+            label="Valor Total Cartera"
+            value={fmt.currency(stats.totalValue)}
+            sub={`Coste invertido: ${fmt.currency(stats.totalInvested)}`}
+            tag="Patrimonio"
+            tagColor="blue"
+            borderAccent="blue"
+            icon={<Layers size={15} className="text-blue-500 dark:text-blue-400" />}
+            iconBg="bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400"
+          />
 
-          {/* Plusvalía Latente */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
-            <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              <div className={`flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border ${stats.totalPnl >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'}`}>
-                {stats.totalPnl >= 0 ? (
-                  <TrendingUp className="w-3.5 h-3.5" />
-                ) : (
-                  <TrendingDown className="w-3.5 h-3.5" />
-                )}
-              </div>
-              <span>Ganancia Latente Total</span>
-            </div>
-            <div
-              className={`text-2xl font-bold font-mono mt-1 ${
-                stats.totalPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-              }`}
-            >
-              {stats.totalPnl >= 0 ? '+' : ''}
-              {fmt.currency(stats.totalPnl)}
-            </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-              Rentabilidad:{' '}
-              <span
-                className={`font-bold font-mono ${
-                  stats.totalPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                }`}
-              >
-                {stats.totalPnl >= 0 ? '+' : ''}
-                {stats.totalPnlPct.toFixed(2)}%
-              </span>
-            </div>
-          </div>
+          <KpiCard
+            hoverGlow
+            label="Ganancia Latente Total"
+            value={`${stats.totalPnl >= 0 ? '+' : ''}${fmt.currency(stats.totalPnl)}`}
+            valueColor={stats.totalPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}
+            tag={`${stats.totalPnl >= 0 ? '+' : ''}${stats.totalPnlPct.toFixed(2)}%`}
+            tagColor={stats.totalPnl >= 0 ? 'emerald' : 'rose'}
+            borderAccent={stats.totalPnl >= 0 ? 'emerald' : 'rose'}
+            sub={`Rentabilidad: ${stats.totalPnl >= 0 ? '+' : ''}${stats.totalPnlPct.toFixed(2)}%`}
+            icon={stats.totalPnl >= 0 ? <TrendingUp size={15} className="text-emerald-500 dark:text-emerald-400" /> : <TrendingDown size={15} className="text-rose-500 dark:text-rose-400" />}
+            iconBg={stats.totalPnl >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400'}
+          />
 
-          {/* Estado de Activos */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
-            <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400">
-                <PieChart className="w-3.5 h-3.5" />
-              </div>
-              <span>Distribución Rentabilidad</span>
-            </div>
-            <div className="text-2xl font-bold font-mono text-slate-950 dark:text-white mt-1">
-              {positions.length} <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">posiciones</span>
-            </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{stats.gainers} en verde</span> •{' '}
-              <span className="text-rose-600 dark:text-rose-400 font-bold">{stats.losers} en rojo</span>
-            </div>
-          </div>
+          <KpiCard
+            hoverGlow
+            label="Distribución Rentabilidad"
+            value={`${positions.length} posiciones`}
+            sub={`${stats.gainers} en verde • ${stats.losers} en rojo`}
+            tag={`${stats.gainers}/${positions.length} verdes`}
+            tagColor={stats.gainers >= stats.losers ? 'emerald' : 'amber'}
+            borderAccent="indigo"
+            icon={<PieChart size={15} className="text-indigo-500 dark:text-indigo-400" />}
+            iconBg="bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400"
+          />
 
-          {/* TER Medio Ponderado */}
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
-            <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400">
-                <Percent className="w-3.5 h-3.5" />
-              </div>
-              <span>Comisión Media (TER)</span>
-            </div>
-            <div className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1">
-              {stats.weightedTer !== null ? `${stats.weightedTer.toFixed(2)}%` : '—'}
-            </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1.5">
-              Ponderado por volumen de cartera
-            </div>
-          </div>
+          <KpiCard
+            hoverGlow
+            label="Comisión Media (TER)"
+            value={stats.weightedTer !== null ? `${stats.weightedTer.toFixed(2)}%` : '—'}
+            valueColor="text-amber-500 dark:text-amber-400"
+            sub="Ponderado por volumen de cartera"
+            tag="Coste anual"
+            tagColor="amber"
+            borderAccent="amber"
+            icon={<Percent size={15} className="text-amber-500 dark:text-amber-400" />}
+            iconBg="bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400"
+          />
         </div>
       )}
 
@@ -258,7 +223,7 @@ export function PositionsPage() {
       {/* Control Bar: Asset Tabs, Search, Sort & View Mode */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100/90 border border-slate-200/80 shadow-sm dark:bg-[#252526] dark:border-white/[0.07] overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card overflow-x-auto">
           {FILTER_TABS.map((tab) => {
             const active = activeFilter === tab.id
             return (

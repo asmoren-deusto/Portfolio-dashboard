@@ -90,7 +90,7 @@ export function BacktestPage() {
   return (
     <div className="flex flex-col gap-5 pb-10">
       {/* Header Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white/90 dark:bg-[#1e1e1e]/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-4 sm:p-5 rounded-2xl shadow-sm">
+      <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5">
         <div className="flex items-start sm:items-center gap-3.5">
           <div className="h-11 w-11 rounded-xl bg-blue-600/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
             <History size={22} />
@@ -138,7 +138,7 @@ export function BacktestPage() {
             </button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* KPI Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
