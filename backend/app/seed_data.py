@@ -190,10 +190,31 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Monetario EUR",
     "ter": 0.06
+  },
+  {
+    "isin": "US67066G1040",
+    "name": "NVIDIA Corporation",
+    "ticker": "NVD.DE",
+    "asset_type": "stock",
+    "currency": "EUR",
+    "category": "Tecnología / Semiconductores & IA",
+    "ter": 0.0
   }
 ]''')
 
 PRICES = json.loads(r'''[
+  {
+    "isin": "US67066G1040",
+    "date": "2026-11-13",
+    "price": 147.78,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00B4ND3602",
+    "date": "2026-11-13",
+    "price": 68.305,
+    "currency": "EUR"
+  },
   {
     "isin": "IE00B4ND3602",
     "date": "2026-10-27",
@@ -4270,5 +4291,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-11",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde BGF World Healthscience, orden 20261111001)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00B4ND3602",
+    "type": "sell",
+    "shares": 28.83,
+    "price": 68.09,
+    "amount": 1963.03,
+    "fees": 1.0,
+    "date": "2026-11-13",
+    "broker": "traderepublic",
+    "notes": "Venta a mercado iShares Physical Gold USD (Acc) en Trade Republic a las 21:10 (28,83 títulos a 68,09 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "US67066G1040",
+    "type": "buy",
+    "shares": 13.261163,
+    "price": 147.82,
+    "amount": 1960.27,
+    "fees": 1.0,
+    "date": "2026-11-13",
+    "broker": "traderepublic",
+    "notes": "Compra a mercado NVIDIA Corp en Trade Republic a las 21:11 (13,261163 acciones a 147,82 €)"
   }
 ]''')

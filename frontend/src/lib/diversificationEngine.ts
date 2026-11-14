@@ -271,6 +271,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'commodity',
     currencies: { USD: 1.0 },
   },
+  // NVIDIA Corporation (US67066G1040)
+  US67066G1040: {
+    geo: { north_america: 1.0 },
+    sectors: { tech: 1.0 },
+    assetClass: 'equity',
+    currencies: { USD: 1.0 },
+  },
   // Vanguard U.S. 500 Stock Index Fund EUR Acc (IE0032126645) - S&P 500
   IE0032126645: {
     geo: { north_america: 1.0, europe: 0.0, japan: 0.0, pacific: 0.0, emerging: 0.0, other: 0.0 },

@@ -99,6 +99,14 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'ETC',
     shareClassLabel: 'ETC Físico (Respaldo en Lingotes de Oro)',
   },
+  // 11. NVIDIA Corporation
+  'US67066G1040': {
+    cleanName: 'NVIDIA Corporation',
+    officialName: 'NVIDIA Corporation (Lang & Schwarz NVD.DE)',
+    currency: 'EUR',
+    shareClass: 'ACC',
+    shareClassLabel: 'Renta Variable Directa (Acciones EE.UU.)',
+  },
 
   // Historical & Traded Assets
   'IE000ZYRH0Q7': {
@@ -214,6 +222,9 @@ export function getAssetCleanName(isin?: string | null, rawName?: string | null)
   }
   if (nLower.includes('gold') || nLower.includes('oro') || nLower.includes('physical gold')) {
     return 'iShares Physical Gold ETC'
+  }
+  if (nLower.includes('nvidia') || nLower.includes('nvda')) {
+    return 'NVIDIA Corporation'
   }
 
   return rawName

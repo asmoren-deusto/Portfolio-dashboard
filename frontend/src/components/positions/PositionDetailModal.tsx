@@ -47,12 +47,15 @@ const FINECT_SLUGS: Record<string, string> = {
   'IE00B4ND3602': 'https://www.finect.com/etfs/ishares-physical-gold-etc',
   'IE0032126645': 'https://www.finect.com/fondos-inversion/IE0032126645-Vanguard_us_500_stock_index_eur_acc',
   'FR0000989626': 'https://www.finect.com/fondos-inversion/FR0000989626-Groupama_tresorerie_ic',
+  'US67066G1040': 'https://www.finect.com/mercados/acciones/US67066G1040-Nvidia_corp',
 }
 
 /**
  * Enlaces específicos directos a la ficha oficial de cada producto o gestora.
  */
 const PRODUCT_GESTORA_URLS: Record<string, string> = {
+  // NVIDIA Corp
+  'US67066G1040': 'https://www.nvidia.com/es-es/investor-relations/',
   // Vanguard U.S. 500 Index EUR Acc
   'IE0032126645': 'https://www.vanguardinvestor.co.uk/investments/vanguard-us-500-stock-index-fund-eur-acc/overview',
   // Groupama Trésorerie IC

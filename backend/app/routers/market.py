@@ -1177,6 +1177,8 @@ PORTFOLIO_ETF_PROXIES = {
     "LU1623762843": {"ticker": "HYG",  "name": "iShares iBoxx $ High Yield Corporate Bond", "desc": "Crédito y Renta Fija Privada"},
     # Oro Físico:
     "IE00B4ND3602": {"ticker": "IAU",  "name": "iShares Gold Trust", "desc": "Oro Físico (ETC / Metales Preciosos)"},
+    # Renta Variable Directa EE.UU. / Semiconductores:
+    "US67066G1040": {"ticker": "XLK",  "name": "Technology Select SPDR", "desc": "NVIDIA / Tecnología EE.UU."},
 }
 
 _sim_portfolio_cache: dict[str, dict] = {}
@@ -1315,6 +1317,7 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
 
     # Currency (EUR / USD) impact analysis
     USD_EXPOSURE_WEIGHTS = {
+        "SPY": 1.00,   # S&P 500 100% USD
         "XLK": 1.00,   # US Tech 100% USD
         "COWZ": 1.00,  # US Cash Cows 100% USD
         "URTH": 0.70,  # MSCI World ~70% US equities
@@ -1325,6 +1328,8 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
         "EWJ": 0.05,   # Japan ~5% USD
         "IXJ": 0.70,   # Global Healthcare ~70% USD
         "BWX": 0.00,   # Bonos Soberanos España 0% USD (100% EUR)
+        "HYG": 1.00,   # US High Yield 100% USD
+        "ICLN": 0.60,  # Global Clean Energy ~60% USD
         "IAU": 1.00,   # Oro Físico cotizado globalmente en USD (XAU/USD)
     }
     portfolio_usd_exposure = sum(etf_weights.get(t, 0.0) * USD_EXPOSURE_WEIGHTS.get(t, 0.70) for t in etf_tickers_list)
