@@ -28,6 +28,7 @@ import { BenchmarkEvolutionChart, type BenchmarkChartMode } from '@/components/c
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
+import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { UnderwaterRiskCard } from '@/components/analytics/UnderwaterRiskCard'
@@ -258,36 +259,43 @@ export function AnalyticsPage() {
               </div>
             </div>
 
-            {/* Mode Switch between % TWR and € Total */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
-              {(['percent', 'currency'] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setBenchmarkMode(m)}
-                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-                    benchmarkMode === m
-                      ? 'text-slate-900 dark:text-white font-bold'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
-                  title={
-                    m === 'percent'
-                      ? 'Comparativa de rentabilidad ponderada en el tiempo (TWR) neutralizando aportaciones'
-                      : 'Patrimonio total (€) y capital neto aportado'
-                  }
-                >
-                  {benchmarkMode === m && (
-                    <motion.div
-                      layoutId="benchmark-mode-indicator"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    />
-                  )}
-                  <span className="relative z-10">
-                    {m === 'percent' ? '% TWR' : '€ Total'}
-                  </span>
-                </button>
-              ))}
-            </div>
+              {/* Mode Switch between % TWR and € Total */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
+                  {(['percent', 'currency'] as const).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setBenchmarkMode(m)}
+                      className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                        benchmarkMode === m
+                          ? 'text-slate-900 dark:text-white font-bold'
+                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                      }`}
+                      title={
+                        m === 'percent'
+                          ? 'Comparativa de rentabilidad ponderada en el tiempo (TWR) neutralizando aportaciones'
+                          : 'Patrimonio total (€) y capital neto aportado'
+                      }
+                    >
+                      {benchmarkMode === m && (
+                        <motion.div
+                          layoutId="benchmark-mode-indicator"
+                          className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                        />
+                      )}
+                      <span className="relative z-10">
+                        {m === 'percent' ? '% TWR' : '€ Total'}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <ExcelExportButton
+                  type="performance"
+                  iconOnly
+                  title="Descargar serie histórica de rentabilidades y comparativa en Excel (.xlsx)"
+                />
+              </div>
           </CardHeader>
 
           <div className={cn("px-4 pb-3 pt-1.5 flex-1 flex flex-col justify-between min-h-0 transition-opacity duration-300", benchmarkFetching ? "opacity-65" : "opacity-100")}>

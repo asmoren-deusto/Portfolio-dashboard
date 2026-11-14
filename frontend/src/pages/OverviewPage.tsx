@@ -56,6 +56,7 @@ import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
+import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
 import { PortfolioAgendaCard } from '@/components/agenda/PortfolioAgendaCard'
 import { fmt, cn, PALETTE_LIGHT, PALETTE_DARK, getConsensusNavDate, formatAssetDisplayName, getExpectedNavHour, isPositionPendingNavUpdate } from '@/lib/utils'
 import { isNativePlatform } from '@/api/config'
@@ -1262,6 +1263,12 @@ export function OverviewPage() {
                   <span>Aportado</span>
                 </motion.button>
               )}
+              {/* 4. Botón Descarga Excel Histórico */}
+              <ExcelExportButton
+                type="performance"
+                iconOnly
+                title="Descargar serie histórica día a día en Excel (.xlsx)"
+              />
             </div>
           </CardHeader>
 
@@ -1771,6 +1778,12 @@ export function OverviewPage() {
                 )
               })}
             </div>
+
+            <ExcelExportButton
+              type="positions"
+              label="Excel"
+              title="Descargar posiciones en Excel (.xlsx) con costes, valores y rentabilidades"
+            />
 
             <Link
               to="/positions"

@@ -22,6 +22,7 @@ import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { PortfolioAttributionCard } from '@/components/analytics/PortfolioAttributionCard'
 import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
+import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
 import { fmt, cn, getConsensusNavDate, formatAssetDisplayName, getExpectedNavHour, isPositionPendingNavUpdate } from '@/lib/utils'
 import { initializeBaselineSeenNavs } from '@/lib/navAlertTracker'
 import { isNativePlatform } from '@/api/config'
@@ -325,6 +326,13 @@ export function PositionsPage() {
             <span className="hidden sm:inline">Diagnóstico vs Mundo</span>
             <span className="sm:hidden">Mundo</span>
           </Link>
+
+          {/* Exportar a Excel */}
+          <ExcelExportButton
+            type="positions"
+            label="Excel"
+            title="Descargar posiciones en Excel (.xlsx) con costes, valores liquidativos y rentabilidades"
+          />
 
           {/* View Toggle */}
           <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 shadow-sm dark:bg-[#252526] dark:border-white/[0.08]">

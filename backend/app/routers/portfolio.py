@@ -11,7 +11,8 @@ try:
 except Exception:
     pass
 import asyncio
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
@@ -1460,3 +1461,120 @@ async def get_analytics(period: str = "1y", user_id: str = Depends(get_current_u
     }
     _analytics_cache[cache_key] = (datetime.now(), res)
     return res
+
+
+# ── Excel Export Endpoints ───────────────────────────────────────────────────
+
+def _resolve_export_user_id(authorization: object | None = None, token: object | None = None) -> str:
+    """Resuelve el usuario autenticado para la descarga, ya sea por Header Bearer o por query param token."""
+    auth_str = authorization if isinstance(authorization, str) else None
+    tok_str = token if isinstance(token, str) else None
+    raw = None
+    if auth_str and auth_str.startswith("Bearer "):
+        raw = auth_str.split(" ", 1)[1]
+    elif tok_str:
+        raw = tok_str
+    if raw:
+        from app.services.auth_service import verify_access_token
+        uid = verify_access_token(raw)
+        if uid:
+            return uid
+    raise HTTPException(status_code=401, detail="No autorizado para descargar este informe")
+
+
+@router.get("/export/positions-excel")
+async def export_positions_excel_endpoint(
+    broker: str | None = None,
+    authorization: str | None = Header(None),
+    token: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """Exporta las posiciones actuales con todas sus métricas a formato Excel (.xlsx)."""
+    from app.services.excel_export import generate_positions_excel
+    user_id = _resolve_export_user_id(authorization, token)
+    positions = await get_positions(user_id=user_id, broker=broker, refresh=False, db=db)
+    buf = generate_positions_excel(positions, broker=broker)
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    b_tag = f"_{broker.lower()}" if broker and broker.lower() not in ("all", "todos") else ""
+    filename = f"Cartera_Posiciones{b_tag}_{today_str}.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/export/performance-excel")
+async def export_performance_excel_endpoint(
+    broker: str | None = None,
+    period: str = "all",
+    authorization: str | None = Header(None),
+    token: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """Exporta el histórico de rendimientos diarios (serie temporal, plusvalías y flujos) a Excel (.xlsx)."""
+    from app.services.excel_export import generate_performance_excel
+    user_id = _resolve_export_user_id(authorization, token)
+    perf = await get_performance(period=period, user_id=user_id, broker=broker, db=db)
+    buf = generate_performance_excel(perf, broker=broker, period=period)
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    b_tag = f"_{broker.lower()}" if broker and broker.lower() not in ("all", "todos") else ""
+    p_tag = f"_{period.lower()}" if period and period.lower() != "all" else ""
+    filename = f"Historico_Rendimiento{b_tag}{p_tag}_{today_str}.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/export/transactions-excel")
+async def export_transactions_excel_endpoint(
+    broker: str | None = None,
+    authorization: str | None = Header(None),
+    token: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """Exporta todas las operaciones y movimientos a Excel (.xlsx)."""
+    from app.services.excel_export import generate_transactions_excel
+    from app.routers.transactions import get_transactions
+    user_id = _resolve_export_user_id(authorization, token)
+    txs = get_transactions(user_id=user_id, broker=broker, db=db)
+    buf = generate_transactions_excel(txs, broker=broker)
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    b_tag = f"_{broker.lower()}" if broker and broker.lower() not in ("all", "todos") else ""
+    filename = f"Operaciones_Historial{b_tag}_{today_str}.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/export/full-portfolio-excel")
+async def export_full_portfolio_excel_endpoint(
+    broker: str | None = None,
+    period: str = "all",
+    authorization: str | None = Header(None),
+    token: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """Genera un libro Excel multi-hoja con Resumen Ejecutivo, Posiciones, Histórico Diario y Operaciones."""
+    from app.services.excel_export import generate_full_portfolio_excel
+    from app.routers.transactions import get_transactions
+    user_id = _resolve_export_user_id(authorization, token)
+    positions_task = get_positions(user_id=user_id, broker=broker, refresh=False, db=db)
+    summary_task = get_portfolio_summary(user_id=user_id, broker=broker, db=db)
+    perf_task = get_performance(period=period, user_id=user_id, broker=broker, db=db)
+    positions, summary, perf = await asyncio.gather(positions_task, summary_task, perf_task)
+    txs = get_transactions(user_id=user_id, broker=broker, db=db)
+
+    buf = generate_full_portfolio_excel(summary, positions, perf, txs, broker=broker, period=period)
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    b_tag = f"_{broker.lower()}" if broker and broker.lower() not in ("all", "todos") else ""
+    filename = f"Cartera_Informe_Completo{b_tag}_{today_str}.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

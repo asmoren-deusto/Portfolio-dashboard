@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RefreshCw, Sun, Moon, Eye, EyeOff, ChevronDown, Check, LogOut, Bell } from 'lucide-react'
+import { RefreshCw, Sun, Moon, Eye, EyeOff, ChevronDown, Check, LogOut, Bell, FileSpreadsheet } from 'lucide-react'
+import { downloadExcelReport } from '@/api/export'
 import { useAppStore } from '@/store/appStore'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -236,6 +237,26 @@ export function HeaderActions({
                       </button>
                     )
                   })}
+                </div>
+
+                {/* Export Full Portfolio in Excel */}
+                <div className="mt-2 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false)
+                      downloadExcelReport('full', { broker: selectedBroker, period })
+                    }}
+                    className="w-full flex items-center justify-between p-2 rounded-xl text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50/70 dark:hover:bg-emerald-500/10 font-semibold transition-colors text-xs cursor-pointer"
+                    title="Descargar libro Excel multi-hoja con Posiciones, Rendimiento Diario, Operaciones y Resumen"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileSpreadsheet size={14} className="text-emerald-600 dark:text-emerald-400" />
+                      <span>Informe Completo (Excel)</span>
+                    </div>
+                    <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
+                      .XLSX
+                    </span>
+                  </button>
                 </div>
 
                 {/* Logout Button */}

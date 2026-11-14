@@ -25,6 +25,7 @@ import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { BrokerBadge } from '@/components/ui/Badge'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
+import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
 import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { apiUrl } from '@/api/config'
@@ -306,6 +307,11 @@ export function TransactionsPage() {
             <Plus className="w-3.5 h-3.5" />
             <span>Nueva Operación</span>
           </button>
+          <ExcelExportButton
+            type="transactions"
+            label="Excel"
+            title="Descargar registro de operaciones en Excel (.xlsx)"
+          />
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
