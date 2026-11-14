@@ -84,7 +84,7 @@ export const ExcelExportButton: React.FC<ExcelExportButtonProps> = ({
       disabled={loading}
       title={errorMsg || tooltip}
       aria-label={tooltip}
-      className={`group relative inline-flex items-center justify-center font-medium transition-all duration-200 cursor-pointer select-none border border-slate-200/90 dark:border-white/[0.08] bg-white hover:bg-emerald-50/60 dark:bg-[#252528] dark:hover:bg-emerald-500/10 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:border-emerald-500/40 shadow-2xs active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed ${sizeClasses} ${className}`}
+      className={`group relative inline-flex items-center justify-center font-semibold transition-all duration-200 cursor-pointer select-none border border-emerald-200 dark:border-emerald-500/20 hover:border-emerald-300 dark:hover:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100/80 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shrink-0 ${sizeClasses} ${className}`}
     >
       {loading ? (
         <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -97,7 +97,7 @@ export const ExcelExportButton: React.FC<ExcelExportButtonProps> = ({
       )}
 
       {!iconOnly && (
-        <span className="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
+        <span className="font-semibold text-emerald-700 dark:text-emerald-300 group-hover:text-emerald-800 dark:group-hover:text-emerald-200">
           {loading ? 'Generando...' : success ? '¡Listo!' : errorMsg ? 'Reintentar' : displayLabel}
         </span>
       )}
