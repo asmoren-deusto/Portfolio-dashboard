@@ -39,7 +39,9 @@ export async function downloadExcelReport(
 
   const fullUrl = `${apiUrl(endpoint)}?${params.toString()}`
 
-  const headers: Record<string, string> = {}
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json',
+  }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
@@ -49,8 +51,17 @@ export async function downloadExcelReport(
     headers,
   })
 
-  if (!res.ok) {
-    throw new Error(`Error ${res.status}: no se ha podido generar el archivo Excel`)
+  // Verificar si el servidor devolvió un error JSON o código HTTP >= 400
+  const contentType = res.headers.get('content-type') || ''
+  if (!res.ok || contentType.includes('application/json')) {
+    let errMsg = `Error ${res.status}: no se ha podido generar el informe Excel`
+    try {
+      const errJson = await res.json()
+      if (errJson?.detail) errMsg = errJson.detail
+    } catch {
+      // Ignorar fallback de lectura JSON
+    }
+    throw new Error(errMsg)
   }
 
   // Extraer nombre de archivo desde Content-Disposition
@@ -65,11 +76,22 @@ export async function downloadExcelReport(
 
   if (!filename) {
     const today = new Date().toISOString().slice(0, 10)
-    const label = type === 'positions' ? 'Posiciones' : type === 'performance' ? 'Historico_Rendimiento' : type === 'transactions' ? 'Operaciones' : 'Informe_Completo'
+    const label =
+      type === 'positions'
+        ? 'Posiciones'
+        : type === 'performance'
+        ? 'Historico_Rendimiento'
+        : type === 'transactions'
+        ? 'Operaciones'
+        : 'Informe_Completo'
     filename = `Cartera_${label}_${today}.xlsx`
   }
 
   const blob = await res.blob()
+  if (blob.size < 200) {
+    throw new Error('El archivo generado está incompleto o dañado.')
+  }
+
   const blobUrl = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = blobUrl

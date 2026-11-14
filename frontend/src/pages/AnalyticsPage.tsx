@@ -292,7 +292,6 @@ export function AnalyticsPage() {
                 </div>
                 <ExcelExportButton
                   type="performance"
-                  iconOnly
                   title="Descargar serie histórica de rentabilidades y comparativa en Excel (.xlsx)"
                 />
               </div>

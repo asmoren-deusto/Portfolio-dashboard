@@ -83,7 +83,7 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'DIST',
     shareClassLabel: 'Distribución (Cupón Anual 5,75%)',
   },
-    // 11. Groupama Trésorerie IC
+  // 11. Groupama Trésorerie IC
   'FR0000989626': {
     cleanName: 'Groupama Trésorerie IC',
     officialName: 'Groupama Trésorerie IC',

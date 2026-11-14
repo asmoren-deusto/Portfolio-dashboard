@@ -1266,7 +1266,6 @@ export function OverviewPage() {
               {/* 4. Botón Descarga Excel Histórico */}
               <ExcelExportButton
                 type="performance"
-                iconOnly
                 title="Descargar serie histórica día a día en Excel (.xlsx)"
               />
             </div>
