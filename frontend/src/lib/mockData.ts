@@ -80,6 +80,7 @@ export interface Transaction {
   id: number | string
   isin: string
   name?: string
+  asset_name?: string
   type: 'buy' | 'sell' | 'dividend' | 'transfer'
   shares: number
   price: number

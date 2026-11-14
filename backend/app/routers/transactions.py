@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 @router.get("", response_model=list[TransactionOut])
 def get_transactions(user_id: str = Depends(get_current_user_id), broker: str | None = None, db: Session = Depends(get_db)):
-    """List all transactions ordered by date desc."""
+    """List all transactions ordered by date desc with resolved asset names."""
     query = db.query(Transaction).filter(Transaction.user_id == user_id)
     if broker and broker.lower() not in ["all", "todos"]:
         b_clean = broker.lower().replace("_", "").replace("-", "")
@@ -25,7 +25,29 @@ def get_transactions(user_id: str = Depends(get_current_user_id), broker: str | 
             query = query.filter(Transaction.broker.in_(["traderepublic", "trade_republic"]))
         else:
             query = query.filter(Transaction.broker == broker.lower())
-    return query.order_by(Transaction.date.desc()).all()
+    rows = query.order_by(Transaction.date.desc()).all()
+    assets_map = {a.isin: a.name for a in db.query(Asset).all()}
+    res = []
+    for t in rows:
+        t_name = assets_map.get(t.isin) or t.notes or t.isin
+        res.append(
+            TransactionOut(
+                id=t.id,
+                user_id=t.user_id,
+                isin=t.isin,
+                type=t.type,
+                shares=t.shares,
+                price=t.price,
+                amount=t.amount,
+                fees=t.fees or 0.0,
+                date=t.date,
+                broker=t.broker or "myinvestor",
+                notes=t.notes,
+                asset_name=t_name,
+                name=t_name,
+            )
+        )
+    return res
 
 
 @router.post("", response_model=TransactionOut)

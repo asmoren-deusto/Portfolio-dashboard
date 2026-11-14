@@ -55,10 +55,13 @@ def _get_all_transactions(db: Session, user_id: str = "asier", broker: str | Non
         else:
             query = query.filter(Transaction.broker == broker.lower())
     rows = query.order_by(Transaction.date).all()
+    assets_map = {a.isin: a.name for a in db.query(Asset).all()}
     return [
         {
             "id": t.id,
             "isin": t.isin,
+            "asset_name": assets_map.get(t.isin) or t.notes or t.isin,
+            "name": assets_map.get(t.isin) or t.notes or t.isin,
             "type": t.type,
             "shares": t.shares,
             "price": t.price,

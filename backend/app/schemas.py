@@ -56,6 +56,8 @@ class UpdatePriceRequest(BaseModel):
 
 class TransactionOut(TransactionBase):
     id: int
+    asset_name: Optional[str] = None
+    name: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -28,6 +28,7 @@ import { BrokerBadge } from '@/components/ui/Badge'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
 import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
+import { getAssetCleanName, ASSET_METADATA_BY_ISIN } from '@/lib/assetMetadata'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { apiUrl } from '@/api/config'
 import { useAppStore } from '@/store/appStore'
@@ -94,7 +95,7 @@ export function TransactionsPage() {
     return transactions.filter((t) => {
       if (activeType !== 'all' && t.type !== activeType) return false
       if (q) {
-        const name = (t as any).name || positionMap.get(t.isin)?.name || ''
+        const name = t.asset_name || (t as any).name || positionMap.get(t.isin)?.name || getAssetCleanName(t.isin) || ''
         const isin = t.isin || ''
         const broker = t.broker || ''
         return (
@@ -357,18 +358,33 @@ export function TransactionsPage() {
                 paginatedTransactions.map((t) => {
                   const conf = TYPE_CONFIG[t.type] ?? TYPE_CONFIG.buy
                   const assetInfo = positionMap.get(t.isin)
-                  const displayName = (t as any).name || assetInfo?.name || t.isin
+                  const cleanName = getAssetCleanName(t.isin)
+                  const displayName = t.asset_name || (t as any).name || assetInfo?.name || cleanName || t.isin
+                  const ticker = assetInfo?.ticker || ASSET_METADATA_BY_ISIN[t.isin]?.cleanName?.slice(0, 4) || t.isin.slice(0, 4)
 
                   return (
                     <tr
                       key={t.id}
                       onClick={() => {
-                          if (assetInfo) setSelectedPosition(assetInfo)
-                        }}
-                        className={`group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] last:border-0 ${
-                          assetInfo ? 'cursor-pointer' : ''
-                        }`}
-                      >
+                        const targetPos: Position = assetInfo || {
+                          isin: t.isin,
+                          name: displayName,
+                          asset_type: 'fund',
+                          currency: 'EUR',
+                          shares: t.shares || 0,
+                          avg_cost: t.price || 0,
+                          current_price: t.price || 0,
+                          current_value: t.amount || 0,
+                          invested_amount: t.amount || 0,
+                          unrealized_pnl: 0,
+                          unrealized_pnl_pct: 0,
+                          weight: 0,
+                          broker: t.broker,
+                        }
+                        setSelectedPosition(targetPos)
+                      }}
+                      className="group border-b border-slate-100 dark:border-white/[0.03] transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.035] last:border-0 cursor-pointer"
+                    >
                       {/* Date */}
                       <td className="px-5 py-3.5 font-mono text-slate-700 dark:text-slate-300 whitespace-nowrap font-medium">
                         {fmt.dateShort(t.date)}
@@ -379,7 +395,7 @@ export function TransactionsPage() {
                         <div className="flex items-center gap-3">
                           <CompanyLogo
                             isin={t.isin}
-                            ticker={assetInfo?.ticker || t.isin.slice(0, 4)}
+                            ticker={ticker}
                             name={displayName}
                             domain={assetInfo?.domain}
                             size="sm"
@@ -605,7 +621,7 @@ function AddTransactionModal({
 
     const newTx = {
       isin,
-      asset_name: selectedPos?.name || isin,
+      asset_name: selectedPos?.name || getAssetCleanName(isin) || isin,
       type,
       date,
       shares: parseFloat(shares) || 0,
