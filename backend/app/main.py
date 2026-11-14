@@ -260,7 +260,7 @@ if os.path.isdir(ASSETS_DIR):
 async def serve_spa(full_path: str):
     # Do not intercept API endpoints
     if full_path.startswith("api/"):
-        return {"detail": "API endpoint not found"}
+        raise HTTPException(status_code=404, detail="API endpoint not found")
 
     # If file exists on disk (e.g. favicon.ico, manifest.json, etc.)
     file_path = os.path.join(STATIC_DIR, full_path)

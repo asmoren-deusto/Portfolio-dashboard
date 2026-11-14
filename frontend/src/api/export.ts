@@ -2,7 +2,7 @@
  * export.ts
  * Utilidad cliente para descargar informes de cartera en formato Microsoft Excel nativo (.xlsx).
  */
-import { apiUrl } from './config'
+import { apiUrl, DEFAULT_PRODUCTION_URL } from './config'
 
 export type ExportType = 'positions' | 'performance' | 'transactions' | 'full'
 
@@ -37,7 +37,8 @@ export async function downloadExcelReport(
   else if (type === 'transactions') endpoint = '/portfolio/export/transactions-excel'
   else if (type === 'full') endpoint = '/portfolio/export/full-portfolio-excel'
 
-  const fullUrl = `${apiUrl(endpoint)}?${params.toString()}`
+  const queryString = params.toString() ? `?${params.toString()}` : ''
+  const fullUrl = `${apiUrl(endpoint)}${queryString}`
 
   const headers: Record<string, string> = {
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json',
@@ -46,13 +47,41 @@ export async function downloadExcelReport(
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  const res = await fetch(fullUrl, {
-    method: 'GET',
-    headers,
-  })
+  let res: Response
+  try {
+    res = await fetch(fullUrl, {
+      method: 'GET',
+      headers,
+    })
+  } catch (netErr) {
+    // Si la llamada local falló por desconexión o red, intentar producción
+    if (!fullUrl.startsWith(DEFAULT_PRODUCTION_URL)) {
+      const fallbackUrl = `${DEFAULT_PRODUCTION_URL}/api${endpoint}${queryString}`
+      res = await fetch(fallbackUrl, { method: 'GET', headers })
+    } else {
+      throw netErr
+    }
+  }
 
   // Verificar si el servidor devolvió un error JSON o código HTTP >= 400
-  const contentType = res.headers.get('content-type') || ''
+  let contentType = res.headers.get('content-type') || ''
+  if (!res.ok || contentType.includes('application/json')) {
+    // Fallback a producción si en local la ruta dio 404 o error
+    if (!fullUrl.startsWith(DEFAULT_PRODUCTION_URL)) {
+      try {
+        const fallbackUrl = `${DEFAULT_PRODUCTION_URL}/api${endpoint}${queryString}`
+        const fallbackRes = await fetch(fallbackUrl, { method: 'GET', headers })
+        const fbType = fallbackRes.headers.get('content-type') || ''
+        if (fallbackRes.ok && !fbType.includes('application/json')) {
+          res = fallbackRes
+          contentType = fbType
+        }
+      } catch {
+        // Ignorar y procesar error original
+      }
+    }
+  }
+
   if (!res.ok || contentType.includes('application/json')) {
     let errMsg = `Error ${res.status}: no se ha podido generar el informe Excel`
     try {
