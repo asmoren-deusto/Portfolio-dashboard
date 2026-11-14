@@ -192,7 +192,7 @@ export function TransactionsPage() {
 
       {/* Summary KPI Highlights */}
       <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
           <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400">
@@ -208,7 +208,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
           <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400">
@@ -224,7 +224,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
           <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400">
@@ -240,7 +240,7 @@ export function TransactionsPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
           <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400">
@@ -321,7 +321,7 @@ export function TransactionsPage() {
 
       {/* Transactions Table Card */}
       <Card className="overflow-hidden relative" delay={0.15}>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto pb-2">
           <table className="w-full text-[13.8px]">
             <thead>
               <tr className="border-b border-slate-100 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01]">

@@ -158,7 +158,7 @@ export function PositionsPage() {
       {stats && (
         <div data-private className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Valor Total */}
-          <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
             <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-blue-500/10 border-blue-500/20 text-blue-500 dark:text-blue-400">
@@ -175,7 +175,7 @@ export function PositionsPage() {
           </div>
 
           {/* Plusvalía Latente */}
-          <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
             <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <div className={`flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border ${stats.totalPnl >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'}`}>
@@ -209,7 +209,7 @@ export function PositionsPage() {
           </div>
 
           {/* Estado de Activos */}
-          <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
             <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400">
@@ -227,7 +227,7 @@ export function PositionsPage() {
           </div>
 
           {/* TER Medio Ponderado */}
-          <div className="relative overflow-hidden p-4 rounded-[20px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card hover:shadow-card-hover transition-all duration-200 cursor-card">
             <div className="pointer-events-none absolute -top-px inset-x-4 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg border bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400">
@@ -373,7 +373,7 @@ export function PositionsPage() {
       {/* Main Content: Table or Grid */}
       {viewMode === 'table' ? (
         <Card className="overflow-hidden relative">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto pb-2">
             <table className="w-full text-[13.8px]">
               <thead>
                 <tr className="border-b border-slate-200/90 bg-slate-50/80 dark:border-white/[0.05] dark:bg-white/[0.01]">
@@ -627,7 +627,7 @@ export function PositionsPage() {
                     transition={{ duration: 0.22, delay: Math.min(i * 0.02, 0.25) }}
                     onClick={() => setSelectedPosition(p)}
                     title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
-                    className="group relative rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 hover:to-white border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:hover:from-[#26262a] dark:border-white/[0.08] dark:hover:border-white/20 p-5 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden"
+                    className="group relative rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 hover:to-white border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-400/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] dark:hover:from-[#26262a] dark:border-white/[0.08] dark:hover:border-white/20 p-5 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden"
                   >
                     {/* Top subtle shine line */}
                     <div className="pointer-events-none absolute -top-px inset-x-5 h-px bg-gradient-to-r from-transparent via-slate-900/[0.08] dark:via-white/[0.18] to-transparent z-10" />

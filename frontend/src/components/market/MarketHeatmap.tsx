@@ -387,7 +387,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           ? 'fixed inset-0 z-[99999] rounded-none p-5 sm:p-6 bg-slate-100 dark:bg-[#1c1c1c] overflow-hidden'
           : fitParent
           ? 'rounded-2xl bg-white dark:bg-[#1e1e1e] shadow-xs p-3.5 sm:p-4'
-          : 'rounded-[22px] bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] shadow-card hover:shadow-card-hover p-4 md:p-5',
+          : 'rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] shadow-card hover:shadow-card-hover p-4 md:p-5',
         className
       )}
     >
