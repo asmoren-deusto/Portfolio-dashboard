@@ -159,7 +159,7 @@ export function Header({
                 : `${updated}/${total} NAVs actualizados. Haz clic para ver el historial.`
             }
             className={cn(
-              "group/nav inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border text-[11px] transition-all cursor-pointer shrink-0 shadow-2xs hover:scale-[1.02] active:scale-97",
+              "inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border text-[11px] transition-colors cursor-pointer shrink-0 shadow-2xs",
               navFresh
                 ? "bg-[#ecfdf5] border-emerald-300/80 hover:border-emerald-400 dark:bg-emerald-950/40 dark:border-emerald-700/50"
                 : "bg-amber-50/90 border-amber-300/80 hover:border-amber-400 dark:bg-amber-950/40 dark:border-amber-700/50"
