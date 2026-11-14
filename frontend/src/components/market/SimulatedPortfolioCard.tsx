@@ -78,9 +78,14 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     category: 'Tecnología y Crecimiento EE.UU.',
   },
   NVDA: {
-    name: 'NVIDIA Corporation',
-    shortName: 'NVIDIA (Acción)',
-    category: 'Renta Variable Directa / Semiconductores & IA',
+    name: 'NVIDIA (Tiempo Real)',
+    shortName: 'NVIDIA (Tiempo Real)',
+    category: 'Acción Directa en Tiempo Real',
+  },
+  FIJO: {
+    name: 'Precio Fijo (Sin réplica)',
+    shortName: 'Bono Fijo',
+    category: 'Fijo a Precio de Compra',
   },
   COWZ: {
     name: 'Alto Cash Flow & Value EE.UU.',
@@ -182,7 +187,12 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
   const { bestPortfolioAsset, worstPortfolioAsset } = useMemo(() => {
     // 1. Prioritize simulated holdings (real-time ETF proxy prices)
     const validHoldings = (holdings || []).filter(
-      (h) => h.etf_change_pct !== undefined && h.etf_change_pct !== null
+      (h) =>
+        h.etf_change_pct !== undefined &&
+        h.etf_change_pct !== null &&
+        !h.is_fixed &&
+        h.etf_ticker !== 'FIJO' &&
+        h.isin !== 'ES0000012411'
     )
 
     if (validHoldings.length > 0) {
@@ -1443,36 +1453,55 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
 
                           {/* Live ETF Quote Price and Daily % */}
                           <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
-                            <div className={cn('font-mono font-bold text-xs flex items-center justify-end gap-1', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-                              {h.is_indicative && (
-                                <span
-                                  className="text-[9px] font-sans font-medium px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                                  title={`Precio en vivo guiado por futuros ${h.proxy_used || ''}`}
-                                >
-                                  Futuros
-                                </span>
-                              )}
-                              <span>{isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%</span>
-                            </div>
-                            {h.etf_price && (
-                              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
-                                {fmt.currency(h.etf_price, 'USD')}
+                            {h.is_fixed || h.etf_ticker === 'FIJO' || h.isin === 'ES0000012411' ? (
+                              <div>
+                                <div className="font-mono font-medium text-xs text-slate-500 dark:text-slate-400">
+                                  0,00%
+                                </div>
+                                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">
+                                  {fmt.currency(h.nav || h.etf_price || 1.1281, 'EUR')}
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                <div className={cn('font-mono font-bold text-xs flex items-center justify-end gap-1', isEtfPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+                                  {h.is_indicative && (
+                                    <span
+                                      className="text-[9px] font-sans font-medium px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                      title={`Precio en vivo guiado por futuros ${h.proxy_used || ''}`}
+                                    >
+                                      Futuros
+                                    </span>
+                                  )}
+                                  <span>{isEtfPos ? '+' : ''}{h.etf_change_pct?.toFixed(2)}%</span>
+                                </div>
+                                {h.etf_price && (
+                                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                                    {fmt.currency(h.etf_price, 'USD')}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </td>
 
                           {/* Estimated Impact in € */}
                           <td className="py-1.5 px-2 text-right whitespace-nowrap">
-                            <span
-                              className={cn(
-                                'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
-                                isGainPos
-                                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
-                                  : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
-                              )}
-                            >
-                              {isGainPos ? '+' : ''}{fmt.currency(h.simulated_gain_amount ?? 0)}
-                            </span>
+                            {h.is_fixed || h.etf_ticker === 'FIJO' || h.isin === 'ES0000012411' ? (
+                              <span className="font-mono font-medium text-xs px-2 py-0.5 rounded-md inline-block text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.04]">
+                                0,00 €
+                              </span>
+                            ) : (
+                              <span
+                                className={cn(
+                                  'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
+                                  isGainPos
+                                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                                    : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                                )}
+                              >
+                                {isGainPos ? '+' : ''}{fmt.currency(h.simulated_gain_amount ?? 0)}
+                              </span>
+                            )}
                           </td>
                         </tr>
                       )
@@ -1541,29 +1570,37 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               </td>
 
                               <td className="py-1.5 px-1.5 text-right font-mono font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
-                                <span>{etf.price ? fmt.currency(etf.price, etf.currency) : '-'}</span>
+                                <span>{etf.price ? fmt.currency(etf.price, etf.currency || 'USD') : '-'}</span>
                               </td>
 
                               <td className="py-1.5 px-1.5 text-right whitespace-nowrap">
                                 <div className="flex items-center justify-end gap-1">
-                                  {etf.is_indicative && (
-                                    <span
-                                      className="text-[9px] font-sans font-medium px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                                      title={`Precio en vivo guiado por futuros ${etf.proxy_used || ''}`}
-                                    >
-                                      Futuros
+                                  {etf.ticker === 'FIJO' ? (
+                                    <span className="font-mono font-medium text-xs px-2 py-0.5 rounded-md inline-block text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.04]">
+                                      0,00%
                                     </span>
+                                  ) : (
+                                    <>
+                                      {etf.is_indicative && (
+                                        <span
+                                          className="text-[9px] font-sans font-medium px-1 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                          title={`Precio en vivo guiado por futuros ${etf.proxy_used || ''}`}
+                                        >
+                                          Futuros
+                                        </span>
+                                      )}
+                                      <span
+                                        className={cn(
+                                          'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
+                                          isPos
+                                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                                        : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                                        )}
+                                      >
+                                        {isPos ? '+' : ''}{etf.change_pct?.toFixed(2)}%
+                                      </span>
+                                    </>
                                   )}
-                                  <span
-                                    className={cn(
-                                      'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
-                                      isPos
-                                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
-                                    : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
-                                    )}
-                                  >
-                                    {isPos ? '+' : ''}{etf.change_pct?.toFixed(2)}%
-                                  </span>
                                 </div>
                               </td>
 
@@ -1584,16 +1621,22 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
                               </td>
 
                               <td className="py-1.5 px-2 text-right whitespace-nowrap">
-                                <span
-                                  className={cn(
-                                    'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
-                                    isImpactPos
-                                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
-                                      : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
-                                  )}
-                                >
-                                  {isImpactPos ? '+' : ''}{fmt.currency(totalImpact)}
-                                </span>
+                                {etf.ticker === 'FIJO' ? (
+                                  <span className="font-mono font-medium text-xs px-2 py-0.5 rounded-md inline-block text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.04]">
+                                    0,00 €
+                                  </span>
+                                ) : (
+                                  <span
+                                    className={cn(
+                                      'font-mono font-bold text-xs px-2 py-0.5 rounded-md inline-block',
+                                      isImpactPos
+                                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10'
+                                        : 'text-rose-700 dark:text-rose-300 bg-rose-500/10'
+                                    )}
+                                  >
+                                    {isImpactPos ? '+' : ''}{fmt.currency(totalImpact)}
+                                  </span>
+                                )}
                               </td>
                             </tr>
                           )

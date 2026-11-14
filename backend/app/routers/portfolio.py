@@ -771,6 +771,12 @@ def invalidate_computed_portfolio_caches():
     _perf_cache.clear()
     _bench_cache.clear()
     _analytics_cache.clear()
+    try:
+        from app.routers.market import _sim_portfolio_cache, _etf_intraday_cache
+        _sim_portfolio_cache.clear()
+        _etf_intraday_cache.clear()
+    except Exception:
+        pass
 
 
 def clear_portfolio_caches():

@@ -545,6 +545,8 @@ export interface SimulatedHolding {
   proxy_used?: string | null
   simulated_gain_amount?: number
   official_gain_amount?: number
+  is_fixed?: boolean
+  is_realtime?: boolean
 }
 
 export interface SimulatedEtfSummary {

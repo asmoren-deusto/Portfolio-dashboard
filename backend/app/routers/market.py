@@ -219,7 +219,6 @@ ETF_PREMARKET_LIVE_PROXIES = {
     "BWX":  "ZN=F",       # Futuros 10-Yr T-Note 24h CME Globex (guía Deuda Soberana / Renta Fija)
     "HYG":  "ZN=F",       # Futuros 10-Yr T-Note 24h (guía Crédito / Renta Fija Privada)
     "IAU":  "GC=F",       # Futuros Oro 24h CME Comex (guía Oro físico fuera de horas)
-    "NVDA": "NQ=F",       # Futuros Nasdaq 100 24h CME Globex (guía tecnológica fuera de horas)
 }
 
 # In-memory cache (shorter TTL for real-time feel)
@@ -1174,12 +1173,12 @@ PORTFOLIO_ETF_PROXIES = {
     # Salud:
     "LU0171307068": {"ticker": "IXJ",  "name": "iShares Global Healthcare ETF", "desc": "Salud y Biotecnología Global"},
     # Renta Fija / Bonos / Crédito:
-    "ES0000012411": {"ticker": "BWX",  "name": "SPDR International Treasury Bond", "desc": "Deuda Soberana / Bonos España & Global"},
+    "ES0000012411": {"ticker": "FIJO", "name": "Precio Fijo (Sin réplica)", "desc": "Fijo a Precio de Compra", "is_fixed": True},
     "LU1623762843": {"ticker": "HYG",  "name": "iShares iBoxx $ High Yield Corporate Bond", "desc": "Crédito y Renta Fija Privada"},
     # Oro Físico:
     "IE00B4ND3602": {"ticker": "IAU",  "name": "iShares Gold Trust", "desc": "Oro Físico (ETC / Metales Preciosos)"},
     # Renta Variable Directa EE.UU. / Semiconductores:
-    "US67066G1040": {"ticker": "NVDA", "name": "NVIDIA Corporation", "desc": "NVIDIA (Cotización Directa)"},
+    "US67066G1040": {"ticker": "NVDA", "name": "NVIDIA (Tiempo Real)", "desc": "Acción Directa en Tiempo Real", "is_realtime": True},
 }
 
 _sim_portfolio_cache: dict[str, dict] = {}
@@ -1214,10 +1213,15 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
     unique_etfs = set()
 
     for isin, f_val in fund_values.items():
-        proxy_info = PORTFOLIO_ETF_PROXIES.get(
-            isin,
-            {"ticker": "URTH", "name": "iShares MSCI World ETF", "desc": "Global Equities"}
-        )
+        if isin == "ES0000012411":
+            proxy_info = {"ticker": "FIJO", "name": "Precio Fijo (Sin réplica)", "desc": "Fijo a Precio de Compra", "is_fixed": True}
+        elif isin == "US67066G1040":
+            proxy_info = {"ticker": "NVDA", "name": "NVIDIA (Tiempo Real)", "desc": "Acción Directa en Tiempo Real", "is_realtime": True}
+        else:
+            proxy_info = PORTFOLIO_ETF_PROXIES.get(
+                isin,
+                {"ticker": "URTH", "name": "iShares MSCI World ETF", "desc": "Global Equities"}
+            )
         etf_ticker = proxy_info["ticker"]
         unique_etfs.add(etf_ticker)
         w = (f_val / total_val) if total_val > 0 else 0
@@ -1229,19 +1233,39 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
             "fund_name": meta.get("name", isin),
             "broker": meta.get("broker", "myinvestor"),
             "shares": round(active[isin]["shares"], 4),
-            "nav": round(navs[isin], 4),
+            "nav": round(navs.get(isin, active[isin].get("avg_cost", 0)), 4),
             "fund_value": round(f_val, 2),
             "weight": round(w * 100, 2),
             "etf_ticker": etf_ticker,
             "etf_name": proxy_info["name"],
             "etf_desc": proxy_info["desc"],
+            "is_fixed": bool(proxy_info.get("is_fixed")),
+            "is_realtime": bool(proxy_info.get("is_realtime")),
         })
 
     etf_tickers_list = sorted(list(unique_etfs))
-    fetch_tickers = sorted(list(unique_etfs | {"EURUSD=X"}))
+    fetch_tickers = sorted(list((unique_etfs - {"FIJO"}) | {"EURUSD=X"}))
 
     # Extended quotes for all ETF proxies and EURUSD currency
     quotes = _fetch_quotes_extended(fetch_tickers)
+
+    # Inyección de activo fijo (bono a coste de compra, sin fluctuación intradía)
+    fixed_bond_p = navs.get("ES0000012411", 1.1281)
+    quotes["FIJO"] = {
+        "ticker": "FIJO",
+        "price": fixed_bond_p,
+        "regular_price": fixed_bond_p,
+        "prev_close": fixed_bond_p,
+        "change": 0.0,
+        "change_pct": 0.0,
+        "regular_change_pct": 0.0,
+        "official_close_pct": 0.0,
+        "official_close_price": fixed_bond_p,
+        "market_state": "CLOSED",
+        "is_indicative": False,
+        "proxy_used": None,
+        "currency": "EUR",
+    }
 
     # Fetch quotes for all needed proxies
     needed_proxy_tickers = list(set(ETF_PREMARKET_LIVE_PROXIES.values()))
@@ -1256,6 +1280,14 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
     is_pre_market_window = (now_ny.weekday() < 5) and (mins_ny_now < 9 * 60 + 30)
 
     for t in etf_tickers_list:
+        if t == "FIJO":
+            quotes["FIJO"]["change_pct"] = 0.0
+            quotes["FIJO"]["official_close_pct"] = 0.0
+            quotes["FIJO"]["official_close_price"] = fixed_bond_p
+            quotes["FIJO"]["is_indicative"] = False
+            quotes["FIJO"]["proxy_used"] = None
+            continue
+
         q = quotes.get(t, {})
         m_state = q.get("market_state")
         # Record official regular session close values (guaranteed static historical close of last regular session)
@@ -1276,7 +1308,23 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
 
         # Only project with 24h futures/index proxies on weekdays BEFORE Wall Street opens (09:30 NY).
         # Once Wall Street opens (REGULAR, POST, or CLOSED after regular session), use the ETF's actual session performance.
-        if is_pre_market_window:
+        # Direct equities (like NVDA) always prioritize their actual real-time price & pre/post market trades.
+        if t == "NVDA":
+            pre_p = q.get("pre_market_price")
+            post_p = q.get("post_market_price")
+            if is_pre_market_window and pre_p and prev_c and prev_c > 0:
+                quotes[t]["price"] = pre_p
+                quotes[t]["change"] = round(pre_p - prev_c, 4)
+                quotes[t]["change_pct"] = round((pre_p - prev_c) / prev_c * 100.0, 2)
+            elif not is_pre_market_window and m_state in ("POST", "POSTPOST") and post_p and prev_c and prev_c > 0:
+                quotes[t]["price"] = post_p
+                quotes[t]["change"] = round(post_p - prev_c, 4)
+                quotes[t]["change_pct"] = round((post_p - prev_c) / prev_c * 100.0, 2)
+            else:
+                quotes[t]["change_pct"] = official_close_pct
+                if reg_p:
+                    quotes[t]["price"] = reg_p
+        elif is_pre_market_window:
             p_tick = ETF_PREMARKET_LIVE_PROXIES.get(t)
             if p_tick:
                 pq = proxy_quotes.get(p_tick, {})
@@ -1303,18 +1351,31 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
 
     # Attach live ETF quote info & simulated gain to each holding
     for h in holdings:
-        q = quotes.get(h["etf_ticker"], {})
-        chg_pct = q.get("change_pct", 0.0) or 0.0
-        off_pct = q.get("official_close_pct", chg_pct)
-        h["etf_price"] = q.get("price")
-        h["etf_change_pct"] = chg_pct
-        h["etf_change"] = q.get("change")
-        h["official_close_pct"] = off_pct
-        h["official_close_price"] = q.get("official_close_price")
-        h["is_indicative"] = q.get("is_indicative", False)
-        h["proxy_used"] = q.get("proxy_used")
-        h["simulated_gain_amount"] = round(h["fund_value"] * (chg_pct / 100.0), 2)
-        h["official_gain_amount"] = round(h["fund_value"] * (off_pct / 100.0), 2)
+        if h.get("is_fixed") or h["isin"] == "ES0000012411" or h["etf_ticker"] == "FIJO":
+            fixed_p = h.get("nav") or 1.1281
+            h["etf_price"] = fixed_p
+            h["etf_change_pct"] = 0.0
+            h["etf_change"] = 0.0
+            h["official_close_pct"] = 0.0
+            h["official_close_price"] = fixed_p
+            h["is_indicative"] = False
+            h["proxy_used"] = None
+            h["simulated_gain_amount"] = 0.0
+            h["official_gain_amount"] = 0.0
+            h["is_fixed"] = True
+        else:
+            q = quotes.get(h["etf_ticker"], {})
+            chg_pct = q.get("change_pct", 0.0) or 0.0
+            off_pct = q.get("official_close_pct", chg_pct)
+            h["etf_price"] = q.get("price")
+            h["etf_change_pct"] = chg_pct
+            h["etf_change"] = q.get("change")
+            h["official_close_pct"] = off_pct
+            h["official_close_price"] = q.get("official_close_price")
+            h["is_indicative"] = q.get("is_indicative", False)
+            h["proxy_used"] = q.get("proxy_used")
+            h["simulated_gain_amount"] = round(h["fund_value"] * (chg_pct / 100.0), 2)
+            h["official_gain_amount"] = round(h["fund_value"] * (off_pct / 100.0), 2)
 
     # Currency (EUR / USD) impact analysis
     USD_EXPOSURE_WEIGHTS = {
@@ -1328,6 +1389,7 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
         "EFV": 0.15,   # EAFE Value ~15% USD
         "EWJ": 0.05,   # Japan ~5% USD
         "IXJ": 0.70,   # Global Healthcare ~70% USD
+        "FIJO": 0.00,  # Bonos España Fijo a precio de compra 0% USD (100% EUR)
         "BWX": 0.00,   # Bonos Soberanos España 0% USD (100% EUR)
         "HYG": 1.00,   # US High Yield 100% USD
         "ICLN": 0.60,  # Global Clean Energy ~60% USD
@@ -1387,8 +1449,8 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
 
         # Download cash ETFs, all futures/index proxies and EURUSD (cached across brokers for 45s)
         all_proxy_symbols = list(set(ETF_PREMARKET_LIVE_PROXIES.values()))
-        all_known_etfs = list(set([p["ticker"] for p in PORTFOLIO_ETF_PROXIES.values()] + etf_tickers_list))
-        download_tickers = sorted(list(set(all_known_etfs + all_proxy_symbols + ["ES=F", "NQ=F", "EURUSD=X"])))
+        all_known_etfs = list((set([p["ticker"] for p in PORTFOLIO_ETF_PROXIES.values()] + etf_tickers_list)) - {"FIJO"})
+        download_tickers = sorted(list(set(all_known_etfs + all_proxy_symbols + ["ES=F", "NQ=F", "EURUSD=X"]) - {"FIJO"}))
 
         df = None
         cached_df_entry = _etf_intraday_cache.get(fetch_period)
@@ -1493,6 +1555,9 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
                             s_comb = pd.Series(combined_vals, index=target_idxs).ffill().bfill()
                             norm_dict[t] = s_comb
 
+                        if "FIJO" in etf_tickers_list:
+                            norm_dict["FIJO"] = pd.Series([0.0] * len(target_idxs), index=target_idxs)
+
                         norm_df = pd.DataFrame(norm_dict, index=target_idxs)
 
                         if fx_closes_raw is not None and not fx_closes_raw.empty:
@@ -1595,6 +1660,8 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
                             prev_base_dict[t] = float(pc) if (pc and pc > 0) else float(target_closes[t].iloc[0])
                         prev_base_s = pd.Series(prev_base_dict)
                         norm_df = (target_closes - prev_base_s) / prev_base_s * 100.0
+                        if "FIJO" in etf_tickers_list:
+                            norm_df["FIJO"] = 0.0
 
                         if fx_closes_raw is not None and not fx_closes_raw.empty:
                             target_fx = fx_closes_raw.reindex(target_idxs).ffill().bfill()
@@ -1633,6 +1700,8 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
                     closes_clean = closes_etfs.ffill().bfill()
                     base_s = closes_clean.iloc[0]
                     norm_df = (closes_clean - base_s) / base_s * 100.0
+                    if "FIJO" in etf_tickers_list:
+                        norm_df["FIJO"] = 0.0
                     if fx_closes_raw is not None and not fx_closes_raw.empty:
                         fx_b = fx_closes_raw.dropna().iloc[0] if not fx_closes_raw.dropna().empty else 1.0
                         usd_fx_series = ((fx_b / fx_closes_raw.reindex(closes_clean.index).ffill().bfill()) - 1.0) * 100.0
@@ -1745,12 +1814,12 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
             "regular_price": q.get("regular_price"),
             "pre_market_price": q.get("pre_market_price"),
             "post_market_price": q.get("post_market_price"),
-            "change_pct": q.get("change_pct"),
-            "official_close_pct": q.get("official_close_pct"),
+            "change_pct": 0.0 if t == "FIJO" else q.get("change_pct"),
+            "official_close_pct": 0.0 if t == "FIJO" else q.get("official_close_pct"),
             "official_close_price": q.get("official_close_price"),
-            "is_indicative": q.get("is_indicative", False),
-            "proxy_used": q.get("proxy_used"),
-            "currency": q.get("currency", "USD"),
+            "is_indicative": False if t == "FIJO" else q.get("is_indicative", False),
+            "proxy_used": None if t == "FIJO" else q.get("proxy_used"),
+            "currency": "EUR" if t == "FIJO" else q.get("currency", "USD"),
         })
 
     # Session dates & human-readable labels: usar la fecha de sesión bursátil real de Wall Street

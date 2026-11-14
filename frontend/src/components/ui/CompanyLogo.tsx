@@ -345,10 +345,13 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
 
   const isSpanishBond =
     Boolean(isin && isin === 'ES0000012411') ||
+    Boolean(ticker && ticker === 'FIJO') ||
     (name || '').toLowerCase().includes('españa gobierno') ||
+    (name || '').toLowerCase().includes('bonos gobierno') ||
     (name || '').toLowerCase().includes('bonos gob. españa') ||
     (name || '').toLowerCase().includes('bonos y obligaciones del estado') ||
-    (name || '').toLowerCase().includes('bono español')
+    (name || '').toLowerCase().includes('bono español') ||
+    (name || '').toLowerCase().includes('precio fijo')
 
   const isBlackRock =
     Boolean(isin && isin === 'LU0171307068') ||
