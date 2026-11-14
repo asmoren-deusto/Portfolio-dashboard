@@ -113,11 +113,11 @@ export function BacktestPage() {
         {/* Global Controls */}
         <div className="flex flex-wrap items-center gap-2 self-start lg:self-center">
           {/* Timeframe Selector */}
-          <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08]">
+          <div className="h-8 inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08]">
             <button
               onClick={() => setTimeframe('5y')}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+                'h-7 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center',
                 timeframe === '5y'
                   ? 'bg-white dark:bg-blue-600 text-slate-900 dark:text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
@@ -128,7 +128,7 @@ export function BacktestPage() {
             <button
               onClick={() => setTimeframe('10y')}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+                'h-7 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center',
                 timeframe === '10y'
                   ? 'bg-white dark:bg-blue-600 text-slate-900 dark:text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'

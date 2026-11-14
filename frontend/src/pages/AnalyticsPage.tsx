@@ -261,12 +261,12 @@ export function AnalyticsPage() {
 
               {/* Mode Switch between % TWR and € Total */}
               <div className="flex items-center gap-1.5 shrink-0">
-                <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
+                <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
                   {(['percent', 'currency'] as const).map((m) => (
                     <button
                       key={m}
                       onClick={() => setBenchmarkMode(m)}
-                      className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                      className={`h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors ${
                         benchmarkMode === m
                           ? 'text-slate-900 dark:text-white font-bold'
                           : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -280,7 +280,7 @@ export function AnalyticsPage() {
                       {benchmarkMode === m && (
                         <motion.div
                           layoutId="benchmark-mode-indicator"
-                          className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                          className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                         />
                       )}

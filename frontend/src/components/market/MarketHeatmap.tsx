@@ -449,7 +449,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           {/* Fullscreen Button */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08] transition-colors shrink-0"
+            className="h-8 w-8 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-400 dark:hover:text-white dark:border-white/[0.08] transition-colors shrink-0"
             title={isFullscreen ? 'Salir de pantalla completa (Esc)' : 'Pantalla completa'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -459,7 +459,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
           {showViewAllLink && !isFullscreen && (
             <Link
               to="/market"
-              className="inline-flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
+              className="inline-flex items-center gap-1.5 h-8 px-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200/80 dark:border-white/[0.08] shrink-0"
               title="Ver mercado"
             >
               <span className="hidden xl:inline">Ver mercado</span>

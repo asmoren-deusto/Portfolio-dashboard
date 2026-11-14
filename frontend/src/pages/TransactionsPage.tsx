@@ -279,17 +279,17 @@ export function TransactionsPage() {
         </div>
 
         {/* Action Buttons & Search Input */}
-        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300 dark:hover:text-white dark:border-white/[0.08] dark:hover:border-white/20 text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+            className="h-8 flex items-center gap-1.5 px-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200/90 dark:bg-[#252526] dark:hover:bg-[#2a2d2e] dark:text-slate-300 dark:hover:text-white dark:border-white/[0.08] dark:hover:border-white/20 text-xs font-semibold transition-all shadow-2xs active:scale-95 shrink-0"
           >
             <Upload className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
             <span>Importar Extracto</span>
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white text-xs font-semibold transition-all shadow-xs dark:shadow-none dark:border dark:border-white/10 active:scale-95 shrink-0"
+            className="h-8 flex items-center gap-1.5 px-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white text-xs font-semibold transition-all shadow-2xs dark:shadow-none dark:border dark:border-white/10 active:scale-95 shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Nueva Operación</span>
@@ -300,13 +300,13 @@ export function TransactionsPage() {
             title="Descargar registro de operaciones en Excel (.xlsx)"
           />
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por activo, ISIN o broker..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-white dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] focus:border-blue-500/50 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all shadow-sm"
+              className="h-8 w-full pl-8 pr-3 rounded-lg bg-white dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] focus:border-blue-500/50 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all shadow-2xs"
             />
           </div>
         </div>
