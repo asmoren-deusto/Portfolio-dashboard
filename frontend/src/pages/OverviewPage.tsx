@@ -1828,8 +1828,9 @@ export function OverviewPage() {
                         const isRowHovered = hoveredIsin === p.isin
                         const assetColor = assetColorMap[p.isin]
                         const pDate = p.price_date || p.last_updated
-                        const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
-                        const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
+                        const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' || p.isin === 'US67066G1040'
+                        const isUpdated = isLive || Boolean(latestNavDate && pDate && pDate >= latestNavDate)
+                        const isPendingNav = !isLive && isPositionPendingNavUpdate(p, latestNavDate)
 
                         return (
                           <tr
@@ -1837,7 +1838,7 @@ export function OverviewPage() {
                             onClick={() => setSelectedPosition(p)}
                             onMouseEnter={() => setHoveredIsin(p.isin)}
                             onMouseLeave={() => setHoveredIsin(null)}
-                            title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
+                            title={isLive ? `Cotización en tiempo real (${p.quote_time ? `Hoy ${p.quote_time}` : pDate})` : (isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`)}
                             className={cn(
                               'transition-colors group cursor-pointer relative',
                               isRowHovered
@@ -1890,6 +1891,14 @@ export function OverviewPage() {
                               </div>
                               <div className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap">
                                 {(() => {
+                                  if (isLive) {
+                                    return (
+                                      <div className="text-[10.5px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-end gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span>{p.quote_time ? `Hoy ${p.quote_time}` : 'Tiempo real'}</span>
+                                      </div>
+                                    )
+                                  }
                                   const raw = p.price_date || p.last_updated
                                   if (!raw) return '—'
                                   try {
@@ -2013,8 +2022,9 @@ export function OverviewPage() {
                           const isRowHovered = hoveredIsin === p.isin
                           const assetColor = assetColorMap[p.isin]
                           const pDate = p.price_date || p.last_updated
-                          const isUpdated = Boolean(latestNavDate && pDate && pDate >= latestNavDate)
-                          const isPendingNav = isPositionPendingNavUpdate(p, latestNavDate)
+                          const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' || p.isin === 'US67066G1040'
+                          const isUpdated = isLive || Boolean(latestNavDate && pDate && pDate >= latestNavDate)
+                          const isPendingNav = !isLive && isPositionPendingNavUpdate(p, latestNavDate)
 
                           return (
                             <tr
@@ -2022,7 +2032,7 @@ export function OverviewPage() {
                               onClick={() => setSelectedPosition(p)}
                               onMouseEnter={() => setHoveredIsin(p.isin)}
                               onMouseLeave={() => setHoveredIsin(null)}
-                              title={isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`}
+                              title={isLive ? `Cotización en tiempo real (${p.quote_time ? `Hoy ${p.quote_time}` : pDate})` : (isUpdated ? `Actualizado con último NAV (${p.price_date || p.last_updated})` : `Pendiente de nuevo NAV (último: ${p.price_date || p.last_updated})`)}
                               className={cn(
                                 'transition-colors group cursor-pointer relative',
                                 isRowHovered
@@ -2075,6 +2085,14 @@ export function OverviewPage() {
                                 </div>
                                 <div className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap">
                                   {(() => {
+                                    if (isLive) {
+                                      return (
+                                        <div className="text-[10.5px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-end gap-1">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                          <span>{p.quote_time ? `Hoy ${p.quote_time}` : 'Tiempo real'}</span>
+                                        </div>
+                                      )
+                                    }
                                     const raw = p.price_date || p.last_updated
                                     if (!raw) return '—'
                                     try {

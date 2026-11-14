@@ -13,8 +13,9 @@ export function filterUnseenNavUpdates(items: NavAlertItem[]): NavAlertItem[] {
     const seenMap: Record<string, string> = raw ? JSON.parse(raw) : {}
 
     return items.filter((item) => {
-      // Exclude live-traded assets (e.g. Gold ETC IE00B4ND3602, stocks, ETFs) from daily NAV publication modals
-      if ((item as any).is_live || item.isin === 'IE00B4ND3602') return false
+      // Exclude live-traded assets (e.g. Gold ETC IE00B4ND3602, NVIDIA US67066G1040, stocks, ETFs) from daily NAV publication modals
+      const assetType = (item as any).asset_type
+      if ((item as any).is_live || assetType === 'stock' || assetType === 'etc' || assetType === 'etf' || item.isin === 'IE00B4ND3602' || item.isin === 'US67066G1040') return false
       // Only include items actually marked as updated
       if (item.is_updated === false) return false
 
@@ -22,7 +23,7 @@ export function filterUnseenNavUpdates(items: NavAlertItem[]): NavAlertItem[] {
       return seenMap[item.isin] !== key
     })
   } catch {
-    return items.filter((item) => item.is_updated !== false && item.isin !== 'IE00B4ND3602')
+    return items.filter((item) => item.is_updated !== false && item.isin !== 'IE00B4ND3602' && item.isin !== 'US67066G1040' && (item as any).asset_type !== 'stock')
   }
 }
 

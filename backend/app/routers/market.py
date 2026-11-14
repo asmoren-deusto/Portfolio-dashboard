@@ -219,6 +219,7 @@ ETF_PREMARKET_LIVE_PROXIES = {
     "BWX":  "ZN=F",       # Futuros 10-Yr T-Note 24h CME Globex (guía Deuda Soberana / Renta Fija)
     "HYG":  "ZN=F",       # Futuros 10-Yr T-Note 24h (guía Crédito / Renta Fija Privada)
     "IAU":  "GC=F",       # Futuros Oro 24h CME Comex (guía Oro físico fuera de horas)
+    "NVDA": "NQ=F",       # Futuros Nasdaq 100 24h CME Globex (guía tecnológica fuera de horas)
 }
 
 # In-memory cache (shorter TTL for real-time feel)
@@ -1178,7 +1179,7 @@ PORTFOLIO_ETF_PROXIES = {
     # Oro Físico:
     "IE00B4ND3602": {"ticker": "IAU",  "name": "iShares Gold Trust", "desc": "Oro Físico (ETC / Metales Preciosos)"},
     # Renta Variable Directa EE.UU. / Semiconductores:
-    "US67066G1040": {"ticker": "XLK",  "name": "Technology Select SPDR", "desc": "NVIDIA / Tecnología EE.UU."},
+    "US67066G1040": {"ticker": "NVDA", "name": "NVIDIA Corporation", "desc": "NVIDIA (Cotización Directa)"},
 }
 
 _sim_portfolio_cache: dict[str, dict] = {}
@@ -1331,6 +1332,7 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
         "HYG": 1.00,   # US High Yield 100% USD
         "ICLN": 0.60,  # Global Clean Energy ~60% USD
         "IAU": 1.00,   # Oro Físico cotizado globalmente en USD (XAU/USD)
+        "NVDA": 1.00,  # NVIDIA 100% USD
     }
     portfolio_usd_exposure = sum(etf_weights.get(t, 0.0) * USD_EXPOSURE_WEIGHTS.get(t, 0.70) for t in etf_tickers_list)
 

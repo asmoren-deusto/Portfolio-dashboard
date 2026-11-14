@@ -432,6 +432,15 @@ async def _scrape_price_with_date_impl(
                 live_d = y_date or datetime.now().strftime("%Y-%m-%d")
                 live_time = datetime.now().strftime("%H:%M")
 
+        # Additional fallback to US quote converted to EUR for US stocks like NVIDIA
+        if live_p is None and isin == "US67066G1040":
+            y_price, y_date = await _fetch_yahoo_price("NVDA")
+            eurusd, _ = await _fetch_yahoo_price("EURUSD=X")
+            if y_price and y_price > 0 and eurusd and eurusd > 0:
+                live_p = round(y_price / eurusd, 4)
+                live_d = y_date or datetime.now().strftime("%Y-%m-%d")
+                live_time = datetime.now().strftime("%H:%M")
+
         if live_p and live_p > 0:
             price = live_p
             price_date = live_d or datetime.now().strftime("%Y-%m-%d")

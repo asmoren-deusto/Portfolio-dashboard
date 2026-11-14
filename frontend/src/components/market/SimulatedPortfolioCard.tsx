@@ -77,6 +77,11 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     shortName: 'Nasdaq-100',
     category: 'Tecnología y Crecimiento EE.UU.',
   },
+  NVDA: {
+    name: 'NVIDIA Corporation',
+    shortName: 'NVIDIA (Acción)',
+    category: 'Renta Variable Directa / Semiconductores & IA',
+  },
   COWZ: {
     name: 'Alto Cash Flow & Value EE.UU.',
     shortName: 'Cash Cows Value',

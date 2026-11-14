@@ -330,6 +330,7 @@ export function isPositionPendingNavUpdate(
   asOfDate?: Date
 ): boolean {
   if (!pos || pos.isin === 'TR_TRANSFER' || pos.isin?.startsWith('TR_')) return false
+  if (pos.asset_type === 'stock' || pos.asset_type === 'etc' || pos.asset_type === 'etf' || pos.isin === 'IE00B4ND3602' || pos.isin === 'US67066G1040') return false
 
   const pDate = (pos.price_date || pos.last_updated)?.slice(0, 10)
   if (!pDate) return true

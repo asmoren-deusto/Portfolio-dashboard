@@ -461,7 +461,7 @@ export function PositionsPage() {
                                 )}
                                 <BrokerBadge broker={p.broker} className="ml-1" />
                                 {(() => {
-                                  const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602'
+                                  const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' || p.isin === 'US67066G1040'
                                   if (isLive) {
                                     return (
                                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10.5px] font-semibold ml-1">
@@ -530,7 +530,7 @@ export function PositionsPage() {
                             )}
                           </div>
                           {(() => {
-                            const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602'
+                            const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' || p.isin === 'US67066G1040'
                             if (isLive) {
                               return (
                                 <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center justify-end gap-1">
@@ -699,7 +699,7 @@ export function PositionsPage() {
                     </div>
                     <div>
                       <span className="text-slate-600 dark:text-slate-400 font-medium block">
-                        {p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' ? 'Cotización:' : 'Precio NAV:'}
+                        {p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' || p.isin === 'US67066G1040' ? 'Cotización:' : 'Precio NAV:'}
                       </span>
                       <span className="text-slate-900 dark:text-slate-200 font-bold">
                         {fmt.price(
@@ -709,7 +709,7 @@ export function PositionsPage() {
                         )}
                       </span>
                       {(() => {
-                        const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602'
+                        const isLive = p.asset_type === 'etc' || p.asset_type === 'etf' || p.asset_type === 'stock' || p.isin === 'IE00B4ND3602' || p.isin === 'US67066G1040'
                         if (isLive) {
                           return (
                             <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
