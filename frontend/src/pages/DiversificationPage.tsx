@@ -14,8 +14,8 @@ export function DiversificationPage() {
   return (
     <div className="flex flex-col gap-4 pb-8">
       {/* Header Banner */}
-      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5">
-        <div className="flex items-start sm:items-center gap-3.5">
+      <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 p-4 sm:p-5">
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0">
           <div className="h-11 w-11 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
             <PieChart size={22} />
           </div>
@@ -37,10 +37,11 @@ export function DiversificationPage() {
         {/* Botón Acción: Informe X-Ray */}
         <Link
           to="/xray"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/35 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0 self-start lg:self-center"
+          title="Ver informe cuantitativo Look-Through de cartera"
         >
-          <ScanSearch size={17} className="stroke-[2.2]" />
-          <span>Generar Informe X-Ray</span>
+          <ScanSearch size={14} className="stroke-[2.2]" />
+          <span>Informe X-Ray</span>
         </Link>
       </Card>
 

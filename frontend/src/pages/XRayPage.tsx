@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import {
   ScanSearch,
   Printer,
@@ -14,7 +13,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   Sparkles,
-  ArrowLeft,
   X,
   ExternalLink,
 } from 'lucide-react'
@@ -33,7 +31,6 @@ import {
 type XRayTab = 'overview' | 'holdings' | 'stylebox' | 'geo_sectors' | 'audit'
 
 export function XRayPage() {
-  const navigate = useNavigate()
   const storeBroker = useAppStore((s) => s.selectedBroker)
   const currentUser = useAppStore((s) => s.currentUser)
   const { data: positions = [], isLoading } = usePositions()
@@ -101,46 +98,38 @@ export function XRayPage() {
       {/* ── VISTA INTERACTIVA WEB DEL INFORME ───────────────────────────── */}
       <div className="print:hidden flex flex-col gap-4 pb-8 w-full">
         {/* ── HEADER BANNER ──────────────────────────────────────────────── */}
-        <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5">
+        <Card className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 sm:gap-6 p-4 sm:p-5">
           <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              title="Volver atrás"
-              className="h-10 w-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 transition-all active:scale-95 cursor-pointer"
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <div className="h-11 w-11 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
-              <ScanSearch className="w-5 h-5 stroke-[2.2]" />
+            <div className="h-11 w-11 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+              <ScanSearch size={22} className="stroke-[2.2]" />
             </div>
-            <div className="min-w-0">
+            <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white truncate">
+                <h1 className="text-lg sm:text-xl font-bold text-slate-950 dark:text-white leading-tight">
                   Informe X-Ray de Cartera
                 </h1>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                   Morningstar Look-Through
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
                 Descomposición analítica en profundidad: empresas subyacentes, estilo 3x3, geografía y sectores reales.
               </p>
             </div>
           </div>
 
           {/* Action Controls & Entity Filter */}
-          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2 shrink-0 self-start xl:self-center">
             {/* Selector de Entidad */}
-            <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-[#252528] p-0.5 text-xs font-semibold">
+            <div className="h-8 inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08] text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => setSelectedBroker('all')}
                 className={cn(
-                  'px-2.5 h-7 rounded-md transition-colors cursor-pointer text-xs font-semibold flex items-center justify-center',
+                  'px-2.5 h-7 rounded-md transition-all cursor-pointer text-xs font-semibold flex items-center justify-center',
                   selectedBroker === 'all'
                     ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 )}
               >
                 Todas
@@ -151,10 +140,10 @@ export function XRayPage() {
                   type="button"
                   onClick={() => setSelectedBroker(b)}
                   className={cn(
-                    'px-2.5 h-7 rounded-md transition-colors cursor-pointer text-xs font-semibold capitalize flex items-center justify-center',
+                    'px-2.5 h-7 rounded-md transition-all cursor-pointer text-xs font-semibold capitalize flex items-center justify-center',
                     selectedBroker === b
                       ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   )}
                 >
                   {b === 'traderepublic' ? 'Trade Rep.' : b}
@@ -167,7 +156,7 @@ export function XRayPage() {
               type="button"
               onClick={() => setShowMorningstarPreview(true)}
               title="Ver informe oficial estilo Morningstar Portfolio X-Ray"
-              className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-xs font-semibold text-red-700 dark:text-red-300 transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-xs font-semibold text-red-700 dark:text-red-400 transition-all shadow-2xs active:scale-95 cursor-pointer"
             >
               <FileText className="w-3.5 h-3.5 text-[#C8102E]" />
               <span>PDF Morningstar</span>
@@ -178,10 +167,10 @@ export function XRayPage() {
               type="button"
               onClick={handlePrint}
               title="Imprimir o guardar como PDF en formato oficial Morningstar"
-              className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#252528] hover:bg-slate-100 dark:hover:bg-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-200/70 dark:border-white/[0.08] bg-slate-100 hover:bg-slate-200/70 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all shadow-2xs active:scale-95 cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5 text-indigo-500" />
-              <span className="hidden sm:inline">Imprimir / PDF</span>
+              <span>Imprimir / PDF</span>
             </button>
 
             {/* Botón Descargar Excel */}
@@ -190,95 +179,95 @@ export function XRayPage() {
               onClick={handleExportExcel}
               disabled={isExportingExcel}
               title="Descargar libro Excel (.xlsx) completo de cartera"
-              className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-xs font-semibold text-emerald-700 dark:text-emerald-300 transition-colors shadow-2xs cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-700 dark:text-emerald-400 transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-60"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span className="hidden sm:inline">Excel</span>
+              <span>Excel</span>
             </button>
           </div>
         </Card>
 
       {/* ── KPI EXECUTIVE STRIP ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 print:grid-cols-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 print:grid-cols-6">
         {/* 1. Valor Analizado */}
-        <Card className="p-3">
+        <Card className="p-3.5 sm:p-4">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             Patrimonio X-Ray
           </span>
-          <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-0.5 truncate">
+          <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-1 truncate">
             {fmt.currency(summary.totalValue)}
           </div>
-          <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
+          <span className="text-[11px] text-slate-400 mt-1 block truncate">
             {summary.numPositions} posiciones activas
           </span>
         </Card>
 
         {/* 2. Score de Diversificación */}
-        <Card className="p-3">
+        <Card className="p-3.5 sm:p-4">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             Salud de Cartera
           </span>
-          <div className="flex items-center gap-1.5 mt-0.5">
+          <div className="flex items-center gap-1.5 mt-1">
             <span className="font-mono font-extrabold text-base sm:text-lg text-emerald-600 dark:text-emerald-400">
               {summary.healthScore}/100
             </span>
-            <span className="text-[10.5px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
               {summary.healthScoreLabel}
             </span>
           </div>
-          <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
+          <span className="text-[11px] text-slate-400 mt-1 block truncate">
             Score multivariable
           </span>
         </Card>
 
         {/* 3. TER Medio Ponderado */}
-        <Card className="p-3">
+        <Card className="p-3.5 sm:p-4">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             TER Medio Ponderado
           </span>
-          <div className="font-mono font-bold text-base sm:text-lg text-indigo-600 dark:text-indigo-400 mt-0.5 truncate">
+          <div className="font-mono font-bold text-base sm:text-lg text-indigo-600 dark:text-indigo-400 mt-1 truncate">
             {summary.weightedTer.toFixed(2)}% <span className="text-xs font-normal text-slate-400">/año</span>
           </div>
-          <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
+          <span className="text-[11px] text-slate-400 mt-1 block truncate">
             Coste: {fmt.currency(summary.annualFeeCostEur)}/año
           </span>
         </Card>
 
         {/* 4. Volatilidad Anualizada */}
-        <Card className="p-3">
+        <Card className="p-3.5 sm:p-4">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             Volatilidad Estimada
           </span>
-          <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-0.5 truncate">
+          <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-1 truncate">
             ±{summary.expectedVolatility.toFixed(1)}%
           </div>
-          <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
+          <span className="text-[11px] text-slate-400 mt-1 block truncate">
             Max Drawdown: {summary.maxDrawdown.toFixed(1)}%
           </span>
         </Card>
 
         {/* 5. Sharpe Ratio */}
-        <Card className="p-3">
+        <Card className="p-3.5 sm:p-4">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             Ratio de Sharpe
           </span>
-          <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-0.5 truncate">
+          <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-1 truncate">
             {summary.sharpeRatio.toFixed(2)}
           </div>
-          <span className="text-[10.5px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block truncate">
+          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1 block truncate">
             Eficiencia alta (&gt;1.0)
           </span>
         </Card>
 
         {/* 6. PER Ponderado & Dividendo */}
-        <Card className="p-3">
+        <Card className="p-3.5 sm:p-4">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             PER Medio / Div. Yield
           </span>
-          <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-0.5 truncate">
+          <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-1 truncate">
             {summary.weightedPe.toFixed(1)}x <span className="text-xs font-normal text-slate-400">· {summary.dividendYieldEst.toFixed(2)}%</span>
           </div>
-          <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
+          <span className="text-[11px] text-slate-400 mt-1 block truncate">
             P/VC: {summary.weightedPb.toFixed(1)}x
           </span>
         </Card>
