@@ -3,6 +3,7 @@ import {
   ScanSearch,
   Printer,
   Download,
+  Loader2,
   FileSpreadsheet,
   FileText,
   Globe,
@@ -50,6 +51,7 @@ export function XRayPage() {
   const [selectedHolding, setSelectedHolding] = useState<LookThroughHolding | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [isExportingExcel, setIsExportingExcel] = useState(false)
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   const [showMorningstarPreview, setShowMorningstarPreview] = useState(false)
 
   const brokerLabel = useMemo(() => {
@@ -74,15 +76,56 @@ export function XRayPage() {
     }, 1500)
   }
 
-  const handleSavePdf = () => {
-    const originalTitle = document.title
-    const dateStr = new Date().toISOString().slice(0, 10)
-    const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
-    document.title = `Morningstar_Portfolio_XRay${entitySuffix}_${dateStr}`
-    window.print()
-    setTimeout(() => {
-      document.title = originalTitle
-    }, 1500)
+  const handleSavePdf = async () => {
+    const element = document.getElementById('morningstar-pdf-canvas')
+    if (!element) return
+
+    try {
+      setIsGeneratingPdf(true)
+      const html2pdfModule = await import('html2pdf.js')
+      const html2pdf = html2pdfModule.default || html2pdfModule
+
+      const dateStr = new Date().toISOString().slice(0, 10)
+      const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
+      const filename = `Morningstar_Portfolio_XRay${entitySuffix}_${dateStr}.pdf`
+
+      const opt = {
+        margin: [0, 0, 0, 0],
+        filename: filename,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          logging: false,
+          scrollY: 0,
+        },
+        jsPDF: {
+          unit: 'mm' as const,
+          format: 'a4' as const,
+          orientation: 'portrait' as const,
+        },
+        pagebreak: {
+          mode: ['css', 'legacy'] as const,
+          after: '.print-page',
+        },
+      }
+
+      // @ts-ignore
+      await html2pdf().set(opt).from(element).save()
+    } catch (err) {
+      console.error('Error al generar PDF directo:', err)
+      const originalTitle = document.title
+      const dateStr = new Date().toISOString().slice(0, 10)
+      const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
+      document.title = `Morningstar_Portfolio_XRay${entitySuffix}_${dateStr}`
+      window.print()
+      setTimeout(() => {
+        document.title = originalTitle
+      }, 1500)
+    } finally {
+      setIsGeneratingPdf(false)
+    }
   }
 
   const handleExportExcel = async () => {
@@ -1088,15 +1131,20 @@ export function XRayPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Botón Guardar como PDF */}
+              {/* Botón Guardar como PDF (descarga directa sin diálogo de impresión) */}
               <button
                 type="button"
                 onClick={handleSavePdf}
-                title="Guardar el informe como archivo PDF en tu dispositivo (con nombre oficial preasignado)"
-                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-[#C8102E] hover:bg-[#a60c24] text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
+                disabled={isGeneratingPdf}
+                title="Descargar el informe como archivo PDF directamente en tu dispositivo"
+                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-[#C8102E] hover:bg-[#a60c24] text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-75 disabled:pointer-events-none"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>Guardar como PDF</span>
+                {isGeneratingPdf ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+                <span>{isGeneratingPdf ? 'Generando PDF...' : 'Guardar como PDF'}</span>
               </button>
 
               {/* Botón Imprimir */}
@@ -1123,7 +1171,7 @@ export function XRayPage() {
 
           {/* Paper Canvas Scroll Area */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center gap-6 bg-slate-200/90 dark:bg-[#111113]">
-            <div className="w-full max-w-[210mm] shadow-2xl rounded-sm overflow-hidden bg-white">
+            <div id="morningstar-pdf-canvas" className="w-full max-w-[210mm] shadow-2xl rounded-sm overflow-hidden bg-white">
               <MorningstarXRayDocument
                 report={report}
                 brokerLabel={brokerLabel}
