@@ -66,21 +66,17 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
   const portX = (sW / totalW) * topX + (dW / totalW) * leftX + (cW / totalW) * rightX
   const portY = (sW / totalW) * topY + (dW / totalW) * leftY + (cW / totalW) * rightY
 
-  const sBench = data.sensible.benchmarkWeight || 44.2
-  const dBench = data.defensivo.benchmarkWeight || 24.3
-  const cBench = data.ciclico.benchmarkWeight || 31.5
-  const totalBench = sBench + dBench + cBench || 1
-
-  const benchX = (sBench / totalBench) * topX + (dBench / totalBench) * leftX + (cBench / totalBench) * rightX
-  const benchY = (sBench / totalBench) * topY + (dBench / totalBench) * leftY + (cBench / totalBench) * rightY
+  // Centroide / Baricentro de convergencia (Centro exacto del triángulo): (60, 63.2)
+  const benchX = (topX + leftX + rightX) / 3
+  const benchY = (topY + leftY + rightY) / 3
 
   return (
-    <Card className={cn('p-5 sm:p-6 flex flex-col justify-between h-full', className)}>
+    <Card className={cn('px-4 sm:px-6 pt-3.5 sm:pt-4 pb-2 sm:pb-2.5 flex flex-col justify-between h-full', className)}>
       <div className="flex flex-col justify-between flex-1 h-full min-h-0">
-        <div className="flex items-end justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-violet-500/10 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 flex items-center justify-center shrink-0">
-              <Compass size={18} />
+        <div className="flex items-end justify-between pb-2.5 sm:pb-3 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-xl bg-violet-500/10 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 flex items-center justify-center shrink-0">
+              <Compass size={17} />
             </div>
             <div>
               <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
@@ -96,10 +92,10 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center my-auto py-2">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-5 items-center mt-2 mb-0.5">
           {/* Ternary Triangle SVG (4 cols) */}
           <div className="md:col-span-4 flex flex-col items-center justify-center pr-0 md:pr-4 md:border-r border-slate-200/70 dark:border-white/[0.08]">
-            <div className="relative w-48 sm:w-52 h-48 sm:h-52 flex items-center justify-center">
+            <div className="relative w-40 sm:w-44 h-40 sm:h-44 flex items-center justify-center">
               <svg viewBox="0 0 120 114" className="w-full h-full overflow-visible">
                 {/* Background shaded areas - Triángulo Equilátero Exacto */}
                 <polygon
@@ -179,7 +175,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               </svg>
             </div>
 
-            <div className="flex items-center gap-3.5 mt-2.5 text-xs font-medium">
+            <div className="flex items-center gap-3.5 mt-1.5 text-xs font-medium">
               <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px]">
                 <span className="w-2.5 h-2.5 rounded-full border-2 border-[#C8102E] bg-white inline-block" /> Tu Cartera
               </span>
@@ -190,27 +186,27 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
           </div>
 
           {/* 3 SuperSectors Breakdown (8 cols - AMPLIA) */}
-          <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
             {/* Cíclico */}
             <div
               onClick={() => setSelectedSector(selectedSector === 'ciclico' ? null : 'ciclico')}
               className={cn(
-                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'ciclico'
                   ? 'border-amber-500 bg-amber-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
-                <div className="flex items-center justify-between pb-2 border-b border-amber-500/20">
+                <div className="flex items-center justify-between pb-1.5 border-b border-amber-500/20">
                   <span className="font-bold text-amber-700 dark:text-amber-400">Cíclico</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white">
                     {data.ciclico.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-2.5 space-y-2">
+                <div className="mt-2 space-y-1.5">
                   {data.ciclico.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
+                    <div key={i} className="flex justify-between items-center text-[11px] sm:text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
                       <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
                         <span className="truncate">{ind.name}</span>
@@ -226,22 +222,22 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'sensible' ? null : 'sensible')}
               className={cn(
-                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'sensible'
                   ? 'border-blue-500 bg-blue-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
-                <div className="flex items-center justify-between pb-2 border-b border-blue-500/20">
+                <div className="flex items-center justify-between pb-1.5 border-b border-blue-500/20">
                   <span className="font-bold text-blue-700 dark:text-blue-400">Sensible al ciclo</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white">
                     {data.sensible.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-2.5 space-y-2">
+                <div className="mt-2 space-y-1.5">
                   {data.sensible.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
+                    <div key={i} className="flex justify-between items-center text-[11px] sm:text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
                       <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
                         <span className="truncate">{ind.name}</span>
@@ -257,22 +253,22 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'defensivo' ? null : 'defensivo')}
               className={cn(
-                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'defensivo'
                   ? 'border-emerald-500 bg-emerald-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
-                <div className="flex items-center justify-between pb-2 border-b border-emerald-500/20">
+                <div className="flex items-center justify-between pb-1.5 border-b border-emerald-500/20">
                   <span className="font-bold text-emerald-700 dark:text-emerald-400">Defensivo</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white">
                     {data.defensivo.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-2.5 space-y-2">
+                <div className="mt-2 space-y-1.5">
                   {data.defensivo.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
+                    <div key={i} className="flex justify-between items-center text-[11px] sm:text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
                       <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
                         <span className="truncate">{ind.name}</span>
