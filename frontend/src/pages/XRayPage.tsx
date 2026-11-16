@@ -690,15 +690,22 @@ export function XRayPage() {
                 </div>
               </div>
 
-              {/* Progress Curve Overview */}
-              <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+              {/* Progress Curve Overview (6 períodos en una sola fila) */}
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-2.5 text-xs">
                 {performance.accumulatedReturns.map((r, i) => (
-                  <div key={i} className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-                    <span className="text-slate-400 block text-[10.5px]">{r.period}</span>
+                  <div
+                    key={i}
+                    className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex flex-col justify-between"
+                  >
+                    <span className="text-slate-500 dark:text-slate-400 block text-[10.5px] font-medium truncate" title={r.period}>
+                      {r.period}
+                    </span>
                     <span className="font-mono font-bold text-base text-slate-900 dark:text-white mt-0.5 block">
                       +{r.portfolio.toFixed(2)}%
                     </span>
-                    <span className="text-[10px] text-slate-400 block">vs {r.reference.toFixed(2)}% Ref</span>
+                    <span className="text-[10px] text-slate-400 mt-0.5 block truncate">
+                      vs {r.reference.toFixed(2)}% Ref
+                    </span>
                   </div>
                 ))}
               </div>
