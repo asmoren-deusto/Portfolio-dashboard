@@ -120,7 +120,7 @@ export function PortfolioAttributionCard({
 
   return (
     <Card className="w-full overflow-hidden" delay={0.28}>
-      <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-2 sm:px-3">
+      <CardHeader className="flex-col sm:flex-row items-start sm:items-end justify-between gap-3 py-3 px-2 sm:px-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500/15 via-blue-500/10 to-indigo-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
             <Compass className="w-4 h-4" />
@@ -141,7 +141,7 @@ export function PortfolioAttributionCard({
         </div>
 
         {/* Mode Switcher */}
-        <div className="flex items-center rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0 self-start sm:self-auto">
+        <div className="flex items-center rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0 self-start sm:self-end">
           {[
             { id: 'attribution', label: 'Atribución P&L', icon: Award },
             { id: 'quadrant', label: 'Mapa Cuadrante', icon: Target },

@@ -50,7 +50,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
   return (
     <Card className="p-4 sm:p-5 flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center justify-between pb-3 border-b border-slate-200/70 dark:border-white/[0.08]">
+        <div className="flex items-end justify-between pb-3 border-b border-slate-200/70 dark:border-white/[0.08]">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-violet-500/10 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 flex items-center justify-center shrink-0">
               <Compass size={18} />
@@ -64,7 +64,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               </p>
             </div>
           </div>
-          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 hidden sm:inline-block">
+          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 hidden sm:inline-block shrink-0 self-end">
             Look-Through Macro
           </span>
         </div>

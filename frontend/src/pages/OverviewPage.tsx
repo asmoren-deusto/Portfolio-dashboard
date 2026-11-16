@@ -2212,7 +2212,7 @@ export function OverviewPage() {
       {/* ── Comparativa de Rendimiento vs Benchmarks (Analítica) ─────────────── */}
       <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 420px' }}>
         <Card className="w-full" delay={0.32} loading={benchmarkFetching}>
-        <CardHeader className="flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <CardHeader className="flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
               <BarChart3 className="w-4 h-4" />
@@ -2232,7 +2232,7 @@ export function OverviewPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2.5 flex-wrap self-start sm:self-end">
             {alphaSp !== null && (
               <div
                 className={cn(

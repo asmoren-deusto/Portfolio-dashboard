@@ -155,7 +155,7 @@ export function AnalyticsPage() {
 
       {/* Benchmark Comparison Card */}
       <Card delay={0.18} loading={analyticsFetching || benchmarkFetching}>
-        <div className="px-4 py-2.5 sm:px-5 sm:py-3 flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-100 dark:border-white/[0.05]">
+        <div className="px-4 py-2.5 sm:px-5 sm:py-3 flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-slate-100 dark:border-white/[0.05]">
           <div>
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-blue-500 dark:text-blue-400" />
@@ -168,7 +168,7 @@ export function AnalyticsPage() {
 
           <Link
             to="/xray"
-            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 transition-all shadow-2xs cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 transition-all shadow-2xs cursor-pointer shrink-0 self-start sm:self-end"
             title="Abrir Informe X-Ray Completo (Morningstar Look-Through)"
           >
             <ScanSearch className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />

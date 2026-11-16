@@ -51,7 +51,7 @@ export const StockOverlapCard: React.FC<StockOverlapCardProps> = ({
   return (
     <Card className="p-4 sm:p-5 flex flex-col justify-between">
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/[0.08]">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
               <Building2 size={20} />
@@ -66,8 +66,8 @@ export const StockOverlapCard: React.FC<StockOverlapCardProps> = ({
             </div>
           </div>
 
-          {/* Controls: Expand/Collapse All + Search Box */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Controls: Expand/Collapse All + Search Box (alineados a la derecha a la altura del subtítulo) */}
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 self-start sm:self-end">
             <button
               type="button"
               onClick={toggleAll}

@@ -367,7 +367,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             {/* Left: Dual Bar Comparison vs World (lg:col-span-8) */}
             <Card className="lg:col-span-8 p-4 sm:p-5 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-white/[0.06]">
+                <div className="flex items-end justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-white/[0.06]">
                   <div>
                     <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                       <Scale className="w-4 h-4 text-blue-500" />
@@ -377,7 +377,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                       Tu porcentaje ponderado (barra azul) frente a la capitalización real de mercado del mundo (barra de fondo).
                     </p>
                   </div>
-                  <div className="flex items-center gap-3.5 text-xs font-semibold">
+                  <div className="flex items-center gap-3.5 text-xs font-semibold self-end">
                     <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
                       <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Tu Cartera
                     </span>
@@ -1003,7 +1003,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
           <div className="lg:col-span-5 flex flex-col gap-4">
             <Card className="p-5 sm:p-6 flex flex-col justify-between border-amber-500/25">
               <div>
-                <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
+                <div className="flex items-end justify-between pb-3.5 mb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
                   <div>
                     <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                       <Sliders className="w-4 h-4 text-amber-500" />
@@ -1013,7 +1013,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                       Impacto monetario estimado según la evolución del dólar.
                     </p>
                   </div>
-                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 self-end">
                     FX Scanner
                   </span>
                 </div>

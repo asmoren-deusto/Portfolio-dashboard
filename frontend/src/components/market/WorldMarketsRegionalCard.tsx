@@ -122,7 +122,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
 
   return (
     <Card className={cn('w-full overflow-hidden', className)}>
-      <CardHeader className="py-3 px-3.5 sm:px-4 border-b border-slate-200/80 dark:border-white/[0.05] flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <CardHeader className="py-3 px-3.5 sm:px-4 border-b border-slate-200/80 dark:border-white/[0.05] flex flex-col md:flex-row md:items-end justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
             <Globe className="w-4 h-4" />
@@ -150,7 +150,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
         </div>
 
         {/* Regional Filter Selector Pills */}
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-0.5">
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-0.5 self-start md:self-end">
           <button
             type="button"
             onClick={() => setSelectedRegion('ALL')}

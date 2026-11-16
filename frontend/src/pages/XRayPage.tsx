@@ -142,7 +142,7 @@ export function XRayPage() {
       {/* ── VISTA INTERACTIVA WEB DEL INFORME ───────────────────────────── */}
       <div className="print:hidden flex flex-col gap-4 pb-8 w-full">
         {/* ── HEADER BANNER ──────────────────────────────────────────────── */}
-        <Card className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 sm:gap-6 p-4 sm:p-5">
+        <Card className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 sm:gap-6 p-4 sm:p-5">
           <div className="flex items-start sm:items-center gap-3.5 min-w-0">
             <div className="h-11 w-11 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
               <ScanSearch size={22} className="stroke-[2.2]" />
@@ -162,8 +162,8 @@ export function XRayPage() {
             </div>
           </div>
 
-          {/* Action Controls & Entity Filter */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0 self-start xl:self-center">
+          {/* Action Controls & Entity Filter (alineados a la derecha a la altura del subtítulo) */}
+          <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-end">
             {/* Selector de Entidad */}
             <div className="h-8 inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08] text-xs font-semibold">
               <button
@@ -199,11 +199,11 @@ export function XRayPage() {
             <button
               type="button"
               onClick={() => setShowMorningstarPreview(true)}
-              title="Ver informe oficial estilo Morningstar Portfolio X-Ray (5 Páginas)"
+              title="Ver informe oficial estilo Morningstar Portfolio X-Ray"
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-xs font-semibold text-red-700 dark:text-red-400 transition-all shadow-2xs active:scale-95 cursor-pointer"
             >
               <FileText className="w-3.5 h-3.5 text-[#C8102E]" />
-              <span>PDF Morningstar (5 Págs)</span>
+              <span>PDF Morningstar</span>
             </button>
 
             {/* Botón Imprimir */}
@@ -733,19 +733,19 @@ export function XRayPage() {
         {/* TAB 4: POSICIONES DE CARTERA */}
         {activeTab === 'funds' && (
           <Card className="p-5 sm:p-6">
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
-                <Building2 className="w-5 h-5 text-blue-500" />
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+              <div className="flex items-start sm:items-center gap-2.5">
+                <Building2 className="w-5 h-5 text-blue-500 mt-0.5 sm:mt-0 shrink-0" />
                 <div>
                   <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
                     Inventario de Posiciones de Cartera
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Fondos y activos con rating de estrellas Morningstar, TER anual y rentabilidad acumulada
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-mono font-bold px-3 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+              <span className="text-xs font-mono font-bold px-3 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0 self-start sm:self-end">
                 {fundPositions.length} Fondos Auditados
               </span>
             </div>
@@ -822,19 +822,19 @@ export function XRayPage() {
         {/* TAB 5: TOP HOLDINGS LOOK-THROUGH */}
         {activeTab === 'holdings' && (
           <Card className="p-5 sm:p-6">
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
-                <Globe className="w-5 h-5 text-indigo-500" />
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+              <div className="flex items-start sm:items-center gap-2.5">
+                <Globe className="w-5 h-5 text-indigo-500 mt-0.5 sm:mt-0 shrink-0" />
                 <div>
                   <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
                     Top 25 Look-Through Holdings
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Las 25 mayores empresas subyacentes agregadas sumando su peso en todos tus fondos
                   </p>
                 </div>
               </div>
-              <span className="text-xs text-slate-400 font-mono">
+              <span className="text-xs text-slate-400 font-mono shrink-0 self-start sm:self-end">
                 {topHoldings.slice(0, 25).reduce((acc, h) => acc + h.portfolioWeight, 0).toFixed(1)}% Cartera Total
               </span>
             </div>

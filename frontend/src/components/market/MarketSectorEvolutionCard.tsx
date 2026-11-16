@@ -468,7 +468,7 @@ export function MarketSectorEvolutionCard({
 
   return (
     <Card className="w-full overflow-hidden" delay={0.12}>
-      <CardHeader className="flex-col lg:flex-row items-start lg:items-center justify-between gap-3 py-3 px-2 sm:px-3">
+      <CardHeader className="flex-col lg:flex-row items-start lg:items-end justify-between gap-3 py-3 px-2 sm:px-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-emerald-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
             <Activity className="w-4 h-4" />
@@ -490,7 +490,7 @@ export function MarketSectorEvolutionCard({
         </div>
 
         {/* Controls: View Mode + Period Selector + Reset */}
-        <div className="flex items-center gap-2 flex-wrap self-start lg:self-auto">
+        <div className="flex items-center gap-2 flex-wrap self-start lg:self-end">
           {/* Chart View Switcher */}
           <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
             <button

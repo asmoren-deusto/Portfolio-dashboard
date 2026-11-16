@@ -42,7 +42,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
   return (
     <Card className="p-5 sm:p-6 flex flex-col justify-between h-full">
       {/* 1. Header */}
-      <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
+      <div className="flex items-end justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
             <Activity size={20} />
@@ -56,7 +56,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
             </p>
           </div>
         </div>
-        <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hidden sm:inline-block shrink-0">
+        <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hidden sm:inline-block shrink-0 self-end">
           Look-Through
         </span>
       </div>

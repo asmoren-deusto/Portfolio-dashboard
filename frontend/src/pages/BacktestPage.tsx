@@ -90,7 +90,7 @@ export function BacktestPage() {
   return (
     <div className="flex flex-col gap-4 pb-8">
       {/* Header Banner */}
-      <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5">
+      <Card className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 p-4 sm:p-5">
         <div className="flex items-start sm:items-center gap-3.5">
           <div className="h-11 w-11 rounded-xl bg-blue-600/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
             <History size={22} />
@@ -110,8 +110,8 @@ export function BacktestPage() {
           </div>
         </div>
 
-        {/* Global Controls */}
-        <div className="flex flex-wrap items-center gap-2 self-start lg:self-center">
+        {/* Global Controls (alineados a la derecha a la altura del subtítulo) */}
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-end">
           {/* Timeframe Selector */}
           <div className="h-8 inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08]">
             <button
@@ -203,7 +203,7 @@ export function BacktestPage() {
 
       {/* Main Interactive Chart Section */}
       <Card className="w-full relative overflow-hidden" loading={isFetching}>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/[0.06] pb-4">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 border-b border-slate-100 dark:border-white/[0.06] pb-4">
           <div className="flex items-center gap-2.5">
             <div className="h-8 w-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <LineChart size={18} />
@@ -222,7 +222,7 @@ export function BacktestPage() {
           </div>
 
           {/* View Mode Toggle */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08] text-xs">
+          <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08] text-xs self-start sm:self-end">
             <button
               onClick={() => setViewMode('growth')}
               className={cn(

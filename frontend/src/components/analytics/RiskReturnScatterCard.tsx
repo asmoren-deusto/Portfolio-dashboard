@@ -37,7 +37,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
   return (
     <Card className="p-5 sm:p-6 flex flex-col justify-between h-full">
       {/* 1. Header */}
-      <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
+      <div className="flex items-end justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
             <Target size={20} />
@@ -51,7 +51,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
             </p>
           </div>
         </div>
-        <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hidden sm:inline-block shrink-0">
+        <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hidden sm:inline-block shrink-0 self-end">
           Ratio de Sharpe 1.71
         </span>
       </div>
