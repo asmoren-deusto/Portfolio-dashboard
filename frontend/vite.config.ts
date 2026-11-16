@@ -9,6 +9,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  optimizeDeps: {
+    include: ['html-to-image', 'jspdf'],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -22,6 +25,8 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (id.includes('jspdf')) return 'vendor-jspdf'
+            if (id.includes('html-to-image')) return 'vendor-html-to-image'
             if (id.includes('lightweight-charts')) return 'vendor-lw-charts'
             if (id.includes('recharts')) return 'vendor-recharts'
             if (id.includes('framer-motion')) return 'vendor-framer-motion'

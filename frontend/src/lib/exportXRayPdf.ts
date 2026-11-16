@@ -1,5 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
+import { jsPDF } from 'jspdf'
+import { toJpeg } from 'html-to-image'
 import { MorningstarXRayDocument } from '@/components/analytics/MorningstarXRayDocument'
 import { buildPortfolioXRayReport } from '@/lib/xrayEngine'
 import type { Position } from '@/api/queries'
@@ -57,9 +59,6 @@ export async function downloadXRayPdf({
       )
       setTimeout(resolve, 350)
     })
-
-    const { jsPDF } = await import('jspdf')
-    const { toJpeg } = await import('html-to-image')
 
     const dateStr = new Date().toISOString().slice(0, 10)
     const entitySuffix = broker !== 'all' ? `_${broker}` : '_Consolidado'
