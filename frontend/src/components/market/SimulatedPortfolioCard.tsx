@@ -737,7 +737,7 @@ export const SimulatedPortfolioCard: React.FC<SimulatedPortfolioCardProps> = ({
               </div>
               <span
                 className={cn(
-                  'text-[11px] font-bold font-mono px-1.5 py-0.5 rounded-md whitespace-nowrap inline-flex items-center leading-none',
+                  'h-[22px] px-1.5 text-[11px] font-bold font-mono rounded-md whitespace-nowrap inline-flex items-center justify-center leading-none self-center',
                   fxInfo.eur_usd_change_pct >= 0
                     ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
                     : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25'
