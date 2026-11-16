@@ -84,8 +84,7 @@ export function XRayPage() {
       setIsGeneratingPdf(true)
       const jspdfModule = await import('jspdf')
       const jsPDF = jspdfModule.jsPDF || jspdfModule.default
-      const html2canvasModule = await import('html2canvas')
-      const html2canvas = html2canvasModule.default || html2canvasModule
+      const { toJpeg } = await import('html-to-image')
 
       const dateStr = new Date().toISOString().slice(0, 10)
       const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
@@ -101,33 +100,28 @@ export function XRayPage() {
       const pages = Array.from(element.querySelectorAll<HTMLElement>('.print-page'))
 
       if (pages.length === 0) {
-        const canvas = await html2canvas(element, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
+        const imgData = await toJpeg(element, {
+          quality: 0.95,
+          pixelRatio: 2,
           backgroundColor: '#ffffff',
+          skipFonts: true,
         })
-        const imgData = canvas.toDataURL('image/jpeg', 0.95)
         pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
       } else {
         for (let i = 0; i < pages.length; i++) {
           const pageEl = pages[i]
-          const canvas = await html2canvas(pageEl, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
+          const imgData = await toJpeg(pageEl, {
+            quality: 0.95,
+            pixelRatio: 2,
             backgroundColor: '#ffffff',
-            onclone: (clonedDoc) => {
-              const p = clonedDoc.querySelectorAll<HTMLElement>('.print-page')[i]
-              if (p) {
-                p.style.boxShadow = 'none'
-                p.style.border = 'none'
-                p.style.borderRadius = '0'
-                p.style.marginBottom = '0'
-              }
+            skipFonts: true,
+            style: {
+              boxShadow: 'none',
+              border: 'none',
+              borderRadius: '0',
+              marginBottom: '0',
             },
           })
-          const imgData = canvas.toDataURL('image/jpeg', 0.95)
           if (i > 0) {
             pdf.addPage('a4', 'portrait')
           }
