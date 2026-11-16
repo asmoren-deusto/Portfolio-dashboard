@@ -168,9 +168,9 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
                   onMouseLeave={() => setActivePoint(null)}
                 >
                   {/* Anillos concéntricos de Tu Cartera */}
-                  <circle cx={cx} cy={cy} r={isHovered ? 20 : 16} fill="#C8102E" fillOpacity="0.18" className="transition-all" />
-                  <circle cx={cx} cy={cy} r={isHovered ? 14 : 11} fill="#ffffff" stroke="#C8102E" strokeWidth="3" className="transition-all" />
-                  <text x={cx} y={cy + 4} textAnchor="middle" className="text-[11px] font-black fill-[#C8102E] pointer-events-none">
+                  <circle cx={cx} cy={cy} r={isHovered ? 20 : 16} fill="#991b1b" fillOpacity="0.18" className="transition-all" />
+                  <circle cx={cx} cy={cy} r={isHovered ? 14 : 11} fill="#ffffff" stroke="#991b1b" strokeWidth="3" className="transition-all" />
+                  <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" className="text-[11px] font-black fill-[#991b1b] pointer-events-none select-none">
                     C
                   </text>
 
@@ -182,14 +182,14 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
                     height="32"
                     rx="10"
                     fill="#ffffff"
-                    stroke="#C8102E"
+                    stroke="#991b1b"
                     strokeWidth="2"
                     className="dark:fill-[#1e1e22] shadow-sm"
                   />
-                  <text x={cx - 84} y={cy + 5} textAnchor="middle" className="text-[12.5px] font-black fill-[#C8102E]">
+                  <text x={cx - 84} y={cy} textAnchor="middle" dominantBaseline="central" className="text-[12.5px] font-black fill-[#991b1b] select-none">
                     Cartera (+{p.meanReturn.toFixed(1)}%)
                   </text>
-                  <line x1={cx - 18} y1={cy} x2={cx - 14} y2={cy} stroke="#C8102E" strokeWidth="2" strokeDasharray="2" />
+                  <line x1={cx - 18} y1={cy} x2={cx - 14} y2={cy} stroke="#991b1b" strokeWidth="2" strokeDasharray="2" />
                 </g>
               )
             }
@@ -215,7 +215,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
               )
             }
 
-            // Fondos individuales (1 a N) - Círculos rojos Morningstar con número blanco nítido
+            // Fondos individuales (1 a N) - Círculos granate idénticos a la matriz con número blanco nítido
             return (
               <g
                 key={p.id}
@@ -227,17 +227,18 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
                   cx={cx}
                   cy={cy}
                   r={isHovered ? 15 : 12}
-                  fill={isHovered ? '#9b0d24' : '#C8102E'}
-                  style={{ fill: isHovered ? '#9b0d24' : '#C8102E' }}
+                  fill={isHovered ? '#7f1d1d' : '#991b1b'}
+                  style={{ fill: isHovered ? '#7f1d1d' : '#991b1b' }}
                   className="transition-all shadow-sm"
                 />
                 <text
                   x={cx}
-                  y={cy + 4}
+                  y={cy}
+                  dominantBaseline="central"
                   fill="#ffffff"
                   style={{ fill: '#ffffff' }}
                   textAnchor="middle"
-                  className="text-[11px] font-extrabold fill-white pointer-events-none"
+                  className="text-[11px] font-extrabold fill-white pointer-events-none select-none"
                 >
                   {p.index}
                 </text>
@@ -254,7 +255,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <span className={cn(
                 "w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs text-white shrink-0",
-                activePoint.isPortfolio ? "bg-[#C8102E]" : activePoint.isBenchmark ? "bg-emerald-600" : "bg-[#C8102E]"
+                activePoint.isPortfolio ? "bg-[#991b1b]" : activePoint.isBenchmark ? "bg-emerald-600" : "bg-[#991b1b]"
               )}>
                 {activePoint.index}
               </span>
@@ -282,7 +283,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
           </div>
         ) : (
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs truncate">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[#991b1b] animate-pulse shrink-0" />
             <span className="truncate">Pasa el cursor sobre cualquier punto numerado o la Cartera para ver su desglose cuantitativo exacto.</span>
           </div>
         )}
@@ -291,7 +292,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
       {/* 4. Legend Strip coincidente en altura y espaciado con la tarjeta derecha */}
       <div className="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-2.5 border-t border-slate-200/80 dark:border-white/10 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
         <span className="flex items-center gap-1.5">
-          <span className="w-3.5 h-3.5 rounded-full border-2 border-[#C8102E] bg-white inline-flex items-center justify-center text-[8px] font-black text-[#C8102E]">C</span>
+          <span className="w-3.5 h-3.5 rounded-full border-2 border-[#991b1b] bg-white inline-flex items-center justify-center text-[8px] font-black text-[#991b1b]">C</span>
           <span>Tu Cartera (+21,5%)</span>
         </span>
         <span className="flex items-center gap-1.5">
@@ -299,7 +300,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
           <span>Benchmark 80/20 (+10,2%)</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3.5 h-3.5 rounded-full bg-[#C8102E] inline-flex items-center justify-center text-[8px] font-bold text-white">#</span>
+          <span className="w-3.5 h-3.5 rounded-full bg-[#991b1b] inline-flex items-center justify-center text-[8px] font-bold text-white">#</span>
           <span>Fondos de Cartera (1-9)</span>
         </span>
       </div>

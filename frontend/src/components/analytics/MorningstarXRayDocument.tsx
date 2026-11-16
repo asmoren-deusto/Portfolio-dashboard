@@ -869,12 +869,12 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       const cy = 120 - (Math.max(0, Math.min(40, cp.meanReturn)) / 40) * 108
                       return (
                         <g>
-                          <circle cx={cx} cy={cy} r="5.6" fill="#ffffff" stroke="#C8102E" strokeWidth="1.8" style={{ fill: '#ffffff', stroke: '#C8102E' }} />
+                          <circle cx={cx} cy={cy} r="5.6" fill="#ffffff" stroke="#991b1b" strokeWidth="1.8" style={{ fill: '#ffffff', stroke: '#991b1b' }} />
                           <text
                             x={cx}
                             y={cy}
-                            fill="#C8102E"
-                            style={{ fill: '#C8102E' }}
+                            fill="#991b1b"
+                            style={{ fill: '#991b1b' }}
                             textAnchor="middle"
                             dominantBaseline="central"
                             fontSize="5.8"
@@ -887,7 +887,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       )
                     })()}
 
-                    {/* Numbered Fund Points (1 to N) - Círculo rojo idéntico al badge de la matriz con número blanco nítido y centrado */}
+                    {/* Numbered Fund Points (1 to N) - Círculo granate idéntico al badge de la matriz con número blanco nítido y centrado */}
                     {performance.scatterPoints
                       .filter((p) => !p.isPortfolio && !p.isBenchmark)
                       .map((p) => {
@@ -899,10 +899,10 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                               cx={fx}
                               cy={fy}
                               r="4.8"
-                              fill="#C8102E"
+                              fill="#991b1b"
                               stroke="#ffffff"
                               strokeWidth="0.6"
-                              style={{ fill: '#C8102E', stroke: '#ffffff' }}
+                              style={{ fill: '#991b1b', stroke: '#ffffff' }}
                             />
                             <text
                               x={fx}
@@ -943,7 +943,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                         : (performance.correlationMatrix[0] || []).map((_, i) => i + 1)
                       ).map((num) => (
                         <th key={num} className="py-0.5 px-0.5 text-center align-middle">
-                          <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#C8102E] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
+                          <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#991b1b] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
                             {num}
                           </span>
                         </th>
@@ -954,7 +954,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     {performance.correlationMatrix.map((row, rIdx) => (
                       <tr key={rIdx}>
                         <td className="py-0.5 px-0.5 text-center align-middle">
-                          <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#C8102E] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
+                          <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#991b1b] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
                             {rIdx + 1}
                           </span>
                         </td>
