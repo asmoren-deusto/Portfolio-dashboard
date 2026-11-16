@@ -91,15 +91,32 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
               </h3>
               <div className="flex items-center gap-3">
                 {/* Donut SVG */}
-                <div className="w-18 h-18 shrink-0">
-                  <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
-                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e2e8f0" strokeWidth="6" />
-                    {/* Acciones: 97.93% */}
-                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#1d4ed8" strokeWidth="6" strokeDasharray="97.93 2.07" strokeDashoffset="0" />
-                    {/* Efectivo: 1.22% */}
-                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#10b981" strokeWidth="6" strokeDasharray="1.22 98.78" strokeDashoffset="-97.93" />
-                    {/* Otro: 0.84% */}
-                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#8b5cf6" strokeWidth="6" strokeDasharray="0.84 99.16" strokeDashoffset="-99.15" />
+                <div className="w-[72px] h-[72px] shrink-0 flex items-center justify-center">
+                  <svg viewBox="0 0 44 44" className="w-full h-full transform -rotate-90 overflow-visible">
+                    <circle cx="22" cy="22" r="15.9155" fill="none" stroke="#e2e8f0" strokeWidth="6" />
+                    {(() => {
+                      let accumulated = 0
+                      return assetAllocation
+                        .filter((item) => item.weight > 0.005)
+                        .map((item) => {
+                          const dash = `${item.weight.toFixed(2)} ${(100 - item.weight).toFixed(2)}`
+                          const offset = -accumulated
+                          accumulated += item.weight
+                          return (
+                            <circle
+                              key={item.id}
+                              cx="22"
+                              cy="22"
+                              r="15.9155"
+                              fill="none"
+                              stroke={item.color}
+                              strokeWidth="6"
+                              strokeDasharray={dash}
+                              strokeDashoffset={offset}
+                            />
+                          )
+                        })
+                    })()}
                   </svg>
                 </div>
                 {/* Table */}

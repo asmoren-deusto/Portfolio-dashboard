@@ -187,7 +187,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             <div className="flex items-center gap-3 sm:gap-3.5 bg-slate-50/90 dark:bg-white/[0.03] px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] shrink-0 shadow-2xs self-start lg:self-auto">
               <div className="relative w-[44px] h-[44px] sm:w-[48px] sm:h-[48px] flex items-center justify-center shrink-0">
                 {/* SVG Radial Meter */}
-                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 36 36">
                   <path
                     className="text-slate-200 dark:text-white/[0.08]"
                     strokeWidth="3.5"

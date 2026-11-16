@@ -199,3 +199,4 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
   )
 }
 export default SuperSectorsTriangleCard
+

@@ -29,7 +29,7 @@ export const MiniDonut = React.memo(function MiniDonut({
       height={size}
       viewBox={`0 0 ${size} ${size}`}
       className={cn(
-        'shrink-0 transition-transform duration-200 ease-out',
+        'shrink-0 transition-transform duration-200 ease-out overflow-visible',
         active && 'scale-110',
         className
       )}

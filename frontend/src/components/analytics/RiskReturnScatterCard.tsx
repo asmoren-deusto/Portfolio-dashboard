@@ -200,3 +200,4 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
   )
 }
 export default RiskReturnScatterCard
+
