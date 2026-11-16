@@ -362,8 +362,8 @@ export function XRayPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
               
-              {/* FILA 1 - IZQUIERDA (5 cols): Asignación Real de Activos */}
-              <div className="lg:col-span-5 flex flex-col min-h-0">
+              {/* FILA 1 - IZQUIERDA (4 cols): Asignación Real de Activos */}
+              <div className="lg:col-span-4 flex flex-col min-h-0">
                 <Card className="p-5 sm:p-6 h-full flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
@@ -399,7 +399,7 @@ export function XRayPage() {
                           key={item.id}
                           className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#252528] border border-slate-200/60 dark:border-white/[0.04]"
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="flex items-center gap-2 min-w-0">
                             <span
                               className="w-3 h-3 rounded-full shrink-0"
                               style={{ backgroundColor: item.color }}
@@ -408,7 +408,7 @@ export function XRayPage() {
                               {item.label}
                             </span>
                           </div>
-                          <div className="flex items-center gap-4 shrink-0">
+                          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
                             <span className="font-mono text-slate-500 dark:text-slate-400 text-xs">
                               {fmt.currency(item.value)}
                             </span>
@@ -423,13 +423,13 @@ export function XRayPage() {
                 </Card>
               </div>
 
-              {/* FILA 1 - DERECHA (7 cols): Triángulo de SuperSectores (Misma altura exacta que Asignación de Activos) */}
-              <div className="lg:col-span-7 flex flex-col min-h-0">
+              {/* FILA 1 - DERECHA (8 cols): Triángulo de SuperSectores (Misma altura exacta que Asignación de Activos) */}
+              <div className="lg:col-span-8 flex flex-col min-h-0">
                 <SuperSectorsTriangleCard data={superSectorsDetail} className="h-full" />
               </div>
 
-              {/* FILA 2 - IZQUIERDA (5 cols): Morningstar Style Box 3x3 */}
-              <div className="lg:col-span-5 flex flex-col min-h-0">
+              {/* FILA 2 - IZQUIERDA (4 cols): Morningstar Style Box 3x3 */}
+              <div className="lg:col-span-4 flex flex-col min-h-0">
                 <Card className="p-5 sm:p-6 h-full flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
@@ -522,8 +522,8 @@ export function XRayPage() {
                 </Card>
               </div>
 
-              {/* FILA 2 - DERECHA (7 cols): Exposición por País % (en 2 columnas para 10 países) */}
-              <div className="lg:col-span-7 flex flex-col min-h-0">
+              {/* FILA 2 - DERECHA (8 cols): Exposición por País % (en 2 columnas para 10 países) */}
+              <div className="lg:col-span-8 flex flex-col min-h-0">
                 <Card className="p-5 sm:p-6 h-full flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
