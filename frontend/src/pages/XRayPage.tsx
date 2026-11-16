@@ -1096,31 +1096,31 @@ export function XRayPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Botón Guardar como PDF (descarga directa sin diálogo de impresión) */}
+              {/* Botón PDF Vectorial (Nativo vía motor de impresión del navegador) */}
+              <button
+                type="button"
+                onClick={handlePrint}
+                title="Abre el diálogo de impresión: selecciona 'Guardar como PDF' para obtener un documento 100% VECTORIAL con texto seleccionable y zoom infinito sin distorsión"
+                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>PDF Vectorial (Nativo)</span>
+              </button>
+
+              {/* Botón Descarga Directa .PDF (300 DPI Lossless PNG) */}
               <button
                 type="button"
                 onClick={handleSavePdf}
                 disabled={isGeneratingPdf}
-                title="Descargar el informe como archivo PDF directamente en tu dispositivo"
-                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-[#C8102E] hover:bg-[#a60c24] text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-75 disabled:pointer-events-none"
+                title="Descargar archivo PDF directamente a 300 DPI sin deformación de proporción"
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-300 dark:border-white/15 bg-white dark:bg-[#252528] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 text-xs font-semibold shadow-2xs transition-all active:scale-95 cursor-pointer disabled:opacity-75 disabled:pointer-events-none"
               >
                 {isGeneratingPdf ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  <Download className="w-3.5 h-3.5" />
+                  <Download className="w-3.5 h-3.5 text-[#C8102E]" />
                 )}
-                <span>{isGeneratingPdf ? 'Generando PDF...' : 'Guardar como PDF'}</span>
-              </button>
-
-              {/* Botón Imprimir */}
-              <button
-                type="button"
-                onClick={handlePrint}
-                title="Enviar documento directamente a la impresora"
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-300 dark:border-white/15 bg-white dark:bg-[#252528] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 text-xs font-semibold shadow-2xs transition-all active:scale-95 cursor-pointer"
-              >
-                <Printer className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
-                <span>Imprimir</span>
+                <span>{isGeneratingPdf ? 'Generando...' : 'Descarga Directa (.PDF)'}</span>
               </button>
 
               <button
@@ -1132,6 +1132,13 @@ export function XRayPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
+          </div>
+
+          {/* Banner informativo de fidelidad vectorial */}
+          <div className="bg-slate-100 dark:bg-white/[0.04] border-b border-slate-200/80 dark:border-white/10 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 shrink-0">
+            <span>
+              💡 <strong>Máxima fidelidad:</strong> Para obtener un PDF <strong>100% vectorial</strong> (con texto seleccionable y curvas matemáticas sin pixelado al ampliar), pulsa <strong>"PDF Vectorial (Nativo)"</strong> y elige <em>"Guardar como PDF"</em> en tu navegador.
+            </span>
           </div>
 
           {/* Paper Canvas Scroll Area */}
