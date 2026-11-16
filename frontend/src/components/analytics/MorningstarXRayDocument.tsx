@@ -429,13 +429,13 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span>Estilo de Renta Variable</span>
                   <span className="text-slate-400 font-mono">3x3 Grid</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="text-[7.5px] font-bold text-slate-500 flex flex-col justify-around h-18 text-right pr-1">
+                <div className="flex items-start gap-1.5">
+                  <div className="text-[7.5px] font-bold text-slate-500 flex flex-col justify-around h-[74px] text-right pr-1">
                     <span>Grande</span>
                     <span>Med.</span>
                     <span>Peq.</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded">
+                  <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded h-[74px]">
                     {[
                       { val: styleBox.largeValue, bg: styleBox.largeValue >= 25 ? 'bg-blue-300' : 'bg-white' },
                       { val: styleBox.largeBlend, bg: styleBox.largeBlend >= 25 ? 'bg-blue-400 text-white font-bold' : 'bg-white' },
@@ -452,18 +452,18 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       </div>
                     ))}
                   </div>
-                  <div className="text-[8.5px] space-y-1 pl-2">
-                    <div className="border-b border-slate-200 pb-0.5">
-                      <span className="text-slate-500 block text-[7.5px]">P/VC:</span>
-                      <strong className="font-mono text-slate-900">{styleBox.priceToBook}</strong>
-                    </div>
-                    <div className="border-b border-slate-200 pb-0.5">
-                      <span className="text-slate-500 block text-[7.5px]">PER:</span>
-                      <strong className="font-mono text-slate-900">{styleBox.priceToEarnings}</strong>
+                  <div className="text-[8.5px] flex flex-col justify-between h-[74px] pl-2 py-0.5">
+                    <div>
+                      <span className="text-slate-500 block text-[7.5px] leading-tight">P/VC:</span>
+                      <strong className="font-mono text-slate-900 leading-tight">{styleBox.priceToBook}</strong>
                     </div>
                     <div>
-                      <span className="text-slate-500 block text-[7.5px]">P/CF:</span>
-                      <strong className="font-mono text-slate-900">{styleBox.priceToCashFlow}</strong>
+                      <span className="text-slate-500 block text-[7.5px] leading-tight">PER:</span>
+                      <strong className="font-mono text-slate-900 leading-tight">{styleBox.priceToEarnings}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[7.5px] leading-tight">P/CF:</span>
+                      <strong className="font-mono text-slate-900 leading-tight">{styleBox.priceToCashFlow}</strong>
                     </div>
                   </div>
                 </div>
@@ -480,13 +480,13 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span>Estilo de Renta Fija</span>
                   <span className="text-slate-400 font-mono">Calidad / Duración</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="text-[7.5px] font-bold text-slate-500 flex flex-col justify-around h-18 text-right pr-1">
+                <div className="flex items-start gap-1.5">
+                  <div className="text-[7.5px] font-bold text-slate-500 flex flex-col justify-around h-[74px] text-right pr-1">
                     <span>Alto</span>
                     <span>Med.</span>
                     <span>Bajo</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded">
+                  <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded h-[74px]">
                     {(fixedIncomeStyle?.grid?.length === 3
                       ? fixedIncomeStyle.grid.flat()
                       : [0, 100, 0, 0, 0, 0, 0, 0, 0]
@@ -505,34 +505,34 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       </div>
                     ))}
                   </div>
-                  <div className="text-[8.5px] space-y-1 pl-2">
-                    <div className="border-b border-slate-200 pb-0.5">
-                      <span className="text-slate-500 block text-[7.5px]">Duración:</span>
-                      <strong className="font-mono text-slate-900">
+                  <div className="text-[8px] flex flex-col justify-between h-[74px] pl-2 py-0.5">
+                    <div>
+                      <span className="text-slate-500 block text-[7.5px] leading-tight">Duración:</span>
+                      <strong className="font-mono text-slate-900 leading-tight">
                         {fixedIncomeStyle?.effectiveDurationPort != null
                           ? `${fixedIncomeStyle.effectiveDurationPort.toFixed(2).replace('.', ',')} a`
                           : '5,20 a'}{' '}
-                        <span className="text-slate-500 font-normal">
+                        <span className="text-slate-500 font-normal text-[7px]">
                           (Ref {fixedIncomeStyle?.effectiveDurationRef?.toFixed(2).replace('.', ',') || '0,50'})
                         </span>
                       </strong>
                     </div>
-                    <div className="border-b border-slate-200 pb-0.5">
-                      <span className="text-slate-500 block text-[7.5px]">Vencimiento:</span>
-                      <strong className="font-mono text-slate-900">
+                    <div>
+                      <span className="text-slate-500 block text-[7.5px] leading-tight">Vencimiento:</span>
+                      <strong className="font-mono text-slate-900 leading-tight">
                         {fixedIncomeStyle?.effectiveMaturityPort != null
                           ? `${fixedIncomeStyle.effectiveMaturityPort.toFixed(2).replace('.', ',')} a`
                           : '5,70 a'}{' '}
-                        <span className="text-slate-500 font-normal">
+                        <span className="text-slate-500 font-normal text-[7px]">
                           (Ref {fixedIncomeStyle?.effectiveMaturityRef?.toFixed(2).replace('.', ',') || '0,74'})
                         </span>
                       </strong>
                     </div>
                     <div>
-                      <span className="text-slate-500 block text-[7.5px]">Calidad cred.:</span>
-                      <strong className="font-mono text-slate-900">
+                      <span className="text-slate-500 block text-[7.5px] leading-tight">Calidad cred.:</span>
+                      <strong className="font-mono text-slate-900 leading-tight">
                         {fixedIncomeStyle?.creditQualityPort || 'A'}{' '}
-                        <span className="text-slate-500 font-normal">
+                        <span className="text-slate-500 font-normal text-[7px]">
                           (Ref {fixedIncomeStyle?.creditQualityRef || 'A'})
                         </span>
                       </strong>
