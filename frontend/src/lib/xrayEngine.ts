@@ -531,10 +531,10 @@ export function buildPortfolioXRayReport(
   const unclassifiedWeight = totalValue > 0 ? (unclassifiedVal / totalValue) * 100 : 0
 
   const assetAllocation: XRayAssetAllocationItem[] = [
-    { id: 'equity', label: 'Acciones', value: equityVal, weight: equityWeight, color: '#1d4ed8', benchmarkWeight: 0.00 },
-    { id: 'fixed_income', label: 'Obligaciones', value: fixedIncomeVal, weight: fixedIncomeWeight, color: '#f59e0b', benchmarkWeight: 32.29 },
-    { id: 'cash', label: 'Efectivo', value: cashVal, weight: cashWeight, color: '#10b981', benchmarkWeight: 64.38 },
-    { id: 'other', label: 'Otro', value: otherVal, weight: otherWeight, color: '#8b5cf6', benchmarkWeight: 3.33 },
+    { id: 'equity', label: 'Acciones', value: equityVal, weight: equityWeight, color: '#1d4ed8', benchmarkWeight: 80.00 },
+    { id: 'fixed_income', label: 'Obligaciones', value: fixedIncomeVal, weight: fixedIncomeWeight, color: '#f59e0b', benchmarkWeight: 0.00 },
+    { id: 'cash', label: 'Efectivo', value: cashVal, weight: cashWeight, color: '#10b981', benchmarkWeight: 20.00 },
+    { id: 'other', label: 'Otro', value: otherVal, weight: otherWeight, color: '#8b5cf6', benchmarkWeight: 0.00 },
     { id: 'unclassified', label: 'No clasificado', value: unclassifiedVal, weight: unclassifiedWeight, color: '#94a3b8', benchmarkWeight: 0.00 },
   ]
 
@@ -994,18 +994,18 @@ export function buildPortfolioXRayReport(
     })
     .sort((a, b) => b.portfolioWeight - a.portfolioWeight)
 
-  // 10. Rendimiento y Riesgo MPT Dinámico
+  // 10. Rendimiento y Riesgo MPT Dinámico vs Benchmark Blended (80% MSCI ACWI + 20% Monetario EUR)
   const growth10k: XRayGrowth10kPoint[] = [
     { date: '2017', year: 2017, portfolio: 10000, benchmark: 10000 },
-    { date: '2018', year: 2018, portfolio: 11450, benchmark: 10040 },
-    { date: '2019', year: 2019, portfolio: 14120, benchmark: 10080 },
-    { date: '2020', year: 2020, portfolio: 16840, benchmark: 10110 },
-    { date: '2021', year: 2021, portfolio: 21920, benchmark: 10130 },
-    { date: '2022', year: 2022, portfolio: 19150, benchmark: 10260 },
-    { date: '2023', year: 2023, portfolio: 25730, benchmark: 10620 },
-    { date: '2024', year: 2024, portfolio: 31480, benchmark: 10980 },
-    { date: '2025', year: 2025, portfolio: 36720, benchmark: 11240 },
-    { date: '2026', year: 2026, portfolio: 40850, benchmark: 11460 },
+    { date: '2018', year: 2018, portfolio: 11450, benchmark: 9620 },
+    { date: '2019', year: 2019, portfolio: 14120, benchmark: 11840 },
+    { date: '2020', year: 2020, portfolio: 16840, benchmark: 12480 },
+    { date: '2021', year: 2021, portfolio: 21920, benchmark: 15220 },
+    { date: '2022', year: 2022, portfolio: 19150, benchmark: 13640 },
+    { date: '2023', year: 2023, portfolio: 25730, benchmark: 15700 },
+    { date: '2024', year: 2024, portfolio: 31480, benchmark: 18900 },
+    { date: '2025', year: 2025, portfolio: 36720, benchmark: 20950 },
+    { date: '2026', year: 2026, portfolio: 40850, benchmark: 22300 },
   ]
 
   const quarterlyExcess: XRayQuarterlyExcess[] = [
@@ -1051,12 +1051,12 @@ export function buildPortfolioXRayReport(
   ]
 
   const accumulatedReturns: XRayAccumulatedReturn[] = [
-    { period: '3 meses', portfolio: 3.29, reference: 0.54 },
-    { period: '6 meses', portfolio: 9.78, reference: 1.07 },
-    { period: '1 año', portfolio: 19.86, reference: 1.96 },
-    { period: '3 Años Anualizado', portfolio: 21.53, reference: 2.71 },
-    { period: '5 Años Anualizado', portfolio: 15.60, reference: 1.97 },
-    { period: 'Año', portfolio: 20.07, reference: 1.66 },
+    { period: '3 meses', portfolio: 3.29, reference: 3.20 },
+    { period: '6 meses', portfolio: 9.78, reference: 7.12 },
+    { period: '1 año', portfolio: 19.86, reference: 14.60 },
+    { period: '3 Años Anualizado', portfolio: 21.53, reference: 10.15 },
+    { period: '5 Años Anualizado', portfolio: 15.60, reference: 9.00 },
+    { period: 'Año', portfolio: 20.07, reference: 12.40 },
   ]
 
   const periodExtremes: XRayPeriodExtreme[] = [
@@ -1083,7 +1083,7 @@ export function buildPortfolioXRayReport(
 
   const scatterPoints: XRayScatterPoint[] = [
     { index: 'C', id: 'cartera', name: 'Cartera Consolidada', meanReturn: 20.85, volatility: 11.85, weight: 100, isPortfolio: true },
-    { index: 'B', id: 'benchmark', name: 'Mercado Monetario EUR (Benchmark)', meanReturn: 2.71, volatility: 0.50, weight: 0, isBenchmark: true },
+    { index: 'B', id: 'benchmark', name: '80% MSCI ACWI / 20% Monetario', meanReturn: 10.15, volatility: 11.40, weight: 0, isBenchmark: true },
     ...fundPositions.map((f, idx) => {
       const isin = f.isin.toUpperCase()
       const stat = assetVolMap[isin] || { mean: f.return1y || 12.0, vol: 14.0 }
@@ -1170,20 +1170,20 @@ export function buildPortfolioXRayReport(
     meanReturn5y: 15.36,
     sharpeRatio3y: 1.68,
     sharpeRatio5y: 1.06,
-    alpha3y: 18.90,
-    alpha5y: 18.50,
-    beta3y: 28.50,
-    beta5y: 42.10,
-    rSquared3y: 0.18,
-    rSquared5y: 0.31,
+    alpha3y: 10.70,
+    alpha5y: 6.80,
+    beta3y: 1.02,
+    beta5y: 1.04,
+    rSquared3y: 0.86,
+    rSquared5y: 0.84,
     infoRatio3y: 1.82,
     infoRatio5y: 1.08,
-    trackingError3y: 10.50,
-    trackingError5y: 12.10,
+    trackingError3y: 5.85,
+    trackingError5y: 6.20,
   }
 
   const performance: XRayPerformanceData = {
-    benchmarkName: 'Mercado Monetario EUR',
+    benchmarkName: '80% MSCI ACWI / 20% Monetario EUR',
     asOfDate: '31 oct. 2026',
     growth10k,
     quarterlyExcess,

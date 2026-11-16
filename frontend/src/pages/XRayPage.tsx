@@ -704,7 +704,7 @@ export function XRayPage() {
                   <span className="font-mono font-bold text-base text-emerald-600 dark:text-emerald-400">
                     40.850 € (4,08x)
                   </span>
-                  <span className="text-[10px] text-slate-400 block">vs 11.460 € Ref.</span>
+                  <span className="text-[10px] text-slate-400 block">vs 22.300 € Ref. (2,23x)</span>
                 </div>
               </div>
 

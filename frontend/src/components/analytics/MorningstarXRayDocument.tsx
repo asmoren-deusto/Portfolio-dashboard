@@ -95,7 +95,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
             </div>
             <div className="text-right text-[9.5px] text-slate-600 space-y-0.5">
               <div><span className="text-slate-400">Titular:</span> <strong>{brokerLabel}</strong></div>
-              <div><span className="text-slate-400">Benchmark:</span> <strong>MSCI ACWI / Mercado Monetario EUR</strong></div>
+              <div><span className="text-slate-400">Benchmark:</span> <strong>80% MSCI ACWI / 20% Monetario EUR</strong></div>
             </div>
           </div>
 
@@ -647,7 +647,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span className="w-2.5 h-2.5 rounded-full bg-[#C8102E] inline-block" /> Cartera
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block" /> Benchmark
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block" /> Benchmark (80/20)
                 </span>
               </div>
             </div>
@@ -665,8 +665,8 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                 <text x="25" y="50" textAnchor="end" dominantBaseline="central" className="text-[7px] font-mono fill-slate-400">20k</text>
                 <text x="25" y="70" textAnchor="end" dominantBaseline="central" className="text-[7px] font-mono fill-slate-400">10k</text>
 
-                {/* Benchmark Line (Flat steady growth) */}
-                <path d="M 30,70 L 80,69 L 130,69 L 180,68 L 230,68 L 280,67 L 330,66 L 380,65 L 430,64 L 490,63" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+                {/* Benchmark Line (Composite 80/20 growth 10k -> 22.3k) */}
+                <path d="M 30,70 L 80,71 L 130,66 L 180,65 L 230,60 L 280,63 L 330,59 L 380,52 L 430,48 L 490,45" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
 
                 {/* Portfolio Line (Exponential growth from 10k to 40.8k) */}
                 <path d="M 30,70 L 80,66 L 130,58 L 180,51 L 230,37 L 280,45 L 330,28 L 380,18 L 430,13 L 490,9" fill="none" stroke="#C8102E" strokeWidth="2.2" />
@@ -839,14 +839,14 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     {/* Scatter Points */}
                     {/* Benchmark */}
                     {(() => {
-                      const bp = performance.scatterPoints.find((p) => p.isBenchmark) || { volatility: 0.5, meanReturn: 2.71 }
+                      const bp = performance.scatterPoints.find((p) => p.isBenchmark) || { volatility: 11.40, meanReturn: 10.15 }
                       const bx = 24 + (Math.max(0, Math.min(35, bp.volatility)) / 35) * 172
                       const by = 120 - (Math.max(0, Math.min(40, bp.meanReturn)) / 40) * 108
                       return (
                         <g>
                           <rect x={bx - 2.5} y={by - 2.5} width="5" height="5" rx="1" fill="#10b981" />
-                          <text x={bx - 1} y={by - 4.5} textAnchor="start" className="text-[4.5px] font-bold fill-emerald-600 font-sans">
-                            Ref Mon. ({bp.meanReturn.toFixed(1)}%)
+                          <text x={bx + 4} y={by + 2} textAnchor="start" className="text-[4.5px] font-bold fill-emerald-600 font-sans">
+                            Benchmark ({bp.meanReturn.toFixed(1)}%)
                           </text>
                         </g>
                       )

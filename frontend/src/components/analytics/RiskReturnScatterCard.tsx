@@ -11,7 +11,7 @@ interface RiskReturnScatterCardProps {
 export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
   points = [
     { index: 'C', id: 'cartera', name: 'Cartera Consolidada', meanReturn: 21.53, volatility: 11.02, weight: 100, isPortfolio: true },
-    { index: 'B', id: 'benchmark', name: 'Mercado Monetario EUR (Ref)', meanReturn: 2.71, volatility: 0.50, weight: 0, isBenchmark: true },
+    { index: 'B', id: 'benchmark', name: '80% MSCI ACWI / 20% Monetario EUR', meanReturn: 10.15, volatility: 11.40, weight: 0, isBenchmark: true },
     { index: 1, id: '1', name: 'Vanguard U.S. 500 Stk Idx € Acc', meanReturn: 19.66, volatility: 12.67, weight: 43.93 },
     { index: 2, id: '2', name: 'DNB Fund Technology A EUR Acc', meanReturn: 29.92, volatility: 17.29, weight: 12.45 },
     { index: 3, id: '3', name: 'Azvalor Internacional FI', meanReturn: 18.85, volatility: 15.52, weight: 11.60 },
@@ -208,7 +208,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
                     y={cy - 6}
                     className="text-[10.5px] font-bold fill-emerald-600 dark:fill-emerald-400 select-none"
                   >
-                    Ref Monetario ({p.meanReturn.toFixed(1)}%)
+                    Benchmark ({p.meanReturn.toFixed(1)}%)
                   </text>
                 </g>
               )
@@ -287,7 +287,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 bg-[#10b981] rounded-xs inline-block" />
-          <span>Benchmark Monetario EUR (2,7%)</span>
+          <span>Benchmark 80/20 (+10,2%)</span>
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-3.5 h-3.5 rounded-full bg-blue-600 inline-flex items-center justify-center text-[8px] font-bold text-white">#</span>
