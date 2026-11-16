@@ -896,7 +896,7 @@ export function buildPortfolioXRayReport(
     'Inmobiliario': '#6366f1',
   }
 
-  const topHoldings: LookThroughHolding[] = Array.from(holdingsMap.values())
+  const fullHoldings: LookThroughHolding[] = Array.from(holdingsMap.values())
     .map((h) => {
       const portfolioWeight = totalValue > 0 ? (h.portfolioValue / totalValue) * 100 : 0
       const eqWeight = equityVal > 0 ? (h.portfolioValue / equityVal) * 100 : 0
@@ -918,8 +918,11 @@ export function buildPortfolioXRayReport(
     })
     .sort((a, b) => b.portfolioWeight - a.portfolioWeight)
 
-  // 8. Solapamiento de Acciones (Stock Overlap Dinámico)
-  const stockOverlap: XRayStockOverlapItem[] = topHoldings
+  // 7. Top Holdings Look-Through Consolidadas (Limitadas estrictamente a las Top 25)
+  const topHoldings: LookThroughHolding[] = fullHoldings.slice(0, 25)
+
+  // 8. Solapamiento de Acciones (Stock Overlap Dinámico sobre el universo completo de holdings)
+  const stockOverlap: XRayStockOverlapItem[] = fullHoldings
     .filter((h) => h.contributingFunds.length > 1)
     .map((h) => ({
       ticker: h.ticker,

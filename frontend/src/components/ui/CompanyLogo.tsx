@@ -62,6 +62,19 @@ const ISIN_DOMAINS: Record<string, string> = {
   'DE0007236101': 'siemens.com',
   'US68389X1054': 'oracle.com',
   'US17275R1023': 'cisco.com',
+  // Holdings look-through
+  'ES0113900J37': 'santander.com',
+  'CA0679011084': 'barrick.com',
+  'US0393801008': 'archrsc.com',
+  'CA7402091015': 'prairiesky.com',
+  'BRVALEACNOR0': 'vale.com',
+  'US20854P1093': 'consolenergy.com',
+  'US01609W1027': 'alibabagroup.com',
+  'INE002A01018': 'ril.com',
+  'JP3902900004': 'mufg.jp',
+  'JP3236200006': 'keyence.com',
+  'JP3571400005': 'tel.com',
+  'US7960502018': 'samsung.com',
 }
 
 const TICKER_DOMAINS: Record<string, string> = {
@@ -84,19 +97,43 @@ const TICKER_DOMAINS: Record<string, string> = {
   JPM: 'jpmorganchase.com',
   '005930': 'samsung.com',
   SMSN: 'samsung.com',
+  'SMSN.IL': 'samsung.com',
   '0700': 'tencent.com',
   TCEHY: 'tencent.com',
   '7203': 'toyota.com',
+  '7203.T': 'toyota.com',
   TM: 'toyota.com',
   MC: 'lvmh.com',
+  'MC.PA': 'lvmh.com',
   TTE: 'totalenergies.com',
   'NOVO-B': 'novonordisk.com',
   NVO: 'novonordisk.com',
   '6758': 'sony.com',
+  '6758.T': 'sony.com',
   SONY: 'sony.com',
   SIE: 'siemens.com',
+  'SIE.DE': 'siemens.com',
   ORCL: 'oracle.com',
   CSCO: 'cisco.com',
+  SAN: 'santander.com',
+  'SAN.MC': 'santander.com',
+  GOLD: 'barrick.com',
+  ARCH: 'archrsc.com',
+  PSK: 'prairiesky.com',
+  'PSK.TO': 'prairiesky.com',
+  VALE: 'vale.com',
+  CEIX: 'consolenergy.com',
+  BABA: 'alibabagroup.com',
+  '9988': 'alibabagroup.com',
+  RELIANCE: 'ril.com',
+  '8306.T': 'mufg.jp',
+  '8306': 'mufg.jp',
+  MUFG: 'mufg.jp',
+  '6861.T': 'keyence.com',
+  '6861': 'keyence.com',
+  KEYENCE: 'keyence.com',
+  '8035.T': 'tel.com',
+  '8035': 'tel.com',
 }
 
 function getMarketIcon(ticker?: string): React.ReactNode {
@@ -430,6 +467,17 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     else if (nl.includes('siemens')) targetDomain = 'siemens.com'
     else if (nl.includes('oracle')) targetDomain = 'oracle.com'
     else if (nl.includes('cisco')) targetDomain = 'cisco.com'
+    else if (nl.includes('santander')) targetDomain = 'santander.com'
+    else if (nl.includes('barrick')) targetDomain = 'barrick.com'
+    else if (nl.includes('arch resources') || nl.includes('arch coal')) targetDomain = 'archrsc.com'
+    else if (nl.includes('prairiesky')) targetDomain = 'prairiesky.com'
+    else if (nl.includes('vale')) targetDomain = 'vale.com'
+    else if (nl.includes('consol energy') || nl.includes('consol')) targetDomain = 'consolenergy.com'
+    else if (nl.includes('alibaba')) targetDomain = 'alibabagroup.com'
+    else if (nl.includes('reliance')) targetDomain = 'ril.com'
+    else if (nl.includes('mitsubishi ufj') || nl.includes('mufg')) targetDomain = 'mufg.jp'
+    else if (nl.includes('keyence')) targetDomain = 'keyence.com'
+    else if (nl.includes('tokyo electron')) targetDomain = 'tel.com'
   }
   const cleanDomain = targetDomain?.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
 
