@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import {
   ScanSearch,
   Printer,
+  Download,
   FileSpreadsheet,
   FileText,
   Globe,
@@ -54,7 +55,23 @@ export function XRayPage() {
   }, [positions, selectedBroker])
 
   const handlePrint = () => {
+    const originalTitle = document.title
+    document.title = 'Morningstar Portfolio X-Ray - Impresión'
     window.print()
+    setTimeout(() => {
+      document.title = originalTitle
+    }, 1500)
+  }
+
+  const handleSavePdf = () => {
+    const originalTitle = document.title
+    const dateStr = new Date().toISOString().slice(0, 10)
+    const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
+    document.title = `Informe_Morningstar_XRay${entitySuffix}_${dateStr}`
+    window.print()
+    setTimeout(() => {
+      document.title = originalTitle
+    }, 1500)
   }
 
   const handleExportExcel = async () => {
@@ -162,15 +179,15 @@ export function XRayPage() {
               <span>PDF Morningstar</span>
             </button>
 
-            {/* Botón Imprimir / Guardar PDF */}
+            {/* Botón Imprimir */}
             <button
               type="button"
               onClick={handlePrint}
-              title="Imprimir o guardar como PDF en formato oficial Morningstar"
+              title="Imprimir en formato oficial Morningstar"
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-200/70 dark:border-white/[0.08] bg-slate-100 hover:bg-slate-200/70 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all shadow-2xs active:scale-95 cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Imprimir / PDF</span>
+              <span>Imprimir</span>
             </button>
 
             {/* Botón Descargar Excel */}
@@ -978,19 +995,32 @@ export function XRayPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Botón Guardar como PDF */}
+              <button
+                type="button"
+                onClick={handleSavePdf}
+                title="Guardar el informe como archivo PDF en tu dispositivo"
+                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-[#C8102E] hover:bg-[#a60c24] text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Guardar como PDF</span>
+              </button>
+
+              {/* Botón Imprimir */}
               <button
                 type="button"
                 onClick={handlePrint}
-                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-[#C8102E] hover:bg-[#a60c24] text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
+                title="Enviar documento directamente a la impresora"
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-300 dark:border-white/15 bg-white dark:bg-[#252528] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 text-xs font-semibold shadow-2xs transition-all active:scale-95 cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Imprimir / Guardar como PDF</span>
+                <Printer className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+                <span>Imprimir</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowMorningstarPreview(false)}
-                className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer ml-0.5"
                 title="Cerrar vista previa"
               >
                 <X className="w-5 h-5" />
