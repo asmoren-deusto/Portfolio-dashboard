@@ -40,7 +40,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
   }
 
   return (
-    <Card className="p-4 sm:p-5 flex flex-col justify-between">
+    <Card className="p-4 sm:p-5 flex flex-col justify-between h-full">
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-slate-200/70 dark:border-white/[0.08]">
           <div className="flex items-center gap-2.5">

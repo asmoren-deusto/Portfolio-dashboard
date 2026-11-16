@@ -48,7 +48,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
   const [selectedSector, setSelectedSector] = useState<'sensible' | 'ciclico' | 'defensivo' | null>(null)
 
   return (
-    <Card className="p-4 sm:p-5 flex flex-col justify-between">
+    <Card className="p-4 sm:p-5 flex flex-col justify-between h-full">
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-slate-200/70 dark:border-white/[0.08]">
           <div className="flex items-center gap-2.5">
@@ -72,38 +72,38 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center mt-4">
           {/* Ternary Triangle SVG */}
           <div className="md:col-span-5 flex flex-col items-center justify-center pr-0 md:pr-3 md:border-r border-slate-200/70 dark:border-white/[0.08]">
-            <div className="relative w-48 h-44">
-              <svg viewBox="0 0 100 90" className="w-full h-full overflow-visible">
+            <div className="relative w-52 h-44">
+              <svg viewBox="0 0 110 94" className="w-full h-full overflow-visible">
                 {/* Background shaded areas */}
-                <polygon points="50,14 14,78 86,78" fill="currentColor" className="text-slate-100 dark:text-white/[0.03] stroke-slate-400 dark:stroke-white/20" strokeWidth="1.2" />
+                <polygon points="55,14 16,76 94,76" fill="currentColor" className="text-slate-100 dark:text-white/[0.03] stroke-slate-400 dark:stroke-white/20" strokeWidth="1.2" />
 
                 {/* Internal dividers */}
-                <line x1="50" y1="14" x2="50" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
-                <line x1="14" y1="78" x2="50" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
-                <line x1="86" y1="78" x2="50" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
+                <line x1="55" y1="14" x2="55" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
+                <line x1="16" y1="76" x2="55" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
+                <line x1="94" y1="76" x2="55" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
 
                 {/* Vertex Labels */}
-                <text x="50" y="8" textAnchor="middle" className="text-[7.5px] font-bold fill-blue-600 dark:fill-blue-400">
+                <text x="55" y="7" textAnchor="middle" className="text-[7.5px] font-bold fill-blue-600 dark:fill-blue-400">
                   Sensible ({data.sensible.totalWeight.toFixed(1)}%)
                 </text>
-                <text x="6" y="86" textAnchor="start" className="text-[7.5px] font-bold fill-emerald-600 dark:fill-emerald-400">
+                <text x="10" y="87" textAnchor="start" className="text-[7.5px] font-bold fill-emerald-600 dark:fill-emerald-400">
                   Defensivo ({data.defensivo.totalWeight.toFixed(1)}%)
                 </text>
-                <text x="94" y="86" textAnchor="end" className="text-[7.5px] font-bold fill-amber-600 dark:fill-amber-400">
+                <text x="100" y="87" textAnchor="end" className="text-[7.5px] font-bold fill-amber-600 dark:fill-amber-400">
                   Cíclico ({data.ciclico.totalWeight.toFixed(1)}%)
                 </text>
 
                 {/* Benchmark Position (Diamond) */}
-                <polygon points="50,47 54,51 50,55 46,51" fill="#10b981" />
+                <polygon points="55,47 59,51 55,55 51,51" fill="#10b981" />
 
                 {/* Portfolio Position (Red Target) */}
-                <circle cx="56" cy="38" r="8" fill="#C8102E" fillOpacity="0.15" />
-                <circle cx="56" cy="38" r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" />
-                <circle cx="56" cy="38" r="1.5" fill="#C8102E" />
+                <circle cx="61" cy="38" r="8" fill="#C8102E" fillOpacity="0.15" />
+                <circle cx="61" cy="38" r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" />
+                <circle cx="61" cy="38" r="1.5" fill="#C8102E" />
               </svg>
             </div>
 
-            <div className="flex items-center gap-4 mt-2 text-xs font-medium">
+            <div className="flex items-center gap-4 mt-3 text-xs font-medium">
               <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                 <span className="w-3 h-3 rounded-full border-2 border-[#C8102E] bg-white inline-block" /> Tu Cartera
               </span>

@@ -725,16 +725,16 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span className="text-[7.5px] text-slate-400 font-mono">Media vs Volatilidad</span>
                 </div>
                 <div className="w-full h-[155px] bg-slate-50 border border-slate-200 rounded p-2.5 flex items-center justify-center relative">
-                  <svg viewBox="0 0 210 135" className="w-full h-full overflow-visible">
+                  <svg viewBox="0 0 210 142" className="w-full h-full overflow-visible">
                     {/* Axis lines */}
                     <line x1="24" y1="8" x2="24" y2="114" stroke="#94a3b8" strokeWidth="1" />
                     <line x1="24" y1="114" x2="200" y2="114" stroke="#94a3b8" strokeWidth="1" />
                     
                     {/* X labels (Volatilidad) */}
                     {[-1, 5, 11, 17, 23].map((v, i) => (
-                      <text key={v} x={28 + i * 42} y="124" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
+                      <text key={v} x={28 + i * 42} y="123" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
                     ))}
-                    <text x="112" y="132" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
+                    <text x="112" y="136" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
 
                     {/* Y labels (Media 3a) */}
                     {[5, 13, 21, 29, 37].map((m, i) => (
