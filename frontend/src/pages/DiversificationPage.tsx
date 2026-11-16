@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Globe, PieChart, Sparkles, ShieldCheck, ScanSearch } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
@@ -6,11 +6,17 @@ import { DiversificationDashboard } from '@/components/analytics/Diversification
 import { SuperSectorsTriangleCard } from '@/components/analytics/SuperSectorsTriangleCard'
 import { MarketSectorEvolutionCard } from '@/components/market/MarketSectorEvolutionCard'
 import { usePositions, useMarketQuotes } from '@/api/queries'
+import { buildPortfolioXRayReport } from '@/lib/xrayEngine'
 
 export function DiversificationPage() {
   const { data: positions = [], isLoading, isFetching } = usePositions()
   const { data: quoteData } = useMarketQuotes()
   const [selectedSector, setSelectedSector] = useState<string>('Todos')
+
+  // Desglose de SuperSectores derivado de las posiciones reales de la cartera
+  const report = useMemo(() => {
+    return buildPortfolioXRayReport(positions)
+  }, [positions])
 
   return (
     <div className="flex flex-col gap-4 pb-8">
@@ -54,7 +60,7 @@ export function DiversificationPage() {
       <DiversificationDashboard positions={positions} isLoading={isLoading} />
 
       {/* Triángulo de SuperSectores Morningstar (Cíclico, Sensible, Defensivo) */}
-      <SuperSectorsTriangleCard />
+      <SuperSectorsTriangleCard data={report.superSectorsDetail} />
 
       {/* Evolución y Rotación Histórica del Mercado por Sectores */}
       <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 520px' }}>

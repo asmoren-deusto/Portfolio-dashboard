@@ -78,9 +78,9 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
   const benchY = (topY + leftY + rightY) / 3
 
   return (
-    <Card className={cn('px-3.5 sm:px-4.5 pt-2.5 sm:pt-3 pb-2.5 sm:pb-3 flex flex-col h-full', className)}>
-      <div className="flex flex-col flex-1 h-full min-h-0">
-        <div className="flex items-center justify-between pb-2 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
+    <Card className={cn('p-4 sm:p-5 flex flex-col', className)}>
+      <div className="flex flex-col min-h-0">
+        <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl bg-violet-500/10 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 flex items-center justify-center shrink-0">
               <Compass size={16} />
@@ -99,32 +99,67 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[195px_1fr] lg:grid-cols-[210px_1fr] gap-3 sm:gap-4 items-stretch mt-2 sm:mt-2.5 flex-1 min-h-0">
+        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[240px_1fr] gap-3 sm:gap-4 items-center mt-3">
           {/* Ternary Triangle SVG */}
-          <div className="flex flex-col items-center justify-center pr-0 md:pr-3.5 md:border-r border-slate-200/70 dark:border-white/[0.08] h-full">
-            <div className="relative w-40 sm:w-44 h-40 sm:h-44 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center pr-0 md:pr-4 md:border-r border-slate-200/70 dark:border-white/[0.08]">
+            <div className="relative w-44 sm:w-48 h-44 sm:h-48 flex items-center justify-center">
               <svg viewBox="0 0 120 114" className="w-full h-full overflow-visible">
                 {/* Background shaded areas - Triángulo Equilátero Exacto */}
                 <polygon
                   points="60,17 20,86.3 100,86.3"
-                  fill="currentColor"
-                  className="text-slate-100 dark:text-white/[0.03] stroke-slate-400 dark:stroke-white/20"
-                  strokeWidth="1.2"
+                  fill="#f8fafc"
+                  stroke="#94a3b8"
+                  strokeWidth="1.4"
+                  style={{ fill: '#f8fafc', stroke: '#94a3b8' }}
+                  className="dark:fill-white/[0.03] dark:stroke-white/20"
                 />
 
                 {/* Internal dividers convergentes en el centroide (60, 63.2) */}
-                <line x1="60" y1="17" x2="60" y2="63.2" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
-                <line x1="20" y1="86.3" x2="60" y2="63.2" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
-                <line x1="100" y1="86.3" x2="60" y2="63.2" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
+                <line
+                  x1="60"
+                  y1="17"
+                  x2="60"
+                  y2="63.2"
+                  stroke="#cbd5e1"
+                  strokeWidth="1"
+                  strokeDasharray="2"
+                  style={{ stroke: '#cbd5e1' }}
+                  className="dark:stroke-white/10"
+                />
+                <line
+                  x1="20"
+                  y1="86.3"
+                  x2="60"
+                  y2="63.2"
+                  stroke="#cbd5e1"
+                  strokeWidth="1"
+                  strokeDasharray="2"
+                  style={{ stroke: '#cbd5e1' }}
+                  className="dark:stroke-white/10"
+                />
+                <line
+                  x1="100"
+                  y1="86.3"
+                  x2="60"
+                  y2="63.2"
+                  stroke="#cbd5e1"
+                  strokeWidth="1"
+                  strokeDasharray="2"
+                  style={{ stroke: '#cbd5e1' }}
+                  className="dark:stroke-white/10"
+                />
 
                 {/* Vertex Labels */}
                 {/* Sensible (Top Vertex) */}
                 <text
                   x="60"
                   y="8"
+                  fill="#2563eb"
+                  style={{ fill: '#2563eb' }}
                   textAnchor="middle"
                   fontSize="7.5"
-                  className="font-bold fill-blue-600 dark:fill-blue-400"
+                  fontWeight="bold"
+                  className="dark:fill-blue-400"
                 >
                   Sensible ({data.sensible.totalWeight.toFixed(1)}%)
                 </text>
@@ -132,57 +167,48 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 {/* Defensivo (Vértice inferior izquierdo) */}
                 <text
                   x="20"
-                  y="95"
+                  y="96"
+                  fill="#059669"
+                  style={{ fill: '#059669' }}
                   textAnchor="middle"
-                  fontSize="7.5"
-                  className="font-bold fill-emerald-600 dark:fill-emerald-400"
+                  fontSize="7.2"
+                  fontWeight="bold"
+                  className="dark:fill-emerald-400"
                 >
-                  Defensivo
-                </text>
-                <text
-                  x="20"
-                  y="103"
-                  textAnchor="middle"
-                  fontSize="6.8"
-                  className="font-bold fill-emerald-600/90 dark:fill-emerald-400/90"
-                >
-                  ({data.defensivo.totalWeight.toFixed(1)}%)
+                  Defensivo ({data.defensivo.totalWeight.toFixed(1)}%)
                 </text>
 
                 {/* Cíclico (Vértice inferior derecho) */}
                 <text
                   x="100"
-                  y="95"
+                  y="96"
+                  fill="#d97706"
+                  style={{ fill: '#d97706' }}
                   textAnchor="middle"
-                  fontSize="7.5"
-                  className="font-bold fill-amber-600 dark:fill-amber-400"
+                  fontSize="7.2"
+                  fontWeight="bold"
+                  className="dark:fill-amber-400"
                 >
-                  Cíclico
-                </text>
-                <text
-                  x="100"
-                  y="103"
-                  textAnchor="middle"
-                  fontSize="6.8"
-                  className="font-bold fill-amber-600/90 dark:fill-amber-400/90"
-                >
-                  ({data.ciclico.totalWeight.toFixed(1)}%)
+                  Cíclico ({data.ciclico.totalWeight.toFixed(1)}%)
                 </text>
 
                 {/* Benchmark Position (Diamond) */}
                 <polygon
-                  points={`${benchX},${benchY - 4} ${benchX + 4},${benchY} ${benchX},${benchY + 4} ${benchX - 4},${benchY}`}
+                  points={`${benchX},${benchY - 4.5} ${benchX + 4.5},${benchY} ${benchX},${benchY + 4.5} ${benchX - 4.5},${benchY}`}
                   fill="#10b981"
+                  stroke="#047857"
+                  strokeWidth="0.8"
+                  style={{ fill: '#10b981', stroke: '#047857' }}
                 />
 
                 {/* Portfolio Position (Red Target) */}
-                <circle cx={portX} cy={portY} r="8" fill="#C8102E" fillOpacity="0.15" />
-                <circle cx={portX} cy={portY} r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" />
-                <circle cx={portX} cy={portY} r="1.5" fill="#C8102E" />
+                <circle cx={portX} cy={portY} r="8" fill="#C8102E" fillOpacity="0.15" style={{ fill: '#C8102E' }} />
+                <circle cx={portX} cy={portY} r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" style={{ fill: '#ffffff', stroke: '#C8102E' }} />
+                <circle cx={portX} cy={portY} r="1.5" fill="#C8102E" style={{ fill: '#C8102E' }} />
               </svg>
             </div>
 
-            <div className="flex items-center justify-center gap-3.5 mt-1.5 text-xs font-medium shrink-0">
+            <div className="flex items-center justify-center gap-3.5 mt-2 text-xs font-medium shrink-0">
               <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11.5px] sm:text-xs whitespace-nowrap">
                 <span className="w-2.5 h-2.5 rounded-full border-2 border-[#C8102E] bg-white inline-block" /> Tu Cartera
               </span>
@@ -192,13 +218,13 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             </div>
           </div>
 
-          {/* 3 SuperSectors Breakdown (ocupa todo el espacio restante) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs items-stretch h-full">
+          {/* 3 SuperSectors Breakdown */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs items-start">
             {/* Cíclico */}
             <div
               onClick={() => setSelectedSector(selectedSector === 'ciclico' ? null : 'ciclico')}
               className={cn(
-                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between shadow-2xs',
                 selectedSector === 'ciclico'
                   ? 'border-amber-500 bg-amber-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
@@ -229,7 +255,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'sensible' ? null : 'sensible')}
               className={cn(
-                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between shadow-2xs',
                 selectedSector === 'sensible'
                   ? 'border-blue-500 bg-blue-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
@@ -260,7 +286,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'defensivo' ? null : 'defensivo')}
               className={cn(
-                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between shadow-2xs',
                 selectedSector === 'defensivo'
                   ? 'border-emerald-500 bg-emerald-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
