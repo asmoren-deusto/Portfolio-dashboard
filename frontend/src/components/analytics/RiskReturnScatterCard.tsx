@@ -39,30 +39,30 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
   const yTicks = [5, 10, 15, 20, 25, 30, 35].filter((r) => r <= maxY)
 
   return (
-    <Card className="p-5 sm:p-6 flex flex-col justify-between h-full">
+    <Card className="p-4 sm:p-5 flex flex-col justify-between h-full">
       {/* 1. Header */}
-      <div className="flex items-end justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
-            <Target size={20} />
+      <div className="flex items-center justify-between pb-2 sm:pb-2.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+            <Target size={17} />
           </div>
           <div>
-            <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
               Diagrama de Dispersión Riesgo-Rentabilidad (3 Años)
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Relación empírica entre Retorno Medio Anualizado (Eje Y) y Volatilidad Histórica (Eje X)
             </p>
           </div>
         </div>
-        <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hidden sm:inline-block shrink-0 self-end">
+        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hidden sm:inline-block shrink-0">
           Ratio de Sharpe 1.71
         </span>
       </div>
 
       {/* 2. Scatter Plot SVG Container (ampliado en altura y anchura aprovechando la reubicación de leyendas) */}
-      <div className="my-3.5 w-full h-[340px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-2 sm:p-3 relative flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
-        <svg viewBox="0 0 650 330" className="w-full h-full max-h-[320px] overflow-visible">
+      <div className="my-2 sm:my-2.5 w-full h-[265px] sm:h-[280px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-xl p-2 sm:p-2.5 relative flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
+        <svg viewBox="0 0 650 330" className="w-full h-full max-h-[265px] sm:max-h-[280px] overflow-visible">
           {/* Grid Lines */}
           {xTicks.map((v) => (
             <line
@@ -223,7 +223,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
       </div>
 
       {/* 3. Detail Panel con altura fija para evitar saltos o redimensiones en hover */}
-      <div className="h-[50px] px-3.5 rounded-2xl bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs sm:text-sm flex items-center shadow-2xs shrink-0 overflow-hidden">
+      <div className="h-[42px] px-3 rounded-xl bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs flex items-center shadow-2xs shrink-0 overflow-hidden">
         {activePoint ? (
           <div className="flex items-center justify-between w-full min-w-0 gap-2">
             <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -233,11 +233,11 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
               )}>
                 {activePoint.index}
               </span>
-              <span className="font-bold text-xs sm:text-[13px] text-slate-900 dark:text-white truncate">
+              <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
                 {activePoint.name}
               </span>
             </div>
-            <div className="flex items-center gap-2.5 font-mono text-xs sm:text-[13px] shrink-0 whitespace-nowrap">
+            <div className="flex items-center gap-2 font-mono text-xs shrink-0 whitespace-nowrap">
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                 +{activePoint.meanReturn.toFixed(1)}%/a
               </span>
@@ -256,7 +256,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm truncate">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs truncate">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <span className="truncate">Pasa el cursor sobre cualquier punto numerado o la Cartera para ver su desglose cuantitativo exacto.</span>
           </div>
@@ -264,17 +264,17 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
       </div>
 
       {/* 4. Legend Strip coincidente en altura y espaciado con la tarjeta derecha */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mt-3.5 pt-3.5 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded-full border-2 border-[#C8102E] bg-white inline-flex items-center justify-center text-[8.5px] font-black text-[#C8102E]">C</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-2.5 border-t border-slate-200/80 dark:border-white/10 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
+        <span className="flex items-center gap-1.5">
+          <span className="w-3.5 h-3.5 rounded-full border-2 border-[#C8102E] bg-white inline-flex items-center justify-center text-[8px] font-black text-[#C8102E]">C</span>
           <span>Tu Cartera (+21,5%)</span>
         </span>
-        <span className="flex items-center gap-2">
-          <span className="w-3.5 h-3.5 bg-[#10b981] rounded-xs inline-block" />
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 bg-[#10b981] rounded-xs inline-block" />
           <span>Benchmark Monetario EUR (2,7%)</span>
         </span>
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded-full bg-blue-600 inline-flex items-center justify-center text-[8.5px] font-bold text-white">#</span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3.5 h-3.5 rounded-full bg-blue-600 inline-flex items-center justify-center text-[8px] font-bold text-white">#</span>
           <span>Fondos de Cartera (1-7)</span>
         </span>
       </div>
