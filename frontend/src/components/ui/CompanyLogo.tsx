@@ -17,6 +17,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'IE00BYX5NH74': 'fidelity.com',
   'LU0261952682': 'fidelity.com',
   'IE00BYX5M476': 'fidelity.com',
+  'LU0997587597': 'fidelity.com',
   'LU1598719752': 'cobasam.com',
   'ES0112611001': 'azvalor.com',
   'LU0302296495': 'dnb.no',
@@ -29,11 +30,41 @@ const ISIN_DOMAINS: Record<string, string> = {
   'IE00BM95B621': 'polarcapital.co.uk',
   'LU1623762843': 'carmignac.es',
   'LU0171307068': 'blackrock.com',
+  'LU0122379958': 'blackrock.com',
   'ES0000012411': 'tesoro.es',
   'IE00B4ND3602': 'ishares.com',
   'IE0032126645': 'vanguard.com',
   'FR0000989626': 'groupama-am.com',
+  // Stocks & Look-Through holdings
   'US67066G1040': 'nvidia.com',
+  'US5949181045': 'microsoft.com',
+  'US0231351067': 'amazon.com',
+  'US02079K3059': 'google.com',
+  'US02079K1079': 'google.com',
+  'US11135F1012': 'broadcom.com',
+  'US8740391003': 'tsmc.com',
+  'US30303M1027': 'meta.com',
+  'NL0010273215': 'asml.com',
+  'US92826C8394': 'visa.com',
+  'DE0007164600': 'sap.com',
+  'US0378331005': 'apple.com',
+  'US88160R1014': 'tesla.com',
+}
+
+const TICKER_DOMAINS: Record<string, string> = {
+  NVDA: 'nvidia.com',
+  MSFT: 'microsoft.com',
+  AMZN: 'amazon.com',
+  GOOGL: 'google.com',
+  GOOG: 'google.com',
+  AVGO: 'broadcom.com',
+  TSM: 'tsmc.com',
+  META: 'meta.com',
+  ASML: 'asml.com',
+  V: 'visa.com',
+  SAP: 'sap.com',
+  AAPL: 'apple.com',
+  TSLA: 'tesla.com',
 }
 
 function getMarketIcon(ticker?: string): React.ReactNode {
@@ -322,6 +353,9 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
   if (!targetDomain && isin && ISIN_DOMAINS[isin]) {
     targetDomain = ISIN_DOMAINS[isin]
   }
+  if (!targetDomain && ticker && TICKER_DOMAINS[ticker.toUpperCase()]) {
+    targetDomain = TICKER_DOMAINS[ticker.toUpperCase()]
+  }
   if (!targetDomain) {
     const nl = (name || '').toLowerCase()
     if (nl.includes('indexa')) targetDomain = 'indexacapital.com'
@@ -340,6 +374,17 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     else if (nl.includes('bbva')) targetDomain = 'bbva.es'
     else if (nl.includes('myinvestor')) targetDomain = 'myinvestor.es'
     else if (nl.includes('españa') || nl.includes('bono')) targetDomain = 'tesoro.es'
+    else if (nl.includes('nvidia')) targetDomain = 'nvidia.com'
+    else if (nl.includes('microsoft')) targetDomain = 'microsoft.com'
+    else if (nl.includes('amazon')) targetDomain = 'amazon.com'
+    else if (nl.includes('alphabet') || nl.includes('google')) targetDomain = 'google.com'
+    else if (nl.includes('broadcom')) targetDomain = 'broadcom.com'
+    else if (nl.includes('taiwan semiconductor') || nl.includes('tsmc')) targetDomain = 'tsmc.com'
+    else if (nl.includes('meta platforms') || nl.includes('facebook')) targetDomain = 'meta.com'
+    else if (nl.includes('asml')) targetDomain = 'asml.com'
+    else if (nl.includes('visa')) targetDomain = 'visa.com'
+    else if (nl.includes('sap')) targetDomain = 'sap.com'
+    else if (nl.includes('apple')) targetDomain = 'apple.com'
   }
   const cleanDomain = targetDomain?.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
 

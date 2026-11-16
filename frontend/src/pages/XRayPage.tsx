@@ -25,6 +25,7 @@ import { usePositions } from '@/api/queries'
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
+import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { downloadExcelReport } from '@/api/export'
 import { MorningstarXRayDocument } from '@/components/analytics/MorningstarXRayDocument'
 import { FundCorrelationMatrixCard } from '@/components/analytics/FundCorrelationMatrixCard'
@@ -766,8 +767,18 @@ export function XRayPage() {
                   {fundPositions.map((f) => (
                     <tr key={f.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02]">
                       <td className="py-3 pr-2">
-                        <span className="font-bold text-slate-900 dark:text-white block">{f.name}</span>
-                        <span className="font-mono text-[10px] text-slate-400">{f.isin}</span>
+                        <div className="flex items-center gap-2.5">
+                          <CompanyLogo
+                            isin={f.isin}
+                            name={f.name}
+                            size="sm"
+                            className="w-8 h-8 rounded-xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
+                          />
+                          <div className="min-w-0">
+                            <span className="font-bold text-slate-900 dark:text-white block truncate">{f.name}</span>
+                            <span className="font-mono text-[10px] text-slate-400 block">{f.isin}</span>
+                          </div>
+                        </div>
                       </td>
                       <td className="py-3 text-slate-600 dark:text-slate-300">{f.type}</td>
                       <td className="py-3 font-mono text-slate-500">{f.portfolioDate}</td>
@@ -826,9 +837,13 @@ export function XRayPage() {
                     <span className="font-mono text-xs font-bold text-slate-400 w-6 text-center">
                       #{idx + 1}
                     </span>
-                    <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs font-mono shrink-0">
-                      {h.ticker}
-                    </div>
+                    <CompanyLogo
+                      isin={h.isin}
+                      ticker={h.ticker}
+                      name={h.name}
+                      size="sm"
+                      className="w-9 h-9 rounded-xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
+                    />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm">
@@ -931,9 +946,13 @@ export function XRayPage() {
           <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-[#202023] border border-slate-200 dark:border-white/10 p-5 sm:p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm font-mono">
-                  {selectedHolding.ticker}
-                </div>
+                <CompanyLogo
+                  isin={selectedHolding.isin}
+                  ticker={selectedHolding.ticker}
+                  name={selectedHolding.name}
+                  size="md"
+                  className="w-10 h-10 rounded-2xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
+                />
                 <div>
                   <h4 className="font-bold text-base text-slate-900 dark:text-white">
                     {selectedHolding.name}
@@ -978,13 +997,21 @@ export function XRayPage() {
                       key={idx}
                       className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5"
                     >
-                      <div className="min-w-0 pr-2">
-                        <span className="font-semibold text-slate-900 dark:text-white block truncate">
-                          {cf.fundName}
-                        </span>
-                        <span className="text-[10.5px] font-mono text-slate-400">
-                          {cf.fundIsin} · {cf.fundWeightInHolding.toFixed(2)}% del fondo
-                        </span>
+                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                        <CompanyLogo
+                          isin={cf.fundIsin}
+                          name={cf.fundName}
+                          size="xs"
+                          className="w-6 h-6 rounded-lg shrink-0 border border-slate-200/60 dark:border-white/10"
+                        />
+                        <div className="min-w-0">
+                          <span className="font-semibold text-slate-900 dark:text-white block truncate">
+                            {cf.fundName}
+                          </span>
+                          <span className="text-[10.5px] font-mono text-slate-400 block">
+                            {cf.fundIsin} · {cf.fundWeightInHolding.toFixed(2)}% del fondo
+                          </span>
+                        </div>
                       </div>
                       <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 shrink-0">
                         {fmt.currency(summary.totalValue * (cf.fundPortfolioWeight / 100) * (cf.fundWeightInHolding / 100))}
