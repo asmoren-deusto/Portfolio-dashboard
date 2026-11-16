@@ -830,8 +830,8 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       const by = 120 - (Math.max(0, Math.min(40, bp.meanReturn)) / 40) * 108
                       return (
                         <g>
-                          <rect x={bx - 3.5} y={by - 3.5} width="7" height="7" rx="1.5" fill="#10b981" />
-                          <text x={bx + 6} y={by} dominantBaseline="central" className="text-[5.5px] font-bold fill-emerald-600 font-sans">
+                          <rect x={bx - 2.5} y={by - 2.5} width="5" height="5" rx="1" fill="#10b981" />
+                          <text x={bx - 1} y={by - 4.5} textAnchor="start" className="text-[4.5px] font-bold fill-emerald-600 font-sans">
                             Ref Mon. ({bp.meanReturn.toFixed(1)}%)
                           </text>
                         </g>
@@ -845,15 +845,15 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       const cy = 120 - (Math.max(0, Math.min(40, cp.meanReturn)) / 40) * 108
                       return (
                         <g>
-                          <circle cx={cx} cy={cy} r="7.5" fill="#ffffff" stroke="#C8102E" strokeWidth="2" />
-                          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" className="text-[7px] font-black fill-[#C8102E] font-sans">
+                          <circle cx={cx} cy={cy} r="5.0" fill="#ffffff" stroke="#C8102E" strokeWidth="1.6" />
+                          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" className="text-[5px] font-black fill-[#C8102E] font-sans">
                             C
                           </text>
                         </g>
                       )
                     })()}
 
-                    {/* Numbered Fund Points (1 to N) */}
+                    {/* Numbered Fund Points (1 to N) - Formato idéntico al badge de la derecha (círculo rojo, texto blanco y más pequeño) */}
                     {performance.scatterPoints
                       .filter((p) => !p.isPortfolio && !p.isBenchmark)
                       .map((p) => {
@@ -861,13 +861,13 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                         const fy = 120 - (Math.max(0, Math.min(40, p.meanReturn)) / 40) * 108
                         return (
                           <g key={p.id || p.index}>
-                            <circle cx={fx} cy={fy} r="5.2" fill="#C8102E" />
+                            <circle cx={fx} cy={fy} r="3.5" fill="#C8102E" />
                             <text
                               x={fx}
                               y={fy}
                               textAnchor="middle"
                               dominantBaseline="central"
-                              className="text-[6.2px] font-black fill-white font-sans"
+                              className="text-[4.2px] font-bold fill-white font-sans"
                             >
                               {p.index}
                             </text>
