@@ -847,7 +847,8 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                           <rect x={bx - 2.8} y={by - 2.8} width="5.6" height="5.6" rx="1.2" fill="#10b981" style={{ fill: '#10b981' }} />
                           <text
                             x={bx + 4.5}
-                            y={by + 2}
+                            y={by}
+                            dominantBaseline="central"
                             fill="#059669"
                             style={{ fill: '#059669' }}
                             textAnchor="start"

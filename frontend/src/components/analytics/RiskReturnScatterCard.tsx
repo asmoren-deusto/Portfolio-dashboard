@@ -205,7 +205,8 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
                   <rect x={cx - 7} y={cy - 7} width="14" height="14" rx="3.5" fill="#10b981" />
                   <text
                     x={cx + 12}
-                    y={cy - 6}
+                    y={cy}
+                    dominantBaseline="central"
                     className="text-[10.5px] font-bold fill-emerald-600 dark:fill-emerald-400 select-none"
                   >
                     Benchmark ({p.meanReturn.toFixed(1)}%)
