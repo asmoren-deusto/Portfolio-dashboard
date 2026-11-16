@@ -73,7 +73,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* ── PÁGINA 1: X-RAY DE CARTERA                                        */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="print-page w-full min-h-[285mm] p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 print:border-none print:p-0">
+      <section className="print-page w-full min-h-[275mm] print:min-h-0 print:h-auto p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 shadow-md rounded-sm mb-6 print:mb-0 print:rounded-none print:shadow-none print:border-none print:p-0">
         <div>
           {/* Header Metadata Strip */}
           <div className="flex items-center justify-between text-[9px] text-slate-500 pb-1 border-b border-slate-300">
@@ -564,7 +564,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* ── PÁGINA 2: MORNINGSTAR RENDIMIENTO X-RAY                            */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="print-page w-full min-h-[285mm] p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 print:border-none print:p-0">
+      <section className="print-page w-full min-h-[275mm] print:min-h-0 print:h-auto p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 shadow-md rounded-sm mb-6 print:mb-0 print:rounded-none print:shadow-none print:border-none print:p-0">
         <div>
           <div className="flex items-center justify-between text-[9px] text-slate-500 pb-1 border-b border-slate-300">
             <span>Informe a {generatedAt}</span>
@@ -940,7 +940,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* ── PÁGINA 3: SOLAPAMIENTO DE ACCIONES                                */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="print-page w-full min-h-[285mm] p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 print:border-none print:p-0">
+      <section className="print-page w-full min-h-[275mm] print:min-h-0 print:h-auto p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 shadow-md rounded-sm mb-6 print:mb-0 print:rounded-none print:shadow-none print:border-none print:p-0">
         <div>
           <div className="flex items-center justify-between text-[9px] text-slate-500 pb-1 border-b border-slate-300">
             <span>Informe a {generatedAt}</span>
@@ -1033,7 +1033,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* ── PÁGINA 4: POSICIONES DE CARTERA                                   */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="print-page w-full min-h-[285mm] p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 print:border-none print:p-0">
+      <section className="print-page w-full min-h-[275mm] print:min-h-0 print:h-auto p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 shadow-md rounded-sm mb-6 print:mb-0 print:rounded-none print:shadow-none print:border-none print:p-0">
         <div>
           <div className="flex items-center justify-between text-[9px] text-slate-500 pb-1 border-b border-slate-300">
             <span>Informe a {generatedAt}</span>
@@ -1118,7 +1118,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* ── PÁGINA 5: DISCLOSURE Y METODOLOGÍA OFICIAL MORNINGSTAR            */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="print-page w-full min-h-[285mm] p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 print:border-none print:p-0">
+      <section className="print-page w-full min-h-[275mm] print:min-h-0 print:h-auto p-6 sm:p-7 flex flex-col justify-between bg-white border border-slate-200 shadow-md rounded-sm print:mb-0 print:rounded-none print:shadow-none print:border-none print:p-0">
         <div>
           <div className="flex items-center justify-between text-[9px] text-slate-500 pb-1 border-b border-slate-300">
             <span>Informe a {generatedAt}</span>

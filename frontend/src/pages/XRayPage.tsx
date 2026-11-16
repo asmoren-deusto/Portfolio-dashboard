@@ -920,7 +920,7 @@ export function XRayPage() {
 
       {/* ── MODAL DETALLE DE COMPAÑÍA SUBYACENTE ───────────────────────── */}
       {selectedHolding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs print:hidden">
           <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-[#202023] border border-slate-200 dark:border-white/10 p-5 sm:p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/10">
               <div className="flex items-center gap-3">
@@ -1003,7 +1003,7 @@ export function XRayPage() {
 
       {/* ── MODAL VISTA PREVIA MORNINGSTAR PDF (5 PÁGINAS COMPLETAS) ────── */}
       {showMorningstarPreview && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-slate-950/85 backdrop-blur-md overflow-hidden animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-slate-950/85 backdrop-blur-md overflow-hidden animate-in fade-in duration-150 print:hidden">
           {/* Top Bar Controls */}
           <div className="h-14 bg-white dark:bg-[#18181b] border-b border-slate-200 dark:border-white/10 px-4 sm:px-6 flex items-center justify-between shrink-0 shadow-md">
             <div className="flex items-center gap-2.5">

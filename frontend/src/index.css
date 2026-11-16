@@ -579,7 +579,7 @@
 @media print {
   @page {
     size: A4 portrait;
-    margin: 8mm 8mm;
+    margin: 8mm 10mm;
   }
 
   html,
@@ -587,11 +587,16 @@
     background: #ffffff !important;
     background-color: #ffffff !important;
     color: #000000 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Ocultar interfaz y barras de la aplicacion en el PDF */
+  /* Ocultar interfaz y barras de la aplicación en el PDF */
   aside,
   header,
   nav,
@@ -602,17 +607,41 @@
     display: none !important;
   }
 
-  main {
+  main,
+  main > div,
+  #root {
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
     background: transparent !important;
+    gap: 0 !important;
+    display: block !important;
   }
 
   .print-page {
-    page-break-inside: avoid !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
     break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: page !important;
+    page-break-after: always !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+  }
+
+  .print-page:last-child,
+  .print-page:last-of-type {
+    break-after: auto !important;
+    page-break-after: auto !important;
   }
 
   .print-page-break {
