@@ -714,8 +714,8 @@ export function XRayPage() {
 
             {/* Scatter Plot & Matriz de Correlación */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-              <RiskReturnScatterCard points={performance.scatterPoints} />
               <FundCorrelationMatrixCard funds={performance.correlationFunds} matrix={performance.correlationMatrix} />
+              <RiskReturnScatterCard points={performance.scatterPoints} />
             </div>
 
             {/* Estadísticas MPT */}

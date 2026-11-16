@@ -724,40 +724,40 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span className="font-bold text-[9.5px] text-slate-900">Análisis de rentabilidades (3a)</span>
                   <span className="text-[7.5px] text-slate-400 font-mono">Media vs Volatilidad</span>
                 </div>
-                <div className="w-full h-[155px] bg-slate-50 border border-slate-200 rounded p-2.5 flex items-center justify-center relative">
-                  <svg viewBox="0 0 210 142" className="w-full h-full overflow-visible">
+                <div className="w-full h-[175px] bg-slate-50 border border-slate-200 rounded p-2.5 flex items-center justify-center relative">
+                  <svg viewBox="0 0 210 148" className="w-full h-full overflow-visible">
                     {/* Axis lines */}
-                    <line x1="24" y1="8" x2="24" y2="114" stroke="#94a3b8" strokeWidth="1" />
-                    <line x1="24" y1="114" x2="200" y2="114" stroke="#94a3b8" strokeWidth="1" />
+                    <line x1="24" y1="8" x2="24" y2="120" stroke="#94a3b8" strokeWidth="1" />
+                    <line x1="24" y1="120" x2="200" y2="120" stroke="#94a3b8" strokeWidth="1" />
                     
                     {/* X labels (Volatilidad) */}
                     {[-1, 5, 11, 17, 23].map((v, i) => (
-                      <text key={v} x={28 + i * 42} y="123" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
+                      <text key={v} x={28 + i * 42} y="130" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
                     ))}
-                    <text x="112" y="136" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
+                    <text x="112" y="142" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
 
                     {/* Y labels (Media 3a) */}
                     {[5, 13, 21, 29, 37].map((m, i) => (
-                      <text key={m} x="20" y={114 - i * 25} textAnchor="end" className="text-[6.5px] font-mono fill-slate-500">{m}</text>
+                      <text key={m} x="20" y={120 - i * 26} textAnchor="end" className="text-[6.5px] font-mono fill-slate-500">{m}</text>
                     ))}
                     
                     {/* Scatter Points */}
                     {/* Benchmark */}
-                    <rect x="25.5" y="111.5" width="5" height="5" fill="#10b981" />
+                    <rect x="25.5" y="117.5" width="5" height="5" fill="#10b981" />
                     {/* Cartera Consolidada */}
-                    <circle cx="103.6" cy="59.5" r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2" />
-                    <text x="103.6" y="61.5" textAnchor="middle" className="text-[5.5px] font-bold fill-[#C8102E]">C</text>
-                    {/* Funds 1 to 7 */}
+                    <circle cx="100.0" cy="62.0" r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2" />
+                    <text x="100.0" y="64.0" textAnchor="middle" className="text-[5.5px] font-bold fill-[#C8102E]">C</text>
+                    {/* Funds 1 to 7 - Separados sin tocarse ni superponerse */}
                     {[
-                      { idx: '1', x: 115.5, y: 66.4 },
-                      { idx: '2', x: 145.6, y: 28.6 },
-                      { idx: '3', x: 128.8, y: 68.5 },
-                      { idx: '4', x: 102.2, y: 75.4 },
-                      { idx: '6', x: 120.4, y: 50.8 },
-                      { idx: '7', x: 117.6, y: 96.4 },
+                      { idx: '1', x: 115.0, y: 72.0 },
+                      { idx: '2', x: 148.0, y: 32.0 },
+                      { idx: '3', x: 132.0, y: 74.0 },
+                      { idx: '4', x: 102.0, y: 82.0 },
+                      { idx: '6', x: 122.0, y: 52.0 },
+                      { idx: '7', x: 118.0, y: 102.0 },
                     ].map((p) => (
                       <g key={p.idx}>
-                        <circle cx={p.x} cy={p.y} r="3.8" fill="#C8102E" />
+                        <circle cx={p.x} cy={p.y} r="3.6" fill="#C8102E" />
                         <text x={p.x} y={p.y + 1.8} textAnchor="middle" className="text-[5px] font-bold fill-white">{p.idx}</text>
                       </g>
                     ))}
