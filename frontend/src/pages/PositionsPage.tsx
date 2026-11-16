@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
-  Search,
   ArrowUpDown,
   LayoutGrid,
   List,
@@ -48,7 +47,6 @@ export function PositionsPage() {
   const { data: summary } = usePortfolioSummary()
   const { data: analytics } = useAnalytics()
 
-  const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<AssetFilter>('all')
   const [sortField, setSortField] = useState<SortField>('current_value')
   const [sortDir, setSortDir] = useState<SortDir>(-1)
@@ -97,22 +95,13 @@ export function PositionsPage() {
   }, [positions])
 
   // Filter and sort
-
   const filteredPositions = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim()
     return [...positions]
       .filter((p) => {
         // Never include Cartera Trade Republic or 0-value placeholder transfer positions
         if (p.isin === 'TR_TRANSFER' || p.isin.startsWith('TR_') || p.name === 'Cartera Trade Republic') return false
         // Asset type filter
         if (activeFilter !== 'all' && p.asset_type !== activeFilter) return false
-        // Search query
-        if (q) {
-          const matchName = p.name.toLowerCase().includes(q)
-          const matchIsin = p.isin.toLowerCase().includes(q)
-          const matchTicker = (p.ticker || '').toLowerCase().includes(q)
-          return matchName || matchIsin || matchTicker
-        }
         return true
       })
       .sort((a, b) => {
@@ -121,7 +110,7 @@ export function PositionsPage() {
         if (typeof va === 'string') return va.localeCompare(vb) * sortDir
         return (va - vb) * sortDir
       })
-  }, [positions, activeFilter, searchQuery, sortField, sortDir])
+  }, [positions, activeFilter, sortField, sortDir])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -219,7 +208,7 @@ export function PositionsPage() {
         />
       )}
 
-      {/* Control Bar: Asset Tabs, Search, Sort & View Mode */}
+      {/* Control Bar: Asset Tabs, Sort, Export & View Mode */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Category Tabs */}
         <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-white dark:bg-[#1e1e20] border border-slate-200/80 dark:border-white/[0.08] shadow-card overflow-x-auto">
@@ -243,20 +232,8 @@ export function PositionsPage() {
           })}
         </div>
 
-        {/* Search, Sort and View Mode */}
-        <div className="flex items-center gap-3 flex-wrap lg:flex-nowrap">
-          {/* Search Box */}
-          <div className="relative flex-1 sm:w-64">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por nombre, ticker o ISIN..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 text-xs shadow-sm dark:bg-[#252526] dark:border-white/[0.08] dark:text-white dark:placeholder-slate-500 transition-all"
-            />
-          </div>
-
+        {/* Sort, Export and View Mode */}
+        <div className="flex items-center gap-2.5 flex-wrap lg:flex-nowrap shrink-0 justify-end">
           {/* Sort Dropdown */}
           <div className="relative">
             <select
@@ -364,15 +341,7 @@ export function PositionsPage() {
                     <td colSpan={10} className="py-20 text-center">
                       <div className="max-w-xs mx-auto text-center space-y-2">
                         <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No se encontraron posiciones</p>
-                        <p className="text-xs text-slate-500">Prueba a cambiar el filtro de búsqueda o categoría.</p>
-                        {searchQuery && (
-                          <button
-                            onClick={() => setSearchQuery('')}
-                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline pt-2 inline-block"
-                          >
-                            Limpiar búsqueda
-                          </button>
-                        )}
+                        <p className="text-xs text-slate-500">Prueba a seleccionar otra categoría de activo.</p>
                       </div>
                     </td>
                   </tr>
@@ -557,15 +526,7 @@ export function PositionsPage() {
           <div className="py-20 text-center">
             <div className="max-w-xs mx-auto text-center space-y-2">
               <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No se encontraron posiciones</p>
-              <p className="text-xs text-slate-500">Prueba a cambiar el filtro de búsqueda o categoría.</p>
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline pt-2 inline-block"
-                >
-                  Limpiar búsqueda
-                </button>
-              )}
+              <p className="text-xs text-slate-500">Prueba a seleccionar otra categoría de activo.</p>
             </div>
           </div>
         ) : (
