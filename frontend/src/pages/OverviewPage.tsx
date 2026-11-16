@@ -1446,31 +1446,25 @@ export function OverviewPage() {
             </div>
 
             {/* Toggle Mode */}
-            <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
-              {(['asset', 'type', 'geo'] as AllocMode[]).map((m) => (
-                <motion.button
-                  key={m}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => setAllocMode(m)}
-                  className={cn(
-                    'h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer',
-                    allocMode === m
-                      ? 'text-slate-900 dark:text-white font-bold'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  )}
-                >
-                  {allocMode === m && (
-                    <motion.div
-                      layoutId="overviewAllocPill"
-                      className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                    />
-                  )}
-                  <span className="relative z-10 text-xs">
-                    {m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}
-                  </span>
-                </motion.button>
-              ))}
+            <div className="flex items-center gap-1 rounded-xl border border-slate-200/80 dark:border-white/[0.08] bg-slate-100/90 dark:bg-white/[0.04] p-1 shrink-0">
+              {(['asset', 'type', 'geo'] as AllocMode[]).map((m) => {
+                const active = allocMode === m
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setAllocMode(m)}
+                    className={cn(
+                      'inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap',
+                      active
+                        ? 'bg-blue-600 text-white shadow-xs font-bold'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
+                    )}
+                  >
+                    <span>{m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}</span>
+                  </button>
+                )
+              })}
             </div>
           </CardHeader>
 

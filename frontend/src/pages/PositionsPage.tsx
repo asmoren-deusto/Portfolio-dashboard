@@ -224,27 +224,23 @@ export function PositionsPage() {
       {/* Control Bar: Asset Tabs, Search, Sort & View Mode */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-gradient-to-b from-white via-white/98 to-slate-50/70 dark:bg-gradient-to-b dark:from-[#212124] dark:via-[#1e1e20] dark:to-[#18181a] border border-slate-200/80 dark:border-white/[0.08] shadow-card overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-white dark:bg-[#1e1e20] border border-slate-200/80 dark:border-white/[0.08] shadow-card overflow-x-auto">
           {FILTER_TABS.map((tab) => {
             const active = activeFilter === tab.id
             return (
-              <motion.button
+              <button
                 key={tab.id}
-                whileTap={{ scale: 0.96 }}
+                type="button"
                 onClick={() => setActiveFilter(tab.id)}
-                className={`relative px-4 py-2 text-xs font-semibold rounded-xl transition-colors whitespace-nowrap ${
-                  active ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
-              >
-                {active && (
-                  <motion.div
-                    layoutId="posTypeTab"
-                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-sm"
-                    transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
-                  />
+                className={cn(
+                  'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0',
+                  active
+                    ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                 )}
-                <span className="relative z-10">{tab.label}</span>
-              </motion.button>
+              >
+                <span>{tab.label}</span>
+              </button>
             )
           })}
         </div>

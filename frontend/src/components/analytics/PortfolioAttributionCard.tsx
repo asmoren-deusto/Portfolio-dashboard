@@ -141,7 +141,7 @@ export function PortfolioAttributionCard({
         </div>
 
         {/* Mode Switcher */}
-        <div className="flex items-center rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0 self-start sm:self-end">
+        <div className="flex items-center gap-1 rounded-xl border border-slate-200/80 dark:border-white/[0.08] bg-slate-100/90 dark:bg-white/[0.04] p-1 shrink-0 self-start sm:self-end">
           {[
             { id: 'attribution', label: 'Atribución P&L', icon: Award },
             { id: 'quadrant', label: 'Mapa Cuadrante', icon: Target },
@@ -152,36 +152,17 @@ export function PortfolioAttributionCard({
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id as any)}
                 className={cn(
-                  'relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0',
                   active
-                    ? 'text-slate-900 dark:text-white font-bold'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                    ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
                 )}
               >
-                {active && (
-                  <motion.div
-                    layoutId="portfolioAttributionTabPill"
-                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
-                    transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-1.5">
-                  <Icon
-                    size={13}
-                    className={
-                      active
-                        ? tab.id === 'attribution'
-                          ? 'text-emerald-500'
-                          : tab.id === 'quadrant'
-                          ? 'text-blue-500'
-                          : 'text-amber-500'
-                        : ''
-                    }
-                  />
-                  <span>{tab.label}</span>
-                </span>
+                <Icon size={14} className={active ? 'text-white' : 'text-slate-500 dark:text-slate-400'} />
+                <span>{tab.label}</span>
               </button>
             )
           })}

@@ -226,14 +226,14 @@ export function BacktestPage() {
           </div>
 
           {/* View Mode Toggle */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08] text-xs self-start sm:self-end">
+          <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-white dark:bg-[#1e1e20] border border-slate-200/80 dark:border-white/[0.08] shadow-card text-xs self-start sm:self-end">
             <button
               onClick={() => setViewMode('growth')}
               className={cn(
-                'px-2.5 py-1 rounded-lg font-medium transition-all',
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0',
                 viewMode === 'growth'
-                  ? 'bg-white dark:bg-blue-600 text-slate-950 dark:text-white shadow-xs font-bold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
               )}
             >
               Base 10k (€)
@@ -241,10 +241,10 @@ export function BacktestPage() {
             <button
               onClick={() => setViewMode('cumulative')}
               className={cn(
-                'px-2.5 py-1 rounded-lg font-medium transition-all',
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0',
                 viewMode === 'cumulative'
-                  ? 'bg-white dark:bg-blue-600 text-slate-950 dark:text-white shadow-xs font-bold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
               )}
             >
               Retorno (%)
@@ -252,10 +252,10 @@ export function BacktestPage() {
             <button
               onClick={() => setViewMode('drawdown')}
               className={cn(
-                'px-2.5 py-1 rounded-lg font-medium transition-all',
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0',
                 viewMode === 'drawdown'
-                  ? 'bg-white dark:bg-blue-600 text-slate-950 dark:text-white shadow-xs font-bold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
               )}
             >
               Drawdown Subacuático
@@ -263,10 +263,10 @@ export function BacktestPage() {
             <button
               onClick={() => setViewMode('annual')}
               className={cn(
-                'px-2.5 py-1 rounded-lg font-medium transition-all',
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0',
                 viewMode === 'annual'
-                  ? 'bg-white dark:bg-blue-600 text-slate-950 dark:text-white shadow-xs font-bold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
               )}
             >
               Por Años
