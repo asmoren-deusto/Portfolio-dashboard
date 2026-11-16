@@ -61,14 +61,14 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
         </span>
       </div>
 
-      {/* 2. Matrix Grid (flex-1 para igualar altura dinámica exacta con la tarjeta derecha) */}
-      <div className="my-4 flex-1 flex flex-col justify-center overflow-x-auto overflow-y-hidden pt-1 pb-4 px-1 -mx-1 min-h-[320px]">
+      {/* 2. Matrix Grid coincidente en altura exacta con el SVG de la tarjeta izquierda */}
+      <div className="my-3.5 w-full h-[320px] flex flex-col justify-center overflow-x-auto overflow-y-hidden px-1 -mx-1 shrink-0">
         <table className="w-full border-separate border-spacing-1 text-center text-xs my-auto">
           <thead>
             <tr>
-              <th className="p-1.5 w-10"></th>
+              <th className="p-1 w-8 sm:w-10"></th>
               {funds.map((f) => (
-                <th key={f.index} className="p-1 sm:p-1.5" title={f.name}>
+                <th key={f.index} className="p-1" title={f.name}>
                   <span className="w-7 h-7 rounded-full bg-[#991b1b] dark:bg-[#7f1d1d] text-white font-black inline-flex items-center justify-center text-xs shadow-xs">
                     {f.index}
                   </span>
@@ -79,7 +79,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
           <tbody>
             {matrix.map((row, rIdx) => (
               <tr key={rIdx}>
-                <td className="p-1 sm:p-1.5 text-left" title={funds[rIdx]?.name}>
+                <td className="p-1 text-left" title={funds[rIdx]?.name}>
                   <span className="w-7 h-7 rounded-full bg-[#991b1b] dark:bg-[#7f1d1d] text-white font-black inline-flex items-center justify-center text-xs shadow-xs">
                     {rIdx + 1}
                   </span>
@@ -92,10 +92,10 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
                       onMouseEnter={() => setHoveredCell({ r: rIdx, c: cIdx, val })}
                       onMouseLeave={() => setHoveredCell(null)}
                       className={cn(
-                        'p-2 sm:p-2.5 font-mono text-xs sm:text-[13px] rounded-lg transition-all cursor-pointer relative',
+                        'p-2 sm:p-2.5 font-mono text-xs sm:text-[13px] rounded-lg transition-transform cursor-pointer relative',
                         getCellColor(val),
                         isHovered
-                          ? 'z-20 ring-2 ring-blue-600 dark:ring-blue-400 ring-offset-1 dark:ring-offset-slate-900 shadow-lg scale-[1.05]'
+                          ? 'z-20 scale-[1.08] shadow-sm'
                           : 'hover:opacity-90'
                       )}
                     >
@@ -109,42 +109,42 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
         </table>
       </div>
 
-      {/* 3. Cell Tooltip Info */}
-      <div className="min-h-12 p-3.5 rounded-2xl bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs sm:text-sm flex items-center justify-between shadow-2xs shrink-0">
+      {/* 3. Cell Tooltip Info con altura fija para evitar saltos o redimensiones en hover */}
+      <div className="h-[50px] px-3.5 rounded-2xl bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs sm:text-sm flex items-center shadow-2xs shrink-0 overflow-hidden">
         {hoveredCell ? (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center w-full min-w-0 gap-1.5 text-xs sm:text-sm truncate">
             <span className="w-5 h-5 rounded-full bg-[#991b1b] text-white text-[11px] font-black inline-flex items-center justify-center shrink-0 shadow-2xs">
               {hoveredCell.r + 1}
             </span>
-            <span className="font-bold text-slate-900 dark:text-white">
+            <span className="font-bold text-slate-900 dark:text-white truncate max-w-[100px] sm:max-w-[140px]">
               {funds[hoveredCell.r]?.name}
             </span>
-            <span className="text-slate-400 font-medium">vs</span>
+            <span className="text-slate-400 font-medium text-xs shrink-0">vs</span>
             <span className="w-5 h-5 rounded-full bg-[#991b1b] text-white text-[11px] font-black inline-flex items-center justify-center shrink-0 shadow-2xs">
               {hoveredCell.c + 1}
             </span>
-            <span className="font-bold text-slate-900 dark:text-white">
+            <span className="font-bold text-slate-900 dark:text-white truncate max-w-[100px] sm:max-w-[140px]">
               {funds[hoveredCell.c]?.name}:
             </span>
-            <span className="font-mono font-extrabold text-blue-600 dark:text-blue-400 ml-1">
-              {hoveredCell.val !== null ? hoveredCell.val.toFixed(2) : 'Sin historial suficiente'}
+            <span className="font-mono font-extrabold text-blue-600 dark:text-blue-400 shrink-0 ml-0.5">
+              {hoveredCell.val !== null ? hoveredCell.val.toFixed(2) : '—'}
             </span>
             {hoveredCell.val !== null && (
-              <span className="text-slate-500 text-xs">
-                ({hoveredCell.val < 0.3 ? 'Excelente diversificación' : hoveredCell.val > 0.7 ? 'Alta correlación' : 'Correlación moderada'})
+              <span className="text-slate-500 text-xs hidden sm:inline shrink-0">
+                ({hoveredCell.val < 0.3 ? 'Excelente div.' : hoveredCell.val > 0.7 ? 'Alta corr.' : 'Corr. moderada'})
               </span>
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-            <span className="w-2 h-2 rounded-full bg-[#991b1b] animate-pulse" />
-            <span>Pasa el cursor sobre cualquier casilla para ver la correlación entre parejas de fondos.</span>
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm truncate">
+            <span className="w-2 h-2 rounded-full bg-[#991b1b] animate-pulse shrink-0" />
+            <span className="truncate">Pasa el cursor sobre cualquier casilla para ver la correlación entre parejas de fondos.</span>
           </div>
         )}
       </div>
 
-      {/* 4. Legend Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3.5 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
+      {/* 4. Legend Strip coincidente en altura y espaciado con la tarjeta izquierda */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mt-3.5 pt-3.5 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
         <span className="flex items-center gap-1.5">
           <span className="w-3.5 h-3.5 rounded bg-blue-600 inline-block" /> 1.00 a 0.60 (Alta)
         </span>

@@ -56,9 +56,9 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
         </span>
       </div>
 
-      {/* 2. Scatter Plot SVG Container (flex-1 para igualar altura dinámica exacta con la tarjeta izquierda) */}
-      <div className="my-4 flex-1 w-full min-h-[320px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-3 sm:p-4 relative flex items-center justify-center shadow-2xs">
-        <svg viewBox="0 0 650 360" className="w-full h-full max-h-[370px] overflow-visible">
+      {/* 2. Scatter Plot SVG Container (altura fija exacta y coincidente con la tarjeta derecha) */}
+      <div className="my-3.5 w-full h-[320px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-3 sm:p-4 relative flex items-center justify-center shadow-2xs shrink-0">
+        <svg viewBox="0 0 650 360" className="w-full h-full max-h-[300px] overflow-visible">
           {/* Grid Lines */}
           {[5, 10, 15, 20].map((v) => (
             <line
@@ -189,49 +189,49 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
         </svg>
       </div>
 
-      {/* 3. Detail Panel */}
-      <div className="min-h-12 p-3.5 rounded-2xl bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs sm:text-sm flex items-center justify-between shadow-2xs shrink-0">
+      {/* 3. Detail Panel con altura fija para evitar saltos o redimensiones en hover */}
+      <div className="h-[50px] px-3.5 rounded-2xl bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs sm:text-sm flex items-center shadow-2xs shrink-0 overflow-hidden">
         {activePoint ? (
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between w-full min-w-0 gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <span className={cn(
-                "w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs text-white",
+                "w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs text-white shrink-0",
                 activePoint.isPortfolio ? "bg-[#C8102E]" : activePoint.isBenchmark ? "bg-emerald-600" : "bg-blue-600"
               )}>
                 {activePoint.index}
               </span>
-              <span className="font-bold text-sm text-slate-900 dark:text-white">
+              <span className="font-bold text-xs sm:text-[13px] text-slate-900 dark:text-white truncate">
                 {activePoint.name}
               </span>
             </div>
-            <div className="flex items-center gap-3 font-mono text-xs sm:text-sm">
+            <div className="flex items-center gap-2.5 font-mono text-xs sm:text-[13px] shrink-0 whitespace-nowrap">
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                Retorno: <strong>+{activePoint.meanReturn.toFixed(2)}%/año</strong>
+                +{activePoint.meanReturn.toFixed(1)}%/a
               </span>
               <span className="text-slate-300 dark:text-white/20">|</span>
               <span className="font-semibold text-blue-600 dark:text-blue-400">
-                Volatilidad: <strong>±{activePoint.volatility.toFixed(2)}%</strong>
+                ±{activePoint.volatility.toFixed(1)}%
               </span>
               {activePoint.weight > 0 && (
                 <>
                   <span className="text-slate-300 dark:text-white/20">|</span>
-                  <span className="text-slate-500 dark:text-slate-400">
-                    Peso: <strong>{activePoint.weight.toFixed(1)}%</strong>
+                  <span className="text-slate-600 dark:text-slate-300 font-sans">
+                    {activePoint.weight.toFixed(1)}%
                   </span>
                 </>
               )}
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Pasa el cursor sobre cualquier punto numerado o la Cartera para ver su desglose cuantitativo exacto.</span>
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm truncate">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="truncate">Pasa el cursor sobre cualquier punto numerado o la Cartera para ver su desglose cuantitativo exacto.</span>
           </div>
         )}
       </div>
 
-      {/* 4. Legend Strip coincidente en altura y espaciado con la tarjeta izquierda */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3.5 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
+      {/* 4. Legend Strip coincidente en altura y espaciado con la tarjeta derecha */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mt-3.5 pt-3.5 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
         <span className="flex items-center gap-2">
           <span className="w-4 h-4 rounded-full border-2 border-[#C8102E] bg-white inline-flex items-center justify-center text-[8.5px] font-black text-[#C8102E]">C</span>
           <span>Tu Cartera (+21,5%)</span>
@@ -243,9 +243,6 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
         <span className="flex items-center gap-2">
           <span className="w-4 h-4 rounded-full bg-blue-600 inline-flex items-center justify-center text-[8.5px] font-bold text-white">#</span>
           <span>Fondos de Cartera (1-7)</span>
-        </span>
-        <span className="text-slate-400 text-xs font-normal">
-          Histórico 3 Años Anualizado
         </span>
       </div>
     </Card>
