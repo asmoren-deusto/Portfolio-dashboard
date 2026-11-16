@@ -38,9 +38,9 @@ export function MorningstarPerformanceHistoryCard({
   const benchmarkMultiple = (benchmarkGrowth / 10000).toFixed(2)
 
   return (
-    <Card className={cn('p-5 sm:p-6 space-y-6', className)}>
+    <Card className={cn('p-4 sm:p-5 flex flex-col gap-4 sm:gap-5', className)}>
       {/* ── HEADER PRINCIPAL DE RENTABILIDAD & BENCHMARK ────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200/70 dark:border-white/[0.08] gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] gap-3">
         <div className="flex items-start gap-3">
           <div className="p-2.5 rounded-xl bg-red-500/10 text-[#C8102E] dark:text-red-400 border border-red-500/20 shrink-0 mt-0.5">
             <TrendingUp className="w-5 h-5 stroke-[2.2]" />
@@ -84,8 +84,8 @@ export function MorningstarPerformanceHistoryCard({
       </div>
 
       {/* ── 1. GRÁFICO: CRECIMIENTO DE 10.000 EUR ──────────────────────── */}
-      <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-4 sm:p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+      <div className="rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] p-3.5 sm:p-4 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-500" />
             <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -208,8 +208,8 @@ export function MorningstarPerformanceHistoryCard({
       </div>
 
       {/* ── 2. GRÁFICO: RENTABILIDAD TRIMESTRAL RESPECTO A BENCHMARK ─────── */}
-      <div className="rounded-2xl bg-slate-50/70 dark:bg-[#18181b] border border-slate-200/80 dark:border-white/[0.06] p-4 sm:p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+      <div className="rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] p-3.5 sm:p-4 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-blue-500" />
             <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -292,9 +292,9 @@ export function MorningstarPerformanceHistoryCard({
       </div>
 
       {/* ── 3. TABLAS DE RENTABILIDAD ACUMULADA Y EXTREMOS POR PERIODOS ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
         {/* Tabla 1 (5 cols): Rentabilidad Acumulada % */}
-        <div className="lg:col-span-5 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] overflow-hidden bg-white dark:bg-[#18181b] flex flex-col justify-between">
+        <div className="lg:col-span-5 rounded-xl border border-slate-200/80 dark:border-white/[0.08] overflow-hidden bg-white dark:bg-[#18181b] flex flex-col justify-between shadow-2xs">
           <div>
             <div className="px-4 py-3 bg-slate-50/80 dark:bg-white/[0.03] border-b border-slate-200/80 dark:border-white/[0.08] flex items-center justify-between">
               <span className="font-bold text-xs text-slate-900 dark:text-white uppercase tracking-wider">
@@ -345,7 +345,7 @@ export function MorningstarPerformanceHistoryCard({
         </div>
 
         {/* Tabla 2 (7 cols): Rentabilidad por Periodos % (Mejor y Peor) */}
-        <div className="lg:col-span-7 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] overflow-hidden bg-white dark:bg-[#18181b] flex flex-col justify-between">
+        <div className="lg:col-span-7 rounded-xl border border-slate-200/80 dark:border-white/[0.08] overflow-hidden bg-white dark:bg-[#18181b] flex flex-col justify-between shadow-2xs">
           <div>
             <div className="px-4 py-3 bg-slate-50/80 dark:bg-white/[0.03] border-b border-slate-200/80 dark:border-white/[0.08] flex items-center justify-between">
               <span className="font-bold text-xs text-slate-900 dark:text-white uppercase tracking-wider">
