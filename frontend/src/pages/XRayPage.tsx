@@ -360,68 +360,77 @@ export function XRayPage() {
         {/* TAB 1: OVERVIEW & SUPERSECTORES */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
               
-              {/* Left: Asignación de Activos & Top Países (5 cols) */}
-              <div className="lg:col-span-5 space-y-5">
-                <Card className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                    <div className="flex items-center gap-2.5">
-                      <PieChart className="w-5 h-5 text-violet-500" />
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                        Asignación Real de Activos
-                      </h3>
+              {/* FILA 1 - IZQUIERDA (5 cols): Asignación Real de Activos */}
+              <div className="lg:col-span-5 flex flex-col min-h-0">
+                <Card className="p-5 sm:p-6 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+                      <div className="flex items-center gap-2.5">
+                        <PieChart className="w-5 h-5 text-violet-500" />
+                        <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                          Asignación Real de Activos
+                        </h3>
+                      </div>
+                      <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                        Total {fmt.currency(summary.totalValue)}
+                      </span>
                     </div>
-                    <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                      Total {fmt.currency(summary.totalValue)}
-                    </span>
-                  </div>
 
-                  {/* Stacked Allocation Progress Bar */}
-                  <div className="mt-5">
-                    <div className="h-4 w-full rounded-full overflow-hidden flex bg-slate-200 dark:bg-white/10 shadow-inner">
+                    {/* Stacked Allocation Progress Bar */}
+                    <div className="mt-5">
+                      <div className="h-4 w-full rounded-full overflow-hidden flex bg-slate-200 dark:bg-white/10 shadow-inner">
+                        {assetAllocation.map((item) => (
+                          <div
+                            key={item.id}
+                            style={{ width: `${item.weight}%`, backgroundColor: item.color }}
+                            title={`${item.label}: ${item.weight.toFixed(1)}% (${fmt.currency(item.value)})`}
+                            className="h-full transition-all duration-300 hover:opacity-85"
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Listado de Clases de Activo con Port vs Benchmark */}
+                    <div className="mt-5 space-y-2 text-xs">
                       {assetAllocation.map((item) => (
                         <div
                           key={item.id}
-                          style={{ width: `${item.weight}%`, backgroundColor: item.color }}
-                          title={`${item.label}: ${item.weight.toFixed(1)}% (${fmt.currency(item.value)})`}
-                          className="h-full transition-all duration-300 hover:opacity-85"
-                        />
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#252528] border border-slate-200/60 dark:border-white/[0.04]"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span
+                              className="w-3 h-3 rounded-full shrink-0"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                              {item.label}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4 shrink-0">
+                            <span className="font-mono text-slate-500 dark:text-slate-400 text-xs">
+                              {fmt.currency(item.value)}
+                            </span>
+                            <span className="font-mono font-bold text-slate-900 dark:text-white w-14 text-right">
+                              {item.weight.toFixed(2)}%
+                            </span>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
-
-                  {/* Listado de Clases de Activo con Port vs Benchmark */}
-                  <div className="mt-5 space-y-2 text-xs">
-                    {assetAllocation.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#252528] border border-slate-200/60 dark:border-white/[0.04]"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span
-                            className="w-3 h-3 rounded-full shrink-0"
-                            style={{ backgroundColor: item.color }}
-                          />
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                            {item.label}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 shrink-0">
-                          <span className="font-mono text-slate-500 dark:text-slate-400 text-xs">
-                            {fmt.currency(item.value)}
-                          </span>
-                          <span className="font-mono font-bold text-slate-900 dark:text-white w-14 text-right">
-                            {item.weight.toFixed(2)}%
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </Card>
+              </div>
 
-                {/* Exposición por País % (Top 10 Oficial) */}
-                <Card className="p-5 sm:p-6">
+              {/* FILA 1 - DERECHA (7 cols): Triángulo de SuperSectores (Misma altura exacta que Asignación de Activos) */}
+              <div className="lg:col-span-7 flex flex-col min-h-0">
+                <SuperSectorsTriangleCard data={superSectorsDetail} className="h-full" />
+              </div>
+
+              {/* FILA 2 - IZQUIERDA (5 cols): Exposición por País % */}
+              <div className="lg:col-span-5 flex flex-col min-h-0">
+                <Card className="p-5 sm:p-6 h-full flex flex-col">
                   <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
                     <div className="flex items-center gap-2.5">
                       <Globe className="w-5 h-5 text-blue-500" />
@@ -432,7 +441,7 @@ export function XRayPage() {
                     <span className="text-xs text-slate-400">Top 10 Países</span>
                   </div>
 
-                  <div className="mt-4 space-y-2 text-xs">
+                  <div className="mt-4 space-y-2 text-xs flex-1">
                     {topCountries.map((c, i) => (
                       <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-slate-50/70 dark:bg-white/[0.02]">
                         <div className="flex items-center gap-2">
@@ -453,13 +462,9 @@ export function XRayPage() {
                 </Card>
               </div>
 
-              {/* Right: Morningstar Style Box 3x3 & SuperSectors (7 cols) */}
-              <div className="lg:col-span-7 space-y-5">
-                {/* Triángulo de SuperSectores */}
-                <SuperSectorsTriangleCard data={superSectorsDetail} />
-
-                {/* Morningstar Style Box 3x3 */}
-                <Card className="p-5 sm:p-6">
+              {/* FILA 2 - DERECHA (7 cols): Morningstar Style Box 3x3 */}
+              <div className="lg:col-span-7 flex flex-col min-h-0">
+                <Card className="p-5 sm:p-6 h-full flex flex-col justify-between">
                   <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
                     <div className="flex items-center gap-2.5">
                       <Layers className="w-5 h-5 text-indigo-500" />

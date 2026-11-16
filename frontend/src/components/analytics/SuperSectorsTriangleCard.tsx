@@ -6,6 +6,7 @@ import type { XRaySuperSectorsReport } from '@/lib/xrayEngine'
 
 interface SuperSectorsTriangleCardProps {
   data?: XRaySuperSectorsReport
+  className?: string
 }
 
 export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> = ({
@@ -44,13 +45,14 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
       benchmark: { x: 50.0, y: 55.0 },
     },
   },
+  className,
 }) => {
   const [selectedSector, setSelectedSector] = useState<'sensible' | 'ciclico' | 'defensivo' | null>(null)
 
   return (
-    <Card className="p-4 sm:p-5 flex flex-col justify-between h-full">
-      <div>
-        <div className="flex items-end justify-between pb-3 border-b border-slate-200/70 dark:border-white/[0.08]">
+    <Card className={cn('p-5 sm:p-6 flex flex-col justify-between h-full', className)}>
+      <div className="flex flex-col justify-between flex-1 h-full min-h-0">
+        <div className="flex items-end justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-violet-500/10 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 flex items-center justify-center shrink-0">
               <Compass size={18} />
@@ -69,37 +71,37 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center my-auto py-2">
           {/* Ternary Triangle SVG */}
-          <div className="md:col-span-5 flex flex-col items-center justify-center pr-0 md:pr-3 md:border-r border-slate-200/70 dark:border-white/[0.08]">
-            <div className="relative w-52 h-44">
-              <svg viewBox="0 0 110 94" className="w-full h-full overflow-visible">
+          <div className="md:col-span-5 flex flex-col items-center justify-center pr-0 md:pr-4 md:border-r border-slate-200/70 dark:border-white/[0.08]">
+            <div className="relative w-56 h-48 flex items-center justify-center">
+              <svg viewBox="0 0 120 100" className="w-full h-full overflow-visible">
                 {/* Background shaded areas */}
-                <polygon points="55,14 16,76 94,76" fill="currentColor" className="text-slate-100 dark:text-white/[0.03] stroke-slate-400 dark:stroke-white/20" strokeWidth="1.2" />
+                <polygon points="60,16 18,78 102,78" fill="currentColor" className="text-slate-100 dark:text-white/[0.03] stroke-slate-400 dark:stroke-white/20" strokeWidth="1.2" />
 
                 {/* Internal dividers */}
-                <line x1="55" y1="14" x2="55" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
-                <line x1="16" y1="76" x2="55" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
-                <line x1="94" y1="76" x2="55" y2="56" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
+                <line x1="60" y1="16" x2="60" y2="58" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
+                <line x1="18" y1="78" x2="60" y2="58" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
+                <line x1="102" y1="78" x2="60" y2="58" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
 
                 {/* Vertex Labels */}
-                <text x="55" y="7" textAnchor="middle" className="text-[7.5px] font-bold fill-blue-600 dark:fill-blue-400">
+                <text x="60" y="8" textAnchor="middle" className="text-[7.5px] font-bold fill-blue-600 dark:fill-blue-400">
                   Sensible ({data.sensible.totalWeight.toFixed(1)}%)
                 </text>
-                <text x="10" y="87" textAnchor="start" className="text-[7.5px] font-bold fill-emerald-600 dark:fill-emerald-400">
+                <text x="12" y="89" textAnchor="start" className="text-[7.5px] font-bold fill-emerald-600 dark:fill-emerald-400">
                   Defensivo ({data.defensivo.totalWeight.toFixed(1)}%)
                 </text>
-                <text x="100" y="87" textAnchor="end" className="text-[7.5px] font-bold fill-amber-600 dark:fill-amber-400">
+                <text x="108" y="89" textAnchor="end" className="text-[7.5px] font-bold fill-amber-600 dark:fill-amber-400">
                   Cíclico ({data.ciclico.totalWeight.toFixed(1)}%)
                 </text>
 
                 {/* Benchmark Position (Diamond) */}
-                <polygon points="55,47 59,51 55,55 51,51" fill="#10b981" />
+                <polygon points="60,49 64,53 60,57 56,53" fill="#10b981" />
 
                 {/* Portfolio Position (Red Target) */}
-                <circle cx="61" cy="38" r="8" fill="#C8102E" fillOpacity="0.15" />
-                <circle cx="61" cy="38" r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" />
-                <circle cx="61" cy="38" r="1.5" fill="#C8102E" />
+                <circle cx="66" cy="40" r="8" fill="#C8102E" fillOpacity="0.15" />
+                <circle cx="66" cy="40" r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" />
+                <circle cx="66" cy="40" r="1.5" fill="#C8102E" />
               </svg>
             </div>
 
@@ -119,28 +121,30 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'ciclico' ? null : 'ciclico')}
               className={cn(
-                'p-3 rounded-2xl border transition-all cursor-pointer',
+                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full',
                 selectedSector === 'ciclico'
                   ? 'border-amber-500 bg-amber-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02]'
               )}
             >
-              <div className="flex items-center justify-between pb-1.5 border-b border-amber-500/20">
-                <span className="font-bold text-amber-700 dark:text-amber-400">Cíclico</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">
-                  {data.ciclico.totalWeight.toFixed(1)}%
-                </span>
-              </div>
-              <div className="mt-2 space-y-1.5">
-                {data.ciclico.industries.map((ind, i) => (
-                  <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
-                    <span className="truncate pr-1 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                      <span>{ind.name}</span>
-                    </span>
-                    <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
-                  </div>
-                ))}
+              <div>
+                <div className="flex items-center justify-between pb-2 border-b border-amber-500/20">
+                  <span className="font-bold text-amber-700 dark:text-amber-400">Cíclico</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">
+                    {data.ciclico.totalWeight.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="mt-2.5 space-y-2">
+                  {data.ciclico.industries.map((ind, i) => (
+                    <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                      <span className="truncate pr-1 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span>{ind.name}</span>
+                      </span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -148,28 +152,30 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'sensible' ? null : 'sensible')}
               className={cn(
-                'p-3 rounded-2xl border transition-all cursor-pointer',
+                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full',
                 selectedSector === 'sensible'
                   ? 'border-blue-500 bg-blue-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02]'
               )}
             >
-              <div className="flex items-center justify-between pb-1.5 border-b border-blue-500/20">
-                <span className="font-bold text-blue-700 dark:text-blue-400">Sensible al ciclo</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">
-                  {data.sensible.totalWeight.toFixed(1)}%
-                </span>
-              </div>
-              <div className="mt-2 space-y-1.5">
-                {data.sensible.industries.map((ind, i) => (
-                  <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
-                    <span className="truncate pr-1 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                      <span>{ind.name}</span>
-                    </span>
-                    <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
-                  </div>
-                ))}
+              <div>
+                <div className="flex items-center justify-between pb-2 border-b border-blue-500/20">
+                  <span className="font-bold text-blue-700 dark:text-blue-400">Sensible al ciclo</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">
+                    {data.sensible.totalWeight.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="mt-2.5 space-y-2">
+                  {data.sensible.industries.map((ind, i) => (
+                    <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                      <span className="truncate pr-1 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span>{ind.name}</span>
+                      </span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -177,28 +183,30 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'defensivo' ? null : 'defensivo')}
               className={cn(
-                'p-3 rounded-2xl border transition-all cursor-pointer',
+                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full',
                 selectedSector === 'defensivo'
                   ? 'border-emerald-500 bg-emerald-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02]'
               )}
             >
-              <div className="flex items-center justify-between pb-1.5 border-b border-emerald-500/20">
-                <span className="font-bold text-emerald-700 dark:text-emerald-400">Defensivo</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">
-                  {data.defensivo.totalWeight.toFixed(1)}%
-                </span>
-              </div>
-              <div className="mt-2 space-y-1.5">
-                {data.defensivo.industries.map((ind, i) => (
-                  <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
-                    <span className="truncate pr-1 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                      <span>{ind.name}</span>
-                    </span>
-                    <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
-                  </div>
-                ))}
+              <div>
+                <div className="flex items-center justify-between pb-2 border-b border-emerald-500/20">
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">Defensivo</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">
+                    {data.defensivo.totalWeight.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="mt-2.5 space-y-2">
+                  {data.defensivo.industries.map((ind, i) => (
+                    <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                      <span className="truncate pr-1 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span>{ind.name}</span>
+                      </span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
