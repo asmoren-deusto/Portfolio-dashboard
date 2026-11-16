@@ -49,6 +49,19 @@ const ISIN_DOMAINS: Record<string, string> = {
   'DE0007164600': 'sap.com',
   'US0378331005': 'apple.com',
   'US88160R1014': 'tesla.com',
+  'US5324571083': 'lilly.com',
+  'US0846707026': 'berkshirehathaway.com',
+  'US46625H1005': 'jpmorganchase.com',
+  'KR7005930003': 'samsung.com',
+  'KYG875721634': 'tencent.com',
+  'JP3633400001': 'toyota.com',
+  'FR0000121014': 'lvmh.com',
+  'FR0000120271': 'totalenergies.com',
+  'DK0062498333': 'novonordisk.com',
+  'JP3435000009': 'sony.com',
+  'DE0007236101': 'siemens.com',
+  'US68389X1054': 'oracle.com',
+  'US17275R1023': 'cisco.com',
 }
 
 const TICKER_DOMAINS: Record<string, string> = {
@@ -65,6 +78,25 @@ const TICKER_DOMAINS: Record<string, string> = {
   SAP: 'sap.com',
   AAPL: 'apple.com',
   TSLA: 'tesla.com',
+  LLY: 'lilly.com',
+  'BRK.B': 'berkshirehathaway.com',
+  BRKB: 'berkshirehathaway.com',
+  JPM: 'jpmorganchase.com',
+  '005930': 'samsung.com',
+  SMSN: 'samsung.com',
+  '0700': 'tencent.com',
+  TCEHY: 'tencent.com',
+  '7203': 'toyota.com',
+  TM: 'toyota.com',
+  MC: 'lvmh.com',
+  TTE: 'totalenergies.com',
+  'NOVO-B': 'novonordisk.com',
+  NVO: 'novonordisk.com',
+  '6758': 'sony.com',
+  SONY: 'sony.com',
+  SIE: 'siemens.com',
+  ORCL: 'oracle.com',
+  CSCO: 'cisco.com',
 }
 
 function getMarketIcon(ticker?: string): React.ReactNode {
@@ -385,6 +417,19 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     else if (nl.includes('visa')) targetDomain = 'visa.com'
     else if (nl.includes('sap')) targetDomain = 'sap.com'
     else if (nl.includes('apple')) targetDomain = 'apple.com'
+    else if (nl.includes('lilly')) targetDomain = 'lilly.com'
+    else if (nl.includes('berkshire')) targetDomain = 'berkshirehathaway.com'
+    else if (nl.includes('jpmorgan')) targetDomain = 'jpmorganchase.com'
+    else if (nl.includes('samsung')) targetDomain = 'samsung.com'
+    else if (nl.includes('tencent')) targetDomain = 'tencent.com'
+    else if (nl.includes('toyota')) targetDomain = 'toyota.com'
+    else if (nl.includes('lvmh') || nl.includes('louis vuitton')) targetDomain = 'lvmh.com'
+    else if (nl.includes('totalenergies')) targetDomain = 'totalenergies.com'
+    else if (nl.includes('novo nordisk')) targetDomain = 'novonordisk.com'
+    else if (nl.includes('sony')) targetDomain = 'sony.com'
+    else if (nl.includes('siemens')) targetDomain = 'siemens.com'
+    else if (nl.includes('oracle')) targetDomain = 'oracle.com'
+    else if (nl.includes('cisco')) targetDomain = 'cisco.com'
   }
   const cleanDomain = targetDomain?.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
 
@@ -563,16 +608,20 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
       <img
         src={currentSrc}
         alt={name}
-        className={`w-full h-full ${imgFit} ${roundedClass} transition-all duration-300 ${
+        className={cn(
+          'w-full h-full transition-opacity duration-200',
+          imgFit,
           loaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        )}
         loading="lazy"
         decoding="async"
         onLoad={() => setLoaded(true)}
         onError={handleError}
       />
       {!loaded && (
-        <div className="absolute inset-0 bg-white/[0.04] animate-pulse rounded-full" />
+        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-slate-500 dark:text-slate-400 select-none">
+          {initials}
+        </span>
       )}
     </div>
   )

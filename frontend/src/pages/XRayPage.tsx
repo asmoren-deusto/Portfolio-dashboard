@@ -323,7 +323,7 @@ export function XRayPage() {
           { id: 'performance', label: 'Rendimiento & Riesgo MPT', icon: TrendingUp },
           { id: 'overlap', label: `Solapamiento de Acciones (${stockOverlap.length})`, icon: Cpu },
           { id: 'funds', label: `Posiciones de Cartera (${fundPositions.length})`, icon: Building2 },
-          { id: 'holdings', label: `Top 10 Holdings (${topHoldings.length})`, icon: Globe },
+          { id: 'holdings', label: `Top 25 Holdings (${topHoldings.length})`, icon: Globe },
           { id: 'audit', label: 'Auditoría & Diagnóstico', icon: ShieldCheck },
         ].map((tab) => {
           const Icon = tab.icon
@@ -814,15 +814,15 @@ export function XRayPage() {
                 <Globe className="w-5 h-5 text-indigo-500" />
                 <div>
                   <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
-                    Top 10 Look-Through Holdings
+                    Top 25 Look-Through Holdings
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Las mayores empresas subyacentes agregadas sumando su peso en todos tus fondos
+                    Las 25 mayores empresas subyacentes agregadas sumando su peso en todos tus fondos
                   </p>
                 </div>
               </div>
               <span className="text-xs text-slate-400 font-mono">
-                {topHoldings.slice(0, 10).reduce((acc, h) => acc + h.portfolioWeight, 0).toFixed(1)}% Cartera Total
+                {topHoldings.slice(0, 25).reduce((acc, h) => acc + h.portfolioWeight, 0).toFixed(1)}% Cartera Total
               </span>
             </div>
 
