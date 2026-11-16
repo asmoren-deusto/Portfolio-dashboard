@@ -430,27 +430,35 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span className="text-slate-400 font-mono">3x3 Grid</span>
                 </div>
                 <div className="flex items-start gap-1.5">
-                  <div className="text-[7.5px] font-bold text-slate-500 flex flex-col justify-around h-[74px] text-right pr-1">
+                  <div className="text-[7.5px] font-bold text-slate-500 flex flex-col justify-around h-[74px] text-right pr-1 shrink-0">
                     <span>Grande</span>
                     <span>Med.</span>
                     <span>Peq.</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded h-[74px]">
-                    {[
-                      { val: styleBox.largeValue, bg: styleBox.largeValue >= 25 ? 'bg-blue-300' : 'bg-white' },
-                      { val: styleBox.largeBlend, bg: styleBox.largeBlend >= 25 ? 'bg-blue-400 text-white font-bold' : 'bg-white' },
-                      { val: styleBox.largeGrowth, bg: styleBox.largeGrowth >= 25 ? 'bg-blue-300' : 'bg-white' },
-                      { val: styleBox.midValue, bg: 'bg-white' },
-                      { val: styleBox.midBlend, bg: 'bg-white' },
-                      { val: styleBox.midGrowth, bg: 'bg-white' },
-                      { val: styleBox.smallValue, bg: 'bg-white' },
-                      { val: styleBox.smallBlend, bg: 'bg-white' },
-                      { val: styleBox.smallGrowth, bg: 'bg-white' },
-                    ].map((box, i) => (
-                      <div key={i} className={`w-8 h-5 flex items-center justify-center font-mono text-[9px] font-semibold ${box.bg}`}>
-                        {box.val}
-                      </div>
-                    ))}
+                  {/* Center: 3x3 Grid + Aligned Bottom Labels */}
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded h-[74px]">
+                      {[
+                        { val: styleBox.largeValue, bg: styleBox.largeValue >= 25 ? 'bg-blue-300' : 'bg-white' },
+                        { val: styleBox.largeBlend, bg: styleBox.largeBlend >= 25 ? 'bg-blue-400 text-white font-bold' : 'bg-white' },
+                        { val: styleBox.largeGrowth, bg: styleBox.largeGrowth >= 25 ? 'bg-blue-300' : 'bg-white' },
+                        { val: styleBox.midValue, bg: 'bg-white' },
+                        { val: styleBox.midBlend, bg: 'bg-white' },
+                        { val: styleBox.midGrowth, bg: 'bg-white' },
+                        { val: styleBox.smallValue, bg: 'bg-white' },
+                        { val: styleBox.smallBlend, bg: 'bg-white' },
+                        { val: styleBox.smallGrowth, bg: 'bg-white' },
+                      ].map((box, i) => (
+                        <div key={i} className={`w-8 h-5 flex items-center justify-center font-mono text-[9px] font-semibold ${box.bg}`}>
+                          {box.val}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-3 gap-0.5 w-full text-[6.5px] font-bold text-slate-500 text-center mt-1 tracking-tight">
+                      <span>Valor</span>
+                      <span>Mixto</span>
+                      <span className="truncate">Crecim.</span>
+                    </div>
                   </div>
                   <div className="text-[8.5px] flex flex-col justify-between h-[74px] pl-2 py-0.5">
                     <div>
@@ -467,11 +475,6 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between text-[7.5px] font-bold text-slate-500 px-8 mt-1">
-                  <span>Valor</span>
-                  <span>Mixto</span>
-                  <span>Crecimiento</span>
-                </div>
               </div>
 
               {/* Fixed Income Style Box & Metrics (4 cols) */}
@@ -481,29 +484,37 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span className="text-slate-400 font-mono">Calidad / Duración</span>
                 </div>
                 <div className="flex items-start gap-1.5">
-                  <div className="text-[7.5px] font-bold text-slate-500 flex flex-col justify-around h-[74px] text-right pr-1">
+                  <div className="text-[7.5px] font-bold text-slate-500 flex flex-col justify-around h-[74px] text-right pr-1 shrink-0">
                     <span>Alto</span>
                     <span>Med.</span>
                     <span>Bajo</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded h-[74px]">
-                    {(fixedIncomeStyle?.grid?.length === 3
-                      ? fixedIncomeStyle.grid.flat()
-                      : [0, 100, 0, 0, 0, 0, 0, 0, 0]
-                    ).map((v, i) => (
-                      <div
-                        key={i}
-                        className={`w-8 h-5 flex items-center justify-center font-mono text-[9px] font-semibold ${
-                          v >= 25
-                            ? 'bg-amber-400 text-slate-950 font-bold'
-                            : v > 0
-                              ? 'bg-amber-100 text-slate-800'
-                              : 'bg-white text-slate-400'
-                        }`}
-                      >
-                        {v}
-                      </div>
-                    ))}
+                  {/* Center: 3x3 Grid + Aligned Bottom Labels */}
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded h-[74px]">
+                      {(fixedIncomeStyle?.grid?.length === 3
+                        ? fixedIncomeStyle.grid.flat()
+                        : [0, 100, 0, 0, 0, 0, 0, 0, 0]
+                      ).map((v, i) => (
+                        <div
+                          key={i}
+                          className={`w-8 h-5 flex items-center justify-center font-mono text-[9px] font-semibold ${
+                            v >= 25
+                              ? 'bg-amber-400 text-slate-950 font-bold'
+                              : v > 0
+                                ? 'bg-amber-100 text-slate-800'
+                                : 'bg-white text-slate-400'
+                          }`}
+                        >
+                          {v}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-3 gap-0.5 w-full text-[6.5px] font-bold text-slate-500 text-center mt-1">
+                      <span>Ltd</span>
+                      <span>Mod</span>
+                      <span>Ext</span>
+                    </div>
                   </div>
                   <div className="text-[8px] flex flex-col justify-between h-[74px] pl-2 py-0.5">
                     <div>
@@ -538,11 +549,6 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       </strong>
                     </div>
                   </div>
-                </div>
-                <div className="flex justify-between text-[7.5px] font-bold text-slate-500 px-8 mt-1">
-                  <span>Ltd</span>
-                  <span>Mod</span>
-                  <span>Ext</span>
                 </div>
               </div>
 
