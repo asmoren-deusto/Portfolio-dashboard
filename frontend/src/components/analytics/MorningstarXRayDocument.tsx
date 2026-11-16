@@ -316,9 +316,39 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     {/* Equilateral Triangle */}
                     <polygon points="50,12 12,78 88,78" fill="#f8fafc" stroke="#334155" strokeWidth="1.5" />
                     {/* Corner Labels */}
-                    <text x="50" y="8" fill="#334155" style={{ fill: '#334155' }} textAnchor="middle" className="text-[6.5px] font-bold">Sensible al ciclo</text>
-                    <text x="12" y="87" fill="#334155" style={{ fill: '#334155' }} textAnchor="middle" className="text-[6px] font-bold">Defensivo</text>
-                    <text x="88" y="87" fill="#334155" style={{ fill: '#334155' }} textAnchor="middle" className="text-[6px] font-bold">Cíclico</text>
+                    <text
+                      x="50"
+                      y="7.5"
+                      fill="#334155"
+                      style={{ fill: '#334155', fontSize: '5.2px' }}
+                      fontSize="5.2"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                    >
+                      Sensible al ciclo
+                    </text>
+                    <text
+                      x="12"
+                      y="87"
+                      fill="#334155"
+                      style={{ fill: '#334155', fontSize: '4.8px' }}
+                      fontSize="4.8"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                    >
+                      Defensivo
+                    </text>
+                    <text
+                      x="88"
+                      y="87"
+                      fill="#334155"
+                      style={{ fill: '#334155', fontSize: '4.8px' }}
+                      fontSize="4.8"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                    >
+                      Cíclico
+                    </text>
                     
                     {/* Inner dividing lines converging at centroid (50, 56) */}
                     <line x1="50" y1="12" x2="50" y2="56" stroke="#cbd5e1" strokeDasharray="1.5" />
