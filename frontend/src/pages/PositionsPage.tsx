@@ -22,7 +22,6 @@ import { Card } from '@/components/ui/Card'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { PortfolioXRayModal } from '@/components/analytics/PortfolioXRayModal'
 import { PortfolioAttributionCard } from '@/components/analytics/PortfolioAttributionCard'
 import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
 import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
@@ -57,7 +56,6 @@ export function PositionsPage() {
   const [sortDir, setSortDir] = useState<SortDir>(-1)
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
-  const [isXRayOpen, setIsXRayOpen] = useState(false)
 
   const latestNavDate = useMemo(() => {
     return getConsensusNavDate(positions, analytics?.latest_nav_date)
@@ -296,16 +294,15 @@ export function PositionsPage() {
           </Link>
 
           {/* Botón Informe X-Ray */}
-          <button
-            type="button"
-            onClick={() => setIsXRayOpen(true)}
+          <Link
+            to="/xray"
             className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-semibold rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 transition-all shadow-2xs shrink-0 cursor-pointer"
             title="Generar Informe X-Ray Completo (Morningstar Look-Through)"
           >
             <ScanSearch className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span className="hidden sm:inline">Informe X-Ray</span>
             <span className="sm:hidden">X-Ray</span>
-          </button>
+          </Link>
 
           {/* Exportar a Excel */}
           <ExcelExportButton
@@ -754,12 +751,6 @@ export function PositionsPage() {
       <PositionDetailModal
         position={selectedPosition}
         onClose={() => setSelectedPosition(null)}
-      />
-
-      {/* Portfolio X-Ray Modal */}
-      <PortfolioXRayModal
-        isOpen={isXRayOpen}
-        onClose={() => setIsXRayOpen(false)}
       />
     </div>
   )

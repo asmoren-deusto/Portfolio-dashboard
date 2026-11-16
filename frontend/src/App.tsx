@@ -11,6 +11,7 @@ const AnalyticsPage = lazyWithRetry(() => import('@/pages/AnalyticsPage'), 'Anal
 const BacktestPage = lazyWithRetry(() => import('@/pages/BacktestPage'), 'BacktestPage')
 const DiversificationPage = lazyWithRetry(() => import('@/pages/DiversificationPage'), 'DiversificationPage')
 const TransactionsPage = lazyWithRetry(() => import('@/pages/TransactionsPage'), 'TransactionsPage')
+const XRayPage = lazyWithRetry(() => import('@/pages/XRayPage'), 'XRayPage')
 const LoginPage = lazyWithRetry(() => import('@/pages/LoginPage'), 'LoginPage')
 
 function PageLoadingFallback() {
@@ -63,6 +64,8 @@ const router = createBrowserRouter([
       { path: 'backtest',         element: <Suspense fallback={<PageLoadingFallback />}><BacktestPage /></Suspense> },
       { path: 'diversification',  element: <Suspense fallback={<PageLoadingFallback />}><DiversificationPage /></Suspense> },
       { path: 'analytics',        element: <Suspense fallback={<PageLoadingFallback />}><AnalyticsPage /></Suspense> },
+      { path: 'xray',             element: <Suspense fallback={<PageLoadingFallback />}><XRayPage /></Suspense> },
+      { path: 'x-ray',            element: <Navigate to="/xray" replace /> },
       { path: 'transactions',     element: <Suspense fallback={<PageLoadingFallback />}><TransactionsPage /></Suspense> },
       { path: 'assets',           element: <Suspense fallback={<PageLoadingFallback />}><MarketPage /></Suspense> },
       { path: '*',                element: <Navigate to="/" /> },

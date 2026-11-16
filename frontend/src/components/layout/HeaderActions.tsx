@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
 import { useRefreshPortfolio } from '@/hooks/useRefreshPortfolio'
-import { PortfolioXRayModal } from '@/components/analytics/PortfolioXRayModal'
 
 const PERIODS = [
   { label: '1M', value: '1mo' },
@@ -48,7 +47,6 @@ export function HeaderActions({
   const { handleRefresh, isRefreshingPrices, refreshSuccess } = useRefreshPortfolio()
 
   const btnSize = compact ? 'w-8 h-8 rounded-full' : 'w-8.5 h-8.5 rounded-full'
-  const [isXRayOpen, setIsXRayOpen] = useState(false)
 
   return (
     <div className={cn('flex items-center gap-1 sm:gap-2 flex-nowrap shrink-0', className)}>
@@ -246,7 +244,7 @@ export function HeaderActions({
                   <button
                     onClick={() => {
                       setUserMenuOpen(false)
-                      setIsXRayOpen(true)
+                      navigate('/xray')
                     }}
                     className="w-full flex items-center justify-between p-2 rounded-xl text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50/70 dark:hover:bg-indigo-500/10 font-semibold transition-colors text-xs cursor-pointer"
                     title="Abrir Informe X-Ray Completo de Cartera (Morningstar Look-Through)"
@@ -387,13 +385,6 @@ export function HeaderActions({
           )}
         </motion.button>
       )}
-
-      {/* Portfolio X-Ray Full Diagnostic Modal */}
-      <PortfolioXRayModal
-        isOpen={isXRayOpen}
-        onClose={() => setIsXRayOpen(false)}
-        initialBroker={selectedBroker}
-      />
     </div>
   )
 }

@@ -1,15 +1,14 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Globe, PieChart, Sparkles, ShieldCheck, ScanSearch } from 'lucide-react'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
 import { MarketSectorEvolutionCard } from '@/components/market/MarketSectorEvolutionCard'
-import { PortfolioXRayModal } from '@/components/analytics/PortfolioXRayModal'
 import { usePositions, useMarketQuotes } from '@/api/queries'
 
 export function DiversificationPage() {
   const { data: positions = [], isLoading, isFetching } = usePositions()
   const { data: quoteData } = useMarketQuotes()
   const [selectedSector, setSelectedSector] = useState<string>('Todos')
-  const [isXRayOpen, setIsXRayOpen] = useState(false)
 
   return (
     <div className="flex flex-col gap-5 pb-10">
@@ -35,14 +34,13 @@ export function DiversificationPage() {
         </div>
 
         {/* Botón Acción: Informe X-Ray */}
-        <button
-          type="button"
-          onClick={() => setIsXRayOpen(true)}
+        <Link
+          to="/xray"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/35 active:scale-95 transition-all cursor-pointer shrink-0"
         >
           <ScanSearch size={17} className="stroke-[2.2]" />
           <span>Generar Informe X-Ray</span>
-        </button>
+        </Link>
       </div>
 
       {/* Main Diversification Dashboard Component */}
@@ -56,12 +54,6 @@ export function DiversificationPage() {
           onSelectSector={setSelectedSector}
         />
       </div>
-
-      {/* Portfolio X-Ray Modal */}
-      <PortfolioXRayModal
-        isOpen={isXRayOpen}
-        onClose={() => setIsXRayOpen(false)}
-      />
     </div>
   )
 }

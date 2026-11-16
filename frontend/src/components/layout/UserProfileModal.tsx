@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark, RefreshCw, ScanSearch, FileSpreadsheet } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -7,7 +6,6 @@ import { APP_VERSION } from '@/version'
 import { cn } from '@/lib/utils'
 import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
 import { downloadExcelReport } from '@/api/export'
-import { PortfolioXRayModal } from '@/components/analytics/PortfolioXRayModal'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -30,14 +28,12 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
   } = useAppStore()
   const navigate = useNavigate()
   const brokers = useMock ? DEMO_BROKERS : BROKERS
-  const [isXRayOpen, setIsXRayOpen] = useState(false)
 
 
   if (!currentUser) return null
 
   return (
-    <>
-      <AnimatePresence>
+    <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
@@ -245,7 +241,8 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
               <button
                 type="button"
                 onClick={() => {
-                  setIsXRayOpen(true)
+                  onClose()
+                  navigate('/xray')
                 }}
                 className="w-full flex items-center justify-between p-2.5 rounded-xl text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50/70 dark:hover:bg-indigo-500/10 font-semibold transition-colors text-xs cursor-pointer border border-indigo-200/50 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-indigo-500/5 active:scale-98"
                 title="Abrir Informe X-Ray Completo de Cartera"
@@ -311,13 +308,5 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
         </div>
       )}
     </AnimatePresence>
-
-    {/* Portfolio X-Ray Full Diagnostic Modal */}
-    <PortfolioXRayModal
-      isOpen={isXRayOpen}
-      onClose={() => setIsXRayOpen(false)}
-      initialBroker={selectedBroker}
-    />
-  </>
   )
 }

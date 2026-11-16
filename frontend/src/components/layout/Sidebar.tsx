@@ -14,6 +14,7 @@ import {
   LogOut,
   PanelLeftClose,
   Pin,
+  ScanSearch,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -29,6 +30,7 @@ const NAV = [
   { to: '/analytics', icon: TrendingUp, label: 'Analítica' },
   { to: '/backtest', icon: History, label: 'Backtest & Crisis' },
   { to: '/diversification', icon: PieChart, label: 'Diversificación' },
+  { to: '/xray', icon: ScanSearch, label: 'Informe X-Ray' },
   { to: '/positions', icon: Layers, label: 'Posiciones' },
   { to: '/transactions', icon: List, label: 'Operaciones' },
 ]
