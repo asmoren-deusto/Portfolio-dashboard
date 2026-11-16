@@ -126,7 +126,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               )}
             >
               <div className="flex items-center justify-between pb-1.5 border-b border-amber-500/20">
-                <span className="font-bold text-amber-700 dark:text-amber-400">⚡ Cíclico</span>
+                <span className="font-bold text-amber-700 dark:text-amber-400">Cíclico</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white">
                   {data.ciclico.totalWeight.toFixed(1)}%
                 </span>
@@ -134,7 +134,10 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               <div className="mt-2 space-y-1.5">
                 {data.ciclico.industries.map((ind, i) => (
                   <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
-                    <span className="truncate pr-1">{ind.name}</span>
+                    <span className="truncate pr-1 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                      <span>{ind.name}</span>
+                    </span>
                     <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
                   </div>
                 ))}
@@ -152,7 +155,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               )}
             >
               <div className="flex items-center justify-between pb-1.5 border-b border-blue-500/20">
-                <span className="font-bold text-blue-700 dark:text-blue-400">⚙️ Sensible</span>
+                <span className="font-bold text-blue-700 dark:text-blue-400">Sensible al ciclo</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white">
                   {data.sensible.totalWeight.toFixed(1)}%
                 </span>
@@ -160,7 +163,10 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               <div className="mt-2 space-y-1.5">
                 {data.sensible.industries.map((ind, i) => (
                   <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
-                    <span className="truncate pr-1">{ind.name}</span>
+                    <span className="truncate pr-1 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                      <span>{ind.name}</span>
+                    </span>
                     <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
                   </div>
                 ))}
@@ -178,7 +184,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               )}
             >
               <div className="flex items-center justify-between pb-1.5 border-b border-emerald-500/20">
-                <span className="font-bold text-emerald-700 dark:text-emerald-400">🛡️ Defensivo</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400">Defensivo</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white">
                   {data.defensivo.totalWeight.toFixed(1)}%
                 </span>
@@ -186,7 +192,10 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               <div className="mt-2 space-y-1.5">
                 {data.defensivo.industries.map((ind, i) => (
                   <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
-                    <span className="truncate pr-1">{ind.name}</span>
+                    <span className="truncate pr-1 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                      <span>{ind.name}</span>
+                    </span>
                     <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
                   </div>
                 ))}

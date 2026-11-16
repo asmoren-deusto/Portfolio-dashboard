@@ -347,15 +347,17 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
               <div className="col-span-9 grid grid-cols-3 gap-3 text-[9px] leading-tight">
                 {/* Cíclico */}
                 <div>
-                  <div className="flex items-center justify-between border-b border-amber-500 pb-0.5 mb-1 font-bold text-amber-900 bg-amber-50/60 px-1 py-0.5 rounded">
-                    <span>⚡ Cíclico</span>
-                    <span className="font-mono">{superSectorsDetail.ciclico.totalWeight.toFixed(2).replace('.', ',')}</span>
+                  <div className="flex items-center justify-between border-b border-slate-400 pb-0.5 mb-1 font-bold">
+                    <span className="text-slate-950 font-bold">Cíclico</span>
+                    <div className="flex gap-2">
+                      <span className="text-slate-900 font-mono">{superSectorsDetail.ciclico.totalWeight.toFixed(2).replace('.', ',')}</span>
+                    </div>
                   </div>
                   {superSectorsDetail.ciclico.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between py-0.5 text-slate-700 border-b border-slate-100">
-                      <span className="truncate pr-1 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ind.color }} />
-                        {ind.name}
+                    <div key={i} className="flex justify-between py-0.5 text-slate-600 border-b border-slate-100">
+                      <span className="truncate pr-1 flex items-center gap-1.5 font-normal">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span>{ind.name}</span>
                       </span>
                       <span className="font-mono text-slate-900 font-medium shrink-0">{ind.weight.toFixed(2).replace('.', ',')}</span>
                     </div>
@@ -364,15 +366,17 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
 
                 {/* Sensible al ciclo */}
                 <div>
-                  <div className="flex items-center justify-between border-b border-blue-500 pb-0.5 mb-1 font-bold text-blue-900 bg-blue-50/60 px-1 py-0.5 rounded">
-                    <span>⚙️ Sensible al ciclo</span>
-                    <span className="font-mono">{superSectorsDetail.sensible.totalWeight.toFixed(2).replace('.', ',')}</span>
+                  <div className="flex items-center justify-between border-b border-slate-400 pb-0.5 mb-1 font-bold">
+                    <span className="text-slate-950 font-bold">Sensible al ciclo</span>
+                    <div className="flex gap-2">
+                      <span className="text-slate-900 font-mono">{superSectorsDetail.sensible.totalWeight.toFixed(2).replace('.', ',')}</span>
+                    </div>
                   </div>
                   {superSectorsDetail.sensible.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between py-0.5 text-slate-700 border-b border-slate-100">
-                      <span className="truncate pr-1 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ind.color }} />
-                        {ind.name}
+                    <div key={i} className="flex justify-between py-0.5 text-slate-600 border-b border-slate-100">
+                      <span className="truncate pr-1 flex items-center gap-1.5 font-normal">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span>{ind.name}</span>
                       </span>
                       <span className="font-mono text-slate-900 font-medium shrink-0">{ind.weight.toFixed(2).replace('.', ',')}</span>
                     </div>
@@ -381,15 +385,17 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
 
                 {/* Defensivo */}
                 <div>
-                  <div className="flex items-center justify-between border-b border-emerald-500 pb-0.5 mb-1 font-bold text-emerald-900 bg-emerald-50/60 px-1 py-0.5 rounded">
-                    <span>🛡️ Defensivo</span>
-                    <span className="font-mono">{superSectorsDetail.defensivo.totalWeight.toFixed(2).replace('.', ',')}</span>
+                  <div className="flex items-center justify-between border-b border-slate-400 pb-0.5 mb-1 font-bold">
+                    <span className="text-slate-950 font-bold">Defensivo</span>
+                    <div className="flex gap-2">
+                      <span className="text-slate-900 font-mono">{superSectorsDetail.defensivo.totalWeight.toFixed(2).replace('.', ',')}</span>
+                    </div>
                   </div>
                   {superSectorsDetail.defensivo.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between py-0.5 text-slate-700 border-b border-slate-100">
-                      <span className="truncate pr-1 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ind.color }} />
-                        {ind.name}
+                    <div key={i} className="flex justify-between py-0.5 text-slate-600 border-b border-slate-100">
+                      <span className="truncate pr-1 flex items-center gap-1.5 font-normal">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span>{ind.name}</span>
                       </span>
                       <span className="font-mono text-slate-900 font-medium shrink-0">{ind.weight.toFixed(2).replace('.', ',')}</span>
                     </div>
