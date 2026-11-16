@@ -35,6 +35,7 @@ import { RiskReturnScatterCard } from '@/components/analytics/RiskReturnScatterC
 import { SuperSectorsTriangleCard } from '@/components/analytics/SuperSectorsTriangleCard'
 import { StockOverlapCard } from '@/components/analytics/StockOverlapCard'
 import { MptStatsCard } from '@/components/analytics/MptStatsCard'
+import { MorningstarPerformanceHistoryCard } from '@/components/analytics/MorningstarPerformanceHistoryCard'
 import { WorldMapChoropleth } from '@/components/analytics/WorldMapChoropleth'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import {
@@ -680,54 +681,39 @@ export function XRayPage() {
                 </div>
               </div>
             </Card>
+
+            {/* Acceso Directo a Rendimiento Histórico 10k & MPT */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-red-500/10 via-indigo-500/10 to-transparent border border-red-500/20 gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-500/10 text-[#C8102E] dark:text-red-400 border border-red-500/20 shrink-0">
+                  <TrendingUp className="w-5 h-5 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Histórico de Rentabilidad & Crecimiento de 10.000 €
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Crecimiento multi-ciclo (+4,08x), rentabilidad trimestral vs benchmark y estadísticas MPT completas
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('performance')}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0 self-start sm:self-auto"
+              >
+                <span>Ver Rendimiento X-Ray</span>
+                <TrendingUp className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
 
         {/* TAB 2: RENDIMIENTO & RIESGO MPT */}
         {activeTab === 'performance' && (
           <div className="space-y-6">
-            {/* Top row: Crecimiento 10k y Exceso Trimestral */}
-            <Card className="p-5 sm:p-6">
-              <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                <div className="flex items-center gap-2.5">
-                  <TrendingUp className="w-5 h-5 text-emerald-500" />
-                  <div>
-                    <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
-                      Crecimiento de Capital (Base 10.000 €) vs Benchmark
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Multiplicación de capital histórico a través del ciclo de mercado (2017 - 2026)
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="font-mono font-bold text-base text-emerald-600 dark:text-emerald-400">
-                    40.850 € (4,08x)
-                  </span>
-                  <span className="text-[10px] text-slate-400 block">vs 22.300 € Ref. (2,23x)</span>
-                </div>
-              </div>
-
-              {/* Progress Curve Overview (6 períodos en una sola fila) */}
-              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-2.5 text-xs">
-                {performance.accumulatedReturns.map((r, i) => (
-                  <div
-                    key={i}
-                    className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5 flex flex-col justify-between"
-                  >
-                    <span className="text-slate-500 dark:text-slate-400 block text-[10.5px] font-medium truncate" title={r.period}>
-                      {r.period}
-                    </span>
-                    <span className="font-mono font-bold text-base text-slate-900 dark:text-white mt-0.5 block">
-                      +{r.portfolio.toFixed(2)}%
-                    </span>
-                    <span className="text-[10px] text-slate-400 mt-0.5 block truncate">
-                      vs {r.reference.toFixed(2)}% Ref
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Card>
+            {/* Histórico Completo de Rentabilidad & Crecimiento 10k (Morningstar X-Ray Page 2) */}
+            <MorningstarPerformanceHistoryCard performance={performance} />
 
             {/* Scatter Plot & Matriz de Correlación */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
