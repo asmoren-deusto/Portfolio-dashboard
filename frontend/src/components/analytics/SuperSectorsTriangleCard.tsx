@@ -182,43 +182,43 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               </svg>
             </div>
 
-            <div className="flex items-center justify-center gap-3 mt-1 text-xs font-medium shrink-0">
-              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px] whitespace-nowrap">
+            <div className="flex items-center justify-center gap-3.5 mt-1.5 text-xs font-medium shrink-0">
+              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11.5px] sm:text-xs whitespace-nowrap">
                 <span className="w-2.5 h-2.5 rounded-full border-2 border-[#C8102E] bg-white inline-block" /> Tu Cartera
               </span>
-              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px] whitespace-nowrap">
+              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11.5px] sm:text-xs whitespace-nowrap">
                 <span className="w-2 h-2 rotate-45 bg-[#10b981] inline-block" /> Benchmark Global
               </span>
             </div>
           </div>
 
           {/* 3 SuperSectors Breakdown (ocupa todo el espacio restante) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 text-xs items-stretch h-full">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs items-stretch h-full">
             {/* Cíclico */}
             <div
               onClick={() => setSelectedSector(selectedSector === 'ciclico' ? null : 'ciclico')}
               className={cn(
-                'p-2 sm:p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'ciclico'
                   ? 'border-amber-500 bg-amber-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
-                <div className="flex items-center justify-between pb-1 border-b border-amber-500/20">
-                  <span className="font-bold text-amber-700 dark:text-amber-400 text-xs">Cíclico</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">
+                <div className="flex items-center justify-between pb-1.5 border-b border-amber-500/20">
+                  <span className="font-bold text-amber-700 dark:text-amber-400 text-xs sm:text-sm">Cíclico</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
                     {data.ciclico.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-1.5 space-y-1 sm:space-y-1.5">
+                <div className="mt-2.5 space-y-2 sm:space-y-2.5">
                   {data.ciclico.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
-                      <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
-                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span className="truncate">{formatIndustryName(ind.name)}</span>
+                    <div key={i} className="flex justify-between items-center text-xs sm:text-[12.5px] text-slate-700 dark:text-slate-300 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
+                      <span className="truncate pr-1 flex items-center gap-2 min-w-0 flex-1">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span className="truncate font-medium">{formatIndustryName(ind.name)}</span>
                       </span>
-                      <span className="font-mono font-semibold text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white shrink-0 ml-2">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -229,27 +229,27 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'sensible' ? null : 'sensible')}
               className={cn(
-                'p-2 sm:p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'sensible'
                   ? 'border-blue-500 bg-blue-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
-                <div className="flex items-center justify-between pb-1 border-b border-blue-500/20">
-                  <span className="font-bold text-blue-700 dark:text-blue-400 text-xs">Sensible al ciclo</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">
+                <div className="flex items-center justify-between pb-1.5 border-b border-blue-500/20">
+                  <span className="font-bold text-blue-700 dark:text-blue-400 text-xs sm:text-sm">Sensible al ciclo</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
                     {data.sensible.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-1.5 space-y-1 sm:space-y-1.5">
+                <div className="mt-2.5 space-y-2 sm:space-y-2.5">
                   {data.sensible.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
-                      <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
-                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span className="truncate">{formatIndustryName(ind.name)}</span>
+                    <div key={i} className="flex justify-between items-center text-xs sm:text-[12.5px] text-slate-700 dark:text-slate-300 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
+                      <span className="truncate pr-1 flex items-center gap-2 min-w-0 flex-1">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span className="truncate font-medium">{formatIndustryName(ind.name)}</span>
                       </span>
-                      <span className="font-mono font-semibold text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white shrink-0 ml-2">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -260,27 +260,27 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'defensivo' ? null : 'defensivo')}
               className={cn(
-                'p-2 sm:p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
+                'p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'defensivo'
                   ? 'border-emerald-500 bg-emerald-500/10'
                   : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
-                <div className="flex items-center justify-between pb-1 border-b border-emerald-500/20">
-                  <span className="font-bold text-emerald-700 dark:text-emerald-400 text-xs">Defensivo</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">
+                <div className="flex items-center justify-between pb-1.5 border-b border-emerald-500/20">
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm">Defensivo</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
                     {data.defensivo.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-1.5 space-y-1 sm:space-y-1.5">
+                <div className="mt-2.5 space-y-2 sm:space-y-2.5">
                   {data.defensivo.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
-                      <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
-                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span className="truncate">{formatIndustryName(ind.name)}</span>
+                    <div key={i} className="flex justify-between items-center text-xs sm:text-[12.5px] text-slate-700 dark:text-slate-300 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
+                      <span className="truncate pr-1 flex items-center gap-2 min-w-0 flex-1">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
+                        <span className="truncate font-medium">{formatIndustryName(ind.name)}</span>
                       </span>
-                      <span className="font-mono font-semibold text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white shrink-0 ml-2">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
