@@ -88,7 +88,7 @@ export function BacktestPage() {
   }, [selectedCrisisId, crises])
 
   return (
-    <div className="flex flex-col gap-5 pb-10">
+    <div className="flex flex-col gap-4 pb-8">
       {/* Header Banner */}
       <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5">
         <div className="flex items-start sm:items-center gap-3.5">

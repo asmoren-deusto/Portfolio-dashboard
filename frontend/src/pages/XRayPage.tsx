@@ -20,6 +20,7 @@ import {
 import { usePositions } from '@/api/queries'
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
+import { Card } from '@/components/ui/Card'
 import { downloadExcelReport } from '@/api/export'
 import {
   buildPortfolioXRayReport,
@@ -75,9 +76,9 @@ export function XRayPage() {
   } = report
 
   return (
-    <div className="flex flex-col gap-5 pb-12 w-full max-w-7xl mx-auto print:max-w-none print:p-0">
+    <div className="flex flex-col gap-4 pb-8 w-full print:p-0">
       {/* ── HEADER BANNER ──────────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-[#1e1e1e]/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 shadow-sm print:bg-white print:border-b-2 print:border-black">
+      <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 print:bg-white print:border-b-2 print:border-black">
         <div className="flex items-start sm:items-center gap-3.5 min-w-0">
           <button
             type="button"
@@ -161,12 +162,12 @@ export function XRayPage() {
             <span className="hidden sm:inline">Excel</span>
           </button>
         </div>
-      </div>
+      </Card>
 
       {/* ── KPI EXECUTIVE STRIP ─────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 print:grid-cols-6">
         {/* 1. Valor Analizado */}
-        <div className="p-3 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/[0.08] shadow-sm">
+        <Card className="p-3">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             Patrimonio X-Ray
           </span>
@@ -176,10 +177,10 @@ export function XRayPage() {
           <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
             {summary.numPositions} posiciones activas
           </span>
-        </div>
+        </Card>
 
         {/* 2. Score de Diversificación */}
-        <div className="p-3 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/[0.08] shadow-sm">
+        <Card className="p-3">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             Salud de Cartera
           </span>
@@ -194,10 +195,10 @@ export function XRayPage() {
           <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
             Score multivariable
           </span>
-        </div>
+        </Card>
 
         {/* 3. TER Medio Ponderado */}
-        <div className="p-3 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/[0.08] shadow-sm">
+        <Card className="p-3">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             TER Medio Ponderado
           </span>
@@ -207,10 +208,10 @@ export function XRayPage() {
           <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
             Coste: {fmt.currency(summary.annualFeeCostEur)}/año
           </span>
-        </div>
+        </Card>
 
         {/* 4. Volatilidad Anualizada */}
-        <div className="p-3 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/[0.08] shadow-sm">
+        <Card className="p-3">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             Volatilidad Estimada
           </span>
@@ -220,10 +221,10 @@ export function XRayPage() {
           <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
             Max Drawdown: {summary.maxDrawdown.toFixed(1)}%
           </span>
-        </div>
+        </Card>
 
         {/* 5. Sharpe Ratio */}
-        <div className="p-3 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/[0.08] shadow-sm">
+        <Card className="p-3">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             Ratio de Sharpe
           </span>
@@ -233,10 +234,10 @@ export function XRayPage() {
           <span className="text-[10.5px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block truncate">
             Eficiencia alta (&gt;1.0)
           </span>
-        </div>
+        </Card>
 
         {/* 6. PER Ponderado & Dividendo */}
-        <div className="p-3 rounded-2xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/[0.08] shadow-sm">
+        <Card className="p-3">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
             PER Medio / Div. Yield
           </span>
@@ -246,11 +247,12 @@ export function XRayPage() {
           <span className="text-[10.5px] text-slate-400 mt-0.5 block truncate">
             P/VC: {summary.weightedPb.toFixed(1)}x
           </span>
-        </div>
+        </Card>
       </div>
 
       {/* ── SUB-TABS NAVIGATION ────────────────────────────────────────── */}
-      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-white/90 dark:bg-[#1e1e1e]/90 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-x-auto no-scrollbar print:hidden">
+      <Card className="p-1.5 overflow-x-auto no-scrollbar print:hidden">
+        <div className="flex items-center gap-1.5 min-w-max">
         {[
           { id: 'overview', label: 'Resumen & Estilo Box', icon: Layers },
           { id: 'holdings', label: `Look-Through Top Holdings (${topHoldings.length})`, icon: Building2 },
@@ -277,7 +279,8 @@ export function XRayPage() {
             </button>
           )
         })}
-      </div>
+        </div>
+      </Card>
 
       {/* ── MAIN CONTENT SECTIONS ───────────────────────────────────────── */}
       <div className="space-y-6">
@@ -288,7 +291,7 @@ export function XRayPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
               
               {/* Left: Asignación de Activos (40% / 5 cols) */}
-              <div className="lg:col-span-5 p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/10 shadow-sm">
+              <Card className="lg:col-span-5 p-5 sm:p-6">
                 <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
                   <div className="flex items-center gap-2.5">
                     <PieChart className="w-5 h-5 text-violet-500" />
@@ -346,10 +349,10 @@ export function XRayPage() {
                 <div className="mt-5 p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-500/10 border border-indigo-200/80 dark:border-indigo-500/20 text-xs text-indigo-900 dark:text-indigo-200 leading-relaxed">
                   💡 <strong>Estructura Patrimonial:</strong> Cartera con perfil marcadamente <strong>Crecimiento / Renta Variable</strong> ({assetAllocation.find((a) => a.id === 'equity')?.weight.toFixed(1)}%), complementada con reservas de liquidez y activos de cobertura.
                 </div>
-              </div>
+              </Card>
 
               {/* Right: Morningstar Style Box 3x3 (60% / 7 cols) */}
-              <div className="lg:col-span-7 p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/10 shadow-sm">
+              <Card className="lg:col-span-7 p-5 sm:p-6">
                 <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
                   <div className="flex items-center gap-2.5">
                     <Layers className="w-5 h-5 text-indigo-500" />
@@ -521,14 +524,14 @@ export function XRayPage() {
                     {styleBox.summaryText}
                   </span>
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         )}
 
         {/* TAB 2: LOOK-THROUGH TOP HOLDINGS */}
         {(activeTab === 'overview' || activeTab === 'holdings') && (
-          <div className="space-y-4 p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/10 shadow-sm">
+          <Card className="space-y-4 p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/80 dark:border-white/[0.08]">
               <div>
                 <div className="flex items-center gap-2.5">
@@ -638,7 +641,7 @@ export function XRayPage() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
         )}
 
         {/* TAB 3: GEOGRAFÍA & SECTORES VS BENCHMARKS */}
@@ -646,7 +649,7 @@ export function XRayPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Left: Geografía vs MSCI ACWI */}
-              <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/10 shadow-sm">
+              <Card className="p-5 sm:p-6">
                 <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
                   <div className="flex items-center gap-2.5">
                     <Globe className="w-5 h-5 text-emerald-500" />
@@ -702,10 +705,10 @@ export function XRayPage() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
 
               {/* Right: Sectores & SuperSectores */}
-              <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#1e1e1e] border border-slate-200/80 dark:border-white/10 shadow-sm">
+              <Card className="p-5 sm:p-6">
                 <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
                   <div className="flex items-center gap-2.5">
                     <Cpu className="w-5 h-5 text-blue-500" />
@@ -774,7 +777,7 @@ export function XRayPage() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         )}
@@ -783,7 +786,7 @@ export function XRayPage() {
         {(activeTab === 'overview' || activeTab === 'audit') && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Puntos Fuertes */}
-            <div className="p-5 rounded-3xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 shadow-sm">
+            <Card className="p-5 border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10">
               <div className="flex items-center gap-2 pb-3 border-b border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-sm">
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Puntos Fuertes de la Cartera</span>
@@ -796,10 +799,10 @@ export function XRayPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
 
             {/* Puntos de Atención */}
-            <div className="p-5 rounded-3xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 shadow-sm">
+            <Card className="p-5 border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10">
               <div className="flex items-center gap-2 pb-3 border-b border-amber-500/20 text-amber-700 dark:text-amber-400 font-bold text-sm">
                 <AlertTriangle className="w-4 h-4" />
                 <span>Puntos de Atención / Riesgo</span>
@@ -812,10 +815,10 @@ export function XRayPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
 
             {/* Recomendaciones Operativas */}
-            <div className="p-5 rounded-3xl bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 shadow-sm">
+            <Card className="p-5 border-indigo-500/20 bg-indigo-500/5 dark:bg-indigo-500/10">
               <div className="flex items-center gap-2 pb-3 border-b border-indigo-500/20 text-indigo-700 dark:text-indigo-400 font-bold text-sm">
                 <Sparkles className="w-4 h-4" />
                 <span>Recomendaciones Cuantitativas</span>
@@ -828,7 +831,7 @@ export function XRayPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
           </div>
         )}
 

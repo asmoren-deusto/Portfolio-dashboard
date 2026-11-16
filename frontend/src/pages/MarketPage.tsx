@@ -228,7 +228,7 @@ export const MarketPage: React.FC = () => {
   const worstStock = stats?.worstStock
 
   return (
-    <div className="space-y-4 pb-8">
+    <div className="flex flex-col gap-4 pb-8">
       {/* Global Market Trading Sessions Bar (Tokyo, Europe, New York) */}
       <MarketSessionsBar
         onSelectSession={(sessionId) => {

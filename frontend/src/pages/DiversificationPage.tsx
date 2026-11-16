@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Globe, PieChart, Sparkles, ShieldCheck, ScanSearch } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
 import { MarketSectorEvolutionCard } from '@/components/market/MarketSectorEvolutionCard'
 import { usePositions, useMarketQuotes } from '@/api/queries'
@@ -11,9 +12,9 @@ export function DiversificationPage() {
   const [selectedSector, setSelectedSector] = useState<string>('Todos')
 
   return (
-    <div className="flex flex-col gap-5 pb-10">
+    <div className="flex flex-col gap-4 pb-8">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/90 dark:bg-[#1e1e1e]/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-4 sm:p-5 rounded-2xl shadow-sm">
+      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5">
         <div className="flex items-start sm:items-center gap-3.5">
           <div className="h-11 w-11 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
             <PieChart size={22} />
@@ -41,7 +42,7 @@ export function DiversificationPage() {
           <ScanSearch size={17} className="stroke-[2.2]" />
           <span>Generar Informe X-Ray</span>
         </Link>
-      </div>
+      </Card>
 
       {/* Main Diversification Dashboard Component */}
       <DiversificationDashboard positions={positions} isLoading={isLoading} />
