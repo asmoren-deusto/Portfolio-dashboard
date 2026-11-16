@@ -38,11 +38,11 @@ export function MorningstarPerformanceHistoryCard({
   const benchmarkMultiple = (benchmarkGrowth / 10000).toFixed(2)
 
   return (
-    <Card className={cn('p-4 sm:p-5 flex flex-col gap-4 sm:gap-5', className)}>
+    <Card className={cn('p-4 sm:p-6 flex flex-col gap-6 sm:gap-7', className)}>
       {/* ── HEADER PRINCIPAL DE RENTABILIDAD & BENCHMARK ────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] gap-3">
         <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-xl bg-red-500/10 text-[#C8102E] dark:text-red-400 border border-red-500/20 shrink-0 mt-0.5">
+          <div className="p-2 rounded-xl bg-red-500/10 text-[#C8102E] dark:text-red-400 border border-red-500/20 shrink-0 mt-0.5">
             <TrendingUp className="w-5 h-5 stroke-[2.2]" />
           </div>
           <div>
@@ -84,8 +84,8 @@ export function MorningstarPerformanceHistoryCard({
       </div>
 
       {/* ── 1. GRÁFICO: CRECIMIENTO DE 10.000 EUR ──────────────────────── */}
-      <div className="rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] p-3.5 sm:p-4 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+      <div className="rounded-xl border border-slate-200/85 dark:border-white/[0.08] bg-white dark:bg-[#18181b] overflow-hidden shadow-2xs">
+        <div className="px-4 py-2.5 sm:py-3 bg-slate-50/80 dark:bg-white/[0.03] border-b border-slate-200/80 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-500" />
             <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -102,114 +102,116 @@ export function MorningstarPerformanceHistoryCard({
           </div>
         </div>
 
-        <div className="h-60 sm:h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={performance.growth10k}
-              margin={{ top: 12, right: 12, left: -12, bottom: 4 }}
-            >
-              <defs>
-                <linearGradient id="growthPortfolioGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#C8102E" stopOpacity={0.22} />
-                  <stop offset="95%" stopColor="#C8102E" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-                stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
-              />
-              <XAxis
-                dataKey="date"
-                tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 11 }}
-                tickLine={false}
-                axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
-              />
-              <YAxis
-                domain={[8000, 44000]}
-                ticks={[10000, 20000, 30000, 40000]}
-                tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`}
-              />
-              <Tooltip
-                content={({ active, payload, label }) => {
-                  if (!active || !payload || !payload.length) return null
-                  const portVal = payload.find((p: any) => p.dataKey === 'portfolio')?.value as number
-                  const benchVal = payload.find((p: any) => p.dataKey === 'benchmark')?.value as number
-                  const excess = portVal && benchVal ? portVal - benchVal : 0
-                  return (
-                    <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-md p-3.5 shadow-xl text-xs font-mono min-w-[210px]">
-                      <div className="font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/10 pb-1.5 mb-2 flex items-center justify-between">
-                        <span>Año {label}</span>
-                        <span className="text-[10px] text-slate-400 font-sans">Base 10.000 €</span>
-                      </div>
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-sans">
-                            <span className="w-2.5 h-2.5 rounded-full bg-[#C8102E]" />
-                            Cartera:
-                          </span>
-                          <span className="font-bold text-[#C8102E]">
-                            {fmt.currency(portVal)} ({(portVal / 10000).toFixed(2)}x)
-                          </span>
+        <div className="p-3.5 sm:p-4">
+          <div className="h-60 sm:h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={performance.growth10k}
+                margin={{ top: 12, right: 16, left: -10, bottom: 6 }}
+              >
+                <defs>
+                  <linearGradient id="growthPortfolioGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#C8102E" stopOpacity={0.22} />
+                    <stop offset="95%" stopColor="#C8102E" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
+                />
+                <YAxis
+                  domain={[8000, 44000]}
+                  ticks={[10000, 20000, 30000, 40000]}
+                  tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload || !payload.length) return null
+                    const portVal = payload.find((p: any) => p.dataKey === 'portfolio')?.value as number
+                    const benchVal = payload.find((p: any) => p.dataKey === 'benchmark')?.value as number
+                    const excess = portVal && benchVal ? portVal - benchVal : 0
+                    return (
+                      <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-md p-3.5 shadow-xl text-xs font-mono min-w-[210px]">
+                        <div className="font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/10 pb-1.5 mb-2 flex items-center justify-between">
+                          <span>Año {label}</span>
+                          <span className="text-[10px] text-slate-400 font-sans">Base 10.000 €</span>
                         </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-sans">
-                            <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-                            Benchmark:
-                          </span>
-                          <span className="font-bold text-slate-700 dark:text-slate-300">
-                            {fmt.currency(benchVal)} ({(benchVal / 10000).toFixed(2)}x)
-                          </span>
-                        </div>
-                        {excess !== 0 && (
-                          <div className="pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
-                            <span className="text-slate-500 font-sans">Ventaja vs Ref:</span>
-                            <span
-                              className={cn(
-                                'font-bold',
-                                excess > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'
-                              )}
-                            >
-                              {excess > 0 ? '+' : ''}
-                              {fmt.currency(excess)}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-sans">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#C8102E]" />
+                              Cartera:
+                            </span>
+                            <span className="font-bold text-[#C8102E]">
+                              {fmt.currency(portVal)} ({(portVal / 10000).toFixed(2)}x)
                             </span>
                           </div>
-                        )}
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-sans">
+                              <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+                              Benchmark:
+                            </span>
+                            <span className="font-bold text-slate-700 dark:text-slate-300">
+                              {fmt.currency(benchVal)} ({(benchVal / 10000).toFixed(2)}x)
+                            </span>
+                          </div>
+                          {excess !== 0 && (
+                            <div className="pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
+                              <span className="text-slate-500 font-sans">Ventaja vs Ref:</span>
+                              <span
+                                className={cn(
+                                  'font-bold',
+                                  excess > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'
+                                )}
+                              >
+                                {excess > 0 ? '+' : ''}
+                                {fmt.currency(excess)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="portfolio"
-                name="Cartera"
-                stroke="#C8102E"
-                strokeWidth={2.4}
-                fill="url(#growthPortfolioGrad)"
-                dot={{ r: 3, fill: '#C8102E' }}
-                activeDot={{ r: 5, fill: '#C8102E', stroke: '#fff', strokeWidth: 2 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="benchmark"
-                name="Benchmark (80/20)"
-                stroke={isDark ? '#94a3b8' : '#64748b'}
-                strokeWidth={1.8}
-                dot={{ r: 2.5, fill: isDark ? '#94a3b8' : '#64748b' }}
-                activeDot={{ r: 4.5, fill: isDark ? '#94a3b8' : '#64748b' }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+                    )
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="portfolio"
+                  name="Cartera"
+                  stroke="#C8102E"
+                  strokeWidth={2.4}
+                  fill="url(#growthPortfolioGrad)"
+                  dot={{ r: 3, fill: '#C8102E' }}
+                  activeDot={{ r: 5, fill: '#C8102E', stroke: '#fff', strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="benchmark"
+                  name="Benchmark (80/20)"
+                  stroke={isDark ? '#94a3b8' : '#64748b'}
+                  strokeWidth={1.8}
+                  dot={{ r: 2.5, fill: isDark ? '#94a3b8' : '#64748b' }}
+                  activeDot={{ r: 4.5, fill: isDark ? '#94a3b8' : '#64748b' }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
       {/* ── 2. GRÁFICO: RENTABILIDAD TRIMESTRAL RESPECTO A BENCHMARK ─────── */}
-      <div className="rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] p-3.5 sm:p-4 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+      <div className="rounded-xl border border-slate-200/85 dark:border-white/[0.08] bg-white dark:bg-[#18181b] overflow-hidden shadow-2xs">
+        <div className="px-4 py-2.5 sm:py-3 bg-slate-50/80 dark:bg-white/[0.03] border-b border-slate-200/80 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-blue-500" />
             <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -226,68 +228,70 @@ export function MorningstarPerformanceHistoryCard({
           </div>
         </div>
 
-        <div className="h-36 sm:h-40 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={performance.quarterlyExcess}
-              margin={{ top: 8, right: 12, left: -20, bottom: 4 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-                stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
-              />
-              <XAxis
-                dataKey="quarter"
-                tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 9.5 }}
-                tickLine={false}
-                axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
-                interval={1}
-              />
-              <YAxis
-                domain={[-24, 20]}
-                ticks={[-16, 0, 16]}
-                tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 10 }}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(val) => `${val >= 0 ? '+' : ''}${val}`}
-              />
-              <ReferenceLine y={0} stroke={isDark ? '#64748b' : '#94a3b8'} strokeWidth={1} />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (!active || !payload || !payload.length) return null
-                  const item = payload[0].payload as { quarter: string; excess: number; isPositive: boolean }
-                  return (
-                    <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-md p-2.5 shadow-xl text-xs font-mono">
-                      <div className="text-slate-500 dark:text-slate-400 font-sans font-medium mb-1">
-                        Trimestre {item.quarter}
+        <div className="p-3.5 sm:p-4">
+          <div className="h-36 sm:h-40 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={performance.quarterlyExcess}
+                margin={{ top: 8, right: 16, left: -20, bottom: 4 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                />
+                <XAxis
+                  dataKey="quarter"
+                  tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 9.5 }}
+                  tickLine={false}
+                  axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
+                  interval={1}
+                />
+                <YAxis
+                  domain={[-24, 20]}
+                  ticks={[-16, 0, 16]}
+                  tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(val) => `${val >= 0 ? '+' : ''}${val}`}
+                />
+                <ReferenceLine y={0} stroke={isDark ? '#64748b' : '#94a3b8'} strokeWidth={1} />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload || !payload.length) return null
+                    const item = payload[0].payload as { quarter: string; excess: number; isPositive: boolean }
+                    return (
+                      <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-md p-2.5 shadow-xl text-xs font-mono">
+                        <div className="text-slate-500 dark:text-slate-400 font-sans font-medium mb-1">
+                          Trimestre {item.quarter}
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-slate-600 dark:text-slate-300 font-sans">Alfa vs Ref:</span>
+                          <span
+                            className={cn(
+                              'font-bold',
+                              item.isPositive ? 'text-[#C8102E]' : 'text-blue-600 dark:text-blue-400'
+                            )}
+                          >
+                            {item.excess >= 0 ? '+' : ''}
+                            {item.excess.toFixed(2)}%
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-slate-600 dark:text-slate-300 font-sans">Alfa vs Ref:</span>
-                        <span
-                          className={cn(
-                            'font-bold',
-                            item.isPositive ? 'text-[#C8102E]' : 'text-blue-600 dark:text-blue-400'
-                          )}
-                        >
-                          {item.excess >= 0 ? '+' : ''}
-                          {item.excess.toFixed(2)}%
-                        </span>
-                      </div>
-                    </div>
-                  )
-                }}
-              />
-              <Bar dataKey="excess" radius={[2, 2, 2, 2]}>
-                {performance.quarterlyExcess.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.isPositive ? '#C8102E' : isDark ? '#3b82f6' : '#1e3a8a'}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                    )
+                  }}
+                />
+                <Bar dataKey="excess" radius={[2, 2, 2, 2]}>
+                  {performance.quarterlyExcess.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.isPositive ? '#C8102E' : isDark ? '#3b82f6' : '#1e3a8a'}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
