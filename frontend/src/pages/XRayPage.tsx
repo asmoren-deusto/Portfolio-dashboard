@@ -446,9 +446,9 @@ export function XRayPage() {
                       Descomposición de la renta variable según capitalización de mercado (Large, Mid, Small) y estilo de inversión (Value, Blend, Growth).
                     </p>
 
-                    {/* Matriz de Estilo Interactiva (desplazada un ~10% a la izquierda según indicación) */}
-                    <div className="mt-3.5 w-full max-w-sm mr-auto -translate-x-[6%] sm:-translate-x-[10%]">
-                      <div className="grid grid-cols-[52px_1fr_1fr_1fr] gap-1.5 sm:gap-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400 pb-1.5">
+                    {/* Matriz de Estilo Interactiva (centrada equilibrada sin cortes de texto) */}
+                    <div className="mt-3.5 w-full max-w-[340px] sm:max-w-[360px] mx-auto">
+                      <div className="grid grid-cols-[60px_1fr_1fr_1fr] gap-1.5 sm:gap-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400 pb-1.5">
                         <div></div>
                         <div className="uppercase tracking-wider text-[11px]">Valor</div>
                         <div className="uppercase tracking-wider text-[11px]">Mixto</div>
@@ -456,7 +456,7 @@ export function XRayPage() {
                       </div>
 
                       {/* Row 1: Large Cap */}
-                      <div className="grid grid-cols-[52px_1fr_1fr_1fr] gap-1.5 sm:gap-2 mb-1.5 items-center">
+                      <div className="grid grid-cols-[60px_1fr_1fr_1fr] gap-1.5 sm:gap-2 mb-1.5 items-center">
                         <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-left">Grande</div>
                         <div className="h-12 sm:h-13 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-50/60 dark:bg-indigo-500/10 border-indigo-200/60 dark:border-indigo-500/20">
                           <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.largeValue}%</span>
@@ -473,7 +473,7 @@ export function XRayPage() {
                       </div>
 
                       {/* Row 2: Mid Cap */}
-                      <div className="grid grid-cols-[52px_1fr_1fr_1fr] gap-1.5 sm:gap-2 mb-1.5 items-center">
+                      <div className="grid grid-cols-[60px_1fr_1fr_1fr] gap-1.5 sm:gap-2 mb-1.5 items-center">
                         <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-left">Mediana</div>
                         <div className="h-10 sm:h-11 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
                           <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.midValue}%</span>
@@ -487,7 +487,7 @@ export function XRayPage() {
                       </div>
 
                       {/* Row 3: Small Cap */}
-                      <div className="grid grid-cols-[52px_1fr_1fr_1fr] gap-1.5 sm:gap-2 mb-1.5 items-center">
+                      <div className="grid grid-cols-[60px_1fr_1fr_1fr] gap-1.5 sm:gap-2 mb-1.5 items-center">
                         <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-left">Pequeña</div>
                         <div className="h-10 sm:h-11 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
                           <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.smallValue}%</span>
