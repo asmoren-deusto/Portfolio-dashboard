@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark, RefreshCw } from 'lucide-react'
+import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark, RefreshCw, ScanSearch, FileSpreadsheet } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store/appStore'
 import { APP_VERSION } from '@/version'
 import { cn } from '@/lib/utils'
 import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
+import { downloadExcelReport } from '@/api/export'
+import { PortfolioXRayModal } from '@/components/analytics/PortfolioXRayModal'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -27,12 +30,14 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
   } = useAppStore()
   const navigate = useNavigate()
   const brokers = useMock ? DEMO_BROKERS : BROKERS
+  const [isXRayOpen, setIsXRayOpen] = useState(false)
 
 
   if (!currentUser) return null
 
   return (
-    <AnimatePresence>
+    <>
+      <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
@@ -232,6 +237,46 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
               </div>
             </div>
 
+            {/* Informes: X-Ray & Completo */}
+            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06] space-y-1">
+              <div className="px-1 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Informes de Cartera
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsXRayOpen(true)
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50/70 dark:hover:bg-indigo-500/10 font-semibold transition-colors text-xs cursor-pointer border border-indigo-200/50 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-indigo-500/5 active:scale-98"
+                title="Abrir Informe X-Ray Completo de Cartera"
+              >
+                <div className="flex items-center gap-2">
+                  <ScanSearch size={15} className="text-indigo-600 dark:text-indigo-400" />
+                  <span>Informe X-Ray</span>
+                </div>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold">
+                  X-RAY
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  downloadExcelReport('full', { broker: selectedBroker })
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50/70 dark:hover:bg-emerald-500/10 font-semibold transition-colors text-xs cursor-pointer border border-emerald-200/50 dark:border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-500/5 active:scale-98"
+                title="Descargar libro Excel multi-hoja con Posiciones, Rendimiento Diario, Operaciones y Resumen"
+              >
+                <div className="flex items-center gap-2">
+                  <FileSpreadsheet size={15} className="text-emerald-600 dark:text-emerald-400" />
+                  <span>Informe Completo</span>
+                </div>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
+                  .XLSX
+                </span>
+              </button>
+            </div>
+
             {/* Logout Button */}
             <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
               <button
@@ -266,5 +311,13 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
         </div>
       )}
     </AnimatePresence>
+
+    {/* Portfolio X-Ray Full Diagnostic Modal */}
+    <PortfolioXRayModal
+      isOpen={isXRayOpen}
+      onClose={() => setIsXRayOpen(false)}
+      initialBroker={selectedBroker}
+    />
+  </>
   )
 }

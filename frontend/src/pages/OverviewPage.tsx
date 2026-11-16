@@ -26,7 +26,6 @@ import {
   CheckCircle2,
   Globe,
   PiggyBank,
-  ScanSearch,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -56,7 +55,6 @@ import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
-import { PortfolioXRayModal } from '@/components/analytics/PortfolioXRayModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
 import { PortfolioAgendaCard } from '@/components/agenda/PortfolioAgendaCard'
@@ -136,7 +134,6 @@ export function OverviewPage() {
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
-  const [isXRayOpen, setIsXRayOpen] = useState(false)
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
   const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
   const [chartStyle, setChartStyle] = useState<'glow' | 'lines' | 'waterfall' | 'heatmap'>(() => {
@@ -738,15 +735,6 @@ export function OverviewPage() {
             {isGlobalUpdating && <LoadingDot />}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsXRayOpen(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 shadow-2xs transition-all cursor-pointer"
-              title="Abrir Informe X-Ray Completo (Morningstar Look-Through)"
-            >
-              <ScanSearch size={13} className="text-indigo-600 dark:text-indigo-400" />
-              <span>Informe X-Ray</span>
-            </button>
             <span data-private className="hidden sm:inline text-[11px] font-mono text-slate-500 dark:text-slate-400">
               Total Cartera
             </span>
@@ -2335,12 +2323,6 @@ export function OverviewPage() {
       <PositionDetailModal
         position={selectedPosition}
         onClose={() => setSelectedPosition(null)}
-      />
-
-      {/* Portfolio X-Ray Full Diagnostic Modal */}
-      <PortfolioXRayModal
-        isOpen={isXRayOpen}
-        onClose={() => setIsXRayOpen(false)}
       />
     </div>
   )
