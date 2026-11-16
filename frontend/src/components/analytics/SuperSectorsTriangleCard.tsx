@@ -75,7 +75,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
           {/* Ternary Triangle SVG (4 cols) */}
           <div className="md:col-span-4 flex flex-col items-center justify-center pr-0 md:pr-4 md:border-r border-slate-200/70 dark:border-white/[0.08]">
             <div className="relative w-48 sm:w-52 h-44 flex items-center justify-center">
-              <svg viewBox="0 0 120 100" className="w-full h-full overflow-visible">
+              <svg viewBox="0 0 120 102" className="w-full h-full overflow-visible">
                 {/* Background shaded areas */}
                 <polygon points="60,16 18,78 102,78" fill="currentColor" className="text-slate-100 dark:text-white/[0.03] stroke-slate-400 dark:stroke-white/20" strokeWidth="1.2" />
 
@@ -85,14 +85,54 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 <line x1="102" y1="78" x2="60" y2="58" stroke="currentColor" strokeDasharray="2" className="text-slate-300 dark:text-white/10" />
 
                 {/* Vertex Labels */}
-                <text x="60" y="8" textAnchor="middle" className="text-[7.5px] font-bold fill-blue-600 dark:fill-blue-400">
+                <text
+                  x="60"
+                  y="8"
+                  textAnchor="middle"
+                  fontSize="7.5"
+                  className="font-bold fill-blue-600 dark:fill-blue-400"
+                >
                   Sensible ({data.sensible.totalWeight.toFixed(1)}%)
                 </text>
-                <text x="14" y="90" textAnchor="start" className="text-[7px] font-bold fill-emerald-600 dark:fill-emerald-400">
-                  Defensivo ({data.defensivo.totalWeight.toFixed(1)}%)
+
+                {/* Defensivo (Vértice inferior izquierdo) */}
+                <text
+                  x="18"
+                  y="87"
+                  textAnchor="middle"
+                  fontSize="7.5"
+                  className="font-bold fill-emerald-600 dark:fill-emerald-400"
+                >
+                  Defensivo
                 </text>
-                <text x="106" y="90" textAnchor="end" className="text-[7px] font-bold fill-amber-600 dark:fill-amber-400">
-                  Cíclico ({data.ciclico.totalWeight.toFixed(1)}%)
+                <text
+                  x="18"
+                  y="95"
+                  textAnchor="middle"
+                  fontSize="6.8"
+                  className="font-bold fill-emerald-600/90 dark:fill-emerald-400/90"
+                >
+                  ({data.defensivo.totalWeight.toFixed(1)}%)
+                </text>
+
+                {/* Cíclico (Vértice inferior derecho) */}
+                <text
+                  x="102"
+                  y="87"
+                  textAnchor="middle"
+                  fontSize="7.5"
+                  className="font-bold fill-amber-600 dark:fill-amber-400"
+                >
+                  Cíclico
+                </text>
+                <text
+                  x="102"
+                  y="95"
+                  textAnchor="middle"
+                  fontSize="6.8"
+                  className="font-bold fill-amber-600/90 dark:fill-amber-400/90"
+                >
+                  ({data.ciclico.totalWeight.toFixed(1)}%)
                 </text>
 
                 {/* Benchmark Position (Diamond) */}
