@@ -428,127 +428,138 @@ export function XRayPage() {
                 <SuperSectorsTriangleCard data={superSectorsDetail} className="h-full" />
               </div>
 
-              {/* FILA 2 - IZQUIERDA (5 cols): Exposición por País % */}
+              {/* FILA 2 - IZQUIERDA (5 cols): Morningstar Style Box 3x3 */}
               <div className="lg:col-span-5 flex flex-col min-h-0">
-                <Card className="p-5 sm:p-6 h-full flex flex-col">
-                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                    <div className="flex items-center gap-2.5">
-                      <Globe className="w-5 h-5 text-blue-500" />
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                        Exposición por País %
-                      </h3>
-                    </div>
-                    <span className="text-xs text-slate-400">Top 10 Países</span>
-                  </div>
-
-                  <div className="mt-4 space-y-2 text-xs flex-1">
-                    {topCountries.map((c, i) => (
-                      <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-slate-50/70 dark:bg-white/[0.02]">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base">{c.flag}</span>
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">{c.country}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-24 h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-                            <div className="h-full bg-blue-600 rounded-full" style={{ width: `${Math.min(100, c.actionWeight * 1.6)}%` }} />
-                          </div>
-                          <span className="font-mono font-bold text-slate-900 dark:text-white w-12 text-right">
-                            {c.actionWeight.toFixed(2)}%
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-
-              {/* FILA 2 - DERECHA (7 cols): Morningstar Style Box 3x3 */}
-              <div className="lg:col-span-7 flex flex-col min-h-0">
                 <Card className="p-5 sm:p-6 h-full flex flex-col justify-between">
-                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                    <div className="flex items-center gap-2.5">
-                      <Layers className="w-5 h-5 text-indigo-500" />
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                        Morningstar Equity Style Box™ (3x3)
-                      </h3>
-                    </div>
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
-                      {styleBox.dominantLabel}
-                    </span>
-                  </div>
-
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2.5">
-                    Descomposición de la renta variable según capitalización de mercado (Large, Mid, Small) y estilo de inversión (Value, Blend, Growth).
-                  </p>
-
-                  {/* Matriz 3x3 Interactiva */}
-                  <div className="mt-5 max-w-md mx-auto">
-                    <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400 pb-1.5">
-                      <div></div>
-                      <div className="uppercase tracking-wider">Valor</div>
-                      <div className="uppercase tracking-wider">Mixto</div>
-                      <div className="uppercase tracking-wider">Crec.</div>
+                  <div>
+                    <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+                      <div className="flex items-center gap-2.5">
+                        <Layers className="w-5 h-5 text-indigo-500" />
+                        <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                          Morningstar Equity Style Box™ (3x3)
+                        </h3>
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
+                        {styleBox.dominantLabel}
+                      </span>
                     </div>
 
-                    {/* Row 1: Large Cap */}
-                    <div className="grid grid-cols-4 gap-2 mb-2 items-center">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Grande</div>
-                      <div className="h-14 sm:h-16 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-50/60 dark:bg-indigo-500/10 border-indigo-200/60 dark:border-indigo-500/20">
-                        <span className="font-mono font-bold text-base text-slate-900 dark:text-white">{styleBox.largeValue}%</span>
-                        <span className="text-[10px] text-slate-400">Large Value</span>
-                      </div>
-                      <div className="h-14 sm:h-16 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-600 text-white border-indigo-700 shadow-sm">
-                        <span className="font-mono font-bold text-base">{styleBox.largeBlend}%</span>
-                        <span className="text-[10px] text-indigo-100">Large Blend</span>
-                      </div>
-                      <div className="h-14 sm:h-16 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-50/60 dark:bg-indigo-500/10 border-indigo-200/60 dark:border-indigo-500/20">
-                        <span className="font-mono font-bold text-base text-slate-900 dark:text-white">{styleBox.largeGrowth}%</span>
-                        <span className="text-[10px] text-slate-400">Large Growth</span>
-                      </div>
-                    </div>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2.5">
+                      Descomposición de la renta variable según capitalización de mercado (Large, Mid, Small) y estilo de inversión (Value, Blend, Growth).
+                    </p>
 
-                    {/* Row 2: Mid Cap */}
-                    <div className="grid grid-cols-4 gap-2 mb-2 items-center">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Mediana</div>
-                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
-                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.midValue}%</span>
+                    {/* Matriz 3x3 Interactiva */}
+                    <div className="mt-4 max-w-sm sm:max-w-md mx-auto">
+                      <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400 pb-1.5">
+                        <div></div>
+                        <div className="uppercase tracking-wider">Valor</div>
+                        <div className="uppercase tracking-wider">Mixto</div>
+                        <div className="uppercase tracking-wider">Crec.</div>
                       </div>
-                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
-                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.midBlend}%</span>
-                      </div>
-                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
-                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.midGrowth}%</span>
-                      </div>
-                    </div>
 
-                    {/* Row 3: Small Cap */}
-                    <div className="grid grid-cols-4 gap-2 mb-2 items-center">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Pequeña</div>
-                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
-                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.smallValue}%</span>
+                      {/* Row 1: Large Cap */}
+                      <div className="grid grid-cols-4 gap-2 mb-2 items-center">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Grande</div>
+                        <div className="h-13 sm:h-14 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-50/60 dark:bg-indigo-500/10 border-indigo-200/60 dark:border-indigo-500/20">
+                          <span className="font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white">{styleBox.largeValue}%</span>
+                          <span className="text-[9.5px] text-slate-400">Large Value</span>
+                        </div>
+                        <div className="h-13 sm:h-14 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-600 text-white border-indigo-700 shadow-sm">
+                          <span className="font-mono font-bold text-sm sm:text-base">{styleBox.largeBlend}%</span>
+                          <span className="text-[9.5px] text-indigo-100">Large Blend</span>
+                        </div>
+                        <div className="h-13 sm:h-14 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-50/60 dark:bg-indigo-500/10 border-indigo-200/60 dark:border-indigo-500/20">
+                          <span className="font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white">{styleBox.largeGrowth}%</span>
+                          <span className="text-[9.5px] text-slate-400">Large Growth</span>
+                        </div>
                       </div>
-                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
-                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.smallBlend}%</span>
+
+                      {/* Row 2: Mid Cap */}
+                      <div className="grid grid-cols-4 gap-2 mb-2 items-center">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Mediana</div>
+                        <div className="h-11 sm:h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                          <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.midValue}%</span>
+                        </div>
+                        <div className="h-11 sm:h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                          <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.midBlend}%</span>
+                        </div>
+                        <div className="h-11 sm:h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                          <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.midGrowth}%</span>
+                        </div>
                       </div>
-                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
-                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.smallGrowth}%</span>
+
+                      {/* Row 3: Small Cap */}
+                      <div className="grid grid-cols-4 gap-2 mb-2 items-center">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Pequeña</div>
+                        <div className="h-11 sm:h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                          <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.smallValue}%</span>
+                        </div>
+                        <div className="h-11 sm:h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                          <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.smallBlend}%</span>
+                        </div>
+                        <div className="h-11 sm:h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                          <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.smallGrowth}%</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Style Metrics Strip */}
-                  <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-200/70 dark:border-white/[0.06] text-center text-xs">
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
-                      <span className="text-slate-400 block text-[10.5px]">Precio/Valor Contable</span>
-                      <span className="font-mono font-bold text-base text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToBook}x</span>
+                  <div className="grid grid-cols-3 gap-2.5 mt-4 pt-3.5 border-t border-slate-200/70 dark:border-white/[0.06] text-center text-xs">
+                    <div className="p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[10px]">P/Valor Cont.</span>
+                      <span className="font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToBook}x</span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
-                      <span className="text-slate-400 block text-[10.5px]">Precio/Beneficio (PER)</span>
-                      <span className="font-mono font-bold text-base text-indigo-600 dark:text-indigo-400 mt-0.5 block">{styleBox.priceToEarnings}x</span>
+                    <div className="p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[10px]">P/Beneficio (PER)</span>
+                      <span className="font-mono font-bold text-sm sm:text-base text-indigo-600 dark:text-indigo-400 mt-0.5 block">{styleBox.priceToEarnings}x</span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
-                      <span className="text-slate-400 block text-[10.5px]">Precio/CashFlow</span>
-                      <span className="font-mono font-bold text-base text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToCashFlow}x</span>
+                    <div className="p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[10px]">P/CashFlow</span>
+                      <span className="font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToCashFlow}x</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* FILA 2 - DERECHA (7 cols): Exposición por País % (en 2 columnas para 10 países) */}
+              <div className="lg:col-span-7 flex flex-col min-h-0">
+                <Card className="p-5 sm:p-6 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+                      <div className="flex items-center gap-2.5">
+                        <Globe className="w-5 h-5 text-blue-500" />
+                        <div>
+                          <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+                            Exposición por País %
+                          </h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Distribución geográfica ponderada de la renta variable subyacente
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+                        Top 10 Países
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      {topCountries.map((c, i) => (
+                        <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#252528] border border-slate-200/60 dark:border-white/[0.04]">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-base shrink-0">{c.flag}</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{c.country}</span>
+                          </div>
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            <div className="w-16 sm:w-20 h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                              <div className="h-full bg-blue-600 rounded-full" style={{ width: `${Math.min(100, c.actionWeight * 1.6)}%` }} />
+                            </div>
+                            <span className="font-mono font-bold text-slate-900 dark:text-white w-12 text-right">
+                              {c.actionWeight.toFixed(2)}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </Card>

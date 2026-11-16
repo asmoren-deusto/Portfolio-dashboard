@@ -72,9 +72,9 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center my-auto py-2">
-          {/* Ternary Triangle SVG */}
-          <div className="md:col-span-5 flex flex-col items-center justify-center pr-0 md:pr-4 md:border-r border-slate-200/70 dark:border-white/[0.08]">
-            <div className="relative w-56 h-48 flex items-center justify-center">
+          {/* Ternary Triangle SVG (4 cols) */}
+          <div className="md:col-span-4 flex flex-col items-center justify-center pr-0 md:pr-4 md:border-r border-slate-200/70 dark:border-white/[0.08]">
+            <div className="relative w-48 sm:w-52 h-44 flex items-center justify-center">
               <svg viewBox="0 0 120 100" className="w-full h-full overflow-visible">
                 {/* Background shaded areas */}
                 <polygon points="60,16 18,78 102,78" fill="currentColor" className="text-slate-100 dark:text-white/[0.03] stroke-slate-400 dark:stroke-white/20" strokeWidth="1.2" />
@@ -88,10 +88,10 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 <text x="60" y="8" textAnchor="middle" className="text-[7.5px] font-bold fill-blue-600 dark:fill-blue-400">
                   Sensible ({data.sensible.totalWeight.toFixed(1)}%)
                 </text>
-                <text x="12" y="89" textAnchor="start" className="text-[7.5px] font-bold fill-emerald-600 dark:fill-emerald-400">
+                <text x="14" y="90" textAnchor="start" className="text-[7px] font-bold fill-emerald-600 dark:fill-emerald-400">
                   Defensivo ({data.defensivo.totalWeight.toFixed(1)}%)
                 </text>
-                <text x="108" y="89" textAnchor="end" className="text-[7.5px] font-bold fill-amber-600 dark:fill-amber-400">
+                <text x="106" y="90" textAnchor="end" className="text-[7px] font-bold fill-amber-600 dark:fill-amber-400">
                   Cíclico ({data.ciclico.totalWeight.toFixed(1)}%)
                 </text>
 
@@ -105,26 +105,26 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               </svg>
             </div>
 
-            <div className="flex items-center gap-4 mt-3 text-xs font-medium">
-              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                <span className="w-3 h-3 rounded-full border-2 border-[#C8102E] bg-white inline-block" /> Tu Cartera
+            <div className="flex items-center gap-3.5 mt-2.5 text-xs font-medium">
+              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-full border-2 border-[#C8102E] bg-white inline-block" /> Tu Cartera
               </span>
-              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                <span className="w-2.5 h-2.5 rotate-45 bg-[#10b981] inline-block" /> Benchmark Global
+              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px]">
+                <span className="w-2 h-2 rotate-45 bg-[#10b981] inline-block" /> Benchmark Global
               </span>
             </div>
           </div>
 
-          {/* 3 SuperSectors Breakdown */}
-          <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          {/* 3 SuperSectors Breakdown (8 cols - AMPLIA) */}
+          <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             {/* Cíclico */}
             <div
               onClick={() => setSelectedSector(selectedSector === 'ciclico' ? null : 'ciclico')}
               className={cn(
-                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full',
+                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'ciclico'
                   ? 'border-amber-500 bg-amber-500/10'
-                  : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02]'
+                  : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
@@ -136,12 +136,12 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 </div>
                 <div className="mt-2.5 space-y-2">
                   {data.ciclico.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400">
                       <span className="truncate pr-1 flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
                         <span>{ind.name}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -152,10 +152,10 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'sensible' ? null : 'sensible')}
               className={cn(
-                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full',
+                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'sensible'
                   ? 'border-blue-500 bg-blue-500/10'
-                  : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02]'
+                  : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
@@ -167,12 +167,12 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 </div>
                 <div className="mt-2.5 space-y-2">
                   {data.sensible.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400">
                       <span className="truncate pr-1 flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
                         <span>{ind.name}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -183,10 +183,10 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
             <div
               onClick={() => setSelectedSector(selectedSector === 'defensivo' ? null : 'defensivo')}
               className={cn(
-                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full',
+                'p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-full shadow-2xs',
                 selectedSector === 'defensivo'
                   ? 'border-emerald-500 bg-emerald-500/10'
-                  : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02]'
+                  : 'border-slate-200/70 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/10'
               )}
             >
               <div>
@@ -198,12 +198,12 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 </div>
                 <div className="mt-2.5 space-y-2">
                   {data.defensivo.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400">
                       <span className="truncate pr-1 flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
                         <span>{ind.name}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
