@@ -1124,8 +1124,7 @@ export function OverviewPage() {
                   )}
                   <span className="relative z-10 flex items-center gap-1.5">
                     <TrendingUp size={12} className={chartStyle === 'lines' ? 'text-blue-500' : ''} />
-                    <span className="hidden xl:inline">Comparativa</span>
-                    <span className="xl:hidden">Líneas</span>
+                    <span>Entidades</span>
                   </span>
                 </motion.button>
 
@@ -1149,8 +1148,8 @@ export function OverviewPage() {
                   )}
                   <span className="relative z-10 flex items-center gap-1.5">
                     <PiggyBank size={12} className={chartStyle === 'waterfall' ? 'text-amber-500' : ''} />
-                    <span className="hidden xl:inline">Aporte vs Ganancia</span>
-                    <span className="xl:hidden">Aporte</span>
+                    <span className="hidden sm:inline">Aporte vs Gan.</span>
+                    <span className="sm:hidden">Aporte</span>
                   </span>
                 </motion.button>
 
