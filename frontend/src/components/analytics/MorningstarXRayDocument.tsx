@@ -782,7 +782,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span className="text-[7.5px] text-slate-400 font-mono">Media vs Volatilidad</span>
                 </div>
                 <div className="w-full h-[175px] bg-slate-50 border border-slate-200 rounded p-2 flex items-center justify-center relative">
-                  <svg viewBox="0 0 210 148" className="w-full h-full overflow-visible">
+                  <svg viewBox="-8 0 218 148" className="w-full h-full overflow-visible">
                     {/* Gridlines */}
                     {[7, 14, 21, 28, 35].map((v) => {
                       const gx = 24 + (v / 35) * 172
@@ -835,6 +835,20 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                         <text key={m} x="20" y={ly} fill="#64748b" style={{ fill: '#64748b' }} textAnchor="end" dominantBaseline="central" className="text-[6.5px] font-mono">{m}</text>
                       )
                     })}
+                    {/* Y Axis Legend (Rentabilidad Media a 3a) */}
+                    <g transform="translate(1, 66) rotate(-90)">
+                      <text
+                        x="0"
+                        y="0"
+                        fill="#475569"
+                        style={{ fill: '#475569' }}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        className="text-[6.5px] font-bold font-sans"
+                      >
+                        Rentabilidad Media a 3a (%)
+                      </text>
+                    </g>
                     
                     {/* Scatter Points */}
                     {/* Benchmark */}
