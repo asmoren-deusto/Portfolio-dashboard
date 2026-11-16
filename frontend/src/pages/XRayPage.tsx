@@ -28,6 +28,7 @@ import { fmt, cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { downloadExcelReport } from '@/api/export'
+import { downloadXRayPdf } from '@/lib/exportXRayPdf'
 import { MorningstarXRayDocument } from '@/components/analytics/MorningstarXRayDocument'
 import { FundCorrelationMatrixCard } from '@/components/analytics/FundCorrelationMatrixCard'
 import { RiskReturnScatterCard } from '@/components/analytics/RiskReturnScatterCard'
@@ -77,59 +78,13 @@ export function XRayPage() {
   }
 
   const handleSavePdf = async () => {
-    const element = document.getElementById('morningstar-pdf-canvas')
-    if (!element) return
-
     try {
       setIsGeneratingPdf(true)
-      const jspdfModule = await import('jspdf')
-      const jsPDF = jspdfModule.jsPDF || jspdfModule.default
-      const { toJpeg } = await import('html-to-image')
-
-      const dateStr = new Date().toISOString().slice(0, 10)
-      const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
-      const filename = `Morningstar_Portfolio_XRay${entitySuffix}_${dateStr}.pdf`
-
-      const pdf = new jsPDF({
-        unit: 'mm',
-        format: 'a4',
-        orientation: 'portrait',
-        compress: true,
+      await downloadXRayPdf({
+        positions,
+        broker: selectedBroker,
+        clientName: currentUser?.name || 'Inversor',
       })
-
-      const pages = Array.from(element.querySelectorAll<HTMLElement>('.print-page'))
-
-      if (pages.length === 0) {
-        const imgData = await toJpeg(element, {
-          quality: 0.95,
-          pixelRatio: 2,
-          backgroundColor: '#ffffff',
-          skipFonts: true,
-        })
-        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
-      } else {
-        for (let i = 0; i < pages.length; i++) {
-          const pageEl = pages[i]
-          const imgData = await toJpeg(pageEl, {
-            quality: 0.95,
-            pixelRatio: 2,
-            backgroundColor: '#ffffff',
-            skipFonts: true,
-            style: {
-              boxShadow: 'none',
-              border: 'none',
-              borderRadius: '0',
-              marginBottom: '0',
-            },
-          })
-          if (i > 0) {
-            pdf.addPage('a4', 'portrait')
-          }
-          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
-        }
-      }
-
-      pdf.save(filename)
     } catch (err) {
       console.error('Error al generar PDF directo:', err)
       alert('No se pudo generar el archivo PDF automáticamente. Revisa la consola para más detalles.')

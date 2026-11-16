@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark, RefreshCw, ScanSearch, FileSpreadsheet } from 'lucide-react'
+import { X, Check, LogOut, ShieldCheck, Sun, Moon, Eye, EyeOff, Landmark, RefreshCw, ScanSearch, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store/appStore'
 import { APP_VERSION } from '@/version'
 import { cn } from '@/lib/utils'
 import { BROKERS, DEMO_BROKERS, BROKER_CONFIG } from '@/components/layout/Header'
 import { downloadExcelReport } from '@/api/export'
+import { downloadXRayPdf } from '@/lib/exportXRayPdf'
+import { usePositions } from '@/api/queries'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -27,6 +30,8 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
     useMock,
   } = useAppStore()
   const navigate = useNavigate()
+  const { data: positions = [] } = usePositions()
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
   const brokers = useMock ? DEMO_BROKERS : BROKERS
 
 
@@ -240,19 +245,36 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  onClose()
-                  navigate('/xray')
+                disabled={isDownloadingPdf}
+                onClick={async () => {
+                  try {
+                    setIsDownloadingPdf(true)
+                    await downloadXRayPdf({
+                      positions,
+                      broker: selectedBroker,
+                      clientName: currentUser?.name || 'Inversor',
+                    })
+                    onClose()
+                  } catch (err) {
+                    console.error('Error al generar PDF X-Ray:', err)
+                    alert('No se pudo generar el archivo PDF automáticamente.')
+                  } finally {
+                    setIsDownloadingPdf(false)
+                  }
                 }}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50/70 dark:hover:bg-indigo-500/10 font-semibold transition-colors text-xs cursor-pointer border border-indigo-200/50 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-indigo-500/5 active:scale-98"
-                title="Abrir Informe X-Ray Completo de Cartera"
+                className="w-full flex items-center justify-between p-2.5 rounded-xl text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50/70 dark:hover:bg-indigo-500/10 font-semibold transition-colors text-xs cursor-pointer border border-indigo-200/50 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-indigo-500/5 active:scale-98 disabled:opacity-60"
+                title="Descargar informe oficial en PDF (Morningstar Portfolio X-Ray)"
               >
                 <div className="flex items-center gap-2">
-                  <ScanSearch size={15} className="text-indigo-600 dark:text-indigo-400" />
-                  <span>Informe X-Ray</span>
+                  {isDownloadingPdf ? (
+                    <Loader2 size={15} className="text-indigo-600 dark:text-indigo-400 animate-spin" />
+                  ) : (
+                    <ScanSearch size={15} className="text-indigo-600 dark:text-indigo-400" />
+                  )}
+                  <span>{isDownloadingPdf ? 'Generando PDF...' : 'Informe X-Ray'}</span>
                 </div>
                 <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold">
-                  X-RAY
+                  .PDF
                 </span>
               </button>
 
