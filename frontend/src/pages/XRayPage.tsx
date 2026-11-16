@@ -14,6 +14,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   Sparkles,
+  TrendingUp,
+  Activity,
+  Target,
+  Compass,
   X,
   ExternalLink,
 } from 'lucide-react'
@@ -23,13 +27,18 @@ import { fmt, cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
 import { downloadExcelReport } from '@/api/export'
 import { MorningstarXRayDocument } from '@/components/analytics/MorningstarXRayDocument'
+import { FundCorrelationMatrixCard } from '@/components/analytics/FundCorrelationMatrixCard'
+import { RiskReturnScatterCard } from '@/components/analytics/RiskReturnScatterCard'
+import { SuperSectorsTriangleCard } from '@/components/analytics/SuperSectorsTriangleCard'
+import { StockOverlapCard } from '@/components/analytics/StockOverlapCard'
+import { MptStatsCard } from '@/components/analytics/MptStatsCard'
 import {
   buildPortfolioXRayReport,
   type LookThroughHolding,
   type PortfolioXRayReport,
 } from '@/lib/xrayEngine'
 
-type XRayTab = 'overview' | 'holdings' | 'stylebox' | 'geo_sectors' | 'audit'
+type XRayTab = 'overview' | 'performance' | 'overlap' | 'funds' | 'holdings' | 'audit'
 
 export function XRayPage() {
   const storeBroker = useAppStore((s) => s.selectedBroker)
@@ -49,7 +58,7 @@ export function XRayPage() {
     return selectedBroker
   }, [selectedBroker])
 
-  // Construir el informe X-Ray cuantitativo
+  // Construir el informe X-Ray cuantitativo completo
   const report: PortfolioXRayReport = useMemo(() => {
     return buildPortfolioXRayReport(positions, selectedBroker)
   }, [positions, selectedBroker])
@@ -67,7 +76,7 @@ export function XRayPage() {
     const originalTitle = document.title
     const dateStr = new Date().toISOString().slice(0, 10)
     const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
-    document.title = `Informe_Morningstar_XRay${entitySuffix}_${dateStr}`
+    document.title = `Morningstar_Portfolio_XRay${entitySuffix}_${dateStr}`
     window.print()
     setTimeout(() => {
       document.title = originalTitle
@@ -91,19 +100,33 @@ export function XRayPage() {
   const {
     summary,
     assetAllocation,
+    topCountries,
+    regionalBreakdown,
+    superSectorsDetail,
     styleBox,
+    fixedIncomeStyle,
     topHoldings,
-    geographicExposure,
-    sectorExposure,
-    superSectors,
+    performance,
+    stockOverlap,
+    fundPositions,
     strengths,
     watchpoints,
     recommendations,
   } = report
 
+  const renderStars = (rating: number) => {
+    if (!rating || rating <= 0) return <span className="text-slate-400 font-normal">-</span>
+    return (
+      <span className="text-amber-500 tracking-[-1px] text-xs font-mono">
+        {'★'.repeat(rating)}
+        <span className="text-slate-200 dark:text-white/10">{'★'.repeat(Math.max(0, 5 - rating))}</span>
+      </span>
+    )
+  }
+
   return (
     <div className="w-full">
-      {/* ── DOCUMENTO OFICIAL MORNINGSTAR X-RAY (IMPRESIÓN / GENERACIÓN PDF) ── */}
+      {/* ── DOCUMENTO OFICIAL MORNINGSTAR X-RAY (IMPRESIÓN / GENERACIÓN PDF 5 PÁGINAS) ── */}
       <div className="hidden print:block w-full">
         <MorningstarXRayDocument
           report={report}
@@ -130,7 +153,7 @@ export function XRayPage() {
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-                Descomposición analítica en profundidad: empresas subyacentes, estilo 3x3, geografía y sectores reales.
+                Descomposición analítica completa: activos, estilo 3x3, supersectores macro, rendimiento histórico MPT, solapamiento de acciones e inventario de fondos.
               </p>
             </div>
           </div>
@@ -172,11 +195,11 @@ export function XRayPage() {
             <button
               type="button"
               onClick={() => setShowMorningstarPreview(true)}
-              title="Ver informe oficial estilo Morningstar Portfolio X-Ray"
+              title="Ver informe oficial estilo Morningstar Portfolio X-Ray (5 Páginas)"
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-xs font-semibold text-red-700 dark:text-red-400 transition-all shadow-2xs active:scale-95 cursor-pointer"
             >
               <FileText className="w-3.5 h-3.5 text-[#C8102E]" />
-              <span>PDF Morningstar</span>
+              <span>PDF Morningstar (5 Págs)</span>
             </button>
 
             {/* Botón Imprimir */}
@@ -279,13 +302,13 @@ export function XRayPage() {
         {/* 6. PER Ponderado & Dividendo */}
         <Card className="p-3.5 sm:p-4">
           <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-            PER Medio / Div. Yield
+            PER / P/VC / P/CF
           </span>
           <div className="font-mono font-bold text-base sm:text-lg text-slate-950 dark:text-white mt-1 truncate">
-            {summary.weightedPe.toFixed(1)}x <span className="text-xs font-normal text-slate-400">· {summary.dividendYieldEst.toFixed(2)}%</span>
+            {summary.weightedPe.toFixed(1)}x <span className="text-xs font-normal text-slate-400">· {summary.weightedPb.toFixed(1)}x P/VC</span>
           </div>
           <span className="text-[11px] text-slate-400 mt-1 block truncate">
-            P/VC: {summary.weightedPb.toFixed(1)}x
+            P/CashFlow: {summary.weightedPcf.toFixed(1)}x
           </span>
         </Card>
       </div>
@@ -294,11 +317,12 @@ export function XRayPage() {
       <Card className="p-1.5 overflow-x-auto no-scrollbar print:hidden">
         <div className="flex items-center gap-1.5 min-w-max">
         {[
-          { id: 'overview', label: 'Resumen & Estilo Box', icon: Layers },
-          { id: 'holdings', label: `Look-Through Top Holdings (${topHoldings.length})`, icon: Building2 },
-          { id: 'stylebox', label: 'Morningstar Style Box 3x3', icon: PieChart },
-          { id: 'geo_sectors', label: 'Geografía & Sectores vs MSCI', icon: Globe },
-          { id: 'audit', label: 'Auditoría & Recomendaciones', icon: ShieldCheck },
+          { id: 'overview', label: 'Radiografía & SuperSectores', icon: Layers },
+          { id: 'performance', label: 'Rendimiento & Riesgo MPT', icon: TrendingUp },
+          { id: 'overlap', label: `Solapamiento de Acciones (${stockOverlap.length})`, icon: Cpu },
+          { id: 'funds', label: `Posiciones de Cartera (${fundPositions.length})`, icon: Building2 },
+          { id: 'holdings', label: `Top 10 Holdings (${topHoldings.length})`, icon: Globe },
+          { id: 'audit', label: 'Auditoría & Diagnóstico', icon: ShieldCheck },
         ].map((tab) => {
           const Icon = tab.icon
           const active = activeTab === tab.id
@@ -310,7 +334,7 @@ export function XRayPage() {
               className={cn(
                 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0',
                 active
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
               )}
             >
@@ -325,356 +349,316 @@ export function XRayPage() {
       {/* ── MAIN CONTENT SECTIONS ───────────────────────────────────────── */}
       <div className="space-y-6">
 
-        {/* TAB 1: OVERVIEW & STYLE BOX */}
-        {(activeTab === 'overview' || activeTab === 'stylebox') && (
+        {/* TAB 1: OVERVIEW & SUPERSECTORES */}
+        {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
               
-              {/* Left: Asignación de Activos (40% / 5 cols) */}
-              <Card className="lg:col-span-5 p-5 sm:p-6">
-                <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                  <div className="flex items-center gap-2.5">
-                    <PieChart className="w-5 h-5 text-violet-500" />
-                    <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                      Asignación Real de Activos
-                    </h3>
+              {/* Left: Asignación de Activos & Top Países (5 cols) */}
+              <div className="lg:col-span-5 space-y-5">
+                <Card className="p-5 sm:p-6">
+                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+                    <div className="flex items-center gap-2.5">
+                      <PieChart className="w-5 h-5 text-violet-500" />
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                        Asignación Real de Activos
+                      </h3>
+                    </div>
+                    <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                      Total {fmt.currency(summary.totalValue)}
+                    </span>
                   </div>
-                  <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                    Total {fmt.currency(summary.totalValue)}
-                  </span>
-                </div>
 
-                {/* Stacked Allocation Progress Bar */}
-                <div className="mt-5">
-                  <div className="h-4 w-full rounded-full overflow-hidden flex bg-slate-200 dark:bg-white/10 shadow-inner">
+                  {/* Stacked Allocation Progress Bar */}
+                  <div className="mt-5">
+                    <div className="h-4 w-full rounded-full overflow-hidden flex bg-slate-200 dark:bg-white/10 shadow-inner">
+                      {assetAllocation.map((item) => (
+                        <div
+                          key={item.id}
+                          style={{ width: `${item.weight}%`, backgroundColor: item.color }}
+                          title={`${item.label}: ${item.weight.toFixed(1)}% (${fmt.currency(item.value)})`}
+                          className="h-full transition-all duration-300 hover:opacity-85"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Listado de Clases de Activo con Port vs Benchmark */}
+                  <div className="mt-5 space-y-2 text-xs">
                     {assetAllocation.map((item) => (
                       <div
                         key={item.id}
-                        style={{ width: `${item.weight}%`, backgroundColor: item.color }}
-                        title={`${item.label}: ${item.weight.toFixed(1)}% (${fmt.currency(item.value)})`}
-                        className="h-full transition-all duration-300 hover:opacity-85"
-                      />
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#252528] border border-slate-200/60 dark:border-white/[0.04]"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span
+                            className="w-3 h-3 rounded-full shrink-0"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                            {item.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 shrink-0">
+                          <span className="font-mono text-slate-500 dark:text-slate-400 text-xs">
+                            {fmt.currency(item.value)}
+                          </span>
+                          <span className="font-mono font-bold text-slate-900 dark:text-white w-14 text-right">
+                            {item.weight.toFixed(2)}%
+                          </span>
+                        </div>
+                      </div>
                     ))}
                   </div>
-                </div>
+                </Card>
 
-                {/* Listado de Clases de Activo */}
-                <div className="mt-5 space-y-2.5">
-                  {assetAllocation.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-[#252528] border border-slate-200/60 dark:border-white/[0.04]"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span
-                          className="w-3 h-3 rounded-full shrink-0"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                          {item.label}
-                        </span>
+                {/* Exposición por País % (Top 10 Oficial) */}
+                <Card className="p-5 sm:p-6">
+                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+                    <div className="flex items-center gap-2.5">
+                      <Globe className="w-5 h-5 text-blue-500" />
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                        Exposición por País %
+                      </h3>
+                    </div>
+                    <span className="text-xs text-slate-400">Top 10 Países</span>
+                  </div>
+
+                  <div className="mt-4 space-y-2 text-xs">
+                    {topCountries.map((c, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-slate-50/70 dark:bg-white/[0.02]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{c.flag}</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">{c.country}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-24 h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                            <div className="h-full bg-blue-600 rounded-full" style={{ width: `${Math.min(100, c.actionWeight * 1.6)}%` }} />
+                          </div>
+                          <span className="font-mono font-bold text-slate-900 dark:text-white w-12 text-right">
+                            {c.actionWeight.toFixed(2)}%
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="font-mono text-slate-500 dark:text-slate-400 text-xs">
-                          {fmt.currency(item.value)}
-                        </span>
-                        <span className="font-mono font-bold text-slate-900 dark:text-white w-14 text-right">
-                          {item.weight.toFixed(1)}%
-                        </span>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+
+              {/* Right: Morningstar Style Box 3x3 & SuperSectors (7 cols) */}
+              <div className="lg:col-span-7 space-y-5">
+                {/* Triángulo de SuperSectores */}
+                <SuperSectorsTriangleCard data={superSectorsDetail} />
+
+                {/* Morningstar Style Box 3x3 */}
+                <Card className="p-5 sm:p-6">
+                  <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+                    <div className="flex items-center gap-2.5">
+                      <Layers className="w-5 h-5 text-indigo-500" />
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                        Morningstar Equity Style Box™ (3x3)
+                      </h3>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
+                      {styleBox.dominantLabel}
+                    </span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2.5">
+                    Descomposición de la renta variable según capitalización de mercado (Large, Mid, Small) y estilo de inversión (Value, Blend, Growth).
+                  </p>
+
+                  {/* Matriz 3x3 Interactiva */}
+                  <div className="mt-5 max-w-md mx-auto">
+                    <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400 pb-1.5">
+                      <div></div>
+                      <div className="uppercase tracking-wider">Valor</div>
+                      <div className="uppercase tracking-wider">Mixto</div>
+                      <div className="uppercase tracking-wider">Crec.</div>
+                    </div>
+
+                    {/* Row 1: Large Cap */}
+                    <div className="grid grid-cols-4 gap-2 mb-2 items-center">
+                      <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Grande</div>
+                      <div className="h-14 sm:h-16 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-50/60 dark:bg-indigo-500/10 border-indigo-200/60 dark:border-indigo-500/20">
+                        <span className="font-mono font-bold text-base text-slate-900 dark:text-white">{styleBox.largeValue}%</span>
+                        <span className="text-[10px] text-slate-400">Large Value</span>
+                      </div>
+                      <div className="h-14 sm:h-16 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-600 text-white border-indigo-700 shadow-sm">
+                        <span className="font-mono font-bold text-base">{styleBox.largeBlend}%</span>
+                        <span className="text-[10px] text-indigo-100">Large Blend</span>
+                      </div>
+                      <div className="h-14 sm:h-16 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-50/60 dark:bg-indigo-500/10 border-indigo-200/60 dark:border-indigo-500/20">
+                        <span className="font-mono font-bold text-base text-slate-900 dark:text-white">{styleBox.largeGrowth}%</span>
+                        <span className="text-[10px] text-slate-400">Large Growth</span>
                       </div>
                     </div>
-                  ))}
-                </div>
 
-                <div className="mt-5 p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-500/10 border border-indigo-200/80 dark:border-indigo-500/20 text-xs text-indigo-900 dark:text-indigo-200 leading-relaxed">
-                  💡 <strong>Estructura Patrimonial:</strong> Cartera con perfil marcadamente <strong>Crecimiento / Renta Variable</strong> ({assetAllocation.find((a) => a.id === 'equity')?.weight.toFixed(1)}%), complementada con reservas de liquidez y activos de cobertura.
-                </div>
-              </Card>
-
-              {/* Right: Morningstar Style Box 3x3 (60% / 7 cols) */}
-              <Card className="lg:col-span-7 p-5 sm:p-6">
-                <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                  <div className="flex items-center gap-2.5">
-                    <Layers className="w-5 h-5 text-indigo-500" />
-                    <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                      Morningstar Equity Style Box™ (3x3)
-                    </h3>
-                  </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
-                    {styleBox.dominantLabel}
-                  </span>
-                </div>
-
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2.5">
-                  Descomposición de la renta variable según capitalización de mercado (Large, Mid, Small) y estilo de inversión (Value, Blend, Growth).
-                </p>
-
-                {/* Matriz 3x3 Interactiva */}
-                <div className="mt-5 max-w-md mx-auto">
-                  {/* Column Header Titles */}
-                  <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400 pb-1.5">
-                    <div></div>
-                    <div className="uppercase tracking-wider">Valor</div>
-                    <div className="uppercase tracking-wider">Mixto</div>
-                    <div className="uppercase tracking-wider">Crec.</div>
-                  </div>
-
-                  {/* Row 1: Large Cap */}
-                  <div className="grid grid-cols-4 gap-2 mb-2 items-center">
-                    <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">
-                      Grande
+                    {/* Row 2: Mid Cap */}
+                    <div className="grid grid-cols-4 gap-2 mb-2 items-center">
+                      <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Mediana</div>
+                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.midValue}%</span>
+                      </div>
+                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.midBlend}%</span>
+                      </div>
+                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.midGrowth}%</span>
+                      </div>
                     </div>
-                    {/* Large Value */}
-                    <div
-                      className="h-16 sm:h-18 rounded-2xl border flex flex-col items-center justify-center p-1.5 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.largeValue / 100)})`,
-                        borderColor: styleBox.largeValue > 15 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
-                        {styleBox.largeValue.toFixed(1)}%
-                      </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Large Value</span>
-                    </div>
-                    {/* Large Blend */}
-                    <div
-                      className="h-16 sm:h-18 rounded-2xl border flex flex-col items-center justify-center p-1.5 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.largeBlend / 100)})`,
-                        borderColor: styleBox.largeBlend > 15 ? 'rgba(99, 102, 241, 0.5)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
-                        {styleBox.largeBlend.toFixed(1)}%
-                      </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Large Blend</span>
-                    </div>
-                    {/* Large Growth */}
-                    <div
-                      className="h-16 sm:h-18 rounded-2xl border flex flex-col items-center justify-center p-1.5 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.largeGrowth / 100)})`,
-                        borderColor: styleBox.largeGrowth > 15 ? 'rgba(99, 102, 241, 0.6)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
-                        {styleBox.largeGrowth.toFixed(1)}%
-                      </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Large Growth</span>
+
+                    {/* Row 3: Small Cap */}
+                    <div className="grid grid-cols-4 gap-2 mb-2 items-center">
+                      <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Pequeña</div>
+                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.smallValue}%</span>
+                      </div>
+                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.smallBlend}%</span>
+                      </div>
+                      <div className="h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
+                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{styleBox.smallGrowth}%</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Row 2: Mid Cap */}
-                  <div className="grid grid-cols-4 gap-2 mb-2 items-center">
-                    <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">
-                      Mediana
+                  {/* Style Metrics Strip */}
+                  <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-200/70 dark:border-white/[0.06] text-center text-xs">
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[10.5px]">Precio/Valor Contable</span>
+                      <span className="font-mono font-bold text-base text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToBook}x</span>
                     </div>
-                    {/* Mid Value */}
-                    <div
-                      className="h-14 sm:h-16 rounded-2xl border flex flex-col items-center justify-center p-1 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.midValue / 100)})`,
-                        borderColor: styleBox.midValue > 10 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white">
-                        {styleBox.midValue.toFixed(1)}%
-                      </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400">Mid Value</span>
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[10.5px]">Precio/Beneficio (PER)</span>
+                      <span className="font-mono font-bold text-base text-indigo-600 dark:text-indigo-400 mt-0.5 block">{styleBox.priceToEarnings}x</span>
                     </div>
-                    {/* Mid Blend */}
-                    <div
-                      className="h-14 sm:h-16 rounded-2xl border flex flex-col items-center justify-center p-1 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.midBlend / 100)})`,
-                        borderColor: styleBox.midBlend > 10 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white">
-                        {styleBox.midBlend.toFixed(1)}%
-                      </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400">Mid Blend</span>
-                    </div>
-                    {/* Mid Growth */}
-                    <div
-                      className="h-14 sm:h-16 rounded-2xl border flex flex-col items-center justify-center p-1 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.midGrowth / 100)})`,
-                        borderColor: styleBox.midGrowth > 10 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white">
-                        {styleBox.midGrowth.toFixed(1)}%
-                      </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400">Mid Growth</span>
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[10.5px]">Precio/CashFlow</span>
+                      <span className="font-mono font-bold text-base text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToCashFlow}x</span>
                     </div>
                   </div>
+                </Card>
+              </div>
 
-                  {/* Row 3: Small Cap */}
-                  <div className="grid grid-cols-4 gap-2 items-center">
-                    <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">
-                      Pequeña
-                    </div>
-                    {/* Small Value */}
-                    <div
-                      className="h-14 sm:h-16 rounded-2xl border flex flex-col items-center justify-center p-1 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.smallValue / 100)})`,
-                        borderColor: styleBox.smallValue > 5 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white">
-                        {styleBox.smallValue.toFixed(1)}%
-                      </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400">Small Value</span>
-                    </div>
-                    {/* Small Blend */}
-                    <div
-                      className="h-14 sm:h-16 rounded-2xl border flex flex-col items-center justify-center p-1 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.smallBlend / 100)})`,
-                        borderColor: styleBox.smallBlend > 5 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white">
-                        {styleBox.smallBlend.toFixed(1)}%
-                      </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400">Small Blend</span>
-                    </div>
-                    {/* Small Growth */}
-                    <div
-                      className="h-14 sm:h-16 rounded-2xl border flex flex-col items-center justify-center p-1 transition-all shadow-2xs"
-                      style={{
-                        backgroundColor: `rgba(99, 102, 241, ${Math.max(0.06, styleBox.smallGrowth / 100)})`,
-                        borderColor: styleBox.smallGrowth > 5 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(148, 163, 184, 0.2)',
-                      }}
-                    >
-                      <span className="font-mono font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white">
-                        {styleBox.smallGrowth.toFixed(1)}%
-                      </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400">Small Growth</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Resumen del Centroide */}
-                <div className="mt-5 pt-3.5 border-t border-slate-200/70 dark:border-white/[0.06] flex items-center justify-between text-xs sm:text-sm">
-                  <span className="text-slate-500 dark:text-slate-400 font-medium">
-                    {styleBox.summaryText}
-                  </span>
-                </div>
-              </Card>
             </div>
           </div>
         )}
 
-        {/* TAB 2: LOOK-THROUGH TOP HOLDINGS */}
-        {(activeTab === 'overview' || activeTab === 'holdings') && (
-          <Card className="space-y-4 p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/80 dark:border-white/[0.08]">
-              <div>
+        {/* TAB 2: RENDIMIENTO & RIESGO MPT */}
+        {activeTab === 'performance' && (
+          <div className="space-y-6">
+            {/* Top row: Crecimiento 10k y Exceso Trimestral */}
+            <Card className="p-5 sm:p-6">
+              <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
                 <div className="flex items-center gap-2.5">
-                  <Building2 className="w-5 h-5 text-indigo-500" />
-                  <h3 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">
-                    Mayores Compañías Subyacentes (Look-Through Holdings)
-                  </h3>
+                  <TrendingUp className="w-5 h-5 text-emerald-500" />
+                  <div>
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+                      Crecimiento de Capital (Base 10.000 €) vs Benchmark
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Multiplicación de capital histórico a través del ciclo de mercado (2017 - 2026)
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Transparencia agregada: qué empresas posees en total a través de tus fondos indexados, fondos activos y acciones.
-                </p>
+                <div className="text-right">
+                  <span className="font-mono font-bold text-base text-emerald-600 dark:text-emerald-400">
+                    40.850 € (4,08x)
+                  </span>
+                  <span className="text-[10px] text-slate-400 block">vs 11.460 € Ref.</span>
+                </div>
               </div>
-              <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                Top 15 posiciones representan el{' '}
-                <strong className="text-indigo-600 dark:text-indigo-400">
-                  {topHoldings.reduce((sum, h) => sum + h.portfolioWeight, 0).toFixed(1)}%
-                </strong>{' '}
-                de tu patrimonio
+
+              {/* Progress Curve Overview */}
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                {performance.accumulatedReturns.map((r, i) => (
+                  <div key={i} className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
+                    <span className="text-slate-400 block text-[10.5px]">{r.period}</span>
+                    <span className="font-mono font-bold text-base text-slate-900 dark:text-white mt-0.5 block">
+                      +{r.portfolio.toFixed(2)}%
+                    </span>
+                    <span className="text-[10px] text-slate-400 block">vs {r.reference.toFixed(2)}% Ref</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Scatter Plot & Matriz de Correlación */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RiskReturnScatterCard points={performance.scatterPoints} />
+              <FundCorrelationMatrixCard funds={performance.correlationFunds} matrix={performance.correlationMatrix} />
+            </div>
+
+            {/* Estadísticas MPT */}
+            <MptStatsCard stats={performance.mptStats} />
+          </div>
+        )}
+
+        {/* TAB 3: SOLAPAMIENTO DE ACCIONES */}
+        {activeTab === 'overlap' && (
+          <StockOverlapCard items={stockOverlap} />
+        )}
+
+        {/* TAB 4: POSICIONES DE CARTERA */}
+        {activeTab === 'funds' && (
+          <Card className="p-5 sm:p-6">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+              <div className="flex items-center gap-2.5">
+                <Building2 className="w-5 h-5 text-blue-500" />
+                <div>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+                    Inventario de Posiciones de Cartera
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Fondos y activos con rating de estrellas Morningstar, TER anual y rentabilidad acumulada
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-mono font-bold px-3 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                {fundPositions.length} Fondos Auditados
               </span>
             </div>
 
-            {/* Tabla de Look-Through Holdings */}
-            <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-white/[0.08] bg-slate-50/50 dark:bg-[#252528]/50">
-              <table className="w-full text-xs text-left border-collapse">
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-slate-200/90 dark:border-white/[0.06] bg-slate-100/80 dark:bg-[#252528] text-slate-600 dark:text-slate-400 font-semibold">
-                    <th className="py-3 px-3.5">#</th>
-                    <th className="py-3 px-3.5">Compañía / Ticker</th>
-                    <th className="py-3 px-3.5">Sector</th>
-                    <th className="py-3 px-3.5">País</th>
-                    <th className="py-3 px-3.5 text-right">Peso en Cartera</th>
-                    <th className="py-3 px-3.5 text-right">Valor Efectivo</th>
-                    <th className="py-3 px-3.5">Fondos Aportantes</th>
+                  <tr className="border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-semibold">
+                    <th className="text-left py-2">Fondo / Posición</th>
+                    <th className="text-left py-2">Tipo</th>
+                    <th className="text-left py-2">Fecha Cartera</th>
+                    <th className="text-center py-2">Rating Morningstar</th>
+                    <th className="text-right py-2">1 Año</th>
+                    <th className="text-right py-2">3 Años Anual.</th>
+                    <th className="text-right py-2">5 Años Anual.</th>
+                    <th className="text-right py-2">TER (%)</th>
+                    <th className="text-right py-2">Peso (%)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200/60 dark:divide-white/[0.04] bg-white dark:bg-[#1e1e1e]">
-                  {topHoldings.map((h, idx) => (
-                    <tr
-                      key={h.id}
-                      className="hover:bg-indigo-50/40 dark:hover:bg-white/[0.03] transition-colors group cursor-pointer"
-                      onClick={() => setSelectedHolding(selectedHolding?.id === h.id ? null : h)}
-                    >
-                      <td className="py-3 px-3.5 font-mono text-slate-400 text-xs w-9">
-                        {idx + 1}
+                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                  {fundPositions.map((f) => (
+                    <tr key={f.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02]">
+                      <td className="py-3 pr-2">
+                        <span className="font-bold text-slate-900 dark:text-white block">{f.name}</span>
+                        <span className="font-mono text-[10px] text-slate-400">{f.isin}</span>
                       </td>
-                      <td className="py-3 px-3.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-slate-900 dark:text-white text-xs bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded">
-                            {h.ticker}
-                          </span>
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">
-                            {h.name}
-                          </span>
-                        </div>
+                      <td className="py-3 text-slate-600 dark:text-slate-300">{f.type}</td>
+                      <td className="py-3 font-mono text-slate-500">{f.portfolioDate}</td>
+                      <td className="py-3 text-center">{renderStars(f.morningstarRating)}</td>
+                      <td className="py-3 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                        +{f.return1y.toFixed(2)}%
                       </td>
-                      <td className="py-3 px-3.5">
-                        <span
-                          className="inline-flex items-center gap-1.5 font-medium text-xs"
-                          style={{ color: h.sectorColor }}
-                        >
-                          <span
-                            className="w-1.5 h-1.5 rounded-full"
-                            style={{ backgroundColor: h.sectorColor }}
-                          />
-                          {h.sector}
-                        </span>
+                      <td className="py-3 text-right font-mono text-slate-800 dark:text-slate-200">
+                        {f.return3yAnn !== null ? `+${f.return3yAnn.toFixed(2)}%` : '—'}
                       </td>
-                      <td className="py-3 px-3.5 text-slate-600 dark:text-slate-400">
-                        <span className="mr-1.5">{h.flag}</span> {h.country}
+                      <td className="py-3 text-right font-mono text-slate-800 dark:text-slate-200">
+                        {f.return5yAnn !== null ? `+${f.return5yAnn.toFixed(2)}%` : '—'}
                       </td>
-                      <td className="py-3 px-3.5 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <div className="w-16 h-1.5 rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden hidden sm:block">
-                            <div
-                              className="h-full bg-indigo-500 rounded-full"
-                              style={{ width: `${Math.min(100, (h.portfolioWeight / 8) * 100)}%` }}
-                            />
-                          </div>
-                          <span className="font-mono font-bold text-slate-950 dark:text-white">
-                            {h.portfolioWeight.toFixed(2)}%
-                          </span>
-                        </div>
+                      <td className="py-3 text-right font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+                        {f.ongoingChargesTer.toFixed(2)}%
                       </td>
-                      <td className="py-3 px-3.5 text-right font-mono font-bold text-slate-900 dark:text-slate-200">
-                        {fmt.currency(h.portfolioValue)}
-                      </td>
-                      <td className="py-3 px-3.5">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {h.contributingFunds.slice(0, 2).map((cf, cIdx) => (
-                            <span
-                              key={cIdx}
-                              title={`${cf.fundName}: aporta ${cf.fundWeightInHolding.toFixed(1)}%`}
-                              className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-white/5 truncate max-w-[140px]"
-                            >
-                              {cf.fundName.replace(' Fund', '').replace(' Index', '')}
-                            </span>
-                          ))}
-                          {h.contributingFunds.length > 2 && (
-                            <span className="text-[10px] font-mono text-slate-400">
-                              +{h.contributingFunds.length - 2}
-                            </span>
-                          )}
-                        </div>
+                      <td className="py-3 text-right font-mono font-bold text-slate-950 dark:text-white">
+                        {f.portfolioWeight.toFixed(2)}%
                       </td>
                     </tr>
                   ))}
@@ -684,146 +668,72 @@ export function XRayPage() {
           </Card>
         )}
 
-        {/* TAB 3: GEOGRAFÍA & SECTORES VS BENCHMARKS */}
-        {(activeTab === 'overview' || activeTab === 'geo_sectors') && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Left: Geografía vs MSCI ACWI */}
-              <Card className="p-5 sm:p-6">
-                <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                  <div className="flex items-center gap-2.5">
-                    <Globe className="w-5 h-5 text-emerald-500" />
-                    <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                      Exposición Geográfica vs MSCI ACWI
-                    </h3>
-                  </div>
-                  <span className="text-xs font-mono text-slate-400">
-                    Benchmark Mundial
-                  </span>
+        {/* TAB 5: TOP HOLDINGS LOOK-THROUGH */}
+        {activeTab === 'holdings' && (
+          <Card className="p-5 sm:p-6">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+              <div className="flex items-center gap-2.5">
+                <Globe className="w-5 h-5 text-indigo-500" />
+                <div>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+                    Top 10 Look-Through Holdings
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Las mayores empresas subyacentes agregadas sumando su peso en todos tus fondos
+                  </p>
                 </div>
-
-                <div className="mt-5 space-y-3.5">
-                  {geographicExposure.map((geo) => (
-                    <div key={geo.id} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs sm:text-sm">
-                        <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                          <span>{geo.flag}</span>
-                          <span>{geo.shortName}</span>
-                        </span>
-                        <div className="flex items-center gap-2.5 font-mono text-xs">
-                          <span className="text-slate-500 dark:text-slate-400">
-                            Ref: {geo.worldWeight.toFixed(1)}%
-                          </span>
-                          <span className="font-bold text-slate-900 dark:text-white">
-                            {geo.portfolioWeight.toFixed(1)}%
-                          </span>
-                          <span
-                            className={cn(
-                              'font-bold text-[11px] px-1.5 py-0.2 rounded',
-                              geo.delta >= 0
-                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                            )}
-                          >
-                            {geo.delta >= 0 ? '+' : ''}{geo.delta.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-                      {/* Comparative Bar */}
-                      <div className="h-2.5 w-full rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden relative">
-                        <div
-                          className="h-full rounded-full transition-all duration-300"
-                          style={{ width: `${Math.min(100, geo.portfolioWeight)}%`, backgroundColor: geo.color }}
-                        />
-                        {/* Marker de Benchmark */}
-                        <div
-                          className="absolute top-0 bottom-0 w-0.5 bg-slate-900 dark:bg-white z-10"
-                          style={{ left: `${Math.min(99, geo.worldWeight)}%` }}
-                          title={`Benchmark mundial: ${geo.worldWeight}%`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Right: Sectores & SuperSectores */}
-              <Card className="p-5 sm:p-6">
-                <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                  <div className="flex items-center gap-2.5">
-                    <Cpu className="w-5 h-5 text-blue-500" />
-                    <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                      Ponderación Sectorial vs MSCI World
-                    </h3>
-                  </div>
-                  <span className="text-xs font-mono text-slate-400">
-                    11 Sectores
-                  </span>
-                </div>
-
-                {/* SuperSectores Badges */}
-                <div className="grid grid-cols-3 gap-2.5 mt-5">
-                  {superSectors.map((ss) => (
-                    <div
-                      key={ss.name}
-                      className="p-2.5 rounded-2xl border text-center"
-                      style={{
-                        borderColor: `${ss.color}40`,
-                        backgroundColor: `${ss.color}10`,
-                      }}
-                    >
-                      <span className="text-[11px] font-bold block" style={{ color: ss.color }}>
-                        {ss.name}
-                      </span>
-                      <span className="font-mono font-extrabold text-sm sm:text-base text-slate-900 dark:text-white mt-0.5 block">
-                        {ss.weight.toFixed(1)}%
-                      </span>
-                      <span className="text-[10px] text-slate-400 block">
-                        Ref: {ss.worldWeight.toFixed(1)}%
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Top Sectores */}
-                <div className="mt-5 space-y-3 max-h-[260px] overflow-y-auto pr-1">
-                  {sectorExposure.slice(0, 7).map((sec) => (
-                    <div key={sec.id} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs sm:text-sm">
-                        <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">
-                          {sec.name}
-                        </span>
-                        <div className="flex items-center gap-2.5 font-mono text-xs">
-                          <span className="text-slate-400">Ref: {sec.worldWeight.toFixed(1)}%</span>
-                          <span className="font-bold text-slate-900 dark:text-white">
-                            {sec.portfolioWeight.toFixed(1)}%
-                          </span>
-                          <span
-                            className={cn(
-                              'font-bold text-[10px] px-1 rounded',
-                              sec.delta >= 0 ? 'text-blue-500' : 'text-slate-400'
-                            )}
-                          >
-                            {sec.delta >= 0 ? '+' : ''}{sec.delta.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-                        <div
-                          className="h-full rounded-full"
-                          style={{ width: `${Math.min(100, sec.portfolioWeight * 2.5)}%`, backgroundColor: sec.color }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              </div>
+              <span className="text-xs text-slate-400 font-mono">
+                {topHoldings.slice(0, 10).reduce((acc, h) => acc + h.portfolioWeight, 0).toFixed(1)}% Cartera Total
+              </span>
             </div>
-          </div>
+
+            <div className="mt-4 divide-y divide-slate-100 dark:divide-white/5">
+              {topHoldings.map((h, idx) => (
+                <div
+                  key={h.id}
+                  onClick={() => setSelectedHolding(h)}
+                  className="py-3 flex items-center justify-between hover:bg-slate-50/60 dark:hover:bg-white/[0.02] p-2 rounded-xl transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono text-xs font-bold text-slate-400 w-6 text-center">
+                      #{idx + 1}
+                    </span>
+                    <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs font-mono shrink-0">
+                      {h.ticker}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm">
+                          {h.name}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">{h.isin}</span>
+                      </div>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        {h.flag} {h.country} · {h.sector}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 shrink-0 text-right">
+                    <div>
+                      <span className="font-mono font-bold text-sm text-indigo-600 dark:text-indigo-400 block">
+                        {h.portfolioWeight.toFixed(2)}%
+                      </span>
+                      <span className="text-[10.5px] font-mono text-slate-400 block">
+                        {fmt.currency(h.portfolioValue)}
+                      </span>
+                    </div>
+                    <ExternalLink size={14} className="text-slate-400 hover:text-slate-900 dark:hover:text-white" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         )}
 
-        {/* TAB 4: AUDITORÍA Y RECOMENDACIONES */}
-        {(activeTab === 'overview' || activeTab === 'audit') && (
+        {/* TAB 6: AUDITORÍA Y RECOMENDACIONES */}
+        {activeTab === 'audit' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Puntos Fuertes */}
             <Card className="p-5 border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10">
@@ -878,7 +788,7 @@ export function XRayPage() {
         {/* Footer Notice */}
         <div className="pt-4 border-t border-slate-200/70 dark:border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2 print:text-black">
           <span>
-            Metodología cuantitativa Morningstar Look-Through agregada con pesos oficiales de fondos y ETFs.
+            Metodología cuantitativa Morningstar Look-Through oficial agregada con pesos de participaciones directas.
           </span>
           <span>
             Generado: {report.generatedAt} · Moneda base: EUR (€)
@@ -902,7 +812,7 @@ export function XRayPage() {
                     {selectedHolding.name}
                   </h4>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {selectedHolding.flag} {selectedHolding.country} · {selectedHolding.sector}
+                    {selectedHolding.flag} {selectedHolding.country} · {selectedHolding.sector} · {selectedHolding.isin}
                   </span>
                 </div>
               </div>
@@ -933,7 +843,7 @@ export function XRayPage() {
 
               <div className="pt-2">
                 <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-2">
-                  ¿A través de qué posiciones tienes esta empresa?
+                  ¿A través de qué fondos tienes esta empresa?
                 </span>
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                   {selectedHolding.contributingFunds.map((cf, idx) => (
@@ -945,8 +855,8 @@ export function XRayPage() {
                         <span className="font-semibold text-slate-900 dark:text-white block truncate">
                           {cf.fundName}
                         </span>
-                        <span className="text-[10.5px] text-slate-400">
-                          Peso de {selectedHolding.ticker} dentro del fondo: {cf.fundWeightInHolding.toFixed(2)}%
+                        <span className="text-[10.5px] font-mono text-slate-400">
+                          {cf.fundIsin} · {cf.fundWeightInHolding.toFixed(2)}% del fondo
                         </span>
                       </div>
                       <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 shrink-0">
@@ -971,7 +881,7 @@ export function XRayPage() {
         </div>
       )}
 
-      {/* ── MODAL VISTA PREVIA MORNINGSTAR PDF ─────────────────────────── */}
+      {/* ── MODAL VISTA PREVIA MORNINGSTAR PDF (5 PÁGINAS COMPLETAS) ────── */}
       {showMorningstarPreview && (
         <div className="fixed inset-0 z-[100] flex flex-col bg-slate-950/85 backdrop-blur-md overflow-hidden animate-in fade-in duration-150">
           {/* Top Bar Controls */}
@@ -987,10 +897,10 @@ export function XRayPage() {
               </div>
               <span className="text-slate-300 dark:text-white/20">|</span>
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                Vista Previa Oficial: Morningstar Portfolio X-Ray®
+                Informe Oficial: Morningstar Portfolio X-Ray®
               </span>
-              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
-                2 Páginas A4
+              <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                5 Páginas A4 (Completo)
               </span>
             </div>
 
@@ -999,7 +909,7 @@ export function XRayPage() {
               <button
                 type="button"
                 onClick={handleSavePdf}
-                title="Guardar el informe como archivo PDF en tu dispositivo"
+                title="Guardar el informe como archivo PDF en tu dispositivo (con nombre oficial preasignado)"
                 className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-[#C8102E] hover:bg-[#a60c24] text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />

@@ -35,6 +35,9 @@ import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { UnderwaterRiskCard } from '@/components/analytics/UnderwaterRiskCard'
 import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
+import { FundCorrelationMatrixCard } from '@/components/analytics/FundCorrelationMatrixCard'
+import { RiskReturnScatterCard } from '@/components/analytics/RiskReturnScatterCard'
+import { MptStatsCard } from '@/components/analytics/MptStatsCard'
 import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
 import { useAnalytics, usePositions, useBenchmarkComparison, usePerformance } from '@/api/queries'
 import { useAppStore } from '@/store/appStore'
@@ -534,6 +537,14 @@ export function AnalyticsPage() {
         totalValue={positions.reduce((acc, p) => acc + (p.current_value || 0), 0)}
         loading={analyticsFetching || perfFetching}
       />
+
+      {/* ── SECCIÓN INSTITUCIONAL MORNINGSTAR MPT & CORRELACIONES ──────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <FundCorrelationMatrixCard />
+        <RiskReturnScatterCard />
+      </div>
+
+      <MptStatsCard />
 
       {/* Compound Wealth & Monte Carlo Cone Simulator */}
       {positions.length > 0 && (

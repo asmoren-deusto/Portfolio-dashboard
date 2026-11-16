@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Globe, PieChart, Sparkles, ShieldCheck, ScanSearch } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { DiversificationDashboard } from '@/components/analytics/DiversificationDashboard'
+import { SuperSectorsTriangleCard } from '@/components/analytics/SuperSectorsTriangleCard'
 import { MarketSectorEvolutionCard } from '@/components/market/MarketSectorEvolutionCard'
 import { usePositions, useMarketQuotes } from '@/api/queries'
 
@@ -47,6 +48,9 @@ export function DiversificationPage() {
 
       {/* Main Diversification Dashboard Component */}
       <DiversificationDashboard positions={positions} isLoading={isLoading} />
+
+      {/* Triángulo de SuperSectores Morningstar (Cíclico, Sensible, Defensivo) */}
+      <SuperSectorsTriangleCard />
 
       {/* Evolución y Rotación Histórica del Mercado por Sectores */}
       <div style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 520px' }}>
