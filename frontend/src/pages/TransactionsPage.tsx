@@ -93,7 +93,9 @@ export function TransactionsPage() {
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
     return transactions.filter((t) => {
-      if (activeType !== 'all' && t.type !== activeType) return false
+      const isTraspaso = t.type === 'transfer' || (t.notes && t.notes.toLowerCase().includes('traspaso'))
+      const effectiveType = isTraspaso ? 'transfer' : t.type
+      if (activeType !== 'all' && effectiveType !== activeType) return false
       if (q) {
         const name = t.asset_name || (t as any).name || positionMap.get(t.isin)?.name || getAssetCleanName(t.isin) || ''
         const isin = t.isin || ''
@@ -352,7 +354,9 @@ export function TransactionsPage() {
                 </tr>
               ) : (
                 paginatedTransactions.map((t) => {
-                  const conf = TYPE_CONFIG[t.type] ?? TYPE_CONFIG.buy
+                  const isTraspaso = t.type === 'transfer' || (t.notes && t.notes.toLowerCase().includes('traspaso'))
+                  const effectiveType = isTraspaso ? 'transfer' : t.type
+                  const conf = TYPE_CONFIG[effectiveType] ?? TYPE_CONFIG.buy
                   const assetInfo = positionMap.get(t.isin)
                   const cleanName = getAssetCleanName(t.isin)
                   const displayName = t.asset_name || (t as any).name || assetInfo?.name || cleanName || t.isin

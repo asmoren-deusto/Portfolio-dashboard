@@ -38,8 +38,9 @@ export function MorningstarPerformanceHistoryCard({
   const benchmarkMultiple = (benchmarkGrowth / 10000).toFixed(2)
 
   return (
-    <Card className={cn('p-4 sm:p-6 flex flex-col gap-6 sm:gap-7', className)}>
-      {/* ── HEADER PRINCIPAL DE RENTABILIDAD & BENCHMARK ────────────────── */}
+    <Card className={cn('p-5 sm:p-6', className)}>
+      <div className="space-y-6 sm:space-y-7 w-full">
+        {/* ── HEADER PRINCIPAL DE RENTABILIDAD & BENCHMARK ────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-3.5 border-b border-slate-200/70 dark:border-white/[0.08] gap-3">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-xl bg-red-500/10 text-[#C8102E] dark:text-red-400 border border-red-500/20 shrink-0 mt-0.5">
@@ -394,6 +395,7 @@ export function MorningstarPerformanceHistoryCard({
             </div>
           </div>
         </div>
+      </div>
       </div>
     </Card>
   )
