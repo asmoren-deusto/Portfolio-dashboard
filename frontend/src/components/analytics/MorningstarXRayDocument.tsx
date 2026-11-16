@@ -647,17 +647,17 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
             </div>
             {/* SVG Curva de Capital (10k a 40k) */}
             <div className="w-full h-24 bg-slate-50 border border-slate-200 rounded p-1.5 relative">
-              <svg viewBox="0 0 500 80" className="w-full h-full overflow-visible">
+              <svg viewBox="0 0 500 84" className="w-full h-full overflow-visible">
                 {/* Horizontal Grid lines */}
                 <line x1="30" y1="10" x2="490" y2="10" stroke="#e2e8f0" strokeDasharray="2" />
                 <line x1="30" y1="30" x2="490" y2="30" stroke="#e2e8f0" strokeDasharray="2" />
                 <line x1="30" y1="50" x2="490" y2="50" stroke="#e2e8f0" strokeDasharray="2" />
                 <line x1="30" y1="70" x2="490" y2="70" stroke="#e2e8f0" strokeDasharray="2" />
                 {/* Y-axis Labels */}
-                <text x="25" y="13" textAnchor="end" className="text-[7px] font-mono fill-slate-400">40k</text>
-                <text x="25" y="33" textAnchor="end" className="text-[7px] font-mono fill-slate-400">30k</text>
-                <text x="25" y="53" textAnchor="end" className="text-[7px] font-mono fill-slate-400">20k</text>
-                <text x="25" y="73" textAnchor="end" className="text-[7px] font-mono fill-slate-400">10k</text>
+                <text x="25" y="10" textAnchor="end" dominantBaseline="central" className="text-[7px] font-mono fill-slate-400">40k</text>
+                <text x="25" y="30" textAnchor="end" dominantBaseline="central" className="text-[7px] font-mono fill-slate-400">30k</text>
+                <text x="25" y="50" textAnchor="end" dominantBaseline="central" className="text-[7px] font-mono fill-slate-400">20k</text>
+                <text x="25" y="70" textAnchor="end" dominantBaseline="central" className="text-[7px] font-mono fill-slate-400">10k</text>
 
                 {/* Benchmark Line (Flat steady growth) */}
                 <path d="M 30,70 L 80,69 L 130,69 L 180,68 L 230,68 L 280,67 L 330,66 L 380,65 L 430,64 L 490,63" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
@@ -667,7 +667,15 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
 
                 {/* Year Markers */}
                 {['2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'].map((yr, i) => (
-                  <text key={yr} x={30 + i * 51} y="79" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{yr}</text>
+                  <text
+                    key={yr}
+                    x={i === 0 ? 32 : i === 9 ? 488 : 30 + i * 51}
+                    y="80"
+                    textAnchor={i === 0 ? 'start' : i === 9 ? 'end' : 'middle'}
+                    className="text-[6.5px] font-mono fill-slate-500"
+                  >
+                    {yr}
+                  </text>
                 ))}
               </svg>
             </div>
