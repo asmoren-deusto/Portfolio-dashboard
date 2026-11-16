@@ -133,12 +133,12 @@ export function PortfolioDailyContributorsCard({
         </div>
 
         {/* Period Selector Tabs */}
-        <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200/80 dark:border-white/[0.08] shrink-0 text-[11px] font-semibold">
+        <div className="h-8 flex items-center gap-1 bg-slate-100/90 dark:bg-[#202022] p-0.5 rounded-lg border border-slate-200/90 dark:border-white/[0.08] shrink-0 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setPeriodMode('1d')}
             className={cn(
-              'px-2 py-1 rounded-lg transition-all',
+              'h-7 px-2.5 rounded-md flex items-center justify-center transition-all cursor-pointer',
               periodMode === '1d'
                 ? 'bg-white dark:bg-[#2b2b2d] text-slate-900 dark:text-white shadow-2xs font-bold'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -150,7 +150,7 @@ export function PortfolioDailyContributorsCard({
             type="button"
             onClick={() => setPeriodMode('7d')}
             className={cn(
-              'px-2 py-1 rounded-lg transition-all',
+              'h-7 px-2.5 rounded-md flex items-center justify-center transition-all cursor-pointer',
               periodMode === '7d'
                 ? 'bg-white dark:bg-[#2b2b2d] text-slate-900 dark:text-white shadow-2xs font-bold'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -162,7 +162,7 @@ export function PortfolioDailyContributorsCard({
             type="button"
             onClick={() => setPeriodMode('total')}
             className={cn(
-              'px-2 py-1 rounded-lg transition-all',
+              'h-7 px-2.5 rounded-md flex items-center justify-center transition-all cursor-pointer',
               periodMode === 'total'
                 ? 'bg-white dark:bg-[#2b2b2d] text-slate-900 dark:text-white shadow-2xs font-bold'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'

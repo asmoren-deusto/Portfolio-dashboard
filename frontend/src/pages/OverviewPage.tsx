@@ -1459,25 +1459,27 @@ export function OverviewPage() {
 
             {/* Toggle Mode & X-Ray Button */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+              <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
                 {(['asset', 'type', 'geo'] as AllocMode[]).map((m) => (
                   <motion.button
                     key={m}
                     whileTap={{ scale: 0.96 }}
                     onClick={() => setAllocMode(m)}
-                    className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${allocMode === m
+                    className={cn(
+                      'h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer',
+                      allocMode === m
                         ? 'text-slate-900 dark:text-white font-bold'
                         : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                      }`}
+                    )}
                   >
                     {allocMode === m && (
                       <motion.div
                         layoutId="overviewAllocPill"
-                        className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                        className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                         transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                       />
                     )}
-                    <span className="relative z-10 text-[11px]">
+                    <span className="relative z-10 text-xs">
                       {m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}
                     </span>
                   </motion.button>
@@ -1488,7 +1490,7 @@ export function OverviewPage() {
                 type="button"
                 onClick={() => setIsXRayOpen(true)}
                 title="Abrir Informe X-Ray Completo de Cartera (Morningstar Look-Through)"
-                className="h-7 px-2 rounded-lg border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center gap-1 text-[11px] font-bold transition-all shadow-2xs cursor-pointer shrink-0"
+                className="h-8 px-2.5 rounded-lg border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 text-xs font-bold transition-all shadow-2xs cursor-pointer shrink-0"
               >
                 <ScanSearch className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 <span className="hidden sm:inline">X-Ray</span>
@@ -1601,26 +1603,28 @@ export function OverviewPage() {
               </div>
             </div>
 
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+            <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => {
                   setReturnsPeriodMode('global')
                   try { localStorage.setItem('returns_period_mode', 'global') } catch { }
                 }}
-                className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'global'
+                className={cn(
+                  'h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer',
+                  returnsPeriodMode === 'global'
                     ? 'text-slate-900 dark:text-white font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
+                )}
               >
                 {returnsPeriodMode === 'global' && (
                   <motion.div
                     layoutId="returnsPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                    className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                     transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                   />
                 )}
-                <span className="relative z-10 text-[11px]">Global</span>
+                <span className="relative z-10 text-xs">Global</span>
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.96 }}
@@ -1628,19 +1632,21 @@ export function OverviewPage() {
                   setReturnsPeriodMode('weekly')
                   try { localStorage.setItem('returns_period_mode', 'weekly') } catch { }
                 }}
-                className={`relative rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors ${returnsPeriodMode === 'weekly'
+                className={cn(
+                  'h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer',
+                  returnsPeriodMode === 'weekly'
                     ? 'text-slate-900 dark:text-white font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
+                )}
               >
                 {returnsPeriodMode === 'weekly' && (
                   <motion.div
                     layoutId="returnsPeriodPill"
-                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                    className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                     transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                   />
                 )}
-                <span className="relative z-10 text-[11px]">Semanal</span>
+                <span className="relative z-10 text-xs">Semanal</span>
               </motion.button>
             </div>
           </CardHeader>
@@ -1766,7 +1772,7 @@ export function OverviewPage() {
 
           <div className="flex items-center gap-2 ml-auto">
             {/* Interactive Quick-Sort Pills */}
-            <div className="hidden sm:flex items-center h-7.5 rounded-lg border border-slate-200/90 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#202022] p-0.5">
+            <div className="hidden sm:flex items-center h-8 rounded-lg border border-slate-200/90 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#202022] p-0.5 shrink-0">
               {(
                 [
                   { id: 'broker', label: 'Entidad', title: 'Agrupar por entidad y valor' },
@@ -1784,7 +1790,7 @@ export function OverviewPage() {
                     onClick={() => setPositionsSortBy(opt.id)}
                     title={opt.title}
                     className={cn(
-                      'relative h-6 px-2 text-[11px] font-semibold rounded-md transition-colors cursor-pointer',
+                      'relative h-7 px-2.5 text-xs font-semibold rounded-md transition-colors cursor-pointer flex items-center justify-center',
                       active
                         ? 'text-slate-900 dark:text-white font-bold'
                         : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -1806,7 +1812,6 @@ export function OverviewPage() {
             <ExcelExportButton
               type="positions"
               label="Excel"
-              className="!h-[31px]"
               title="Descargar posiciones en Excel (.xlsx) con costes, valores y rentabilidades"
             />
 

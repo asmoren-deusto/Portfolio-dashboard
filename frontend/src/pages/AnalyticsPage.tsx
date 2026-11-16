@@ -346,12 +346,12 @@ export function AnalyticsPage() {
             </div>
 
             {/* Toggle Switch between Returns and Distribution */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
+            <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
               {(['returns', 'distribution'] as const).map((view) => (
                 <button
                   key={view}
                   onClick={() => setSecondaryView(view)}
-                  className={`relative rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                  className={`h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer ${
                     secondaryView === view
                       ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -360,11 +360,11 @@ export function AnalyticsPage() {
                   {secondaryView === view && (
                     <motion.div
                       layoutId="analyticsSecondaryPill"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
                     />
                   )}
-                  <span className="relative z-10 text-[11px] font-bold">
+                  <span className="relative z-10 text-xs font-bold">
                     {view === 'distribution' ? 'Distribución' : 'Rentabilidad'}
                   </span>
                 </button>

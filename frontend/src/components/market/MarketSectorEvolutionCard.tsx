@@ -492,11 +492,11 @@ export function MarketSectorEvolutionCard({
         {/* Controls: View Mode + Period Selector + Reset */}
         <div className="flex items-center gap-2 flex-wrap self-start lg:self-auto">
           {/* Chart View Switcher */}
-          <div className="flex items-center rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5">
+          <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
             <button
               onClick={() => setChartMode('lines')}
               className={cn(
-                'relative px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5',
+                'h-7 relative px-2.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer',
                 chartMode === 'lines'
                   ? 'text-slate-900 dark:text-white font-bold'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -505,7 +505,7 @@ export function MarketSectorEvolutionCard({
               {chartMode === 'lines' && (
                 <motion.div
                   layoutId="sectorEvoModePill"
-                  className="absolute inset-0 rounded-lg bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                  className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
                   transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
                 />
               )}
@@ -516,7 +516,7 @@ export function MarketSectorEvolutionCard({
             <button
               onClick={() => setChartMode('annual')}
               className={cn(
-                'relative px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5',
+                'h-7 relative px-2.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer',
                 chartMode === 'annual'
                   ? 'text-slate-900 dark:text-white font-bold'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -526,7 +526,7 @@ export function MarketSectorEvolutionCard({
               {chartMode === 'annual' && (
                 <motion.div
                   layoutId="sectorEvoModePill"
-                  className="absolute inset-0 rounded-lg bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                  className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
                   transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
                 />
               )}
@@ -537,7 +537,7 @@ export function MarketSectorEvolutionCard({
             <button
               onClick={() => setChartMode('bars')}
               className={cn(
-                'relative px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5',
+                'h-7 relative px-2.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer',
                 chartMode === 'bars'
                   ? 'text-slate-900 dark:text-white font-bold'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -546,7 +546,7 @@ export function MarketSectorEvolutionCard({
               {chartMode === 'bars' && (
                 <motion.div
                   layoutId="sectorEvoModePill"
-                  className="absolute inset-0 rounded-lg bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                  className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
                   transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
                 />
               )}
@@ -556,7 +556,7 @@ export function MarketSectorEvolutionCard({
           </div>
 
           {/* Period Selector Pills (Including 10A) */}
-          <div className="flex items-center rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5">
+          <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
             {PERIOD_OPTIONS.map((p) => {
               const active = period === p.id
               return (
@@ -565,7 +565,7 @@ export function MarketSectorEvolutionCard({
                   onClick={() => setPeriod(p.id)}
                   title={p.title}
                   className={cn(
-                    'relative px-2 py-1 rounded-lg text-xs font-semibold transition-colors',
+                    'h-7 relative px-2.5 rounded-md text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer',
                     active
                       ? 'text-slate-900 dark:text-white font-bold'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -574,7 +574,7 @@ export function MarketSectorEvolutionCard({
                   {active && (
                     <motion.div
                       layoutId="sectorEvoPeriodPill"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#323235] dark:border dark:border-white/10 shadow-xs"
                       transition={{ type: 'spring', bounce: 0.12, duration: 0.26 }}
                     />
                   )}
@@ -588,9 +588,9 @@ export function MarketSectorEvolutionCard({
             <button
               onClick={() => setHiddenKeys(new Set())}
               title="Mostrar todos los sectores"
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-xs font-semibold transition-colors"
+              className="h-8 inline-flex items-center gap-1.5 px-2.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-xs font-semibold transition-colors cursor-pointer shrink-0"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3.5 h-3.5" />
               <span>Ver todos</span>
             </button>
           )}

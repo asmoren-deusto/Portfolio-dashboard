@@ -609,10 +609,10 @@ export function BenchmarkEvolutionChart({
           {/* Toggle Mode: % (Rentabilidad vs Benchmarks) vs € (Patrimonio Total) */}
           {showModeSelector && (
             <div className="flex items-center gap-1.5">
-              <div className="flex rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+              <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5 shrink-0">
                 <button
                   onClick={() => setMode('percent')}
-                  className={`min-w-[28px] px-2.5 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
+                  className={`h-7 min-w-[32px] px-2.5 text-xs font-bold rounded-md flex items-center justify-center transition-colors text-center cursor-pointer ${
                     mode === 'percent'
                       ? 'bg-white dark:bg-[#333333] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -623,7 +623,7 @@ export function BenchmarkEvolutionChart({
                 </button>
                 <button
                   onClick={() => setMode('currency')}
-                  className={`min-w-[28px] px-2.5 py-0.5 text-xs font-bold rounded-md transition-colors text-center ${
+                  className={`h-7 min-w-[32px] px-2.5 text-xs font-bold rounded-md flex items-center justify-center transition-colors text-center cursor-pointer ${
                     mode === 'currency'
                       ? 'bg-white dark:bg-[#333333] dark:border dark:border-white/10 text-slate-900 dark:text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
