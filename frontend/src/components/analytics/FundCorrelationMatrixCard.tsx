@@ -62,7 +62,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
       </div>
 
       {/* 2. Matrix Grid coincidente en altura exacta con el SVG de la tarjeta izquierda */}
-      <div className="my-3.5 w-full h-[320px] flex flex-col justify-center overflow-x-auto overflow-y-hidden px-1 -mx-1 shrink-0">
+      <div className="my-3.5 w-full h-[340px] flex flex-col justify-center overflow-x-auto overflow-y-hidden px-1 -mx-1 shrink-0">
         <table className="w-full border-separate border-spacing-1 text-center text-xs my-auto">
           <thead>
             <tr>
