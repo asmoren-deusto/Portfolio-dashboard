@@ -316,9 +316,9 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     {/* Equilateral Triangle */}
                     <polygon points="50,12 12,78 88,78" fill="#f8fafc" stroke="#334155" strokeWidth="1.5" />
                     {/* Corner Labels */}
-                    <text x="50" y="8" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-700">Sensible al ciclo</text>
-                    <text x="12" y="87" textAnchor="middle" className="text-[6px] font-bold fill-slate-700">Defensivo</text>
-                    <text x="88" y="87" textAnchor="middle" className="text-[6px] font-bold fill-slate-700">Cíclico</text>
+                    <text x="50" y="8" fill="#334155" style={{ fill: '#334155' }} textAnchor="middle" className="text-[6.5px] font-bold">Sensible al ciclo</text>
+                    <text x="12" y="87" fill="#334155" style={{ fill: '#334155' }} textAnchor="middle" className="text-[6px] font-bold">Defensivo</text>
+                    <text x="88" y="87" fill="#334155" style={{ fill: '#334155' }} textAnchor="middle" className="text-[6px] font-bold">Cíclico</text>
                     
                     {/* Inner dividing lines converging at centroid (50, 56) */}
                     <line x1="50" y1="12" x2="50" y2="56" stroke="#cbd5e1" strokeDasharray="1.5" />
@@ -823,16 +823,16 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     {[0, 7, 14, 21, 28, 35].map((v) => {
                       const lx = 24 + (v / 35) * 172
                       return (
-                        <text key={v} x={lx} y="130" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
+                        <text key={v} x={lx} y="130" fill="#64748b" style={{ fill: '#64748b' }} textAnchor="middle" className="text-[6.5px] font-mono">{v}</text>
                       )
                     })}
-                    <text x="110" y="142" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
+                    <text x="110" y="142" fill="#475569" style={{ fill: '#475569' }} textAnchor="middle" className="text-[6.5px] font-bold">Volatilidad a 3a (%)</text>
 
                     {/* Y labels (Media 3a) */}
                     {[0, 10, 20, 30, 40].map((m) => {
                       const ly = 120 - (m / 40) * 108
                       return (
-                        <text key={m} x="20" y={ly} textAnchor="end" dominantBaseline="central" className="text-[6.5px] font-mono fill-slate-500">{m}</text>
+                        <text key={m} x="20" y={ly} fill="#64748b" style={{ fill: '#64748b' }} textAnchor="end" dominantBaseline="central" className="text-[6.5px] font-mono">{m}</text>
                       )
                     })}
                     
@@ -844,8 +844,17 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       const by = 120 - (Math.max(0, Math.min(40, bp.meanReturn)) / 40) * 108
                       return (
                         <g>
-                          <rect x={bx - 2.5} y={by - 2.5} width="5" height="5" rx="1" fill="#10b981" />
-                          <text x={bx + 4} y={by + 2} textAnchor="start" className="text-[4.5px] font-bold fill-emerald-600 font-sans">
+                          <rect x={bx - 2.8} y={by - 2.8} width="5.6" height="5.6" rx="1.2" fill="#10b981" style={{ fill: '#10b981' }} />
+                          <text
+                            x={bx + 4.5}
+                            y={by + 2}
+                            fill="#059669"
+                            style={{ fill: '#059669' }}
+                            textAnchor="start"
+                            fontSize="4.8"
+                            fontWeight="bold"
+                            fontFamily="sans-serif"
+                          >
                             Benchmark ({bp.meanReturn.toFixed(1)}%)
                           </text>
                         </g>
@@ -859,15 +868,25 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                       const cy = 120 - (Math.max(0, Math.min(40, cp.meanReturn)) / 40) * 108
                       return (
                         <g>
-                          <circle cx={cx} cy={cy} r="5.0" fill="#ffffff" stroke="#C8102E" strokeWidth="1.6" />
-                          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" className="text-[5px] font-black fill-[#C8102E] font-sans">
+                          <circle cx={cx} cy={cy} r="5.6" fill="#ffffff" stroke="#C8102E" strokeWidth="1.8" style={{ fill: '#ffffff', stroke: '#C8102E' }} />
+                          <text
+                            x={cx}
+                            y={cy}
+                            fill="#C8102E"
+                            style={{ fill: '#C8102E' }}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fontSize="5.8"
+                            fontWeight="900"
+                            fontFamily="sans-serif"
+                          >
                             C
                           </text>
                         </g>
                       )
                     })()}
 
-                    {/* Numbered Fund Points (1 to N) - Formato idéntico al badge de la derecha (círculo rojo, texto blanco y más pequeño) */}
+                    {/* Numbered Fund Points (1 to N) - Círculo rojo idéntico al badge de la matriz con número blanco nítido y centrado */}
                     {performance.scatterPoints
                       .filter((p) => !p.isPortfolio && !p.isBenchmark)
                       .map((p) => {
@@ -875,13 +894,25 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                         const fy = 120 - (Math.max(0, Math.min(40, p.meanReturn)) / 40) * 108
                         return (
                           <g key={p.id || p.index}>
-                            <circle cx={fx} cy={fy} r="3.5" fill="#C8102E" />
+                            <circle
+                              cx={fx}
+                              cy={fy}
+                              r="4.8"
+                              fill="#C8102E"
+                              stroke="#ffffff"
+                              strokeWidth="0.6"
+                              style={{ fill: '#C8102E', stroke: '#ffffff' }}
+                            />
                             <text
                               x={fx}
                               y={fy}
+                              fill="#ffffff"
+                              style={{ fill: '#ffffff' }}
                               textAnchor="middle"
                               dominantBaseline="central"
-                              className="text-[4.2px] font-bold fill-white font-sans"
+                              fontSize="5.2"
+                              fontWeight="bold"
+                              fontFamily="sans-serif"
                             >
                               {p.index}
                             </text>

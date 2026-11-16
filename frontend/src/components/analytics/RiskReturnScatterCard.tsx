@@ -214,7 +214,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
               )
             }
 
-            // Fondos individuales (1 a 7) - Círculos limpios y nítidos sin textos pegados
+            // Fondos individuales (1 a N) - Círculos rojos Morningstar con número blanco nítido
             return (
               <g
                 key={p.id}
@@ -226,10 +226,18 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
                   cx={cx}
                   cy={cy}
                   r={isHovered ? 15 : 12}
-                  fill={isHovered ? '#1d4ed8' : '#2563eb'}
+                  fill={isHovered ? '#9b0d24' : '#C8102E'}
+                  style={{ fill: isHovered ? '#9b0d24' : '#C8102E' }}
                   className="transition-all shadow-sm"
                 />
-                <text x={cx} y={cy + 4} textAnchor="middle" className="text-[11px] font-extrabold fill-white pointer-events-none">
+                <text
+                  x={cx}
+                  y={cy + 4}
+                  fill="#ffffff"
+                  style={{ fill: '#ffffff' }}
+                  textAnchor="middle"
+                  className="text-[11px] font-extrabold fill-white pointer-events-none"
+                >
                   {p.index}
                 </text>
               </g>
@@ -245,7 +253,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <span className={cn(
                 "w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs text-white shrink-0",
-                activePoint.isPortfolio ? "bg-[#C8102E]" : activePoint.isBenchmark ? "bg-emerald-600" : "bg-blue-600"
+                activePoint.isPortfolio ? "bg-[#C8102E]" : activePoint.isBenchmark ? "bg-emerald-600" : "bg-[#C8102E]"
               )}>
                 {activePoint.index}
               </span>
@@ -290,8 +298,8 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
           <span>Benchmark 80/20 (+10,2%)</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3.5 h-3.5 rounded-full bg-blue-600 inline-flex items-center justify-center text-[8px] font-bold text-white">#</span>
-          <span>Fondos de Cartera (1-7)</span>
+          <span className="w-3.5 h-3.5 rounded-full bg-[#C8102E] inline-flex items-center justify-center text-[8px] font-bold text-white">#</span>
+          <span>Fondos de Cartera (1-9)</span>
         </span>
       </div>
     </Card>
