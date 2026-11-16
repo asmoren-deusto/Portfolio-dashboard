@@ -90,12 +90,12 @@ export function BacktestPage() {
   return (
     <div className="flex flex-col gap-4 pb-8">
       {/* Header Banner */}
-      <Card className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 p-4 sm:p-5">
-        <div className="flex items-start sm:items-center gap-3.5">
-          <div className="h-11 w-11 rounded-xl bg-blue-600/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
+      <Card className="p-4 sm:p-5">
+        <div className="flex items-start gap-3.5 min-w-0">
+          <div className="h-11 w-11 rounded-xl bg-blue-600/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0 mt-0.5">
             <History size={22} />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg sm:text-xl font-bold text-slate-950 dark:text-white leading-tight">
                 Simulación & Backtest Histórico de Cartera
@@ -104,38 +104,42 @@ export function BacktestPage() {
                 Trackback {timeframe.toUpperCase()}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-              Análisis cuantitativo de cómo se habría comportado tu asignación actual de activos en los últimos 5 y 10 años, sometida a los mayores shocks del mercado (Covid, Inflación 2022 y Guerra Comercial).
-            </p>
-          </div>
-        </div>
 
-        {/* Global Controls (alineados a la derecha a la altura del subtítulo) */}
-        <div className="flex flex-wrap items-center gap-2 self-start sm:self-end">
-          {/* Timeframe Selector */}
-          <div className="h-8 inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08]">
-            <button
-              onClick={() => setTimeframe('5y')}
-              className={cn(
-                'h-7 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center',
-                timeframe === '5y'
-                  ? 'bg-white dark:bg-blue-600 text-slate-900 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-              )}
-            >
-              5 Años
-            </button>
-            <button
-              onClick={() => setTimeframe('10y')}
-              className={cn(
-                'h-7 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center',
-                timeframe === '10y'
-                  ? 'bg-white dark:bg-blue-600 text-slate-900 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-              )}
-            >
-              10 Años
-            </button>
+            {/* Subtítulo a la izquierda y Controles centrados en altura a la derecha */}
+            <div className="mt-1.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+                Análisis cuantitativo de cómo se habría comportado tu asignación actual de activos en los últimos 5 y 10 años, sometida a los mayores shocks del mercado (Covid, Inflación 2022 y Guerra Comercial).
+              </p>
+
+              {/* Global Controls (centrados en altura con el subtítulo) */}
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                {/* Timeframe Selector */}
+                <div className="h-9 inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08] text-xs font-semibold">
+                  <button
+                    onClick={() => setTimeframe('5y')}
+                    className={cn(
+                      'h-7 px-3.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer',
+                      timeframe === '5y'
+                        ? 'bg-white dark:bg-blue-600 text-slate-900 dark:text-white shadow-2xs font-bold'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                    )}
+                  >
+                    5 Años
+                  </button>
+                  <button
+                    onClick={() => setTimeframe('10y')}
+                    className={cn(
+                      'h-7 px-3.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer',
+                      timeframe === '10y'
+                        ? 'bg-white dark:bg-blue-600 text-slate-900 dark:text-white shadow-2xs font-bold'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                    )}
+                  >
+                    10 Años
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </Card>

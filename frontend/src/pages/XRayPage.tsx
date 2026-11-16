@@ -142,12 +142,12 @@ export function XRayPage() {
       {/* ── VISTA INTERACTIVA WEB DEL INFORME ───────────────────────────── */}
       <div className="print:hidden flex flex-col gap-4 pb-8 w-full">
         {/* ── HEADER BANNER ──────────────────────────────────────────────── */}
-        <Card className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 sm:gap-6 p-4 sm:p-5">
-          <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-            <div className="h-11 w-11 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+        <Card className="p-4 sm:p-5">
+          <div className="flex items-start gap-3.5 min-w-0">
+            <div className="h-11 w-11 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0 mt-0.5">
               <ScanSearch size={22} className="stroke-[2.2]" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-lg sm:text-xl font-bold text-slate-950 dark:text-white leading-tight">
                   Informe X-Ray de Cartera
@@ -156,78 +156,82 @@ export function XRayPage() {
                   Morningstar Look-Through
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-                Descomposición analítica completa: activos, estilo 3x3, supersectores macro, rendimiento histórico MPT, solapamiento de acciones e inventario de fondos.
-              </p>
+
+              {/* Subtítulo a la izquierda y Controles centrados en altura a la derecha */}
+              <div className="mt-1.5 flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+                  Descomposición analítica completa: activos, estilo 3x3, supersectores macro, rendimiento histórico MPT, solapamiento de acciones e inventario de fondos.
+                </p>
+
+                {/* Action Controls & Entity Filter (centrados en altura con el subtítulo) */}
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {/* Selector de Entidad */}
+                  <div className="h-9 inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08] text-xs font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBroker('all')}
+                      className={cn(
+                        'px-2.5 h-7 rounded-lg transition-all cursor-pointer text-xs font-semibold flex items-center justify-center',
+                        selectedBroker === 'all'
+                          ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      )}
+                    >
+                      Todas
+                    </button>
+                    {['myinvestor', 'indexa', 'traderepublic'].map((b) => (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => setSelectedBroker(b)}
+                        className={cn(
+                          'px-2.5 h-7 rounded-lg transition-all cursor-pointer text-xs font-semibold capitalize flex items-center justify-center',
+                          selectedBroker === b
+                            ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        )}
+                      >
+                        {b === 'traderepublic' ? 'Trade Rep.' : b}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Botón Vista Previa PDF Morningstar */}
+                  <button
+                    type="button"
+                    onClick={() => setShowMorningstarPreview(true)}
+                    title="Ver informe oficial estilo Morningstar Portfolio X-Ray"
+                    className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-xs font-semibold text-red-700 dark:text-red-400 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-[#C8102E]" />
+                    <span>PDF Morningstar</span>
+                  </button>
+
+                  {/* Botón Imprimir */}
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    title="Imprimir en formato oficial Morningstar"
+                    className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-slate-200/70 dark:border-white/[0.08] bg-slate-100 hover:bg-slate-200/70 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Imprimir</span>
+                  </button>
+
+                  {/* Botón Descargar Excel */}
+                  <button
+                    type="button"
+                    onClick={handleExportExcel}
+                    disabled={isExportingExcel}
+                    title="Descargar libro Excel (.xlsx) completo de cartera"
+                    className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-700 dark:text-emerald-400 transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-60"
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Excel</span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* Action Controls & Entity Filter (alineados a la derecha a la altura del subtítulo) */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-end">
-            {/* Selector de Entidad */}
-            <div className="h-8 inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/[0.08] text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setSelectedBroker('all')}
-                className={cn(
-                  'px-2.5 h-7 rounded-md transition-all cursor-pointer text-xs font-semibold flex items-center justify-center',
-                  selectedBroker === 'all'
-                    ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                )}
-              >
-                Todas
-              </button>
-              {['myinvestor', 'indexa', 'traderepublic'].map((b) => (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => setSelectedBroker(b)}
-                  className={cn(
-                    'px-2.5 h-7 rounded-md transition-all cursor-pointer text-xs font-semibold capitalize flex items-center justify-center',
-                    selectedBroker === b
-                      ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  )}
-                >
-                  {b === 'traderepublic' ? 'Trade Rep.' : b}
-                </button>
-              ))}
-            </div>
-
-            {/* Botón Vista Previa PDF Morningstar */}
-            <button
-              type="button"
-              onClick={() => setShowMorningstarPreview(true)}
-              title="Ver informe oficial estilo Morningstar Portfolio X-Ray"
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-xs font-semibold text-red-700 dark:text-red-400 transition-all shadow-2xs active:scale-95 cursor-pointer"
-            >
-              <FileText className="w-3.5 h-3.5 text-[#C8102E]" />
-              <span>PDF Morningstar</span>
-            </button>
-
-            {/* Botón Imprimir */}
-            <button
-              type="button"
-              onClick={handlePrint}
-              title="Imprimir en formato oficial Morningstar"
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-200/70 dark:border-white/[0.08] bg-slate-100 hover:bg-slate-200/70 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all shadow-2xs active:scale-95 cursor-pointer"
-            >
-              <Printer className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Imprimir</span>
-            </button>
-
-            {/* Botón Descargar Excel */}
-            <button
-              type="button"
-              onClick={handleExportExcel}
-              disabled={isExportingExcel}
-              title="Descargar libro Excel (.xlsx) completo de cartera"
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-700 dark:text-emerald-400 transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-60"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Excel</span>
-            </button>
           </div>
         </Card>
 
