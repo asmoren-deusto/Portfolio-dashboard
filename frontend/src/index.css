@@ -150,26 +150,58 @@
     background: rgba(255, 255, 255, 0.18);
   }
 
-  /* Interactive pointer styles */
+  /* Interactive pointer styles: Ensures pointer hand ('la mano') appears on all interactive elements and their children */
   button,
+  button *,
   [role="button"],
+  [role="button"] *,
   select,
   summary,
   a,
+  a *,
   input[type="button"],
   input[type="submit"],
   input[type="reset"],
   input[type="checkbox"],
   input[type="radio"],
-  label[for] {
-    cursor: pointer;
+  label[for],
+  .cursor-pointer,
+  .cursor-pointer * {
+    cursor: pointer !important;
+  }
+
+  /* Prevent text selection I-beam on clickable rows, cards and buttons */
+  .cursor-pointer,
+  [role="button"],
+  button {
+    user-select: none;
+  }
+
+  /* Ensure text inputs and editable fields always maintain text I-beam cursor */
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  [contenteditable="true"],
+  .cursor-pointer input,
+  .cursor-pointer textarea {
+    cursor: text !important;
+    user-select: auto !important;
   }
 
   button:disabled,
+  button:disabled *,
   [role="button"][aria-disabled="true"],
+  [role="button"][aria-disabled="true"] *,
   input:disabled,
-  select:disabled {
-    cursor: not-allowed;
+  select:disabled,
+  .cursor-not-allowed,
+  .cursor-not-allowed * {
+    cursor: not-allowed !important;
   }
 
   ::selection {
@@ -372,7 +404,9 @@
   .cursor-card a *,
   .cursor-card select,
   .cursor-card [role="button"],
-  .cursor-card [role="button"] * {
+  .cursor-card [role="button"] *,
+  .cursor-card .cursor-pointer,
+  .cursor-card .cursor-pointer * {
     cursor: pointer !important;
   }
 

@@ -21,7 +21,7 @@ import {
   X,
   ExternalLink,
 } from 'lucide-react'
-import { usePositions } from '@/api/queries'
+import { usePositions, type Position } from '@/api/queries'
 import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
@@ -34,6 +34,7 @@ import { SuperSectorsTriangleCard } from '@/components/analytics/SuperSectorsTri
 import { StockOverlapCard } from '@/components/analytics/StockOverlapCard'
 import { MptStatsCard } from '@/components/analytics/MptStatsCard'
 import { WorldMapChoropleth } from '@/components/analytics/WorldMapChoropleth'
+import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import {
   buildPortfolioXRayReport,
   type LookThroughHolding,
@@ -49,6 +50,7 @@ export function XRayPage() {
   const [selectedBroker, setSelectedBroker] = useState<string>(storeBroker || 'all')
   const [activeTab, setActiveTab] = useState<XRayTab>('overview')
   const [selectedHolding, setSelectedHolding] = useState<LookThroughHolding | null>(null)
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [isExportingExcel, setIsExportingExcel] = useState(false)
   const [showMorningstarPreview, setShowMorningstarPreview] = useState(false)
 
@@ -764,42 +766,53 @@ export function XRayPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                  {fundPositions.map((f) => (
-                    <tr key={f.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02]">
-                      <td className="py-3 pr-2">
-                        <div className="flex items-center gap-2.5">
-                          <CompanyLogo
-                            isin={f.isin}
-                            name={f.name}
-                            size="sm"
-                            className="w-8 h-8 rounded-xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
-                          />
-                          <div className="min-w-0">
-                            <span className="font-bold text-slate-900 dark:text-white block truncate">{f.name}</span>
-                            <span className="font-mono text-[10px] text-slate-400 block">{f.isin}</span>
+                  {fundPositions.map((f) => {
+                    const matchingPos = positions.find((p) => p.isin === f.isin || p.name === f.name)
+                    return (
+                      <tr
+                        key={f.id}
+                        onClick={() => matchingPos && setSelectedPosition(matchingPos)}
+                        className={cn(
+                          'hover:bg-slate-50/80 dark:hover:bg-white/[0.035] transition-colors select-none',
+                          matchingPos && 'cursor-pointer'
+                        )}
+                        title={matchingPos ? 'Haz clic para ver el desglose completo del fondo' : undefined}
+                      >
+                        <td className="py-3 pr-2">
+                          <div className="flex items-center gap-2.5">
+                            <CompanyLogo
+                              isin={f.isin}
+                              name={f.name}
+                              size="sm"
+                              className="w-8 h-8 rounded-xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
+                            />
+                            <div className="min-w-0">
+                              <span className="font-bold text-slate-900 dark:text-white block truncate">{f.name}</span>
+                              <span className="font-mono text-[10px] text-slate-400 block">{f.isin}</span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 text-slate-600 dark:text-slate-300">{f.type}</td>
-                      <td className="py-3 font-mono text-slate-500">{f.portfolioDate}</td>
-                      <td className="py-3 text-center">{renderStars(f.morningstarRating)}</td>
-                      <td className="py-3 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-                        +{f.return1y.toFixed(2)}%
-                      </td>
-                      <td className="py-3 text-right font-mono text-slate-800 dark:text-slate-200">
-                        {f.return3yAnn !== null ? `+${f.return3yAnn.toFixed(2)}%` : '—'}
-                      </td>
-                      <td className="py-3 text-right font-mono text-slate-800 dark:text-slate-200">
-                        {f.return5yAnn !== null ? `+${f.return5yAnn.toFixed(2)}%` : '—'}
-                      </td>
-                      <td className="py-3 text-right font-mono font-semibold text-indigo-600 dark:text-indigo-400">
-                        {f.ongoingChargesTer.toFixed(2)}%
-                      </td>
-                      <td className="py-3 text-right font-mono font-bold text-slate-950 dark:text-white">
-                        {f.portfolioWeight.toFixed(2)}%
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="py-3 text-slate-600 dark:text-slate-300">{f.type}</td>
+                        <td className="py-3 font-mono text-slate-500">{f.portfolioDate}</td>
+                        <td className="py-3 text-center">{renderStars(f.morningstarRating)}</td>
+                        <td className="py-3 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                          +{f.return1y.toFixed(2)}%
+                        </td>
+                        <td className="py-3 text-right font-mono text-slate-800 dark:text-slate-200">
+                          {f.return3yAnn !== null ? `+${f.return3yAnn.toFixed(2)}%` : '—'}
+                        </td>
+                        <td className="py-3 text-right font-mono text-slate-800 dark:text-slate-200">
+                          {f.return5yAnn !== null ? `+${f.return5yAnn.toFixed(2)}%` : '—'}
+                        </td>
+                        <td className="py-3 text-right font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+                          {f.ongoingChargesTer.toFixed(2)}%
+                        </td>
+                        <td className="py-3 text-right font-mono font-bold text-slate-950 dark:text-white">
+                          {f.portfolioWeight.toFixed(2)}%
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -831,10 +844,19 @@ export function XRayPage() {
                 <div
                   key={h.id}
                   onClick={() => setSelectedHolding(h)}
-                  className="py-3 flex items-center justify-between hover:bg-slate-50/60 dark:hover:bg-white/[0.02] p-2 rounded-xl transition-colors cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setSelectedHolding(h)
+                    }
+                  }}
+                  className="py-3 px-2 flex items-center justify-between hover:bg-slate-100/70 dark:hover:bg-white/[0.04] rounded-xl transition-all cursor-pointer group select-none"
+                  title="Haz clic para ver el desglose detallado de esta compañía en tus fondos"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="font-mono text-xs font-bold text-slate-400 w-6 text-center">
+                    <span className="font-mono text-xs font-bold text-slate-400 w-6 text-center shrink-0">
                       #{idx + 1}
                     </span>
                     <CompanyLogo
@@ -846,12 +868,12 @@ export function XRayPage() {
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm">
+                        <span className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                           {h.name}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono">{h.isin}</span>
+                        <span className="text-[10px] text-slate-400 font-mono shrink-0">{h.isin}</span>
                       </div>
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 block truncate">
                         {h.flag} {h.country} · {h.sector}
                       </span>
                     </div>
@@ -859,14 +881,14 @@ export function XRayPage() {
 
                   <div className="flex items-center gap-4 shrink-0 text-right">
                     <div>
-                      <span className="font-mono font-bold text-sm text-indigo-600 dark:text-indigo-400 block">
+                      <span className="font-mono font-bold text-sm text-blue-700 dark:text-blue-400 block">
                         {h.portfolioWeight.toFixed(2)}%
                       </span>
                       <span className="text-[10.5px] font-mono text-slate-400 block">
                         {fmt.currency(h.portfolioValue)}
                       </span>
                     </div>
-                    <ExternalLink size={14} className="text-slate-400 hover:text-slate-900 dark:hover:text-white" />
+                    <ExternalLink size={15} className="text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shrink-0" />
                   </div>
                 </div>
               ))}
@@ -1104,6 +1126,12 @@ export function XRayPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Desglose Completo de Fondo / Posición */}
+      <PositionDetailModal
+        position={selectedPosition}
+        onClose={() => setSelectedPosition(null)}
+      />
     </div>
   )
 }
