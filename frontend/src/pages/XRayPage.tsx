@@ -44,7 +44,7 @@ import {
   type PortfolioXRayReport,
 } from '@/lib/xrayEngine'
 
-type XRayTab = 'overview' | 'performance' | 'overlap' | 'funds' | 'holdings' | 'audit'
+type XRayTab = 'overview' | 'performance' | 'risk' | 'funds' | 'holdings' | 'audit'
 
 export function XRayPage() {
   const { selectedBroker, setSelectedBroker, currentUser } = useAppStore()
@@ -332,10 +332,10 @@ export function XRayPage() {
         <div className="flex items-center gap-1.5 min-w-max">
         {[
           { id: 'overview', label: 'Radiografía & SuperSectores', icon: Layers },
-          { id: 'performance', label: 'Rendimiento & Riesgo MPT', icon: TrendingUp },
-          { id: 'overlap', label: `Solapamiento de Acciones (${stockOverlap.length})`, icon: Cpu },
+          { id: 'performance', label: 'Rendimiento & Crecimiento', icon: TrendingUp },
+          { id: 'risk', label: 'Riesgo & Métricas MPT', icon: Activity },
           { id: 'funds', label: `Posiciones de Cartera (${fundPositions.length})`, icon: Building2 },
-          { id: 'holdings', label: `Top 25 Holdings (${topHoldings.length})`, icon: Globe },
+          { id: 'holdings', label: `Look-Through & Solapamiento (${topHoldings.length})`, icon: Globe },
           { id: 'audit', label: 'Auditoría & Diagnóstico', icon: ShieldCheck },
         ].map((tab) => {
           const Icon = tab.icon
@@ -694,12 +694,16 @@ export function XRayPage() {
           </div>
         )}
 
-        {/* TAB 2: RENDIMIENTO & RIESGO MPT */}
+        {/* TAB 2: RENDIMIENTO & CRECIMIENTO HISTÓRICO */}
         {activeTab === 'performance' && (
           <div className="space-y-6">
-            {/* Histórico Completo de Rentabilidad & Crecimiento 10k (Morningstar X-Ray Page 2) */}
             <MorningstarPerformanceHistoryCard performance={performance} />
+          </div>
+        )}
 
+        {/* TAB 3: RIESGO & MÉTRICAS MPT */}
+        {activeTab === 'risk' && (
+          <div className="space-y-6">
             {/* Scatter Plot & Matriz de Correlación */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
               <RiskReturnScatterCard points={performance.scatterPoints} />
@@ -709,11 +713,6 @@ export function XRayPage() {
             {/* Estadísticas MPT */}
             <MptStatsCard stats={performance.mptStats} />
           </div>
-        )}
-
-        {/* TAB 3: SOLAPAMIENTO DE ACCIONES */}
-        {activeTab === 'overlap' && (
-          <StockOverlapCard items={stockOverlap} />
         )}
 
         {/* TAB 4: POSICIONES DE CARTERA */}
@@ -805,81 +804,87 @@ export function XRayPage() {
           </Card>
         )}
 
-        {/* TAB 5: TOP HOLDINGS LOOK-THROUGH */}
+        {/* TAB 5: LOOK-THROUGH & SOLAPAMIENTO DE ACCIONES */}
         {activeTab === 'holdings' && (
-          <Card className="p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-              <div className="flex items-start sm:items-center gap-2.5">
-                <Globe className="w-5 h-5 text-indigo-500 mt-0.5 sm:mt-0 shrink-0" />
-                <div>
-                  <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
-                    Top 25 Look-Through Holdings
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Las 25 mayores empresas subyacentes agregadas sumando su peso en todos tus fondos
-                  </p>
+          <div className="space-y-6">
+            {/* 1. Solapamiento de Acciones entre Fondos */}
+            <StockOverlapCard items={stockOverlap} />
+
+            {/* 2. Top 25 Look-Through Holdings */}
+            <Card className="p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
+                <div className="flex items-start sm:items-center gap-2.5">
+                  <Globe className="w-5 h-5 text-indigo-500 mt-0.5 sm:mt-0 shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+                      Top 25 Look-Through Holdings
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Las 25 mayores empresas subyacentes agregadas sumando su peso en todos tus fondos
+                    </p>
+                  </div>
                 </div>
+                <span className="text-xs text-slate-400 font-mono shrink-0 self-start sm:self-end">
+                  {topHoldings.slice(0, 25).reduce((acc, h) => acc + h.portfolioWeight, 0).toFixed(1)}% Cartera Total
+                </span>
               </div>
-              <span className="text-xs text-slate-400 font-mono shrink-0 self-start sm:self-end">
-                {topHoldings.slice(0, 25).reduce((acc, h) => acc + h.portfolioWeight, 0).toFixed(1)}% Cartera Total
-              </span>
-            </div>
 
-            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-1">
-              {topHoldings.map((h, idx) => (
-                <div
-                  key={h.id}
-                  onClick={() => setSelectedHolding(h)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      setSelectedHolding(h)
-                    }
-                  }}
-                  className="py-2.5 px-3 flex items-center justify-between hover:bg-slate-100/70 dark:hover:bg-white/[0.04] rounded-xl transition-all cursor-pointer group select-none border border-transparent hover:border-slate-200/60 dark:hover:border-white/10"
-                  title="Haz clic para ver el desglose detallado de esta compañía en tus fondos"
-                >
-                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
-                    <span className="font-mono text-xs font-bold text-slate-400 w-5 sm:w-6 text-center shrink-0">
-                      #{idx + 1}
-                    </span>
-                    <CompanyLogo
-                      isin={h.isin}
-                      ticker={h.ticker}
-                      name={h.name}
-                      size="sm"
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
-                    />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-[13px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                          {h.name}
+              <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-1">
+                {topHoldings.map((h, idx) => (
+                  <div
+                    key={h.id}
+                    onClick={() => setSelectedHolding(h)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedHolding(h)
+                      }
+                    }}
+                    className="py-2.5 px-3 flex items-center justify-between hover:bg-slate-100/70 dark:hover:bg-white/[0.04] rounded-xl transition-all cursor-pointer group select-none border border-transparent hover:border-slate-200/60 dark:hover:border-white/10"
+                    title="Haz clic para ver el desglose detallado de esta compañía en tus fondos"
+                  >
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
+                      <span className="font-mono text-xs font-bold text-slate-400 w-5 sm:w-6 text-center shrink-0">
+                        #{idx + 1}
+                      </span>
+                      <CompanyLogo
+                        isin={h.isin}
+                        ticker={h.ticker}
+                        name={h.name}
+                        size="sm"
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
+                      />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-[13px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            {h.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono shrink-0 hidden sm:inline">{h.isin}</span>
+                        </div>
+                        <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 block truncate">
+                          {h.flag} {h.country} · {h.sector}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono shrink-0 hidden sm:inline">{h.isin}</span>
                       </div>
-                      <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 block truncate">
-                        {h.flag} {h.country} · {h.sector}
-                      </span>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-3 shrink-0 text-right">
-                    <div>
-                      <span className="font-mono font-bold text-xs sm:text-sm text-blue-700 dark:text-blue-400 block">
-                        {h.portfolioWeight.toFixed(2)}%
-                      </span>
-                      <span className="text-[10px] sm:text-[10.5px] font-mono text-slate-400 block">
-                        {fmt.currency(h.portfolioValue)}
-                      </span>
+                    <div className="flex items-center gap-3 shrink-0 text-right">
+                      <div>
+                        <span className="font-mono font-bold text-xs sm:text-sm text-blue-700 dark:text-blue-400 block">
+                          {h.portfolioWeight.toFixed(2)}%
+                        </span>
+                        <span className="text-[10px] sm:text-[10.5px] font-mono text-slate-400 block">
+                          {fmt.currency(h.portfolioValue)}
+                        </span>
+                      </div>
+                      <ExternalLink size={14} className="text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shrink-0 ml-1" />
                     </div>
-                    <ExternalLink size={14} className="text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shrink-0 ml-1" />
                   </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+                ))}
+              </div>
+            </Card>
+          </div>
         )}
 
         {/* TAB 6: AUDITORÍA Y RECOMENDACIONES */}
