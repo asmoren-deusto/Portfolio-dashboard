@@ -1082,7 +1082,7 @@ export function XRayPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Botón PDF Vectorial (Nativo vía motor de impresión del navegador) */}
+              {/* Botón Imprimir (Nativo vía motor de impresión del navegador) */}
               <button
                 type="button"
                 onClick={handlePrint}
@@ -1090,7 +1090,7 @@ export function XRayPage() {
                 className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5" />
-                <span>PDF Vectorial (Nativo)</span>
+                <span>Imprimir (Nativo)</span>
               </button>
 
               {/* Botón Descarga Directa .PDF (300 DPI Lossless PNG) */}
@@ -1123,7 +1123,7 @@ export function XRayPage() {
           {/* Banner informativo de fidelidad vectorial */}
           <div className="bg-slate-100 dark:bg-white/[0.04] border-b border-slate-200/80 dark:border-white/10 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 shrink-0">
             <span>
-              💡 <strong>Máxima fidelidad:</strong> Para obtener un PDF <strong>100% vectorial</strong> (con texto seleccionable y curvas matemáticas sin pixelado al ampliar), pulsa <strong>"PDF Vectorial (Nativo)"</strong> y elige <em>"Guardar como PDF"</em> en tu navegador.
+              💡 <strong>Máxima fidelidad:</strong> Para obtener un PDF <strong>100% vectorial</strong> (con texto seleccionable y curvas matemáticas sin pixelado al ampliar), pulsa <strong>"Imprimir (Nativo)"</strong> y elige <em>"Guardar como PDF"</em> en tu navegador.
             </span>
           </div>
 
