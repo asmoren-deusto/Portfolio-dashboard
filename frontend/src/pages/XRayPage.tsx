@@ -362,12 +362,12 @@ export function XRayPage() {
               
               {/* FILA 1 - IZQUIERDA (4 cols): Asignación Real de Activos */}
               <div className="lg:col-span-4 flex flex-col min-h-0">
-                <Card className="p-5 sm:p-6 h-full flex flex-col justify-between">
+                <Card className="p-4 sm:p-4.5 h-full flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06]">
-                      <div className="flex items-center gap-2.5">
-                        <PieChart className="w-5 h-5 text-violet-500" />
-                        <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                    <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-slate-200/70 dark:border-white/[0.06]">
+                      <div className="flex items-center gap-2">
+                        <PieChart className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-violet-500" />
+                        <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
                           Asignación Real de Activos
                         </h3>
                       </div>
@@ -377,8 +377,8 @@ export function XRayPage() {
                     </div>
 
                     {/* Stacked Allocation Progress Bar */}
-                    <div className="mt-5">
-                      <div className="h-4 w-full rounded-full overflow-hidden flex bg-slate-200 dark:bg-white/10 shadow-inner">
+                    <div className="mt-3 sm:mt-3.5">
+                      <div className="h-3 w-full rounded-full overflow-hidden flex bg-slate-200 dark:bg-white/10 shadow-inner">
                         {assetAllocation.map((item) => (
                           <div
                             key={item.id}
@@ -391,26 +391,26 @@ export function XRayPage() {
                     </div>
 
                     {/* Listado de Clases de Activo con Port vs Benchmark */}
-                    <div className="mt-5 space-y-2 text-xs">
+                    <div className="mt-3 space-y-1.5 text-xs">
                       {assetAllocation.map((item) => (
                         <div
                           key={item.id}
-                          className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#252528] border border-slate-200/60 dark:border-white/[0.04]"
+                          className="flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-slate-50 dark:bg-[#252528] border border-slate-200/60 dark:border-white/[0.04]"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <span
-                              className="w-3 h-3 rounded-full shrink-0"
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
                               style={{ backgroundColor: item.color }}
                             />
-                            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate text-xs">
                               {item.label}
                             </span>
                           </div>
                           <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
-                            <span className="font-mono text-slate-500 dark:text-slate-400 text-xs">
+                            <span className="font-mono text-slate-500 dark:text-slate-400 text-[11px] sm:text-xs">
                               {fmt.currency(item.value)}
                             </span>
-                            <span className="font-mono font-bold text-slate-900 dark:text-white w-14 text-right">
+                            <span className="font-mono font-bold text-slate-900 dark:text-white w-14 text-right text-xs">
                               {item.weight.toFixed(2)}%
                             </span>
                           </div>
