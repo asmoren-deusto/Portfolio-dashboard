@@ -52,7 +52,7 @@ export function BacktestPage() {
   const { theme } = useAppStore()
   const isDark = theme === 'dark'
 
-  const [timeframe, setTimeframe] = useState<'5y' | '10y'>('10y')
+  const [timeframe, setTimeframe] = useState<'5y' | '10y'>('5y')
   const [viewMode, setViewMode] = useState<ChartViewMode>('growth')
   const [selectedCrisisId, setSelectedCrisisId] = useState<string | null>(null)
 
