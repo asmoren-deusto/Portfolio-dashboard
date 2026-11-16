@@ -726,7 +726,7 @@ export function buildPortfolioXRayReport(
       industries: [
         { name: 'Materiales Básicos', weight: matW, color: '#d97706' },
         { name: 'Consumo Cíclico', weight: consCycW, color: '#f59e0b' },
-        { name: 'Servicios Financieros', weight: finW, color: '#10b981' },
+        { name: 'Serv. Financieros', weight: finW, color: '#10b981' },
         { name: 'Inmobiliario', weight: reW, color: '#6366f1' },
       ],
     },
@@ -734,7 +734,7 @@ export function buildPortfolioXRayReport(
       totalWeight: sensibleTotal,
       benchmarkWeight: 44.20,
       industries: [
-        { name: 'Servicios de Comunicación', weight: commsW, color: '#06b6d4' },
+        { name: 'Serv. Comunicación', weight: commsW, color: '#06b6d4' },
         { name: 'Energía', weight: energyW, color: '#ef4444' },
         { name: 'Industria', weight: indW, color: '#8b5cf6' },
         { name: 'Tecnología', weight: techW, color: '#3b82f6' },
@@ -746,7 +746,7 @@ export function buildPortfolioXRayReport(
       industries: [
         { name: 'Consumo Defensivo', weight: consDefW, color: '#84cc16' },
         { name: 'Salud', weight: healthW, color: '#ec4899' },
-        { name: 'Servicios Públicos', weight: utilW, color: '#14b8a6' },
+        { name: 'Serv. Públicos', weight: utilW, color: '#14b8a6' },
       ],
     },
     triangleCoords: {

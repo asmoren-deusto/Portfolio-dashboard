@@ -9,6 +9,13 @@ interface SuperSectorsTriangleCardProps {
   className?: string
 }
 
+const formatIndustryName = (name: string): string => {
+  return name
+    .replace('Servicios de Comunicación', 'Serv. Comunicación')
+    .replace('Servicios Financieros', 'Serv. Financieros')
+    .replace('Servicios Públicos', 'Serv. Públicos')
+}
+
 export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> = ({
   data = {
     ciclico: {
@@ -17,7 +24,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
       industries: [
         { name: 'Materiales Básicos', weight: 4.39, color: '#d97706' },
         { name: 'Consumo Cíclico', weight: 8.90, color: '#f59e0b' },
-        { name: 'Servicios Financieros', weight: 14.27, color: '#10b981' },
+        { name: 'Serv. Financieros', weight: 14.27, color: '#10b981' },
         { name: 'Inmobiliario', weight: 1.18, color: '#6366f1' },
       ],
     },
@@ -25,7 +32,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
       totalWeight: 58.95,
       benchmarkWeight: 44.20,
       industries: [
-        { name: 'Servicios de Comunicación', weight: 8.74, color: '#06b6d4' },
+        { name: 'Serv. Comunicación', weight: 8.74, color: '#06b6d4' },
         { name: 'Energía', weight: 7.20, color: '#ef4444' },
         { name: 'Industria', weight: 9.14, color: '#8b5cf6' },
         { name: 'Tecnología', weight: 33.87, color: '#3b82f6' },
@@ -37,7 +44,7 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
       industries: [
         { name: 'Consumo Defensivo', weight: 3.83, color: '#84cc16' },
         { name: 'Salud', weight: 5.69, color: '#ec4899' },
-        { name: 'Servicios Públicos', weight: 2.22, color: '#14b8a6' },
+        { name: 'Serv. Públicos', weight: 2.22, color: '#14b8a6' },
       ],
     },
     triangleCoords: {
@@ -71,9 +78,9 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
   const benchY = (topY + leftY + rightY) / 3
 
   return (
-    <Card className={cn('px-4 sm:px-5 pt-3 sm:pt-3.5 pb-2.5 sm:pb-3 flex flex-col h-full', className)}>
+    <Card className={cn('px-3.5 sm:px-4.5 pt-2.5 sm:pt-3 pb-2.5 sm:pb-3 flex flex-col h-full', className)}>
       <div className="flex flex-col flex-1 h-full min-h-0">
-        <div className="flex items-center justify-between pb-2 sm:pb-2.5 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200/70 dark:border-white/[0.08] shrink-0">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl bg-violet-500/10 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 flex items-center justify-center shrink-0">
               <Compass size={16} />
@@ -92,10 +99,10 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 lg:gap-4 items-center mt-2.5 sm:mt-3 my-auto">
-          {/* Ternary Triangle SVG (4 cols) */}
-          <div className="md:col-span-4 flex flex-col items-center justify-center pr-0 md:pr-4 md:border-r border-slate-200/70 dark:border-white/[0.08]">
-            <div className="relative w-36 sm:w-40 h-36 sm:h-40 flex items-center justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-[195px_1fr] lg:grid-cols-[210px_1fr] gap-3 sm:gap-4 items-stretch mt-2 sm:mt-2.5 flex-1 min-h-0">
+          {/* Ternary Triangle SVG */}
+          <div className="flex flex-col items-center justify-center pr-0 md:pr-3.5 md:border-r border-slate-200/70 dark:border-white/[0.08] h-full">
+            <div className="relative w-40 sm:w-44 h-40 sm:h-44 flex items-center justify-center">
               <svg viewBox="0 0 120 114" className="w-full h-full overflow-visible">
                 {/* Background shaded areas - Triángulo Equilátero Exacto */}
                 <polygon
@@ -175,18 +182,18 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
               </svg>
             </div>
 
-            <div className="flex items-center gap-3.5 mt-1.5 text-xs font-medium">
-              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px]">
+            <div className="flex items-center justify-center gap-3 mt-1 text-xs font-medium shrink-0">
+              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px] whitespace-nowrap">
                 <span className="w-2.5 h-2.5 rounded-full border-2 border-[#C8102E] bg-white inline-block" /> Tu Cartera
               </span>
-              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px]">
+              <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-[11px] whitespace-nowrap">
                 <span className="w-2 h-2 rotate-45 bg-[#10b981] inline-block" /> Benchmark Global
               </span>
             </div>
           </div>
 
-          {/* 3 SuperSectors Breakdown (8 cols - AMPLIA) */}
-          <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 text-xs">
+          {/* 3 SuperSectors Breakdown (ocupa todo el espacio restante) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 text-xs items-stretch h-full">
             {/* Cíclico */}
             <div
               onClick={() => setSelectedSector(selectedSector === 'ciclico' ? null : 'ciclico')}
@@ -204,14 +211,14 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                     {data.ciclico.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-1.5 space-y-1">
+                <div className="mt-1.5 space-y-1 sm:space-y-1.5">
                   {data.ciclico.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0">
+                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
                       <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span className="truncate">{ind.name}</span>
+                        <span className="truncate">{formatIndustryName(ind.name)}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-semibold text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -235,14 +242,14 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                     {data.sensible.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-1.5 space-y-1">
+                <div className="mt-1.5 space-y-1 sm:space-y-1.5">
                   {data.sensible.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0">
+                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
                       <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span className="truncate">{ind.name}</span>
+                        <span className="truncate">{formatIndustryName(ind.name)}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-semibold text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -266,14 +273,14 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                     {data.defensivo.totalWeight.toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-1.5 space-y-1">
+                <div className="mt-1.5 space-y-1 sm:space-y-1.5">
                   {data.defensivo.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0">
+                    <div key={i} className="flex justify-between items-center text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0" title={`${ind.name}: ${ind.weight.toFixed(1)}%`}>
                       <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span className="truncate">{ind.name}</span>
+                        <span className="truncate">{formatIndustryName(ind.name)}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-semibold text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
