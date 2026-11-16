@@ -1457,44 +1457,32 @@ export function OverviewPage() {
               </div>
             </div>
 
-            {/* Toggle Mode & X-Ray Button */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
-                {(['asset', 'type', 'geo'] as AllocMode[]).map((m) => (
-                  <motion.button
-                    key={m}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => setAllocMode(m)}
-                    className={cn(
-                      'h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer',
-                      allocMode === m
-                        ? 'text-slate-900 dark:text-white font-bold'
-                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                    )}
-                  >
-                    {allocMode === m && (
-                      <motion.div
-                        layoutId="overviewAllocPill"
-                        className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                        transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                      />
-                    )}
-                    <span className="relative z-10 text-xs">
-                      {m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}
-                    </span>
-                  </motion.button>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsXRayOpen(true)}
-                title="Abrir Informe X-Ray Completo de Cartera (Morningstar Look-Through)"
-                className="h-8 px-2.5 rounded-lg border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 text-xs font-bold transition-all shadow-2xs cursor-pointer shrink-0"
-              >
-                <ScanSearch className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                <span className="hidden sm:inline">X-Ray</span>
-              </button>
+            {/* Toggle Mode */}
+            <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
+              {(['asset', 'type', 'geo'] as AllocMode[]).map((m) => (
+                <motion.button
+                  key={m}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setAllocMode(m)}
+                  className={cn(
+                    'h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer',
+                    allocMode === m
+                      ? 'text-slate-900 dark:text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  )}
+                >
+                  {allocMode === m && (
+                    <motion.div
+                      layoutId="overviewAllocPill"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                    />
+                  )}
+                  <span className="relative z-10 text-xs">
+                    {m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}
+                  </span>
+                </motion.button>
+              ))}
             </div>
           </CardHeader>
 
