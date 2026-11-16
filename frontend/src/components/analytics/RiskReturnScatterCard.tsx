@@ -56,7 +56,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
           </div>
         </div>
         <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hidden sm:inline-block shrink-0">
-          Ratio de Sharpe 1.71
+          Ratio Sharpe 1.71
         </span>
       </div>
 
@@ -93,16 +93,28 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
           <line x1={70} y1={12} x2={70} y2={305} stroke="currentColor" strokeWidth="1.5" className="text-slate-400 dark:text-slate-500" />
           <line x1={70} y1={305} x2={625} y2={305} stroke="currentColor" strokeWidth="1.5" className="text-slate-400 dark:text-slate-500" />
 
-          {/* Y Axis Vertical Label (a la izquierda del eje vertical, según diseño institucional) */}
-          <text
-            transform="rotate(-90)"
-            x={-158}
-            y={18}
-            textAnchor="middle"
-            className="text-[12px] font-bold fill-slate-700 dark:fill-slate-300 select-none tracking-tight"
-          >
-            Retorno Medio Anualizado (3 Años) ↑
-          </text>
+          {/* Y Axis Vertical Label con contenedor de fondo blanco */}
+          <g transform="rotate(-90)" className="pointer-events-none select-none">
+            <rect
+              x={-285}
+              y={6}
+              width="254"
+              height="25"
+              rx="6"
+              fill="#ffffff"
+              stroke="#cbd5e1"
+              strokeWidth="1"
+              className="dark:fill-[#1e1e24] dark:stroke-white/10 shadow-2xs"
+            />
+            <text
+              x={-158}
+              y={22.5}
+              textAnchor="middle"
+              className="text-[11px] font-bold fill-slate-700 dark:fill-slate-300 font-sans"
+            >
+              ↑ Retorno Medio Anualizado (3 Años)
+            </text>
+          </g>
 
           {/* Y Axis Ticks */}
           {yTicks.map((r) => (
@@ -190,8 +202,12 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
                   onMouseEnter={() => setActivePoint(p)}
                   onMouseLeave={() => setActivePoint(null)}
                 >
-                  <rect x={cx - 8} y={cy - 8} width="16" height="16" rx="4" fill="#10b981" />
-                  <text x={cx + 14} y={cy + 4} className="text-[11.5px] font-bold fill-emerald-600 dark:fill-emerald-400">
+                  <rect x={cx - 7} y={cy - 7} width="14" height="14" rx="3.5" fill="#10b981" />
+                  <text
+                    x={cx - 6}
+                    y={cy + 15}
+                    className="text-[10.5px] font-bold fill-emerald-600 dark:fill-emerald-400 select-none"
+                  >
                     Ref Monetario ({p.meanReturn.toFixed(1)}%)
                   </text>
                 </g>
