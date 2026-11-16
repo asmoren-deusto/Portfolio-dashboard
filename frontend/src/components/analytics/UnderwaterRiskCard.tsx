@@ -24,10 +24,13 @@ import {
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { fmt, cn } from '@/lib/utils'
 import type { Analytics, PricePoint } from '@/lib/mockData'
+import type { BacktestCurvePoint, BacktestSummary } from '@/api/queries'
 
 interface UnderwaterRiskCardProps {
   analytics?: Analytics
-  performance: PricePoint[]
+  performance?: PricePoint[]
+  backtestCurves?: BacktestCurvePoint[]
+  backtestSummary?: BacktestSummary
   totalValue?: number
   loading?: boolean
 }
@@ -35,21 +38,144 @@ interface UnderwaterRiskCardProps {
 export function UnderwaterRiskCard({
   analytics,
   performance,
+  backtestCurves,
+  backtestSummary,
   totalValue = 0,
   loading = false,
 }: UnderwaterRiskCardProps) {
   const [viewMode, setViewMode] = useState<'underwater' | 'ratios'>('underwater')
 
   const quantStats = useMemo(() => {
+    // ── MODO 1: BACKTEST SIMULADO (Curvas históricas de 5y / 10y) ──
+    if (backtestCurves && backtestCurves.length >= 3) {
+      const cagr = backtestSummary?.portfolio_cagr ?? analytics?.cagr ?? 12.4
+      const vol = backtestSummary?.volatility_portfolio ?? analytics?.volatility ?? 10.5
+      const sharpe = backtestSummary?.sharpe_ratio_portfolio ?? analytics?.sharpe_ratio ?? 1.25
+      const reportedMaxDd = backtestSummary?.max_drawdown_portfolio ?? analytics?.max_drawdown ?? -15.0
+
+      let hwmCount = 0
+      let monthsSincePeak = 0
+      let maxRecoveryMonths = 0
+      let minDd = 0
+      let maxDdDate = backtestCurves[0].date
+      const monthlyReturns: number[] = []
+      const downsideMonthlyReturns: number[] = []
+
+      const rawSeries = backtestCurves.map((pt, i) => {
+        const dd = typeof pt.portfolio_drawdown === 'number' ? pt.portfolio_drawdown : 0
+        const isHwm = dd >= -0.05
+        if (isHwm) {
+          hwmCount++
+          if (monthsSincePeak > maxRecoveryMonths) {
+            maxRecoveryMonths = monthsSincePeak
+          }
+          monthsSincePeak = 0
+        } else {
+          monthsSincePeak++
+        }
+        if (dd < minDd) {
+          minDd = dd
+          maxDdDate = pt.date
+        }
+
+        if (i > 0) {
+          const prevVal = backtestCurves[i - 1].portfolio_val
+          if (prevVal > 0) {
+            const r = (pt.portfolio_val - prevVal) / prevVal
+            monthlyReturns.push(r)
+            if (r < 0) downsideMonthlyReturns.push(r)
+          }
+        }
+
+        return {
+          date: pt.date,
+          dd: +dd.toFixed(2),
+          isHwm,
+          val: pt.portfolio_val,
+        }
+      })
+
+      const effectiveMaxDd = minDd < -0.05 ? minDd : (reportedMaxDd < 0 ? reportedMaxDd : -5.0)
+      const currentDdPct = rawSeries[rawSeries.length - 1]?.dd ?? 0
+      const lastVal = totalValue || rawSeries[rawSeries.length - 1]?.val || 10000
+      const impliedPeakVal = currentDdPct < 0 ? lastVal / (1 + currentDdPct / 100) : lastVal
+      const currentDdEur = currentDdPct < 0 ? lastVal - impliedPeakVal : 0
+
+      // Downside deviation & Sortino
+      const downsideSqSum = downsideMonthlyReturns.reduce((acc, r) => acc + r * r, 0)
+      const downsideDevAnnual =
+        monthlyReturns.length > 3 && downsideSqSum > 0
+          ? Math.sqrt(downsideSqSum / monthlyReturns.length) * Math.sqrt(12) * 100
+          : vol * 0.7
+      const riskFree = 2.5
+      const sortino =
+        downsideDevAnnual > 0.2
+          ? +((cagr - riskFree) / downsideDevAnnual).toFixed(2)
+          : +(sharpe * 1.35).toFixed(2)
+
+      // Calmar = CAGR / |Max DD|
+      const calmar =
+        Math.abs(effectiveMaxDd) > 0.1
+          ? +(cagr / Math.abs(effectiveMaxDd)).toFixed(2)
+          : 2.5
+
+      // Ulcer Index = sqrt(mean(dd^2))
+      const sumSqDd = rawSeries.reduce((acc, p) => acc + p.dd * p.dd, 0)
+      const ulcerIndex = +(Math.sqrt(sumSqDd / rawSeries.length) || 1.2).toFixed(2)
+
+      // Win rate & Profit factor
+      const posMonths = monthlyReturns.filter((r) => r > 0.0001)
+      const negMonths = monthlyReturns.filter((r) => r < -0.0001)
+      const activeMonths = posMonths.length + negMonths.length
+      const winRatePct = activeMonths > 0 ? +((posMonths.length / activeMonths) * 100).toFixed(1) : 60.0
+
+      const grossGain = posMonths.reduce((a, r) => a + r, 0)
+      const grossLoss = Math.abs(negMonths.reduce((a, r) => a + r, 0))
+      const profitFactor = grossLoss > 0 ? +(grossGain / grossLoss).toFixed(2) : 1.8
+
+      // Monthly VaR 95%
+      const monthlyStd = vol / Math.sqrt(12)
+      const var95MonthlyPct = +(-1.645 * monthlyStd).toFixed(2)
+
+      return {
+        isBacktest: true,
+        underwaterSeries: rawSeries,
+        currentDdPct,
+        currentDdEur,
+        maxDdPct: +effectiveMaxDd.toFixed(2),
+        maxDdDate,
+        hwmCount,
+        sortino,
+        calmar,
+        ulcerIndex,
+        winRatePct,
+        winRateLabel: 'Win Rate Mensual',
+        profitFactor,
+        var95MonthlyPct,
+        maxRecoveryCount: Math.max(maxRecoveryMonths, 1),
+        recoveryUnit: 'meses',
+        sharpe,
+      }
+    }
+
+    // ── MODO 2: CUENTA REAL (Transacciones en vivo) ──
     const cagr = analytics?.cagr ?? analytics?.annualized_return ?? 12.4
     const vol = analytics?.volatility ?? 9.8
     const sharpe = analytics?.sharpe_ratio ?? 1.42
     const reportedMaxDd = analytics?.max_drawdown ?? -4.8
 
-    if (!performance || performance.length < 3) {
+    // Filtrar días iniciales sin actividad real para evitar líneas planas de ceros
+    const validPoints = performance || []
+    const firstActiveIdx = validPoints.findIndex(
+      (pt) => (pt.value && pt.value > 0) || (pt.invested && pt.invested > 0) || (typeof pt.daily_return === 'number' && Math.abs(pt.daily_return) > 0.0001)
+    )
+    const activePerformance = firstActiveIdx > 0 ? validPoints.slice(Math.max(0, firstActiveIdx - 1)) : validPoints
+
+    if (activePerformance.length < 3) {
       const sortino = +(sharpe * 1.42).toFixed(2)
       const calmar = reportedMaxDd !== 0 ? +(cagr / Math.abs(reportedMaxDd)).toFixed(2) : 2.5
       return {
+        isBacktest: false,
         underwaterSeries: [],
         currentDdPct: 0,
         currentDdEur: 0,
@@ -60,9 +186,12 @@ export function UnderwaterRiskCard({
         calmar,
         ulcerIndex: 1.65,
         winRatePct: 58.4,
+        winRateLabel: 'Win Rate Sesiones',
         profitFactor: 1.48,
         var95MonthlyPct: -(vol / Math.sqrt(12)) * 1.645,
-        maxRecoveryDays: 18,
+        maxRecoveryCount: 18,
+        recoveryUnit: 'sesiones',
+        sharpe,
       }
     }
 
@@ -70,7 +199,7 @@ export function UnderwaterRiskCard({
     let unitNav = 100
     let peakNav = 100
     let maxDdPct = 0
-    let maxDdDate = performance[0].date
+    let maxDdDate = activePerformance[0].date
     let hwmCount = 0
     let daysSincePeak = 0
     let maxRecoveryDays = 0
@@ -84,11 +213,11 @@ export function UnderwaterRiskCard({
       val: number
     }[] = []
 
-    for (let i = 0; i < performance.length; i++) {
-      const pt = performance[i]
+    for (let i = 0; i < activePerformance.length; i++) {
+      const pt = activePerformance[i]
       let r = 0
       if (i > 0) {
-        const prev = performance[i - 1]
+        const prev = activePerformance[i - 1]
         if (typeof pt.daily_return === 'number') {
           // Backend stores daily_return in percentage points (e.g. -0.45 = -0.45%)
           r = pt.daily_return / 100
@@ -140,8 +269,7 @@ export function UnderwaterRiskCard({
     )
 
     const currentDdPct = underwaterSeries[underwaterSeries.length - 1]?.dd ?? 0
-    const lastVal = totalValue || performance[performance.length - 1]?.value || 0
-    // If unitNav is down currentDdPct% from peakNav, the equivalent euro drawdown from peak is:
+    const lastVal = totalValue || activePerformance[activePerformance.length - 1]?.value || 0
     const impliedPeakVal = currentDdPct < 0 ? lastVal / (1 + currentDdPct / 100) : lastVal
     const currentDdEur = currentDdPct < 0 ? lastVal - impliedPeakVal : 0
 
@@ -182,6 +310,7 @@ export function UnderwaterRiskCard({
     const var95MonthlyPct = +(-1.645 * monthlyStd).toFixed(2)
 
     return {
+      isBacktest: false,
       underwaterSeries: sampledSeries,
       currentDdPct,
       currentDdEur,
@@ -192,11 +321,14 @@ export function UnderwaterRiskCard({
       calmar,
       ulcerIndex,
       winRatePct,
+      winRateLabel: 'Win Rate Sesiones',
       profitFactor,
       var95MonthlyPct,
-      maxRecoveryDays: Math.max(maxRecoveryDays, 5),
+      maxRecoveryCount: Math.max(maxRecoveryDays, 5),
+      recoveryUnit: 'sesiones',
+      sharpe,
     }
-  }, [analytics, performance, totalValue])
+  }, [analytics, performance, backtestCurves, backtestSummary, totalValue])
 
   const isAtAllTimeHigh = Math.abs(quantStats.currentDdPct) < 0.15
 
@@ -221,12 +353,14 @@ export function UnderwaterRiskCard({
                 )}
               >
                 {isAtAllTimeHigh
-                  ? '★ En Máximo Histórico (High-Water Mark)'
+                  ? (quantStats.isBacktest ? '★ Simulación en Máximo' : '★ En Máximo Histórico (High-Water Mark)')
                   : `Distancia a Máximo: ${fmt.pct(quantStats.currentDdPct)}`}
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Curva subacuática de caídas desde pico (High-Water Mark), Sortino, Calmar, Índice de Úlcera y VaR 95%
+              {quantStats.isBacktest
+                ? 'Curva subacuática histórica de la simulación de cartera (High-Water Mark), Sortino, Calmar, Índice de Úlcera y VaR 95%'
+                : 'Curva subacuática de caídas desde pico (High-Water Mark), Sortino, Calmar, Índice de Úlcera y VaR 95%'}
             </p>
           </div>
         </div>
@@ -296,7 +430,7 @@ export function UnderwaterRiskCard({
               badgeBg: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20',
             },
             {
-              label: 'Win Rate Sesiones',
+              label: quantStats.winRateLabel,
               value: `${quantStats.winRatePct.toFixed(1)}%`,
               sub: `Profit Factor: ${quantStats.profitFactor}x`,
               tag: quantStats.winRatePct >= 54 ? 'Consistente' : 'Neutral',
@@ -315,13 +449,15 @@ export function UnderwaterRiskCard({
               badgeBg: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20',
             },
             {
-              label: 'Drawdown Actual',
+              label: quantStats.isBacktest ? 'Drawdown Final' : 'Drawdown Actual',
               value: fmt.pct(quantStats.currentDdPct),
               sub:
                 quantStats.currentDdEur < -1
                   ? `${fmt.currency(quantStats.currentDdEur)} desde pico`
                   : `Máx Hist: ${fmt.pct(quantStats.maxDdPct)}`,
-              tag: isAtAllTimeHigh ? 'En Pico HWM' : `Recup. ~${quantStats.maxRecoveryDays}d`,
+              tag: isAtAllTimeHigh
+                ? 'En Pico HWM'
+                : `Recup. ~${quantStats.maxRecoveryCount}${quantStats.recoveryUnit === 'meses' ? 'm' : 'd'}`,
               color: isAtAllTimeHigh
                 ? 'text-emerald-600 dark:text-emerald-400'
                 : 'text-rose-600 dark:text-rose-400',
@@ -406,9 +542,11 @@ export function UnderwaterRiskCard({
                       axisLine={false}
                       minTickGap={36}
                       tickFormatter={(d: string) => {
-                        if (!d || d.length < 10) return d
+                        if (!d) return ''
                         const parts = d.split('-')
-                        return `${parts[2]}/${parts[1]}`
+                        if (parts.length === 3) return `${parts[2]}/${parts[1]}`
+                        if (parts.length === 2) return `${parts[1]}/${parts[0].slice(2)}`
+                        return d
                       }}
                     />
                     <YAxis
@@ -451,7 +589,9 @@ export function UnderwaterRiskCard({
                             </div>
                             {pt.val > 0 && (
                               <div className="flex items-center justify-between gap-4 mt-0.5">
-                                <span className="text-slate-600 dark:text-slate-300">Patrimonio:</span>
+                                <span className="text-slate-600 dark:text-slate-300">
+                                  {quantStats.isBacktest ? 'Simulado (Base 10k):' : 'Patrimonio:'}
+                                </span>
                                 <span className="font-bold text-slate-900 dark:text-white">
                                   {fmt.currency(pt.val)}
                                 </span>
@@ -486,14 +626,14 @@ export function UnderwaterRiskCard({
             {[
               {
                 title: 'Eficiencia Asimétrica (Sortino vs Sharpe)',
-                metric: `${fmt.ratio(quantStats.sortino)} vs ${fmt.ratio(analytics?.sharpe_ratio ?? 1.4)}`,
+                metric: `${fmt.ratio(quantStats.sortino)} vs ${fmt.ratio(quantStats.sharpe)}`,
                 desc: 'Mientras el Ratio de Sharpe penaliza tanto las subidas fuertes como las caídas, el Ratio de Sortino aísla únicamente la volatilidad negativa (riesgo de pérdida real). Un Sortino superior a 1.5 confirma que la volatilidad de tu cartera juega a tu favor.',
                 tone: 'border-emerald-500/20 bg-emerald-500/[0.03]',
               },
               {
                 title: 'Velocidad de Recuperación (Calmar & HWM)',
                 metric: `${quantStats.hwmCount} picos históricos`,
-                desc: `Tu cartera ha marcado ${quantStats.hwmCount} nuevos máximos históricos (High-Water Marks) en el periodo, con un tiempo máximo de recuperación de ${quantStats.maxRecoveryDays} sesiones y un Ratio Calmar de ${fmt.ratio(quantStats.calmar)}x retorno anual por unidad de caída máxima.`,
+                desc: `Tu cartera ha marcado ${quantStats.hwmCount} nuevos máximos históricos (High-Water Marks) en el periodo, con un tiempo máximo de recuperación de ${quantStats.maxRecoveryCount} ${quantStats.recoveryUnit} y un Ratio Calmar de ${fmt.ratio(quantStats.calmar)}x retorno anual por unidad de caída máxima.`,
                 tone: 'border-blue-500/20 bg-blue-500/[0.03]',
               },
               {

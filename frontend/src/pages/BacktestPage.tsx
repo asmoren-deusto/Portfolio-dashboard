@@ -866,8 +866,10 @@ export function BacktestPage() {
         <UnderwaterRiskCard
           analytics={analytics}
           performance={performance}
+          backtestCurves={curves}
+          backtestSummary={summary}
           totalValue={totalValue}
-          loading={analyticsFetching || perfFetching}
+          loading={isLoading || isFetching}
         />
       </div>
 
