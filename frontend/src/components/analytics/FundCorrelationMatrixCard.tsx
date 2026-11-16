@@ -92,7 +92,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
                       onMouseEnter={() => setHoveredCell({ r: rIdx, c: cIdx, val })}
                       onMouseLeave={() => setHoveredCell(null)}
                       className={cn(
-                        'py-1 sm:py-1.5 px-0.5 sm:px-1 font-mono text-[10px] sm:text-[11px] rounded sm:rounded-md transition-transform cursor-pointer relative leading-none',
+                        'py-1 sm:py-1.5 px-0.5 sm:px-1 font-mono text-[10.5px] sm:text-[12px] font-bold rounded sm:rounded-md transition-transform cursor-pointer relative leading-none',
                         getCellColor(val),
                         isHovered
                           ? 'z-20 scale-[1.08] shadow-sm'

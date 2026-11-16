@@ -43,11 +43,11 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
 
   // Correlation Color Mapper
   const getCorrelationColor = (val: number | null) => {
-    if (val === null) return 'bg-slate-100 text-slate-400'
+    if (val === null) return 'bg-slate-100 text-slate-400 font-normal'
     if (val >= 0.60) return 'bg-[#1e40af] text-white font-bold' // 1.00 to 0.60 (Dark Blue)
-    if (val >= 0.20) return 'bg-[#60a5fa] text-slate-900 font-semibold' // 0.60 to 0.20 (Light Blue)
-    if (val >= -0.20) return 'bg-[#f1f5f9] text-slate-800' // 0.20 to -0.20 (Neutral)
-    if (val >= -0.60) return 'bg-[#fed7aa] text-amber-900' // -0.20 to -0.60 (Orange)
+    if (val >= 0.20) return 'bg-[#60a5fa] text-slate-900 font-bold' // 0.60 to 0.20 (Light Blue)
+    if (val >= -0.20) return 'bg-[#f1f5f9] text-slate-800 font-semibold' // 0.20 to -0.20 (Neutral)
+    if (val >= -0.60) return 'bg-[#fed7aa] text-amber-950 font-bold' // -0.20 to -0.60 (Orange)
     return 'bg-[#ef4444] text-white font-bold' // -0.60 to -1.00 (Red)
   }
 
@@ -980,7 +980,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     Fondos 1-{(performance.correlationFunds.length > 0 ? performance.correlationFunds.length : (performance.correlationMatrix[0] || []).length)}
                   </span>
                 </div>
-                <table className="w-full border-collapse text-[8px] leading-tight text-center overflow-visible">
+                <table className="w-full border-collapse text-[8.5px] leading-tight text-center overflow-visible">
                   <thead>
                     <tr>
                       <th className="w-4 py-0.5"></th>
@@ -989,7 +989,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                         : (performance.correlationMatrix[0] || []).map((_, i) => i + 1)
                       ).map((num) => (
                         <th key={num} className="py-0.5 px-0.5 text-center align-middle">
-                          <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#991b1b] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
+                          <span className="w-4 h-4 mx-auto rounded-full bg-[#991b1b] text-white font-bold flex items-center justify-center text-[7.5px] leading-none shrink-0 shadow-2xs">
                             {num}
                           </span>
                         </th>
@@ -1000,14 +1000,14 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     {performance.correlationMatrix.map((row, rIdx) => (
                       <tr key={rIdx}>
                         <td className="py-0.5 px-0.5 text-center align-middle">
-                          <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#991b1b] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
+                          <span className="w-4 h-4 mx-auto rounded-full bg-[#991b1b] text-white font-bold flex items-center justify-center text-[7.5px] leading-none shrink-0 shadow-2xs">
                             {rIdx + 1}
                           </span>
                         </td>
                         {row.map((val, cIdx) => (
                           <td
                             key={cIdx}
-                            className={`py-0.5 px-0.5 border border-white font-mono text-[6.5px] ${getCorrelationColor(val)}`}
+                            className={`py-1 px-0.5 border border-white font-mono text-[8.8px] leading-tight align-middle text-center whitespace-nowrap ${getCorrelationColor(val)}`}
                           >
                             {val !== null ? val.toFixed(2) : '-'}
                           </td>
@@ -1018,11 +1018,11 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                 </table>
               </div>
               {/* Correlation Color Legend */}
-              <div className="flex items-center justify-between text-[7px] mt-1.5 pt-1 border-t border-slate-100 font-mono text-slate-600">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#1e40af] inline-block" /> 1.00 - 0.60</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#60a5fa] inline-block" /> 0.60 - 0.20</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#f1f5f9] border border-slate-300 inline-block" /> 0.20 - -0.20</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#fed7aa] inline-block" /> -0.20 - -0.60</span>
+              <div className="flex items-center justify-between text-[7.5px] mt-1.5 pt-1 border-t border-slate-100 font-mono text-slate-600">
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-[#1e40af] inline-block" /> 1.00 - 0.60</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-[#60a5fa] inline-block" /> 0.60 - 0.20</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-[#f1f5f9] border border-slate-300 inline-block" /> 0.20 - -0.20</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-[#fed7aa] inline-block" /> -0.20 - -0.60</span>
               </div>
             </div>
           </div>
