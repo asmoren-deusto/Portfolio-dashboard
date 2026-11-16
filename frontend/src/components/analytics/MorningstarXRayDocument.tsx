@@ -320,16 +320,28 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     <text x="8" y="86" textAnchor="middle" className="text-[7px] font-bold fill-slate-700">Defensivo</text>
                     <text x="90" y="86" textAnchor="middle" className="text-[7px] font-bold fill-slate-700">Cíclico</text>
                     
-                    {/* Inner dividing lines */}
+                    {/* Inner dividing lines converging at centroid (50, 56) */}
                     <line x1="50" y1="12" x2="50" y2="56" stroke="#cbd5e1" strokeDasharray="1.5" />
                     <line x1="12" y1="78" x2="50" y2="56" stroke="#cbd5e1" strokeDasharray="1.5" />
                     <line x1="88" y1="78" x2="50" y2="56" stroke="#cbd5e1" strokeDasharray="1.5" />
 
-                    {/* Benchmark Point (Diamond) */}
-                    <polygon points="50,48 53,52 50,56 47,52" fill="#10b981" stroke="#047857" strokeWidth="0.8" />
-                    {/* Cartera Point (Circle with red ring) */}
-                    <circle cx="58" cy="38" r="4.5" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" />
-                    <circle cx="58" cy="38" r="1.5" fill="#C8102E" />
+                    {/* Benchmark Point (Diamond perfectly centered at 50, 56) */}
+                    <polygon points="50,52 53.5,56 50,60 46.5,56" fill="#10b981" stroke="#047857" strokeWidth="0.8" />
+                    {/* Cartera Point (Circle with red ring calculated from macro weights) */}
+                    {(() => {
+                      const sW = superSectorsDetail.sensible.totalWeight || 0
+                      const dW = superSectorsDetail.defensivo.totalWeight || 0
+                      const cW = superSectorsDetail.ciclico.totalWeight || 0
+                      const totalW = sW + dW + cW || 100
+                      const portX = (sW / totalW) * 50 + (dW / totalW) * 12 + (cW / totalW) * 88
+                      const portY = (sW / totalW) * 12 + (dW / totalW) * 78 + (cW / totalW) * 78
+                      return (
+                        <g>
+                          <circle cx={portX} cy={portY} r="4.5" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" />
+                          <circle cx={portX} cy={portY} r="1.5" fill="#C8102E" />
+                        </g>
+                      )
+                    })()}
                   </svg>
                 </div>
                 {/* Legend */}
