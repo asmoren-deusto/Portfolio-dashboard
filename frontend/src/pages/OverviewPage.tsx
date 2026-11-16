@@ -24,7 +24,6 @@ import {
   Coins,
   History,
   CheckCircle2,
-  Globe,
   PiggyBank,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -73,9 +72,8 @@ import {
   type MarketStock,
   type Position,
 } from '@/api/queries'
-import { analyzePortfolioDiversification } from '@/lib/diversificationEngine'
 
-type AllocMode = 'asset' | 'type' | 'geo'
+type AllocMode = 'asset' | 'type'
 
 const BROKER_ORDER = ['myinvestor', 'indexa', 'bbva', 'kutxabank', 'traderepublic', 'scalable']
 
@@ -428,19 +426,6 @@ export function OverviewPage() {
         box2Label: 'Top 3:',
         box2Val: `${top3Pct.toFixed(1)}%`,
         box2Title: `Concentración 3 mayores activos: ${top3Pct.toFixed(1)}%`,
-      }
-    } else if (allocMode === 'geo') {
-      const diag = analyzePortfolioDiversification(positions)
-      const validGeos = diag.geographicBreakdown.filter((g) => g.portfolioValue > 0.01)
-      const topGeo = validGeos[0]
-      const secondGeo = validGeos[1]
-      return {
-        box1Label: 'Líder:',
-        box1Val: topGeo ? `${topGeo.region.flag} ${topGeo.portfolioWeight.toFixed(1)}%` : '—',
-        box1Title: `Mayor región: ${topGeo?.region.name || '—'} (${topGeo?.portfolioWeight.toFixed(1)}%)`,
-        box2Label: secondGeo ? `${secondGeo.region.shortName}:` : 'Regiones:',
-        box2Val: secondGeo ? `${secondGeo.region.flag} ${secondGeo.portfolioWeight.toFixed(1)}%` : `${validGeos.length}`,
-        box2Title: secondGeo ? `Segunda región: ${secondGeo.region.name} (${secondGeo.portfolioWeight.toFixed(1)}%)` : `${validGeos.length} regiones mundiales`,
       }
     } else {
       const byType: Record<string, number> = {}
@@ -1446,25 +1431,31 @@ export function OverviewPage() {
             </div>
 
             {/* Toggle Mode */}
-            <div className="flex items-center gap-1 rounded-xl border border-slate-200/80 dark:border-white/[0.08] bg-slate-100/90 dark:bg-white/[0.04] p-1 shrink-0">
-              {(['asset', 'type', 'geo'] as AllocMode[]).map((m) => {
-                const active = allocMode === m
-                return (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setAllocMode(m)}
-                    className={cn(
-                      'inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap',
-                      active
-                        ? 'bg-blue-600 text-white shadow-xs font-bold'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
-                    )}
-                  >
-                    <span>{m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}</span>
-                  </button>
-                )
-              })}
+            <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#202022] p-0.5 shrink-0">
+              {(['asset', 'type'] as AllocMode[]).map((m) => (
+                <motion.button
+                  key={m}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setAllocMode(m)}
+                  className={cn(
+                    'h-7 relative rounded-md px-2.5 flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer',
+                    allocMode === m
+                      ? 'text-slate-900 dark:text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  )}
+                >
+                  {allocMode === m && (
+                    <motion.div
+                      layoutId="overviewAllocPill"
+                      className="absolute inset-0 rounded-md bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                    />
+                  )}
+                  <span className="relative z-10 text-xs">
+                    {m === 'asset' ? 'Activo' : 'Tipo'}
+                  </span>
+                </motion.button>
+              ))}
             </div>
           </CardHeader>
 
@@ -1503,7 +1494,7 @@ export function OverviewPage() {
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
                     <div className="w-5 h-5 rounded-md flex items-center justify-center bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
-                      {allocMode === 'geo' ? <Globe size={12} /> : <PieChart size={12} />}
+                      <PieChart size={12} />
                     </div>
                     <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
                       {allocStats.box1Label}
@@ -1531,7 +1522,7 @@ export function OverviewPage() {
                 >
                   <div className="flex items-center gap-1.5 min-w-0 shrink-0">
                     <div className="w-5 h-5 rounded-md flex items-center justify-center bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-                      {allocMode === 'geo' ? <Globe size={12} /> : <Layers size={12} />}
+                      <Layers size={12} />
                     </div>
                     <span className="text-slate-600 dark:text-slate-400 text-[11px] font-bold whitespace-nowrap">
                       {allocStats.box2Label}
