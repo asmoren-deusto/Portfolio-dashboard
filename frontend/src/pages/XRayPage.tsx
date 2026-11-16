@@ -44,10 +44,8 @@ import {
 type XRayTab = 'overview' | 'performance' | 'overlap' | 'funds' | 'holdings' | 'audit'
 
 export function XRayPage() {
-  const storeBroker = useAppStore((s) => s.selectedBroker)
-  const currentUser = useAppStore((s) => s.currentUser)
+  const { selectedBroker, setSelectedBroker, currentUser } = useAppStore()
   const { data: positions = [], isLoading } = usePositions()
-  const [selectedBroker, setSelectedBroker] = useState<string>(storeBroker || 'all')
   const [activeTab, setActiveTab] = useState<XRayTab>('overview')
   const [selectedHolding, setSelectedHolding] = useState<LookThroughHolding | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)

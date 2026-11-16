@@ -24,15 +24,19 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
   const [activePoint, setActivePoint] = useState<XRayScatterPoint | null>(null)
 
   // Bounds for SVG mapping
-  // X (volatility): 0 to 22%
-  // Y (mean return): 0 to 35%
   const minX = 0
-  const maxX = 22
+  const maxVol = Math.max(...points.map((p) => p.volatility), 20)
+  const maxX = Math.max(20, Math.ceil((maxVol + 2) / 5) * 5)
   const minY = 0
-  const maxY = 35
+  const maxRet = Math.max(...points.map((p) => p.meanReturn), 30)
+  const maxY = Math.max(35, Math.ceil((maxRet + 2) / 5) * 5)
 
   const mapX = (vol: number) => 70 + ((vol - minX) / (maxX - minX)) * 550
   const mapY = (ret: number) => 305 - ((ret - minY) / (maxY - minY)) * 290
+
+  const xTicks = [5, 10, 15, 20, 25, 30].filter((v) => v <= maxX)
+  const xLabels = [0, 5, 10, 15, 20, 25, 30].filter((v) => v <= maxX)
+  const yTicks = [5, 10, 15, 20, 25, 30, 35].filter((r) => r <= maxY)
 
   return (
     <Card className="p-5 sm:p-6 flex flex-col justify-between h-full">
@@ -60,7 +64,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
       <div className="my-3.5 w-full h-[340px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-2 sm:p-3 relative flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
         <svg viewBox="0 0 650 330" className="w-full h-full max-h-[320px] overflow-visible">
           {/* Grid Lines */}
-          {[5, 10, 15, 20].map((v) => (
+          {xTicks.map((v) => (
             <line
               key={v}
               x1={mapX(v)}
@@ -72,7 +76,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
               className="text-slate-200 dark:text-white/10"
             />
           ))}
-          {[5, 10, 15, 20, 25, 30].map((r) => (
+          {yTicks.map((r) => (
             <line
               key={r}
               x1={70}
@@ -101,14 +105,14 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
           </text>
 
           {/* Y Axis Ticks */}
-          {[5, 10, 15, 20, 25, 30].map((r) => (
+          {yTicks.map((r) => (
             <text key={r} x={62} y={mapY(r) + 4} textAnchor="end" className="text-[12px] font-mono font-bold fill-slate-500">
               {r}%
             </text>
           ))}
 
           {/* X Axis Ticks (separados y limpios) */}
-          {[0, 5, 10, 15, 20].map((v) => (
+          {xLabels.map((v) => (
             <text key={v} x={mapX(v)} y={322} textAnchor="middle" className="text-[12px] font-mono font-bold fill-slate-500">
               {v}%
             </text>
