@@ -205,17 +205,6 @@ export function XRayPage() {
                     <span>PDF Morningstar</span>
                   </button>
 
-                  {/* Botón Imprimir */}
-                  <button
-                    type="button"
-                    onClick={handlePrint}
-                    title="Imprimir en formato oficial Morningstar"
-                    className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-slate-200/70 dark:border-white/[0.08] bg-slate-100 hover:bg-slate-200/70 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all shadow-2xs active:scale-95 cursor-pointer"
-                  >
-                    <Printer className="w-3.5 h-3.5 text-indigo-500" />
-                    <span>Imprimir</span>
-                  </button>
-
                   {/* Botón Descargar Excel */}
                   <button
                     type="button"
