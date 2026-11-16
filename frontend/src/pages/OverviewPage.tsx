@@ -1781,6 +1781,7 @@ export function OverviewPage() {
             <ExcelExportButton
               type="positions"
               label="Excel"
+              className="!h-[31px]"
               title="Descargar posiciones en Excel (.xlsx) con costes, valores y rentabilidades"
             />
 
