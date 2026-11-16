@@ -18,6 +18,7 @@ import {
   Layers,
   Globe,
   Compass,
+  ScanSearch,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, LoadingDot } from '@/components/ui/Card'
 import { KpiCard } from '@/components/ui/KpiCard'
@@ -30,6 +31,7 @@ import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { AssetBadge, PnlBadge } from '@/components/ui/Badge'
 import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
+import { PortfolioXRayModal } from '@/components/analytics/PortfolioXRayModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { UnderwaterRiskCard } from '@/components/analytics/UnderwaterRiskCard'
 import { CompoundProjectionCard } from '@/components/analytics/CompoundProjectionCard'
@@ -49,6 +51,7 @@ export function AnalyticsPage() {
   const [benchmarkMode, setBenchmarkMode] = useState<BenchmarkChartMode>('percent')
   const [secondaryView, setSecondaryView] = useState<'returns' | 'distribution'>('returns')
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
+  const [isXRayOpen, setIsXRayOpen] = useState(false)
 
   const isSharpeGood = (analytics?.sharpe_ratio ?? 0) >= 1.0
 
@@ -160,6 +163,16 @@ export function AnalyticsPage() {
               Rendimiento ponderado en el tiempo (TWR) neutralizando aportaciones periódicas frente a índices globales de referencia.
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsXRayOpen(true)}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 transition-all shadow-2xs cursor-pointer shrink-0"
+            title="Abrir Informe X-Ray Completo (Morningstar Look-Through)"
+          >
+            <ScanSearch className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+            <span>Informe X-Ray</span>
+          </button>
         </div>
 
         <div className={cn("grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 p-3 sm:p-3.5 transition-opacity duration-300", (analyticsFetching || benchmarkFetching) ? "opacity-65" : "opacity-100")}>
@@ -641,6 +654,12 @@ export function AnalyticsPage() {
       <PositionDetailModal
         position={selectedPosition}
         onClose={() => setSelectedPosition(null)}
+      />
+
+      {/* Portfolio X-Ray Modal */}
+      <PortfolioXRayModal
+        isOpen={isXRayOpen}
+        onClose={() => setIsXRayOpen(false)}
       />
     </div>
   )

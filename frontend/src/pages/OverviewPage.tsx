@@ -26,6 +26,7 @@ import {
   CheckCircle2,
   Globe,
   PiggyBank,
+  ScanSearch,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -55,6 +56,7 @@ import { MarketTicker } from '@/components/market/MarketTicker'
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
+import { PortfolioXRayModal } from '@/components/analytics/PortfolioXRayModal'
 import { TableSkeletonRows } from '@/components/ui/TableSkeleton'
 import { ExcelExportButton } from '@/components/ui/ExcelExportButton'
 import { PortfolioAgendaCard } from '@/components/agenda/PortfolioAgendaCard'
@@ -134,6 +136,7 @@ export function OverviewPage() {
   const [allocMode, setAllocMode] = useState<AllocMode>('asset')
   const [selectedStock, setSelectedStock] = useState<MarketStock | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
+  const [isXRayOpen, setIsXRayOpen] = useState(false)
   const [hoveredIsin, setHoveredIsin] = useState<string | null>(null)
   const [chartView, setChartView] = useState<'evolution' | 'heatmap'>('evolution')
   const [chartStyle, setChartStyle] = useState<'glow' | 'lines' | 'waterfall' | 'heatmap'>(() => {
@@ -734,9 +737,20 @@ export function OverviewPage() {
             <span>Métricas Globales</span>
             {isGlobalUpdating && <LoadingDot />}
           </div>
-          <span data-private className="hidden sm:inline text-[11px] font-mono text-slate-500 dark:text-slate-400">
-            Total Cartera
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsXRayOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 shadow-2xs transition-all cursor-pointer"
+              title="Abrir Informe X-Ray Completo (Morningstar Look-Through)"
+            >
+              <ScanSearch size={13} className="text-indigo-600 dark:text-indigo-400" />
+              <span>Informe X-Ray</span>
+            </button>
+            <span data-private className="hidden sm:inline text-[11px] font-mono text-slate-500 dark:text-slate-400">
+              Total Cartera
+            </span>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5">
           <KpiCard
@@ -1444,30 +1458,42 @@ export function OverviewPage() {
               </div>
             </div>
 
-            {/* Toggle Mode */}
-            <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
-              {(['asset', 'type', 'geo'] as AllocMode[]).map((m) => (
-                <motion.button
-                  key={m}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => setAllocMode(m)}
-                  className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${allocMode === m
-                      ? 'text-slate-900 dark:text-white font-bold'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                    }`}
-                >
-                  {allocMode === m && (
-                    <motion.div
-                      layoutId="overviewAllocPill"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
-                      transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
-                    />
-                  )}
-                  <span className="relative z-10 text-[11px]">
-                    {m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}
-                  </span>
-                </motion.button>
-              ))}
+            {/* Toggle Mode & X-Ray Button */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+                {(['asset', 'type', 'geo'] as AllocMode[]).map((m) => (
+                  <motion.button
+                    key={m}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => setAllocMode(m)}
+                    className={`relative rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${allocMode === m
+                        ? 'text-slate-900 dark:text-white font-bold'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                      }`}
+                  >
+                    {allocMode === m && (
+                      <motion.div
+                        layoutId="overviewAllocPill"
+                        className="absolute inset-0 rounded-lg bg-white dark:bg-[#333333] dark:border dark:border-white/10 shadow-xs"
+                        transition={{ type: 'spring', bounce: 0.12, duration: 0.28 }}
+                      />
+                    )}
+                    <span className="relative z-10 text-[11px]">
+                      {m === 'asset' ? 'Activo' : m === 'type' ? 'Tipo' : 'Geo'}
+                    </span>
+                  </motion.button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsXRayOpen(true)}
+                title="Abrir Informe X-Ray Completo de Cartera (Morningstar Look-Through)"
+                className="h-7 px-2 rounded-lg border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center gap-1 text-[11px] font-bold transition-all shadow-2xs cursor-pointer shrink-0"
+              >
+                <ScanSearch className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <span className="hidden sm:inline">X-Ray</span>
+              </button>
             </div>
           </CardHeader>
 
@@ -2317,6 +2343,12 @@ export function OverviewPage() {
       <PositionDetailModal
         position={selectedPosition}
         onClose={() => setSelectedPosition(null)}
+      />
+
+      {/* Portfolio X-Ray Full Diagnostic Modal */}
+      <PortfolioXRayModal
+        isOpen={isXRayOpen}
+        onClose={() => setIsXRayOpen(false)}
       />
     </div>
   )
