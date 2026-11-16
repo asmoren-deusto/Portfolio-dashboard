@@ -716,95 +716,99 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
           </div>
 
           {/* Análisis de Rentabilidades (Scatter Plot) y Matriz de Correlación */}
-          <div className="grid grid-cols-12 gap-3 py-2 border-b border-slate-200">
+          <div className="grid grid-cols-12 gap-3 py-2 border-b border-slate-200 items-stretch">
             {/* Scatter Plot Riesgo/Retorno (6 cols) */}
-            <div className="col-span-6 pr-2 border-r border-slate-200">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-[9.5px] text-slate-900">Análisis de rentabilidades (3a)</span>
-                <span className="text-[7.5px] text-slate-400 font-mono">Media vs Volatilidad</span>
-              </div>
-              <div className="w-full h-32 bg-slate-50 border border-slate-200 rounded p-2 relative">
-                <svg viewBox="0 0 200 120" className="w-full h-full overflow-visible">
-                  {/* Axis lines */}
-                  <line x1="20" y1="10" x2="20" y2="105" stroke="#94a3b8" strokeWidth="1" />
-                  <line x1="20" y1="105" x2="195" y2="105" stroke="#94a3b8" strokeWidth="1" />
-                  
-                  {/* X labels (Volatilidad) */}
-                  {[-1, 5, 11, 17, 23].map((v, i) => (
-                    <text key={v} x={25 + i * 38} y="115" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
-                  ))}
-                  <text x="110" y="122" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
+            <div className="col-span-6 pr-2 border-r border-slate-200 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-[9.5px] text-slate-900">Análisis de rentabilidades (3a)</span>
+                  <span className="text-[7.5px] text-slate-400 font-mono">Media vs Volatilidad</span>
+                </div>
+                <div className="w-full h-[155px] bg-slate-50 border border-slate-200 rounded p-2.5 flex items-center justify-center relative">
+                  <svg viewBox="0 0 210 135" className="w-full h-full overflow-visible">
+                    {/* Axis lines */}
+                    <line x1="24" y1="8" x2="24" y2="114" stroke="#94a3b8" strokeWidth="1" />
+                    <line x1="24" y1="114" x2="200" y2="114" stroke="#94a3b8" strokeWidth="1" />
+                    
+                    {/* X labels (Volatilidad) */}
+                    {[-1, 5, 11, 17, 23].map((v, i) => (
+                      <text key={v} x={28 + i * 42} y="124" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
+                    ))}
+                    <text x="112" y="132" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
 
-                  {/* Y labels (Media 3a) */}
-                  {[5, 13, 21, 29, 37].map((m, i) => (
-                    <text key={m} x="16" y={100 - i * 20} textAnchor="end" className="text-[6.5px] font-mono fill-slate-500">{m}</text>
-                  ))}
-                  
-                  {/* Scatter Points */}
-                  {/* Benchmark */}
-                  <rect x="23" y="102" width="5" height="5" fill="#10b981" />
-                  {/* Cartera Consolidada */}
-                  <circle cx="85" cy="46" r="6" fill="#ffffff" stroke="#C8102E" strokeWidth="2.5" />
-                  <text x="85" y="48.5" textAnchor="middle" className="text-[6px] font-bold fill-[#C8102E]">C</text>
-                  {/* Funds 1 to 7 */}
-                  {[
-                    { idx: '1', x: 92, y: 52 },
-                    { idx: '2', x: 135, y: 22 },
-                    { idx: '3', x: 118, y: 56 },
-                    { idx: '4', x: 88, y: 62 },
-                    { idx: '6', x: 108, y: 41 },
-                    { idx: '7', x: 104, y: 82 },
-                  ].map((p) => (
-                    <g key={p.idx}>
-                      <circle cx={p.x} cy={p.y} r="4.5" fill="#C8102E" />
-                      <text x={p.x} y={p.y + 2} textAnchor="middle" className="text-[6px] font-bold fill-white">{p.idx}</text>
-                    </g>
-                  ))}
-                </svg>
+                    {/* Y labels (Media 3a) */}
+                    {[5, 13, 21, 29, 37].map((m, i) => (
+                      <text key={m} x="20" y={114 - i * 25} textAnchor="end" className="text-[6.5px] font-mono fill-slate-500">{m}</text>
+                    ))}
+                    
+                    {/* Scatter Points */}
+                    {/* Benchmark */}
+                    <rect x="25.5" y="111.5" width="5" height="5" fill="#10b981" />
+                    {/* Cartera Consolidada */}
+                    <circle cx="103.6" cy="59.5" r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2" />
+                    <text x="103.6" y="61.5" textAnchor="middle" className="text-[5.5px] font-bold fill-[#C8102E]">C</text>
+                    {/* Funds 1 to 7 */}
+                    {[
+                      { idx: '1', x: 115.5, y: 66.4 },
+                      { idx: '2', x: 145.6, y: 28.6 },
+                      { idx: '3', x: 128.8, y: 68.5 },
+                      { idx: '4', x: 102.2, y: 75.4 },
+                      { idx: '6', x: 120.4, y: 50.8 },
+                      { idx: '7', x: 117.6, y: 96.4 },
+                    ].map((p) => (
+                      <g key={p.idx}>
+                        <circle cx={p.x} cy={p.y} r="3.8" fill="#C8102E" />
+                        <text x={p.x} y={p.y + 1.8} textAnchor="middle" className="text-[5px] font-bold fill-white">{p.idx}</text>
+                      </g>
+                    ))}
+                  </svg>
+                </div>
               </div>
             </div>
 
             {/* Matriz de Correlación (6 cols) */}
-            <div className="col-span-6 pl-1">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-[9.5px] text-slate-900">Matriz de correlación</span>
-                <span className="text-[7.5px] text-slate-400 font-mono">Fondos 1-7</span>
-              </div>
-              <table className="w-full border-collapse text-[8px] leading-tight text-center">
-                <thead>
-                  <tr>
-                    <th className="w-4"></th>
-                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <th key={num} className="w-6 py-0.5">
-                        <span className="w-4 h-4 rounded-full bg-[#C8102E] text-white font-bold inline-flex items-center justify-center text-[7px]">
-                          {num}
-                        </span>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {performance.correlationMatrix.map((row, rIdx) => (
-                    <tr key={rIdx}>
-                      <td className="py-0.5">
-                        <span className="w-4 h-4 rounded-full bg-[#C8102E] text-white font-bold inline-flex items-center justify-center text-[7px]">
-                          {rIdx + 1}
-                        </span>
-                      </td>
-                      {row.map((val, cIdx) => (
-                        <td
-                          key={cIdx}
-                          className={`p-0.5 border border-white font-mono text-[7px] ${getCorrelationColor(val)}`}
-                        >
-                          {val !== null ? val.toFixed(2) : '-'}
-                        </td>
+            <div className="col-span-6 pl-1 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-[9.5px] text-slate-900">Matriz de correlación</span>
+                  <span className="text-[7.5px] text-slate-400 font-mono">Fondos 1-7</span>
+                </div>
+                <table className="w-full border-collapse text-[8px] leading-tight text-center overflow-visible">
+                  <thead>
+                    <tr>
+                      <th className="w-5 py-1"></th>
+                      {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                        <th key={num} className="py-1 px-0.5 text-center align-middle">
+                          <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#C8102E] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
+                            {num}
+                          </span>
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {performance.correlationMatrix.map((row, rIdx) => (
+                      <tr key={rIdx}>
+                        <td className="py-1 px-0.5 text-center align-middle">
+                          <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#C8102E] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
+                            {rIdx + 1}
+                          </span>
+                        </td>
+                        {row.map((val, cIdx) => (
+                          <td
+                            key={cIdx}
+                            className={`p-1 border border-white font-mono text-[7px] ${getCorrelationColor(val)}`}
+                          >
+                            {val !== null ? val.toFixed(2) : '-'}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               {/* Correlation Color Legend */}
-              <div className="flex items-center justify-between text-[7px] mt-1 font-mono text-slate-600">
+              <div className="flex items-center justify-between text-[7px] mt-1.5 pt-1 border-t border-slate-100 font-mono text-slate-600">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#1e40af] inline-block" /> 1.00 - 0.60</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#60a5fa] inline-block" /> 0.60 - 0.20</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#f1f5f9] border border-slate-300 inline-block" /> 0.20 - -0.20</span>
@@ -833,7 +837,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   {performance.correlationFunds.map((f) => (
                     <tr key={f.index} className="border-b border-slate-100">
                       <td className="py-0.5 flex items-center gap-1 truncate font-medium">
-                        <span className="w-3.5 h-3.5 rounded-full bg-[#C8102E] text-white inline-flex items-center justify-center text-[7px] shrink-0 font-bold">
+                        <span className="w-3.5 h-3.5 rounded-full bg-[#C8102E] text-white flex items-center justify-center text-[6.5px] leading-none shrink-0 font-bold shadow-2xs">
                           {f.index}
                         </span>
                         <span className="truncate">{f.name}</span>
