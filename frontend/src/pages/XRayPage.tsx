@@ -839,7 +839,7 @@ export function XRayPage() {
               </span>
             </div>
 
-            <div className="mt-4 divide-y divide-slate-100 dark:divide-white/5">
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-1">
               {topHoldings.map((h, idx) => (
                 <div
                   key={h.id}
@@ -852,11 +852,11 @@ export function XRayPage() {
                       setSelectedHolding(h)
                     }
                   }}
-                  className="py-3 px-2 flex items-center justify-between hover:bg-slate-100/70 dark:hover:bg-white/[0.04] rounded-xl transition-all cursor-pointer group select-none"
+                  className="py-2.5 px-3 flex items-center justify-between hover:bg-slate-100/70 dark:hover:bg-white/[0.04] rounded-xl transition-all cursor-pointer group select-none border border-transparent hover:border-slate-200/60 dark:hover:border-white/10"
                   title="Haz clic para ver el desglose detallado de esta compañía en tus fondos"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="font-mono text-xs font-bold text-slate-400 w-6 text-center shrink-0">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
+                    <span className="font-mono text-xs font-bold text-slate-400 w-5 sm:w-6 text-center shrink-0">
                       #{idx + 1}
                     </span>
                     <CompanyLogo
@@ -864,31 +864,31 @@ export function XRayPage() {
                       ticker={h.ticker}
                       name={h.name}
                       size="sm"
-                      className="w-9 h-9 rounded-xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shrink-0 shadow-2xs border border-slate-200/60 dark:border-white/10"
                     />
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <span className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-[13px] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                           {h.name}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono shrink-0">{h.isin}</span>
+                        <span className="text-[10px] text-slate-400 font-mono shrink-0 hidden sm:inline">{h.isin}</span>
                       </div>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 block truncate">
+                      <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 block truncate">
                         {h.flag} {h.country} · {h.sector}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 shrink-0 text-right">
+                  <div className="flex items-center gap-3 shrink-0 text-right">
                     <div>
-                      <span className="font-mono font-bold text-sm text-blue-700 dark:text-blue-400 block">
+                      <span className="font-mono font-bold text-xs sm:text-sm text-blue-700 dark:text-blue-400 block">
                         {h.portfolioWeight.toFixed(2)}%
                       </span>
-                      <span className="text-[10.5px] font-mono text-slate-400 block">
+                      <span className="text-[10px] sm:text-[10.5px] font-mono text-slate-400 block">
                         {fmt.currency(h.portfolioValue)}
                       </span>
                     </div>
-                    <ExternalLink size={15} className="text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shrink-0" />
+                    <ExternalLink size={14} className="text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shrink-0 ml-1" />
                   </div>
                 </div>
               ))}
