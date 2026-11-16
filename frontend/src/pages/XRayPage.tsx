@@ -691,31 +691,6 @@ export function XRayPage() {
                 </div>
               </div>
             </Card>
-
-            {/* Acceso Directo a Rendimiento Histórico 10k & MPT */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-red-500/10 via-indigo-500/10 to-transparent border border-red-500/20 gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-red-500/10 text-[#C8102E] dark:text-red-400 border border-red-500/20 shrink-0">
-                  <TrendingUp className="w-5 h-5 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                    Histórico de Rentabilidad & Crecimiento de 10.000 €
-                  </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Crecimiento multi-ciclo (+4,08x), rentabilidad trimestral vs benchmark y estadísticas MPT completas
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveTab('performance')}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0 self-start sm:self-auto"
-              >
-                <span>Ver Rendimiento X-Ray</span>
-                <TrendingUp className="w-3.5 h-3.5" />
-              </button>
-            </div>
           </div>
         )}
 
