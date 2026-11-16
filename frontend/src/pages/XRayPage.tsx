@@ -4,6 +4,7 @@ import {
   ScanSearch,
   Printer,
   FileSpreadsheet,
+  FileText,
   Globe,
   PieChart,
   Layers,
@@ -22,6 +23,7 @@ import { useAppStore } from '@/store/appStore'
 import { fmt, cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
 import { downloadExcelReport } from '@/api/export'
+import { MorningstarXRayDocument } from '@/components/analytics/MorningstarXRayDocument'
 import {
   buildPortfolioXRayReport,
   type LookThroughHolding,
@@ -33,11 +35,21 @@ type XRayTab = 'overview' | 'holdings' | 'stylebox' | 'geo_sectors' | 'audit'
 export function XRayPage() {
   const navigate = useNavigate()
   const storeBroker = useAppStore((s) => s.selectedBroker)
+  const currentUser = useAppStore((s) => s.currentUser)
   const { data: positions = [], isLoading } = usePositions()
   const [selectedBroker, setSelectedBroker] = useState<string>(storeBroker || 'all')
   const [activeTab, setActiveTab] = useState<XRayTab>('overview')
   const [selectedHolding, setSelectedHolding] = useState<LookThroughHolding | null>(null)
   const [isExportingExcel, setIsExportingExcel] = useState(false)
+  const [showMorningstarPreview, setShowMorningstarPreview] = useState(false)
+
+  const brokerLabel = useMemo(() => {
+    if (selectedBroker === 'all') return 'Todas las Entidades (Consolidado)'
+    if (selectedBroker === 'myinvestor') return 'MyInvestor'
+    if (selectedBroker === 'indexa') return 'Indexa Capital'
+    if (selectedBroker === 'traderepublic') return 'Trade Republic'
+    return selectedBroker
+  }, [selectedBroker])
 
   // Construir el informe X-Ray cuantitativo
   const report: PortfolioXRayReport = useMemo(() => {
@@ -76,93 +88,115 @@ export function XRayPage() {
   } = report
 
   return (
-    <div className="flex flex-col gap-4 pb-8 w-full print:p-0">
-      {/* ── HEADER BANNER ──────────────────────────────────────────────── */}
-      <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 print:bg-white print:border-b-2 print:border-black">
-        <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            title="Volver atrás"
-            className="h-10 w-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 transition-all active:scale-95 cursor-pointer print:hidden"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div className="h-11 w-11 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
-            <ScanSearch className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white truncate">
-                Informe X-Ray de Cartera
-              </h1>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 uppercase tracking-wider">
-                Morningstar Look-Through
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
-              Descomposición analítica en profundidad: empresas subyacentes, estilo 3x3, geografía y sectores reales.
-            </p>
-          </div>
-        </div>
+    <div className="w-full">
+      {/* ── DOCUMENTO OFICIAL MORNINGSTAR X-RAY (IMPRESIÓN / GENERACIÓN PDF) ── */}
+      <div className="hidden print:block w-full">
+        <MorningstarXRayDocument
+          report={report}
+          brokerLabel={brokerLabel}
+          clientName={currentUser?.name || 'Inversor'}
+        />
+      </div>
 
-        {/* Action Controls & Entity Filter */}
-        <div className="flex items-center gap-2 shrink-0 flex-wrap print:hidden">
-          {/* Selector de Entidad */}
-          <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-[#252528] p-0.5 text-xs font-semibold">
+      {/* ── VISTA INTERACTIVA WEB DEL INFORME ───────────────────────────── */}
+      <div className="print:hidden flex flex-col gap-4 pb-8 w-full">
+        {/* ── HEADER BANNER ──────────────────────────────────────────────── */}
+        <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5">
+          <div className="flex items-start sm:items-center gap-3.5 min-w-0">
             <button
               type="button"
-              onClick={() => setSelectedBroker('all')}
-              className={cn(
-                'px-2.5 h-7 rounded-md transition-colors cursor-pointer text-xs font-semibold flex items-center justify-center',
-                selectedBroker === 'all'
-                  ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-              )}
+              onClick={() => navigate(-1)}
+              title="Volver atrás"
+              className="h-10 w-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 transition-all active:scale-95 cursor-pointer"
             >
-              Todas
+              <ArrowLeft size={18} />
             </button>
-            {['myinvestor', 'indexa', 'traderepublic'].map((b) => (
+            <div className="h-11 w-11 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+              <ScanSearch className="w-5 h-5 stroke-[2.2]" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white truncate">
+                  Informe X-Ray de Cartera
+                </h1>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 uppercase tracking-wider">
+                  Morningstar Look-Through
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+                Descomposición analítica en profundidad: empresas subyacentes, estilo 3x3, geografía y sectores reales.
+              </p>
+            </div>
+          </div>
+
+          {/* Action Controls & Entity Filter */}
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            {/* Selector de Entidad */}
+            <div className="h-8 flex items-center rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-[#252528] p-0.5 text-xs font-semibold">
               <button
-                key={b}
                 type="button"
-                onClick={() => setSelectedBroker(b)}
+                onClick={() => setSelectedBroker('all')}
                 className={cn(
-                  'px-2.5 h-7 rounded-md transition-colors cursor-pointer text-xs font-semibold capitalize flex items-center justify-center',
-                  selectedBroker === b
+                  'px-2.5 h-7 rounded-md transition-colors cursor-pointer text-xs font-semibold flex items-center justify-center',
+                  selectedBroker === 'all'
                     ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
                     : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 )}
               >
-                {b === 'traderepublic' ? 'Trade Rep.' : b}
+                Todas
               </button>
-            ))}
+              {['myinvestor', 'indexa', 'traderepublic'].map((b) => (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setSelectedBroker(b)}
+                  className={cn(
+                    'px-2.5 h-7 rounded-md transition-colors cursor-pointer text-xs font-semibold capitalize flex items-center justify-center',
+                    selectedBroker === b
+                      ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white font-bold shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  )}
+                >
+                  {b === 'traderepublic' ? 'Trade Rep.' : b}
+                </button>
+              ))}
+            </div>
+
+            {/* Botón Vista Previa PDF Morningstar */}
+            <button
+              type="button"
+              onClick={() => setShowMorningstarPreview(true)}
+              title="Ver informe oficial estilo Morningstar Portfolio X-Ray"
+              className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-xs font-semibold text-red-700 dark:text-red-300 transition-colors shadow-2xs cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#C8102E]" />
+              <span>PDF Morningstar</span>
+            </button>
+
+            {/* Botón Imprimir / Guardar PDF */}
+            <button
+              type="button"
+              onClick={handlePrint}
+              title="Imprimir o guardar como PDF en formato oficial Morningstar"
+              className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#252528] hover:bg-slate-100 dark:hover:bg-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-2xs cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5 text-indigo-500" />
+              <span className="hidden sm:inline">Imprimir / PDF</span>
+            </button>
+
+            {/* Botón Descargar Excel */}
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              disabled={isExportingExcel}
+              title="Descargar libro Excel (.xlsx) completo de cartera"
+              className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-xs font-semibold text-emerald-700 dark:text-emerald-300 transition-colors shadow-2xs cursor-pointer disabled:opacity-60"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden sm:inline">Excel</span>
+            </button>
           </div>
-
-          {/* Botón Imprimir / Guardar PDF */}
-          <button
-            type="button"
-            onClick={handlePrint}
-            title="Imprimir o guardar como PDF este informe X-Ray"
-            className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#252528] hover:bg-slate-100 dark:hover:bg-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-2xs cursor-pointer"
-          >
-            <Printer className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="hidden sm:inline">Imprimir / PDF</span>
-          </button>
-
-          {/* Botón Descargar Excel */}
-          <button
-            type="button"
-            onClick={handleExportExcel}
-            disabled={isExportingExcel}
-            title="Descargar libro Excel (.xlsx) completo de cartera"
-            className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-xs font-semibold text-emerald-700 dark:text-emerald-300 transition-colors shadow-2xs cursor-pointer disabled:opacity-60"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span className="hidden sm:inline">Excel</span>
-          </button>
-        </div>
-      </Card>
+        </Card>
 
       {/* ── KPI EXECUTIVE STRIP ─────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 print:grid-cols-6">
@@ -846,6 +880,7 @@ export function XRayPage() {
         </div>
 
       </div>
+      </div>
 
       {/* ── MODAL DETALLE DE COMPAÑÍA SUBYACENTE ───────────────────────── */}
       {selectedHolding && (
@@ -925,6 +960,63 @@ export function XRayPage() {
               >
                 Cerrar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL VISTA PREVIA MORNINGSTAR PDF ─────────────────────────── */}
+      {showMorningstarPreview && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-slate-950/85 backdrop-blur-md overflow-hidden animate-in fade-in duration-150">
+          {/* Top Bar Controls */}
+          <div className="h-14 bg-white dark:bg-[#18181b] border-b border-slate-200 dark:border-white/10 px-4 sm:px-6 flex items-center justify-between shrink-0 shadow-md">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center text-sm font-black tracking-tight text-slate-900 dark:text-white font-sans">
+                <span>M</span>
+                <span className="relative inline-flex items-center justify-center w-3 h-3 mx-[1px]">
+                  <span className="w-3 h-3 rounded-full border-[2px] border-slate-900 dark:border-white" />
+                  <span className="absolute w-1 h-1 rounded-full bg-[#C8102E]" />
+                </span>
+                <span>RNINGSTAR</span>
+              </div>
+              <span className="text-slate-300 dark:text-white/20">|</span>
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                Vista Previa Oficial: Morningstar Portfolio X-Ray®
+              </span>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                2 Páginas A4
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-[#C8102E] hover:bg-[#a60c24] text-white text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Imprimir / Guardar como PDF</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowMorningstarPreview(false)}
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                title="Cerrar vista previa"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Paper Canvas Scroll Area */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center gap-6 bg-slate-200/90 dark:bg-[#111113]">
+            <div className="w-full max-w-[210mm] shadow-2xl rounded-sm overflow-hidden bg-white">
+              <MorningstarXRayDocument
+                report={report}
+                brokerLabel={brokerLabel}
+                clientName={currentUser?.name || 'Inversor'}
+              />
             </div>
           </div>
         </div>

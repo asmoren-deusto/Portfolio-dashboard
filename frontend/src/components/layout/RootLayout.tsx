@@ -278,8 +278,7 @@ export function RootLayout() {
 
         <div className={`flex flex-1 flex-col min-h-screen md:transition-all md:duration-300 ${sidebarCollapsed ? 'ml-0 max-w-full' : 'ml-0 md:ml-[230px] max-w-full md:max-w-[calc(100vw-230px)]'}`}>
           {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop - Opaque solid background with crisp Retina text) */}
-          {/* Mobile / Collapsed Desktop Header Bar (Fixed on mobile, sticky on desktop - Opaque solid background with crisp Retina text) */}
-          <header className={`fixed top-0 left-0 right-0 md:sticky z-[60] bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs pt-[env(safe-area-inset-top,0px)] ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
+          <header className={`fixed top-0 left-0 right-0 md:sticky z-[60] bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs pt-[env(safe-area-inset-top,0px)] print:hidden ${!sidebarCollapsed ? 'md:hidden' : ''}`}>
             {/* Mobile Header Bar: exactly 44px tall, 100% symmetrically centered vertically */}
             <div className="flex items-center justify-between px-3 sm:px-4 h-[44px] md:h-[50px]">
               <div className="flex items-center gap-1.5 shrink-0">
@@ -334,10 +333,10 @@ export function RootLayout() {
           </header>
 
           {/* Spacer to prevent content overlap with fixed mobile header - calibrated 1:1 with header height for 0px gap with ticker */}
-          <div className="h-[calc(env(safe-area-inset-top,0px)+44px)] md:hidden shrink-0" aria-hidden="true" />
+          <div className="h-[calc(env(safe-area-inset-top,0px)+44px)] md:hidden shrink-0 print:hidden" aria-hidden="true" />
 
           {/* Top White Bar with Selectors (Desktop only) - Exactly 60px sticky top bar */}
-          <div className="relative z-[90] hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 md:sticky md:top-0 shadow-xs">
+          <div className="relative z-[90] hidden md:flex items-center h-[60px] w-full bg-white dark:bg-[#1c1c1c] border-b border-slate-200/80 dark:border-white/[0.08] px-4 md:px-7 shrink-0 md:sticky md:top-0 shadow-xs print:hidden">
             <Header
               title={pageMeta.title}
               subtitle={pageMeta.subtitle}
@@ -348,16 +347,16 @@ export function RootLayout() {
               - Desktop: Fixed full-width ribbon across the entire viewport (0 to 100vw), including the lateral menu
               - Mobile: In-flow right under the mobile header spacer
           */}
-          <div className="relative z-40 md:fixed md:top-[60px] md:left-0 md:right-0 md:z-[60] shadow-xs">
+          <div className="relative z-40 md:fixed md:top-[60px] md:left-0 md:right-0 md:z-[60] shadow-xs print:hidden">
             <MarketTicker fullWidth />
           </div>
 
           {/* Desktop spacer to prevent content overlap under the fixed full-width ticker */}
-          <div className="hidden md:block h-[40px] shrink-0" aria-hidden="true" />
+          <div className="hidden md:block h-[40px] shrink-0 print:hidden" aria-hidden="true" />
 
           {/* Page Content Animation: Instant mounting with silky smooth opacity transition and zero layout shifts */}
           <main
-            className={`flex flex-1 flex-col gap-4 px-4 pt-4 md:px-7 md:pt-4 md:pb-6 ${
+            className={`flex flex-1 flex-col gap-4 px-4 pt-4 md:px-7 md:pt-4 md:pb-6 print:p-0 print:m-0 print:gap-0 print:max-w-none ${
               isNativePlatform()
                 ? 'pb-[calc(6.6rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(6.6rem+env(safe-area-inset-bottom,0px))]'
                 : 'pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] sm:pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))]'
