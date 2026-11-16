@@ -62,14 +62,14 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
       </div>
 
       {/* 2. Matrix Grid coincidente en altura exacta con el SVG de la tarjeta izquierda */}
-      <div className="my-3.5 w-full h-[340px] flex flex-col justify-center overflow-x-auto overflow-y-hidden px-1 -mx-1 shrink-0">
-        <table className="w-full border-separate border-spacing-1 text-center text-xs my-auto">
+      <div className="my-3.5 w-full h-[340px] flex flex-col justify-center overflow-x-auto px-1 -mx-1 shrink-0">
+        <table className="w-full border-separate border-spacing-0.5 sm:border-spacing-1 text-center text-xs my-auto">
           <thead>
             <tr>
-              <th className="p-1 w-8 sm:w-10"></th>
+              <th className="p-0.5 sm:p-1 w-7 sm:w-8"></th>
               {funds.map((f) => (
-                <th key={f.index} className="p-1" title={f.name}>
-                  <span className="w-7 h-7 rounded-full bg-[#991b1b] dark:bg-[#7f1d1d] text-white font-black inline-flex items-center justify-center text-xs shadow-xs">
+                <th key={f.index} className="p-0.5 sm:p-1" title={f.name}>
+                  <span className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full bg-[#991b1b] dark:bg-[#7f1d1d] text-white font-black inline-flex items-center justify-center text-[10px] sm:text-[11px] shadow-xs">
                     {f.index}
                   </span>
                 </th>
@@ -79,8 +79,8 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
           <tbody>
             {matrix.map((row, rIdx) => (
               <tr key={rIdx}>
-                <td className="p-1 text-left" title={funds[rIdx]?.name}>
-                  <span className="w-7 h-7 rounded-full bg-[#991b1b] dark:bg-[#7f1d1d] text-white font-black inline-flex items-center justify-center text-xs shadow-xs">
+                <td className="p-0.5 sm:p-1 text-left" title={funds[rIdx]?.name}>
+                  <span className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full bg-[#991b1b] dark:bg-[#7f1d1d] text-white font-black inline-flex items-center justify-center text-[10px] sm:text-[11px] shadow-xs">
                     {rIdx + 1}
                   </span>
                 </td>
@@ -92,7 +92,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
                       onMouseEnter={() => setHoveredCell({ r: rIdx, c: cIdx, val })}
                       onMouseLeave={() => setHoveredCell(null)}
                       className={cn(
-                        'p-2 sm:p-2.5 font-mono text-xs sm:text-[13px] rounded-lg transition-transform cursor-pointer relative',
+                        'py-1 sm:py-1.5 px-0.5 sm:px-1.5 font-mono text-[10.5px] sm:text-xs rounded-md sm:rounded-lg transition-transform cursor-pointer relative leading-none',
                         getCellColor(val),
                         isHovered
                           ? 'z-20 scale-[1.08] shadow-sm'
