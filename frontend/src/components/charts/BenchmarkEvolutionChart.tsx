@@ -177,8 +177,8 @@ export function BenchmarkEvolutionChart({
           fixLeftEdge: true,
           fixRightEdge: true,
         },
-        handleScroll: true,
-        handleScale: true,
+        handleScroll: false,
+        handleScale: false,
       })
 
       // 1. Portfolio Series (Area)
