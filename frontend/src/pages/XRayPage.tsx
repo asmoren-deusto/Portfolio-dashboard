@@ -252,15 +252,25 @@ export function XRayPage() {
             Salud de Cartera
           </span>
           <div className="flex items-center gap-1.5 mt-1">
-            <span className="font-mono font-extrabold text-base sm:text-lg text-emerald-600 dark:text-emerald-400">
+            <span
+              className="font-mono font-extrabold text-base sm:text-lg text-emerald-600 dark:text-emerald-400"
+              style={{ color: summary.healthScoreColor }}
+            >
               {summary.healthScore}/100
             </span>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            <span
+              className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border"
+              style={{
+                color: summary.healthScoreColor,
+                backgroundColor: `${summary.healthScoreColor}1a`,
+                borderColor: `${summary.healthScoreColor}33`,
+              }}
+            >
               {summary.healthScoreLabel}
             </span>
           </div>
           <span className="text-[11px] text-slate-400 mt-1 block truncate">
-            Score multivariable
+            {summary.healthScore >= 80 ? 'Nivel institucional' : 'Score multivariable'}
           </span>
         </Card>
 
