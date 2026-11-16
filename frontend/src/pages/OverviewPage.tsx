@@ -2287,21 +2287,21 @@ export function OverviewPage() {
       </Card>
     </div>
 
-      {/* ── Agenda Financiera (60%) y Mapa de Calor del Mercado (40%) ── */}
+      {/* ── Agenda Financiera (5 cols / 41.7%) y Mapa de Calor del Mercado (7 cols / 58.3%) ── */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch lg:min-h-[612px] lg:h-[625px]"
+        className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch lg:min-h-[612px] lg:h-[625px]"
         style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto none auto 625px' }}
       >
-        {/* Columna Izquierda (60%): Agenda Financiera & Próximos Eventos */}
-        <div className="w-full h-full lg:col-span-3 flex flex-col min-h-0">
+        {/* Columna Izquierda (41.7%): Agenda Financiera & Próximos Eventos */}
+        <div className="w-full h-full lg:col-span-5 flex flex-col min-h-0">
           <PortfolioAgendaCard
             defaultCollapsed={false}
             className="h-full max-h-[625px] flex flex-col min-h-0"
           />
         </div>
 
-        {/* Columna Derecha (40%): Mapa de Calor del Mercado */}
-        <div className="w-full h-full lg:col-span-2 flex flex-col min-h-0">
+        {/* Columna Derecha (58.3%): Mapa de Calor del Mercado */}
+        <div className="w-full h-full lg:col-span-7 flex flex-col min-h-0">
           <MarketHeatmap
             stocks={marketData?.stocks ?? []}
             onSelectStock={(stock) => setSelectedStock(stock)}

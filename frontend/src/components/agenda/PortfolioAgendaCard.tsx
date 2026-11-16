@@ -340,7 +340,7 @@ export const PortfolioAgendaCard: React.FC<{
 
   return (
     <Card className={cn('w-full overflow-hidden transition-all duration-300', className)}>
-      <CardHeader className="py-2.5 px-3 sm:px-4 border-b border-slate-200/80 dark:border-white/[0.05] flex flex-row items-center justify-between gap-2.5">
+      <CardHeader className="py-2.5 px-3 sm:px-4 border-b border-slate-200/80 dark:border-white/[0.05] flex flex-row items-end justify-between gap-2.5">
         <div className="flex items-center gap-2 min-w-0">
           <div className="p-1.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
             <CalendarIcon className="w-3.5 h-3.5" />
@@ -366,7 +366,7 @@ export const PortfolioAgendaCard: React.FC<{
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 self-end">
           <button
             type="button"
             onClick={() => setShowAddModal(true)}

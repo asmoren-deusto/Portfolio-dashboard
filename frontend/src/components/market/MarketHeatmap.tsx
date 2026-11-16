@@ -395,7 +395,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
       {/* Heatmap Header Toolbar */}
       <div
         className={cn(
-          'flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200/80 dark:border-white/[0.06] shrink-0',
+          'flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 border-b border-slate-200/80 dark:border-white/[0.06] shrink-0',
           fitParent ? 'pb-2 mb-2 gap-2' : 'pb-3.5 mb-3 gap-3'
         )}
       >
@@ -423,7 +423,7 @@ export const MarketHeatmap: React.FC<MarketHeatmapProps> = ({
         </div>
 
         {/* Controls: Legend, Fullscreen & View Market */}
-        <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+        <div className="flex items-center gap-1.5 flex-wrap shrink-0 self-start sm:self-end">
           {/* Color Scale Legend */}
           <div
             className="flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl bg-slate-50 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.06] text-[11px] sm:text-xs font-mono font-medium"
