@@ -10,12 +10,12 @@ export interface WorldMapChoroplethProps {
   australasiaWeight?: number
 }
 
-// Escala institucional oficial Morningstar: <25, 25-50, 50-75, >75
+// Escala coroplética institucional optimizada para carteras globales (<10%, 10-25%, 25-50%, >50%)
 export function getChoroplethColor(weight: number): { fill: string; stroke: string } {
-  if (weight >= 75) return { fill: '#ea580c', stroke: '#c2410c' }
-  if (weight >= 50) return { fill: '#fb923c', stroke: '#ea580c' }
-  if (weight >= 25) return { fill: '#fed7aa', stroke: '#f97316' }
-  if (weight > 0) return { fill: '#ffedd5', stroke: '#d97706' }
+  if (weight >= 50) return { fill: '#ea580c', stroke: '#c2410c' }
+  if (weight >= 25) return { fill: '#fb923c', stroke: '#ea580c' }
+  if (weight >= 10) return { fill: '#fdba74', stroke: '#ea580c' }
+  if (weight > 0) return { fill: '#ffedd5', stroke: '#f59e0b' }
   return { fill: '#f1f5f9', stroke: '#cbd5e1' }
 }
 

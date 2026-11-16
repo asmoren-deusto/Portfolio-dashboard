@@ -581,10 +581,10 @@ export function XRayPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 text-xs font-mono self-start sm:self-auto">
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#ffedd5] border border-amber-300" /> &lt;25%</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#fed7aa] border border-orange-300" /> 25-50%</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#fb923c] border border-orange-400" /> 50-75%</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#ea580c] border border-orange-600" /> &gt;75%</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#ffedd5] border border-amber-300" /> &lt;10%</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#fdba74] border border-orange-400" /> 10-25%</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#fb923c] border border-orange-500" /> 25-50%</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#ea580c] border border-orange-700" /> &gt;50%</span>
                 </div>
               </div>
 

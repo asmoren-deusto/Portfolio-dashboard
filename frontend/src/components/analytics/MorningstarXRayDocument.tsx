@@ -237,10 +237,10 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                 </div>
                 {/* Scale Legend */}
                 <div className="flex items-center justify-between text-[8px] font-mono text-slate-600 mt-1.5 pt-1 border-t border-slate-200">
-                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#ffedd5] inline-block border border-amber-300" /> &lt;25</span>
-                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#fed7aa] inline-block border border-orange-300" /> 25-50</span>
-                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#fb923c] inline-block border border-orange-400" /> 50-75</span>
-                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#ea580c] inline-block border border-orange-600" /> &gt;75</span>
+                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#ffedd5] inline-block border border-amber-300" /> &lt;10</span>
+                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#fdba74] inline-block border border-orange-400" /> 10-25</span>
+                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#fb923c] inline-block border border-orange-500" /> 25-50</span>
+                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#ea580c] inline-block border border-orange-700" /> &gt;50</span>
                 </div>
                 <div className="mt-1 text-[8px] text-slate-500">
                   No Clasificados: <span className="font-bold text-slate-800 font-mono">0,57%</span>
