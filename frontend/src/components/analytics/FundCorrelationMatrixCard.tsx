@@ -62,7 +62,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
       </div>
 
       {/* 2. Matrix Grid coincidente en altura exacta con el SVG de la tarjeta izquierda */}
-      <div className="my-2 sm:my-2.5 w-full h-[265px] sm:h-[280px] flex flex-col justify-center overflow-x-auto px-1 -mx-1 shrink-0">
+      <div className="my-2 sm:my-2.5 w-full h-[330px] sm:h-[355px] flex flex-col justify-center overflow-x-auto px-1 -mx-1 shrink-0">
         <table className="w-full border-separate border-spacing-[2px] sm:border-spacing-1 text-center text-xs my-auto">
           <thead>
             <tr>
@@ -92,7 +92,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
                       onMouseEnter={() => setHoveredCell({ r: rIdx, c: cIdx, val })}
                       onMouseLeave={() => setHoveredCell(null)}
                       className={cn(
-                        'py-0.5 sm:py-1 px-0.5 sm:px-1 font-mono text-[10px] sm:text-[11px] rounded sm:rounded-md transition-transform cursor-pointer relative leading-none',
+                        'py-1 sm:py-1.5 px-0.5 sm:px-1 font-mono text-[10px] sm:text-[11px] rounded sm:rounded-md transition-transform cursor-pointer relative leading-none',
                         getCellColor(val),
                         isHovered
                           ? 'z-20 scale-[1.08] shadow-sm'

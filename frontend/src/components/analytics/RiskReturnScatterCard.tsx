@@ -61,8 +61,8 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
       </div>
 
       {/* 2. Scatter Plot SVG Container (ampliado en altura y anchura aprovechando la reubicación de leyendas) */}
-      <div className="my-2 sm:my-2.5 w-full h-[265px] sm:h-[280px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-xl p-2 sm:p-2.5 relative flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
-        <svg viewBox="0 0 650 330" className="w-full h-full max-h-[265px] sm:max-h-[280px] overflow-visible">
+      <div className="my-2 sm:my-2.5 w-full h-[330px] sm:h-[355px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-xl p-2 sm:p-2.5 relative flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
+        <svg viewBox="0 0 650 330" className="w-full h-full max-h-[330px] sm:max-h-[355px] overflow-visible">
           {/* Grid Lines */}
           {xTicks.map((v) => (
             <line
@@ -204,8 +204,8 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
                 >
                   <rect x={cx - 7} y={cy - 7} width="14" height="14" rx="3.5" fill="#10b981" />
                   <text
-                    x={cx - 6}
-                    y={cy + 15}
+                    x={cx + 12}
+                    y={cy - 6}
                     className="text-[10.5px] font-bold fill-emerald-600 dark:fill-emerald-400 select-none"
                   >
                     Ref Monetario ({p.meanReturn.toFixed(1)}%)
