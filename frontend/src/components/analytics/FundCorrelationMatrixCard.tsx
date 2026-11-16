@@ -61,15 +61,15 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
           </span>
         </div>
 
-        {/* Matrix Grid */}
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full border-collapse text-center text-xs">
+        {/* Matrix Grid (con buffer inferior y overflow-y-hidden para que el hover nunca se corte ni genere scroll) */}
+        <div className="mt-4 overflow-x-auto overflow-y-hidden pt-1 pb-4 px-1 -mx-1">
+          <table className="w-full border-separate border-spacing-1 text-center text-xs">
             <thead>
               <tr>
                 <th className="p-1.5 w-10"></th>
                 {funds.map((f) => (
                   <th key={f.index} className="p-1 sm:p-1.5" title={f.name}>
-                    <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-extrabold inline-flex items-center justify-center text-xs shadow-xs">
+                    <span className="w-7 h-7 rounded-full bg-[#991b1b] dark:bg-[#7f1d1d] text-white font-black inline-flex items-center justify-center text-xs shadow-xs">
                       {f.index}
                     </span>
                   </th>
@@ -80,24 +80,29 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
               {matrix.map((row, rIdx) => (
                 <tr key={rIdx}>
                   <td className="p-1 sm:p-1.5 text-left" title={funds[rIdx]?.name}>
-                    <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-extrabold inline-flex items-center justify-center text-xs shadow-xs">
+                    <span className="w-7 h-7 rounded-full bg-[#991b1b] dark:bg-[#7f1d1d] text-white font-black inline-flex items-center justify-center text-xs shadow-xs">
                       {rIdx + 1}
                     </span>
                   </td>
-                  {row.map((val, cIdx) => (
-                    <td
-                      key={cIdx}
-                      onMouseEnter={() => setHoveredCell({ r: rIdx, c: cIdx, val })}
-                      onMouseLeave={() => setHoveredCell(null)}
-                      className={cn(
-                        'p-2 sm:p-2.5 border border-white dark:border-[#1e1e20] font-mono text-xs sm:text-[13px] rounded-lg transition-transform cursor-pointer',
-                        getCellColor(val),
-                        hoveredCell?.r === rIdx && hoveredCell?.c === cIdx && 'scale-110 z-10 ring-2 ring-blue-500 shadow-md'
-                      )}
-                    >
-                      {val !== null ? val.toFixed(2) : '—'}
-                    </td>
-                  ))}
+                  {row.map((val, cIdx) => {
+                    const isHovered = hoveredCell?.r === rIdx && hoveredCell?.c === cIdx
+                    return (
+                      <td
+                        key={cIdx}
+                        onMouseEnter={() => setHoveredCell({ r: rIdx, c: cIdx, val })}
+                        onMouseLeave={() => setHoveredCell(null)}
+                        className={cn(
+                          'p-2 sm:p-2.5 font-mono text-xs sm:text-[13px] rounded-lg transition-all cursor-pointer relative',
+                          getCellColor(val),
+                          isHovered
+                            ? 'z-20 ring-2 ring-blue-600 dark:ring-blue-400 ring-offset-1 dark:ring-offset-slate-900 shadow-lg scale-[1.05]'
+                            : 'hover:opacity-90'
+                        )}
+                      >
+                        {val !== null ? val.toFixed(2) : '—'}
+                      </td>
+                    )
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -108,10 +113,20 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
         <div className="min-h-12 mt-4 p-3.5 rounded-2xl bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs sm:text-sm flex items-center justify-between shadow-2xs">
           {hoveredCell ? (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold text-slate-900 dark:text-white">
-                [{hoveredCell.r + 1}] {funds[hoveredCell.r]?.name} vs [{hoveredCell.c + 1}] {funds[hoveredCell.c]?.name}:
+              <span className="w-5 h-5 rounded-full bg-[#991b1b] text-white text-[11px] font-black inline-flex items-center justify-center shrink-0 shadow-2xs">
+                {hoveredCell.r + 1}
               </span>
-              <span className="font-mono font-extrabold text-blue-600 dark:text-blue-400">
+              <span className="font-bold text-slate-900 dark:text-white">
+                {funds[hoveredCell.r]?.name}
+              </span>
+              <span className="text-slate-400 font-medium">vs</span>
+              <span className="w-5 h-5 rounded-full bg-[#991b1b] text-white text-[11px] font-black inline-flex items-center justify-center shrink-0 shadow-2xs">
+                {hoveredCell.c + 1}
+              </span>
+              <span className="font-bold text-slate-900 dark:text-white">
+                {funds[hoveredCell.c]?.name}:
+              </span>
+              <span className="font-mono font-extrabold text-blue-600 dark:text-blue-400 ml-1">
                 {hoveredCell.val !== null ? hoveredCell.val.toFixed(2) : 'Sin historial suficiente'}
               </span>
               {hoveredCell.val !== null && (
@@ -122,7 +137,7 @@ export const FundCorrelationMatrixCard: React.FC<FundCorrelationMatrixCardProps>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#991b1b] animate-pulse" />
               <span>Pasa el cursor sobre cualquier casilla para ver la correlación entre parejas de fondos.</span>
             </div>
           )}
