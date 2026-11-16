@@ -199,10 +199,26 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Tecnología / Semiconductores & IA",
     "ter": 0.0
+  },
+  {
+    "isin": "LU0840158819",
+    "name": "Storm Fund II - Storm Bond Fund RC EUR",
+    "ticker": "LU0840158819",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "morningstar_id": "F00000PKY4",
+    "category": "Renta Fija Corporativa EUR",
+    "ter": 0.84
   }
 ]''')
 
 PRICES = json.loads(r'''[
+  {
+    "isin": "LU0840158819",
+    "date": "2026-11-16",
+    "price": 158.52,
+    "currency": "EUR"
+  },
   {
     "isin": "US67066G1040",
     "date": "2026-11-13",
@@ -4315,5 +4331,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-13",
     "broker": "traderepublic",
     "notes": "Compra a mercado NVIDIA Corp en Trade Republic a las 21:11 (13,261163 acciones a 147,82 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "sell",
+    "shares": 48.55,
+    "price": 83.8676,
+    "amount": 4071.77,
+    "fees": 0.0,
+    "date": "2026-11-12",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Storm Bond Fund, ref 0232191540323, orden 0232191540323)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU0840158819",
+    "type": "buy",
+    "shares": 25.686,
+    "price": 141.547146,
+    "amount": 3635.78,
+    "fees": 0.0,
+    "date": "2026-11-16",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232191540323, orden 0232191540323, coste fiscal originario 3.635,78 € de valor 4.071,76 €)"
   }
 ]''')

@@ -35,6 +35,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'IE00B4ND3602': 'ishares.com',
   'IE0032126645': 'vanguard.com',
   'FR0000989626': 'groupama-am.com',
+  'LU0840158819': 'stormcapital.no',
   // Stocks & Look-Through holdings
   'US67066G1040': 'nvidia.com',
   'US5949181045': 'microsoft.com',
@@ -439,6 +440,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     else if (nl.includes('dnb')) targetDomain = 'dnb.no'
     else if (nl.includes('amundi')) targetDomain = 'amundi.es'
     else if (nl.includes('carmignac')) targetDomain = 'carmignac.es'
+    else if (nl.includes('storm')) targetDomain = 'stormcapital.no'
     else if (nl.includes('kutxabank') || nl.includes('baskepensiones')) targetDomain = 'kutxabank.es'
     else if (nl.includes('bbva')) targetDomain = 'bbva.es'
     else if (nl.includes('myinvestor')) targetDomain = 'myinvestor.es'

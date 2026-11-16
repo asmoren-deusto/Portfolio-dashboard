@@ -203,7 +203,7 @@ def classify_asset_type(isin: str, asset_types_map: dict[str, str] | None = None
     isin_u = (isin or '').strip().upper()
     if isin_u in ('IE00B4ND3602',) or (asset_types_map and asset_types_map.get(isin) == 'etc'):
         return 'commodity'
-    if isin_u in ('ES0000012411', 'LU1623762843', '0201G') or (asset_types_map and asset_types_map.get(isin) in ('bond', 'fixed_income')):
+    if isin_u in ('ES0000012411', 'LU1623762843', 'LU0840158819', '0201G') or (asset_types_map and asset_types_map.get(isin) in ('bond', 'fixed_income')):
         return 'fixed_income'
     if isin_u.startswith('CASH') or isin_u == 'FR0000989626':
         return 'cash'

@@ -107,6 +107,14 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'ACC',
     shareClassLabel: 'Renta Variable Directa (Acciones EE.UU.)',
   },
+  // 12. Storm Fund II - Storm Bond Fund RC EUR
+  'LU0840158819': {
+    cleanName: 'Storm Bond Fund RC EUR',
+    officialName: 'Storm Fund II - Storm Bond Fund RC EUR Acc',
+    currency: 'EUR',
+    shareClass: 'ACC',
+    shareClassLabel: 'Renta Fija Corporativa EUR (Acumulación)',
+  },
 
   // Historical & Traded Assets
   'IE000ZYRH0Q7': {
