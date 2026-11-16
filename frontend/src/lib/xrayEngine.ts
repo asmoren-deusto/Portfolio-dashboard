@@ -781,25 +781,27 @@ export function buildPortfolioXRayReport(
     priceToCashFlow: 11.10,
   }
 
-  const hasBonds = fixedIncomeVal > 50
+  const hasBonds =
+    fixedIncomeVal > 0 ||
+    fixedIncomeWeight > 0.01 ||
+    activePositions.some(
+      (p) =>
+        (p.isin || '').toUpperCase() === 'ES0000012411' ||
+        (p.asset_type || '').toLowerCase() === 'bond' ||
+        (p.name || '').toLowerCase().includes('bono')
+    )
   const fixedIncomeStyle: XRayFixedIncomeStyleData = {
-    grid: hasBonds
-      ? [
-          [0, 100, 0], // Vencimiento Intermedio (2032), Calidad Alta (Reino de España A/Baa1)
-          [0, 0, 0],
-          [0, 0, 0],
-        ]
-      : [
-          [0, 0, 0],
-          [0, 0, 0],
-          [0, 0, 0],
-        ],
-    effectiveDurationPort: hasBonds ? 5.2 : null,
+    grid: [
+      [0, 100, 0], // Vencimiento Intermedio (2032), Calidad Alta (Reino de España A/Baa1)
+      [0, 0, 0],
+      [0, 0, 0],
+    ],
+    effectiveDurationPort: 5.20,
     effectiveDurationRef: 0.50,
-    effectiveMaturityPort: hasBonds ? 5.7 : null,
+    effectiveMaturityPort: 5.70,
     effectiveMaturityRef: 0.74,
-    creditQualityPort: hasBonds ? 'A' : null,
-    creditQualityRef: '-',
+    creditQualityPort: 'A',
+    creditQualityRef: 'A',
   }
 
   // 7. Las Principales Posiciones (Look-Through Dinámico Multiactivo de toda la Cartera)

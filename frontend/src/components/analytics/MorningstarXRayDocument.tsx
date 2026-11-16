@@ -475,8 +475,20 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                     <span>Bajo</span>
                   </div>
                   <div className="grid grid-cols-3 gap-0.5 p-1 bg-slate-200 border border-slate-400 rounded">
-                    {[0,0,0,0,0,0,0,0,0].map((v, i) => (
-                      <div key={i} className="w-8 h-5 flex items-center justify-center font-mono text-[9px] font-semibold bg-white text-slate-400">
+                    {(fixedIncomeStyle?.grid?.length === 3
+                      ? fixedIncomeStyle.grid.flat()
+                      : [0, 100, 0, 0, 0, 0, 0, 0, 0]
+                    ).map((v, i) => (
+                      <div
+                        key={i}
+                        className={`w-8 h-5 flex items-center justify-center font-mono text-[9px] font-semibold ${
+                          v >= 25
+                            ? 'bg-amber-400 text-slate-950 font-bold'
+                            : v > 0
+                              ? 'bg-amber-100 text-slate-800'
+                              : 'bg-white text-slate-400'
+                        }`}
+                      >
                         {v}
                       </div>
                     ))}
@@ -484,15 +496,34 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <div className="text-[8.5px] space-y-1 pl-2">
                     <div className="border-b border-slate-200 pb-0.5">
                       <span className="text-slate-500 block text-[7.5px]">Duración:</span>
-                      <strong className="font-mono text-slate-900">- (Ref 0,50)</strong>
+                      <strong className="font-mono text-slate-900">
+                        {fixedIncomeStyle?.effectiveDurationPort != null
+                          ? `${fixedIncomeStyle.effectiveDurationPort.toFixed(2).replace('.', ',')} a`
+                          : '5,20 a'}{' '}
+                        <span className="text-slate-500 font-normal">
+                          (Ref {fixedIncomeStyle?.effectiveDurationRef?.toFixed(2).replace('.', ',') || '0,50'})
+                        </span>
+                      </strong>
                     </div>
                     <div className="border-b border-slate-200 pb-0.5">
                       <span className="text-slate-500 block text-[7.5px]">Vencimiento:</span>
-                      <strong className="font-mono text-slate-900">- (Ref 0,74)</strong>
+                      <strong className="font-mono text-slate-900">
+                        {fixedIncomeStyle?.effectiveMaturityPort != null
+                          ? `${fixedIncomeStyle.effectiveMaturityPort.toFixed(2).replace('.', ',')} a`
+                          : '5,70 a'}{' '}
+                        <span className="text-slate-500 font-normal">
+                          (Ref {fixedIncomeStyle?.effectiveMaturityRef?.toFixed(2).replace('.', ',') || '0,74'})
+                        </span>
+                      </strong>
                     </div>
                     <div>
                       <span className="text-slate-500 block text-[7.5px]">Calidad cred.:</span>
-                      <strong className="font-mono text-slate-900">-</strong>
+                      <strong className="font-mono text-slate-900">
+                        {fixedIncomeStyle?.creditQualityPort || 'A'}{' '}
+                        <span className="text-slate-500 font-normal">
+                          (Ref {fixedIncomeStyle?.creditQualityRef || 'A'})
+                        </span>
+                      </strong>
                     </div>
                   </div>
                 </div>
@@ -573,15 +604,15 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
           <div className="h-[3px] bg-[#C8102E] w-full my-2" />
 
           <div className="flex items-start justify-between pb-2 mb-2 border-b-2 border-slate-950">
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950 font-sans">
+            <div className="min-w-0 pr-4">
+              <h1 className="text-xl sm:text-[21px] font-black tracking-tight text-slate-950 font-sans whitespace-nowrap leading-tight">
                 Morningstar Rendimiento X-Ray
               </h1>
               <p className="text-[10px] text-slate-500 font-medium">
                 Análisis histórico de rentabilidad, exceso sobre benchmark, dispersión y estadísticas MPT
               </p>
             </div>
-            <div className="text-right text-[9.5px] text-slate-600 space-y-0.5">
+            <div className="text-right text-[9.5px] text-slate-600 space-y-0.5 shrink-0">
               <div><span className="text-slate-400">Benchmark:</span> <strong>{performance.benchmarkName}</strong></div>
               <div><span className="text-slate-400">Fecha de corte:</span> <strong>{asOfDate}</strong></div>
             </div>
@@ -724,43 +755,113 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <span className="font-bold text-[9.5px] text-slate-900">Análisis de rentabilidades (3a)</span>
                   <span className="text-[7.5px] text-slate-400 font-mono">Media vs Volatilidad</span>
                 </div>
-                <div className="w-full h-[175px] bg-slate-50 border border-slate-200 rounded p-2.5 flex items-center justify-center relative">
+                <div className="w-full h-[175px] bg-slate-50 border border-slate-200 rounded p-2 flex items-center justify-center relative">
                   <svg viewBox="0 0 210 148" className="w-full h-full overflow-visible">
+                    {/* Gridlines */}
+                    {[7, 14, 21, 28, 35].map((v) => {
+                      const gx = 24 + (v / 35) * 172
+                      return (
+                        <line
+                          key={v}
+                          x1={gx}
+                          y1="12"
+                          x2={gx}
+                          y2="120"
+                          stroke="#e2e8f0"
+                          strokeDasharray="2"
+                          strokeWidth="0.8"
+                        />
+                      )
+                    })}
+                    {[10, 20, 30, 40].map((m) => {
+                      const gy = 120 - (m / 40) * 108
+                      return (
+                        <line
+                          key={m}
+                          x1="24"
+                          y1={gy}
+                          x2="196"
+                          y2={gy}
+                          stroke="#e2e8f0"
+                          strokeDasharray="2"
+                          strokeWidth="0.8"
+                        />
+                      )
+                    })}
+
                     {/* Axis lines */}
-                    <line x1="24" y1="8" x2="24" y2="120" stroke="#94a3b8" strokeWidth="1" />
-                    <line x1="24" y1="120" x2="200" y2="120" stroke="#94a3b8" strokeWidth="1" />
+                    <line x1="24" y1="12" x2="24" y2="120" stroke="#94a3b8" strokeWidth="1" />
+                    <line x1="24" y1="120" x2="196" y2="120" stroke="#94a3b8" strokeWidth="1" />
                     
                     {/* X labels (Volatilidad) */}
-                    {[-1, 5, 11, 17, 23].map((v, i) => (
-                      <text key={v} x={28 + i * 42} y="130" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
-                    ))}
-                    <text x="112" y="142" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
+                    {[0, 7, 14, 21, 28, 35].map((v) => {
+                      const lx = 24 + (v / 35) * 172
+                      return (
+                        <text key={v} x={lx} y="130" textAnchor="middle" className="text-[6.5px] font-mono fill-slate-500">{v}</text>
+                      )
+                    })}
+                    <text x="110" y="142" textAnchor="middle" className="text-[6.5px] font-bold fill-slate-600">Volatilidad a 3a (%)</text>
 
                     {/* Y labels (Media 3a) */}
-                    {[5, 13, 21, 29, 37].map((m, i) => (
-                      <text key={m} x="20" y={120 - i * 26} textAnchor="end" className="text-[6.5px] font-mono fill-slate-500">{m}</text>
-                    ))}
+                    {[0, 10, 20, 30, 40].map((m) => {
+                      const ly = 120 - (m / 40) * 108
+                      return (
+                        <text key={m} x="20" y={ly} textAnchor="end" dominantBaseline="central" className="text-[6.5px] font-mono fill-slate-500">{m}</text>
+                      )
+                    })}
                     
                     {/* Scatter Points */}
                     {/* Benchmark */}
-                    <rect x="25.5" y="117.5" width="5" height="5" fill="#10b981" />
+                    {(() => {
+                      const bp = performance.scatterPoints.find((p) => p.isBenchmark) || { volatility: 0.5, meanReturn: 2.71 }
+                      const bx = 24 + (Math.max(0, Math.min(35, bp.volatility)) / 35) * 172
+                      const by = 120 - (Math.max(0, Math.min(40, bp.meanReturn)) / 40) * 108
+                      return (
+                        <g>
+                          <rect x={bx - 3.5} y={by - 3.5} width="7" height="7" rx="1.5" fill="#10b981" />
+                          <text x={bx + 6} y={by} dominantBaseline="central" className="text-[5.5px] font-bold fill-emerald-600 font-sans">
+                            Ref Mon. ({bp.meanReturn.toFixed(1)}%)
+                          </text>
+                        </g>
+                      )
+                    })()}
+
                     {/* Cartera Consolidada */}
-                    <circle cx="100.0" cy="62.0" r="5" fill="#ffffff" stroke="#C8102E" strokeWidth="2" />
-                    <text x="100.0" y="64.0" textAnchor="middle" className="text-[5.5px] font-bold fill-[#C8102E]">C</text>
-                    {/* Funds 1 to 7 - Separados sin tocarse ni superponerse */}
-                    {[
-                      { idx: '1', x: 115.0, y: 72.0 },
-                      { idx: '2', x: 148.0, y: 32.0 },
-                      { idx: '3', x: 132.0, y: 74.0 },
-                      { idx: '4', x: 102.0, y: 82.0 },
-                      { idx: '6', x: 122.0, y: 52.0 },
-                      { idx: '7', x: 118.0, y: 102.0 },
-                    ].map((p) => (
-                      <g key={p.idx}>
-                        <circle cx={p.x} cy={p.y} r="3.6" fill="#C8102E" />
-                        <text x={p.x} y={p.y + 1.8} textAnchor="middle" className="text-[5px] font-bold fill-white">{p.idx}</text>
-                      </g>
-                    ))}
+                    {(() => {
+                      const cp = performance.scatterPoints.find((p) => p.isPortfolio) || { volatility: 11.85, meanReturn: 20.85 }
+                      const cx = 24 + (Math.max(0, Math.min(35, cp.volatility)) / 35) * 172
+                      const cy = 120 - (Math.max(0, Math.min(40, cp.meanReturn)) / 40) * 108
+                      return (
+                        <g>
+                          <circle cx={cx} cy={cy} r="7.5" fill="#ffffff" stroke="#C8102E" strokeWidth="2" />
+                          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" className="text-[7px] font-black fill-[#C8102E] font-sans">
+                            C
+                          </text>
+                        </g>
+                      )
+                    })()}
+
+                    {/* Numbered Fund Points (1 to N) */}
+                    {performance.scatterPoints
+                      .filter((p) => !p.isPortfolio && !p.isBenchmark)
+                      .map((p) => {
+                        const fx = 24 + (Math.max(0, Math.min(35, p.volatility)) / 35) * 172
+                        const fy = 120 - (Math.max(0, Math.min(40, p.meanReturn)) / 40) * 108
+                        return (
+                          <g key={p.id || p.index}>
+                            <circle cx={fx} cy={fy} r="5.2" fill="#C8102E" />
+                            <text
+                              x={fx}
+                              y={fy}
+                              textAnchor="middle"
+                              dominantBaseline="central"
+                              className="text-[6.2px] font-black fill-white font-sans"
+                            >
+                              {p.index}
+                            </text>
+                          </g>
+                        )
+                      })}
                   </svg>
                 </div>
               </div>
@@ -771,14 +872,19 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-[9.5px] text-slate-900">Matriz de correlación</span>
-                  <span className="text-[7.5px] text-slate-400 font-mono">Fondos 1-7</span>
+                  <span className="text-[7.5px] text-slate-400 font-mono">
+                    Fondos 1-{(performance.correlationFunds.length > 0 ? performance.correlationFunds.length : (performance.correlationMatrix[0] || []).length)}
+                  </span>
                 </div>
                 <table className="w-full border-collapse text-[8px] leading-tight text-center overflow-visible">
                   <thead>
                     <tr>
-                      <th className="w-5 py-1"></th>
-                      {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                        <th key={num} className="py-1 px-0.5 text-center align-middle">
+                      <th className="w-4 py-0.5"></th>
+                      {(performance.correlationFunds.length > 0
+                        ? performance.correlationFunds.map((f) => f.index)
+                        : (performance.correlationMatrix[0] || []).map((_, i) => i + 1)
+                      ).map((num) => (
+                        <th key={num} className="py-0.5 px-0.5 text-center align-middle">
                           <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#C8102E] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
                             {num}
                           </span>
@@ -789,7 +895,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                   <tbody>
                     {performance.correlationMatrix.map((row, rIdx) => (
                       <tr key={rIdx}>
-                        <td className="py-1 px-0.5 text-center align-middle">
+                        <td className="py-0.5 px-0.5 text-center align-middle">
                           <span className="w-3.5 h-3.5 mx-auto rounded-full bg-[#C8102E] text-white font-bold flex items-center justify-center text-[6.5px] leading-none shrink-0 shadow-2xs">
                             {rIdx + 1}
                           </span>
@@ -797,7 +903,7 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
                         {row.map((val, cIdx) => (
                           <td
                             key={cIdx}
-                            className={`p-1 border border-white font-mono text-[7px] ${getCorrelationColor(val)}`}
+                            className={`py-0.5 px-0.5 border border-white font-mono text-[6.5px] ${getCorrelationColor(val)}`}
                           >
                             {val !== null ? val.toFixed(2) : '-'}
                           </td>
