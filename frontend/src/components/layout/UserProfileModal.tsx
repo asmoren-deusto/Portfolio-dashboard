@@ -32,6 +32,7 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
   const navigate = useNavigate()
   const { data: positions = [] } = usePositions()
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
+  const [isDownloadingExcel, setIsDownloadingExcel] = useState(false)
   const brokers = useMock ? DEMO_BROKERS : BROKERS
 
 
@@ -280,15 +281,29 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
 
               <button
                 type="button"
-                onClick={() => {
-                  downloadExcelReport('full', { broker: selectedBroker })
+                disabled={isDownloadingExcel}
+                onClick={async () => {
+                  try {
+                    setIsDownloadingExcel(true)
+                    await downloadExcelReport('full', { broker: selectedBroker })
+                    onClose()
+                  } catch (err) {
+                    console.error('Error al descargar Informe Completo Excel:', err)
+                    alert('No se pudo generar el informe Excel.')
+                  } finally {
+                    setIsDownloadingExcel(false)
+                  }
                 }}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50/70 dark:hover:bg-emerald-500/10 font-semibold transition-colors text-xs cursor-pointer border border-emerald-200/50 dark:border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-500/5 active:scale-98"
+                className="w-full flex items-center justify-between p-2.5 rounded-xl text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50/70 dark:hover:bg-emerald-500/10 font-semibold transition-colors text-xs cursor-pointer border border-emerald-200/50 dark:border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-500/5 active:scale-98 disabled:opacity-60"
                 title="Descargar libro Excel multi-hoja con Posiciones, Rendimiento Diario, Operaciones y Resumen"
               >
                 <div className="flex items-center gap-2">
-                  <FileSpreadsheet size={15} className="text-emerald-600 dark:text-emerald-400" />
-                  <span>Informe Completo</span>
+                  {isDownloadingExcel ? (
+                    <Loader2 size={15} className="text-emerald-600 dark:text-emerald-400 animate-spin" />
+                  ) : (
+                    <FileSpreadsheet size={15} className="text-emerald-600 dark:text-emerald-400" />
+                  )}
+                  <span>{isDownloadingExcel ? 'Generando...' : 'Informe Completo'}</span>
                 </div>
                 <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
                   .XLSX
