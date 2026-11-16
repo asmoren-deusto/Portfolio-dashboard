@@ -14,8 +14,6 @@ import {
   Percent,
   SlidersHorizontal,
   ExternalLink,
-  Globe,
-  ScanSearch,
 } from 'lucide-react'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { Card } from '@/components/ui/Card'
@@ -277,28 +275,6 @@ export function PositionsPage() {
             </select>
             <ArrowUpDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
           </div>
-
-          {/* Link to Diversification Analysis */}
-          <Link
-            to="/analytics?tab=diversification"
-            className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-semibold rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 transition-all shadow-2xs shrink-0"
-            title="Comparar diversificación geográfica y sectorial con respecto a la capitalización mundial"
-          >
-            <Globe className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
-            <span className="hidden sm:inline">Diagnóstico vs Mundo</span>
-            <span className="sm:hidden">Mundo</span>
-          </Link>
-
-          {/* Botón Informe X-Ray */}
-          <Link
-            to="/xray"
-            className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-semibold rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 transition-all shadow-2xs shrink-0 cursor-pointer"
-            title="Generar Informe X-Ray Completo (Morningstar Look-Through)"
-          >
-            <ScanSearch className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span className="hidden sm:inline">Informe X-Ray</span>
-            <span className="sm:hidden">X-Ray</span>
-          </Link>
 
           {/* Exportar a Excel */}
           <ExcelExportButton

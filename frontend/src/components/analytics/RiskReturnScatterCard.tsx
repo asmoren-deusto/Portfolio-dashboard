@@ -32,7 +32,7 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
   const maxY = 35
 
   const mapX = (vol: number) => 75 + ((vol - minX) / (maxX - minX)) * 535
-  const mapY = (ret: number) => 310 - ((ret - minY) / (maxY - minY)) * 275
+  const mapY = (ret: number) => 305 - ((ret - minY) / (maxY - minY)) * 265
 
   return (
     <Card className="p-5 sm:p-6 flex flex-col justify-between h-full">
@@ -56,15 +56,15 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
         </span>
       </div>
 
-      {/* 2. Scatter Plot SVG Container (altura fija exacta y coincidente con la tarjeta derecha) */}
-      <div className="my-3.5 w-full h-[320px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-3 sm:p-4 relative flex items-center justify-center shadow-2xs shrink-0">
-        <svg viewBox="0 0 650 360" className="w-full h-full max-h-[300px] overflow-visible">
+      {/* 2. Scatter Plot SVG Container (optimizado para evitar desbordamiento y encajar verticalmente) */}
+      <div className="my-3.5 w-full h-[320px] bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-2 sm:p-3 relative flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
+        <svg viewBox="0 0 650 330" className="w-full h-full max-h-[300px] overflow-visible">
           {/* Grid Lines */}
           {[5, 10, 15, 20].map((v) => (
             <line
               key={v}
               x1={mapX(v)}
-              y1={35}
+              y1={40}
               x2={mapX(v)}
               y2={305}
               stroke="currentColor"
@@ -86,27 +86,56 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
           ))}
 
           {/* Axes */}
-          <line x1={75} y1={25} x2={75} y2={305} stroke="currentColor" strokeWidth="1.5" className="text-slate-400 dark:text-slate-500" />
+          <line x1={75} y1={35} x2={75} y2={305} stroke="currentColor" strokeWidth="1.5" className="text-slate-400 dark:text-slate-500" />
           <line x1={75} y1={305} x2={615} y2={305} stroke="currentColor" strokeWidth="1.5" className="text-slate-400 dark:text-slate-500" />
 
-          {/* Axis Ticks & Labels con separación generosa para evitar solapamiento */}
-          {[0, 5, 10, 15, 20].map((v) => (
-            <text key={v} x={mapX(v)} y={325} textAnchor="middle" className="text-[12px] font-mono font-bold fill-slate-500">
-              {v}%
-            </text>
-          ))}
-          <text x={342} y={352} textAnchor="middle" className="text-[13px] font-bold fill-slate-800 dark:fill-slate-200">
-            Volatilidad Histórica (Desviación Típica a 3 Años) →
+          {/* Y Axis Vertical Label (a la izquierda del eje vertical, despejando la parte superior) */}
+          <text
+            transform="rotate(-90)"
+            x={-170}
+            y={20}
+            textAnchor="middle"
+            className="text-[12px] font-bold fill-slate-700 dark:fill-slate-300 select-none tracking-tight"
+          >
+            Retorno Medio Anualizado (3 Años) ↑
           </text>
 
+          {/* Y Axis Ticks */}
           {[5, 10, 15, 20, 25, 30].map((r) => (
             <text key={r} x={65} y={mapY(r) + 4} textAnchor="end" className="text-[12px] font-mono font-bold fill-slate-500">
               {r}%
             </text>
           ))}
-          <text x={75} y={16} textAnchor="start" className="text-[13px] font-bold fill-slate-800 dark:fill-slate-200">
-            ↑ Retorno Medio Anualizado (3 Años)
-          </text>
+
+          {/* X Axis Ticks (separados y limpios) */}
+          {[0, 5, 10, 15, 20].map((v) => (
+            <text key={v} x={mapX(v)} y={322} textAnchor="middle" className="text-[12px] font-mono font-bold fill-slate-500">
+              {v}%
+            </text>
+          ))}
+
+          {/* X Axis Label (ubicado en el cuadrante inferior derecho despejado según diseño) */}
+          <g className="pointer-events-none select-none">
+            <rect
+              x={442}
+              y={272}
+              width="170"
+              height="24"
+              rx="6"
+              fill="#ffffff"
+              stroke="#cbd5e1"
+              strokeWidth="1"
+              className="dark:fill-[#1e1e24] dark:stroke-white/10 shadow-2xs"
+            />
+            <text
+              x={527}
+              y={288}
+              textAnchor="middle"
+              className="text-[11px] font-bold fill-slate-700 dark:fill-slate-300 font-sans"
+            >
+              Volatilidad Histórica (3 Años) →
+            </text>
+          </g>
 
           {/* Points & Labels */}
           {points.map((p) => {

@@ -436,7 +436,7 @@ export function XRayPage() {
                       <div className="flex items-center gap-2.5">
                         <Layers className="w-5 h-5 text-indigo-500" />
                         <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                          Morningstar Equity Style Box™ (3x3)
+                          Morningstar Equity Style Box™
                         </h3>
                       </div>
                       <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
@@ -459,7 +459,7 @@ export function XRayPage() {
 
                       {/* Row 1: Large Cap */}
                       <div className="grid grid-cols-4 gap-2 mb-2 items-center">
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Grande</div>
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-left pl-1 sm:pl-2">Grande</div>
                         <div className="h-13 sm:h-14 rounded-xl border flex flex-col items-center justify-center p-1 bg-indigo-50/60 dark:bg-indigo-500/10 border-indigo-200/60 dark:border-indigo-500/20">
                           <span className="font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white">{styleBox.largeValue}%</span>
                           <span className="text-[9.5px] text-slate-400">Large Value</span>
@@ -476,7 +476,7 @@ export function XRayPage() {
 
                       {/* Row 2: Mid Cap */}
                       <div className="grid grid-cols-4 gap-2 mb-2 items-center">
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Mediana</div>
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-left pl-1 sm:pl-2">Mediana</div>
                         <div className="h-11 sm:h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
                           <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.midValue}%</span>
                         </div>
@@ -490,7 +490,7 @@ export function XRayPage() {
 
                       {/* Row 3: Small Cap */}
                       <div className="grid grid-cols-4 gap-2 mb-2 items-center">
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-right pr-2">Pequeña</div>
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 text-left pl-1 sm:pl-2">Pequeña</div>
                         <div className="h-11 sm:h-12 rounded-xl border flex flex-col items-center justify-center p-1 bg-slate-50 dark:bg-white/[0.02] border-slate-200/60 dark:border-white/5">
                           <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{styleBox.smallValue}%</span>
                         </div>
@@ -504,19 +504,19 @@ export function XRayPage() {
                     </div>
                   </div>
 
-                  {/* Style Metrics Strip */}
-                  <div className="grid grid-cols-3 gap-2.5 mt-4 pt-3.5 border-t border-slate-200/70 dark:border-white/[0.06] text-center text-xs">
-                    <div className="p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
-                      <span className="text-slate-400 block text-[10px]">P/Valor Cont.</span>
-                      <span className="font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToBook}x</span>
+                  {/* Style Metrics Strip (reducido para un ajuste armónico y proporcionado) */}
+                  <div className="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-slate-200/70 dark:border-white/[0.06] text-center text-xs">
+                    <div className="py-1 px-2 rounded-lg bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[9.5px]">P/Valor Cont.</span>
+                      <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToBook}x</span>
                     </div>
-                    <div className="p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
-                      <span className="text-slate-400 block text-[10px]">P/Beneficio (PER)</span>
-                      <span className="font-mono font-bold text-sm sm:text-base text-indigo-600 dark:text-indigo-400 mt-0.5 block">{styleBox.priceToEarnings}x</span>
+                    <div className="py-1 px-2 rounded-lg bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[9.5px]">P/Beneficio (PER)</span>
+                      <span className="font-mono font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 mt-0.5 block">{styleBox.priceToEarnings}x</span>
                     </div>
-                    <div className="p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02]">
-                      <span className="text-slate-400 block text-[10px]">P/CashFlow</span>
-                      <span className="font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToCashFlow}x</span>
+                    <div className="py-1 px-2 rounded-lg bg-slate-50 dark:bg-white/[0.02]">
+                      <span className="text-slate-400 block text-[9.5px]">P/CashFlow</span>
+                      <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-0.5 block">{styleBox.priceToCashFlow}x</span>
                     </div>
                   </div>
                 </Card>

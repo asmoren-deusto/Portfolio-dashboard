@@ -210,12 +210,12 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 </div>
                 <div className="mt-2.5 space-y-2">
                   {data.ciclico.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400">
-                      <span className="truncate pr-1 flex items-center gap-1.5">
+                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
+                      <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span>{ind.name}</span>
+                        <span className="truncate">{ind.name}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -241,12 +241,12 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 </div>
                 <div className="mt-2.5 space-y-2">
                   {data.sensible.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400">
-                      <span className="truncate pr-1 flex items-center gap-1.5">
+                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
+                      <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span>{ind.name}</span>
+                        <span className="truncate">{ind.name}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -272,12 +272,12 @@ export const SuperSectorsTriangleCard: React.FC<SuperSectorsTriangleCardProps> =
                 </div>
                 <div className="mt-2.5 space-y-2">
                   {data.defensivo.industries.map((ind, i) => (
-                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400">
-                      <span className="truncate pr-1 flex items-center gap-1.5">
+                    <div key={i} className="flex justify-between items-center text-[11.5px] text-slate-600 dark:text-slate-400 min-w-0">
+                      <span className="truncate pr-1 flex items-center gap-1.5 min-w-0 flex-1">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ind.color }} />
-                        <span>{ind.name}</span>
+                        <span className="truncate">{ind.name}</span>
                       </span>
-                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0">{ind.weight.toFixed(1)}%</span>
+                      <span className="font-mono font-medium text-slate-900 dark:text-white shrink-0 ml-1">{ind.weight.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
