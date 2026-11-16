@@ -82,47 +82,63 @@ export function XRayPage() {
 
     try {
       setIsGeneratingPdf(true)
-      const html2pdfModule = await import('html2pdf.js')
-      const html2pdf = html2pdfModule.default || html2pdfModule
+      const jspdfModule = await import('jspdf')
+      const jsPDF = jspdfModule.jsPDF || jspdfModule.default
+      const html2canvasModule = await import('html2canvas')
+      const html2canvas = html2canvasModule.default || html2canvasModule
 
       const dateStr = new Date().toISOString().slice(0, 10)
       const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
       const filename = `Morningstar_Portfolio_XRay${entitySuffix}_${dateStr}.pdf`
 
-      const opt = {
-        margin: [0, 0, 0, 0],
-        filename: filename,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: {
+      const pdf = new jsPDF({
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait',
+        compress: true,
+      })
+
+      const pages = Array.from(element.querySelectorAll<HTMLElement>('.print-page'))
+
+      if (pages.length === 0) {
+        const canvas = await html2canvas(element, {
           scale: 2,
           useCORS: true,
-          letterRendering: true,
           logging: false,
-          scrollY: 0,
-        },
-        jsPDF: {
-          unit: 'mm' as const,
-          format: 'a4' as const,
-          orientation: 'portrait' as const,
-        },
-        pagebreak: {
-          mode: ['css', 'legacy'] as const,
-          after: '.print-page',
-        },
+          backgroundColor: '#ffffff',
+        })
+        const imgData = canvas.toDataURL('image/jpeg', 0.95)
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+      } else {
+        for (let i = 0; i < pages.length; i++) {
+          const pageEl = pages[i]
+          const canvas = await html2canvas(pageEl, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+            onclone: (clonedDoc) => {
+              const p = clonedDoc.querySelectorAll<HTMLElement>('.print-page')[i]
+              if (p) {
+                p.style.boxShadow = 'none'
+                p.style.border = 'none'
+                p.style.borderRadius = '0'
+                p.style.marginBottom = '0'
+              }
+            },
+          })
+          const imgData = canvas.toDataURL('image/jpeg', 0.95)
+          if (i > 0) {
+            pdf.addPage('a4', 'portrait')
+          }
+          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+        }
       }
 
-      // @ts-ignore
-      await html2pdf().set(opt).from(element).save()
+      pdf.save(filename)
     } catch (err) {
       console.error('Error al generar PDF directo:', err)
-      const originalTitle = document.title
-      const dateStr = new Date().toISOString().slice(0, 10)
-      const entitySuffix = selectedBroker !== 'all' ? `_${selectedBroker}` : '_Consolidado'
-      document.title = `Morningstar_Portfolio_XRay${entitySuffix}_${dateStr}`
-      window.print()
-      setTimeout(() => {
-        document.title = originalTitle
-      }, 1500)
+      alert('No se pudo generar el archivo PDF automáticamente. Revisa la consola para más detalles.')
     } finally {
       setIsGeneratingPdf(false)
     }
