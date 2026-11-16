@@ -1,6 +1,7 @@
 import React from 'react'
 import type { PortfolioXRayReport } from '@/lib/xrayEngine'
 import { fmt } from '@/lib/utils'
+import { WorldMapChoropleth } from './WorldMapChoropleth'
 
 interface MorningstarXRayDocumentProps {
   report: PortfolioXRayReport
@@ -49,6 +50,22 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
     if (val >= -0.60) return 'bg-[#fed7aa] text-amber-900' // -0.20 to -0.60 (Orange)
     return 'bg-[#ef4444] text-white font-bold' // -0.60 to -1.00 (Red)
   }
+
+  // Pesos regionales agregados para el Mapamundi Coroplético
+  const naWeight =
+    (regionalBreakdown.america?.subregions?.find((s) => s.name === 'Estados Unidos')?.actionWeight ?? 56.06) +
+    (regionalBreakdown.america?.subregions?.find((s) => s.name === 'Canada')?.actionWeight ?? 1.73)
+  const laWeight =
+    regionalBreakdown.america?.subregions?.find((s) => s.name.includes('América Latina'))?.actionWeight ?? 2.13
+  const euWeight = regionalBreakdown.europa?.actionWeight ?? 19.07
+  const afWeight =
+    regionalBreakdown.europa?.subregions?.find((s) => s.name.includes('Oriente Medio'))?.actionWeight ?? 0.91
+  const asWeight =
+    (regionalBreakdown.asia?.subregions?.find((s) => s.name === 'Japón')?.actionWeight ?? 11.02) +
+    (regionalBreakdown.asia?.subregions?.find((s) => s.name.includes('4 tigres'))?.actionWeight ?? 5.56) +
+    (regionalBreakdown.asia?.subregions?.find((s) => s.name.includes('Emergente'))?.actionWeight ?? 3.44)
+  const ocWeight =
+    regionalBreakdown.asia?.subregions?.find((s) => s.name === 'Australasia')?.actionWeight ?? 0.42
 
   return (
     <div className="w-full bg-white text-slate-900 font-sans antialiased text-[10px] leading-normal selection:bg-slate-200">
@@ -207,23 +224,23 @@ export const MorningstarXRayDocument: React.FC<MorningstarXRayDocumentProps> = (
             <div className="grid grid-cols-12 gap-3 items-start">
               {/* Mapamundi / Leyenda (3 cols) */}
               <div className="col-span-3 pr-2 border-r border-slate-200">
-                <div className="w-full h-16 bg-slate-50 border border-slate-200 rounded flex items-center justify-center relative overflow-hidden">
-                  {/* Simplified World Vector Silhouette */}
-                  <svg viewBox="0 0 100 50" className="w-full h-full opacity-60">
-                    <path d="M15,10 Q25,8 30,16 Q28,28 18,32 Q12,25 15,10 Z" fill="#f97316" />
-                    <path d="M22,34 Q28,32 30,42 Q24,48 20,44 Z" fill="#fed7aa" />
-                    <path d="M45,8 Q55,5 58,15 Q52,22 46,18 Z" fill="#fdba74" />
-                    <path d="M60,10 Q85,8 88,25 Q75,35 62,25 Z" fill="#fb923c" />
-                    <path d="M78,32 Q88,32 85,42 Q78,44 75,38 Z" fill="#ffedd5" />
-                  </svg>
-                  <span className="absolute bottom-1 right-1 text-[8px] font-mono text-slate-400">Mapamundi</span>
+                <div className="w-full h-[76px] bg-slate-50/80 border border-slate-200 rounded flex items-center justify-center overflow-hidden">
+                  <WorldMapChoropleth
+                    className="w-full h-full"
+                    northAmericaWeight={naWeight}
+                    latinAmericaWeight={laWeight}
+                    europeWeight={euWeight}
+                    africaMiddleEastWeight={afWeight}
+                    asiaWeight={asWeight}
+                    australasiaWeight={ocWeight}
+                  />
                 </div>
                 {/* Scale Legend */}
                 <div className="flex items-center justify-between text-[8px] font-mono text-slate-600 mt-1.5 pt-1 border-t border-slate-200">
-                  <span className="flex items-center gap-0.5"><span className="w-2 h-2 bg-[#ffedd5] inline-block border border-slate-300" /> &lt;25</span>
-                  <span className="flex items-center gap-0.5"><span className="w-2 h-2 bg-[#fed7aa] inline-block" /> 25-50</span>
-                  <span className="flex items-center gap-0.5"><span className="w-2 h-2 bg-[#fb923c] inline-block" /> 50-75</span>
-                  <span className="flex items-center gap-0.5"><span className="w-2 h-2 bg-[#ea580c] inline-block" /> &gt;75</span>
+                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#ffedd5] inline-block border border-amber-300" /> &lt;25</span>
+                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#fed7aa] inline-block border border-orange-300" /> 25-50</span>
+                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#fb923c] inline-block border border-orange-400" /> 50-75</span>
+                  <span className="flex items-center gap-0.5"><span className="w-2.5 h-2 bg-[#ea580c] inline-block border border-orange-600" /> &gt;75</span>
                 </div>
                 <div className="mt-1 text-[8px] text-slate-500">
                   No Clasificados: <span className="font-bold text-slate-800 font-mono">0,57%</span>

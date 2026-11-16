@@ -32,6 +32,7 @@ import { RiskReturnScatterCard } from '@/components/analytics/RiskReturnScatterC
 import { SuperSectorsTriangleCard } from '@/components/analytics/SuperSectorsTriangleCard'
 import { StockOverlapCard } from '@/components/analytics/StockOverlapCard'
 import { MptStatsCard } from '@/components/analytics/MptStatsCard'
+import { WorldMapChoropleth } from '@/components/analytics/WorldMapChoropleth'
 import {
   buildPortfolioXRayReport,
   type LookThroughHolding,
@@ -540,8 +541,127 @@ export function XRayPage() {
                   </div>
                 </Card>
               </div>
-
             </div>
+
+            {/* Desglose Regional Jerárquico Oficial con Mapamundi Coroplético */}
+            <Card className="p-5 sm:p-6 mt-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-200/70 dark:border-white/[0.06] gap-2">
+                <div className="flex items-center gap-2.5">
+                  <Globe className="w-5 h-5 text-blue-500" />
+                  <div>
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+                      Desglose por Regiones %
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Mapa coroplético institucional y asignación jerárquica por bloques económicos
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs font-mono self-start sm:self-auto">
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#ffedd5] border border-amber-300" /> &lt;25%</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#fed7aa] border border-orange-300" /> 25-50%</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#fb923c] border border-orange-400" /> 50-75%</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-xs bg-[#ea580c] border border-orange-600" /> &gt;75%</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5 items-start">
+                {/* Mapamundi Coroplético (4 cols) */}
+                <div className="lg:col-span-4 flex flex-col items-center">
+                  <div className="w-full h-44 sm:h-48 rounded-xl border border-slate-200/80 dark:border-white/[0.08] overflow-hidden bg-slate-50/50 dark:bg-white/[0.02] shadow-2xs">
+                    <WorldMapChoropleth
+                      className="w-full h-full"
+                      northAmericaWeight={
+                        (regionalBreakdown.america?.subregions?.find((s) => s.name === 'Estados Unidos')?.actionWeight ?? 56.06) +
+                        (regionalBreakdown.america?.subregions?.find((s) => s.name === 'Canada')?.actionWeight ?? 1.73)
+                      }
+                      latinAmericaWeight={
+                        regionalBreakdown.america?.subregions?.find((s) => s.name.includes('América Latina'))?.actionWeight ?? 2.13
+                      }
+                      europeWeight={regionalBreakdown.europa?.actionWeight ?? 19.07}
+                      africaMiddleEastWeight={
+                        regionalBreakdown.europa?.subregions?.find((s) => s.name.includes('Oriente Medio'))?.actionWeight ?? 0.91
+                      }
+                      asiaWeight={
+                        (regionalBreakdown.asia?.subregions?.find((s) => s.name === 'Japón')?.actionWeight ?? 11.02) +
+                        (regionalBreakdown.asia?.subregions?.find((s) => s.name.includes('4 tigres'))?.actionWeight ?? 5.56) +
+                        (regionalBreakdown.asia?.subregions?.find((s) => s.name.includes('Emergente'))?.actionWeight ?? 3.44)
+                      }
+                      australasiaWeight={
+                        regionalBreakdown.asia?.subregions?.find((s) => s.name === 'Australasia')?.actionWeight ?? 0.42
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full mt-2.5 text-xs text-slate-500 dark:text-slate-400 font-mono px-1">
+                    <span>No clasificados: <strong className="text-slate-800 dark:text-slate-200">0,57%</strong></span>
+                    <span>Consolidado Morningstar</span>
+                  </div>
+                </div>
+
+                {/* Tablas Jerárquicas Regionales (8 cols) */}
+                <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                  {/* Europa */}
+                  <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.06]">
+                    <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-300 dark:border-white/10 font-bold">
+                      <span className="text-slate-900 dark:text-white">Europa</span>
+                      <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">
+                        {regionalBreakdown.europa.actionWeight.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {regionalBreakdown.europa.subregions.map((sub, idx) => (
+                        <div key={idx} className="flex justify-between text-slate-600 dark:text-slate-400 text-[11px]">
+                          <span className="truncate pr-1">{sub.name}</span>
+                          <span className="font-mono text-slate-900 dark:text-slate-200 shrink-0 font-medium">
+                            {sub.actionWeight.toFixed(2)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* América */}
+                  <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.06]">
+                    <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-300 dark:border-white/10 font-bold">
+                      <span className="text-slate-900 dark:text-white">América</span>
+                      <span className="font-mono text-orange-600 dark:text-orange-400 font-bold">
+                        {regionalBreakdown.america.actionWeight.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {regionalBreakdown.america.subregions.map((sub, idx) => (
+                        <div key={idx} className="flex justify-between text-slate-600 dark:text-slate-400 text-[11px]">
+                          <span className="truncate pr-1">{sub.name}</span>
+                          <span className="font-mono text-slate-900 dark:text-slate-200 shrink-0 font-medium">
+                            {sub.actionWeight.toFixed(2)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Asia */}
+                  <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.06]">
+                    <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-300 dark:border-white/10 font-bold">
+                      <span className="text-slate-900 dark:text-white">Asia</span>
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                        {regionalBreakdown.asia.actionWeight.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {regionalBreakdown.asia.subregions.map((sub, idx) => (
+                        <div key={idx} className="flex justify-between text-slate-600 dark:text-slate-400 text-[11px]">
+                          <span className="truncate pr-1">{sub.name}</span>
+                          <span className="font-mono text-slate-900 dark:text-slate-200 shrink-0 font-medium">
+                            {sub.actionWeight.toFixed(2)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
