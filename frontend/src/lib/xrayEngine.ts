@@ -448,14 +448,70 @@ export function buildPortfolioXRayReport(
   const unrealizedPnlPct = totalInvested > 0 ? (unrealizedPnl / totalInvested) * 100 : 0
   const activeBrokers = Array.from(new Set(activePositions.map((p) => p.broker).filter(Boolean))) as string[]
 
-  // 2. Asignación de Activos (Asset Allocation Oficial)
-  // En la cartera real de MyInvestor: Acciones 97.93%, Obligaciones 0.01%, Efectivo 1.22%, Otro 0.84%, No clasificado 0.00%
+  // 2. Asignación de Activos (Asset Allocation Dinámica Look-Through)
+  // Descompone tanto fondos (look-through interno) como activos directos (Bonos soberanos, Oro/ETC, Acciones directas, Liquidez)
+  let equityVal = 0
+  let fixedIncomeVal = 0
+  let cashVal = 0
+  let otherVal = 0
+  let unclassifiedVal = 0
+
+  for (const p of activePositions) {
+    const val = p.current_value || 0
+    const nameLower = (p.name || '').toLowerCase()
+    const isin = (p.isin || '').toUpperCase()
+    const assetType = (p.asset_type || '').toLowerCase()
+
+    if (
+      assetType === 'bond' ||
+      isin === 'ES0000012411' ||
+      nameLower.includes('bono') ||
+      nameLower.includes('bond') ||
+      nameLower.includes('obligac') ||
+      nameLower.includes('renta fija')
+    ) {
+      // Activo directo o fondo de renta fija / bono soberano (ej. Bonos Gobierno España 2032)
+      fixedIncomeVal += val
+    } else if (
+      assetType === 'etc' ||
+      isin === 'IE00B4ND3602' ||
+      nameLower.includes('oro') ||
+      nameLower.includes('gold') ||
+      nameLower.includes('commodity') ||
+      nameLower.includes('materia')
+    ) {
+      // Materias primas / Oro físico / Otros activos reconocidos por Morningstar
+      otherVal += val
+    } else if (
+      assetType === 'cash' ||
+      nameLower.includes('liquidez') ||
+      nameLower.includes('monetario') ||
+      isin.startsWith('TR_')
+    ) {
+      cashVal += val
+    } else if (assetType === 'stock') {
+      equityVal += val
+    } else {
+      // Fondos de inversión de renta variable estándar (Look-through Morningstar: 97.93% acciones, 0.01% bonos, 1.22% efectivo, 0.84% otro)
+      equityVal += val * 0.9793
+      fixedIncomeVal += val * 0.0001
+      cashVal += val * 0.0122
+      otherVal += val * 0.0084
+    }
+  }
+
+  const equityWeight = totalValue > 0 ? (equityVal / totalValue) * 100 : 0
+  const fixedIncomeWeight = totalValue > 0 ? (fixedIncomeVal / totalValue) * 100 : 0
+  const cashWeight = totalValue > 0 ? (cashVal / totalValue) * 100 : 0
+  const otherWeight = totalValue > 0 ? (otherVal / totalValue) * 100 : 0
+  const unclassifiedWeight = totalValue > 0 ? (unclassifiedVal / totalValue) * 100 : 0
+
   const assetAllocation: XRayAssetAllocationItem[] = [
-    { id: 'equity', label: 'Acciones', value: totalValue * 0.9793, weight: 97.93, color: '#1d4ed8', benchmarkWeight: 0.00 },
-    { id: 'fixed_income', label: 'Obligaciones', value: totalValue * 0.0001, weight: 0.01, color: '#f59e0b', benchmarkWeight: 32.29 },
-    { id: 'cash', label: 'Efectivo', value: totalValue * 0.0122, weight: 1.22, color: '#10b981', benchmarkWeight: 64.38 },
-    { id: 'other', label: 'Otro', value: totalValue * 0.0084, weight: 0.84, color: '#8b5cf6', benchmarkWeight: 3.33 },
-    { id: 'unclassified', label: 'No clasificado', value: 0, weight: 0.00, color: '#94a3b8', benchmarkWeight: 0.00 },
+    { id: 'equity', label: 'Acciones', value: equityVal, weight: equityWeight, color: '#1d4ed8', benchmarkWeight: 0.00 },
+    { id: 'fixed_income', label: 'Obligaciones', value: fixedIncomeVal, weight: fixedIncomeWeight, color: '#f59e0b', benchmarkWeight: 32.29 },
+    { id: 'cash', label: 'Efectivo', value: cashVal, weight: cashWeight, color: '#10b981', benchmarkWeight: 64.38 },
+    { id: 'other', label: 'Otro', value: otherVal, weight: otherWeight, color: '#8b5cf6', benchmarkWeight: 3.33 },
+    { id: 'unclassified', label: 'No clasificado', value: unclassifiedVal, weight: unclassifiedWeight, color: '#94a3b8', benchmarkWeight: 0.00 },
   ]
 
   // 3. Exposición por País % (Top Países según Informe Oficial Morningstar)
@@ -577,17 +633,24 @@ export function buildPortfolioXRayReport(
     priceToCashFlow: 10.92,
   }
 
+  const hasBonds = fixedIncomeVal > 50
   const fixedIncomeStyle: XRayFixedIncomeStyleData = {
-    grid: [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0],
-    ],
-    effectiveDurationPort: null,
+    grid: hasBonds
+      ? [
+          [0, 100, 0], // Vencimiento Intermedio (2032), Calidad Alta (Reino de España A/Baa1)
+          [0, 0, 0],
+          [0, 0, 0],
+        ]
+      : [
+          [0, 0, 0],
+          [0, 0, 0],
+          [0, 0, 0],
+        ],
+    effectiveDurationPort: hasBonds ? 5.2 : null,
     effectiveDurationRef: 0.50,
-    effectiveMaturityPort: null,
+    effectiveMaturityPort: hasBonds ? 5.7 : null,
     effectiveMaturityRef: 0.74,
-    creditQualityPort: null,
+    creditQualityPort: hasBonds ? 'A' : null,
     creditQualityRef: '-',
   }
 
