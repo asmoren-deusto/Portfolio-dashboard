@@ -121,10 +121,10 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
           {/* X Axis Label (ubicado en el cuadrante inferior derecho despejado según indicación visual) */}
           <g className="pointer-events-none select-none">
             <rect
-              x={426}
-              y={274}
-              width="194"
-              height="24"
+              x={368}
+              y={273}
+              width="254"
+              height="25"
               rx="6"
               fill="#ffffff"
               stroke="#cbd5e1"
@@ -132,8 +132,8 @@ export const RiskReturnScatterCard: React.FC<RiskReturnScatterCardProps> = ({
               className="dark:fill-[#1e1e24] dark:stroke-white/10 shadow-2xs"
             />
             <text
-              x={523}
-              y={290}
+              x={495}
+              y={289.5}
               textAnchor="middle"
               className="text-[11px] font-bold fill-slate-700 dark:fill-slate-300 font-sans"
             >
