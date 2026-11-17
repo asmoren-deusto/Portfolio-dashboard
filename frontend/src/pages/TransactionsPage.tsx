@@ -39,10 +39,34 @@ import type { Transaction } from '@/lib/mockData'
 type TxType = 'all' | 'buy' | 'sell' | 'dividend' | 'transfer'
 
 const TYPE_CONFIG: Record<string, { label: string; cls: string; icon: string }> = {
-  buy: { label: 'Compra DCA', cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: '↑' },
-  sell: { label: 'Venta', cls: 'text-rose-400 bg-rose-500/10 border-rose-500/20', icon: '↓' },
-  dividend: { label: 'Dividendo', cls: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: '💰' },
-  transfer: { label: 'Traspaso', cls: 'text-purple-400 bg-purple-500/10 border-purple-500/20', icon: '↔' },
+  buy: { label: 'Compra', cls: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20', icon: '↑' },
+  buy_dca: { label: 'Compra DCA', cls: 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 border-teal-200 dark:border-teal-500/20', icon: '↑' },
+  sell: { label: 'Venta', cls: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20', icon: '↓' },
+  dividend: { label: 'Dividendo', cls: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20', icon: '💰' },
+  transfer: { label: 'Traspaso', cls: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20', icon: '↔' },
+}
+
+function isDcaTransaction(
+  t: { broker?: string | null; isin?: string | null; notes?: string | null; asset_name?: string | null },
+  assetName?: string | null
+): boolean {
+  const broker = (t.broker || '').toLowerCase()
+  const isin = (t.isin || '').toUpperCase()
+  const notes = (t.notes || '').toLowerCase()
+  const name = `${t.asset_name || ''} ${assetName || ''}`.toLowerCase()
+
+  return (
+    broker.includes('indexa') ||
+    broker.includes('kutxa') ||
+    isin.startsWith('0192#') ||
+    isin === '0201G' ||
+    notes.includes('indexa') ||
+    notes.includes('kutxa') ||
+    notes.includes('baskepensiones') ||
+    name.includes('indexa') ||
+    name.includes('kutxa') ||
+    name.includes('baskepensiones')
+  )
 }
 
 const TYPE_TABS: { id: TxType; label: string }[] = [
@@ -100,10 +124,13 @@ export function TransactionsPage() {
         const name = t.asset_name || (t as any).name || positionMap.get(t.isin)?.name || getAssetCleanName(t.isin) || ''
         const isin = t.isin || ''
         const broker = t.broker || ''
+        const isDca = effectiveType === 'buy' && isDcaTransaction(t, name)
+        const typeLabel = isTraspaso ? 'traspaso' : isDca ? 'compra dca' : t.type === 'buy' ? 'compra' : t.type
         return (
           name.toLowerCase().includes(q) ||
           isin.toLowerCase().includes(q) ||
-          broker.toLowerCase().includes(q)
+          broker.toLowerCase().includes(q) ||
+          typeLabel.toLowerCase().includes(q)
         )
       }
       return true
@@ -356,11 +383,16 @@ export function TransactionsPage() {
                 paginatedTransactions.map((t) => {
                   const isTraspaso = t.type === 'transfer' || (t.notes && t.notes.toLowerCase().includes('traspaso'))
                   const effectiveType = isTraspaso ? 'transfer' : t.type
-                  const conf = TYPE_CONFIG[effectiveType] ?? TYPE_CONFIG.buy
                   const assetInfo = positionMap.get(t.isin)
                   const cleanName = getAssetCleanName(t.isin)
                   const displayName = t.asset_name || (t as any).name || assetInfo?.name || cleanName || t.isin
                   const ticker = assetInfo?.ticker || ASSET_METADATA_BY_ISIN[t.isin]?.cleanName?.slice(0, 4) || t.isin.slice(0, 4)
+
+                  let conf = TYPE_CONFIG[effectiveType] ?? TYPE_CONFIG.buy
+                  if (effectiveType === 'buy') {
+                    const isDca = isDcaTransaction(t, displayName)
+                    conf = isDca ? TYPE_CONFIG.buy_dca : TYPE_CONFIG.buy
+                  }
 
                   return (
                     <tr
