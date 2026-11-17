@@ -183,50 +183,10 @@ def _seed_asier_data():
                     if p_data["isin"] == "IE00B4ND3602":
                         entry.source = "live_yahoo" if p_data["date"] >= "2026-10-27" else "history_sync"
 
-            # 3. Seed transactions — ensure all seed transactions exist even on persistent DB volumes
-            # Clean up obsolete duplicate Vanguard S&P 500 transaction created during v3.5.3 on persistent volumes
-            db.query(Transaction).filter(
-                Transaction.user_id == "asier",
-                Transaction.isin == "IE0032126645",
-                Transaction.date == "2026-10-28",
-            ).delete()
-
-            existing_txs = {
-                (t.user_id, t.isin, t.date, round(float(t.amount), 2), t.type)
-                for t in db.query(Transaction).filter(Transaction.user_id == "asier").all()
-            }
-            for t_data in TRANSACTIONS:
-                sig = (
-                    t_data.get("user_id", "asier"),
-                    t_data["isin"],
-                    t_data["date"],
-                    round(float(t_data["amount"]), 2),
-                    t_data["type"],
-                )
-                if sig not in existing_txs:
+            # 3. Seed transactions — only on fresh / empty database to prevent duplicate re-seeding
+            if db.query(Transaction).filter(Transaction.user_id == "asier").count() == 0:
+                for t_data in TRANSACTIONS:
                     db.add(Transaction(**t_data))
-                    existing_txs.add(sig)
-                else:
-                    tx_obj = db.query(Transaction).filter(
-                        Transaction.user_id == sig[0],
-                        Transaction.isin == sig[1],
-                        Transaction.date == sig[2],
-                        Transaction.type == sig[4],
-                        Transaction.amount == t_data["amount"],
-                    ).first()
-                    if tx_obj:
-                        if t_data.get("notes") and tx_obj.notes != t_data["notes"]:
-                            tx_obj.notes = t_data["notes"]
-                        if t_data.get("shares") is not None and abs((tx_obj.shares or 0) - t_data["shares"]) > 0.0001:
-                            tx_obj.shares = t_data["shares"]
-                        if t_data.get("price") is not None and abs((tx_obj.price or 0) - t_data["price"]) > 0.0001:
-                            tx_obj.price = t_data["price"]
-
-            db.query(Transaction).filter(
-                Transaction.user_id == "asier",
-                Transaction.isin == "IE000ZYRH0Q7",
-                Transaction.date == "2025-10-29"
-            ).update({"notes": "Traspaso de Entrada desde Trade Republic"})
 
             db.commit()
         except Exception:
