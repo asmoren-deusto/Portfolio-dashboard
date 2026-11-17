@@ -18,6 +18,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'LU0261952682': 'fidelity.com',
   'IE00BYX5M476': 'fidelity.com',
   'LU0997587597': 'fidelity.com',
+  'LU1372006947': 'cobasam.com',
   'LU1598719752': 'cobasam.com',
   'ES0112611001': 'azvalor.com',
   'LU0302296495': 'dnb.no',

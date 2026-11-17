@@ -139,7 +139,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'equity',
     currencies: { EUR: 0.44, USD: 0.32, Other: 0.24 },
   },
-  // Cobas Selección FI (ES0124037005 / ES0124037039)
+  // Cobas Selección FI / Cobas Selection Fund P EUR Acc (LU1372006947 / ES0124037005 / ES0124037039)
+  LU1372006947: {
+    geo: { europe: 0.56, north_america: 0.18, emerging: 0.14, japan: 0.06, pacific: 0.03, other: 0.03 },
+    sectors: { energy: 0.28, industrials: 0.24, consumer_disc: 0.18, materials: 0.14, financials: 0.08, health: 0.05, comms: 0.03 },
+    assetClass: 'equity',
+    currencies: { EUR: 0.48, USD: 0.26, JPY: 0.06, Other: 0.20 },
+  },
   ES0124037005: {
     geo: { europe: 0.56, north_america: 0.18, emerging: 0.14, japan: 0.06, pacific: 0.03, other: 0.03 },
     sectors: { energy: 0.28, industrials: 0.24, consumer_disc: 0.18, materials: 0.14, financials: 0.08, health: 0.05, comms: 0.03 },

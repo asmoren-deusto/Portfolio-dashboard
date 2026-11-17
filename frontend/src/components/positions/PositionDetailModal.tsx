@@ -40,6 +40,7 @@ const FINECT_SLUGS: Record<string, string> = {
   'LU1623762843': 'https://www.finect.com/fondos-inversion/LU1623762843-Carmignac_portfolio_credit_a_eur_acc',
   'IE00BYX5NX33': 'https://www.finect.com/fondos-inversion/IE00BYX5NX33-Fidelity_msci_world_index_p_acc_eur',
   'IE00BYX5M476': 'https://www.finect.com/fondos-inversion/IE00BYX5M476-Fidelity_msci_emerging_markets_index_p_acc_eur',
+  'LU1372006947': 'https://www.finect.com/fondos-inversion/LU1372006947-Cobas_lux_sicav_cobas_selection_fund_eur',
   'LU1598719752': 'https://www.finect.com/fondos-inversion/LU1598719752-Cobas_international_fund_p_eur_acc',
   'LU0996182563': 'https://www.finect.com/fondos-inversion/LU0996182563-Amundi_index_msci_world_ae_c',
   '0192#0011': 'https://www.finect.com/planes-pensiones/indexa-mas-rentabilidad-acciones-epsv',
@@ -82,6 +83,8 @@ const PRODUCT_GESTORA_URLS: Record<string, string> = {
   'IE00BM95B621': 'https://www.polarcapitalfunds.com/',
   // Robeco Smart Energy
   'LU2145461757': 'https://www.robeco.com/es-es/',
+  // Cobas Selection
+  'LU1372006947': 'https://www.cobasam.com/productos/cobas-lux-sicav/lux_selection_eur/',
   // Cobas International
   'LU1598719752': 'https://www.cobasam.com/',
   // Carmignac Portfolio Credit

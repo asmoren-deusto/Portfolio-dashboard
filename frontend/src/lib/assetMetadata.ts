@@ -138,6 +138,13 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'ACC',
     shareClassLabel: 'Acumulación',
   },
+  'LU1372006947': {
+    cleanName: 'Cobas Selection Fund',
+    officialName: 'Cobas Lux SICAV - Cobas Selection Fund P EUR Acc',
+    currency: 'EUR',
+    shareClass: 'ACC',
+    shareClassLabel: 'Acumulación',
+  },
   'LU1598719752': {
     cleanName: 'Cobas International Fund',
     officialName: 'Cobas Lux SICAV - Cobas International Fund P EUR Acc',
@@ -206,6 +213,9 @@ export function getAssetCleanName(isin?: string | null, rawName?: string | null)
   }
   if (nLower.includes('dnb') && (nLower.includes('tech') || nLower.includes('tecnología'))) {
     return 'DNB Fund Technology'
+  }
+  if (nLower.includes('cobas') && (nLower.includes('selection') || nLower.includes('selección') || nLower.includes('seleccion'))) {
+    return 'Cobas Selection Fund'
   }
   if (nLower.includes('azvalor')) {
     return 'Azvalor Internacional FI'
@@ -303,6 +313,7 @@ export const NAV_UPDATE_SCHEDULE_BY_ISIN: Record<string, string> = {
   'IE000ZYRH0Q7': '22:00',
   'IE00BYX5NX33': '21:00',
   'IE00BYX5M476': '22:30',
+  'LU1372006947': '22:00',
   'LU1598719752': '22:00',
   'LU0996182563': '21:00',
   'LU1623762843': '20:30',

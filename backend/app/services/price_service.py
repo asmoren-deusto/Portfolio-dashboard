@@ -146,6 +146,7 @@ KNOWN_TICKERS: dict[str, str] = {
     "0192#0011": "0P0001FTQ7.F",  # Indexa Más Rentabilidad Acciones EPSV (Morningstar: 0P0001FTQ7)
     "01920011": "0P0001FTQ7.F",
     "IE00BYX5NX33": "0P0001CLDK.F",  # Fidelity MSCI World Index Fund EUR P Acc
+    "LU1372006947": "0P0001AZ4D.F",  # Cobas Lux SICAV - Cobas Selection Fund P EUR Acc
     "LU1598719752": "0P0001A94B.F",  # Cobas Lux SICAV - Cobas International Fund P EUR Acc
     "LU0996182563": "0P00012PP6.F",  # Amundi Index MSCI World AE-C
     "IE00BYX5M476": "0P0001CJGK.F",  # Fidelity MSCI Emerging Markets Index Fund EUR P Acc
@@ -864,6 +865,7 @@ async def _fetch_azvalor_history(isin: str, period: str = "max", db=None) -> lis
 
 
 COBAS_PRODUCT_SLUGS: dict[str, str] = {
+    "LU1372006947": "https://www.cobasam.com/productos/cobas-lux-sicav/lux_selection_eur/",
     "LU1598719752": "https://www.cobasam.com/productos/cobas-lux-sicav/lux_international_eur/",
     "LU1598720172": "https://www.cobasam.com/productos/cobas-lux-sicav/lux_selection_eur/",
     "LU1598720503": "https://www.cobasam.com/productos/cobas-lux-sicav/lux_large_cap_eur/",
@@ -1048,6 +1050,7 @@ FINECT_SLUGS: dict[str, str] = {
     "ES0112609005": "ES0112609005-Azvalor_iberia_fi",
     "ES0112612009": "ES0112612009-Azvalor_capital_fi",
     "ES0112613007": "ES0112613007-Azvalor_blue_chips_fi",
+    "LU1372006947": "LU1372006947-Cobas_lux_sicav_cobas_selection_fund_eur",
     "LU1598719752": "LU1598719752-Cobas_international_fund_p_eur_acc",
     "LU0302296495": "LU0302296495-Dnb_fund_technology_retail_a",
     "LU1623762843": "LU1623762843-Carmignac_portfolio_credit_a_eur_acc",
