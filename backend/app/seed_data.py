@@ -209,10 +209,26 @@ ASSETS = json.loads(r'''[
     "morningstar_id": "F00000PKY4",
     "category": "Renta Fija Corporativa EUR",
     "ter": 0.84
+  },
+  {
+    "isin": "LU1372006947",
+    "name": "Cobas Lux SICAV - Cobas Selection Fund P EUR Acc",
+    "ticker": "LU1372006947",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "morningstar_id": "0P0001AZ4D",
+    "category": "Renta Variable Global Value",
+    "ter": 1.85
   }
 ]''')
 
 PRICES = json.loads(r'''[
+  {
+    "isin": "LU1372006947",
+    "date": "2026-11-16",
+    "price": 38736.47,
+    "currency": "EUR"
+  },
   {
     "isin": "LU0840158819",
     "date": "2026-11-16",
@@ -4349,11 +4365,35 @@ TRANSACTIONS = json.loads(r'''[
     "isin": "LU0840158819",
     "type": "buy",
     "shares": 25.686,
-    "price": 141.547146,
-    "amount": 3635.78,
+    "price": 158.52,
+    "amount": 4071.76,
     "fees": 0.0,
     "date": "2026-11-16",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232191540323, orden 0232191540323, coste fiscal originario 3.635,78 € de valor 4.071,76 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "sell",
+    "shares": 48.55,
+    "price": 83.8676,
+    "amount": 4071.77,
+    "fees": 0.0,
+    "date": "2026-11-12",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Cobas Selection Fund, ref 0232191543110, orden 0232191543110)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "LU1372006947",
+    "type": "buy",
+    "shares": 0.10511,
+    "price": 38736.47,
+    "amount": 4071.77,
+    "fees": 0.0,
+    "date": "2026-11-16",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232191543110, orden 0232191543110, coste fiscal originario 3.635,78 € de valor 4.071,77 €)"
   }
 ]''')

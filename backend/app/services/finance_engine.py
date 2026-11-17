@@ -75,7 +75,15 @@ def calculate_traspaso_balances(transactions: list[dict], as_of_date_str: str | 
 
         if tx["type"] == "buy":
             pos["shares"] += tx["shares"]
-            pos["total_cost"] += tx["amount"]
+            cost_amount = tx["amount"]
+            if "coste fiscal originario" in notes:
+                m = re.search(r"coste fiscal originario\s*([\d\.,]+)", notes)
+                if m:
+                    try:
+                        cost_amount = float(m.group(1).replace(".", "").replace(",", "."))
+                    except Exception:
+                        pass
+            pos["total_cost"] += cost_amount
             if is_traspaso:
                 buy_m_val = tx["amount"]
                 val_m = re.search(r"de valor\s*([\d\.,]+)", notes)
@@ -168,23 +176,34 @@ def calculate_traspaso_balances(transactions: list[dict], as_of_date_str: str | 
 def calculate_positions(transactions: list[dict]) -> dict[str, dict]:
     """
     Calculate current positions from transaction history.
+    Preserves deferred fiscal cost basis (coste fiscal originario) for fund transfers.
     Returns: {isin: {shares, avg_cost, invested_amount, transactions}}
     """
     positions: dict[str, dict] = {}
 
-    for tx in sorted(transactions, key=lambda x: x["date"]):
+    for tx in sorted(transactions, key=lambda x: (x["date"], 0 if x.get("type") == "sell" else 1)):
         isin = tx["isin"]
         if isin not in positions:
             positions[isin] = {"shares": 0.0, "total_cost": 0.0, "transactions": []}
 
         pos = positions[isin]
+        notes = (tx.get("notes") or "").lower()
+
         if tx["type"] == "buy":
             pos["shares"] += tx["shares"]
-            pos["total_cost"] += tx["amount"]
+            cost_amount = tx["amount"]
+            if "coste fiscal originario" in notes:
+                m = re.search(r"coste fiscal originario\s*([\d\.,]+)", notes)
+                if m:
+                    try:
+                        cost_amount = float(m.group(1).replace(".", "").replace(",", "."))
+                    except Exception:
+                        pass
+            pos["total_cost"] += cost_amount
         elif tx["type"] == "sell":
             pos["shares"] -= tx["shares"]
             # Reduce cost proportionally
-            if pos["shares"] > 0:
+            if pos["shares"] > 0.0001:
                 pos["total_cost"] -= (tx["shares"] / (pos["shares"] + tx["shares"])) * pos["total_cost"]
             else:
                 pos["total_cost"] = 0.0
@@ -861,7 +880,16 @@ def calculate_enhanced_kpis(
 
         if tx_type == "buy":
             pos["shares"] += shares
-            pos["total_cost"] += amt
+            cost_amount = amt
+            notes_str = (tx.get("notes") or "").lower()
+            if "coste fiscal originario" in notes_str:
+                m = re.search(r"coste fiscal originario\s*([\d\.,]+)", notes_str)
+                if m:
+                    try:
+                        cost_amount = float(m.group(1).replace(".", "").replace(",", "."))
+                    except Exception:
+                        pass
+            pos["total_cost"] += cost_amount
             if not is_tr:
                 external_buys_count += 1
                 if ym:
