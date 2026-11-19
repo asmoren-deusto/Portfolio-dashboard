@@ -183,8 +183,26 @@ def _seed_asier_data():
                     if p_data["isin"] == "IE00B4ND3602":
                         entry.source = "live_yahoo" if p_data["date"] >= "2026-10-27" else "history_sync"
 
-            # 3. Seed transactions — only on fresh / empty database to prevent duplicate re-seeding
-            if db.query(Transaction).filter(Transaction.user_id == "asier").count() == 0:
+            # 3. Seed transactions — synchronize 'asier' transactions with TRANSACTIONS in seed_data.py
+            def _tx_tuple(isin, dt, ttype, shares, price, amount, notes):
+                return (
+                    str(isin or ""),
+                    str(dt or ""),
+                    str(ttype or ""),
+                    round(float(shares or 0), 4),
+                    round(float(price or 0), 4),
+                    round(float(amount or 0), 2),
+                    str(notes or ""),
+                )
+
+            db_txs = db.query(Transaction).filter(Transaction.user_id == "asier").all()
+            db_sigs = sorted(_tx_tuple(t.isin, t.date, t.type, t.shares, t.price, t.amount, t.notes) for t in db_txs)
+            seed_sigs = sorted(
+                _tx_tuple(t["isin"], t["date"], t["type"], t.get("shares"), t.get("price"), t.get("amount"), t.get("notes"))
+                for t in TRANSACTIONS
+            )
+            if db_sigs != seed_sigs:
+                db.query(Transaction).filter(Transaction.user_id == "asier").delete()
                 for t_data in TRANSACTIONS:
                     db.add(Transaction(**t_data))
 
