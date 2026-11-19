@@ -139,7 +139,21 @@ if __name__ == "__main__":
         wait_for_port(8000, timeout=12.0)
 
         # 2. Iniciar Vite frontend una vez que el backend ya acepta peticiones
-        if os.path.exists(os.path.join(frontend_dir, "package.json")):
+        pkg_json_path = os.path.join(frontend_dir, "package.json")
+        if os.path.exists(pkg_json_path):
+            try:
+                import json
+                with open(pkg_json_path, "r", encoding="utf-8") as f:
+                    pkg_data = json.load(f)
+                all_deps = list((pkg_data.get("dependencies") or {}).keys()) + list((pkg_data.get("devDependencies") or {}).keys())
+                node_modules_dir = os.path.join(frontend_dir, "node_modules")
+                missing_deps = [d for d in all_deps if not os.path.exists(os.path.join(node_modules_dir, *d.split("/")))]
+                if missing_deps:
+                    print(f"[INFO] Instalando dependencias nuevas de frontend ({', '.join(missing_deps)})...")
+                    subprocess.run([npm_cmd, "install"], cwd=frontend_dir, check=False)
+            except Exception as e:
+                print(f"[WARN] No se pudo verificar node_modules: {e}")
+
             frontend_proc = subprocess.Popen(
                 [npm_cmd, "run", "dev"],
                 cwd=frontend_dir,
