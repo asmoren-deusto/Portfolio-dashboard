@@ -20,6 +20,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'LU0997587597': 'fidelity.com',
   'LU1372006947': 'cobasam.com',
   'LU1598719752': 'cobasam.com',
+  'ES0146309002': 'horosam.com',
   'ES0112611001': 'azvalor.com',
   'LU0302296495': 'dnb.no',
   'IE000QAZP7L2': 'ishares.com',
@@ -431,6 +432,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     const nl = (name || '').toLowerCase()
     if (nl.includes('indexa')) targetDomain = 'indexacapital.com'
     else if (nl.includes('cobas')) targetDomain = 'cobasam.com'
+    else if (nl.includes('horos')) targetDomain = 'horosam.com'
     else if (nl.includes('azvalor')) targetDomain = 'azvalor.com'
     else if (nl.includes('fidelity')) targetDomain = 'fidelity.com'
     else if (nl.includes('blackrock') || nl.includes('bgf') || nl.includes('healthscience')) targetDomain = 'blackrock.com'

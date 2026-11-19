@@ -147,6 +147,7 @@ KNOWN_TICKERS: dict[str, str] = {
     "01920011": "0P0001FTQ7.F",
     "IE00BYX5NX33": "0P0001CLDK.F",  # Fidelity MSCI World Index Fund EUR P Acc
     "LU1372006947": "0P0001AZ4D.F",  # Cobas Lux SICAV - Cobas Selection Fund P EUR Acc
+    "ES0146309002": "0P0001DFE8.F",  # Horos Value Internacional FI
     "LU1598719752": "0P0001A94B.F",  # Cobas Lux SICAV - Cobas International Fund P EUR Acc
     "LU0996182563": "0P00012PP6.F",  # Amundi Index MSCI World AE-C
     "IE00BYX5M476": "0P0001CJGK.F",  # Fidelity MSCI Emerging Markets Index Fund EUR P Acc

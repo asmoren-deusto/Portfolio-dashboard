@@ -145,6 +145,13 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'ACC',
     shareClassLabel: 'Acumulación',
   },
+  'ES0146309002': {
+    cleanName: 'Horos Value Internacional',
+    officialName: 'Horos Value Internacional FI',
+    currency: 'EUR',
+    shareClass: 'ACC',
+    shareClassLabel: 'Renta Variable Global Value (Acumulación)',
+  },
   'LU1598719752': {
     cleanName: 'Cobas International Fund',
     officialName: 'Cobas Lux SICAV - Cobas International Fund P EUR Acc',
@@ -216,6 +223,9 @@ export function getAssetCleanName(isin?: string | null, rawName?: string | null)
   }
   if (nLower.includes('cobas') && (nLower.includes('selection') || nLower.includes('selección') || nLower.includes('seleccion'))) {
     return 'Cobas Selection Fund'
+  }
+  if (nLower.includes('horos')) {
+    return 'Horos Value Internacional'
   }
   if (nLower.includes('azvalor')) {
     return 'Azvalor Internacional FI'
@@ -314,6 +324,7 @@ export const NAV_UPDATE_SCHEDULE_BY_ISIN: Record<string, string> = {
   'IE00BYX5NX33': '21:00',
   'IE00BYX5M476': '22:30',
   'LU1372006947': '22:00',
+  'ES0146309002': '22:00',
   'LU1598719752': '22:00',
   'LU0996182563': '21:00',
   'LU1623762843': '20:30',

@@ -219,10 +219,26 @@ ASSETS = json.loads(r'''[
     "morningstar_id": "0P0001AZ4D",
     "category": "Renta Variable Global Value",
     "ter": 1.85
+  },
+  {
+    "isin": "ES0146309002",
+    "name": "Horos Value Internacional FI",
+    "ticker": "0P0001DFE8.F",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "morningstar_id": "0P0001DFE8",
+    "category": "Renta Variable Global Value",
+    "ter": 1.80
   }
 ]''')
 
 PRICES = json.loads(r'''[
+  {
+    "isin": "ES0146309002",
+    "date": "2026-11-18",
+    "price": 215.353067,
+    "currency": "EUR"
+  },
   {
     "isin": "LU1372006947",
     "date": "2026-11-16",
@@ -4395,5 +4411,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-16",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232191543110, orden 0232191543110, coste fiscal originario 3.635,78 € de valor 4.071,77 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "sell",
+    "shares": 48.55,
+    "price": 83.8346,
+    "amount": 4070.16,
+    "fees": 0.0,
+    "date": "2026-11-13",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Horos Value Internacional, ref 0232191543526, orden 0232191543526)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "ES0146309002",
+    "type": "buy",
+    "shares": 18.89993977,
+    "price": 215.353067,
+    "amount": 4070.16,
+    "fees": 0.0,
+    "date": "2026-11-18",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232191543526, orden 0232191543526, coste fiscal originario 3.635,78 € de valor 4.070,16 €)"
   }
 ]''')
