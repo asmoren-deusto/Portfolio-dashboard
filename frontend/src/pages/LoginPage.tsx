@@ -83,7 +83,20 @@ export const LoginPage: React.FC = () => {
   }, [selectedProfile, login, navigate])
 
   // Mode for setting/changing password on a profile
-  const [isSettingPassword, setIsSettingPassword] = useState(false)
+  const [isSettingPassword, setIsSettingPassword] = useState<boolean>(() =>
+    selectedProfile ? !selectedProfile.passwordHash : false
+  )
+
+  // Sync selectedProfile & isSettingPassword when backend user list resolves
+  useEffect(() => {
+    if (selectedProfile) {
+      const fresh = users.find((u) => u.id === selectedProfile.id)
+      if (fresh && Boolean(fresh.passwordHash) !== Boolean(selectedProfile.passwordHash)) {
+        setSelectedProfile(fresh)
+        setIsSettingPassword(!fresh.passwordHash)
+      }
+    }
+  }, [users, selectedProfile])
   const [profileCurrentPassword, setProfileCurrentPassword] = useState('')
   const [showProfileCurrentPassword, setShowProfileCurrentPassword] = useState(false)
   const [profileNewPassword, setProfileNewPassword] = useState('')

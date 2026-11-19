@@ -392,6 +392,24 @@ export const useAppStore = create<AppState>((set, get) => ({
         }> = await res.json()
 
         const state = get()
+        if (typeof window !== 'undefined') {
+          try {
+            const pwdRaw = localStorage.getItem('portfolio_user_passwords')
+            if (pwdRaw) {
+              const pwdMap = JSON.parse(pwdRaw)
+              let changed = false
+              backendUsers.forEach((bu) => {
+                if (!bu.has_password && pwdMap[bu.id]) {
+                  delete pwdMap[bu.id]
+                  changed = true
+                }
+              })
+              if (changed) {
+                localStorage.setItem('portfolio_user_passwords', JSON.stringify(pwdMap))
+              }
+            }
+          } catch {}
+        }
         const merged = state.users.map((existing) => {
           const match = backendUsers.find((bu) => bu.id === existing.id)
           if (match) {
