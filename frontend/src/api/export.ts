@@ -3,6 +3,7 @@
  * Utilidad cliente para descargar informes de cartera en formato Microsoft Excel nativo (.xlsx).
  */
 import { apiUrl, DEFAULT_PRODUCTION_URL } from './config'
+import { handleUnauthorized } from './client'
 
 export type ExportType = 'positions' | 'performance' | 'transactions' | 'full'
 
@@ -65,6 +66,11 @@ export async function downloadExcelReport(
 
   // Verificar si el servidor devolvió un error JSON o código HTTP >= 400
   let contentType = res.headers.get('content-type') || ''
+  if (res.status === 401) {
+    handleUnauthorized()
+    throw new Error('Sesión caducada. Redirigiendo a inicio de sesión...')
+  }
+
   if (!res.ok || contentType.includes('application/json')) {
     // Fallback a producción si en local la ruta dio 404 o error
     if (!fullUrl.startsWith(DEFAULT_PRODUCTION_URL)) {
@@ -80,6 +86,11 @@ export async function downloadExcelReport(
         // Ignorar y procesar error original
       }
     }
+  }
+
+  if (res.status === 401) {
+    handleUnauthorized()
+    throw new Error('Sesión caducada. Redirigiendo a inicio de sesión...')
   }
 
   if (!res.ok || contentType.includes('application/json')) {

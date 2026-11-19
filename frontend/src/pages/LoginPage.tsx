@@ -49,10 +49,27 @@ export const LoginPage: React.FC = () => {
     }
   }, [preselectedUserId, login, navigate])
 
+  const [sessionExpiredNotice, setSessionExpiredNotice] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const expired = sessionStorage.getItem('portfolio_session_expired') === 'true'
+      if (expired) {
+        sessionStorage.removeItem('portfolio_session_expired')
+        return true
+      }
+    }
+    return false
+  })
+
   const [activeTab, setActiveTab] = useState<'profiles' | 'form' | 'new'>('profiles')
   const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(() => {
     if (preselectedUserId && preselectedUserId !== 'demo') {
       return users.find((u) => u.id === preselectedUserId) || null
+    }
+    if (typeof window !== 'undefined') {
+      const lastUser = localStorage.getItem('portfolio_last_user_id')
+      if (lastUser && lastUser !== 'demo') {
+        return users.find((u) => u.id === lastUser) || null
+      }
     }
     return null
   })
@@ -329,6 +346,13 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div className="p-5 sm:p-7">
+            {sessionExpiredNotice && (
+              <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs font-medium flex items-center gap-2 animate-in fade-in duration-200">
+                <AlertCircle size={15} className="shrink-0 text-amber-500" />
+                <span>Tu sesión ha caducado por inactividad o seguridad. Introduce tu contraseña para reanudar el acceso.</span>
+              </div>
+            )}
+
             {error && (
               <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-medium flex items-center gap-2 animate-in fade-in duration-200">
                 <AlertCircle size={15} className="shrink-0" />

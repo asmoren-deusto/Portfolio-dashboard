@@ -31,6 +31,7 @@ import { fmt, cn, formatAssetDisplayName } from '@/lib/utils'
 import { getAssetCleanName, ASSET_METADATA_BY_ISIN } from '@/lib/assetMetadata'
 import { useTransactions, usePositions, type Position } from '@/api/queries'
 import { apiUrl } from '@/api/config'
+import { apiFetch } from '@/api/client'
 import { useAppStore } from '@/store/appStore'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { DcaFlowAnalyticsCard } from '@/components/transactions/DcaFlowAnalyticsCard'
@@ -178,7 +179,7 @@ export function TransactionsPage() {
   // Handle manual addition
   const handleAddTransaction = async (newTx: any) => {
     try {
-      const res = await fetch(apiUrl('/transactions'), {
+      const res = await apiFetch('/transactions', {
         method: 'POST',
         headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ ...newTx, user_id: userId }),
@@ -202,7 +203,7 @@ export function TransactionsPage() {
     if (!window.confirm('¿Deseas eliminar esta transacción de tu cartera?')) return
     setIsDeleting(txId)
     try {
-      const res = await fetch(apiUrl(`/transactions/${txId}`), {
+      const res = await apiFetch(`/transactions/${txId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
@@ -885,7 +886,7 @@ function ImportExtractoModal({
     setIsProcessing(true)
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
-      const res = await fetch(apiUrl('/transactions/import-text'), {
+      const res = await apiFetch('/transactions/import-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -916,7 +917,7 @@ function ImportExtractoModal({
       const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
       const formData = new FormData()
       formData.append('file', file)
-      const res = await fetch(apiUrl(`/transactions/import-csv?user_id=${userId}`), {
+      const res = await apiFetch(`/transactions/import-csv?user_id=${userId}`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: formData,

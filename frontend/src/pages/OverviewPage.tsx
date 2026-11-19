@@ -779,7 +779,7 @@ export function OverviewPage() {
               )
             }
             svgDecoration={<HeroSparklineSvg points={performance} positive={pnlPositive} />}
-            sub={displaySummary ? `Aportado: ${fmt.currency(displaySummary.total_invested)}` : undefined}
+            sub={displaySummary?.total_invested !== undefined ? `Aportado: ${fmt.currency(displaySummary.total_invested)}` : undefined}
             tag={
               displaySummary
                 ? `${displaySummary.num_positions ?? positions.length} pos. (act. ${updatedPositionsCount}/${displaySummary.num_positions ?? positions.length})`
@@ -799,7 +799,7 @@ export function OverviewPage() {
             value={
               analytics?.annualized_return !== undefined ? (
                 <AnimatedNumber value={analytics.annualized_return} format={fmt.pct} />
-              ) : displaySummary ? (
+              ) : displaySummary?.total_pnl_pct !== undefined ? (
                 <AnimatedNumber value={displaySummary.total_pnl_pct} format={fmt.pct} />
               ) : (
                 '—'
@@ -819,7 +819,7 @@ export function OverviewPage() {
             hoverGlow
             label="Plusvalía Acumulada"
             value={
-              displaySummary ? (
+              displaySummary?.total_pnl !== undefined ? (
                 <AnimatedNumber
                   value={displaySummary.total_pnl}
                   format={(n) => `${n >= 0 ? '+' : ''}${fmt.currency(n)}`}

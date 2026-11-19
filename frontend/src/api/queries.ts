@@ -14,6 +14,7 @@ import {
 export type { Position, PortfolioSummary, Analytics, Transaction, PricePoint }
 import { useAppStore, type Period } from '@/store/appStore'
 import { apiUrl } from './config'
+import { apiFetch, handleUnauthorized } from './client'
 
 // Demo data has no per-broker series: derive them from the broker's share of the positions.
 function brokerShare(positions: Position[], broker: string): number {
@@ -59,32 +60,27 @@ const keepSameUser =
     prevQuery?.queryKey[1] === userId ? prev : undefined
 
 async function get<T>(path: string): Promise<T> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
-  const headers: Record<string, string> = { 'Cache-Control': 'no-cache, no-store' }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
+  const res = await apiFetch(path)
+  if (!res.ok) {
+    if (res.status === 401) {
+      handleUnauthorized()
+    }
+    throw new Error(`HTTP ${res.status}`)
   }
-  const url = apiUrl(path)
-  const res = await fetch(url, {
-    headers,
-    cache: 'no-store',
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
 }
 
 export async function refreshPortfolioPrices(userId = 'asier') {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-  const url = apiUrl(`/portfolio/refresh-prices?user_id=${userId}`)
-  const res = await fetch(url, {
+  const res = await apiFetch(`/portfolio/refresh-prices?user_id=${userId}`, {
     method: 'POST',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
   })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  if (!res.ok) {
+    if (res.status === 401) {
+      handleUnauthorized()
+    }
+    throw new Error(`HTTP ${res.status}`)
+  }
   return res.json()
 }
 

@@ -21,6 +21,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { fetchLatestNavAlert, prefetchAllBrokers } from '@/api/queries'
 import { filterUnseenNavUpdates, markNavUpdatesAsSeen } from '@/lib/navAlertTracker'
 import { isNativePlatform } from '@/api/config'
+import { apiFetch, handleUnauthorized } from '@/api/client'
 
 export function RootLayout() {
   const location = useLocation()
@@ -73,6 +74,23 @@ export function RootLayout() {
     }, 1500)
     return () => clearTimeout(timer)
   }, [currentUser?.id, queryClient])
+
+  // Proactively verify session authentication validity on mount/resume
+  useEffect(() => {
+    if (!currentUser || currentUser.isDemo) return
+    const token = typeof window !== 'undefined' ? localStorage.getItem('portfolio_auth_token') : null
+    if (!token) {
+      handleUnauthorized()
+      return
+    }
+    apiFetch('/auth/me')
+      .then((res) => {
+        if (res.status === 401 || res.status === 403) {
+          handleUnauthorized()
+        }
+      })
+      .catch(() => {})
+  }, [currentUser?.id])
 
   useEffect(() => {
     const isDark = theme === 'dark'

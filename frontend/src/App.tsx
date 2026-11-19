@@ -1,9 +1,10 @@
 import { Suspense } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@tanstack/react-query'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { RootLayout } from '@/components/layout/RootLayout'
 import { OverviewPage } from '@/pages/OverviewPage'
 import { lazyWithRetry } from '@/utils/lazyWithRetry'
+import { handleUnauthorized } from '@/api/client'
 
 const MarketPage = lazyWithRetry(() => import('@/pages/MarketPage'), 'MarketPage')
 const PositionsPage = lazyWithRetry(() => import('@/pages/PositionsPage'), 'PositionsPage')
@@ -41,9 +42,29 @@ function LoginLoadingFallback() {
 }
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      if (error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+        handleUnauthorized()
+      }
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error) => {
+      if (error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+        handleUnauthorized()
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: (failureCount, error) => {
+        // Never retry 401 Unauthorized
+        if (error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+          return false
+        }
+        return failureCount < 1
+      },
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       refetchOnMount: true, // Auto-refresh views if data is older than staleTime

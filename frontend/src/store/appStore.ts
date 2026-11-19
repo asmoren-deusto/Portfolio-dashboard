@@ -517,6 +517,9 @@ export const useAppStore = create<AppState>((set, get) => ({
           if (data.token && typeof window !== 'undefined') {
             localStorage.setItem('portfolio_auth_token', data.token)
             localStorage.setItem('portfolio_active_user_id', data.user.id)
+            if (data.user.id !== 'demo') {
+              localStorage.setItem('portfolio_last_user_id', data.user.id)
+            }
           }
           const state = get()
           const target = state.users.find((u) => u.id === data.user.id) || getUserProfileById(data.user.id)
@@ -564,6 +567,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   logout: () => {
     if (typeof window !== 'undefined') {
+      const activeId = localStorage.getItem('portfolio_active_user_id')
+      if (activeId && activeId !== 'demo') {
+        localStorage.setItem('portfolio_last_user_id', activeId)
+      }
       localStorage.removeItem('portfolio_active_user_id')
       localStorage.removeItem('portfolio_auth_token')
     }
