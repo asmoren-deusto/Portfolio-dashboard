@@ -2068,6 +2068,18 @@ PRICES = json.loads(r'''[
     "date": "2026-11-12",
     "price": 23.84379,
     "currency": "EUR"
+  },
+  {
+    "isin": "ES0112611001",
+    "date": "2026-11-17",
+    "price": 344.159664,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE0032126645",
+    "date": "2026-11-19",
+    "price": 79.9032,
+    "currency": "EUR"
   }
 ]''')
 
@@ -4435,5 +4447,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-18",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232191543526, orden 0232191543526, coste fiscal originario 3.635,78 € de valor 4.070,16 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "ES0112611001",
+    "type": "sell",
+    "shares": 19.542877,
+    "price": 344.159664,
+    "amount": 6725.87,
+    "fees": 0.0,
+    "date": "2026-11-17",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Vanguard US 500 Stock, ref 0232191543061, orden 0232191543061, valor salida 6.524,09 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "buy",
+    "shares": 81.64,
+    "price": 79.9032,
+    "amount": 6524.09,
+    "fees": 0.0,
+    "date": "2026-11-19",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde Azvalor Internacional, ref 0232191543061, orden 0232191543061, coste fiscal originario 6.401,14 € de valor 6.524,09 €)"
   }
 ]''')
