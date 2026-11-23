@@ -10,7 +10,7 @@ try:
         warnings.filterwarnings("ignore", category=pd.errors.Pandas4Warning)
 except Exception:
     pass
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles

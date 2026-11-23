@@ -66,12 +66,14 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
   const currentPct = hoveredPoint ? hoveredPoint.change_pct : changePct
   const currentPts = hoveredPoint ? hoveredPoint.change_pts : change
 
-  const isPositive = currentPct >= 0
+  const isOverallPositive = changePct >= 0
+  const isPositive = hoveredPoint ? hoveredPoint.change_pct >= 0 : isOverallPositive
 
   // Chart refs
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const seriesRef = useRef<ISeriesApi<'Area'> | null>(null)
+  const priceLineRef = useRef<any>(null)
   const chartPointsRef = useRef<Sp500ChartPoint[]>(chartPoints)
   chartPointsRef.current = chartPoints
   const sessionMarkersRef = useRef<SessionMarker[]>(sessionMarkers)
@@ -110,7 +112,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         }
       }
 
-      if (minDiff > 900) {
+      if (minDiff > 1800) {
         continue
       }
 
@@ -186,10 +188,10 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         handleScale: false,
       })
 
-      const seriesColor = isPositive ? '#10b981' : '#f43f5e'
+      const seriesColor = isOverallPositive ? '#10b981' : '#f43f5e'
       const areaSeries = chart.addSeries(AreaSeries, {
         lineColor: seriesColor,
-        topColor: isPositive
+        topColor: isOverallPositive
           ? (isDark ? 'rgba(16, 185, 129, 0.32)' : 'rgba(16, 185, 129, 0.22)')
           : (isDark ? 'rgba(244, 63, 94, 0.32)' : 'rgba(244, 63, 94, 0.22)'),
         bottomColor: 'rgba(0, 0, 0, 0.0)',
@@ -209,21 +211,9 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         crosshairMarkerBorderWidth: 2,
       })
 
-      // Add baseline: at prevClose if in points mode, at 0.00% if in pct mode
-      const baselineVal = viewMode === 'pts' ? prevClose : 0
-      if (baselineVal !== 0 || viewMode === 'pct') {
-        areaSeries.createPriceLine({
-          price: baselineVal,
-          color: isDark ? 'rgba(255, 255, 255, 0.40)' : 'rgba(71, 85, 105, 0.45)',
-          lineWidth: 1,
-          lineStyle: LineStyle.Dotted,
-          axisLabelVisible: true,
-          title: viewMode === 'pts' ? `Ref. ${baselineVal.toFixed(1)}` : 'Ref. 0.00%',
-        })
-      }
-
       chartRef.current = chart
       seriesRef.current = areaSeries
+      priceLineRef.current = null
 
       // Interactive crosshair move tracking
       chart.subscribeCrosshairMove((param) => {
@@ -276,14 +266,51 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
       }
       chartRef.current = null
       seriesRef.current = null
+      priceLineRef.current = null
     }
-  }, [isDark, isPositive, viewMode, prevClose])
+  }, [isDark])
 
-  // Update series data
+  // Update series data, styles, price line and markers whenever data or viewMode changes
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current || !chartPoints || !chartPoints.length) return
 
     try {
+      const seriesColor = isOverallPositive ? '#10b981' : '#f43f5e'
+      seriesRef.current.applyOptions({
+        lineColor: seriesColor,
+        topColor: isOverallPositive
+          ? (isDark ? 'rgba(16, 185, 129, 0.32)' : 'rgba(16, 185, 129, 0.22)')
+          : (isDark ? 'rgba(244, 63, 94, 0.32)' : 'rgba(244, 63, 94, 0.22)'),
+        bottomColor: 'rgba(0, 0, 0, 0.0)',
+        priceFormat: {
+          type: 'custom',
+          formatter: (p: number) =>
+            viewMode === 'pts'
+              ? p.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+              : `${p >= 0 ? '+' : ''}${p.toFixed(2)}%`,
+        },
+      })
+
+      // Update baseline price line
+      if (priceLineRef.current) {
+        try {
+          seriesRef.current.removePriceLine(priceLineRef.current)
+        } catch {}
+        priceLineRef.current = null
+      }
+
+      const baselineVal = viewMode === 'pts' ? prevClose : 0
+      if (baselineVal > 0 || viewMode === 'pct') {
+        priceLineRef.current = seriesRef.current.createPriceLine({
+          price: baselineVal,
+          color: isDark ? 'rgba(255, 255, 255, 0.40)' : 'rgba(71, 85, 105, 0.45)',
+          lineWidth: 1,
+          lineStyle: LineStyle.Dotted,
+          axisLabelVisible: true,
+          title: viewMode === 'pts' ? `Ref. ${baselineVal.toFixed(1)}` : 'Ref. 0.00%',
+        })
+      }
+
       const map = new Map<number, number>()
       for (const p of chartPoints) {
         const val = viewMode === 'pts' ? p.price : p.change_pct
@@ -306,10 +333,12 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         const sweepKey = `${period}_${viewMode}_${formatted.length}_${formatted[0]?.value}_${formatted[formatted.length - 1]?.value}`
         if (sweepKey !== lastSweepKeyRef.current) {
           lastSweepKeyRef.current = sweepKey
-          prepareChartForAnimation(chartContainerRef.current)
-          requestAnimationFrame(() => {
-            triggerChartAnimation(chartContainerRef.current, 750)
-          })
+          if (chartContainerRef.current?.querySelector('canvas')) {
+            prepareChartForAnimation(chartContainerRef.current)
+            requestAnimationFrame(() => {
+              triggerChartAnimation(chartContainerRef.current, 750)
+            })
+          }
         }
 
         requestAnimationFrame(() => {
@@ -319,7 +348,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
     } catch (err) {
       console.warn('Error setting S&P 500 chart data:', err)
     }
-  }, [chartPoints, sessionMarkers, viewMode, period])
+  }, [chartPoints, sessionMarkers, viewMode, period, isDark, prevClose, isOverallPositive])
 
   return (
     <div
@@ -587,7 +616,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
 
         <div
           ref={chartContainerRef}
-          className="w-full h-full rounded-xl overflow-hidden"
+          className="w-full h-full min-h-[275px] sm:min-h-[295px] rounded-xl overflow-hidden"
           onMouseLeave={() => setHoveredPoint(null)}
         />
 
