@@ -109,9 +109,14 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     category: 'Renta Variable Europea',
   },
   EFV: {
-    name: 'EAFE Internacional Value',
+    name: 'EAFE Internacional Value (Cobas)',
     shortName: 'EAFE Value',
-    category: 'RV Internacional Value',
+    category: 'RV Internacional Deep Value',
+  },
+  AVDV: {
+    name: 'Int. Small Cap Value (Horos)',
+    shortName: 'Small Cap Value',
+    category: 'RV Internacional Small/Mid Value',
   },
   IXJ: {
     name: 'iShares Global Healthcare (Salud)',
@@ -132,6 +137,11 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     name: 'iShares High Yield Corporate Bond',
     shortName: 'Crédito Corporativo',
     category: 'Renta Fija Privada / High Yield',
+  },
+  SHYG: {
+    name: 'High Yield Corp 0-5Y (Storm)',
+    shortName: 'High Yield 0-5Y',
+    category: 'Renta Fija Corporativa High Yield Corta Duración',
   },
   LQD: {
     name: 'iShares Investment Grade Corporate Bond',

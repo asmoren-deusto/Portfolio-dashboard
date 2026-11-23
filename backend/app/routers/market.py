@@ -155,6 +155,8 @@ STOCK_UNIVERSE = [
     {"ticker": "EWJ",    "name": "iShares MSCI Japan ETF",            "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 14000000000},
     {"ticker": "FEZ",    "name": "SPDR EURO STOXX 50 ETF",            "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs", "EUROSTOXX", "Euro 50"], "default_market_cap": 4000000000},
     {"ticker": "EFV",    "name": "iShares MSCI EAFE Value ETF",       "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 17000000000},
+    {"ticker": "AVDV",   "name": "Avantis Int. Small Cap Value ETF",  "domain": "avantisinvestors.com", "sector": "ETF Cartera", "index": ["ETFs"],        "default_market_cap": 7500000000},
+    {"ticker": "SHYG",   "name": "iShares 0-5Y High Yield Corp Bond", "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 6500000000},
     {"ticker": "IXJ",    "name": "iShares Global Healthcare ETF",     "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 4000000000},
     {"ticker": "BWX",    "name": "SPDR International Treasury Bond",  "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 1200000000},
     {"ticker": "IAU",    "name": "iShares Gold Trust",                "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "Materias Primas"], "default_market_cap": 32000000000},
@@ -209,6 +211,7 @@ ETF_PREMARKET_LIVE_PROXIES = {
     "SPY":  "ES=F",       # Futuros S&P 500 24h CME Globex (réplica exacta para S&P 500)
     "FEZ":  "^STOXX50E",  # Euro Stoxx 50 cash index (sesión europea 09:00 - 17:30 CET)
     "EFV":  "^STOXX50E",  # RV Internacional EAFE Value (sesión europea)
+    "AVDV": "^STOXX50E",  # RV Internacional Small/Mid Cap Value (sesión europea)
     "EWJ":  "NIY=F",      # Futuros Nikkei 225 24h CME Globex (guía RV Japón fuera de horas de Tokio)
     "URTH": "ES=F",       # Futuros S&P 500 24h CME Globex (guía RV global antes de apertura NY)
     "ACWI": "ES=F",       # Futuros S&P 500 24h
@@ -218,6 +221,7 @@ ETF_PREMARKET_LIVE_PROXIES = {
     "ICLN": "NQ=F",       # Futuros Nasdaq 100 24h (guía Smart Energy)
     "BWX":  "ZN=F",       # Futuros 10-Yr T-Note 24h CME Globex (guía Deuda Soberana / Renta Fija)
     "HYG":  "ZN=F",       # Futuros 10-Yr T-Note 24h (guía Crédito / Renta Fija Privada)
+    "SHYG": "ZN=F",       # Futuros 10-Yr T-Note 24h (guía Crédito High Yield Corta Duración)
     "IAU":  "GC=F",       # Futuros Oro 24h CME Comex (guía Oro físico fuera de horas)
 }
 
@@ -1160,9 +1164,13 @@ PORTFOLIO_ETF_PROXIES = {
     "IE00BM95B621": {"ticker": "XLK",  "name": "Technology Select SPDR", "desc": "Tecnología Global (Polar)"},
     # Clean Energy / Smart Energy:
     "LU2145461757": {"ticker": "ICLN", "name": "iShares Global Clean Energy", "desc": "Energía Limpia / Smart Energy"},
-    # Value Internacional:
+    # Value Internacional (Azvalor, Cobas, Horos):
     "ES0112611001": {"ticker": "COWZ", "name": "Pacer US Cash Cows 100", "desc": "Value Internacional & Cash Flow"},
-    "LU1598719752": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE"},
+    "LU1598719752": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE (Cobas)"},
+    "LU1372006947": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE (Cobas Selection)"},
+    "ES0124037005": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE (Cobas Selección)"},
+    "ES0124037039": {"ticker": "EFV",  "name": "iShares MSCI EAFE Value ETF", "desc": "Value Internacional EAFE (Cobas Selección)"},
+    "ES0146309002": {"ticker": "AVDV", "name": "Avantis Int. Small Cap Value ETF", "desc": "Value Internacional Small/Mid Cap (Horos)"},
     # Mercados Emergentes:
     "IE000QAZP7L2": {"ticker": "EEM",  "name": "iShares MSCI Emerging Markets", "desc": "Mercados Emergentes"},
     "IE00BYX5M476": {"ticker": "EEM",  "name": "iShares MSCI Emerging Markets", "desc": "Mercados Emergentes"},
@@ -1175,6 +1183,9 @@ PORTFOLIO_ETF_PROXIES = {
     # Renta Fija / Bonos / Crédito:
     "ES0000012411": {"ticker": "FIJO", "name": "Precio Fijo (Sin réplica)", "desc": "Fijo a Precio de Compra", "is_fixed": True},
     "LU1623762843": {"ticker": "HYG",  "name": "iShares iBoxx $ High Yield Corporate Bond", "desc": "Crédito y Renta Fija Privada"},
+    "LU0840158819": {"ticker": "SHYG", "name": "iShares 0-5 Year High Yield Corp Bond", "desc": "Renta Fija Corporativa High Yield Corta Duración (Storm)"},
+    "LU0840158496": {"ticker": "SHYG", "name": "iShares 0-5 Year High Yield Corp Bond", "desc": "Renta Fija Corporativa High Yield Corta Duración (Storm)"},
+    "LU1915698069": {"ticker": "SHYG", "name": "iShares 0-5 Year High Yield Corp Bond", "desc": "Renta Fija Corporativa High Yield Corta Duración (Storm)"},
     # Oro Físico:
     "IE00B4ND3602": {"ticker": "IAU",  "name": "iShares Gold Trust", "desc": "Oro Físico (ETC / Metales Preciosos)"},
     # Renta Variable Directa EE.UU. / Semiconductores:
@@ -1388,12 +1399,14 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
         "ACWI": 0.65,  # MSCI ACWI ~65% US equities
         "EEM": 0.75,   # Emerging Markets ~75% USD linked
         "FEZ": 0.00,   # Euro Stoxx 50 0% USD (100% EUR)
-        "EFV": 0.15,   # EAFE Value ~15% USD
+        "EFV": 0.25,   # EAFE Value (Cobas Selection ~25% USD)
+        "AVDV": 0.20,  # Int. Small Cap Value (Horos Value Internacional ~20% USD)
         "EWJ": 0.05,   # Japan ~5% USD
         "IXJ": 0.70,   # Global Healthcare ~70% USD
         "FIJO": 0.00,  # Bonos España Fijo a precio de compra 0% USD (100% EUR)
         "BWX": 0.00,   # Bonos Soberanos España 0% USD (100% EUR)
         "HYG": 1.00,   # US High Yield 100% USD
+        "SHYG": 0.00,  # Storm Bond Fund RC EUR 0% USD (clase 100% cubierta a EUR)
         "ICLN": 0.60,  # Global Clean Energy ~60% USD
         "IAU": 1.00,   # Oro Físico cotizado globalmente en USD (XAU/USD)
         "NVDA": 1.00,  # NVIDIA 100% USD

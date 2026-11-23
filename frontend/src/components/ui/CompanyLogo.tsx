@@ -172,12 +172,17 @@ function getMarketIcon(ticker?: string): React.ReactNode {
       return <Landmark className="w-full h-full p-0.5 text-indigo-600 dark:text-indigo-400" />
     case 'COWZ':
     case 'EFV':
+    case 'AVDV':
+    case 'DFIV':
+    case 'GCOW':
       return <TrendingUp className="w-full h-full p-0.5 text-emerald-600 dark:text-emerald-400" />
     case 'IXJ':
       return <Activity className="w-full h-full p-0.5 text-rose-500 dark:text-rose-400" />
     case 'BWX':
     case 'ZN=F':
     case 'HYG':
+    case 'SHYG':
+    case 'SJNK':
     case 'LQD':
       return <Landmark className="w-full h-full p-0.5 text-amber-600 dark:text-amber-400" />
     case 'ICLN':
