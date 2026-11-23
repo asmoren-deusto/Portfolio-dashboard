@@ -449,7 +449,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
       </div>
 
       {/* KPI Summary Header: Harmonized compact typography */}
-      <div className="flex items-center justify-between gap-2 mb-1 pb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
+      <div className="flex items-center justify-between gap-2 pt-1.5 sm:pt-2 pb-2.5 sm:pb-3 mb-1.5 border-b border-slate-200/60 dark:border-white/[0.06]">
         {hoveredPoint ? (
           /* Hover inspection state */
           <div className="flex flex-col justify-center min-w-0">
