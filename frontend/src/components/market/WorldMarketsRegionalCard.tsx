@@ -220,7 +220,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
           </div>
 
           {/* Scrollable container of cards with organized regional sections */}
-          <div className="space-y-2.5 sm:space-y-3 flex-1 min-h-0 max-h-[490px] lg:max-h-[505px] overflow-y-auto pr-1 scrollbar-thin">
+          <div className="space-y-2 sm:space-y-2.5 flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin">
             {regionsToDisplay.map((region) => {
               const regionStocks = region.tickers
                 .map((t) => indexMap.get(t))
