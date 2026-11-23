@@ -711,9 +711,9 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
           </div>
 
           {/* Leyenda inferior y porcentaje dentro del rango */}
-          <div className="flex items-center justify-between mt-1 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+          <div className="flex items-center justify-between mt-1.5 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
             <span className="text-rose-600/90 dark:text-rose-400 font-semibold">0% (Mínimo)</span>
-            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+            <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-[11.5px] sm:text-[12.5px]">
               Posición actual: {currentRangePct.toFixed(0)}%
             </span>
             <span className="text-emerald-600/90 dark:text-emerald-400 font-semibold">100% (Máximo)</span>
