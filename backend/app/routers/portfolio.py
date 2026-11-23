@@ -325,9 +325,22 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
             except Exception:
                 pass
 
+        from app.services.price_service import _price_cache as _svc_pc
+        live_info = _price_cache.get(isin, {}) or _svc_pc.get(isin, {})
+        live_chg_pct = live_info.get("daily_change_pct")
+        live_prev = live_info.get("prev_close")
+
+        if live_prev and live_prev > 0 and (p_prev is None or isin == "US67066G1040"):
+            p_prev = live_prev
+
         if p_prev and p_prev > 0 and effective_price and effective_price > 0:
             daily_change = round(effective_price - p_prev, 4)
             daily_change_pct = round((effective_price - p_prev) / p_prev * 100, 2)
+
+        if live_chg_pct is not None and (daily_change_pct is None or isin == "US67066G1040"):
+            daily_change_pct = round(float(live_chg_pct), 2)
+            if live_info.get("daily_change") is not None:
+                daily_change = round(float(live_info["daily_change"]), 4)
 
         weekly_change = None
         weekly_change_pct = None

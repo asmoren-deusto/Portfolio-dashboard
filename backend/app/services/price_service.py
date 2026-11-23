@@ -203,9 +203,10 @@ def _map_morningstar_to_indexa_date(ms_date_str: str) -> str:
         return ms_date_str
 
 
-async def _fetch_boerse_frankfurt_price(isin: str) -> tuple[Optional[float], Optional[str], Optional[str]]:
+async def _fetch_boerse_frankfurt_price(isin: str) -> tuple[Optional[float], Optional[str], Optional[str], Optional[float], Optional[float], Optional[float]]:
     """
-    Fetch real-time trade price, date, and local quote time from Börse Frankfurt JSON API.
+    Fetch real-time trade price, date, local quote time, daily change %, daily change abs,
+    and previous close from Börse Frankfurt JSON API.
     Börse Frankfurt is the primary European exchange for German Xetra listings (including Gold ETC IE00B4ND3602).
     """
     url = f"https://api.boerse-frankfurt.de/v1/data/quote_box/single?isin={isin}"
@@ -235,10 +236,26 @@ async def _fetch_boerse_frankfurt_price(isin: str) -> tuple[Optional[float], Opt
                         quote_time = datetime.now().strftime("%H:%M")
                 else:
                     quote_time = datetime.now().strftime("%H:%M")
-                return price, price_date, quote_time
+
+                chg_pct = None
+                chg_abs = None
+                prev_close = None
+                if data.get("changeToPrevDayInPercent") is not None:
+                    try:
+                        chg_pct = round(float(data["changeToPrevDayInPercent"]), 2)
+                    except Exception:
+                        pass
+                if data.get("changeToPrevDayAbsolute") is not None:
+                    try:
+                        chg_abs = round(float(data["changeToPrevDayAbsolute"]), 4)
+                        prev_close = round(price - chg_abs, 4)
+                    except Exception:
+                        pass
+
+                return price, price_date, quote_time, chg_pct, chg_abs, prev_close
     except Exception as e:
         logger.debug(f"Börse Frankfurt quote failed for {isin}: {e}")
-    return None, None, None
+    return None, None, None, None, None, None
 
 
 
@@ -423,9 +440,10 @@ async def _scrape_price_with_date_impl(
     )
     if is_live_traded:
         live_p, live_d, live_time = None, None, None
+        live_chg_pct, live_chg_abs, live_prev_close = None, None, None
         # Try primary exchange: Börse Frankfurt for European ETCs/ETFs (IE00B4ND3602, etc.)
         if isin == "IE00B4ND3602" or (ticker and ticker.endswith(".DE")):
-            live_p, live_d, live_time = await _fetch_boerse_frankfurt_price(isin)
+            live_p, live_d, live_time, live_chg_pct, live_chg_abs, live_prev_close = await _fetch_boerse_frankfurt_price(isin)
 
         # Fallback to Yahoo Finance live quote if Börse Frankfurt didn't return
         if live_p is None and ticker:
@@ -451,9 +469,16 @@ async def _scrape_price_with_date_impl(
                 "price": price,
                 "date": price_date,
                 "quote_time": live_time or datetime.now().strftime("%H:%M"),
+                "daily_change_pct": live_chg_pct,
+                "daily_change": live_chg_abs,
+                "prev_close": live_prev_close,
                 "ts": datetime.now(),
             }
             _save_cached_price(isin, price_date, price, source="live_exchange")
+            if live_prev_close and live_prev_close > 0:
+                prev_b_date = get_previous_business_date()
+                if prev_b_date and prev_b_date < price_date:
+                    _save_cached_price(isin, prev_b_date, live_prev_close, source="exchange_prev_close")
             _sync_latest_price_into_history_cache(isin, price, price_date)
             return price, price_date
 

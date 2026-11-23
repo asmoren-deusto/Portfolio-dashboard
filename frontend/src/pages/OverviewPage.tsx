@@ -1937,9 +1937,12 @@ export function OverviewPage() {
                                 ) : (
                                   <span className="font-mono text-xs text-slate-400">—</span>
                                 )}
-                                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap">
+                                <span
+                                  title="Variación acumulada de los últimos 7 días (1 semana)"
+                                  className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap"
+                                >
                                   {typeof p.weekly_change_pct === 'number'
-                                    ? fmt.pct(p.weekly_change_pct)
+                                    ? `${fmt.pct(p.weekly_change_pct)} (1s)`
                                     : '—'}
                                 </span>
                               </div>
@@ -2131,9 +2134,12 @@ export function OverviewPage() {
                                   ) : (
                                     <span className="font-mono text-xs text-slate-400">—</span>
                                   )}
-                                  <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap">
+                                  <span
+                                    title="Variación acumulada de los últimos 7 días (1 semana)"
+                                    className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-400/75 mt-0.5 whitespace-nowrap"
+                                  >
                                     {typeof p.weekly_change_pct === 'number'
-                                      ? fmt.pct(p.weekly_change_pct)
+                                      ? `${fmt.pct(p.weekly_change_pct)} (1s)`
                                       : '—'}
                                   </span>
                                 </div>
