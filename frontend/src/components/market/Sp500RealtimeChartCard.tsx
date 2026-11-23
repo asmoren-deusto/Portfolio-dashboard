@@ -364,30 +364,25 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
       )}
     >
       {/* Top Header of the Chart: Title, Live Pill & Period Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 h-auto sm:h-10 pb-2 border-b border-slate-200/60 dark:border-white/[0.06] shrink-0">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
-            <Activity className="w-4 h-4 animate-pulse" />
+          <div className="p-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+            <Activity className="w-3.5 h-3.5 animate-pulse" />
           </div>
-          <div>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                <img
-                  src="https://flagcdn.com/w40/us.png"
-                  alt="EE. UU."
-                  className="w-4 h-3 rounded-2xs object-cover shadow-2xs border border-black/10 dark:border-white/10"
-                />
-                <span>S&P 500 • Tiempo Real</span>
-              </h3>
-              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold tracking-wide uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
-                <span className="live-dot emerald" />
-                EN DIRECTO
-              </span>
-              {isFetching && <LoadingDot />}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
-              <span>NYSE & CME Futures • Puente continuo</span>
-            </p>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <img
+                src="https://flagcdn.com/w40/us.png"
+                alt="EE. UU."
+                className="w-3.5 h-2.5 rounded-2xs object-cover shadow-2xs border border-black/10 dark:border-white/10"
+              />
+              <span>S&P 500 • Tiempo Real</span>
+            </h3>
+            <span className="inline-flex items-center gap-1 text-[9.5px] font-bold tracking-wide uppercase px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
+              <span className="live-dot emerald" />
+              EN DIRECTO
+            </span>
+            {isFetching && <LoadingDot />}
           </div>
         </div>
 

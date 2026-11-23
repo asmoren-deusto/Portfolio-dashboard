@@ -201,7 +201,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
         {/* Right Column (lg:col-span-7): Organized Regional Global Market Cards */}
         <div className="lg:col-span-7 flex flex-col rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 gap-2.5">
           {/* Subheader bar inside the right column */}
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/[0.06] shrink-0">
+          <div className="flex items-center justify-between gap-2 h-auto sm:h-10 pb-2 border-b border-slate-200/60 dark:border-white/[0.06] shrink-0">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                 {selectedRegion === 'ALL'
