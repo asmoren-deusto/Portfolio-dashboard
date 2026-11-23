@@ -57,6 +57,117 @@ export function AnalyticsPage() {
 
   const isSharpeGood = (analytics?.sharpe_ratio ?? 0) >= 1.0
 
+  // Compare current (or last completed) drawdown between portfolio (TWR) and S&P 500
+  const latestDrawdownComparison = useMemo(() => {
+    const pts = benchmarkData?.points
+    if (!pts || pts.length < 2) return null
+
+    let portPeak = -Infinity
+    let portPeakDate = pts[0].date
+    let spPeak = -Infinity
+    let spPeakDate = pts[0].date
+
+    const series = pts.map((pt) => {
+      const portWealth = 1 + (pt.portfolio_twr ?? 0) / 100
+      const spWealth = 1 + (pt.sp500 ?? 0) / 100
+
+      if (portWealth >= portPeak) {
+        portPeak = portWealth
+        portPeakDate = pt.date
+      }
+      if (spWealth >= spPeak) {
+        spPeak = spWealth
+        spPeakDate = pt.date
+      }
+
+      const portDd = portPeak > 0 ? ((portWealth - portPeak) / portPeak) * 100 : 0
+      const spDd = spPeak > 0 ? ((spWealth - spPeak) / spPeak) * 100 : 0
+
+      return {
+        date: pt.date,
+        portDd,
+        spDd,
+        portPeakDate,
+        spPeakDate,
+      }
+    })
+
+    const last = series[series.length - 1]
+    const isCurrentDrawdown = last.portDd < -0.05 || last.spDd < -0.05
+
+    if (isCurrentDrawdown) {
+      const portDd = Number(last.portDd.toFixed(2))
+      const spDd = Number(last.spDd.toFixed(2))
+      const diff = Number((portDd - spDd).toFixed(2))
+      return {
+        isCurrent: true,
+        portDd,
+        spDd,
+        diff,
+        portPeakDate: last.portPeakDate,
+        spPeakDate: last.spPeakDate,
+        asOfDate: last.date,
+      }
+    }
+
+    // Both currently at period highs: fall back to the most recent completed drawdown episode
+    let episodeEndIdx = -1
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i].portDd < -0.25 || series[i].spDd < -0.25) {
+        episodeEndIdx = i
+        break
+      }
+    }
+
+    if (episodeEndIdx === -1) {
+      return {
+        isCurrent: true,
+        portDd: 0,
+        spDd: 0,
+        diff: 0,
+        portPeakDate: last.portPeakDate,
+        spPeakDate: last.spPeakDate,
+        asOfDate: last.date,
+      }
+    }
+
+    let episodeStartIdx = episodeEndIdx
+    while (
+      episodeStartIdx > 0 &&
+      (series[episodeStartIdx].portDd < -0.05 || series[episodeStartIdx].spDd < -0.05)
+    ) {
+      episodeStartIdx--
+    }
+
+    let minPortDd = 0
+    let minSpDd = 0
+    let minPortPeakDate = series[episodeEndIdx].portPeakDate
+    let minSpPeakDate = series[episodeEndIdx].spPeakDate
+    for (let i = episodeStartIdx; i <= episodeEndIdx; i++) {
+      if (series[i].portDd < minPortDd) {
+        minPortDd = series[i].portDd
+        minPortPeakDate = series[i].portPeakDate
+      }
+      if (series[i].spDd < minSpDd) {
+        minSpDd = series[i].spDd
+        minSpPeakDate = series[i].spPeakDate
+      }
+    }
+
+    const portDd = Number(minPortDd.toFixed(2))
+    const spDd = Number(minSpDd.toFixed(2))
+    const diff = Number((portDd - spDd).toFixed(2))
+    return {
+      isCurrent: false,
+      portDd,
+      spDd,
+      diff,
+      portPeakDate: minPortPeakDate,
+      spPeakDate: minSpPeakDate,
+      asOfDate: series[episodeEndIdx].date,
+    }
+  }, [benchmarkData?.points])
+
   const allocStats = useMemo(() => {
     if (!positions || positions.length === 0) return null
     const totalVal = positions.reduce((acc, p) => acc + (p.current_value || 0), 0)
@@ -176,10 +287,10 @@ export function AnalyticsPage() {
           </Link>
         </div>
 
-        <div className={cn("grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 p-3 sm:p-3.5 transition-opacity duration-300", (analyticsFetching || benchmarkFetching) ? "opacity-65" : "opacity-100")}>
-          <div data-private className="px-3.5 py-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
+        <div className={cn("grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3 p-3 sm:p-3.5 transition-opacity duration-300", (analyticsFetching || benchmarkFetching) ? "opacity-65" : "opacity-100")}>
+          <div data-private className="px-3 py-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Tu Cartera (TWR)</span>
+              <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block truncate">Tu Cartera (TWR)</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
             <span className={cn(
@@ -192,12 +303,12 @@ export function AnalyticsPage() {
                 ? fmt.pct(analytics.twr)
                 : '—'}
             </span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Flujos neutralizados</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block truncate">Flujos neutralizados</span>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
+          <div className="px-3 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold block">S&P 500 (^GSPC)</span>
+              <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold block truncate">S&P 500 (^GSPC)</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
             <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-0.5 block leading-tight">
@@ -205,12 +316,12 @@ export function AnalyticsPage() {
                 ? `${benchmarkData.summary.sp500 >= 0 ? '+' : ''}${benchmarkData.summary.sp500.toFixed(2)}%`
                 : '+14.58%'}
             </span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Índice EE.UU.</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block truncate">Índice EE.UU.</span>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
+          <div className="px-3 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block">Tasa BCE / Depósito</span>
+              <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block truncate">Tasa BCE / Depósito</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
             <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-0.5 block leading-tight">
@@ -218,12 +329,12 @@ export function AnalyticsPage() {
                 ? `${benchmarkData.summary.bce_rate >= 0 ? '+' : ''}${benchmarkData.summary.bce_rate.toFixed(2)}%`
                 : '+3.45%'}
             </span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Tipo libre de riesgo</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block truncate">Tipo libre de riesgo</span>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
+          <div className="px-3 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-purple-700 dark:text-purple-400 font-semibold block">MSCI World (URTH)</span>
+              <span className="text-xs text-purple-700 dark:text-purple-400 font-semibold block truncate">MSCI World (URTH)</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
             <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-0.5 block leading-tight">
@@ -231,12 +342,12 @@ export function AnalyticsPage() {
                 ? `${benchmarkData.summary.msci_world >= 0 ? '+' : ''}${benchmarkData.summary.msci_world.toFixed(2)}%`
                 : '+14.70%'}
             </span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Mercados Desarrollados</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block truncate">Mercados Desarrollados</span>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
+          <div className="px-3 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold block">Alfa vs S&P 500</span>
+              <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold block truncate">Alfa vs S&P 500</span>
               {(analyticsFetching || benchmarkFetching) && <LoadingDot />}
             </div>
             <span className={cn(
@@ -247,7 +358,57 @@ export function AnalyticsPage() {
                 ? `${benchmarkData.summary.alpha_sp500 >= 0 ? '+' : ''}${benchmarkData.summary.alpha_sp500.toFixed(2)}%`
                 : '+7.87%'}
             </span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block">Exceso de rentabilidad</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 block truncate">Exceso de rentabilidad</span>
+          </div>
+
+          <div
+            data-private
+            className="px-3 py-2.5 rounded-xl bg-slate-100/90 dark:bg-[#252526] border border-slate-200/90 dark:border-white/[0.08] shadow-2xs"
+            title={
+              latestDrawdownComparison
+                ? `${latestDrawdownComparison.isCurrent ? 'Drawdown actual desde máximos' : 'Último drawdown completado'} (${latestDrawdownComparison.asOfDate}): Tu Cartera ${latestDrawdownComparison.portDd.toFixed(2)}% (pico ${latestDrawdownComparison.portPeakDate}) vs S&P 500 ${latestDrawdownComparison.spDd.toFixed(2)}% (pico ${latestDrawdownComparison.spPeakDate}). Diferencia: ${latestDrawdownComparison.diff >= 0 ? '+' : ''}${latestDrawdownComparison.diff.toFixed(2)} pp.`
+                : 'Comparativa del último drawdown entre tu cartera y el S&P 500'
+            }
+          >
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs text-rose-700 dark:text-rose-400 font-semibold block truncate">
+                {latestDrawdownComparison?.isCurrent === false ? 'Último Drawdown' : 'Drawdown Actual'}
+              </span>
+              {(analyticsFetching || benchmarkFetching) ? (
+                <LoadingDot />
+              ) : latestDrawdownComparison ? (
+                <span
+                  className={cn(
+                    'text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md border shrink-0 leading-tight',
+                    latestDrawdownComparison.diff >= 0
+                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                      : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
+                  )}
+                >
+                  {latestDrawdownComparison.diff >= 0 ? '+' : ''}
+                  {latestDrawdownComparison.diff.toFixed(2)}%
+                </span>
+              ) : null}
+            </div>
+            <span
+              className={cn(
+                'text-xl sm:text-2xl font-bold font-mono mt-0.5 block leading-tight',
+                (latestDrawdownComparison?.portDd ?? 0) >= -0.05
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-rose-600 dark:text-rose-400'
+              )}
+            >
+              {latestDrawdownComparison
+                ? `${latestDrawdownComparison.portDd.toFixed(2)}%`
+                : '—'}
+            </span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5 flex items-center gap-1 truncate">
+              <span>vs</span>
+              <span className="text-amber-700 dark:text-amber-400 font-semibold">S&P 500:</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                {latestDrawdownComparison ? `${latestDrawdownComparison.spDd.toFixed(2)}%` : '—'}
+              </span>
+            </span>
           </div>
         </div>
       </Card>
