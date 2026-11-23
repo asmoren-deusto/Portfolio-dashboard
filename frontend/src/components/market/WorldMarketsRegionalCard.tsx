@@ -220,7 +220,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
           </div>
 
           {/* Scrollable container of cards with organized regional sections */}
-          <div className="space-y-4 max-h-[515px] overflow-y-auto pr-1 scrollbar-thin">
+          <div className="space-y-2.5 sm:space-y-3 flex-1 min-h-0 max-h-[600px] overflow-y-auto pr-1 scrollbar-thin">
             {regionsToDisplay.map((region) => {
               const regionStocks = region.tickers
                 .map((t) => indexMap.get(t))
@@ -229,7 +229,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
               if (regionStocks.length === 0 && !isLoading) return null
 
               return (
-                <div key={region.id} className="space-y-2">
+                <div key={region.id} className="space-y-1.5">
                   {/* Region Sub-header if 'ALL' is selected or for clear demarcation */}
                   <div className="flex items-center justify-between px-0.5">
                     <div className="flex items-center gap-1.5">
@@ -240,10 +240,10 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
                           className="w-3.5 h-2.5 rounded-2xs object-cover shadow-2xs border border-black/10 dark:border-white/10"
                         />
                       )}
-                      <h4 className="text-[11.5px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         {region.name}
                       </h4>
-                      <span className="text-[10.5px] text-slate-400 dark:text-slate-500">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">
                         • {region.label}
                       </span>
                     </div>
@@ -271,11 +271,11 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
                         <div
                           key={stock.ticker}
                           onClick={() => onSelectIndex?.(stock)}
-                          className="group/idx p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:bg-white dark:hover:bg-white/[0.05] transition-all cursor-pointer shadow-2xs hover:shadow-sm relative flex flex-col justify-between"
+                          className="group/idx p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:bg-white dark:hover:bg-white/[0.05] transition-all cursor-pointer shadow-2xs hover:shadow-sm relative flex flex-col justify-between"
                         >
                           {/* Top: Flag/Icon + Name + Session Status */}
                           <div>
-                            <div className="flex items-center justify-between gap-1 mb-1">
+                            <div className="flex items-center justify-between gap-1 mb-0.5">
                               <div className="flex items-center gap-1.5 min-w-0">
                                 {meta.flag ? (
                                   <img
@@ -294,7 +294,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
                               {/* Session status pill */}
                               <span
                                 className={cn(
-                                  'text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full border shrink-0',
+                                  'text-[8.5px] font-mono font-bold px-1.5 py-0.2 rounded-full border shrink-0',
                                   isOpen
                                     ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 border-emerald-300 dark:border-emerald-500/30'
                                     : isFutures
@@ -309,33 +309,33 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
                             </div>
 
                             {/* Ticker subtitle */}
-                            <div className="text-[10px] font-mono text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                            <div className="text-[9.5px] font-mono text-slate-400 dark:text-slate-500 flex items-center gap-1">
                               <span>{stock.ticker}</span>
                               {meta.country && <span>• {meta.country}</span>}
                             </div>
                           </div>
 
                           {/* Middle: Price + Variation */}
-                          <div className="my-2 flex items-baseline justify-between gap-1">
-                            <span className="font-mono font-extrabold text-sm sm:text-base text-slate-950 dark:text-white tracking-tight">
+                          <div className="my-1 sm:my-1.5 flex items-baseline justify-between gap-1">
+                            <span className="font-mono font-extrabold text-sm sm:text-[15px] text-slate-950 dark:text-white tracking-tight">
                               {stock.price ? fmt.num(stock.price, 2) : '—'}
-                              <span className="text-[10px] font-normal text-slate-400 ml-1">
+                              <span className="text-[9.5px] font-normal text-slate-400 ml-0.5">
                                 {stock.currency || 'EUR'}
                               </span>
                             </span>
 
                             <span
                               className={cn(
-                                'inline-flex items-center gap-0.5 font-mono text-[11px] font-bold px-1.5 py-0.5 rounded-lg border tabular-nums shrink-0',
+                                'inline-flex items-center gap-0.5 font-mono text-[10.5px] font-bold px-1.5 py-0.5 rounded-lg border tabular-nums shrink-0',
                                 isPositive
                                   ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 border-emerald-300/80 dark:border-emerald-500/30'
                                   : 'bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-400 border-rose-300/80 dark:border-rose-500/30'
                               )}
                             >
                               {isPositive ? (
-                                <TrendingUp className="w-3 h-3 stroke-[2.5]" />
+                                <TrendingUp className="w-2.5 h-2.5 stroke-[2.5]" />
                               ) : (
-                                <TrendingDown className="w-3 h-3 stroke-[2.5]" />
+                                <TrendingDown className="w-2.5 h-2.5 stroke-[2.5]" />
                               )}
                               <span>{fmt.pct(stock.change_pct)}</span>
                             </span>
@@ -343,10 +343,10 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
 
                           {/* Bottom: Day Range Visual Bar or Points variation */}
                           {rangePct !== null && stock.day_low != null && stock.day_high != null ? (
-                            <div className="pt-1 border-t border-slate-200/60 dark:border-white/[0.04]">
-                              <div className="flex items-center justify-between text-[9.5px] font-mono text-slate-400 mb-0.5">
+                            <div className="pt-0.5 border-t border-slate-200/60 dark:border-white/[0.04]">
+                              <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 mb-0.5">
                                 <span>{fmt.num(stock.day_low, 1)}</span>
-                                <span className="text-[8.5px] uppercase tracking-wider text-slate-400 font-semibold">Rango</span>
+                                <span className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">Rango</span>
                                 <span>{fmt.num(stock.day_high, 1)}</span>
                               </div>
                               <div className="w-full h-1 rounded-full bg-slate-200/80 dark:bg-white/[0.08] overflow-hidden relative">
@@ -360,7 +360,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
                               </div>
                             </div>
                           ) : (
-                            <div className="pt-0.5 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                            <div className="pt-0.5 flex items-center justify-between text-[9.5px] text-slate-400 dark:text-slate-500 font-mono">
                               <span>Var. pts:</span>
                               <span className={cn('font-bold', isPositive ? 'text-emerald-600' : 'text-rose-600')}>
                                 {stock.change ? `${stock.change > 0 ? '+' : ''}${fmt.num(stock.change, 2)}` : '—'}
