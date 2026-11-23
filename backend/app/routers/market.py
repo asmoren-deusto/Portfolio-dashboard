@@ -1960,6 +1960,202 @@ async def get_simulated_portfolio(
     return data
 
 
+# ── S&P 500 Real-Time Chart Endpoint ──────────────────────────────────────────
+_sp500_chart_cache: dict = {}
+SP500_CHART_CACHE_TTL = 30  # 30 seconds for responsive live feel
+
+
+def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
+    import yfinance as yf
+    import pandas as pd
+    from zoneinfo import ZoneInfo
+    from datetime import datetime
+
+    madrid_tz = ZoneInfo("Europe/Madrid")
+    ny_tz = ZoneInfo("America/New_York")
+    now_madrid = datetime.now(madrid_tz)
+    now_ny = datetime.now(ny_tz)
+
+    valid_periods = {"1d", "5d", "1mo"}
+    p = period if period in valid_periods else "1d"
+
+    q_gspc = _fetch_yahoo_chart_quote("^GSPC") or {}
+    q_es = _fetch_yahoo_chart_quote("ES=F") or {}
+
+    reg_p = _clean_float(q_gspc.get("regular_price") or q_gspc.get("price")) or 6000.0
+    prev_c = _clean_float(q_gspc.get("prev_close")) or reg_p
+    m_state = q_gspc.get("market_state", "CLOSED")
+
+    is_pre = (m_state == "PRE")
+    es_chg = _clean_float(q_es.get("change_pct"), 0.0)
+    live_p = reg_p
+    if is_pre and reg_p and es_chg is not None:
+        live_p = round(reg_p * (1.0 + es_chg / 100.0), 2)
+
+    cur_p = live_p or reg_p
+    ref_c = prev_c if (prev_c and prev_c > 0) else cur_p
+    chg_pts = round(cur_p - ref_c, 2)
+    chg_pct = round((cur_p - ref_c) / ref_c * 100.0, 2)
+
+    interval = "5m" if p == "1d" else "15m" if p == "5d" else "1h"
+    dl_period = "2d" if p == "1d" else p
+    prepost = (p == "1d")
+
+    tickers = ["^GSPC", "ES=F"] if p == "1d" else ["^GSPC"]
+    df = yf.download(tickers, period=dl_period, interval=interval, prepost=prepost, progress=False)
+    closes = df["Close"] if "Close" in df else df
+    if closes.index.tz is None:
+        closes.index = closes.index.tz_localize(ny_tz)
+
+    points = []
+    session_markers = []
+
+    if p == "1d":
+        gspc_s = closes["^GSPC"] if "^GSPC" in closes else None
+        es_s = closes["ES=F"] if "ES=F" in closes else None
+        es_prev = _clean_float(q_es.get("prev_close")) or (float(es_s.dropna().iloc[0]) if es_s is not None and not es_s.dropna().empty else 1.0)
+
+        # 1. Friday/yesterday regular session
+        if gspc_s is not None:
+            g_clean = gspc_s.dropna()
+            dates = sorted(list(set(idx.astimezone(ny_tz).date() for idx in g_clean.index)))
+            last_date = dates[-1] if dates else None
+            if last_date:
+                sub = g_clean[g_clean.index.map(lambda x: x.astimezone(ny_tz).date() == last_date)]
+                for dt, pt_val in sub.items():
+                    dt_m = dt.astimezone(madrid_tz)
+                    dt_n = dt.astimezone(ny_tz)
+                    p_val = round(float(pt_val), 2)
+                    pt_chg_pts = round(p_val - ref_c, 2)
+                    pt_chg_pct = round((p_val - ref_c) / ref_c * 100.0, 2)
+                    points.append({
+                        "time": dt_m.isoformat(),
+                        "time_unix": int(dt.timestamp()),
+                        "label": dt_m.strftime("%H:%M"),
+                        "time_ny": dt_n.strftime("%H:%M"),
+                        "date": dt_m.strftime("%Y-%m-%d"),
+                        "phase": "REGULAR",
+                        "price": p_val,
+                        "change_pct": pt_chg_pct,
+                        "change_pts": pt_chg_pts,
+                    })
+
+                # Session marker for close of that session
+                if not sub.empty:
+                    last_dt = sub.index[-1]
+                    session_markers.append({
+                        "time_unix": int(last_dt.timestamp()),
+                        "label": "22:00 • Cierre Oficial",
+                        "type": "cierre_ayer",
+                        "color": "#64748b",
+                        "phase": "CLOSED",
+                    })
+
+        # 2. Today pre-market points (from ES=F if before regular open)
+        if es_s is not None and is_pre:
+            now_ny_d = now_ny.date()
+            e_sub = es_s[es_s.index.map(lambda x: x.astimezone(ny_tz).date() == now_ny_d)]
+            e_clean = e_sub.dropna()
+
+            t_tokyo = int(datetime(now_madrid.year, now_madrid.month, now_madrid.day, 1, 0, tzinfo=madrid_tz).timestamp())
+            t_europa = int(datetime(now_madrid.year, now_madrid.month, now_madrid.day, 9, 0, tzinfo=madrid_tz).timestamp())
+            t_pre = int(datetime(now_madrid.year, now_madrid.month, now_madrid.day, 10, 0, tzinfo=madrid_tz).timestamp())
+            t_ny = int(datetime(now_madrid.year, now_madrid.month, now_madrid.day, 15, 30, tzinfo=madrid_tz).timestamp())
+
+            session_markers.append({"time_unix": t_tokyo, "label": "01:00 • Tokio", "type": "tokyo", "color": "#e11d48", "phase": "REGULAR"})
+            session_markers.append({"time_unix": t_europa, "label": "09:00 • Europa", "type": "europa", "color": "#2563eb", "phase": "REGULAR"})
+            session_markers.append({"time_unix": t_pre, "label": "10:00 • Pre-market", "type": "pre_market", "color": "#6366f1", "phase": "PRE"})
+            session_markers.append({"time_unix": t_ny, "label": "15:30 • Wall Street", "type": "regular_open", "color": "#10b981", "phase": "REGULAR"})
+
+            for dt, ep in e_clean.items():
+                dt_m = dt.astimezone(madrid_tz)
+                dt_n = dt.astimezone(ny_tz)
+                ep_val = float(ep)
+                es_move = (ep_val - es_prev) / es_prev
+                proj_p = round(reg_p * (1.0 + es_move), 2)
+                pt_chg_pts = round(proj_p - ref_c, 2)
+                pt_chg_pct = round((proj_p - ref_c) / ref_c * 100.0, 2)
+                points.append({
+                    "time": dt_m.isoformat(),
+                    "time_unix": int(dt.timestamp()),
+                    "label": dt_m.strftime("%H:%M"),
+                    "time_ny": dt_n.strftime("%H:%M"),
+                    "date": dt_m.strftime("%Y-%m-%d"),
+                    "phase": "PRE",
+                    "price": proj_p,
+                    "change_pct": pt_chg_pct,
+                    "change_pts": pt_chg_pts,
+                })
+    else:
+        gspc_s = closes["^GSPC"] if (isinstance(closes, pd.DataFrame) and "^GSPC" in closes) else (closes if isinstance(closes, pd.Series) else closes.iloc[:,0])
+        g_clean = gspc_s.dropna()
+        base_p = float(g_clean.iloc[0]) if not g_clean.empty else ref_c
+        for dt, p_val in g_clean.items():
+            dt_m = dt.astimezone(madrid_tz)
+            dt_n = dt.astimezone(ny_tz)
+            val = round(float(p_val), 2)
+            pt_chg_pts = round(val - base_p, 2)
+            pt_chg_pct = round((val - base_p) / base_p * 100.0, 2)
+            lbl = dt_m.strftime("%d %b, %H:%M") if p == "5d" else dt_m.strftime("%d %b")
+            points.append({
+                "time": dt_m.isoformat(),
+                "time_unix": int(dt.timestamp()),
+                "label": lbl,
+                "time_ny": dt_n.strftime("%H:%M"),
+                "date": dt_m.strftime("%Y-%m-%d"),
+                "phase": "REGULAR",
+                "price": val,
+                "change_pct": pt_chg_pct,
+                "change_pts": pt_chg_pts,
+            })
+
+    seen_times = set()
+    dedup_points = []
+    for pt in points:
+        if pt["time_unix"] not in seen_times:
+            seen_times.add(pt["time_unix"])
+            dedup_points.append(pt)
+    dedup_points.sort(key=lambda x: x["time_unix"])
+
+    summary = {
+        "ticker": "^GSPC",
+        "name": "S&P 500 (Wall Street)",
+        "price": cur_p,
+        "official_close_price": ref_c,
+        "change": chg_pts,
+        "change_pct": chg_pct,
+        "market_state": m_state,
+        "is_pre_market": is_pre,
+        "day_high": _clean_float(q_gspc.get("day_high")) or cur_p,
+        "day_low": _clean_float(q_gspc.get("day_low")) or cur_p,
+        "prev_close": ref_c,
+        "period": p,
+        "as_of": now_madrid.isoformat(),
+    }
+
+    return _sanitize_for_json({
+        "summary": summary,
+        "chart_points": dedup_points,
+        "session_markers": session_markers,
+    })
+
+
+@router.get("/sp500-chart")
+async def get_sp500_chart(period: str = "1d"):
+    """Real-time S&P 500 chart data with pre-market futures bridge and TradingView-aligned points."""
+    valid_periods = {"1d", "5d", "1mo"}
+    p = period if period in valid_periods else "1d"
+    now = time.time()
+    if p in _sp500_chart_cache:
+        entry = _sp500_chart_cache[p]
+        if now - entry["ts"] < SP500_CHART_CACHE_TTL:
+            return entry["data"]
+
+    data = await asyncio.to_thread(_fetch_sp500_chart_sync, p)
+    _sp500_chart_cache[p] = {"data": data, "ts": now}
+    return data
+
+
 
 
 # ── Curated stock universe with metadata ───────────────────────────────────────

@@ -520,6 +520,50 @@ export function useMarketHistory(ticker?: string, period: string = '1mo') {
   })
 }
 
+// ── S&P 500 Real-Time Chart ────────────────────────────────────────────────────
+export interface Sp500ChartPoint {
+  time: string
+  time_unix: number
+  label: string
+  time_ny?: string
+  date?: string
+  phase?: 'PRE' | 'REGULAR' | 'POST'
+  price: number
+  change_pct: number
+  change_pts: number
+}
+
+export interface Sp500ChartResponse {
+  summary: {
+    ticker: string
+    name: string
+    price: number
+    official_close_price: number
+    change: number
+    change_pct: number
+    market_state: string
+    is_pre_market: boolean
+    day_high: number
+    day_low: number
+    prev_close: number
+    period: string
+    as_of: string
+  }
+  chart_points: Sp500ChartPoint[]
+  session_markers: SessionMarker[]
+}
+
+export function useSp500Chart(period: string = '1d') {
+  return useQuery<Sp500ChartResponse>({
+    queryKey: ['sp500-chart', period],
+    queryFn: () => get<Sp500ChartResponse>(`/market/sp500-chart?period=${period}`),
+    staleTime: 1000 * 30, // 30s
+    refetchInterval: 1000 * 45, // 45s poll
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: 'always',
+  })
+}
+
 // ── Simulated Fund Portfolio via ETF Proxies ───────────────────────────────────
 export interface SimulatedHolding {
   isin: string
