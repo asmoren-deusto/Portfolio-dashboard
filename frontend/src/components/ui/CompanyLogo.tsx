@@ -39,6 +39,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'IE0032126645': 'vanguard.com',
   'FR0000989626': 'groupama-am.com',
   'LU0840158819': 'stormcapital.no',
+  'ES0140794001': 'singularbank.es',
   // Stocks & Look-Through holdings
   'US67066G1040': 'nvidia.com',
   'US5949181045': 'microsoft.com',
@@ -182,6 +183,7 @@ function getMarketIcon(ticker?: string): React.ReactNode {
     case 'ZN=F':
     case 'HYG':
     case 'SHYG':
+    case 'IGSB':
     case 'SJNK':
     case 'LQD':
       return <Landmark className="w-full h-full p-0.5 text-amber-600 dark:text-amber-400" />
@@ -454,6 +456,7 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = React.memo(({
     else if (nl.includes('amundi')) targetDomain = 'amundi.es'
     else if (nl.includes('carmignac')) targetDomain = 'carmignac.es'
     else if (nl.includes('storm')) targetDomain = 'stormcapital.no'
+    else if (nl.includes('gamma') || nl.includes('singular')) targetDomain = 'singularbank.es'
     else if (nl.includes('kutxabank') || nl.includes('baskepensiones')) targetDomain = 'kutxabank.es'
     else if (nl.includes('bbva')) targetDomain = 'bbva.es'
     else if (nl.includes('myinvestor')) targetDomain = 'myinvestor.es'

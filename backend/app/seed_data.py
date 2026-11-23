@@ -238,10 +238,26 @@ ASSETS = json.loads(r'''[
     "morningstar_id": "0P0001DFE8",
     "category": "Renta Variable Global Value",
     "ter": 1.80
+  },
+  {
+    "isin": "ES0140794001",
+    "name": "Gamma Global FI",
+    "ticker": "ES0140794001",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "morningstar_id": "0P0001K87I",
+    "category": "Renta Fija Mixta / Crédito Global",
+    "ter": 1.15
   }
 ]''')
 
 PRICES = json.loads(r'''[
+  {
+    "isin": "ES0140794001",
+    "date": "2026-11-20",
+    "price": 14.057657,
+    "currency": "EUR"
+  },
   {
     "isin": "ES0146309002",
     "date": "2026-11-18",
@@ -4552,5 +4568,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-23",
     "broker": "traderepublic",
     "notes": "Compra a mercado NVIDIA Corp en Trade Republic a las 17:22 (3,418467 acciones a 152,68 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "sell",
+    "shares": 47.69,
+    "price": 81.5614,
+    "amount": 3889.66,
+    "fees": 0.0,
+    "date": "2026-11-17",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Gamma Global FI, ref 0232191857918, orden 0232191857918)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "ES0140794001",
+    "type": "buy",
+    "shares": 276.693344,
+    "price": 14.05765655,
+    "amount": 3889.66,
+    "fees": 0.0,
+    "date": "2026-11-20",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232191857918, orden 0232191857918, coste fiscal originario 3.571,40 € de valor 3.889,66 €)"
   }
 ]''')

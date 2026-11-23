@@ -50,6 +50,8 @@ const FINECT_SLUGS: Record<string, string> = {
   'FR0000989626': 'https://www.finect.com/fondos-inversion/FR0000989626-Groupama_tresorerie_ic',
   'US67066G1040': 'https://www.finect.com/mercados/acciones/US67066G1040-Nvidia_corp',
   'IE00B5BMR087': 'https://www.finect.com/etfs/ishares-core-sp-500-ucits-etf-acc',
+  'ES0146309002': 'https://www.finect.com/fondos-inversion/ES0146309002-Horos_value_internacional_fi',
+  'ES0140794001': 'https://www.finect.com/fondos-inversion/ES0140794001-Gamma_global_fi',
 }
 
 /**
@@ -92,6 +94,10 @@ const PRODUCT_GESTORA_URLS: Record<string, string> = {
   'LU1598719752': 'https://www.cobasam.com/',
   // Carmignac Portfolio Credit
   'LU1623762843': 'https://www.carmignac.es/',
+  // Horos Value Internacional
+  'ES0146309002': 'https://horosam.com/fondos-de-inversion/horos-value-internacional/',
+  // Gamma Global FI
+  'ES0140794001': 'https://www.singularbank.es/',
   // Fidelity Funds
   'IE00BYX5NX33': 'https://www.fondosfidelity.es/',
   'IE00BYX5M476': 'https://www.fondosfidelity.es/',

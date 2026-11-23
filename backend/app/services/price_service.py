@@ -1093,6 +1093,8 @@ FINECT_SLUGS: dict[str, str] = {
     "IE00BYX5NH74": "IE00BYX5NH74-Fidelity_msci_japan_index_p_acc_eur",
     "LU0261952682": "LU0261952682-Fidelity_funds__euro_stoxx_50_tm_aacc_eur",
     "LU0171307068": "LU0171307068-Bgf_world_healthscience_a2",
+    "ES0146309002": "ES0146309002-Horos_value_internacional_fi",
+    "ES0140794001": "ES0140794001-Gamma_global_fi",
 }
 
 

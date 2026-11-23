@@ -160,6 +160,13 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'ACC',
     shareClassLabel: 'Renta Variable Global Value (Acumulación)',
   },
+  'ES0140794001': {
+    cleanName: 'Gamma Global FI',
+    officialName: 'Gamma Global FI (Singular Asset Management)',
+    currency: 'EUR',
+    shareClass: 'ACC',
+    shareClassLabel: 'Renta Fija Mixta & Crédito Global (Acumulación)',
+  },
   'LU1598719752': {
     cleanName: 'Cobas International Fund',
     officialName: 'Cobas Lux SICAV - Cobas International Fund P EUR Acc',
@@ -333,6 +340,7 @@ export const NAV_UPDATE_SCHEDULE_BY_ISIN: Record<string, string> = {
   'IE00BYX5M476': '22:30',
   'LU1372006947': '22:00',
   'ES0146309002': '22:00',
+  'ES0140794001': '21:00',
   'LU1598719752': '22:00',
   'LU0996182563': '21:00',
   'LU1623762843': '20:30',

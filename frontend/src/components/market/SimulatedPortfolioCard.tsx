@@ -143,6 +143,11 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     shortName: 'High Yield 0-5Y',
     category: 'Renta Fija Corporativa High Yield Corta Duración',
   },
+  IGSB: {
+    name: 'Corp Bond IG 1-5Y (Gamma Global)',
+    shortName: 'Crédito IG 1-5Y',
+    category: 'Renta Fija Mixta & Crédito Corta Duración',
+  },
   LQD: {
     name: 'iShares Investment Grade Corporate Bond',
     shortName: 'Bonos Corporativos IG',

@@ -157,6 +157,7 @@ STOCK_UNIVERSE = [
     {"ticker": "EFV",    "name": "iShares MSCI EAFE Value ETF",       "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 17000000000},
     {"ticker": "AVDV",   "name": "Avantis Int. Small Cap Value ETF",  "domain": "avantisinvestors.com", "sector": "ETF Cartera", "index": ["ETFs"],        "default_market_cap": 7500000000},
     {"ticker": "SHYG",   "name": "iShares 0-5Y High Yield Corp Bond", "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 6500000000},
+    {"ticker": "IGSB",   "name": "iShares 1-5Y Investment Grade Corp","domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 21000000000},
     {"ticker": "IXJ",    "name": "iShares Global Healthcare ETF",     "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 4000000000},
     {"ticker": "BWX",    "name": "SPDR International Treasury Bond",  "domain": "ssga.com",      "sector": "ETF Cartera", "index": ["ETFs"],               "default_market_cap": 1200000000},
     {"ticker": "IAU",    "name": "iShares Gold Trust",                "domain": "ishares.com",   "sector": "ETF Cartera", "index": ["ETFs", "Materias Primas"], "default_market_cap": 32000000000},
@@ -222,6 +223,7 @@ ETF_PREMARKET_LIVE_PROXIES = {
     "BWX":  "ZN=F",       # Futuros 10-Yr T-Note 24h CME Globex (guía Deuda Soberana / Renta Fija)
     "HYG":  "ZN=F",       # Futuros 10-Yr T-Note 24h (guía Crédito / Renta Fija Privada)
     "SHYG": "ZN=F",       # Futuros 10-Yr T-Note 24h (guía Crédito High Yield Corta Duración)
+    "IGSB": "ZN=F",       # Futuros 10-Yr T-Note 24h (guía Crédito Corporativo IG Corta Duración)
     "IAU":  "GC=F",       # Futuros Oro 24h CME Comex (guía Oro físico fuera de horas)
 }
 
@@ -1186,6 +1188,7 @@ PORTFOLIO_ETF_PROXIES = {
     "LU0840158819": {"ticker": "SHYG", "name": "iShares 0-5 Year High Yield Corp Bond", "desc": "Renta Fija Corporativa High Yield Corta Duración (Storm)"},
     "LU0840158496": {"ticker": "SHYG", "name": "iShares 0-5 Year High Yield Corp Bond", "desc": "Renta Fija Corporativa High Yield Corta Duración (Storm)"},
     "LU1915698069": {"ticker": "SHYG", "name": "iShares 0-5 Year High Yield Corp Bond", "desc": "Renta Fija Corporativa High Yield Corta Duración (Storm)"},
+    "ES0140794001": {"ticker": "IGSB", "name": "iShares 1-5Y Investment Grade Corp Bond", "desc": "Crédito Corporativo & RF Mixta Corta Duración (Gamma)"},
     # Oro Físico:
     "IE00B4ND3602": {"ticker": "IAU",  "name": "iShares Gold Trust", "desc": "Oro Físico (ETC / Metales Preciosos)"},
     # Renta Variable Directa EE.UU. / Semiconductores:
@@ -1407,6 +1410,7 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
         "BWX": 0.00,   # Bonos Soberanos España 0% USD (100% EUR)
         "HYG": 1.00,   # US High Yield 100% USD
         "SHYG": 0.00,  # Storm Bond Fund RC EUR 0% USD (clase 100% cubierta a EUR)
+        "IGSB": 0.15,  # Gamma Global FI ~15% USD / 85% EUR
         "ICLN": 0.60,  # Global Clean Energy ~60% USD
         "IAU": 1.00,   # Oro Físico cotizado globalmente en USD (XAU/USD)
         "NVDA": 1.00,  # NVIDIA 100% USD
