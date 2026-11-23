@@ -220,7 +220,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
           </div>
 
           {/* Scrollable container of cards with organized regional sections */}
-          <div className="space-y-2 sm:space-y-2.5 flex-1 min-h-0 max-h-[500px] sm:max-h-[530px] overflow-y-auto pr-1 scrollbar-thin">
+          <div className="space-y-1.5 sm:space-y-2 flex-1 min-h-0 max-h-[515px] sm:max-h-[540px] overflow-y-auto pr-1 scrollbar-thin">
             {regionsToDisplay.map((region) => {
               const regionStocks = region.tickers
                 .map((t) => indexMap.get(t))
@@ -229,7 +229,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
               if (regionStocks.length === 0 && !isLoading) return null
 
               return (
-                <div key={region.id} className="space-y-1.5">
+                <div key={region.id} className="space-y-1">
                   {/* Region Sub-header if 'ALL' is selected or for clear demarcation */}
                   <div className="flex items-center justify-between px-0.5">
                     <div className="flex items-center gap-1.5">
@@ -250,7 +250,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
                   </div>
 
                   {/* Responsive Grid of Index Cards (1 col mobile, 2 cols sm/md, 3 cols xl) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1.5">
                     {regionStocks.map((stock) => {
                       const isPositive = (stock.change_pct ?? 0) >= 0
                       const meta = TICKER_FLAG_MAP[stock.ticker] || { country: '' }
@@ -316,7 +316,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
                           </div>
 
                           {/* Middle: Price + Variation */}
-                          <div className="my-1 sm:my-1.5 flex items-baseline justify-between gap-1">
+                          <div className="my-0.5 sm:my-1 flex items-baseline justify-between gap-1">
                             <span className="font-mono font-extrabold text-sm sm:text-[15px] text-slate-950 dark:text-white tracking-tight">
                               {stock.price ? fmt.num(stock.price, 2) : '—'}
                               <span className="text-[9.5px] font-normal text-slate-400 ml-0.5">
