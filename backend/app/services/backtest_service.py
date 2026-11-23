@@ -24,6 +24,7 @@ DEFAULT_PROXIES = {
     "ES0000012411": ("IEF", "Bonos Soberanos 7-10Y", "Renta Fija / Estabilidad"),
     "IE00B4ND3602": ("GLD", "Oro Físico (ETC)", "Activo Refugio / Descorrelación"),
     "US67066G1040": ("NVDA", "NVIDIA Corporation", "Líder Global IA & Semiconductores"),
+    "IE00B5BMR087": ("SPY", "iShares Core S&P 500 (Acc)", "Motor de Crecimiento Core EE.UU."),
     "FR0000989626": ("SHV", "Monetario / Liquidez (Groupama)", "Fondo Monetario Ultra-Corto Plazo"),
 }
 

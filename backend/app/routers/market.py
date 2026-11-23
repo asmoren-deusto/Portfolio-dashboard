@@ -1179,6 +1179,8 @@ PORTFOLIO_ETF_PROXIES = {
     "IE00B4ND3602": {"ticker": "IAU",  "name": "iShares Gold Trust", "desc": "Oro Físico (ETC / Metales Preciosos)"},
     # Renta Variable Directa EE.UU. / Semiconductores:
     "US67066G1040": {"ticker": "NVDA", "name": "NVIDIA (Tiempo Real)", "desc": "Acción Directa en Tiempo Real", "is_realtime": True},
+    # S&P 500 ETF:
+    "IE00B5BMR087": {"ticker": "SPY",  "name": "iShares Core S&P 500 ETF", "desc": "S&P 500 (EE.UU.)", "is_realtime": True},
 }
 
 _sim_portfolio_cache: dict[str, dict] = {}

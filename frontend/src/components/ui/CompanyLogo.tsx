@@ -35,6 +35,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'LU0122379958': 'blackrock.com',
   'ES0000012411': 'tesoro.es',
   'IE00B4ND3602': 'ishares.com',
+  'IE00B5BMR087': 'ishares.com',
   'IE0032126645': 'vanguard.com',
   'FR0000989626': 'groupama-am.com',
   'LU0840158819': 'stormcapital.no',
@@ -82,6 +83,8 @@ const ISIN_DOMAINS: Record<string, string> = {
 
 const TICKER_DOMAINS: Record<string, string> = {
   NVDA: 'nvidia.com',
+  SXR8: 'ishares.com',
+  'SXR8.DE': 'ishares.com',
   MSFT: 'microsoft.com',
   AMZN: 'amazon.com',
   GOOGL: 'google.com',
@@ -146,6 +149,8 @@ function getMarketIcon(ticker?: string): React.ReactNode {
     case 'SPY':
     case 'VOO':
     case 'IVV':
+    case 'SXR8':
+    case 'SXR8.DE':
       return <TrendingUp className="w-full h-full p-0.5 text-blue-600 dark:text-blue-400" />
     case '^IXIC':
     case 'NQ=F':

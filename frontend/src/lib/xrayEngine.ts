@@ -377,6 +377,21 @@ const FUND_LOOK_THROUGH_HOLDINGS: Record<string, FundHoldingWeight[]> = {
     { ticker: 'JPM', name: 'JPMorgan Chase & Co', isin: 'US46625H1005', sector: 'Servicios Financieros', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0131 },
     { ticker: 'LLY', name: 'Eli Lilly and Company', isin: 'US5324571083', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0154 },
   ],
+  // iShares Core S&P 500 UCITS ETF (Acc) (IE00B5BMR087)
+  IE00B5BMR087: [
+    { ticker: 'NVDA', name: 'NVIDIA Corporation', isin: 'US67066G1040', sector: 'Tecnología', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0839 },
+    { ticker: 'MSFT', name: 'Microsoft Corporation', isin: 'US5949181045', sector: 'Tecnología', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0578 },
+    { ticker: 'AAPL', name: 'Apple Inc.', isin: 'US0378331005', sector: 'Tecnología', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0682 },
+    { ticker: 'AMZN', name: 'Amazon.com Inc.', isin: 'US0231351067', sector: 'Consumo Cíclico', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0371 },
+    { ticker: 'GOOGL', name: 'Alphabet Inc Class A', isin: 'US02079K3059', sector: 'Servicios de Comunicación', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0307 },
+    { ticker: 'GOOG', name: 'Alphabet Inc Class C', isin: 'US02079K1079', sector: 'Servicios de Comunicación', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0245 },
+    { ticker: 'AVGO', name: 'Broadcom Inc', isin: 'US11135F1012', sector: 'Tecnología', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0254 },
+    { ticker: 'META', name: 'Meta Platforms Inc Class A', isin: 'US30303M1027', sector: 'Servicios de Comunicación', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0243 },
+    { ticker: 'V', name: 'Visa Inc Class A', isin: 'US92826C8394', sector: 'Servicios Financieros', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0093 },
+    { ticker: 'BRK.B', name: 'Berkshire Hathaway Inc', isin: 'US0846707026', sector: 'Servicios Financieros', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0172 },
+    { ticker: 'JPM', name: 'JPMorgan Chase & Co', isin: 'US46625H1005', sector: 'Servicios Financieros', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0131 },
+    { ticker: 'LLY', name: 'Eli Lilly and Company', isin: 'US5324571083', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0154 },
+  ],
   // DNB Fund Technology A EUR Acc (LU0302296495)
   LU0302296495: [
     { ticker: 'MSFT', name: 'Microsoft Corporation', isin: 'US5949181045', sector: 'Tecnología', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0954 },
@@ -551,7 +566,7 @@ export function buildPortfolioXRayReport(
       countryValueMap['España'] = (countryValueMap['España'] || 0) + val
     } else if (assetType === 'stock' || isin === 'US67066G1040') {
       countryValueMap['Estados Unidos'] = (countryValueMap['Estados Unidos'] || 0) + val
-    } else if (isin === 'IE0032126645') {
+    } else if (isin === 'IE0032126645' || isin === 'IE00B5BMR087') {
       // S&P 500: 100% EE.UU.
       countryValueMap['Estados Unidos'] = (countryValueMap['Estados Unidos'] || 0) + val
     } else if (isin === '0192#0011') {
@@ -954,6 +969,7 @@ export function buildPortfolioXRayReport(
     'LU0997587597': { r1y: 21.16, r3y: 24.68, r5y: 17.87, rating: 4, ter: 0.15 },
     'ES0000012411': { r1y: 3.85,  r3y: 2.10,  r5y: 1.45,  rating: 0, ter: 0.00 },
     'US67066G1040': { r1y: 35.40, r3y: 68.20, r5y: 74.50, rating: 5, ter: 0.00 },
+    'IE00B5BMR087': { r1y: 15.41, r3y: 20.60, r5y: 12.30, rating: 5, ter: 0.07 },
   }
 
   const fundPositions: XRayFundInventoryItem[] = activePositions

@@ -201,6 +201,15 @@ ASSETS = json.loads(r'''[
     "ter": 0.0
   },
   {
+    "isin": "IE00B5BMR087",
+    "name": "Core S&P 500 USD (Acc)",
+    "ticker": "SXR8.DE",
+    "asset_type": "etf",
+    "currency": "EUR",
+    "category": "Renta Variable USA - S&P 500",
+    "ter": 0.07
+  },
+  {
     "isin": "LU0840158819",
     "name": "Storm Fund II - Storm Bond Fund RC EUR",
     "ticker": "LU0840158819",
@@ -2079,6 +2088,18 @@ PRICES = json.loads(r'''[
     "isin": "IE0032126645",
     "date": "2026-11-19",
     "price": 79.9032,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00B5BMR087",
+    "date": "2026-11-20",
+    "price": 694.06,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00B5BMR087",
+    "date": "2026-11-23",
+    "price": 695.88,
     "currency": "EUR"
   }
 ]''')
@@ -4471,5 +4492,41 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-19",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde Azvalor Internacional, ref 0232191543061, orden 0232191543061, coste fiscal originario 6.401,14 € de valor 6.524,09 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "US67066G1040",
+    "type": "buy",
+    "shares": 3.237059,
+    "price": 123.18,
+    "amount": 399.74,
+    "fees": 1.0,
+    "date": "2026-11-20",
+    "broker": "traderepublic",
+    "notes": "Compra a mercado NVIDIA Corp en Trade Republic a las 18:40 (3,237059 acciones a 123,18 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00B5BMR087",
+    "type": "buy",
+    "shares": 0.727103,
+    "price": 687.7,
+    "amount": 501.03,
+    "fees": 1.0,
+    "date": "2026-11-20",
+    "broker": "traderepublic",
+    "notes": "Compra a mercado Core S&P 500 USD (Acc) en Trade Republic a las 20:40 (0,727103 títulos a 687,70 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "US67066G1040",
+    "type": "buy",
+    "shares": 0.830536,
+    "price": 119.2,
+    "amount": 100.0,
+    "fees": 1.0,
+    "date": "2026-11-20",
+    "broker": "traderepublic",
+    "notes": "Compra a mercado NVIDIA Corp en Trade Republic a las 20:40 (0,830536 acciones a 119,20 €)"
   }
 ]''')

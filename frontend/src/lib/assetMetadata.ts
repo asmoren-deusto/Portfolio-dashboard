@@ -107,6 +107,14 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'ACC',
     shareClassLabel: 'Renta Variable Directa (Acciones EE.UU.)',
   },
+  // 12. Core S&P 500 USD (Acc)
+  'IE00B5BMR087': {
+    cleanName: 'Core S&P 500 USD (Acc)',
+    officialName: 'iShares Core S&P 500 UCITS ETF (Acc) (Lang & Schwarz SXR8.DE)',
+    currency: 'EUR',
+    shareClass: 'ACC',
+    shareClassLabel: 'ETF Indexado Acumulación (Lang & Schwarz / Xetra)',
+  },
   // 12. Storm Fund II - Storm Bond Fund RC EUR
   'LU0840158819': {
     cleanName: 'Storm Bond Fund RC EUR',

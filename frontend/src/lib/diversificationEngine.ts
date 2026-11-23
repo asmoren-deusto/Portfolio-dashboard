@@ -337,6 +337,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'equity',
     currencies: { USD: 1.0 },
   },
+  // iShares Core S&P 500 UCITS ETF (Acc) (IE00B5BMR087)
+  IE00B5BMR087: {
+    geo: { north_america: 1.0, europe: 0.0, japan: 0.0, pacific: 0.0, emerging: 0.0, other: 0.0 },
+    sectors: { tech: 0.32, financials: 0.135, health: 0.12, consumer_disc: 0.105, comms: 0.09, industrials: 0.08, consumer_stap: 0.06, energy: 0.04, utilities: 0.03, materials: 0.02 },
+    assetClass: 'equity',
+    currencies: { USD: 1.0 },
+  },
 }
 
 /**

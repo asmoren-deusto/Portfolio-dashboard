@@ -163,6 +163,7 @@ KNOWN_TICKERS: dict[str, str] = {
     "IE0032126645": "0P00000SUJ.F",  # Vanguard U.S. 500 Index EUR Acc
     "FR0000989626": "0P00000LRT.F",  # Groupama Trésorerie IC
     "US67066G1040": "NVD.DE",  # NVIDIA Corp (Lang & Schwarz / Xetra EUR)
+    "IE00B5BMR087": "SXR8.DE",  # iShares Core S&P 500 UCITS ETF (Acc) (Lang & Schwarz / Xetra EUR)
 }
 
 

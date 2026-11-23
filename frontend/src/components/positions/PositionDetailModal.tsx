@@ -49,6 +49,7 @@ const FINECT_SLUGS: Record<string, string> = {
   'IE0032126645': 'https://www.finect.com/fondos-inversion/IE0032126645-Vanguard_us_500_stock_index_eur_acc',
   'FR0000989626': 'https://www.finect.com/fondos-inversion/FR0000989626-Groupama_tresorerie_ic',
   'US67066G1040': 'https://www.finect.com/mercados/acciones/US67066G1040-Nvidia_corp',
+  'IE00B5BMR087': 'https://www.finect.com/etfs/ishares-core-sp-500-ucits-etf-acc',
 }
 
 /**
@@ -57,6 +58,8 @@ const FINECT_SLUGS: Record<string, string> = {
 const PRODUCT_GESTORA_URLS: Record<string, string> = {
   // NVIDIA Corp
   'US67066G1040': 'https://www.nvidia.com/es-es/investor-relations/',
+  // iShares Core S&P 500 ETF
+  'IE00B5BMR087': 'https://www.ishares.com/es/profesionales/es/productos/253743/ishares-sp-500-b-ucits-etf-acc-fund',
   // Vanguard U.S. 500 Index EUR Acc
   'IE0032126645': 'https://www.vanguardinvestor.co.uk/investments/vanguard-us-500-stock-index-fund-eur-acc/overview',
   // Groupama Trésorerie IC
