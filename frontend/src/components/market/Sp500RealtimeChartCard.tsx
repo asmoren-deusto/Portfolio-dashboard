@@ -448,8 +448,8 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         </div>
       </div>
 
-      {/* KPI Summary Header: Fixed locked height to eliminate layout shift on hover */}
-      <div className="h-[68px] min-h-[68px] max-h-[68px] flex items-center justify-between gap-2 mb-1 pb-2 border-b border-slate-200/60 dark:border-white/[0.06] overflow-hidden">
+      {/* KPI Summary Header: Natural two-line layout without clipping */}
+      <div className="min-h-[58px] flex items-center justify-between gap-2 mb-1 pb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
         {hoveredPoint ? (
           /* Hover inspection state */
           <div className="flex flex-col justify-center min-w-0">
@@ -507,55 +507,45 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
             </div>
           </div>
         ) : summary?.is_pre_market ? (
-          /* Dual display: Cierre Oficial + Pre-apertura */
-          <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-            {/* 1. Official Session Close */}
-            <div className="pr-3 sm:pr-4 border-r border-slate-200/70 dark:border-white/[0.08]">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                <span>Cierre Oficial • S&P 500</span>
-              </div>
-              <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-xl sm:text-2xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
-                  {summary.official_close_price ? fmt.num(summary.official_close_price, 2) : '—'}
-                </span>
-                <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
-                  pts
-                </span>
-              </div>
-            </div>
-
-            {/* 2. Live Pre-market Futures bridge */}
-            <div className="pl-1 sm:pl-2">
-              <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+          /* Pre-market live display with official close context */
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                 <span className="live-dot warn" />
                 <span>Pre-mercado CME Futures</span>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <span className="text-xl sm:text-2xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
-                  {price ? fmt.num(price, 2) : '—'}
-                </span>
-                <span
-                  className={cn(
-                    'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-md border inline-flex items-center gap-0.5',
-                    changePct >= 0
-                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                      : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
-                  )}
-                >
+              </span>
+              {summary.official_close_price && (
+                <>
+                  <span className="text-slate-300 dark:text-white/20">•</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-normal normal-case">
+                    Cierre Oficial: <strong className="font-mono font-bold text-slate-600 dark:text-slate-300">{fmt.num(summary.official_close_price, 2)} pts</strong>
+                  </span>
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
+                {price ? fmt.num(price, 2) : '—'}
+              </span>
+              <span
+                className={cn(
+                  'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs inline-flex items-center gap-1',
+                  changePct >= 0
+                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                    : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
+                )}
+              >
+                {changePct >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                <span>
                   {changePct >= 0 ? '+' : ''}
                   {changePct.toFixed(2)}%
                 </span>
-                <span
-                  className={cn(
-                    'text-xs sm:text-sm font-bold font-mono',
-                    change >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-rose-600 dark:text-rose-400'
-                  )}
-                >
-                  ({change >= 0 ? '+' : ''}{change.toFixed(2)} pts)
+                <span className="text-xs opacity-75">
+                  ({change >= 0 ? '+' : ''}
+                  {change.toFixed(2)} pts)
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         ) : (
