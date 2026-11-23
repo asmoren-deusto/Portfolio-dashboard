@@ -134,6 +134,12 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
     return { minVal: Math.min(...vals), maxVal: Math.max(...vals) }
   }, [chartPoints, viewMode])
 
+  // Day range progress calculation for visual bar
+  const dayLow = summary?.day_low ?? price
+  const dayHigh = summary?.day_high ?? price
+  const rangeDiff = dayHigh - dayLow
+  const currentRangePct = rangeDiff > 0 ? Math.max(0, Math.min(100, ((price - dayLow) / rangeDiff) * 100)) : 50
+
   // Initialize and maintain TradingView Lightweight Charts instance
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -249,7 +255,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         requestAnimationFrame(() => {
           updateMarkerPositionsRef.current()
         })
-      } catch {}
+      } catch { }
     })
 
     if (chartContainerRef.current) {
@@ -262,7 +268,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
       if (chart) {
         try {
           chart.remove()
-        } catch {}
+        } catch { }
       }
       chartRef.current = null
       seriesRef.current = null
@@ -295,7 +301,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
       if (priceLineRef.current) {
         try {
           seriesRef.current.removePriceLine(priceLineRef.current)
-        } catch {}
+        } catch { }
         priceLineRef.current = null
       }
 
@@ -365,35 +371,35 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                 <img
                   src="https://flagcdn.com/w40/us.png"
                   alt="EE. UU."
-                  className="w-3.5 h-2.5 rounded-2xs object-cover shadow-2xs border border-black/10 dark:border-white/10"
+                  className="w-4 h-3 rounded-2xs object-cover shadow-2xs border border-black/10 dark:border-white/10"
                 />
                 <span>S&P 500 • Tiempo Real</span>
               </h3>
-              <span className="inline-flex items-center gap-1 text-[9.5px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold tracking-wide uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
                 <span className="live-dot emerald" />
                 EN DIRECTO
               </span>
               {isFetching && <LoadingDot />}
             </div>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
               <span>NYSE & CME Futures • Puente continuo</span>
             </p>
           </div>
         </div>
 
         {/* Controls: Unit Toggle (pts vs %) + Period (1D, 5D, 1M) */}
-        <div className="flex items-center gap-1.5 self-start sm:self-auto flex-wrap">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {/* Unit Toggle: Puntos vs % */}
-          <div className="flex items-center h-7 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+          <div className="flex items-center h-7.5 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             <button
               type="button"
               onClick={() => setViewMode('pts')}
               className={cn(
-                'h-full px-2 text-[10.5px] font-semibold rounded-md transition-colors flex items-center justify-center',
+                'h-full px-2.5 text-xs font-semibold rounded-md transition-colors flex items-center justify-center',
                 viewMode === 'pts'
                   ? 'bg-white dark:bg-[#333333] text-blue-600 dark:text-blue-400 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -406,7 +412,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
               type="button"
               onClick={() => setViewMode('pct')}
               className={cn(
-                'h-full px-2 text-[10.5px] font-semibold rounded-md transition-colors flex items-center justify-center',
+                'h-full px-2.5 text-xs font-semibold rounded-md transition-colors flex items-center justify-center',
                 viewMode === 'pct'
                   ? 'bg-white dark:bg-[#333333] text-blue-600 dark:text-blue-400 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -418,7 +424,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
           </div>
 
           {/* Period selector */}
-          <div className="flex items-center h-7 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
+          <div className="flex items-center h-7.5 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-[#252526] p-0.5">
             {[
               { id: '1d' as const, label: '1D' },
               { id: '5d' as const, label: '5D' },
@@ -429,7 +435,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                 type="button"
                 onClick={() => setPeriod(tab.id)}
                 className={cn(
-                  'h-full px-2 text-[10.5px] font-semibold rounded-md transition-colors flex items-center justify-center',
+                  'h-full px-2.5 text-xs font-semibold rounded-md transition-colors flex items-center justify-center',
                   period === tab.id
                     ? 'bg-white dark:bg-[#333333] text-slate-900 dark:text-white shadow-xs font-bold'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -442,58 +448,58 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         </div>
       </div>
 
-      {/* KPI Summary Header: Dual Display (Official Close vs Pre-market) or Regular Live */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1 pb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
+      {/* KPI Summary Header: Fixed locked height to eliminate layout shift on hover */}
+      <div className="h-[68px] min-h-[68px] max-h-[68px] flex items-center justify-between gap-2 mb-1 pb-2 border-b border-slate-200/60 dark:border-white/[0.06] overflow-hidden">
         {hoveredPoint ? (
           /* Hover inspection state */
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
+          <div className="flex flex-col justify-center min-w-0">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
               <span>A las {hoveredPoint.label} (Madrid)</span>
               <div className="flex items-center gap-1">
                 {hoveredPoint.time_ny && (
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                     {hoveredPoint.time_ny} NY
                   </span>
                 )}
                 {hoveredPoint.phase && (
                   <span
                     className={cn(
-                      'px-1.5 py-0.2 rounded text-[9px] font-bold border',
+                      'px-1.5 py-0.5 rounded text-[10px] font-bold border',
                       hoveredPoint.phase === 'REGULAR'
                         ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25'
                         : hoveredPoint.phase === 'PRE'
-                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25'
-                        : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/25'
+                          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25'
+                          : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/25'
                     )}
                   >
                     {hoveredPoint.phase === 'REGULAR'
                       ? 'REGULAR'
                       : hoveredPoint.phase === 'PRE'
-                      ? 'PRE-MKT'
-                      : 'AFTER-HOURS'}
+                        ? 'PRE-MKT'
+                        : 'AFTER-HOURS'}
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className="text-xl sm:text-2xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <span className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
                 {hoveredPoint.price ? fmt.num(hoveredPoint.price, 2) : '—'}
               </span>
               <span
                 className={cn(
-                  'text-xs font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs inline-flex items-center gap-0.5',
+                  'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs inline-flex items-center gap-0.5',
                   currentPct >= 0
                     ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                     : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
                 )}
               >
-                {currentPct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {currentPct >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                 <span>
                   {currentPct >= 0 ? '+' : ''}
                   {currentPct.toFixed(2)}%
                 </span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-1">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 ml-1">
                   ({currentPts >= 0 ? '+' : ''}
                   {currentPts.toFixed(2)} pts)
                 </span>
@@ -505,14 +511,14 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
           <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
             {/* 1. Official Session Close */}
             <div className="pr-3 sm:pr-4 border-r border-slate-200/70 dark:border-white/[0.08]">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 <span>Cierre Oficial • S&P 500</span>
               </div>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="text-lg sm:text-xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-xl sm:text-2xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
                   {summary.official_close_price ? fmt.num(summary.official_close_price, 2) : '—'}
                 </span>
-                <span className="text-[10.5px] font-mono text-slate-400 dark:text-slate-500">
+                <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
                   pts
                 </span>
               </div>
@@ -520,17 +526,17 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
 
             {/* 2. Live Pre-market Futures bridge */}
             <div className="pl-1 sm:pl-2">
-              <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+              <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                 <span className="live-dot warn" />
                 <span>Pre-mercado CME Futures</span>
               </div>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <span className="text-lg sm:text-xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
+                <span className="text-xl sm:text-2xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
                   {price ? fmt.num(price, 2) : '—'}
                 </span>
                 <span
                   className={cn(
-                    'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center gap-0.5',
+                    'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-md border inline-flex items-center gap-0.5',
                     changePct >= 0
                       ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                       : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
@@ -541,7 +547,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                 </span>
                 <span
                   className={cn(
-                    'text-xs font-bold font-mono',
+                    'text-xs sm:text-sm font-bold font-mono',
                     change >= 0
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-rose-600 dark:text-rose-400'
@@ -555,12 +561,12 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         ) : (
           /* Regular session display */
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
               <span>{period === '1d' ? 'Cotización Hoy' : `Periodo (${period.toUpperCase()})`}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <div className="flex items-center gap-2.5 mt-0.5 flex-wrap">
-              <span className="text-xl sm:text-2xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
+              <span className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
                 {price ? fmt.num(price, 2) : '—'}
               </span>
               <span
@@ -576,7 +582,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                   {changePct >= 0 ? '+' : ''}
                   {changePct.toFixed(2)}%
                 </span>
-                <span className="text-[11px] opacity-75">
+                <span className="text-xs opacity-75">
                   ({change >= 0 ? '+' : ''}
                   {change.toFixed(2)} pts)
                 </span>
@@ -586,15 +592,15 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         )}
 
         {/* Right Info: Base Cierre & Day Range */}
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1 shrink-0">
           <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-medium text-[11px]">Cierre Previo:</span>
-            <span className="font-mono font-bold text-xs text-slate-900 dark:text-white">
+            <span className="font-medium text-xs">Cierre Previo:</span>
+            <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">
               {prevClose ? fmt.num(prevClose, 2) : '—'}
             </span>
           </div>
           {chartPoints.length > 0 && (
-            <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white/90 dark:bg-white/[0.06] px-2 py-0.5 rounded-lg border border-slate-200/80 dark:border-white/[0.08] shadow-2xs">
+            <div className="flex items-center gap-1.5 text-xs font-mono text-slate-600 dark:text-slate-400 bg-white/90 dark:bg-white/[0.06] px-2.5 py-0.5 rounded-lg border border-slate-200/80 dark:border-white/[0.08] shadow-2xs">
               <span className="font-bold text-slate-700 dark:text-slate-300">
                 {viewMode === 'pts' ? fmt.num(minVal, 1) : `${minVal >= 0 ? '+' : ''}${minVal.toFixed(2)}%`}
               </span>
@@ -607,8 +613,8 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         </div>
       </div>
 
-      {/* TradingView Lightweight Charts Container */}
-      <div className="relative w-full flex-1 min-h-[275px] sm:min-h-[295px] select-none rounded-xl overflow-hidden border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20">
+      {/* TradingView Lightweight Charts Container: Fixed locked height */}
+      <div className="relative w-full h-[295px] min-h-[295px] max-h-[295px] select-none rounded-xl overflow-hidden border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20">
         {isLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40 rounded-xl">
             <LoadingDot />
@@ -618,7 +624,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
 
         <div
           ref={chartContainerRef}
-          className="w-full h-full min-h-[275px] sm:min-h-[295px] rounded-xl overflow-hidden"
+          className="w-full h-full rounded-xl overflow-hidden"
           onMouseLeave={() => setHoveredPoint(null)}
         />
 
@@ -659,16 +665,16 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                       isCierre
                         ? 'bg-slate-100/95 text-slate-700 border-slate-300 dark:bg-slate-800/95 dark:text-slate-300 dark:border-slate-600'
                         : isTokyo
-                        ? 'bg-rose-50/95 text-rose-800 border-rose-400/50 dark:bg-rose-950/95 dark:text-rose-300 dark:border-rose-500/50'
-                        : isEuropa
-                        ? 'bg-blue-50/95 text-blue-800 border-blue-400/50 dark:bg-blue-950/95 dark:text-blue-300 dark:border-blue-500/50'
-                        : isPre
-                        ? 'bg-indigo-50/95 text-indigo-800 border-indigo-400/50 dark:bg-indigo-950/95 dark:text-indigo-300 dark:border-indigo-500/50'
-                        : isWallStreet
-                        ? 'bg-emerald-50/95 text-emerald-800 border-emerald-400/50 dark:bg-emerald-950/95 dark:text-emerald-300 dark:border-emerald-500/50'
-                        : isAfterHours
-                        ? 'bg-amber-50/95 text-amber-800 border-amber-400/50 dark:bg-amber-950/95 dark:text-amber-300 dark:border-amber-500/50'
-                        : 'bg-slate-50/95 text-slate-800 border-slate-300 dark:bg-slate-800/95 dark:text-slate-200 dark:border-slate-600'
+                          ? 'bg-rose-50/95 text-rose-800 border-rose-400/50 dark:bg-rose-950/95 dark:text-rose-300 dark:border-rose-500/50'
+                          : isEuropa
+                            ? 'bg-blue-50/95 text-blue-800 border-blue-400/50 dark:bg-blue-950/95 dark:text-blue-300 dark:border-blue-500/50'
+                            : isPre
+                              ? 'bg-indigo-50/95 text-indigo-800 border-indigo-400/50 dark:bg-indigo-950/95 dark:text-indigo-300 dark:border-indigo-500/50'
+                              : isWallStreet
+                                ? 'bg-emerald-50/95 text-emerald-800 border-emerald-400/50 dark:bg-emerald-950/95 dark:text-emerald-300 dark:border-emerald-500/50'
+                                : isAfterHours
+                                  ? 'bg-amber-50/95 text-amber-800 border-amber-400/50 dark:bg-amber-950/95 dark:text-amber-300 dark:border-amber-500/50'
+                                  : 'bg-slate-50/95 text-slate-800 border-slate-300 dark:bg-slate-800/95 dark:text-slate-200 dark:border-slate-600'
                     )}
                   >
                     {labelText}
@@ -680,68 +686,86 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         )}
       </div>
 
-      {/* Highlights 2x2 Balanced Grid */}
+      {/* Highlights Grid: Combined Session Range Card + Session & State Cards */}
       <div className="grid grid-cols-2 gap-2 mt-0.5 pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
-        {/* 1. Máximo Día */}
-        <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            <span>Máximo Día</span>
-            <Flame className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+        {/* 1. Tarjeta Unificada de Rango de la Sesión (Ocupa las 2 columnas con barra de gradiente) */}
+        <div className="col-span-2 p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              <Flame className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>Rango de la Sesión</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-mono font-bold">
+              <span className="text-rose-600 dark:text-rose-400">
+                Mín: {dayLow ? fmt.num(dayLow, 2) : '—'}
+              </span>
+              <span className="text-slate-400 dark:text-slate-500 font-sans">↔</span>
+              <span className="text-emerald-600 dark:text-emerald-400">
+                Máx: {dayHigh ? fmt.num(dayHigh, 2) : '—'}
+              </span>
+            </div>
           </div>
-          <div className="mt-1 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-            {summary?.day_high ? fmt.num(summary.day_high, 2) : '—'}
-            <span className="text-[10px] text-slate-400 ml-1 font-normal">pts</span>
+
+          {/* Barra horizontal visual verde-roja con aguja / cursor */}
+          <div className="relative w-full pt-1.5 pb-1">
+            {/* Track de gradiente de rojo a verde pasando por ámbar */}
+            <div className="relative h-2.5 w-full rounded-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-500 overflow-hidden shadow-inner opacity-90" />
+
+            {/* Marcador / cursor en el punto actual */}
+            <div
+              className="absolute top-0.5 -translate-x-1/2 flex flex-col items-center transition-all duration-300 pointer-events-none"
+              style={{ left: `${currentRangePct}%` }}
+            >
+              <div className="w-4 h-4 rounded-full bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-md" />
+            </div>
+          </div>
+
+          {/* Leyenda inferior y porcentaje dentro del rango */}
+          <div className="flex items-center justify-between mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <span className="text-rose-600/90 dark:text-rose-400 font-semibold">0% (Mínimo)</span>
+            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+              Posición actual: {currentRangePct.toFixed(0)}%
+            </span>
+            <span className="text-emerald-600/90 dark:text-emerald-400 font-semibold">100% (Máximo)</span>
           </div>
         </div>
 
-        {/* 2. Mínimo Día */}
-        <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            <span>Mínimo Día</span>
-            <TrendingDown className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-          </div>
-          <div className="mt-1 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-            {summary?.day_low ? fmt.num(summary.day_low, 2) : '—'}
-            <span className="text-[10px] text-slate-400 ml-1 font-normal">pts</span>
-          </div>
-        </div>
-
-        {/* 3. Sesión Oficial */}
-        <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {/* 2. Sesión Wall Street */}
+        <div className="p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             <span>Sesión Wall Street</span>
-            <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+            <Clock className="w-4 h-4 text-blue-500 shrink-0" />
           </div>
-          <div className="mt-1 font-mono text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
+          <div className="mt-1 font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 truncate">
             15:30 - 22:00 CET
           </div>
         </div>
 
-        {/* 4. Estado Mercado */}
-        <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            <span>Estado NYSE</span>
-            <ShieldCheck className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+        {/* 3. Estado NYSE / CME */}
+        <div className="p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span>Estado NYSE / CME</span>
+            <ShieldCheck className="w-4 h-4 text-indigo-500 shrink-0" />
           </div>
-          <div className="mt-1 flex items-center gap-1.5">
+          <div className="mt-1 flex items-center gap-2">
             <span
               className={cn(
                 'live-dot',
                 summary?.market_state === 'REGULAR'
                   ? 'emerald'
                   : summary?.market_state === 'PRE'
-                  ? 'warn'
-                  : 'slate'
+                    ? 'warn'
+                    : 'slate'
               )}
             />
-            <span className="font-mono text-[11px] font-bold text-slate-800 dark:text-slate-200">
+            <span className="font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
               {summary?.market_state === 'REGULAR'
                 ? 'ABIERTO'
                 : summary?.market_state === 'PRE'
-                ? 'PRE-MKT'
-                : summary?.market_state === 'POST'
-                ? 'AFTER-HOURS'
-                : 'CERRADO'}
+                  ? 'PRE-MKT'
+                  : summary?.market_state === 'POST'
+                    ? 'AFTER-HOURS'
+                    : 'CERRADO'}
             </span>
           </div>
         </div>
