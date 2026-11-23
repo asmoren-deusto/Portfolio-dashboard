@@ -512,16 +512,8 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                 <span className="text-lg sm:text-xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
                   {summary.official_close_price ? fmt.num(summary.official_close_price, 2) : '—'}
                 </span>
-                <span
-                  className={cn(
-                    'text-xs font-bold font-mono',
-                    changePct >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-rose-600 dark:text-rose-400'
-                  )}
-                >
-                  {changePct >= 0 ? '+' : ''}
-                  {changePct.toFixed(2)}%
+                <span className="text-[10.5px] font-mono text-slate-400 dark:text-slate-500">
+                  pts
                 </span>
               </div>
             </div>
@@ -532,7 +524,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                 <span className="live-dot warn" />
                 <span>Pre-mercado CME Futures</span>
               </div>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 <span className="text-lg sm:text-xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
                   {price ? fmt.num(price, 2) : '—'}
                 </span>
@@ -546,6 +538,16 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                 >
                   {changePct >= 0 ? '+' : ''}
                   {changePct.toFixed(2)}%
+                </span>
+                <span
+                  className={cn(
+                    'text-xs font-bold font-mono',
+                    change >= 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
+                  )}
+                >
+                  ({change >= 0 ? '+' : ''}{change.toFixed(2)} pts)
                 </span>
               </div>
             </div>

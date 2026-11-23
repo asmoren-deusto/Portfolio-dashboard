@@ -1982,18 +1982,22 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
     q_gspc = _fetch_yahoo_chart_quote("^GSPC") or {}
     q_es = _fetch_yahoo_chart_quote("ES=F") or {}
 
-    reg_p = _clean_float(q_gspc.get("regular_price") or q_gspc.get("price")) or 6000.0
+    reg_p = _clean_float(q_gspc.get("regular_price") or q_gspc.get("price")) or 6900.0
     prev_c = _clean_float(q_gspc.get("prev_close")) or reg_p
     m_state = q_gspc.get("market_state", "CLOSED")
 
     is_pre = (m_state == "PRE")
-    es_chg = _clean_float(q_es.get("change_pct"), 0.0)
-    live_p = reg_p
-    if is_pre and reg_p and es_chg is not None:
-        live_p = round(reg_p * (1.0 + es_chg / 100.0), 2)
 
+    # In PRE-market, the official baseline close is Friday's cash close (regular_price),
+    # NOT prev_close which still points to Thursday until Wall Street opens.
+    ref_c = reg_p if is_pre else (prev_c if (prev_c and prev_c > 0) else reg_p)
+
+    es_prev = _clean_float(q_es.get("prev_close")) or 6935.0
+    es_cur = _clean_float(q_es.get("price")) or es_prev
+    es_move = (es_cur - es_prev) / es_prev if es_prev and es_prev > 0 else 0.0
+
+    live_p = round(ref_c * (1.0 + es_move), 2) if is_pre else reg_p
     cur_p = live_p or reg_p
-    ref_c = prev_c if (prev_c and prev_c > 0) else cur_p
     chg_pts = round(cur_p - ref_c, 2)
     chg_pct = round((cur_p - ref_c) / ref_c * 100.0, 2)
 
@@ -2154,6 +2158,10 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
             dedup_points.append(pt)
     dedup_points.sort(key=lambda x: x["time_unix"])
 
+    summary_prices = [pt["price"] for pt in dedup_points] if dedup_points else [cur_p]
+    day_hi = max(summary_prices) if is_pre else (_clean_float(q_gspc.get("day_high")) or max(summary_prices))
+    day_lo = min(summary_prices) if is_pre else (_clean_float(q_gspc.get("day_low")) or min(summary_prices))
+
     summary = {
         "ticker": "^GSPC",
         "name": "S&P 500 (Wall Street)",
@@ -2163,8 +2171,8 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
         "change_pct": chg_pct,
         "market_state": m_state,
         "is_pre_market": is_pre,
-        "day_high": _clean_float(q_gspc.get("day_high")) or cur_p,
-        "day_low": _clean_float(q_gspc.get("day_low")) or cur_p,
+        "day_high": round(day_hi, 2),
+        "day_low": round(day_lo, 2),
         "prev_close": ref_c,
         "period": p,
         "as_of": now_madrid.isoformat(),
