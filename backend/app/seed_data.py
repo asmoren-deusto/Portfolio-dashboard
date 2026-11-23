@@ -4509,13 +4509,13 @@ TRANSACTIONS = json.loads(r'''[
     "user_id": "asier",
     "isin": "IE00B5BMR087",
     "type": "buy",
-    "shares": 0.727103,
+    "shares": 0.728792,
     "price": 687.7,
     "amount": 501.03,
     "fees": 1.0,
     "date": "2026-11-20",
     "broker": "traderepublic",
-    "notes": "Compra a mercado Core S&P 500 USD (Acc) en Trade Republic a las 20:40 (0,727103 títulos a 687,70 €)"
+    "notes": "Compra a mercado Core S&P 500 USD (Acc) en Trade Republic a las 20:40 (0,728792 títulos a 687,70 €)"
   },
   {
     "user_id": "asier",
@@ -4528,5 +4528,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-20",
     "broker": "traderepublic",
     "notes": "Compra a mercado NVIDIA Corp en Trade Republic a las 20:40 (0,830536 acciones a 119,20 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00B5BMR087",
+    "type": "sell",
+    "shares": 0.728792,
+    "price": 720.04,
+    "amount": 523.76,
+    "fees": 1.0,
+    "date": "2026-11-23",
+    "broker": "traderepublic",
+    "notes": "Venta a mercado Core S&P 500 USD (Acc) en Trade Republic a las 17:22 (0,728792 títulos a 720,04 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "US67066G1040",
+    "type": "buy",
+    "shares": 3.418467,
+    "price": 152.68,
+    "amount": 522.93,
+    "fees": 1.0,
+    "date": "2026-11-23",
+    "broker": "traderepublic",
+    "notes": "Compra a mercado NVIDIA Corp en Trade Republic a las 17:22 (3,418467 acciones a 152,68 €)"
   }
 ]''')
