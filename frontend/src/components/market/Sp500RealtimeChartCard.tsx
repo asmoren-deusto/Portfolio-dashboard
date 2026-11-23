@@ -10,13 +10,10 @@ import {
 } from 'lightweight-charts'
 import { useAppStore } from '@/store/appStore'
 import {
-  TrendingUp,
-  TrendingDown,
   Clock,
   Activity,
   Flame,
   ShieldCheck,
-  Zap,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -58,16 +55,12 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
 
   const price = summary?.price ?? 0
   const prevClose = summary?.prev_close ?? summary?.official_close_price ?? price
-  const change = summary?.change ?? (price - prevClose)
   const changePct = summary?.change_pct ?? (prevClose ? ((price - prevClose) / prevClose) * 100 : 0)
 
   // Current inspected / active values
-  const currentPrice = hoveredPoint ? hoveredPoint.price : price
   const currentPct = hoveredPoint ? hoveredPoint.change_pct : changePct
-  const currentPts = hoveredPoint ? hoveredPoint.change_pts : change
 
   const isOverallPositive = changePct >= 0
-  const isPositive = hoveredPoint ? hoveredPoint.change_pct >= 0 : isOverallPositive
 
   // Chart refs
   const chartContainerRef = useRef<HTMLDivElement>(null)
@@ -448,7 +441,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         {hoveredPoint ? (
           /* Hover inspection state */
           <div className="flex flex-col justify-center min-w-0">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
+            <div className="min-h-[18px] text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5 flex-wrap">
               <span>A las {hoveredPoint.label} (Madrid)</span>
               <div className="flex items-center gap-1">
                 {hoveredPoint.time_ny && (
@@ -478,35 +471,35 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
             </div>
 
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-lg sm:text-xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
-                {hoveredPoint.price ? fmt.num(hoveredPoint.price, 2) : '—'}
+              <span
+                className={cn(
+                  'text-lg sm:text-xl font-black font-mono tracking-tight leading-none',
+                  currentPct >= 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400'
+                )}
+              >
+                {currentPct >= 0 ? '+' : ''}
+                {currentPct.toFixed(2)}%
               </span>
               <span
                 className={cn(
-                  'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center gap-0.5',
+                  'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center leading-none',
                   currentPct >= 0
-                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
-                    : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
+                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                    : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
                 )}
               >
-                {currentPct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                <span>
-                  {currentPct >= 0 ? '+' : ''}
-                  {currentPct.toFixed(2)}%
-                </span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-1">
-                  ({currentPts >= 0 ? '+' : ''}
-                  {currentPts.toFixed(2)} pts)
-                </span>
+                {hoveredPoint.price ? `${fmt.num(hoveredPoint.price, 2)} pts` : '—'}
               </span>
             </div>
           </div>
         ) : summary?.is_pre_market ? (
-          /* Pre-market live display with official close context */
+          /* Pre-market live display matching SimulatedPortfolioCard reference */
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 flex-wrap">
-              <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                <span className="live-dot warn" />
+            <div className="min-h-[18px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 flex-wrap text-slate-600 dark:text-slate-300">
+              <span className="flex items-center gap-1.5">
+                <span className={cn('live-dot', changePct >= 0 ? 'emerald' : 'warn')} />
                 <span>Pre-mercado CME Futures</span>
               </span>
               {summary.official_close_price && (
@@ -520,58 +513,88 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
             </div>
 
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-lg sm:text-xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
-                {price ? fmt.num(price, 2) : '—'}
-              </span>
-              <span
-                className={cn(
-                  'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center gap-1',
-                  changePct >= 0
-                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                    : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
-                )}
-              >
-                {changePct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                <span>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={`sp500-pre-pct-${period}-${changePct}`}
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -3 }}
+                  transition={{ duration: 0.2 }}
+                  className={cn(
+                    'text-lg sm:text-xl font-black font-mono tracking-tight leading-none',
+                    changePct >= 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
+                  )}
+                >
                   {changePct >= 0 ? '+' : ''}
                   {changePct.toFixed(2)}%
-                </span>
-                <span className="text-[10.5px] opacity-75 font-mono">
-                  ({change >= 0 ? '+' : ''}
-                  {change.toFixed(2)} pts)
-                </span>
-              </span>
+                </motion.span>
+              </AnimatePresence>
+
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={`sp500-pre-val-${period}-${price}`}
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -3 }}
+                  transition={{ duration: 0.2 }}
+                  className={cn(
+                    'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center leading-none',
+                    changePct >= 0
+                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                      : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
+                  )}
+                >
+                  {price ? `${fmt.num(price, 2)} pts` : '—'}
+                </motion.span>
+              </AnimatePresence>
             </div>
           </div>
         ) : (
-          /* Regular session display */
+          /* Regular session display matching SimulatedPortfolioCard reference */
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <div className="min-h-[18px] text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+              <span className={cn('live-dot', changePct >= 0 ? 'emerald' : 'warn')} />
               <span>{period === '1d' ? 'Cotización Hoy' : `Periodo (${period.toUpperCase()})`}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-lg sm:text-xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
-                {price ? fmt.num(price, 2) : '—'}
-              </span>
-              <span
-                className={cn(
-                  'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center gap-1',
-                  changePct >= 0
-                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
-                    : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
-                )}
-              >
-                {changePct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                <span>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={`sp500-pct-${period}-${changePct}`}
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -3 }}
+                  transition={{ duration: 0.2 }}
+                  className={cn(
+                    'text-lg sm:text-xl font-black font-mono tracking-tight leading-none',
+                    changePct >= 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
+                  )}
+                >
                   {changePct >= 0 ? '+' : ''}
                   {changePct.toFixed(2)}%
-                </span>
-                <span className="text-[10.5px] opacity-75 font-mono">
-                  ({change >= 0 ? '+' : ''}
-                  {change.toFixed(2)} pts)
-                </span>
-              </span>
+                </motion.span>
+              </AnimatePresence>
+
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={`sp500-val-${period}-${price}`}
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -3 }}
+                  transition={{ duration: 0.2 }}
+                  className={cn(
+                    'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center leading-none',
+                    changePct >= 0
+                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                      : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
+                  )}
+                >
+                  {price ? `${fmt.num(price, 2)} pts` : '—'}
+                </motion.span>
+              </AnimatePresence>
             </div>
           </div>
         )}
