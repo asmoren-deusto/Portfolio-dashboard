@@ -194,14 +194,14 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-3 items-stretch">
         
         {/* Left Column (lg:col-span-5): Exact S&P 500 Real-Time Chart with Identical Style & Functionality */}
-        <div className="lg:col-span-5 flex flex-col">
+        <div className="lg:col-span-5 flex flex-col max-h-[545px]">
           <Sp500RealtimeChartCard onSelectStock={onSelectIndex} />
         </div>
 
         {/* Right Column (lg:col-span-7): Organized Regional Global Market Cards */}
-        <div className="lg:col-span-7 flex flex-col rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 gap-2.5">
+        <div className="lg:col-span-7 flex flex-col max-h-[545px] rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 gap-2.5">
           {/* Subheader bar inside the right column */}
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/[0.06] shrink-0">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                 {selectedRegion === 'ALL'
@@ -271,7 +271,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
                         <div
                           key={stock.ticker}
                           onClick={() => onSelectIndex?.(stock)}
-                          className="group/idx p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:bg-white dark:hover:bg-white/[0.05] transition-all cursor-pointer shadow-2xs hover:shadow-sm relative flex flex-col justify-between"
+                          className="group/idx p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:bg-white dark:hover:bg-white/[0.05] transition-all cursor-pointer shadow-2xs hover:shadow-sm relative flex flex-col justify-between"
                         >
                           {/* Top: Flag/Icon + Name + Session Status */}
                           <div>
