@@ -603,8 +603,8 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         </div>
       </div>
 
-      {/* TradingView Lightweight Charts Container: Fixed locked height */}
-      <div className="relative w-full h-[295px] min-h-[295px] max-h-[295px] select-none rounded-xl overflow-hidden border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20">
+      {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
+      <div className="relative w-full flex-1 min-h-[260px] sm:min-h-[280px] select-none rounded-xl overflow-hidden border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20">
         {isLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40 rounded-xl">
             <LoadingDot />
@@ -677,7 +677,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
       </div>
 
       {/* Highlights Grid: Combined Session Range Card + Session & State Cards */}
-      <div className="grid grid-cols-2 gap-2 mt-0.5 pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
+      <div className="grid grid-cols-2 gap-2 mt-auto pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
         {/* 1. Tarjeta Unificada de Rango de la Sesión (Ocupa las 2 columnas con barra de gradiente) */}
         <div className="col-span-2 p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
           <div className="flex items-center justify-between mb-1.5">
