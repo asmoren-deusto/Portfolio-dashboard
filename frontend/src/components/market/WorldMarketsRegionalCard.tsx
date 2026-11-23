@@ -194,12 +194,12 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-3 items-stretch">
         
         {/* Left Column (lg:col-span-5): Exact S&P 500 Real-Time Chart with Identical Style & Functionality */}
-        <div className="lg:col-span-5 flex flex-col max-h-[545px]">
+        <div className="lg:col-span-5 flex flex-col">
           <Sp500RealtimeChartCard onSelectStock={onSelectIndex} />
         </div>
 
         {/* Right Column (lg:col-span-7): Organized Regional Global Market Cards */}
-        <div className="lg:col-span-7 flex flex-col max-h-[545px] rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 pb-3.5 sm:pb-4 gap-2.5">
+        <div className="lg:col-span-7 flex flex-col rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 gap-2.5">
           {/* Subheader bar inside the right column */}
           <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/[0.06] shrink-0">
             <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
           </div>
 
           {/* Scrollable container of cards with organized regional sections */}
-          <div className="space-y-2 sm:space-y-2.5 flex-1 min-h-0 overflow-y-auto pr-1 pb-1 scrollbar-thin">
+          <div className="space-y-2 sm:space-y-2.5 flex-1 min-h-0 max-h-[500px] sm:max-h-[530px] overflow-y-auto pr-1 scrollbar-thin">
             {regionsToDisplay.map((region) => {
               const regionStocks = region.tickers
                 .map((t) => indexMap.get(t))

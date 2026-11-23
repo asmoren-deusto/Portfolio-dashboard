@@ -359,7 +359,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 pb-3.5 sm:pb-4 gap-2.5 h-full max-h-[545px]',
+        'flex flex-col rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] p-3 sm:p-3.5 gap-2.5 h-full',
         className
       )}
     >
@@ -604,7 +604,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
       </div>
 
       {/* TradingView Lightweight Charts HTML5 Canvas Container (100% Proportional, No Distortion) */}
-      <div className="relative w-full h-[200px] min-h-[200px] max-h-[200px] select-none rounded-xl overflow-hidden border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20">
+      <div className="relative w-full flex-1 min-h-[275px] sm:min-h-[295px] select-none rounded-xl overflow-hidden border border-slate-200/70 dark:border-white/[0.06] bg-slate-100/40 dark:bg-black/20">
         {isLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center text-xs text-slate-400 bg-slate-50/50 dark:bg-black/40 rounded-xl">
             <LoadingDot />
