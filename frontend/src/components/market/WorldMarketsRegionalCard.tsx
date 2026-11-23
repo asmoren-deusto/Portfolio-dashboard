@@ -203,6 +203,9 @@ export const WorldMarketsRegionalCard: React.FC<WorldMarketsRegionalCardProps> =
           {/* Subheader bar inside the right column */}
           <div className="flex items-center justify-between gap-2 h-auto sm:h-10 pb-2 border-b border-slate-200/60 dark:border-white/[0.06] shrink-0">
             <div className="flex items-center gap-2">
+              <div className="p-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+                <Globe className="w-3.5 h-3.5" />
+              </div>
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                 {selectedRegion === 'ALL'
                   ? 'Mercados Internacionales & Materias Primas'
