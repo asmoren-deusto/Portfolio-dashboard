@@ -448,23 +448,23 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         </div>
       </div>
 
-      {/* KPI Summary Header: Natural two-line layout without clipping */}
-      <div className="min-h-[58px] flex items-center justify-between gap-2 mb-1 pb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
+      {/* KPI Summary Header: Harmonized compact typography */}
+      <div className="flex items-center justify-between gap-2 mb-1 pb-2 border-b border-slate-200/60 dark:border-white/[0.06]">
         {hoveredPoint ? (
           /* Hover inspection state */
           <div className="flex flex-col justify-center min-w-0">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
               <span>A las {hoveredPoint.label} (Madrid)</span>
               <div className="flex items-center gap-1">
                 {hoveredPoint.time_ny && (
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                     {hoveredPoint.time_ny} NY
                   </span>
                 )}
                 {hoveredPoint.phase && (
                   <span
                     className={cn(
-                      'px-1.5 py-0.5 rounded text-[10px] font-bold border',
+                      'px-1.5 py-0.2 rounded text-[9px] font-bold border',
                       hoveredPoint.phase === 'REGULAR'
                         ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25'
                         : hoveredPoint.phase === 'PRE'
@@ -483,23 +483,23 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
             </div>
 
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
+              <span className="text-lg sm:text-xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
                 {hoveredPoint.price ? fmt.num(hoveredPoint.price, 2) : '—'}
               </span>
               <span
                 className={cn(
-                  'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs inline-flex items-center gap-0.5',
+                  'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center gap-0.5',
                   currentPct >= 0
                     ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                     : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
                 )}
               >
-                {currentPct >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                {currentPct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 <span>
                   {currentPct >= 0 ? '+' : ''}
                   {currentPct.toFixed(2)}%
                 </span>
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 ml-1">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-1">
                   ({currentPts >= 0 ? '+' : ''}
                   {currentPts.toFixed(2)} pts)
                 </span>
@@ -509,8 +509,8 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         ) : summary?.is_pre_market ? (
           /* Pre-market live display with official close context */
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 flex-wrap">
-              <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+            <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 flex-wrap">
+              <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
                 <span className="live-dot warn" />
                 <span>Pre-mercado CME Futures</span>
               </span>
@@ -518,30 +518,30 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                 <>
                   <span className="text-slate-300 dark:text-white/20">•</span>
                   <span className="text-slate-400 dark:text-slate-500 font-normal normal-case">
-                    Cierre Oficial: <strong className="font-mono font-bold text-slate-600 dark:text-slate-300">{fmt.num(summary.official_close_price, 2)} pts</strong>
+                    Cierre Oficial: <strong className="font-mono font-semibold text-slate-600 dark:text-slate-300">{fmt.num(summary.official_close_price, 2)} pts</strong>
                   </span>
                 </>
               )}
             </div>
 
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
+              <span className="text-lg sm:text-xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
                 {price ? fmt.num(price, 2) : '—'}
               </span>
               <span
                 className={cn(
-                  'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs inline-flex items-center gap-1',
+                  'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center gap-1',
                   changePct >= 0
                     ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                     : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
                 )}
               >
-                {changePct >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                {changePct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 <span>
                   {changePct >= 0 ? '+' : ''}
                   {changePct.toFixed(2)}%
                 </span>
-                <span className="text-xs opacity-75">
+                <span className="text-[10.5px] opacity-75 font-mono">
                   ({change >= 0 ? '+' : ''}
                   {change.toFixed(2)} pts)
                 </span>
@@ -551,28 +551,28 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         ) : (
           /* Regular session display */
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
               <span>{period === '1d' ? 'Cotización Hoy' : `Periodo (${period.toUpperCase()})`}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
-            <div className="flex items-center gap-2.5 mt-0.5 flex-wrap">
-              <span className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <span className="text-lg sm:text-xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white">
                 {price ? fmt.num(price, 2) : '—'}
               </span>
               <span
                 className={cn(
-                  'text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-lg border shadow-2xs inline-flex items-center gap-1',
+                  'text-xs font-bold font-mono px-1.5 py-0.5 rounded-md border inline-flex items-center gap-1',
                   changePct >= 0
                     ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
                     : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25'
                 )}
               >
-                {changePct >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                {changePct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 <span>
                   {changePct >= 0 ? '+' : ''}
                   {changePct.toFixed(2)}%
                 </span>
-                <span className="text-xs opacity-75">
+                <span className="text-[10.5px] opacity-75 font-mono">
                   ({change >= 0 ? '+' : ''}
                   {change.toFixed(2)} pts)
                 </span>
@@ -583,14 +583,14 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
 
         {/* Right Info: Base Cierre & Day Range */}
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-medium text-xs">Cierre Previo:</span>
-            <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">
+          <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+            <span className="font-medium text-[10.5px]">Cierre Previo:</span>
+            <span className="font-mono font-bold text-xs text-slate-900 dark:text-white">
               {prevClose ? fmt.num(prevClose, 2) : '—'}
             </span>
           </div>
           {chartPoints.length > 0 && (
-            <div className="flex items-center gap-1.5 text-xs font-mono text-slate-600 dark:text-slate-400 bg-white/90 dark:bg-white/[0.06] px-2.5 py-0.5 rounded-lg border border-slate-200/80 dark:border-white/[0.08] shadow-2xs">
+            <div className="flex items-center gap-1.5 text-[10.5px] font-mono text-slate-600 dark:text-slate-400 bg-white/90 dark:bg-white/[0.06] px-2 py-0.5 rounded-lg border border-slate-200/80 dark:border-white/[0.08] shadow-2xs">
               <span className="font-bold text-slate-700 dark:text-slate-300">
                 {viewMode === 'pts' ? fmt.num(minVal, 1) : `${minVal >= 0 ? '+' : ''}${minVal.toFixed(2)}%`}
               </span>
