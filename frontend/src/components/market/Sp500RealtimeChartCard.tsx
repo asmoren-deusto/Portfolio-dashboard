@@ -679,13 +679,13 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
       {/* Highlights Grid: Combined Session Range Card + Session & State Cards */}
       <div className="grid grid-cols-2 gap-2 mt-0.5 pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
         {/* 1. Tarjeta Unificada de Rango de la Sesión (Ocupa las 2 columnas con barra de gradiente) */}
-        <div className="col-span-2 p-2.5 sm:p-3 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <Flame className="w-4 h-4 text-amber-500 shrink-0" />
+        <div className="col-span-2 p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span>Rango de la Sesión</span>
             </div>
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-mono font-bold">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono font-bold">
               <span className="text-rose-600 dark:text-rose-400">
                 Mín: {dayLow ? fmt.num(dayLow, 2) : '—'}
               </span>
@@ -697,21 +697,21 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
           </div>
 
           {/* Barra horizontal visual verde-roja con aguja / cursor */}
-          <div className="relative w-full pt-1.5 pb-1">
+          <div className="relative w-full pt-1 pb-0.5">
             {/* Track de gradiente de rojo a verde pasando por ámbar */}
-            <div className="relative h-2.5 w-full rounded-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-500 overflow-hidden shadow-inner opacity-90" />
+            <div className="relative h-2 w-full rounded-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-500 overflow-hidden shadow-inner opacity-90" />
 
             {/* Marcador / cursor en el punto actual */}
             <div
-              className="absolute top-0.5 -translate-x-1/2 flex flex-col items-center transition-all duration-300 pointer-events-none"
+              className="absolute top-0 -translate-x-1/2 flex flex-col items-center transition-all duration-300 pointer-events-none"
               style={{ left: `${currentRangePct}%` }}
             >
-              <div className="w-4 h-4 rounded-full bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-md" />
+              <div className="w-3.5 h-3.5 rounded-full bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-md" />
             </div>
           </div>
 
           {/* Leyenda inferior y porcentaje dentro del rango */}
-          <div className="flex items-center justify-between mt-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <div className="flex items-center justify-between mt-1 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
             <span className="text-rose-600/90 dark:text-rose-400 font-semibold">0% (Mínimo)</span>
             <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
               Posición actual: {currentRangePct.toFixed(0)}%
@@ -721,23 +721,23 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
         </div>
 
         {/* 2. Sesión Wall Street */}
-        <div className="p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             <span>Sesión Wall Street</span>
-            <Clock className="w-4 h-4 text-blue-500 shrink-0" />
+            <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0" />
           </div>
-          <div className="mt-1 font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 truncate">
+          <div className="mt-1 font-mono text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 truncate">
             15:30 - 22:00 CET
           </div>
         </div>
 
         {/* 3. Estado NYSE / CME */}
-        <div className="p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
-          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] shadow-2xs">
+          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             <span>Estado NYSE / CME</span>
-            <ShieldCheck className="w-4 h-4 text-indigo-500 shrink-0" />
+            <ShieldCheck className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
           </div>
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-1 flex items-center gap-1.5">
             <span
               className={cn(
                 'live-dot',
@@ -748,7 +748,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                     : 'slate'
               )}
             />
-            <span className="font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+            <span className="font-mono text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200">
               {summary?.market_state === 'REGULAR'
                 ? 'ABIERTO'
                 : summary?.market_state === 'PRE'
