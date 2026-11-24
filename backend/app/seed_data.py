@@ -4592,5 +4592,17 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-20",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232191857918, orden 0232191857918, coste fiscal originario 3.571,40 € de valor 3.889,66 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "US67066G1040",
+    "type": "sell",
+    "shares": 20.747225,
+    "price": 144.58,
+    "amount": 2998.63,
+    "fees": 1.0,
+    "date": "2026-11-24",
+    "broker": "traderepublic",
+    "notes": "Venta orden stop NVIDIA Corp en Trade Republic a las 10:54 (20,747225 acciones a 144,58 €, beneficio +15,70 € / +0,53%)"
   }
 ]''')
