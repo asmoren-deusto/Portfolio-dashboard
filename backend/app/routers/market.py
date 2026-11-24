@@ -2067,67 +2067,85 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
     if p == "1d":
         gspc_s = closes["^GSPC"] if (isinstance(closes, pd.DataFrame) and "^GSPC" in closes) else None
         es_s = closes["ES=F"] if (isinstance(closes, pd.DataFrame) and "ES=F" in closes) else None
-        es_prev = _clean_float(q_es.get("prev_close")) or (float(es_s.dropna().iloc[0]) if es_s is not None and not es_s.dropna().empty else 1.0)
 
         now_ny_d = now_ny.date()
-        e_today = es_s[es_s.index.map(lambda x: x.astimezone(ny_tz).date() == now_ny_d)].dropna() if es_s is not None else pd.Series(dtype=float)
-        g_today = gspc_s[gspc_s.index.map(lambda x: x.astimezone(ny_tz).date() == now_ny_d)].dropna() if gspc_s is not None else pd.Series(dtype=float)
+        is_weekday = (now_madrid.weekday() < 5)
 
-        is_active_today = (now_madrid.weekday() < 5) and (not e_today.empty or not g_today.empty or is_pre)
+        # Match /simulated-portfolio exact 1D timeline: from yesterday's 22:00 Madrid (US close) up to now
+        past_dates = sorted(list(set(
+            idx.astimezone(madrid_tz).date()
+            for idx in closes.index
+            if idx.astimezone(madrid_tz).date() < now_madrid.date()
+        )))
+        yesterday_madrid_date = past_dates[-1] if past_dates else None
 
-        if is_active_today:
-            # Active weekday session (today)
-            t_tokyo = int(datetime(now_madrid.year, now_madrid.month, now_madrid.day, 1, 0, tzinfo=madrid_tz).timestamp())
-            t_europa = int(datetime(now_madrid.year, now_madrid.month, now_madrid.day, 9, 0, tzinfo=madrid_tz).timestamp())
-            t_pre = int(datetime(now_madrid.year, now_madrid.month, now_madrid.day, 10, 0, tzinfo=madrid_tz).timestamp())
-            t_ny = int(datetime(now_madrid.year, now_madrid.month, now_madrid.day, 15, 30, tzinfo=madrid_tz).timestamp())
+        today_idxs = [
+            idx for idx in closes.index
+            if (
+                yesterday_madrid_date
+                and idx.astimezone(madrid_tz).date() == yesterday_madrid_date
+                and idx.astimezone(madrid_tz).hour >= 22
+            )
+            or (idx.astimezone(madrid_tz).date() == now_madrid.date())
+        ]
 
-            session_markers.append({"time_unix": t_tokyo, "label": "01:00 • Tokio", "type": "tokyo", "color": "#e11d48", "phase": "REGULAR"})
-            session_markers.append({"time_unix": t_europa, "label": "09:00 • Europa", "type": "europa", "color": "#2563eb", "phase": "REGULAR"})
-            session_markers.append({"time_unix": t_pre, "label": "10:00 • Pre-market", "type": "pre_market", "color": "#6366f1", "phase": "PRE"})
-            session_markers.append({"time_unix": t_ny, "label": "15:30 • Wall Street", "type": "regular_open", "color": "#10b981", "phase": "REGULAR"})
+        is_active_today = is_weekday and (len(today_idxs) >= 2 or is_pre)
 
-            if not g_today.empty:
-                # Regular session is open or has bars today
-                for dt, pt_val in g_today.items():
-                    dt_m = dt.astimezone(madrid_tz)
-                    dt_n = dt.astimezone(ny_tz)
-                    p_val = round(float(pt_val), 2)
-                    pt_chg_pts = round(p_val - ref_c, 2)
-                    pt_chg_pct = round((p_val - ref_c) / ref_c * 100.0, 2)
-                    points.append({
-                        "time": dt_m.isoformat(),
-                        "time_unix": int(dt.timestamp()),
-                        "label": dt_m.strftime("%H:%M"),
-                        "time_ny": dt_n.strftime("%H:%M"),
-                        "date": dt_m.strftime("%Y-%m-%d"),
-                        "phase": "REGULAR",
-                        "price": p_val,
-                        "change_pct": pt_chg_pct,
-                        "change_pts": pt_chg_pts,
-                    })
-            elif not e_today.empty:
-                # Pre-market: project S&P 500 from ES=F futures
-                for dt, ep in e_today.items():
-                    dt_m = dt.astimezone(madrid_tz)
-                    dt_n = dt.astimezone(ny_tz)
-                    ep_val = float(ep)
-                    es_move = (ep_val - es_prev) / es_prev if es_prev and es_prev > 0 else 0.0
-                    proj_p = round(ref_c * (1.0 + es_move), 2)
-                    pt_chg_pts = round(proj_p - ref_c, 2)
-                    pt_chg_pct = round((proj_p - ref_c) / ref_c * 100.0, 2)
-                    points.append({
-                        "time": dt_m.isoformat(),
-                        "time_unix": int(dt.timestamp()),
-                        "label": dt_m.strftime("%H:%M"),
-                        "time_ny": dt_n.strftime("%H:%M"),
-                        "date": dt_m.strftime("%Y-%m-%d"),
-                        "phase": "PRE",
-                        "price": proj_p,
-                        "change_pct": pt_chg_pct,
-                        "change_pts": pt_chg_pts,
-                    })
-            
+        if is_active_today and today_idxs:
+            # Anchor ES=F at yesterday's 22:00 Madrid close so overnight projection starts cleanly at ref_c (0.00%)
+            es_anchor = _clean_float(q_es.get("prev_close"))
+            if es_s is not None:
+                es_in_window = es_s.loc[today_idxs].dropna()
+                if not es_in_window.empty and (not es_anchor or es_anchor <= 0):
+                    es_anchor = float(es_in_window.iloc[0])
+                elif not es_in_window.empty and yesterday_madrid_date:
+                    y_close_bars = es_in_window[es_in_window.index.map(
+                        lambda x: x.astimezone(madrid_tz).date() == yesterday_madrid_date and x.astimezone(madrid_tz).hour == 22
+                    )]
+                    if not y_close_bars.empty:
+                        es_anchor = float(y_close_bars.iloc[0])
+            if not es_anchor or es_anchor <= 0:
+                es_anchor = 1.0
+
+            es_ffill = es_s.loc[today_idxs].ffill().bfill() if es_s is not None else None
+            gspc_win = gspc_s.loc[today_idxs] if gspc_s is not None else None
+
+            for idx in today_idxs:
+                dt_m = idx.astimezone(madrid_tz)
+                dt_n = idx.astimezone(ny_tz)
+                mins_ny = dt_n.hour * 60 + dt_n.minute
+                is_today_ny = (dt_n.date() == now_ny_d)
+                is_regular_bar = is_today_ny and (9 * 60 + 30 <= mins_ny < 16 * 60)
+                is_post_bar = is_today_ny and (mins_ny >= 16 * 60)
+
+                p_val = None
+                if is_regular_bar and gspc_win is not None and not pd.isna(gspc_win.loc[idx]):
+                    p_val = round(float(gspc_win.loc[idx]), 2)
+                elif es_ffill is not None and not pd.isna(es_ffill.loc[idx]):
+                    ep_val = float(es_ffill.loc[idx])
+                    es_mv = (ep_val - es_anchor) / es_anchor
+                    p_val = round(ref_c * (1.0 + es_mv), 2)
+                elif gspc_win is not None and not pd.isna(gspc_win.loc[idx]):
+                    p_val = round(float(gspc_win.loc[idx]), 2)
+
+                if p_val is None or p_val <= 0:
+                    continue
+
+                pt_chg_pts = round(p_val - ref_c, 2)
+                pt_chg_pct = round((p_val - ref_c) / ref_c * 100.0, 2)
+                phase = "REGULAR" if is_regular_bar else ("POST" if is_post_bar else "PRE")
+                points.append({
+                    "time": dt_m.isoformat(),
+                    "time_unix": int(idx.timestamp()),
+                    "label": dt_m.strftime("%H:%M"),
+                    "time_ny": dt_n.strftime("%H:%M"),
+                    "date": dt_m.strftime("%Y-%m-%d"),
+                    "phase": phase,
+                    "price": p_val,
+                    "change_pct": pt_chg_pct,
+                    "change_pts": pt_chg_pts,
+                })
+
             # Ensure latest live quote point is present
             now_unix = int(now_madrid.timestamp())
             if not points or (now_unix - points[-1]["time_unix"] >= 120):
@@ -2141,6 +2159,77 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
                     "price": cur_p,
                     "change_pct": chg_pct,
                     "change_pts": chg_pts,
+                })
+
+            # Identical 6 international session markers as /simulated-portfolio (Madrid time)
+            if yesterday_madrid_date:
+                dt_yesterday_close = datetime.combine(
+                    yesterday_madrid_date, datetime.min.time().replace(hour=22)
+                ).replace(tzinfo=madrid_tz)
+                session_markers.append({
+                    "time_unix": int(dt_yesterday_close.timestamp()),
+                    "label": "22:00 • Cierre Ayer",
+                    "type": "cierre_ayer",
+                    "color": "#64748b",
+                    "phase": "CLOSED",
+                })
+
+            t_tokyo = int(now_madrid.replace(hour=1, minute=0, second=0, microsecond=0).timestamp())
+            if now_unix >= t_tokyo - 300:
+                session_markers.append({
+                    "time_unix": t_tokyo,
+                    "label": "01:00 • Tokio",
+                    "type": "tokyo",
+                    "color": "#e11d48",
+                    "phase": "REGULAR",
+                })
+
+            t_europa = int(now_madrid.replace(hour=9, minute=0, second=0, microsecond=0).timestamp())
+            if now_unix >= t_europa - 300:
+                session_markers.append({
+                    "time_unix": t_europa,
+                    "label": "09:00 • Europa",
+                    "type": "europa",
+                    "color": "#2563eb",
+                    "phase": "REGULAR",
+                })
+
+            t_pre = int(now_madrid.replace(hour=10, minute=0, second=0, microsecond=0).timestamp())
+            if now_unix >= t_pre - 300:
+                session_markers.append({
+                    "time_unix": t_pre,
+                    "label": "10:00 • Pre-market",
+                    "type": "pre_market",
+                    "color": "#6366f1",
+                    "phase": "PRE",
+                })
+
+            dt_today_ny_open = datetime.combine(
+                now_ny_d, datetime.min.time().replace(hour=9, minute=30)
+            ).replace(tzinfo=ny_tz)
+            dt_mad_open = dt_today_ny_open.astimezone(madrid_tz)
+            t_ny = int(dt_mad_open.timestamp())
+            if now_unix >= t_ny - 300:
+                session_markers.append({
+                    "time_unix": t_ny,
+                    "label": f"{dt_mad_open.strftime('%H:%M')} • Wall Street",
+                    "type": "regular_open",
+                    "color": "#10b981",
+                    "phase": "REGULAR",
+                })
+
+            dt_today_ny_close = datetime.combine(
+                now_ny_d, datetime.min.time().replace(hour=16, minute=0)
+            ).replace(tzinfo=ny_tz)
+            dt_mad_close = dt_today_ny_close.astimezone(madrid_tz)
+            t_post = int(dt_mad_close.timestamp())
+            if now_unix >= t_post - 300:
+                session_markers.append({
+                    "time_unix": t_post,
+                    "label": f"{dt_mad_close.strftime('%H:%M')} • After-Hours",
+                    "type": "post_market",
+                    "color": "#f59e0b",
+                    "phase": "POST",
                 })
         else:
             # Weekend or closed: display last completed regular session (e.g. Friday)
