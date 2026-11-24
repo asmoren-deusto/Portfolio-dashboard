@@ -606,10 +606,17 @@ export interface PortfolioAuditAdvice {
 }
 
 export interface ScoreBreakdownItem {
-  id: 'regions' | 'top_region' | 'sectors' | 'top3'
+  id:
+    | 'geo_alignment'
+    | 'sector_balance'
+    | 'position_concentration'
+    | 'cost_efficiency'
+    | 'currency_balance'
+    | 'asset_architecture'
   label: string
   points: number
   maxPoints: number
+  status: 'optimal' | 'good' | 'warning'
   currentText: string
   detailText: string
 }
@@ -1033,87 +1040,306 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     }
   })
 
-  // 7. Calculate Diversification Health Score (0 - 100) with transparent pillar breakdown
-  const activeRegions = geographicBreakdown.filter((g) => g.portfolioWeight >= 2.0).length
-  const missingRegions = geographicBreakdown
-    .filter((g) => g.portfolioWeight < 2.0 && g.region.id !== 'other')
-    .map((g) => g.region.shortName)
-  const regionPts =
-    activeRegions >= 5 ? 35 : activeRegions === 4 ? 30 : activeRegions === 3 ? 22 : 12
+  // 7. Weighted TER Calculation (needed for Institutional Health Score & Audit)
+  let terAccum = 0
+  let terTotalWeight = 0
+  for (const pos of validPositions) {
+    const val = pos.current_value || 0
+    if (typeof pos.ter === 'number' && pos.ter >= 0) {
+      terAccum += pos.ter * val
+      terTotalWeight += val
+    } else if (pos.asset_type === 'cash' || pos.asset_type === 'bond' || pos.asset_type === 'stock') {
+      terTotalWeight += val
+    }
+  }
+  const weightedTer = terTotalWeight > 0 ? terAccum / terTotalWeight : 0.18
 
-  const topGeoWeight = geographicBreakdown[0]?.portfolioWeight || 100
-  const topGeoName = geographicBreakdown[0]?.region.shortName || 'Región líder'
-  const topGeoPts =
-    topGeoWeight <= 68 ? 35 : topGeoWeight <= 78 ? 28 : topGeoWeight <= 88 ? 18 : 8
+  // 8. Institutional 6-Pillar Diversification & Portfolio Health Score (0 - 100)
+  // Evaluates Equity sleeve separately for Geo/Sector purity so EUR bonds/cash don't distort equity metrics.
+  const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x))
+  const equityValue = assetClassValues['equity'] || 0
+  const useEquitySleeve = equityValue >= totalValue * 0.15
+  const eqBase = useEquitySleeve ? equityValue : totalValue
 
-  const activeSectors = sectorBreakdown.filter((s) => s.portfolioWeight >= 4.0).length
-  const sectorPts = activeSectors >= 7 ? 15 : activeSectors >= 5 ? 12 : 7
+  const geoEqValues: Record<string, number> = {}
+  const secEqValues: Record<string, number> = {}
+  let singleStockMaxPct = 0
+  let singleSectorFundMaxPct = 0
+  let broadGlobalVehiclePct = 0
 
+  for (const pos of validPositions) {
+    const pVal = pos.current_value || 0
+    const wPct = (pVal / totalValue) * 100
+    const tax = resolveAssetTaxonomy(pos)
+
+    if ((useEquitySleeve && tax.assetClass === 'equity') || !useEquitySleeve) {
+      for (const [rId, rShare] of Object.entries(tax.geo)) {
+        geoEqValues[rId] = (geoEqValues[rId] || 0) + pVal * rShare
+      }
+      for (const [sId, sShare] of Object.entries(tax.sectors)) {
+        secEqValues[sId] = (secEqValues[sId] || 0) + pVal * sShare
+      }
+    }
+
+    const isSingleStockOrCrypto =
+      pos.asset_type === 'stock' || pos.asset_type === 'crypto' || tax.assetClass === 'crypto'
+    if (isSingleStockOrCrypto) {
+      singleStockMaxPct = Math.max(singleStockMaxPct, wPct)
+    }
+
+    const maxSecShare = Math.max(0, ...Object.values(tax.sectors))
+    if (tax.assetClass === 'equity' && maxSecShare >= 0.7 && !isSingleStockOrCrypto) {
+      singleSectorFundMaxPct = Math.max(singleSectorFundMaxPct, wPct)
+    }
+
+    const broadRegionCount = Object.entries(tax.geo).filter(([k, share]) => k !== 'other' && share >= 0.05).length
+    if (tax.assetClass === 'equity' && broadRegionCount >= 3 && maxSecShare < 0.4) {
+      broadGlobalVehiclePct += wPct
+    }
+  }
+
+  // Pillar 1: Diversificación Geográfica en RV vs MSCI ACWI (20 pts)
+  const eqGeoPct: Record<string, number> = {}
+  for (const reg of WORLD_GEO_BENCHMARK) {
+    eqGeoPct[reg.id] = ((geoEqValues[reg.id] || 0) / eqBase) * 100
+  }
+  const geoActiveShare =
+    0.5 * WORLD_GEO_BENCHMARK.reduce((acc, reg) => acc + Math.abs((eqGeoPct[reg.id] || 0) - reg.worldWeight), 0)
+  const geoAsPts = 12 * clamp(1 - Math.max(0, geoActiveShare - 12) / 40, 0, 1)
+
+  const naEq = eqGeoPct['north_america'] || 0
+  const euEq = eqGeoPct['europe'] || 0
+  const emEq = eqGeoPct['emerging'] || 0
+  const asiaDevEq = (eqGeoPct['japan'] || 0) + (eqGeoPct['pacific'] || 0)
+
+  const geoBlockPts =
+    (naEq >= 20 ? 2 : naEq >= 10 ? 1 : 0) +
+    (euEq >= 8 ? 2 : euEq >= 4 ? 1 : 0) +
+    (emEq >= 5 ? 2 : emEq >= 2 ? 1 : 0) +
+    (asiaDevEq >= 4 ? 2 : asiaDevEq >= 2 ? 1 : 0)
+  const coveredGeoBlocks =
+    (naEq >= 20 ? 1 : 0) + (euEq >= 8 ? 1 : 0) + (emEq >= 5 ? 1 : 0) + (asiaDevEq >= 4 ? 1 : 0)
+  const missingGeoBlocks: string[] = []
+  if (naEq < 20) missingGeoBlocks.push('Norteamérica')
+  if (euEq < 8) missingGeoBlocks.push('Europa')
+  if (emEq < 5) missingGeoBlocks.push('Emergentes')
+  if (asiaDevEq < 4) missingGeoBlocks.push('Asia-Pacífico')
+
+  let geoScore = Math.round(geoAsPts + geoBlockPts)
+  if (!useEquitySleeve) geoScore = Math.min(geoScore, 8)
+  geoScore = clamp(geoScore, 0, 20)
+
+  // Pillar 2: Equilibrio Sectorial y Macro en RV (20 pts)
+  const eqSecPct: Record<string, number> = {}
+  for (const sec of WORLD_SECTOR_BENCHMARK) {
+    eqSecPct[sec.id] = ((secEqValues[sec.id] || 0) / eqBase) * 100
+  }
+  const eqSectorHhi = Object.values(eqSecPct).reduce((acc, w) => acc + w * w, 0)
+  const hhiPts = 12 * clamp(1 - Math.max(0, eqSectorHhi - 1450) / 1800, 0, 1)
+
+  const eqDefW = defensiveSectorIds.reduce((acc, id) => acc + (eqSecPct[id] || 0), 0)
+  const eqCycW = cyclicalSectorIds.reduce((acc, id) => acc + (eqSecPct[id] || 0), 0)
+  const eqSenW = sensitiveSectorIds.reduce((acc, id) => acc + (eqSecPct[id] || 0), 0)
+  const macroDrift = 0.5 * (Math.abs(eqSenW - 47.9) + Math.abs(eqCycW - 29.0) + Math.abs(eqDefW - 23.1))
+  const macroPts = 8 * clamp(1 - Math.max(0, macroDrift - 4) / 24, 0, 1)
+
+  let sectorScore = Math.round(hhiPts + macroPts)
+  if (!useEquitySleeve) sectorScore = Math.min(sectorScore, 6)
+  sectorScore = clamp(sectorScore, 0, 20)
+
+  // Pillar 3: Concentración de Posiciones y Riesgo Específico (15 pts)
+  const posWeights = validPositions.map((p) => (p.current_value || 0) / totalValue)
+  const sumSqWeights = posWeights.reduce((acc, w) => acc + w * w, 0)
+  const effectivePositions = sumSqWeights > 0 ? 1 / sumSqWeights : 0
   const sortedPos = [...validPositions].sort((a, b) => (b.current_value || 0) - (a.current_value || 0))
   const top3Weight = sortedPos.slice(0, 3).reduce((acc, p) => acc + ((p.current_value || 0) / totalValue) * 100, 0)
-  const top3Pts =
-    top3Weight <= 50 ? 15 : top3Weight <= 65 ? 12 : top3Weight <= 80 ? 8 : 4
+
+  let idiosyncPenalty = 0
+  if (singleStockMaxPct > 5) {
+    idiosyncPenalty += clamp(((singleStockMaxPct - 5) / 15) * 6, 0, 6)
+  }
+  if (singleSectorFundMaxPct > 12) {
+    idiosyncPenalty += clamp(((singleSectorFundMaxPct - 12) / 18) * 4, 0, 4)
+  }
+  const subConcA = Math.max(0, 6 - idiosyncPenalty)
+  const subConcB =
+    broadGlobalVehiclePct >= 70
+      ? validPositions.length === 1
+        ? 8
+        : 9
+      : 5 * clamp((effectivePositions - 1.5) / 5.5, 0, 1) +
+        4 * clamp(1 - Math.max(0, top3Weight - 50) / 35, 0, 1)
+  const concScore = clamp(Math.round(subConcA + subConcB), 0, 15)
+
+  // Pillar 4: Eficiencia de Costes — TER Medio Ponderado (15 pts)
+  const terScore = clamp(Math.round(15 * clamp(1 - Math.max(0, weightedTer - 0.25) / 1.15, 0, 1)), 0, 15)
+
+  // Pillar 5: Equilibrio Cambiario EUR / FX (15 pts)
+  const eurCurrencyWeight = currencyBreakdown.find((c) => c.code === 'EUR')?.weight ?? 0
+  const usdCurrencyWeight = currencyBreakdown.find((c) => c.code === 'USD')?.weight ?? 0
+  const activeCurrencies = currencyBreakdown.filter((c) => c.weight >= 5.0).length
+
+  const eurPts =
+    eurCurrencyWeight >= 28 && eurCurrencyWeight <= 68
+      ? 6
+      : eurCurrencyWeight < 28
+        ? 6 * clamp(eurCurrencyWeight / 28, 0, 1)
+        : 6 * clamp(1 - (eurCurrencyWeight - 68) / 32, 0, 1)
+  const usdPts = 5 * clamp(1 - Math.max(0, usdCurrencyWeight - 60) / 35, 0, 1)
+  const curDivPts = activeCurrencies >= 3 ? 4 : activeCurrencies === 2 ? 2.5 : 0.5
+  const fxScore = clamp(Math.round(eurPts + usdPts + curDivPts), 0, 15)
+
+  // Pillar 6: Estructura Multiactivo y Liquidez (15 pts)
+  const commodityRatio = assetClassBreakdown.find((a) => a.id === 'commodity')?.weight ?? 0
+  const defensiveCushionRatio = fixedIncomeRatio + cashRatio + commodityRatio
+
+  const archPts =
+    equityRatio >= 55 && equityRatio <= 90 && defensiveCushionRatio >= 10
+      ? 9
+      : equityRatio > 90
+        ? 6 + 3 * clamp(defensiveCushionRatio / 10, 0, 1)
+        : equityRatio >= 35
+          ? 8
+          : 4 + 4 * clamp(equityRatio / 35, 0, 1)
+
+  const cashDisciplinePts =
+    cashRatio >= 2 && cashRatio <= 12
+      ? 6
+      : cashRatio < 2
+        ? 4 + cashRatio
+        : cashRatio <= 20
+          ? 6 - ((cashRatio - 12) / 8) * 3
+          : Math.max(0, 3 - ((cashRatio - 20) / 25) * 3)
+  const archScore = clamp(Math.round(archPts + cashDisciplinePts), 0, 15)
+
+  const getPillarStatus = (pts: number, max: number): 'optimal' | 'good' | 'warning' => {
+    if (pts >= max) return 'optimal'
+    return pts / max >= 0.75 ? 'good' : 'warning'
+  }
 
   const scoreBreakdown: ScoreBreakdownItem[] = [
     {
-      id: 'regions',
-      label: 'Cobertura Regional',
-      points: regionPts,
-      maxPoints: 35,
-      currentText: `${activeRegions} ${activeRegions === 1 ? 'región' : 'regiones'} ≥ 2%`,
-      detailText:
-        regionPts === 35
-          ? 'Cobertura global óptima (≥ 5 regiones)'
-          : `Necesitas ≥ 5 regiones con ≥ 2%${missingRegions.length ? ` (falta ${missingRegions.slice(0, 2).join(', ')})` : ''}`,
+      id: 'geo_alignment',
+      label: 'Geografía Global (RV)',
+      points: geoScore,
+      maxPoints: 20,
+      status: getPillarStatus(geoScore, 20),
+      currentText: useEquitySleeve
+        ? `Active Share ${geoActiveShare.toFixed(1)}% · ${coveredGeoBlocks}/4 bloques`
+        : `RV insuficiente (${equityRatio.toFixed(0)}%)`,
+      detailText: !useEquitySleeve
+        ? 'Sin exposición relevante a renta variable global (≥ 15%)'
+        : geoScore >= 20
+          ? 'Réplica regional en RV muy alineada al MSCI ACWI (Active Share ≤ 12%)'
+          : missingGeoBlocks.length > 0
+            ? `Refuerza ${missingGeoBlocks.slice(0, 2).join(' y ')} en RV para cubrir los 4 grandes bloques`
+            : `Ligero desvío regional en RV vs ACWI (objetivo Active Share ≤ 12%)`,
     },
     {
-      id: 'top_region',
-      label: 'Equilibrio Geográfico',
-      points: topGeoPts,
-      maxPoints: 35,
-      currentText: `${topGeoName}: ${topGeoWeight.toFixed(1)}%`,
-      detailText:
-        topGeoPts === 35
-          ? 'Sin sobreconcentración regional (≤ 68%)'
-          : 'Reduce la región líder por debajo del 68%',
+      id: 'sector_balance',
+      label: 'Equilibrio Sectorial y Macro',
+      points: sectorScore,
+      maxPoints: 20,
+      status: getPillarStatus(sectorScore, 20),
+      currentText: useEquitySleeve
+        ? `HHI ${Math.round(eqSectorHhi)} · Desvío macro ${macroDrift.toFixed(1)}%`
+        : 'Sin cartera sectorial en RV',
+      detailText: !useEquitySleeve
+        ? 'Añade renta variable diversificada para activar balance sectorial'
+        : sectorScore >= 20
+          ? 'Baja concentración sectorial (HHI ≤ 1.450) y ciclo macro equilibrado'
+          : eqSectorHhi > 1650
+            ? `Concentración sectorial elevada en RV (HHI ${Math.round(eqSectorHhi)} vs ≤ 1.450 óptimo)`
+            : eqDefW < 18
+              ? `Super-sector defensivo bajo en RV (${eqDefW.toFixed(1)}% vs 23,1% mundo)`
+              : `Ajusta el balance Sensible/Cíclico/Defensivo (desvío objetivo ≤ 4%)`,
     },
     {
-      id: 'sectors',
-      label: 'Amplitud Sectorial',
-      points: sectorPts,
+      id: 'position_concentration',
+      label: 'Concentración y Riesgo',
+      points: concScore,
       maxPoints: 15,
-      currentText: `${activeSectors} sectores ≥ 4%`,
+      status: getPillarStatus(concScore, 15),
+      currentText:
+        broadGlobalVehiclePct >= 70
+          ? `Vehículo global (${broadGlobalVehiclePct.toFixed(0)}%)`
+          : `N_eff ${effectivePositions.toFixed(1)} · Top 3: ${top3Weight.toFixed(1)}%`,
       detailText:
-        sectorPts === 15
-          ? 'Diversificación sectorial óptima (≥ 7)'
-          : 'Alcanza ≥ 7 sectores con al menos 4% cada uno',
+        singleStockMaxPct > 5
+          ? `Acción/cripto individual al ${singleStockMaxPct.toFixed(1)}% (riesgo específico > 5%)`
+          : singleSectorFundMaxPct > 12
+            ? `Fondo temático/sectorial al ${singleSectorFundMaxPct.toFixed(1)}% (> 12% recomendado)`
+            : concScore >= 15
+              ? 'Peso bien repartido sin riesgo idiosincrático excesivo'
+              : 'Reduce peso en el Top 3 (≤ 50%) o amplía diversificación efectiva',
     },
     {
-      id: 'top3',
-      label: 'Desconcentración Top 3',
-      points: top3Pts,
+      id: 'cost_efficiency',
+      label: 'Eficiencia de Costes (TER)',
+      points: terScore,
       maxPoints: 15,
-      currentText: `Top 3 activos: ${top3Weight.toFixed(1)}%`,
+      status: getPillarStatus(terScore, 15),
+      currentText: `TER medio: ${weightedTer.toFixed(2)}%`,
       detailText:
-        top3Pts === 15
-          ? 'Peso bien repartido (≤ 50% en Top 3)'
-          : 'Reduce el peso del Top 3 por debajo del 50%',
+        weightedTer <= 0.25
+          ? 'Costes ultrabajos de nivel institucional (≤ 0,25%)'
+          : weightedTer <= 0.5
+            ? 'Costes competitivos; pequeño margen optimizando gestión activa'
+            : weightedTer <= 0.8
+              ? 'Fricción moderada por fondos activos (óptimo institucional ≤ 0,25%)'
+              : 'Alto lastre anual de comisiones sobre el interés compuesto (> 0,80%)',
+    },
+    {
+      id: 'currency_balance',
+      label: 'Equilibrio Cambiario (FX)',
+      points: fxScore,
+      maxPoints: 15,
+      status: getPillarStatus(fxScore, 15),
+      currentText: `EUR ${eurCurrencyWeight.toFixed(1)}% · USD ${usdCurrencyWeight.toFixed(1)}%`,
+      detailText:
+        fxScore >= 15
+          ? `Base EUR sólida (28%–68%), USD controlado y ${activeCurrencies} divisas ≥ 5%`
+          : usdCurrencyWeight > 60
+            ? `Alta exposición al dólar sin cubrir (${usdCurrencyWeight.toFixed(1)}% > 60%)`
+            : eurCurrencyWeight > 68
+              ? `Sesgo elevado a divisa local EUR (${eurCurrencyWeight.toFixed(1)}% > 68%)`
+              : eurCurrencyWeight < 28
+                ? `Base EUR baja (${eurCurrencyWeight.toFixed(1)}% < 28%) eleva volatilidad FX`
+                : 'Amplía diversificación multidivisa (objetivo ≥ 3 divisas ≥ 5%)',
+    },
+    {
+      id: 'asset_architecture',
+      label: 'Multiactivo y Liquidez',
+      points: archScore,
+      maxPoints: 15,
+      status: getPillarStatus(archScore, 15),
+      currentText: `RV ${equityRatio.toFixed(0)}% · RF ${fixedIncomeRatio.toFixed(0)}% · Caja ${cashRatio.toFixed(1)}%`,
+      detailText:
+        archScore >= 15
+          ? 'Motor RV + colchón defensivo (≥ 10%) y pólvora seca óptima (2%–12%)'
+          : cashRatio > 15
+            ? `Liquidez ociosa elevada (${cashRatio.toFixed(1)}% > 15%) genera cash drag`
+            : equityRatio > 90
+              ? 'Sin colchón RF/liquidez (≥ 10%) para amortiguar caídas y rebalancear'
+              : cashRatio < 2
+                ? 'Sin liquidez táctica (2%–12%) para aprovechar correcciones'
+                : 'Baja proporción de renta variable para crecimiento real a largo plazo',
     },
   ]
 
-  let score = regionPts + topGeoPts + sectorPts + top3Pts
+  let score = geoScore + sectorScore + concScore + terScore + fxScore + archScore
   score = Math.min(100, Math.max(10, Math.round(score)))
 
   let scoreLabel = 'Diversificación Moderada'
   let scoreColor = '#f59e0b'
   if (score >= 85) {
-    scoreLabel = 'Excelente Diversificación Global'
+    scoreLabel = 'Excelente Salud Patrimonial'
     scoreColor = '#10b981'
   } else if (score >= 70) {
-    scoreLabel = 'Buena Diversificación Global'
+    scoreLabel = 'Buena Salud y Equilibrio'
     scoreColor = '#3b82f6'
   } else if (score < 50) {
-    scoreLabel = 'Alta Concentración Regional'
+    scoreLabel = 'Riesgo de Concentración Alto'
     scoreColor = '#ef4444'
   }
 
@@ -1206,16 +1432,6 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
   }
 
   // 10. Rigorous Audit & Advisory System (5 Institutional Pillars)
-  let terAccum = 0
-  let terTotalWeight = 0
-  for (const pos of validPositions) {
-    if (typeof pos.ter === 'number' && pos.ter >= 0) {
-      terAccum += pos.ter * (pos.current_value || 0)
-      terTotalWeight += (pos.current_value || 0)
-    }
-  }
-  const weightedTer = terTotalWeight > 0 ? terAccum / terTotalWeight : 0.18
-
   const auditAdvice: PortfolioAuditAdvice[] = []
 
   // Pillar 1: Small Caps & Size Factor Gap

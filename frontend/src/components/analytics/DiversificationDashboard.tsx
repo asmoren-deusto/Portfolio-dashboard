@@ -240,7 +240,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
             </button>
           </div>
 
-          {/* Transparent Health Score Breakdown (4 Pillars summing to /100) */}
+          {/* Transparent Institutional Health Score Breakdown (6 Pillars summing to /100) */}
           <AnimatePresence initial={false}>
             {showScoreBreakdown && scoreBreakdown.length > 0 && (
               <motion.div
@@ -251,21 +251,22 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                 className="overflow-hidden"
               >
                 <div className="pt-2.5 pb-1">
-                  <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                     <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                       <Info className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Desglose de Puntuación ({score}/100)</span>
+                      <span>Modelo Institucional de Salud · 6 Pilares ({score}/100)</span>
                     </span>
                     <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
                       {score < 100
-                        ? `Te faltan ${100 - score} pts para el 100/100`
+                        ? `Margen de mejora: ${100 - score} pts`
                         : 'Puntuación máxima alcanzada'}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                     {scoreBreakdown.map((item) => {
-                      const isFull = item.points >= item.maxPoints
+                      const isOptimal = item.status === 'optimal'
+                      const isGood = item.status === 'good'
                       const pct = Math.round((item.points / item.maxPoints) * 100)
                       const missingPts = item.maxPoints - item.points
                       return (
@@ -273,9 +274,11 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                           key={item.id}
                           className={cn(
                             'px-3 py-2 rounded-xl border transition-colors',
-                            isFull
+                            isOptimal
                               ? 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.06] border-emerald-500/20'
-                              : 'bg-amber-500/[0.06] dark:bg-amber-500/[0.08] border-amber-500/30'
+                              : isGood
+                                ? 'bg-blue-500/[0.04] dark:bg-blue-500/[0.07] border-blue-500/25'
+                                : 'bg-amber-500/[0.06] dark:bg-amber-500/[0.08] border-amber-500/30'
                           )}
                         >
                           <div className="flex items-center justify-between gap-1.5">
@@ -285,9 +288,11 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                             <span
                               className={cn(
                                 'font-mono text-[11px] font-extrabold px-1.5 py-0.5 rounded-md border leading-none shrink-0',
-                                isFull
+                                isOptimal
                                   ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
-                                  : 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30'
+                                  : isGood
+                                    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/25'
+                                    : 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30'
                               )}
                             >
                               {item.points}/{item.maxPoints}
@@ -298,7 +303,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                             <div
                               className={cn(
                                 'h-full rounded-full transition-all duration-500',
-                                isFull ? 'bg-emerald-500' : 'bg-amber-500'
+                                isOptimal ? 'bg-emerald-500' : isGood ? 'bg-blue-500' : 'bg-amber-500'
                               )}
                               style={{ width: `${pct}%` }}
                             />
@@ -308,8 +313,15 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                             <span className="font-mono font-semibold text-slate-700 dark:text-slate-300 truncate">
                               {item.currentText}
                             </span>
-                            {!isFull && (
-                              <span className="font-mono font-bold text-amber-700 dark:text-amber-400 shrink-0">
+                            {missingPts > 0 && (
+                              <span
+                                className={cn(
+                                  'font-mono font-bold shrink-0',
+                                  isGood
+                                    ? 'text-blue-600 dark:text-blue-400'
+                                    : 'text-amber-700 dark:text-amber-400'
+                                )}
+                              >
                                 -{missingPts} pts
                               </span>
                             )}
