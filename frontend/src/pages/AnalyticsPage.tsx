@@ -781,7 +781,7 @@ export function AnalyticsPage() {
                       </div>
                     </td>
                     <td className="px-5 py-3.5">
-                      <AssetBadge type={p.asset_type} />
+                      <AssetBadge type={p.asset_type} isin={p.isin} name={p.name} />
                     </td>
                     <td className="px-5 py-3.5 text-right font-mono text-slate-700 dark:text-slate-300 font-medium">
                       {fmt.currency(p.avg_cost)}

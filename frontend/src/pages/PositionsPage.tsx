@@ -432,7 +432,7 @@ export function PositionsPage() {
                         {/* Tipo */}
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-1.5 shrink-0">
-                            <AssetBadge type={p.asset_type} />
+                            <AssetBadge type={p.asset_type} isin={p.isin} name={p.name} />
 
                           </div>
                         </td>
@@ -583,7 +583,7 @@ export function PositionsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <AssetBadge type={p.asset_type} />
+                      <AssetBadge type={p.asset_type} isin={p.isin} name={p.name} />
 
                     </div>
                   </div>

@@ -1883,7 +1883,7 @@ export function OverviewPage() {
                                   </div>
                                   <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                     <span>{p.isin}</span>
-                                    {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
+                                    {!isNativePlatform() && <AssetBadge type={p.asset_type} isin={p.isin} name={p.name} />}
 
                                   </div>
                                 </div>
@@ -2080,7 +2080,7 @@ export function OverviewPage() {
                                     </div>
                                     <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
                                       <span>{p.isin}</span>
-                                      {!isNativePlatform() && <AssetBadge type={p.asset_type} />}
+                                      {!isNativePlatform() && <AssetBadge type={p.asset_type} isin={p.isin} name={p.name} />}
 
                                     </div>
                                   </div>

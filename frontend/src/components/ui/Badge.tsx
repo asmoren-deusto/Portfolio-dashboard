@@ -1,15 +1,47 @@
 import React from 'react'
 import { cn, ASSET_TYPE_LABELS } from '@/lib/utils'
 
+const FIXED_INCOME_FUND_ISINS = new Set([
+  'LU0840158819', // Storm Bond Fund RC EUR
+  'LU0840158496', // Storm Bond Fund
+  'LU1915698069', // Storm Bond Fund
+  'ES0140794001', // Gamma Global FI (Renta Fija Mixta / Crédito Global)
+  'LU1623762843', // Carmignac Credit
+  'FR0000989626', // Groupama Trésorerie (Monetario / RF ultracorto)
+  'IE00B18GC888', // Vanguard Global Bond Index
+  'IE00B03HCZ61', // Vanguard Euro Government Bond
+])
+
+function isFixedIncomeFund(isin?: string | null, name?: string | null): boolean {
+  const code = (isin || '').trim().toUpperCase()
+  if (code && FIXED_INCOME_FUND_ISINS.has(code)) return true
+  const n = (name || '').toLowerCase()
+  return (
+    n.includes('bond') ||
+    n.includes('credit') ||
+    n.includes('crédito') ||
+    n.includes('renta fija') ||
+    n.includes('gamma global') ||
+    n.includes('trésorerie') ||
+    n.includes('tresorerie') ||
+    n.includes('monetario') ||
+    n.includes('high yield') ||
+    n.includes('fixed income') ||
+    n.includes('treasury')
+  )
+}
+
 const configs: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  fund:   { label: 'Fondo',   bg: 'bg-blue-500/10 dark:bg-blue-500/15',     text: 'text-blue-700 dark:text-blue-300',     border: 'border-blue-500/20' },
-  epsv:   { label: 'EPSV',    bg: 'bg-purple-500/10 dark:bg-purple-500/15', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-500/20' },
-  etf:    { label: 'ETF',     bg: 'bg-amber-500/10 dark:bg-amber-500/15',   text: 'text-amber-700 dark:text-amber-300',   border: 'border-amber-500/20' },
-  stock:  { label: 'Acción',  bg: 'bg-emerald-500/10 dark:bg-emerald-500/15', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-500/20' },
-  bond:   { label: 'Bono',    bg: 'bg-zinc-500/10 dark:bg-zinc-500/15',     text: 'text-zinc-700 dark:text-zinc-300',     border: 'border-zinc-500/20' },
-  etc:    { label: 'ETC Oro', bg: 'bg-yellow-500/10 dark:bg-yellow-500/15', text: 'text-yellow-700 dark:text-yellow-400', border: 'border-yellow-500/20' },
-  crypto: { label: 'Cripto',  bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-500/15', text: 'text-fuchsia-700 dark:text-fuchsia-300', border: 'border-fuchsia-500/20' },
-  cash:   { label: 'Liquidez', bg: 'bg-teal-500/10 dark:bg-teal-500/15', text: 'text-teal-700 dark:text-teal-300', border: 'border-teal-500/20' },
+  fund:    { label: 'Fondo RV', bg: 'bg-blue-500/10 dark:bg-blue-500/15',       text: 'text-blue-700 dark:text-blue-300',       border: 'border-blue-500/20' },
+  fund_rv: { label: 'Fondo RV', bg: 'bg-blue-500/10 dark:bg-blue-500/15',       text: 'text-blue-700 dark:text-blue-300',       border: 'border-blue-500/20' },
+  fund_rf: { label: 'Fondo RF', bg: 'bg-orange-500/10 dark:bg-orange-500/15',   text: 'text-orange-700 dark:text-orange-300',   border: 'border-orange-500/25' },
+  epsv:    { label: 'EPSV',     bg: 'bg-purple-500/10 dark:bg-purple-500/15',   text: 'text-purple-700 dark:text-purple-300',   border: 'border-purple-500/20' },
+  etf:     { label: 'ETF',      bg: 'bg-amber-500/10 dark:bg-amber-500/15',     text: 'text-amber-700 dark:text-amber-300',     border: 'border-amber-500/20' },
+  stock:   { label: 'Acción',   bg: 'bg-emerald-500/10 dark:bg-emerald-500/15', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-500/20' },
+  bond:    { label: 'Bono',     bg: 'bg-zinc-500/10 dark:bg-zinc-500/15',       text: 'text-zinc-700 dark:text-zinc-300',       border: 'border-zinc-500/20' },
+  etc:     { label: 'ETC Oro',  bg: 'bg-yellow-500/10 dark:bg-yellow-500/15',   text: 'text-yellow-700 dark:text-yellow-400',   border: 'border-yellow-500/20' },
+  crypto:  { label: 'Cripto',   bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-500/15', text: 'text-fuchsia-700 dark:text-fuchsia-300', border: 'border-fuchsia-500/20' },
+  cash:    { label: 'Liquidez', bg: 'bg-teal-500/10 dark:bg-teal-500/15',       text: 'text-teal-700 dark:text-teal-300',       border: 'border-teal-500/20' },
 }
 
 const brokerConfigs: Record<string, { label: string; bg: string; text: string; border: string; dot: string }> = {
@@ -73,14 +105,17 @@ const brokerConfigs: Record<string, { label: string; bg: string; text: string; b
 
 interface BadgeProps {
   type: string
+  isin?: string | null
+  name?: string | null
   className?: string
 }
 
-export const AssetBadge = React.memo(function AssetBadge({ type, className }: BadgeProps) {
-  const cfg = configs[type] ?? configs.fund
+export const AssetBadge = React.memo(function AssetBadge({ type, isin, name, className }: BadgeProps) {
+  const resolvedKey = type === 'fund' ? (isFixedIncomeFund(isin, name) ? 'fund_rf' : 'fund_rv') : type
+  const cfg = configs[resolvedKey] ?? configs.fund_rv
   return (
     <span className={cn(
-      'inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide leading-none shadow-2xs',
+      'inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide leading-none shadow-2xs whitespace-nowrap',
       cfg.bg, cfg.text, cfg.border, className
     )}>
       {cfg.label}
