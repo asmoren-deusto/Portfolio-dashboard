@@ -1806,22 +1806,22 @@ export function OverviewPage() {
                 <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[37%] min-w-[200px]" />
+                      <col className="w-[35%] min-w-[185px]" />
                       <col className="w-[12%] min-w-[74px]" />
                       <col className="w-[11%] min-w-[70px]" />
-                      <col className="w-[15%] min-w-[88px]" />
+                      <col className="w-[17%] min-w-[98px]" />
                       <col className="w-[12%] min-w-[72px]" />
                       <col className="w-[13%] min-w-[72px]" />
                     </colgroup>
                   <thead>
                     <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
-                      <th className="py-2 px-2.5">Activo / Fondo</th>
-                      <th className="py-2 px-2 text-right">NAV</th>
+                      <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400 whitespace-nowrap">#</th>
+                      <th className="py-2 px-2.5 whitespace-nowrap">Activo / Fondo</th>
+                      <th className="py-2 px-2 text-right whitespace-nowrap">NAV</th>
                       <th className="py-2 px-2 text-right whitespace-nowrap">Día/Sem</th>
-                      <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
-                      <th className="py-2 px-2 text-right">Ganancia</th>
-                      <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
+                      <th className="py-2 px-2 text-right whitespace-nowrap">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
+                      <th className="py-2 px-2 text-right whitespace-nowrap">Ganancia</th>
+                      <th className="py-2 pr-3 pl-1.5 text-right whitespace-nowrap">Peso</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
@@ -1878,7 +1878,7 @@ export function OverviewPage() {
                                   size="sm"
                                 />
                                 <div className="min-w-0">
-                                  <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[220px] sm:max-w-[270px] xl:max-w-[250px] 2xl:max-w-[320px] text-[14px]">
+                                  <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[200px] sm:max-w-[240px] xl:max-w-[210px] 2xl:max-w-[285px] text-[14px]">
                                     {formatAssetDisplayName(p.name, true, p.isin)}
                                   </div>
                                   <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
@@ -2003,22 +2003,22 @@ export function OverviewPage() {
                   <table className="w-full text-left border-collapse text-xs">
                     <colgroup>
                       <col className="w-6 sm:w-7 shrink-0" />
-                      <col className="w-[37%] min-w-[200px]" />
+                      <col className="w-[35%] min-w-[185px]" />
                       <col className="w-[12%] min-w-[74px]" />
                       <col className="w-[11%] min-w-[70px]" />
-                      <col className="w-[15%] min-w-[88px]" />
+                      <col className="w-[17%] min-w-[98px]" />
                       <col className="w-[12%] min-w-[72px]" />
                       <col className="w-[13%] min-w-[72px]" />
                     </colgroup>
                     <thead className="hidden xl:table-header-group">
                       <tr className="border-b border-slate-200/90 dark:border-white/[0.05] bg-slate-50/70 dark:bg-white/[0.01] text-[11.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400">#</th>
-                        <th className="py-2 px-2.5">Activo / Fondo</th>
-                        <th className="py-2 px-2 text-right">NAV</th>
+                        <th className="py-2 pl-3 pr-1 text-center w-6 text-slate-400 whitespace-nowrap">#</th>
+                        <th className="py-2 px-2.5 whitespace-nowrap">Activo / Fondo</th>
+                        <th className="py-2 px-2 text-right whitespace-nowrap">NAV</th>
                         <th className="py-2 px-2 text-right whitespace-nowrap">Día/Sem</th>
-                        <th className="py-2 px-2 text-right">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
-                        <th className="py-2 px-2 text-right">Ganancia</th>
-                        <th className="py-2 pr-3 pl-1.5 text-right">Peso</th>
+                        <th className="py-2 px-2 text-right whitespace-nowrap">{isNativePlatform() ? 'Valor' : 'Valor Actual'}</th>
+                        <th className="py-2 px-2 text-right whitespace-nowrap">Ganancia</th>
+                        <th className="py-2 pr-3 pl-1.5 text-right whitespace-nowrap">Peso</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-white/[0.03]">
@@ -2075,7 +2075,7 @@ export function OverviewPage() {
                                     size="sm"
                                   />
                                   <div className="min-w-0">
-                                    <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[220px] sm:max-w-[270px] xl:max-w-[250px] 2xl:max-w-[320px] text-[14px]">
+                                    <div className="font-semibold text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate max-w-[200px] sm:max-w-[240px] xl:max-w-[210px] 2xl:max-w-[285px] text-[14px]">
                                       {formatAssetDisplayName(p.name, true, p.isin)}
                                     </div>
                                     <div className="flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-400/80">
