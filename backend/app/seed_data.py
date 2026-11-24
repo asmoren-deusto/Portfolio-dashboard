@@ -257,6 +257,16 @@ ASSETS = json.loads(r'''[
     "currency": "EUR",
     "category": "Liquidez / Cuenta Remunerada EUR",
     "ter": 0.0
+  },
+  {
+    "isin": "IE00BKSBD942",
+    "name": "Polar Capital Healthcare Opps",
+    "ticker": "0P0001JDIB",
+    "asset_type": "fund",
+    "currency": "EUR",
+    "morningstar_id": "0P0001JDIB",
+    "category": "Renta Variable Sector Salud Global",
+    "ter": 1.58
   }
 ]''')
 
@@ -2131,6 +2141,18 @@ PRICES = json.loads(r'''[
     "isin": "CASH_TR_EUR",
     "date": "2026-11-24",
     "price": 1.0,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BKSBD942",
+    "date": "2026-11-20",
+    "price": 79.1334,
+    "currency": "EUR"
+  },
+  {
+    "isin": "IE00BKSBD942",
+    "date": "2026-11-23",
+    "price": 81.192,
     "currency": "EUR"
   }
 ]''')
@@ -4631,5 +4653,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-24",
     "broker": "traderepublic",
     "notes": "Saldo en Cuenta Remunerada Trade Republic (2,50% TIN / pago mensual día 1 tras venta de NVIDIA)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "sell",
+    "shares": 48.99,
+    "price": 76.9476,
+    "amount": 3769.66,
+    "fees": 0.0,
+    "date": "2026-11-23",
+    "broker": "myinvestor",
+    "notes": "Reembolso por Traspaso Interno (a Polar Capital Healthcare Opps, ref 0232192511732, orden 0232192511732, fecha valor 20/11/2026)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE00BKSBD942",
+    "type": "buy",
+    "shares": 46.272,
+    "price": 81.4674,
+    "amount": 3769.66,
+    "fees": 0.0,
+    "date": "2026-11-24",
+    "broker": "myinvestor",
+    "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232192511732, orden 0232192511732, coste fiscal originario 3.739,24 € de valor 3.769,66 €, 46,272 part. R USD @ 89,08 USD / coste medio MyInvestor 81,26 €)"
   }
 ]''')
