@@ -719,7 +719,8 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
 
   // 1. Accumulate weights
   const geoValues: Record<string, number> = {}
-  const sectorValues: Record<string, number> = {}
+  const equitySectorValues: Record<string, number> = {}
+  const allSectorValues: Record<string, number> = {}
   const currencyValues: Record<string, number> = {}
   const assetClassValues: Record<string, number> = {}
 
@@ -731,9 +732,12 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     for (const [rId, rShare] of Object.entries(tax.geo)) {
       geoValues[rId] = (geoValues[rId] || 0) + pVal * rShare
     }
-    // Sectors
+    // Sectors (GICS Equity Sectors exclude Fixed Income & Cash per Morningstar/MSCI methodology)
     for (const [sId, sShare] of Object.entries(tax.sectors)) {
-      sectorValues[sId] = (sectorValues[sId] || 0) + pVal * sShare
+      allSectorValues[sId] = (allSectorValues[sId] || 0) + pVal * sShare
+      if (tax.assetClass === 'equity') {
+        equitySectorValues[sId] = (equitySectorValues[sId] || 0) + pVal * sShare
+      }
     }
     // Currency
     for (const [cId, cShare] of Object.entries(tax.currencies)) {
@@ -742,6 +746,11 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     // Asset class
     assetClassValues[tax.assetClass] = (assetClassValues[tax.assetClass] || 0) + pVal
   }
+
+  const equitySectorTotal = assetClassValues['equity'] || 0
+  const hasEquityForSectors = equitySectorTotal > 0.01
+  const sectorValues = hasEquityForSectors ? equitySectorValues : allSectorValues
+  const sectorBaseValue = hasEquityForSectors ? equitySectorTotal : totalValue
 
   // 2. Build Geographic Comparison
   const geographicBreakdown: GeographicComparisonItem[] = WORLD_GEO_BENCHMARK.map((reg) => {
@@ -775,10 +784,10 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     }
   }).sort((a, b) => b.portfolioWeight - a.portfolioWeight)
 
-  // 3. Build Sector Comparison & Macro Super-Sectors
+  // 3. Build Sector Comparison & Macro Super-Sectors (normalized over Equity sleeve)
   const sectorBreakdown: SectorComparisonItem[] = WORLD_SECTOR_BENCHMARK.map((sec) => {
     const val = sectorValues[sec.id] || 0
-    const pWeight = (val / totalValue) * 100
+    const pWeight = sectorBaseValue > 0 ? (val / sectorBaseValue) * 100 : 0
     const delta = pWeight - sec.worldWeight
 
     let status: 'overweight' | 'underweight' | 'aligned' = 'aligned'
@@ -805,7 +814,7 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
 
   const getSuperSectorStats = (ids: string[]) => {
     const val = ids.reduce((acc, id) => acc + (sectorValues[id] || 0), 0)
-    const pWeight = (val / totalValue) * 100
+    const pWeight = sectorBaseValue > 0 ? (val / sectorBaseValue) * 100 : 0
     const wWeight = ids.reduce((acc, id) => {
       const sec = WORLD_SECTOR_BENCHMARK.find((s) => s.id === id)
       return acc + (sec?.worldWeight || 0)

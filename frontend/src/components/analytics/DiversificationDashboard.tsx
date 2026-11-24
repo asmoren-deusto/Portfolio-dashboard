@@ -853,7 +853,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   Concentración Top 3 Sectores
                 </span>
                 <span className="text-lg sm:text-xl font-extrabold font-mono text-slate-900 dark:text-white mt-1 block">
-                  {top3SectorsWeight.toFixed(1)}% de cartera
+                  {top3SectorsWeight.toFixed(1)}% de la RV
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block truncate">
                   {sectorBreakdown.slice(0, 3).map((s) => s.sector.name.split(' ')[0]).join(', ')}
