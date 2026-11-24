@@ -661,6 +661,8 @@ async def _scrape_price_with_date_impl(
         ref_price, db_latest_date = _get_latest_cached_price(isin)
         today_str = datetime.now().strftime("%Y-%m-%d")
         is_usd_fund = isin in USD_DENOMINATED_ISINS
+        # Portals that already report fund NAVs converted into EUR (do NOT divide by EUR/USD again)
+        EUR_ALREADY_SOURCES = {"onvista", "quefondos", "finect", "ariva"}
 
         # Candidates with (date, decimal_precision_priority, price, source)
         # Date is strictly priority #1: freshest/most recent liquidation date always wins immediately!
@@ -672,15 +674,15 @@ async def _scrape_price_with_date_impl(
                     # Validation: no future dates, no absurd jumps vs last known NAV
                     if r_date > today_str or r_price <= 0:
                         continue
-                    if is_usd_fund:
+                    name = task_names[i]
+                    if is_usd_fund and name not in EUR_ALREADY_SOURCES:
                         fx_rate = await _get_eurusd_rate(r_date)
                         if not fx_rate or fx_rate <= 0:
                             continue
                         r_price = round(r_price / fx_rate, 4)
                     if ref_price and abs(r_price - ref_price) / ref_price > MAX_NAV_JUMP:
-                        logger.warning(f"Rejected implausible NAV {r_price} ({r_date}) for {isin} from {task_names[i]} (ref {ref_price})")
+                        logger.warning(f"Rejected implausible NAV {r_price} ({r_date}) for {isin} from {name} (ref {ref_price})")
                         continue
-                    name = task_names[i]
                     prec = NAV_SOURCE_PRIORITY.get(name, 2)
                     candidates.append((r_date, prec, r_price, name))
 
