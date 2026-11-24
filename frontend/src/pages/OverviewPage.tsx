@@ -41,7 +41,7 @@ import { AllocationChart, AllocationChartSkeleton } from '@/components/charts/Al
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
 import { BenchmarkEvolutionChart, type BenchmarkChartMode } from '@/components/charts/BenchmarkEvolutionChart'
-import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
+import { AssetBadge, BrokerBadge, PnlBadge, getAssetTypeRank } from '@/components/ui/Badge'
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { MiniDonut } from '@/components/ui/MiniDonut'
 import {
@@ -181,11 +181,16 @@ export function OverviewPage() {
     })
     return map
   }, [positions, palette])
-  const [positionsSortBy, setPositionsSortBy] = useState<'broker' | 'value' | 'pnl' | 'day'>('broker')
+  const [positionsSortBy, setPositionsSortBy] = useState<'broker' | 'type' | 'value' | 'pnl' | 'day'>('broker')
 
   const sortedPositions = useMemo(
     () =>
       [...positions].sort((a, b) => {
+        if (positionsSortBy === 'type') {
+          const typeCompare = getAssetTypeRank(a.asset_type, a.isin, a.name) - getAssetTypeRank(b.asset_type, b.isin, b.name)
+          if (typeCompare !== 0) return typeCompare
+          return (b.current_value ?? 0) - (a.current_value ?? 0)
+        }
         if (positionsSortBy === 'value') {
           return (b.current_value ?? 0) - (a.current_value ?? 0)
         }
@@ -1737,6 +1742,7 @@ export function OverviewPage() {
               {(
                 [
                   { id: 'broker', label: 'Entidad', title: 'Agrupar por entidad y valor' },
+                  { id: 'type', label: 'Tipo', title: 'Agrupar por tipo de activo (Fondo RV, EPSV, Fondo RF, Bono, Liquidez)' },
                   { id: 'value', label: 'Valor €', title: 'Ordenar de mayor a menor valor actual' },
                   { id: 'pnl', label: 'Plusvalía', title: 'Ordenar por mayor ganancia acumulada' },
                   { id: 'day', label: 'Día 1D%', title: 'Ordenar por mejor rendimiento diario' },

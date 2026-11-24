@@ -17,7 +17,7 @@ import {
 import { CompanyLogo } from '@/components/ui/CompanyLogo'
 import { Card } from '@/components/ui/Card'
 import { KpiCard } from '@/components/ui/KpiCard'
-import { AssetBadge, BrokerBadge, PnlBadge } from '@/components/ui/Badge'
+import { AssetBadge, BrokerBadge, PnlBadge, getAssetTypeRank } from '@/components/ui/Badge'
 import { PositionDetailModal } from '@/components/positions/PositionDetailModal'
 import { PortfolioAttributionCard } from '@/components/analytics/PortfolioAttributionCard'
 import { TableSkeletonRows, CardSkeletonGrid } from '@/components/ui/TableSkeleton'
@@ -29,7 +29,7 @@ import { usePositions, usePortfolioSummary, useAnalytics } from '@/api/queries'
 import type { Position } from '@/lib/mockData'
 
 type AssetFilter = 'all' | 'fund' | 'epsv' | 'bond' | 'etc' | 'etf' | 'stock' | 'cash'
-type SortField = 'current_value' | 'unrealized_pnl_pct' | 'unrealized_pnl' | 'name' | 'weight'
+type SortField = 'current_value' | 'unrealized_pnl_pct' | 'unrealized_pnl' | 'name' | 'weight' | 'asset_type'
 type SortDir = 1 | -1
 
 const FILTER_TABS: { id: AssetFilter; label: string }[] = [
@@ -106,6 +106,12 @@ export function PositionsPage() {
         return true
       })
       .sort((a, b) => {
+        if (sortField === 'asset_type') {
+          const ra = getAssetTypeRank(a.asset_type, a.isin, a.name)
+          const rb = getAssetTypeRank(b.asset_type, b.isin, b.name)
+          if (ra !== rb) return (ra - rb) * (sortDir === -1 ? 1 : -1)
+          return (b.current_value ?? 0) - (a.current_value ?? 0)
+        }
         const va = (a as any)[sortField] ?? -Infinity
         const vb = (b as any)[sortField] ?? -Infinity
         if (typeof va === 'string') return va.localeCompare(vb) * sortDir
@@ -313,9 +319,7 @@ export function PositionsPage() {
               <thead>
                 <tr className="border-b border-slate-200/90 bg-slate-50/80 dark:border-white/[0.05] dark:bg-white/[0.01]">
                   <SortHeader field="name" label="Activo / Fondo" />
-                  <th className="border-b border-slate-200/90 dark:border-white/[0.05] px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Tipo
-                  </th>
+                  <SortHeader field="asset_type" label="Tipo" />
                   <th className="border-b border-slate-200/90 dark:border-white/[0.05] px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Títulos
                   </th>

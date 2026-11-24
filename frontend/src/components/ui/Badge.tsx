@@ -110,8 +110,33 @@ interface BadgeProps {
   className?: string
 }
 
+export function getAssetBadgeKey(type?: string | null, isin?: string | null, name?: string | null): string {
+  const t = (type || 'fund').toLowerCase()
+  if (t === 'fund') {
+    return isFixedIncomeFund(isin, name) ? 'fund_rf' : 'fund_rv'
+  }
+  return t
+}
+
+const ASSET_TYPE_SORT_ORDER: Record<string, number> = {
+  fund_rv: 1,
+  epsv: 2,
+  etf: 3,
+  stock: 4,
+  fund_rf: 5,
+  bond: 6,
+  etc: 7,
+  cash: 8,
+  crypto: 9,
+}
+
+export function getAssetTypeRank(type?: string | null, isin?: string | null, name?: string | null): number {
+  const key = getAssetBadgeKey(type, isin, name)
+  return ASSET_TYPE_SORT_ORDER[key] ?? 99
+}
+
 export const AssetBadge = React.memo(function AssetBadge({ type, isin, name, className }: BadgeProps) {
-  const resolvedKey = type === 'fund' ? (isFixedIncomeFund(isin, name) ? 'fund_rf' : 'fund_rv') : type
+  const resolvedKey = getAssetBadgeKey(type, isin, name)
   const cfg = configs[resolvedKey] ?? configs.fund_rv
   return (
     <span className={cn(
