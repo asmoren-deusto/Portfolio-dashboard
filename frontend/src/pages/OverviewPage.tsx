@@ -1794,7 +1794,7 @@ export function OverviewPage() {
 
         {/* Dynamic Parallel Columns Grid (switches cleanly to full-width if <= 5 positions to avoid empty column) */}
         {(() => {
-          const overviewPositions = sortedPositions.slice(0, 12)
+          const overviewPositions = sortedPositions
           const hasSecondColumn = overviewPositions.length > 5
           const splitIndex = hasSecondColumn ? Math.ceil(overviewPositions.length / 2) : overviewPositions.length
           const col1Positions = overviewPositions.slice(0, splitIndex)
