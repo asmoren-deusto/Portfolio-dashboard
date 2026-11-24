@@ -40,6 +40,7 @@ import {
   Clock,
   Activity,
   Wallet,
+  ChevronDown,
 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -86,6 +87,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
   // Sub-tab selection inside Diversification
   const [activeTab, setActiveTab] = useState<'geo' | 'sectors' | 'currency' | 'assets' | 'rebalance'>('geo')
   const [hoveredGeoId, setHoveredGeoId] = useState<string | null>(null)
+  const [showScoreBreakdown, setShowScoreBreakdown] = useState<boolean>(true)
 
   // Interactive controls for deep-dive tabs
   const [sectorFilter, setSectorFilter] = useState<'all' | 'defensive' | 'cyclical' | 'sensitive'>('all')
@@ -101,6 +103,7 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
     score,
     scoreLabel,
     scoreColor,
+    scoreBreakdown,
     verdictTitle,
     verdictParagraphs,
     usExposurePct,
@@ -183,8 +186,13 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
               </div>
             </div>
 
-            {/* Right: Circular Score Gauge */}
-            <div className="flex items-center gap-3 sm:gap-3.5 bg-slate-50/90 dark:bg-white/[0.03] px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] shrink-0 shadow-2xs self-start lg:self-auto">
+            {/* Right: Circular Score Gauge (clickable to toggle detailed score breakdown) */}
+            <button
+              type="button"
+              onClick={() => setShowScoreBreakdown((v) => !v)}
+              title="Haz clic para ver u ocultar el desglose exacto de la puntuación"
+              className="flex items-center gap-3 sm:gap-3.5 bg-slate-50/90 hover:bg-slate-100/90 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200/80 dark:border-white/[0.08] shrink-0 shadow-2xs self-start lg:self-auto transition-colors cursor-pointer text-left"
+            >
               <div className="relative w-[44px] h-[44px] sm:w-[48px] sm:h-[48px] flex items-center justify-center shrink-0">
                 {/* SVG Radial Meter */}
                 <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 36 36">
@@ -213,7 +221,15 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
               </div>
 
               <div>
-                <span className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">Salud de Cartera</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-tight">
+                    Salud de Cartera
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 text-[9.5px] font-semibold text-blue-600 dark:text-blue-400">
+                    <span>{showScoreBreakdown ? 'Ocultar' : '¿Por qué?'}</span>
+                    <ChevronDown className={cn('w-3 h-3 transition-transform duration-200', showScoreBreakdown && 'rotate-180')} />
+                  </span>
+                </div>
                 <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white block mt-0.5" style={{ color: scoreColor }}>
                   {scoreLabel}
                 </span>
@@ -221,8 +237,94 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
                   {score >= 80 ? 'Nivel institucional' : score >= 65 ? 'Adecuada y equilibrada' : 'Concentrada'}
                 </span>
               </div>
-            </div>
+            </button>
           </div>
+
+          {/* Transparent Health Score Breakdown (4 Pillars summing to /100) */}
+          <AnimatePresence initial={false}>
+            {showScoreBreakdown && scoreBreakdown.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.22 }}
+                className="overflow-hidden"
+              >
+                <div className="pt-2.5 pb-1">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                      <Info className="w-3.5 h-3.5 text-blue-500" />
+                      <span>Desglose de Puntuación ({score}/100)</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                      {score < 100
+                        ? `Te faltan ${100 - score} pts para el 100/100`
+                        : 'Puntuación máxima alcanzada'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    {scoreBreakdown.map((item) => {
+                      const isFull = item.points >= item.maxPoints
+                      const pct = Math.round((item.points / item.maxPoints) * 100)
+                      const missingPts = item.maxPoints - item.points
+                      return (
+                        <div
+                          key={item.id}
+                          className={cn(
+                            'px-3 py-2 rounded-xl border transition-colors',
+                            isFull
+                              ? 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.06] border-emerald-500/20'
+                              : 'bg-amber-500/[0.06] dark:bg-amber-500/[0.08] border-amber-500/30'
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-1.5">
+                            <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
+                              {item.label}
+                            </span>
+                            <span
+                              className={cn(
+                                'font-mono text-[11px] font-extrabold px-1.5 py-0.5 rounded-md border leading-none shrink-0',
+                                isFull
+                                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
+                                  : 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30'
+                              )}
+                            >
+                              {item.points}/{item.maxPoints}
+                            </span>
+                          </div>
+
+                          <div className="w-full h-1.5 rounded-full bg-slate-200/80 dark:bg-white/[0.08] overflow-hidden mt-1.5">
+                            <div
+                              className={cn(
+                                'h-full rounded-full transition-all duration-500',
+                                isFull ? 'bg-emerald-500' : 'bg-amber-500'
+                              )}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+
+                          <div className="mt-1.5 flex items-center justify-between gap-1 text-[10.5px]">
+                            <span className="font-mono font-semibold text-slate-700 dark:text-slate-300 truncate">
+                              {item.currentText}
+                            </span>
+                            {!isFull && (
+                              <span className="font-mono font-bold text-amber-700 dark:text-amber-400 shrink-0">
+                                -{missingPts} pts
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                            {item.detailText}
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* 4 Executive KPI Badges */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 pt-2">

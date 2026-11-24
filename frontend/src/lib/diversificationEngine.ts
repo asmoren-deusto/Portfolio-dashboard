@@ -605,10 +605,20 @@ export interface PortfolioAuditAdvice {
   badgeText: string
 }
 
+export interface ScoreBreakdownItem {
+  id: 'regions' | 'top_region' | 'sectors' | 'top3'
+  label: string
+  points: number
+  maxPoints: number
+  currentText: string
+  detailText: string
+}
+
 export interface DiversificationDiagnosis {
   score: number // 0 to 100
   scoreLabel: string
   scoreColor: string
+  scoreBreakdown: ScoreBreakdownItem[]
   verdictTitle: string
   verdictParagraphs: string[]
   topRegion: GeographicComparisonItem
@@ -648,6 +658,7 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
       score: 0,
       scoreLabel: 'Sin datos',
       scoreColor: '#94a3b8',
+      scoreBreakdown: [],
       verdictTitle: 'Cartera vacía o sin valoración activa',
       verdictParagraphs: ['Registra tus primeras operaciones para desbloquear el diagnóstico mundial.'],
       topRegion: {
@@ -1022,32 +1033,75 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     }
   })
 
-  // 7. Calculate Diversification Health Score (0 - 100)
-  let score = 0
+  // 7. Calculate Diversification Health Score (0 - 100) with transparent pillar breakdown
   const activeRegions = geographicBreakdown.filter((g) => g.portfolioWeight >= 2.0).length
-  if (activeRegions >= 5) score += 35
-  else if (activeRegions === 4) score += 30
-  else if (activeRegions === 3) score += 22
-  else score += 12
+  const missingRegions = geographicBreakdown
+    .filter((g) => g.portfolioWeight < 2.0 && g.region.id !== 'other')
+    .map((g) => g.region.shortName)
+  const regionPts =
+    activeRegions >= 5 ? 35 : activeRegions === 4 ? 30 : activeRegions === 3 ? 22 : 12
 
   const topGeoWeight = geographicBreakdown[0]?.portfolioWeight || 100
-  if (topGeoWeight <= 68) score += 35
-  else if (topGeoWeight <= 78) score += 28
-  else if (topGeoWeight <= 88) score += 18
-  else score += 8
+  const topGeoName = geographicBreakdown[0]?.region.shortName || 'Región líder'
+  const topGeoPts =
+    topGeoWeight <= 68 ? 35 : topGeoWeight <= 78 ? 28 : topGeoWeight <= 88 ? 18 : 8
 
   const activeSectors = sectorBreakdown.filter((s) => s.portfolioWeight >= 4.0).length
-  if (activeSectors >= 7) score += 15
-  else if (activeSectors >= 5) score += 12
-  else score += 7
+  const sectorPts = activeSectors >= 7 ? 15 : activeSectors >= 5 ? 12 : 7
 
   const sortedPos = [...validPositions].sort((a, b) => (b.current_value || 0) - (a.current_value || 0))
   const top3Weight = sortedPos.slice(0, 3).reduce((acc, p) => acc + ((p.current_value || 0) / totalValue) * 100, 0)
-  if (top3Weight <= 50) score += 15
-  else if (top3Weight <= 65) score += 12
-  else if (top3Weight <= 80) score += 8
-  else score += 4
+  const top3Pts =
+    top3Weight <= 50 ? 15 : top3Weight <= 65 ? 12 : top3Weight <= 80 ? 8 : 4
 
+  const scoreBreakdown: ScoreBreakdownItem[] = [
+    {
+      id: 'regions',
+      label: 'Cobertura Regional',
+      points: regionPts,
+      maxPoints: 35,
+      currentText: `${activeRegions} ${activeRegions === 1 ? 'región' : 'regiones'} ≥ 2%`,
+      detailText:
+        regionPts === 35
+          ? 'Cobertura global óptima (≥ 5 regiones)'
+          : `Necesitas ≥ 5 regiones con ≥ 2%${missingRegions.length ? ` (falta ${missingRegions.slice(0, 2).join(', ')})` : ''}`,
+    },
+    {
+      id: 'top_region',
+      label: 'Equilibrio Geográfico',
+      points: topGeoPts,
+      maxPoints: 35,
+      currentText: `${topGeoName}: ${topGeoWeight.toFixed(1)}%`,
+      detailText:
+        topGeoPts === 35
+          ? 'Sin sobreconcentración regional (≤ 68%)'
+          : 'Reduce la región líder por debajo del 68%',
+    },
+    {
+      id: 'sectors',
+      label: 'Amplitud Sectorial',
+      points: sectorPts,
+      maxPoints: 15,
+      currentText: `${activeSectors} sectores ≥ 4%`,
+      detailText:
+        sectorPts === 15
+          ? 'Diversificación sectorial óptima (≥ 7)'
+          : 'Alcanza ≥ 7 sectores con al menos 4% cada uno',
+    },
+    {
+      id: 'top3',
+      label: 'Desconcentración Top 3',
+      points: top3Pts,
+      maxPoints: 15,
+      currentText: `Top 3 activos: ${top3Weight.toFixed(1)}%`,
+      detailText:
+        top3Pts === 15
+          ? 'Peso bien repartido (≤ 50% en Top 3)'
+          : 'Reduce el peso del Top 3 por debajo del 50%',
+    },
+  ]
+
+  let score = regionPts + topGeoPts + sectorPts + top3Pts
   score = Math.min(100, Math.max(10, Math.round(score)))
 
   let scoreLabel = 'Diversificación Moderada'
@@ -1285,6 +1339,7 @@ export function analyzePortfolioDiversification(positions: Position[]): Diversif
     score,
     scoreLabel,
     scoreColor,
+    scoreBreakdown,
     verdictTitle: `Diagnóstico de Diversificación: ${score}/100 • ${scoreLabel}`,
     verdictParagraphs,
     topRegion: geographicBreakdown[0],
