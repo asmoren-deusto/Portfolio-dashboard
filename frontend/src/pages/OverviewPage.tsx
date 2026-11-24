@@ -38,6 +38,7 @@ import {
   WaterfallGrowthChart,
 } from '@/components/charts/EvolutionCharts'
 import { AllocationChart, AllocationChartSkeleton } from '@/components/charts/AllocationChart'
+import { DryPowderPlaybookCard } from '@/components/market/DryPowderPlaybookCard'
 import { ReturnsChart, ReturnsChartSkeleton } from '@/components/charts/ReturnsChart'
 import { MonthlyReturnsHeatmap } from '@/components/charts/MonthlyReturnsHeatmap'
 import { BenchmarkEvolutionChart, type BenchmarkChartMode } from '@/components/charts/BenchmarkEvolutionChart'
@@ -716,6 +717,9 @@ export function OverviewPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-8">
+      {/* Alerta automática de Pólvora Seca (solo visible si el S&P 500 alcanza -10% / -20% / -30%) */}
+      <DryPowderPlaybookCard variant="alert-only" />
+
       {/* 1. Métricas Globales (Totales Cartera) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between px-0.5">

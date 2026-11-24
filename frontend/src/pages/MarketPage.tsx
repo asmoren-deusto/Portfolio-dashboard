@@ -15,6 +15,7 @@ import { WorldMarketsRegionalCard } from '@/components/market/WorldMarketsRegion
 import { MarketHeatmap } from '@/components/market/MarketHeatmap'
 import { StockDetailModal } from '@/components/market/StockDetailModal'
 import { SimulatedPortfolioCard } from '@/components/market/SimulatedPortfolioCard'
+import { DryPowderPlaybookCard } from '@/components/market/DryPowderPlaybookCard'
 import { cn } from '@/lib/utils'
 
 const INDEX_TABS = [
@@ -250,6 +251,9 @@ export const MarketPage: React.FC = () => {
         totalStocks={data?.stocks.length}
         onSelectStock={setSelectedStock}
       />
+
+      {/* Protocolo Pólvora Seca: 3 Disparos S&P 500 (-10% / -20% / -30%) */}
+      <DryPowderPlaybookCard />
 
       {/* Selector de Modo de Visualización */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-1.5 sm:p-2 rounded-2xl bg-white dark:bg-[#1e1e20] border border-slate-200/80 dark:border-white/[0.08] shadow-card">

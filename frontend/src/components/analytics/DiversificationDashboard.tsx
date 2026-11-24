@@ -44,6 +44,7 @@ import {
 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
+import { DryPowderPlaybookCard } from '@/components/market/DryPowderPlaybookCard'
 import { fmt, cn } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
 import {
@@ -1351,6 +1352,9 @@ export function DiversificationDashboard({ positions, isLoading = false }: Diver
       {/* ── 7. TAB 5: Consejos & Calculadora de Rebalanceo Inteligente ───────── */}
       {activeTab === 'rebalance' && (
         <div className="flex flex-col gap-4">
+          {/* Protocolo Pólvora Seca: 3 Disparos S&P 500 (-10% / -20% / -30%) */}
+          <DryPowderPlaybookCard />
+
           {/* Smart Cash-Flow Rebalancing Calculator (Zero-Tax via New Inflows) */}
           <Card className="p-5 sm:p-6 border-blue-500/25">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-white/[0.06]">

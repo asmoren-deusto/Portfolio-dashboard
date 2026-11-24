@@ -1983,6 +1983,36 @@ async def get_simulated_portfolio(
 # ── S&P 500 Real-Time Chart Endpoint ──────────────────────────────────────────
 _sp500_chart_cache: dict = {}
 SP500_CHART_CACHE_TTL = 30  # 30 seconds for responsive live feel
+_sp500_ath_cache: dict = {"price": None, "date": None, "ts": 0.0}
+SP500_ATH_CACHE_TTL = 6 * 3600  # 6 hours
+
+
+def _get_sp500_ath_sync(current_price: float, day_high: float) -> tuple[float, str | None]:
+    """Return cached 5-year / all-time high of S&P 500 (^GSPC) and its date."""
+    now = time.time()
+    ath_p = _sp500_ath_cache.get("price")
+    ath_d = _sp500_ath_cache.get("date")
+    if not ath_p or (now - _sp500_ath_cache.get("ts", 0.0)) > SP500_ATH_CACHE_TTL:
+        try:
+            import yfinance as yf
+            hist = yf.Ticker("^GSPC").history(period="5y", auto_adjust=False)
+            if not hist.empty and "High" in hist.columns:
+                high_s = hist["High"].dropna()
+                if not high_s.empty:
+                    idx_max = high_s.idxmax()
+                    ath_p = round(float(high_s.loc[idx_max]), 2)
+                    ath_d = str(idx_max.date())
+                    _sp500_ath_cache["price"] = ath_p
+                    _sp500_ath_cache["date"] = ath_d
+                    _sp500_ath_cache["ts"] = now
+        except Exception as e:
+            logger.warning(f"Error fetching S&P 500 ATH: {e}")
+
+    live_max = max(current_price or 0.0, day_high or 0.0)
+    if not ath_p or live_max > ath_p:
+        ath_p = round(live_max, 2)
+        ath_d = datetime.now().strftime("%Y-%m-%d")
+    return ath_p, ath_d
 
 
 def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
@@ -2181,6 +2211,10 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
     summary_prices = [pt["price"] for pt in dedup_points] if dedup_points else [cur_p]
     day_hi = max(summary_prices) if is_pre else (_clean_float(q_gspc.get("day_high")) or max(summary_prices))
     day_lo = min(summary_prices) if is_pre else (_clean_float(q_gspc.get("day_low")) or min(summary_prices))
+    ath_p, ath_d = _get_sp500_ath_sync(cur_p, day_hi)
+    dd_ath_pct = round(((cur_p - ath_p) / ath_p) * 100.0, 2) if ath_p and ath_p > 0 else 0.0
+    if dd_ath_pct > 0:
+        dd_ath_pct = 0.0
 
     summary = {
         "ticker": "^GSPC",
@@ -2194,6 +2228,9 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
         "day_high": round(day_hi, 2),
         "day_low": round(day_lo, 2),
         "prev_close": ref_c,
+        "ath_price": ath_p,
+        "ath_date": ath_d,
+        "drawdown_from_ath_pct": dd_ath_pct,
         "period": p,
         "as_of": now_madrid.isoformat(),
     }

@@ -546,6 +546,9 @@ export interface Sp500ChartResponse {
     day_high: number
     day_low: number
     prev_close: number
+    ath_price?: number
+    ath_date?: string | null
+    drawdown_from_ath_pct?: number
     period: string
     as_of: string
   }
