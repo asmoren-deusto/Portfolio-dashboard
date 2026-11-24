@@ -1182,8 +1182,9 @@ PORTFOLIO_ETF_PROXIES = {
     "LU0261952682": {"ticker": "FEZ",  "name": "SPDR EURO STOXX 50 ETF", "desc": "Euro Stoxx 50 (Europa)"},
     # Salud:
     "LU0171307068": {"ticker": "IXJ",  "name": "iShares Global Healthcare ETF", "desc": "Salud y Biotecnología Global"},
-    # Renta Fija / Bonos / Crédito:
+    # Renta Fija / Bonos / Crédito / Liquidez:
     "ES0000012411": {"ticker": "FIJO", "name": "Precio Fijo (Sin réplica)", "desc": "Fijo a Precio de Compra", "is_fixed": True},
+    "CASH_TR_EUR":  {"ticker": "FIJO", "name": "Cuenta Remunerada (Sin fluctuación)", "desc": "Liquidez Remunerada EUR (2,50% TIN · Pago mensual)", "is_fixed": True},
     "LU1623762843": {"ticker": "HYG",  "name": "iShares iBoxx $ High Yield Corporate Bond", "desc": "Crédito y Renta Fija Privada"},
     "LU0840158819": {"ticker": "SHYG", "name": "iShares 0-5 Year High Yield Corp Bond", "desc": "Renta Fija Corporativa High Yield Corta Duración (Storm)"},
     "LU0840158496": {"ticker": "SHYG", "name": "iShares 0-5 Year High Yield Corp Bond", "desc": "Renta Fija Corporativa High Yield Corta Duración (Storm)"},
@@ -1231,6 +1232,8 @@ def _fetch_simulated_portfolio_sync(period: str, active: dict, navs: dict, asset
     for isin, f_val in fund_values.items():
         if isin == "ES0000012411":
             proxy_info = {"ticker": "FIJO", "name": "Precio Fijo (Sin réplica)", "desc": "Fijo a Precio de Compra", "is_fixed": True}
+        elif isin == "CASH_TR_EUR":
+            proxy_info = {"ticker": "FIJO", "name": "Cuenta Remunerada (Sin fluctuación)", "desc": "Liquidez Remunerada EUR (2,50% TIN · Pago mensual)", "is_fixed": True}
         elif isin == "US67066G1040":
             proxy_info = {"ticker": "NVDA", "name": "NVIDIA (Tiempo Real)", "desc": "Acción Directa en Tiempo Real", "is_realtime": True}
         else:

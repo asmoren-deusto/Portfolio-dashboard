@@ -9,6 +9,7 @@ const configs: Record<string, { label: string; bg: string; text: string; border:
   bond:   { label: 'Bono',    bg: 'bg-zinc-500/10 dark:bg-zinc-500/15',     text: 'text-zinc-700 dark:text-zinc-300',     border: 'border-zinc-500/20' },
   etc:    { label: 'ETC Oro', bg: 'bg-yellow-500/10 dark:bg-yellow-500/15', text: 'text-yellow-700 dark:text-yellow-400', border: 'border-yellow-500/20' },
   crypto: { label: 'Cripto',  bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-500/15', text: 'text-fuchsia-700 dark:text-fuchsia-300', border: 'border-fuchsia-500/20' },
+  cash:   { label: 'Liquidez', bg: 'bg-teal-500/10 dark:bg-teal-500/15', text: 'text-teal-700 dark:text-teal-300', border: 'border-teal-500/20' },
 }
 
 const brokerConfigs: Record<string, { label: string; bg: string; text: string; border: string; dot: string }> = {

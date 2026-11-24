@@ -34,6 +34,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'LU0171307068': 'blackrock.com',
   'LU0122379958': 'blackrock.com',
   'ES0000012411': 'tesoro.es',
+  'CASH_TR_EUR': 'traderepublic.com',
   'IE00B4ND3602': 'ishares.com',
   'IE00B5BMR087': 'ishares.com',
   'IE0032126645': 'vanguard.com',

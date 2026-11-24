@@ -968,6 +968,7 @@ export function buildPortfolioXRayReport(
     'IE00BYX5NH74': { r1y: 21.16, r3y: 24.68, r5y: 17.87, rating: 4, ter: 0.15 },
     'LU0997587597': { r1y: 21.16, r3y: 24.68, r5y: 17.87, rating: 4, ter: 0.15 },
     'ES0000012411': { r1y: 3.85,  r3y: 2.10,  r5y: 1.45,  rating: 0, ter: 0.00 },
+    'CASH_TR_EUR':  { r1y: 2.53,  r3y: 2.50,  r5y: null,  rating: 0, ter: 0.00 },
     'US67066G1040': { r1y: 35.40, r3y: 68.20, r5y: 74.50, rating: 5, ter: 0.00 },
     'IE00B5BMR087': { r1y: 15.41, r3y: 20.60, r5y: 12.30, rating: 5, ter: 0.07 },
   }
@@ -982,6 +983,7 @@ export function buildPortfolioXRayReport(
 
       let displayType = 'Fondo de Inversión'
       if (assetType === 'bond' || isin === 'ES0000012411') displayType = 'Bono Soberano'
+      else if (assetType === 'cash' || isin === 'CASH_TR_EUR') displayType = 'Cuenta Remunerada'
       else if (assetType === 'epsv' || isin.startsWith('0192')) displayType = 'Plan EPSV'
       else if (assetType === 'stock') displayType = 'Acción Directa'
       else if (assetType === 'etf') displayType = 'ETF'
@@ -1094,6 +1096,7 @@ export function buildPortfolioXRayReport(
     'IE00BYX5NH74': { mean: 23.28, vol: 14.45 },
     'LU0997587597': { mean: 23.28, vol: 14.45 },
     'ES0000012411': { mean: 3.85,  vol: 4.20 },
+    'CASH_TR_EUR':  { mean: 2.53,  vol: 0.15 },
     'US67066G1040': { mean: 35.40, vol: 28.50 },
   }
 

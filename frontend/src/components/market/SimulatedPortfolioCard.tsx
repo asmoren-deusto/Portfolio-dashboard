@@ -84,9 +84,9 @@ export const ETF_INFO_MAP: Record<string, EtfInfo> = {
     category: 'Acción Directa en Tiempo Real',
   },
   FIJO: {
-    name: 'Precio Fijo (Sin réplica)',
-    shortName: 'Bono Fijo',
-    category: 'Fijo a Precio de Compra',
+    name: 'Precio Fijo / Liquidez (Sin réplica)',
+    shortName: 'Fijo / Liquidez',
+    category: 'Sin fluctuación intradía',
   },
   COWZ: {
     name: 'Alto Cash Flow & Value EE.UU.',

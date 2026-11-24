@@ -110,7 +110,6 @@ async def get_portfolio_summary(user_id: str = Depends(get_current_user_id), bro
         if pos["shares"] > 0.0001
         and isin != "TR_TRANSFER"
         and not isin.startswith("TR_")
-        and not (all_assets.get(isin) and "Trade Republic" in (all_assets.get(isin).name or ""))
     }
 
     async def _fetch_pos_val(isin, pos):
@@ -238,7 +237,7 @@ async def get_positions(user_id: str = Depends(get_current_user_id), broker: str
     async def _fetch_position_bundle(isin, pos):
         asset = all_assets.get(isin)
         name = asset.name if asset else isin
-        if isin == "TR_TRANSFER" or isin.startswith("TR_") or "Trade Republic" in name:
+        if isin == "TR_TRANSFER" or isin.startswith("TR_"):
             return None
         ticker = asset.ticker if asset else None
         pos_txs = [t for t in transactions if t["isin"] == isin]
@@ -532,7 +531,7 @@ async def check_portfolio_navs(user_id: str = "asier", db: Session = None) -> di
                 elif p_date and prev_d and p_date == prev_d and prev_p and abs(p - prev_p) > 0.0001:
                     is_updated = True
 
-            if isin in ("ES0000012411", "TR_TRANSFER") or isin.startswith("TR_"):
+            if isin in ("ES0000012411", "CASH_TR_EUR", "TR_TRANSFER") or isin.startswith("TR_"):
                 is_updated = False
 
             # Base reference for diff

@@ -281,6 +281,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'cash',
     currencies: { EUR: 1.0 },
   },
+  // Cuenta Remunerada Trade Republic EUR (CASH_TR_EUR)
+  CASH_TR_EUR: {
+    geo: { europe: 1.0 },
+    sectors: { financials: 1.0 },
+    assetClass: 'cash',
+    currencies: { EUR: 1.0 },
+  },
   // Groupama Trésorerie IC (FR0000989626) - Monetario EUR
   FR0000989626: {
     geo: { europe: 1.0 },

@@ -344,6 +344,49 @@ async def _background_refresh_isin(isin: str, ticker: str | None = None):
         logger.debug(f"Background refresh error for {isin}: {e}")
 
 
+# ── Trade Republic Cuenta Remunerada EUR (CASH_TR_EUR) ─────────────────────
+# Trade Republic Spain calculates interest daily (Actual/365) on uninvested EUR
+# cash at the standard rate (2.50% TIN / 2.53% TAE) and credits net monthly
+# interest (after 19% IRPF withholding = 2.025% net TIN) on the 1st of each month.
+TR_CASH_ISIN = "CASH_TR_EUR"
+TR_CASH_START_DATE = "2026-11-24"
+TR_CASH_ANNUAL_TIN = 0.0250
+TR_CASH_WITHHOLDING = 0.19
+
+
+def _compute_tr_cash_schedule(up_to_date_str: str | None = None) -> list[dict]:
+    """
+    Build the unit NAV step curve for CASH_TR_EUR starting at 1.000000 EUR on
+    TR_CASH_START_DATE, automatically compounding net monthly interest on the
+    1st of every subsequent month (matching Trade Republic's monthly payouts).
+    """
+    today_str = up_to_date_str or datetime.now().strftime("%Y-%m-%d")
+    start_dt = datetime.strptime(TR_CASH_START_DATE, "%Y-%m-%d")
+    end_dt = datetime.strptime(today_str, "%Y-%m-%d")
+    if end_dt < start_dt:
+        return [{"date": TR_CASH_START_DATE, "price": 1.0}]
+
+    net_annual_rate = TR_CASH_ANNUAL_TIN * (1.0 - TR_CASH_WITHHOLDING)
+    unit_nav = 1.0
+    series = [{"date": TR_CASH_START_DATE, "price": round(unit_nav, 6)}]
+
+    period_start = start_dt
+    payout_dt = datetime(start_dt.year + 1, 1, 1) if start_dt.month == 12 else datetime(start_dt.year, start_dt.month + 1, 1)
+
+    while payout_dt <= end_dt:
+        days_accrued = (payout_dt - period_start).days
+        if days_accrued > 0:
+            unit_nav *= (1.0 + net_annual_rate * (days_accrued / 365.0))
+        series.append({"date": payout_dt.strftime("%Y-%m-%d"), "price": round(unit_nav, 6)})
+        period_start = payout_dt
+        payout_dt = datetime(payout_dt.year + 1, 1, 1) if payout_dt.month == 12 else datetime(payout_dt.year, payout_dt.month + 1, 1)
+
+    if series[-1]["date"] != today_str:
+        series.append({"date": today_str, "price": round(unit_nav, 6)})
+
+    return series
+
+
 async def get_price_with_date(
     isin: str,
     ticker: str | None = None,
@@ -371,6 +414,17 @@ async def get_price_with_date(
             _save_cached_price(isin, today_str, fixed_price, source="purchase_fixed")
         return fixed_price, today_str
 
+    if isin == TR_CASH_ISIN:
+        # Trade Republic Cuenta Remunerada EUR: starts at 1.000000 EUR on 2026-11-24 and
+        # automatically steps up on the 1st of each month with credited monthly net interest.
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        schedule = _compute_tr_cash_schedule(today_str)
+        curr_nav = schedule[-1]["price"]
+        if isin not in _price_cache or _price_cache[isin].get("date") != today_str or _price_cache[isin].get("price") != curr_nav:
+            _price_cache[isin] = {"price": curr_nav, "date": today_str, "ts": datetime.now()}
+            _save_cached_price(isin, today_str, curr_nav, source="tr_cash_accrual")
+        return curr_nav, today_str
+
     ticker = KNOWN_TICKERS.get(isin) or ticker
 
     is_live_traded = bool(
@@ -378,7 +432,7 @@ async def get_price_with_date(
         and not ticker.startswith("0P000")
         and not isin.startswith("0192")
         and not isin.startswith("ES011261")
-        and isin != "ES0000012411"
+        and isin not in ("ES0000012411", TR_CASH_ISIN)
     )
 
     if not force:
@@ -436,7 +490,7 @@ async def _scrape_price_with_date_impl(
         and not ticker.startswith("0P000")
         and not isin.startswith("0192")
         and not isin.startswith("ES011261")
-        and isin != "ES0000012411"
+        and isin not in ("ES0000012411", TR_CASH_ISIN)
     )
     if is_live_traded:
         live_p, live_d, live_time = None, None, None
@@ -1704,6 +1758,11 @@ async def _fetch_full_price_history_impl(isin: str, ticker: str | None = None) -
             {"date": "2026-10-26", "price": fixed_price},
             {"date": today_str, "price": fixed_price},
         ]
+        _history_cache[max_key] = (datetime.now(), res)
+        return res
+
+    if isin == TR_CASH_ISIN:
+        res = _compute_tr_cash_schedule()
         _history_cache[max_key] = (datetime.now(), res)
         return res
 

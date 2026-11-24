@@ -83,6 +83,14 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'DIST',
     shareClassLabel: 'Distribución (Cupón Anual 5,75%)',
   },
+  // 9b. Cuenta Remunerada Trade Republic
+  'CASH_TR_EUR': {
+    cleanName: 'Cuenta Remunerada Trade Republic',
+    officialName: 'Cuenta Remunerada Trade Republic EUR (2,50% TIN · Pago mensual día 1)',
+    currency: 'EUR',
+    shareClass: 'CASH',
+    shareClassLabel: 'Cuenta Remunerada EUR (Interés Mensual)',
+  },
   // 11. Groupama Trésorerie IC
   'FR0000989626': {
     cleanName: 'Groupama Trésorerie IC',
@@ -376,7 +384,7 @@ export function isPositionPendingNavUpdate(
   asOfDate?: Date
 ): boolean {
   if (!pos || pos.isin === 'TR_TRANSFER' || pos.isin?.startsWith('TR_')) return false
-  if (pos.asset_type === 'stock' || pos.asset_type === 'etc' || pos.asset_type === 'etf' || pos.isin === 'IE00B4ND3602' || pos.isin === 'US67066G1040') return false
+  if (pos.asset_type === 'stock' || pos.asset_type === 'etc' || pos.asset_type === 'etf' || pos.asset_type === 'cash' || pos.isin === 'IE00B4ND3602' || pos.isin === 'US67066G1040' || pos.isin === 'CASH_TR_EUR') return false
 
   const pDate = (pos.price_date || pos.last_updated)?.slice(0, 10)
   if (!pDate) return true

@@ -248,6 +248,15 @@ ASSETS = json.loads(r'''[
     "morningstar_id": "0P0001K87I",
     "category": "Renta Fija Mixta / Crédito Global",
     "ter": 1.15
+  },
+  {
+    "isin": "CASH_TR_EUR",
+    "name": "Cuenta Remunerada Trade Republic",
+    "ticker": "CASH_TR",
+    "asset_type": "cash",
+    "currency": "EUR",
+    "category": "Liquidez / Cuenta Remunerada EUR",
+    "ter": 0.0
   }
 ]''')
 
@@ -2116,6 +2125,12 @@ PRICES = json.loads(r'''[
     "isin": "IE00B5BMR087",
     "date": "2026-11-23",
     "price": 695.88,
+    "currency": "EUR"
+  },
+  {
+    "isin": "CASH_TR_EUR",
+    "date": "2026-11-24",
+    "price": 1.0,
     "currency": "EUR"
   }
 ]''')
@@ -4604,5 +4619,17 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-24",
     "broker": "traderepublic",
     "notes": "Venta orden stop NVIDIA Corp en Trade Republic a las 10:54 (20,747225 acciones a 144,58 €, beneficio +15,70 € / +0,53%)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "CASH_TR_EUR",
+    "type": "buy",
+    "shares": 2997.49,
+    "price": 1.0,
+    "amount": 2997.49,
+    "fees": 0.0,
+    "date": "2026-11-24",
+    "broker": "traderepublic",
+    "notes": "Saldo en Cuenta Remunerada Trade Republic (2,50% TIN / pago mensual día 1 tras venta de NVIDIA)"
   }
 ]''')
