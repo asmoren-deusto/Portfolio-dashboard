@@ -242,10 +242,10 @@ ASSETS = json.loads(r'''[
   {
     "isin": "ES0140794001",
     "name": "Gamma Global FI",
-    "ticker": "ES0140794001",
+    "ticker": "0P0001MABK.F",
     "asset_type": "fund",
     "currency": "EUR",
-    "morningstar_id": "0P0001K87I",
+    "morningstar_id": "0P0001MABK",
     "category": "Renta Fija Mixta / Crédito Global",
     "ter": 1.15
   },
@@ -271,6 +271,12 @@ ASSETS = json.loads(r'''[
 ]''')
 
 PRICES = json.loads(r'''[
+  {
+    "isin": "ES0140794001",
+    "date": "2026-11-23",
+    "price": 14.084699,
+    "currency": "EUR"
+  },
   {
     "isin": "ES0140794001",
     "date": "2026-11-20",

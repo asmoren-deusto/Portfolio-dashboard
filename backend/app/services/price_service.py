@@ -148,6 +148,7 @@ KNOWN_TICKERS: dict[str, str] = {
     "IE00BYX5NX33": "0P0001CLDK.F",  # Fidelity MSCI World Index Fund EUR P Acc
     "LU1372006947": "0P0001AZ4D.F",  # Cobas Lux SICAV - Cobas Selection Fund P EUR Acc
     "ES0146309002": "0P0001DFE8.F",  # Horos Value Internacional FI
+    "ES0140794001": "0P0001MABK.F",  # Gamma Global FI (Singular Asset Management)
     "LU1598719752": "0P0001A94B.F",  # Cobas Lux SICAV - Cobas International Fund P EUR Acc
     "LU0996182563": "0P00012PP6.F",  # Amundi Index MSCI World AE-C
     "IE00BYX5M476": "0P0001CJGK.F",  # Fidelity MSCI Emerging Markets Index Fund EUR P Acc
@@ -1416,9 +1417,54 @@ async def _fetch_morningstar_nav(isin: str) -> tuple[Optional[float], Optional[s
     return None, None
 
 
+SINGULAR_FUND_INDICES: dict[str, int] = {
+    "ES0140794001": 24,  # Gamma Global, FI - Clase A
+    "ES0140794019": 33,  # Gamma Global, FI - Clase Z
+    "ES0157626005": 22,  # Lambda Universal, FI
+    "ES0156506000": 23,  # Kappa, FI
+    "ES0175902008": 25,  # Sigma Internacional, FI
+}
+
+
+async def _fetch_singular_official(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Fetch official 6-decimal NAV and valuation date directly from Singular Asset Management JSON API:
+    https://www.singularam.es/wp-content/fund-datasheet/main.php?fndIndx=24&fm=...&to=...
+    """
+    fnd_idx = SINGULAR_FUND_INDICES.get(isin)
+    if fnd_idx is None:
+        return None, None
+    try:
+        now = datetime.now()
+        fm_str = (now - timedelta(days=20)).strftime("%Y%m%d")
+        to_str = (now + timedelta(days=1)).strftime("%Y%m%d")
+        url = f"https://www.singularam.es/wp-content/fund-datasheet/main.php?fndIndx={fnd_idx}&fm={fm_str}&to={to_str}"
+        client = _get_async_client()
+        resp = await client.get(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                "Accept": "application/json, text/javascript, */*; q=0.01",
+                "Referer": "https://www.singularam.es/gamma-global-fi-clase-a/",
+            },
+            timeout=10.0,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            prices = data.get("prices") or {}
+            price_val = prices.get("price")
+            dt_raw = str(prices.get("dateAsString") or "").strip()
+            if price_val and float(price_val) > 0 and len(dt_raw) == 8 and dt_raw.isdigit():
+                date_iso = f"{dt_raw[:4]}-{dt_raw[4:6]}-{dt_raw[6:8]}"
+                return round(float(price_val), 6), _normalize_business_date(date_iso)
+    except Exception as e:
+        logger.debug(f"Singular AM official fetch error for {isin}: {e}")
+    return None, None
+
+
 # Tie-break priority between sources reporting the SAME date (the date itself always wins first).
 NAV_SOURCE_PRIORITY: dict[str, float] = {
-    "myinvestor": 8, "azvalor": 7, "cobas": 7, "blackrock": 7,
+    "myinvestor": 8, "singular": 7.5, "azvalor": 7, "cobas": 7, "blackrock": 7,
     "onvista": 6.5, "quefondos": 6, "finect": 6, "morningstar": 5.5,
     "ft": 5, "yahoo": 4, "investing": 3, "ariva": 1,
 }
@@ -1436,6 +1482,8 @@ def _build_nav_fetch_tasks(isin: str, ticker: str | None) -> tuple[list[str], li
         ("morningstar", _fetch_morningstar_nav(isin)),
         ("ariva", _fetch_ariva_price(isin)),
     ]
+    if isin in SINGULAR_FUND_INDICES:
+        pairs.append(("singular", _fetch_singular_official(isin)))
     if isin.startswith("ES011261"):
         pairs.append(("azvalor", _fetch_azvalor_official(isin)))
     if isin in COBAS_PRODUCT_SLUGS or isin.startswith("ES011919") or isin == "LU1598719752":
