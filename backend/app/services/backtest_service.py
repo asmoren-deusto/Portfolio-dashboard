@@ -17,11 +17,17 @@ DEFAULT_PROXIES = {
     "0192#0011": ("URTH", "MSCI World (Indexa EPSV)", "Renta Variable Global"),
     "LU0302296495": ("XLK", "Tecnología Global (DNB Fund)", "Crecimiento / Megatendencias"),
     "ES0112611001": ("0P00016YQ5.F", "Azvalor Internacional FI", "Value / Materias Primas & Energía"),
+    "ES0146309002": ("EFV", "Value Internacional (Horos)", "Renta Variable Global Value"),
+    "LU1372006947": ("EFV", "Value Internacional (Cobas)", "Renta Variable Deep Value"),
     "IE000QAZP7L2": ("EEM", "Mercados Emergentes", "Diversificación Geográfica"),
     "IE00BYX5NH74": ("EWJ", "Renta Variable Japón", "Diversificación Asia Desarrollada"),
     "LU0261952682": ("EZU", "Euro Stoxx 50 (Europa)", "Renta Variable Europea"),
     "LU0171307068": ("XLV", "World Healthscience (Salud)", "Sector Defensivo Anticíclico"),
-    "ES0000012411": ("IEF", "Bonos Soberanos 7-10Y", "Renta Fija / Estabilidad"),
+    "IE00BKSBD942": ("XLV", "Polar Capital Healthcare (Salud)", "Sector Defensivo Anticíclico"),
+    "LU0840158819": ("HYG", "Crédito Corporativo HY (Storm)", "Renta Fija Corporativa / Cupón"),
+    "ES0140794001": ("LQD", "Crédito Global Flexible (Gamma)", "Renta Fija Corporativa / Estabilidad"),
+    "ES0000012411": ("IEF", "Bonos Soberanos 7-10Y", "Renta Fija Soberana / Refugio"),
+    "CASH_TR_EUR": ("SHV", "Liquidez / Cuenta Remunerada", "Pólvora Seca / Sin Volatilidad"),
     "IE00B4ND3602": ("GLD", "Oro Físico (ETC)", "Activo Refugio / Descorrelación"),
     "US67066G1040": ("NVDA", "NVIDIA Corporation", "Líder Global IA & Semiconductores"),
     "IE00B5BMR087": ("SPY", "iShares Core S&P 500 (Acc)", "Motor de Crecimiento Core EE.UU."),
@@ -35,9 +41,15 @@ def resolve_asset_proxy(isin: str, name: str, asset_type: str) -> tuple[str, str
     n_lower = (name or "").lower()
     t_lower = (asset_type or "").lower()
 
+    if t_lower == "cash" or "remunerada" in n_lower or "monetario" in n_lower or "liquidez" in n_lower:
+        return ("SHV", "Liquidez / Monetario", "Pólvora Seca / Estabilidad")
     if "gold" in n_lower or "oro" in n_lower or t_lower == "etc":
         return ("GLD", "Oro Físico", "Activo Refugio")
-    if t_lower == "bond" or "bono" in n_lower or "renta fija" in n_lower:
+    if "storm" in n_lower or "high yield" in n_lower:
+        return ("HYG", "Crédito Corporativo HY", "Renta Fija Corporativa")
+    if "gamma" in n_lower or "credit" in n_lower or "crédito" in n_lower:
+        return ("LQD", "Crédito Corporativo Global", "Renta Fija Corporativa")
+    if t_lower == "bond" or "bono" in n_lower or "bond" in n_lower or "renta fija" in n_lower:
         return ("IEF", "Renta Fija Intermedia", "Renta Fija / Estabilidad")
     if "tech" in n_lower or "tecnolog" in n_lower:
         return ("XLK", "Sector Tecnológico", "Crecimiento Tecnológico")
@@ -49,6 +61,8 @@ def resolve_asset_proxy(isin: str, name: str, asset_type: str) -> tuple[str, str
         return ("EWJ", "Renta Variable Japón", "Asia Desarrollada")
     if "europa" in n_lower or "euro" in n_lower:
         return ("EZU", "Renta Variable Europa", "Renta Variable Europa")
+    if "cobas" in n_lower or "horos" in n_lower or "value" in n_lower:
+        return ("EFV", "Renta Variable Value Internacional", "Value Internacional")
     if "energy" in n_lower or "energ" in n_lower or "valor" in n_lower:
         return ("XLE", "Energía / Value", "Value / Energía")
     if "sp500" in n_lower or "s&p" in n_lower or "500" in n_lower:
@@ -61,14 +75,17 @@ async def get_historical_market_monthly_df() -> pd.DataFrame:
     """
     Downloads and caches 10 years of monthly adjusted close prices for all relevant proxies.
     """
-    cache_key = "10y_monthly_proxies"
+    cache_key = "10y_monthly_proxies_v2"
     now = datetime.now()
     if cache_key in _HIST_CACHE:
         ts, df = _HIST_CACHE[cache_key]
         if (now - ts).total_seconds() < 43200:  # 12 hours cache
             return df.copy()
 
-    tickers = ["SPY", "URTH", "XLK", "0P00016YQ5.F", "XLE", "EEM", "EWJ", "EZU", "XLV", "IEF", "GLD"]
+    tickers = [
+        "SPY", "URTH", "XLK", "XLV", "EFV", "XLE", "EEM", "EWJ", "EZU",
+        "HYG", "LQD", "IEF", "SHV", "GLD", "0P00016YQ5.F",
+    ]
     
     loop = asyncio.get_running_loop()
     def _fetch():
@@ -344,102 +361,158 @@ def calculate_portfolio_backtest(
         "sharpe_ratio_sp500": sp_sharpe,
     }
 
-    # Crisis Stress-Testing Scenarios (Exact dates and metrics)
-    crises = [
-        {
-            "id": "2022_inflation",
-            "title": "Crisis de Inflación, Tipos y Guerra de Ucrania",
-            "period_label": "Ene 2022 – Dic 2022",
-            "severity": "Alta",
-            "color": "#ef4444",
-            "portfolio_return": -11.0,
-            "sp500_return": -18.2,
-            "msci_return": -18.0,
-            "b6040_return": -16.9,
-            "max_drawdown": -13.8,
-            "alpha_vs_sp500": 7.2,
-            "recovery_months": 7,
-            "hero_assets": [
-                {"name": "Azvalor Internacional FI", "ret": "+64.2%", "desc": "Materias primas, energía y uranio absorbieron el shock global"},
-                {"name": "iShares Physical Gold ETC", "ret": "+6.1%", "desc": "Refugio en EUR frente a la depreciación monetaria"},
-                {"name": "World Healthscience", "ret": "-5.1%", "desc": "Sector farmacéutico defensivo con baja caída"}
-            ],
-            "vulnerable_assets": [
-                {"name": "DNB Fund - Technology", "ret": "-33.1%", "desc": "Múltiplos de crecimiento comprimidos por tipos"},
-                {"name": "Bonos Gob. España", "ret": "-15.8%", "desc": "Peor año histórico de la renta fija"}
-            ],
-            "conclusion": "Tu cartera superó al S&P 500 en +7.2 puntos porcentuales. La combinación anticíclica de Azvalor y Oro neutralizó el desplome tecnológico."
-        },
-        {
-            "id": "2020_covid",
-            "title": "Crash Covid-19 y Confinamientos Mundiales",
-            "period_label": "Feb 2020 – May 2020",
-            "severity": "Extrema (Shock V-Shape)",
-            "color": "#f59e0b",
-            "portfolio_return": 13.6,  # Full year 2020
-            "sp500_return": 18.3,
-            "msci_return": 15.8,
-            "b6040_return": 14.5,
-            "max_drawdown": -20.6,    # Peak-to-trough drop (vs -33.9% SP500)
-            "alpha_vs_sp500": 13.3,   # 13.3 pp less drawdown!
-            "recovery_months": 4,     # Fast V-shape
-            "hero_assets": [
-                {"name": "iShares Physical Gold ETC", "ret": "+24.8%", "desc": "Vuelo hacia la máxima seguridad"},
-                {"name": "DNB Fund - Technology", "ret": "+42.5%", "desc": "Boom de digitalización y teletrabajo"},
-                {"name": "World Healthscience", "ret": "+13.2%", "desc": "Investigación biomédica y vacunas"}
-            ],
-            "vulnerable_assets": [
-                {"name": "Fidelity Euro 50", "ret": "-3.8%", "desc": "Industria y banca europea paralizadas"},
-                {"name": "Azvalor Internacional", "ret": "-8.2%", "desc": "Petróleo y consumo en mínimos durante marzo"}
-            ],
-            "conclusion": "En el crash más violento de las últimas décadas, la cartera sufrió un drawdown de solo -20.6% frente al -33.9% del S&P 500, recuperándose en solo 4 meses."
-        },
-        {
-            "id": "2018_selloff",
-            "title": "Guerra Comercial EE.UU.-China y Subidas de Tipos Fed",
-            "period_label": "Ene 2018 – Dic 2018",
-            "severity": "Moderada",
-            "color": "#8b5cf6",
-            "portfolio_return": -7.5,
-            "sp500_return": -4.6,
-            "msci_return": -8.6,
-            "b6040_return": -2.3,
-            "max_drawdown": -12.4,
-            "alpha_vs_sp500": -2.9,
-            "recovery_months": 5,
-            "hero_assets": [
-                {"name": "Bonos Gob. España / IEF", "ret": "+1.2%", "desc": "Refugio seguro en renta fija de calidad"},
-                {"name": "World Healthscience", "ret": "+4.8%", "desc": "Demanda inelástica y dividendos estables"}
-            ],
-            "vulnerable_assets": [
-                {"name": "iShares Emerging Markets", "ret": "-16.2%", "desc": "Fortaleza del dólar y aranceles a China"},
-                {"name": "Fidelity Euro 50", "ret": "-12.5%", "desc": "Desaceleración exportadora en Europa"}
-            ],
-            "conclusion": "Año de rotación defensiva: la renta fija y el sector salud amortiguaron el castigo de los mercados emergentes y la bolsa europea."
-        },
-        {
-            "id": "2023_2026_expansion",
-            "title": "Rally de la Inteligencia Artificial y Expansión Global",
-            "period_label": "Ene 2023 – Oct 2026",
-            "severity": "Fase Alcista Fuerte",
-            "color": "#10b981",
-            "portfolio_return": 73.4,
-            "sp500_return": 82.5,
-            "msci_return": 74.2,
-            "b6040_return": 39.8,
-            "max_drawdown": -7.2,
-            "alpha_vs_sp500": -9.1,
-            "recovery_months": 2,
-            "hero_assets": [
-                {"name": "DNB Fund - Technology", "ret": "+118.4%", "desc": "Liderazgo incontestable del ciclo IA y semiconductores"},
-                {"name": "Vanguard U.S. 500", "ret": "+78.6%", "desc": "Grandes tecnológicas impulsando máximos históricos"},
-                {"name": "Fidelity MSCI Japan", "ret": "+46.2%", "desc": "Reforma corporativa de la Bolsa de Tokio y fin de tipos negativos"}
-            ],
-            "vulnerable_assets": [
-                {"name": "Bonos Soberanos", "ret": "+8.4%", "desc": "Rentabilidad limitada por tipos oficiales elevados"}
-            ],
-            "conclusion": "La cartera capturó con enorme fuerza la ola tecnológica global con una subida acumulada de +73.4% y drawdowns inferiores al 7%."
+    # Dynamic Crisis Stress-Testing Scenarios computed from the ACTUAL current portfolio allocation
+    def _build_dynamic_crisis(
+        cid: str,
+        title: str,
+        period_label: str,
+        severity: str,
+        color: str,
+        start_ym: str,
+        end_ym: str,
+        dd_start_ym: str | None = None,
+        dd_end_ym: str | None = None,
+        fallback_rec_months: int = 6,
+    ) -> dict:
+        mask = (rets_full.index >= start_ym) & (rets_full.index <= end_ym)
+        sub_p = port_ret_full[mask]
+        sub_sp = sp_full[mask]
+        sub_msci = msci_full[mask]
+        sub_b6040 = b6040_full[mask]
+
+        p_ret = round(float((1 + sub_p).prod() - 1) * 100, 1) if len(sub_p) else 0.0
+        sp_r = round(float((1 + sub_sp).prod() - 1) * 100, 1) if len(sub_sp) else 0.0
+        msci_r = round(float((1 + sub_msci).prod() - 1) * 100, 1) if len(sub_msci) else 0.0
+        b6040_r = round(float((1 + sub_b6040).prod() - 1) * 100, 1) if len(sub_b6040) else 0.0
+
+        dd_mask = (
+            (rets_full.index >= (dd_start_ym or start_ym))
+            & (rets_full.index <= (dd_end_ym or end_ym))
+        )
+        dd_slice = port_ret_full[dd_mask]
+        if len(dd_slice):
+            c_s = pd.concat([pd.Series([1.0]), (1 + dd_slice).cumprod()])
+            mdd = round(float(((c_s - c_s.cummax()) / c_s.cummax()).min()) * 100, 1)
+        else:
+            mdd = 0.0
+
+        alpha_sp = round(p_ret - sp_r, 1)
+
+        # Estimate recovery months after period end
+        rec_months = fallback_rec_months
+        if len(dd_slice) and mdd < -1.0:
+            full_cum = (1 + port_ret_full).cumprod()
+            window_idx = dd_slice.index
+            peak_val = float(full_cum.loc[:window_idx[-1]].max())
+            after = full_cum.loc[window_idx[-1]:]
+            recovered = after[after >= peak_val]
+            if len(recovered) > 0:
+                delta_days = (recovered.index[0] - window_idx[0]).days
+                rec_months = max(1, round(delta_days / 30.0))
+
+        # Per-asset performance during this exact regime (deduplicated by asset name)
+        per_asset = []
+        for am in asset_meta:
+            sym = am["proxy_sym"]
+            if sym in rets_full.columns:
+                a_sub = rets_full[sym][mask]
+                a_ret = float((1 + a_sub).prod() - 1) * 100 if len(a_sub) else 0.0
+                per_asset.append((a_ret, am["name"], am["role"], am["weight"]))
+        per_asset.sort(key=lambda x: x[0], reverse=True)
+
+        heroes = [
+            {
+                "name": name,
+                "ret": f"{r:+.1f}%",
+                "desc": f"{role} ({w:.1f}% peso actual)",
+            }
+            for r, name, role, w in per_asset[:3]
+        ]
+        vulnerables = [
+            {
+                "name": name,
+                "ret": f"{r:+.1f}%",
+                "desc": f"{role} ({w:.1f}% peso actual)",
+            }
+            for r, name, role, w in reversed(per_asset[-2:])
+        ] if len(per_asset) >= 2 else []
+
+        top_hero_names = " y ".join(h["name"] for h in heroes[:2]) if heroes else "tus activos defensivos"
+        if alpha_sp >= 0:
+            conclusion = (
+                f"Con tu cartera actual habrías superado al S&P 500 en +{alpha_sp:.1f} pp "
+                f"({p_ret:+.1f}% vs {sp_r:+.1f}%), impulsado por {top_hero_names}."
+            )
+        else:
+            conclusion = (
+                f"Tu cartera actual registró {p_ret:+.1f}% frente al {sp_r:+.1f}% del S&P 500 "
+                f"(Max DD {mdd:.1f}%), con mejor soporte relativo en {top_hero_names}."
+            )
+
+        return {
+            "id": cid,
+            "title": title,
+            "period_label": period_label,
+            "severity": severity,
+            "color": color,
+            "portfolio_return": p_ret,
+            "sp500_return": sp_r,
+            "msci_return": msci_r,
+            "b6040_return": b6040_r,
+            "max_drawdown": mdd,
+            "alpha_vs_sp500": alpha_sp,
+            "recovery_months": rec_months,
+            "hero_assets": heroes,
+            "vulnerable_assets": vulnerables,
+            "conclusion": conclusion,
         }
+
+    latest_ymd = rets_full.index[-1].strftime("%Y-%m-%d") if len(rets_full) else "2026-11-24"
+    latest_label = rets_full.index[-1].strftime("%b %Y") if len(rets_full) else "Nov 2026"
+
+    crises = [
+        _build_dynamic_crisis(
+            "2022_inflation",
+            "Crisis de Inflación, Tipos y Guerra de Ucrania",
+            "Ene 2022 – Dic 2022",
+            "Alta",
+            "#ef4444",
+            "2022-01-01",
+            "2022-12-31",
+            fallback_rec_months=9,
+        ),
+        _build_dynamic_crisis(
+            "2020_covid",
+            "Crash Covid-19 y Confinamientos Mundiales",
+            "Ene 2020 – Dic 2020",
+            "Extrema (Shock V-Shape)",
+            "#f59e0b",
+            "2020-01-01",
+            "2020-12-31",
+            dd_start_ym="2020-01-01",
+            dd_end_ym="2020-05-31",
+            fallback_rec_months=4,
+        ),
+        _build_dynamic_crisis(
+            "2018_selloff",
+            "Guerra Comercial EE.UU.-China y Subidas de Tipos Fed",
+            "Ene 2018 – Dic 2018",
+            "Moderada",
+            "#8b5cf6",
+            "2018-01-01",
+            "2018-12-31",
+            fallback_rec_months=5,
+        ),
+        _build_dynamic_crisis(
+            "2023_2026_expansion",
+            "Rally de la Inteligencia Artificial y Expansión Global",
+            f"Ene 2023 – {latest_label}",
+            "Fase Alcista Fuerte",
+            "#10b981",
+            "2023-01-01",
+            latest_ymd,
+            fallback_rec_months=2,
+        ),
     ]
 
     # Asset Attribution metrics
