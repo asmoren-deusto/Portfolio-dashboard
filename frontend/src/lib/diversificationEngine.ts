@@ -132,6 +132,13 @@ const ASSET_REGISTRY: Record<string, AssetTaxonomy> = {
     assetClass: 'equity',
     currencies: { USD: 0.85, EUR: 0.10, Other: 0.05 },
   },
+  // Polar Capital Healthcare Opportunities Fund R USD Acc (IE00BKSBD942)
+  IE00BKSBD942: {
+    geo: { north_america: 0.70, europe: 0.20, japan: 0.05, other: 0.05 },
+    sectors: { health: 1.0 },
+    assetClass: 'equity',
+    currencies: { USD: 0.70, EUR: 0.20, Other: 0.10 },
+  },
   // Azvalor Internacional FI (ES0112611001)
   ES0112611001: {
     geo: { europe: 0.44, north_america: 0.32, emerging: 0.18, japan: 0.0, pacific: 0.02, other: 0.04 },

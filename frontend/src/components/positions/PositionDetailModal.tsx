@@ -35,6 +35,7 @@ const FINECT_SLUGS: Record<string, string> = {
   'IE000QAZP7L2': 'https://www.finect.com/fondos-inversion/IE000QAZP7L2-Ishares_emerging_markets_index_ie_s_acc_eur',
   'LU2145461757': 'https://www.finect.com/fondos-inversion/LU2145461757-Robeco_smart_energy_d_eur',
   'IE00BM95B621': 'https://www.finect.com/fondos-inversion/IE00BM95B621-Polar_capital_funds_plc_polar_capital_global_technology_fund_r_eur_acc',
+  'IE00BKSBD942': 'https://www.finect.com/fondos-inversion/IE00BKSBD942-Polar_capital_healthcare_opportunities_r_usd_acc',
   'IE00BYX5NH74': 'https://www.finect.com/fondos-inversion/IE00BYX5NH74-Fidelity_msci_japan_index_p_acc_eur',
   'LU0302296495': 'https://www.finect.com/fondos-inversion/LU0302296495-Dnb_fund_technology_a_eur',
   'LU1623762843': 'https://www.finect.com/fondos-inversion/LU1623762843-Carmignac_portfolio_credit_a_eur_acc',
@@ -86,6 +87,8 @@ const PRODUCT_GESTORA_URLS: Record<string, string> = {
   'LU0996182563': 'https://www.amundi.es/retail/product/view/LU0996182563',
   // Polar Capital Global Technology
   'IE00BM95B621': 'https://www.polarcapitalfunds.com/',
+  // Polar Capital Healthcare Opportunities R USD
+  'IE00BKSBD942': 'https://www.polarcapitalfunds.com/es/professional/fund/polar-capital-healthcare-opportunities-fund/',
   // Robeco Smart Energy
   'LU2145461757': 'https://www.robeco.com/es-es/',
   // Cobas Selection

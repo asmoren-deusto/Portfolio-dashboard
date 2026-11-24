@@ -30,6 +30,7 @@ const ISIN_DOMAINS: Record<string, string> = {
   'LU0996182563': 'amundi.es',
   'LU2145461757': 'robeco.com',
   'IE00BM95B621': 'polarcapital.co.uk',
+  'IE00BKSBD942': 'polarcapital.co.uk',
   'LU1623762843': 'carmignac.es',
   'LU0171307068': 'blackrock.com',
   'LU0122379958': 'blackrock.com',

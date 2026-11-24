@@ -392,6 +392,17 @@ const FUND_LOOK_THROUGH_HOLDINGS: Record<string, FundHoldingWeight[]> = {
     { ticker: 'JPM', name: 'JPMorgan Chase & Co', isin: 'US46625H1005', sector: 'Servicios Financieros', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0131 },
     { ticker: 'LLY', name: 'Eli Lilly and Company', isin: 'US5324571083', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0154 },
   ],
+  // Polar Capital Healthcare Opportunities Fund R USD Acc (IE00BKSBD942)
+  IE00BKSBD942: [
+    { ticker: 'LLY', name: 'Eli Lilly and Company', isin: 'US5324571083', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0820 },
+    { ticker: 'ABBV', name: 'AbbVie Inc.', isin: 'US00287Y1091', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0640 },
+    { ticker: 'UNH', name: 'UnitedHealth Group Inc.', isin: 'US91324P1021', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0590 },
+    { ticker: 'AZN', name: 'AstraZeneca PLC', isin: 'GB0009895292', sector: 'Salud', country: 'Reino Unido', flag: '🇬🇧', weight: 0.0540 },
+    { ticker: 'NOVO-B', name: 'Novo Nordisk A/S', isin: 'DK0062498333', sector: 'Salud', country: 'Dinamarca', flag: '🇩🇰', weight: 0.0480 },
+    { ticker: 'BSX', name: 'Boston Scientific Corp.', isin: 'US1011371077', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0460 },
+    { ticker: 'ISRG', name: 'Intuitive Surgical Inc.', isin: 'US46120E6023', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0420 },
+    { ticker: 'SYK', name: 'Stryker Corporation', isin: 'US8636671013', sector: 'Salud', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0390 },
+  ],
   // DNB Fund Technology A EUR Acc (LU0302296495)
   LU0302296495: [
     { ticker: 'MSFT', name: 'Microsoft Corporation', isin: 'US5949181045', sector: 'Tecnología', country: 'Estados Unidos', flag: '🇺🇸', weight: 0.0954 },
@@ -969,6 +980,7 @@ export function buildPortfolioXRayReport(
     'LU0997587597': { r1y: 21.16, r3y: 24.68, r5y: 17.87, rating: 4, ter: 0.15 },
     'ES0000012411': { r1y: 3.85,  r3y: 2.10,  r5y: 1.45,  rating: 0, ter: 0.00 },
     'CASH_TR_EUR':  { r1y: 2.53,  r3y: 2.50,  r5y: null,  rating: 0, ter: 0.00 },
+    'IE00BKSBD942': { r1y: 12.40, r3y: 9.85,  r5y: 11.20, rating: 4, ter: 1.58 },
     'US67066G1040': { r1y: 35.40, r3y: 68.20, r5y: 74.50, rating: 5, ter: 0.00 },
     'IE00B5BMR087': { r1y: 15.41, r3y: 20.60, r5y: 12.30, rating: 5, ter: 0.07 },
   }
@@ -1097,6 +1109,7 @@ export function buildPortfolioXRayReport(
     'LU0997587597': { mean: 23.28, vol: 14.45 },
     'ES0000012411': { mean: 3.85,  vol: 4.20 },
     'CASH_TR_EUR':  { mean: 2.53,  vol: 0.15 },
+    'IE00BKSBD942': { mean: 14.80, vol: 14.20 },
     'US67066G1040': { mean: 35.40, vol: 28.50 },
   }
 
@@ -1139,6 +1152,13 @@ export function buildPortfolioXRayReport(
     'IE0032126645:IE00BYX5NH74': 0.40,
     'IE0032126645:ES0000012411': -0.08,
     'IE0032126645:US67066G1040': 0.82,
+    'IE0032126645:IE00BKSBD942': 0.56,
+    '0192#0011:IE00BKSBD942': 0.54,
+    'LU0302296495:IE00BKSBD942': 0.44,
+    'LU0261952682:IE00BKSBD942': 0.42,
+    'IE000QAZP7L2:IE00BKSBD942': 0.30,
+    'IE00BYX5NH74:IE00BKSBD942': 0.34,
+    'ES0000012411:IE00BKSBD942': 0.02,
     '0192#0011:LU0302296495': 0.72,
     '0192#0011:ES0112611001': 0.22,
     '0192#0011:LU0261952682': 0.64,

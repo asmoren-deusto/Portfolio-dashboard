@@ -210,6 +210,13 @@ export const ASSET_METADATA_BY_ISIN: Record<string, AssetMetaInfo> = {
     shareClass: 'ACC',
     shareClassLabel: 'Acumulación',
   },
+  'IE00BKSBD942': {
+    cleanName: 'Polar Capital Healthcare Opps',
+    officialName: 'Polar Capital Healthcare Opportunities Fund R USD Acc',
+    currency: 'USD',
+    shareClass: 'ACC',
+    shareClassLabel: 'Acumulación (Clase USD · Valorado en EUR)',
+  },
   '0201G': {
     cleanName: 'Kutxabank Baskepensiones',
     officialName: 'Kutxabank Baskepensiones EPSV',
@@ -264,6 +271,9 @@ export function getAssetCleanName(isin?: string | null, rawName?: string | null)
   }
   if (nLower.includes('healthscience') || nLower.includes('health science') || nLower.includes('world health')) {
     return 'BGF World Healthscience'
+  }
+  if (nLower.includes('healthcare opport') || (nLower.includes('polar') && nLower.includes('health'))) {
+    return 'Polar Capital Healthcare Opps'
   }
   if (nLower.includes('indexa') && (nLower.includes('acciones') || nLower.includes('rentabilidad'))) {
     return 'Indexa Más Rentabilidad EPSV'

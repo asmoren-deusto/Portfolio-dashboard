@@ -154,6 +154,7 @@ KNOWN_TICKERS: dict[str, str] = {
     "IE00BYX5NH74": "0P0001CJGR.F",  # Fidelity MSCI Japan Index Fund EUR P Acc
     "IE000ZYRH0Q7": "0P0001XF40.F",  # iShares Developed World Index (IE) S Acc EUR
     "IE00BM95B621": "0P0001LT4H.F",  # Polar Capital Global Technology Fund R Acc
+    "IE00BKSBD942": "0P0001JDIB",  # Polar Capital Healthcare Opportunities Fund R USD Acc (USD -> EUR)
     "LU1623762843": "0P0001FE3K.F",  # Carmignac Portfolio Credit A EUR Acc
     "LU2145461757": "0P0001XYYU.F",  # Robeco Capital Growth - Robeco Smart Energy D EUR
     "LU0302296495": "0P00009PQ4.F",  # DNB Fund - Technology A EUR Acc
@@ -165,6 +166,49 @@ KNOWN_TICKERS: dict[str, str] = {
     "US67066G1040": "NVD.DE",  # NVIDIA Corp (Lang & Schwarz / Xetra EUR)
     "IE00B5BMR087": "SXR8.DE",  # iShares Core S&P 500 UCITS ETF (Acc) (Lang & Schwarz / Xetra EUR)
 }
+
+# Mutual funds whose official NAV is quoted in USD (must be converted to EUR using EURUSD=X)
+USD_DENOMINATED_ISINS: set[str] = {
+    "IE00BKSBD942",  # Polar Capital Healthcare Opportunities Fund R USD Acc
+}
+_eurusd_cache: dict[str, tuple[datetime, dict[str, float]]] = {}
+
+
+def _sync_fetch_eurusd_map(period: str = "1mo") -> dict[str, float]:
+    """Fetch EUR/USD closing rates keyed by YYYY-MM-DD."""
+    try:
+        hist = yf.Ticker("EURUSD=X").history(period=period)
+        if not hist.empty:
+            return {
+                str(idx.date()): float(row["Close"])
+                for idx, row in hist.iterrows()
+                if float(row["Close"]) > 0
+            }
+    except Exception as e:
+        logger.warning(f"EURUSD=X fetch error ({period}): {e}")
+    return {}
+
+
+async def _get_eurusd_rate(target_date: Optional[str] = None) -> Optional[float]:
+    """Return EUR/USD exchange rate for target_date (or latest available close), cached 15 min."""
+    now = datetime.now()
+    cached = _eurusd_cache.get("1mo")
+    if cached and (now - cached[0]).total_seconds() < 900 and cached[1]:
+        rates = cached[1]
+    else:
+        rates = await asyncio.to_thread(_sync_fetch_eurusd_map, "1mo")
+        if rates:
+            _eurusd_cache["1mo"] = (now, rates)
+    if not rates:
+        return None
+    if target_date and target_date in rates:
+        return rates[target_date]
+    sorted_dates = sorted(rates.keys())
+    if target_date:
+        prior = [d for d in sorted_dates if d <= target_date]
+        if prior:
+            return rates[prior[-1]]
+    return rates[sorted_dates[-1]]
 
 
 def get_previous_business_date() -> str:
@@ -616,6 +660,7 @@ async def _scrape_price_with_date_impl(
         # Reference NAV for sanity validation of scraped values
         ref_price, db_latest_date = _get_latest_cached_price(isin)
         today_str = datetime.now().strftime("%Y-%m-%d")
+        is_usd_fund = isin in USD_DENOMINATED_ISINS
 
         # Candidates with (date, decimal_precision_priority, price, source)
         # Date is strictly priority #1: freshest/most recent liquidation date always wins immediately!
@@ -627,6 +672,11 @@ async def _scrape_price_with_date_impl(
                     # Validation: no future dates, no absurd jumps vs last known NAV
                     if r_date > today_str or r_price <= 0:
                         continue
+                    if is_usd_fund:
+                        fx_rate = await _get_eurusd_rate(r_date)
+                        if not fx_rate or fx_rate <= 0:
+                            continue
+                        r_price = round(r_price / fx_rate, 4)
                     if ref_price and abs(r_price - ref_price) / ref_price > MAX_NAV_JUMP:
                         logger.warning(f"Rejected implausible NAV {r_price} ({r_date}) for {isin} from {task_names[i]} (ref {ref_price})")
                         continue
@@ -1531,10 +1581,18 @@ async def _fetch_ft_official(isin: str) -> tuple[Optional[float], Optional[str]]
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     }
     client = _get_async_client()
-    for url in [
-        f"https://markets.ft.com/data/funds/tearsheet/summary?s={isin}:EUR",
-        f"https://markets.ft.com/data/funds/tearsheet/summary?s={isin}",
-    ]:
+    ft_urls = (
+        [
+            f"https://markets.ft.com/data/funds/tearsheet/summary?s={isin}:USD",
+            f"https://markets.ft.com/data/funds/tearsheet/summary?s={isin}",
+        ]
+        if isin in USD_DENOMINATED_ISINS
+        else [
+            f"https://markets.ft.com/data/funds/tearsheet/summary?s={isin}:EUR",
+            f"https://markets.ft.com/data/funds/tearsheet/summary?s={isin}",
+        ]
+    )
+    for url in ft_urls:
         try:
             resp = await client.get(url, headers=headers, timeout=8.0)
             if resp.status_code == 200 and "mod-ui-data-list__value" in resp.text:
@@ -1810,6 +1868,21 @@ async def _fetch_full_price_history_impl(isin: str, ticker: str | None = None) -
         try:
             res = await asyncio.to_thread(_sync_fetch_yahoo_history, ticker, "max")
             if res:
+                if isin in USD_DENOMINATED_ISINS:
+                    fx_map = await asyncio.to_thread(_sync_fetch_eurusd_map, "max")
+                    if fx_map:
+                        fx_dates = sorted(fx_map.keys())
+                        converted = []
+                        fx_idx = 0
+                        for pt in res:
+                            d = pt["date"]
+                            while fx_idx + 1 < len(fx_dates) and fx_dates[fx_idx + 1] <= d:
+                                fx_idx += 1
+                            rate = fx_map.get(d) or fx_map[fx_dates[fx_idx]]
+                            if rate and rate > 0:
+                                converted.append({"date": d, "price": round(pt["price"] / rate, 4)})
+                        if converted:
+                            res = converted
                 is_live_traded = bool(ticker and not ticker.startswith("0P000") and not isin.startswith("0192"))
                 res = _merge_db_recent_prices_into_history(isin, res, is_live_traded=is_live_traded)
                 _history_cache[max_key] = (datetime.now(), res)
