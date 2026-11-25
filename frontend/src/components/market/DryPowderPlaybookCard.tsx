@@ -30,10 +30,12 @@ interface ShotExecutionState {
   pendingSettlement?: boolean
 }
 
+type ShotPctOption = 3.3 | 5 | 6.6
+
 interface PlaybookStorageState {
   shots: Record<string, ShotExecutionState>
   shot2SourceIsin: 'LU0840158819' | 'ES0140794001'
-  shotPctAth: 4 | 5 | 6
+  shotPctAth: ShotPctOption
 }
 
 const STORAGE_KEY = 'portfolio_dry_powder_playbook_v3'
@@ -60,7 +62,7 @@ function loadPlaybookState(): PlaybookStorageState {
       shots: parsed?.shots && typeof parsed.shots === 'object' ? parsed.shots : {},
       shot2SourceIsin:
         parsed?.shot2SourceIsin === 'ES0140794001' ? 'ES0140794001' : 'LU0840158819',
-      shotPctAth: pct === 4 || pct === 5 || pct === 6 ? pct : 5,
+      shotPctAth: pct === 3.3 || pct === 5 || pct === 6.6 ? pct : 5,
     }
   } catch {
     return DEFAULT_STATE
@@ -99,6 +101,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
   const { data: portfolioSummary } = usePortfolioSummary()
 
   const [state, setState] = useState<PlaybookStorageState>(() => loadPlaybookState())
+  const [confirmingReset, setConfirmingReset] = useState<boolean>(false)
 
   // Keep multiple mounted instances (Overview / Market / Diversification) in sync
   useEffect(() => {
@@ -160,7 +163,8 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
   }, [perfHistory, totalPortfolioValue])
 
   const shotPctAth = state.shotPctAth
-  const targetPerShot = Math.round(portfolioAth * (shotPctAth / 100))
+  const totalReservePct = shotPctAth === 3.3 ? 10 : shotPctAth === 6.6 ? 20 : 15
+  const targetPerShot = Math.round(portfolioAth * (totalReservePct / 300))
   const totalTargetReserve = targetPerShot * 3
 
   const cashTrAmount = posByIsin['CASH_TR_EUR'] ?? 0
@@ -265,6 +269,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
   }
 
   const resetCycle = () => {
+    setConfirmingReset(false)
     persistState({ ...state, shots: {} })
   }
 
@@ -272,7 +277,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
     persistState({ ...state, shot2SourceIsin: isin })
   }
 
-  const setShotPctAth = (pct: 4 | 5 | 6) => {
+  const setShotPctAth = (pct: ShotPctOption) => {
     persistState({ ...state, shotPctAth: pct })
   }
 
@@ -426,9 +431,36 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 <span className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25">
                   -10% · -20% · -30%
                 </span>
-                <span className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/25">
-                  {shotPctAth}% ATH / disparo ({shotPctAth * 3}% total)
-                </span>
+                {executedCount > 0 && !confirmingReset && (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingReset(true)}
+                    title="Reiniciar los 3 disparos cuando el S&P 500 recupere máximos y hayas recargado los refugios"
+                    className="inline-flex items-center gap-1 text-[10.5px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/25 transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Rearmar ciclo</span>
+                  </button>
+                )}
+                {confirmingReset && (
+                  <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30">
+                    <span>¿Reiniciar los 3 disparos?</span>
+                    <button
+                      type="button"
+                      onClick={resetCycle}
+                      className="px-1.5 py-0.2 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-extrabold cursor-pointer transition-colors"
+                    >
+                      Sí
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingReset(false)}
+                      className="px-1.5 py-0.2 rounded-md bg-slate-200/90 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 text-[10px] font-bold cursor-pointer transition-colors"
+                    >
+                      No
+                    </button>
+                  </span>
+                )}
                 {triggeredPendingShots.length > 0 && (
                   <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 animate-pulse">
                     ¡{triggeredPendingShots.length} disparo activo!
@@ -445,13 +477,13 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
           <div className="flex items-center gap-2 flex-wrap">
             {/* Sizing % of Portfolio ATH selector */}
             <div
-              title="Porcentaje del ATH de tu cartera asignado a cada uno de los 3 disparos"
+              title="Porcentaje del ATH de tu cartera asignado a cada uno de los 3 disparos (10% / 15% / 20% total)"
               className="inline-flex items-center gap-0.5 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200/80 dark:border-white/[0.08] text-[11px]"
             >
               <span className="px-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Disparo:
               </span>
-              {([4, 5, 6] as const).map((pct) => (
+              {([3.3, 5, 6.6] as const).map((pct) => (
                 <button
                   key={pct}
                   type="button"
@@ -514,18 +546,6 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 </span>
               </div>
             </div>
-
-            {executedCount > 0 && (
-              <button
-                type="button"
-                onClick={resetCycle}
-                title="Reiniciar los 3 disparos cuando el S&P 500 recupere máximos y hayas recargado los refugios"
-                className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] border border-slate-200/80 dark:border-white/[0.08] transition-colors cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Rearmar ciclo</span>
-              </button>
-            )}
           </div>
         </div>
 
