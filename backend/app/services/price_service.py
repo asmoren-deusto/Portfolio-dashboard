@@ -1462,9 +1462,115 @@ async def _fetch_singular_official(isin: str) -> tuple[Optional[float], Optional
     return None, None
 
 
+HOROS_API_IDS: dict[str, str] = {
+    "ES0146309002": "5a017ae36ccb761f259a0435",  # Horos Value Internacional FI
+    "ES0146311008": "5acf59f6bf4c77472b24604e",  # Horos Value Iberia FI
+}
+
+HOROS_SHEET_IDS: dict[str, str] = {
+    "ES0146309002": "1MpvXGcQcwhTX54UGoerorUKsQGgqDY-Mho9RWZ20E60",
+}
+
+
+async def _fetch_horos_official(isin: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Fetch official daily NAV directly from Horos Asset Management (horosam.com JSON API),
+    with automatic fallback to Horos's official public Google Sheet NAV ledger.
+    """
+    api_id = HOROS_API_IDS.get(isin)
+    if not api_id:
+        return None, None
+    client = _get_async_client()
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Referer": "https://horosam.com/fondos-de-inversion/horos-value-internacional/",
+    }
+    try:
+        resp = await client.get(
+            f"https://horosam.com/api/pricesLast_{api_id}.json",
+            headers=headers,
+            timeout=10.0,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            price_val = data.get("price")
+            dt_raw = str(data.get("dateAsString") or "").strip()
+            if price_val and float(price_val) > 0 and len(dt_raw) == 8 and dt_raw.isdigit():
+                date_iso = f"{dt_raw[:4]}-{dt_raw[4:6]}-{dt_raw[6:8]}"
+                return round(float(price_val), 6), _normalize_business_date(date_iso)
+    except Exception as e:
+        logger.debug(f"Horos AM JSON API error for {isin}: {e}")
+
+    # Fallback: official Horos public Google Sheet CSV
+    sheet_id = HOROS_SHEET_IDS.get(isin)
+    if sheet_id:
+        try:
+            resp = await client.get(
+                f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv",
+                headers=headers,
+                timeout=12.0,
+            )
+            if resp.status_code == 200 and resp.text:
+                rows = list(csv.reader(resp.text.splitlines()))
+                for row in reversed(rows[1:]):
+                    if len(row) >= 2 and row[0].strip() and row[1].strip():
+                        m = re.match(r"^(\d{1,2})/(\d{1,2})/(\d{4})$", row[0].strip())
+                        if not m:
+                            continue
+                        d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                        dt_obj = datetime(y, mo, d)
+                        if dt_obj.weekday() >= 5:
+                            continue
+                        val = float(row[1].strip().replace(",", "."))
+                        if val > 0:
+                            return round(val, 6), dt_obj.strftime("%Y-%m-%d")
+        except Exception as e:
+            logger.debug(f"Horos AM Google Sheet fallback error for {isin}: {e}")
+    return None, None
+
+
+async def _fetch_horos_history(isin: str) -> list[dict]:
+    """Fetch complete official historical NAV ledger directly from horosam.com."""
+    api_id = HOROS_API_IDS.get(isin)
+    if not api_id:
+        return []
+    client = _get_async_client()
+    try:
+        resp = await client.get(
+            f"https://horosam.com/api/pricesPure_{api_id}.json",
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Accept": "application/json",
+                "Referer": "https://horosam.com/fondos-de-inversion/horos-value-internacional/",
+            },
+            timeout=12.0,
+        )
+        if resp.status_code == 200:
+            arr = resp.json()
+            if isinstance(arr, list):
+                pts: dict[str, float] = {}
+                for item in arr:
+                    dt_raw = str(item.get("dateAsString") or "").strip()
+                    p_val = item.get("price")
+                    if p_val and float(p_val) > 0 and len(dt_raw) == 8 and dt_raw.isdigit():
+                        d_iso = f"{dt_raw[:4]}-{dt_raw[4:6]}-{dt_raw[6:8]}"
+                        try:
+                            if datetime.strptime(d_iso, "%Y-%m-%d").weekday() >= 5:
+                                continue
+                        except ValueError:
+                            continue
+                        pts[d_iso] = round(float(p_val), 4)
+                if pts:
+                    return [{"date": d, "price": p} for d, p in sorted(pts.items())]
+    except Exception as e:
+        logger.debug(f"Horos AM history error for {isin}: {e}")
+    return []
+
+
 # Tie-break priority between sources reporting the SAME date (the date itself always wins first).
 NAV_SOURCE_PRIORITY: dict[str, float] = {
-    "myinvestor": 8, "singular": 7.5, "azvalor": 7, "cobas": 7, "blackrock": 7,
+    "myinvestor": 8, "singular": 7.5, "horos": 7.5, "azvalor": 7, "cobas": 7, "blackrock": 7,
     "onvista": 6.5, "quefondos": 6, "finect": 6, "morningstar": 5.5,
     "ft": 5, "yahoo": 4, "investing": 3, "ariva": 1,
 }
@@ -1484,6 +1590,8 @@ def _build_nav_fetch_tasks(isin: str, ticker: str | None) -> tuple[list[str], li
     ]
     if isin in SINGULAR_FUND_INDICES:
         pairs.append(("singular", _fetch_singular_official(isin)))
+    if isin in HOROS_API_IDS:
+        pairs.append(("horos", _fetch_horos_official(isin)))
     if isin.startswith("ES011261"):
         pairs.append(("azvalor", _fetch_azvalor_official(isin)))
     if isin in COBAS_PRODUCT_SLUGS or isin.startswith("ES011919") or isin == "LU1598719752":
@@ -1904,6 +2012,14 @@ async def _fetch_full_price_history_impl(isin: str, ticker: str | None = None) -
             az_hist = _merge_db_recent_prices_into_history(isin, az_hist)
             _history_cache[max_key] = (datetime.now(), az_hist)
             return az_hist
+
+    # 0b2. Horos AM official JSON ledger (full dataset since 2018)
+    if isin in HOROS_API_IDS:
+        horos_hist = await _fetch_horos_history(isin)
+        if horos_hist:
+            horos_hist = _merge_db_recent_prices_into_history(isin, horos_hist)
+            _history_cache[max_key] = (datetime.now(), horos_hist)
+            return horos_hist
 
     # 0c. BlackRock official chart data (full dataset)
     if isin in BLACKROCK_PRODUCT_URLS or isin == "LU0171307068":
