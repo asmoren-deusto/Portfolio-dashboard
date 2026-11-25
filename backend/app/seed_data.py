@@ -4683,5 +4683,29 @@ TRANSACTIONS = json.loads(r'''[
     "date": "2026-11-24",
     "broker": "myinvestor",
     "notes": "Suscripción por Traspaso Interno (desde Vanguard US 500 Stock, ref 0232192511732, orden 0232192511732, coste fiscal originario 3.739,24 € de valor 3.769,66 €, 46,272 part. R USD @ 89,08 USD / coste medio MyInvestor 81,26 €)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "CASH_TR_EUR",
+    "type": "sell",
+    "shares": 2997.49,
+    "price": 1.0,
+    "amount": 2997.49,
+    "fees": 0.0,
+    "date": "2026-11-25",
+    "broker": "traderepublic",
+    "notes": "Retirada total a MyInvestor para Disparo 1 Pólvora Seca (orden de compra 3.000,00 € en Vanguard U.S. SP500)"
+  },
+  {
+    "user_id": "asier",
+    "isin": "IE0032126645",
+    "type": "buy",
+    "shares": 37.374,
+    "price": 80.2696,
+    "amount": 3000.0,
+    "fees": 0.0,
+    "date": "2026-11-25",
+    "broker": "myinvestor",
+    "notes": "Suscripción PENDIENTE de liquidar (Disparo 1 Pólvora Seca: 3.000,00 € desde Cuenta TR + 2,51 €; participaciones y VL provisionales a ajustar al confirmarse liquidación)"
   }
 ]''')

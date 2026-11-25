@@ -19,6 +19,8 @@ import { fmt, cn } from '@/lib/utils'
 interface ShotExecutionState {
   executedAt?: string
   executedPrice?: number
+  executedAmount?: number
+  pendingSettlement?: boolean
 }
 
 interface PlaybookStorageState {
@@ -26,10 +28,16 @@ interface PlaybookStorageState {
   shot2SourceIsin: 'LU0840158819' | 'ES0140794001'
 }
 
-const STORAGE_KEY = 'portfolio_dry_powder_playbook_v1'
+const STORAGE_KEY = 'portfolio_dry_powder_playbook_v2'
 
 const DEFAULT_STATE: PlaybookStorageState = {
-  shots: {},
+  shots: {
+    shot_10: {
+      executedAt: '25 nov 2026',
+      executedAmount: 3000,
+      pendingSettlement: true,
+    },
+  },
   shot2SourceIsin: 'LU0840158819',
 }
 
@@ -149,12 +157,14 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         phaseLabel: 'Corrección (-10%)',
         sourceIsin: 'CASH_TR_EUR',
         sourceName: 'Cuenta Remunerada TR',
-        sourceAmount: cashTrAmount,
-        targetLabel: 'ETF Core S&P 500 (SXR8.DE)',
-        targetIsin: 'IE00B5BMR087',
-        brokerLabel: 'Trade Republic',
-        executionNote: 'Compra a mercado al instante · TER 0,07%',
-        speedLabel: 'Inmediata (1 min)',
+        sourceAmount: cashTrAmount > 0.01 ? cashTrAmount : (state.shots.shot_10?.executedAmount ?? 0),
+        targetLabel: 'Vanguard U.S. SP500 Index',
+        targetIsin: 'IE0032126645',
+        brokerLabel: 'MyInvestor',
+        executionNote: state.shots.shot_10?.pendingSettlement
+          ? 'Orden pendiente de liquidar (3.000 € desde TR) · TER 0,10%'
+          : 'Transferencia desde TR → suscripción fondo · TER 0,10%',
+        speedLabel: state.shots.shot_10?.pendingSettlement ? 'Pendiente liquidar' : 'Fondo indexado',
       },
       {
         id: 'shot_20',
@@ -186,7 +196,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         speedLabel: 'Búnker final',
       },
     ],
-    [cashTrAmount, activeShot2Isin, gammaAmount, stormAmount, bondAmount]
+    [cashTrAmount, activeShot2Isin, gammaAmount, stormAmount, bondAmount, state.shots.shot_10]
   )
 
   const toggleShotExecuted = (shotId: ShotDefinition['id']) => {
@@ -501,9 +511,20 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                     </div>
 
                     {isExecuted ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 shrink-0">
-                        <CheckCircle2 className="w-3 h-3" />
-                        <span>EJECUTADO</span>
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0',
+                          execInfo?.pendingSettlement
+                            ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30'
+                            : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/25'
+                        )}
+                      >
+                        {execInfo?.pendingSettlement ? (
+                          <Clock className="w-3 h-3" />
+                        ) : (
+                          <CheckCircle2 className="w-3 h-3" />
+                        )}
+                        <span>{execInfo?.pendingSettlement ? 'EN CURSO' : 'EJECUTADO'}</span>
                       </span>
                     ) : isTriggered ? (
                       <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-500 text-white shadow-xs shrink-0 animate-pulse">
