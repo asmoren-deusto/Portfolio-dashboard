@@ -30,12 +30,17 @@ interface ShotExecutionState {
   pendingSettlement?: boolean
 }
 
-type ShotPctOption = 3.3 | 5 | 6.6
+const PYRAMID_SHOT_PCTS = {
+  shot_10: 3,
+  shot_20: 5,
+  shot_30: 7,
+} as const
+
+const TOTAL_RESERVE_PCT = 15 // 3% + 5% + 7% del ATH de la cartera
 
 interface PlaybookStorageState {
   shots: Record<string, ShotExecutionState>
   shot2SourceIsin: 'LU0840158819' | 'ES0140794001'
-  shotPctAth: ShotPctOption
 }
 
 const STORAGE_KEY = 'portfolio_dry_powder_playbook_v3'
@@ -49,7 +54,6 @@ const DEFAULT_STATE: PlaybookStorageState = {
     },
   },
   shot2SourceIsin: 'LU0840158819',
-  shotPctAth: 5,
 }
 
 function loadPlaybookState(): PlaybookStorageState {
@@ -57,12 +61,10 @@ function loadPlaybookState(): PlaybookStorageState {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_STATE
     const parsed = JSON.parse(raw)
-    const pct = parsed?.shotPctAth
     return {
       shots: parsed?.shots && typeof parsed.shots === 'object' ? parsed.shots : {},
       shot2SourceIsin:
         parsed?.shot2SourceIsin === 'ES0140794001' ? 'ES0140794001' : 'LU0840158819',
-      shotPctAth: pct === 3.3 || pct === 5 || pct === 6.6 ? pct : 5,
     }
   } catch {
     return DEFAULT_STATE
@@ -79,6 +81,7 @@ interface ShotDefinition {
   id: 'shot_10' | 'shot_20' | 'shot_30'
   index: 1 | 2 | 3
   triggerPct: number // positive magnitude: 10, 20, 30
+  shotPctAth: number // pyramidal allocation: 3, 5, 7 (% of Portfolio ATH)
   phaseLabel: string
   sourceIsin: string
   sourceName: string
@@ -162,10 +165,10 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
     return { portfolioAth: maxVal, portfolioAthDate: maxDate }
   }, [perfHistory, totalPortfolioValue])
 
-  const shotPctAth = state.shotPctAth
-  const totalReservePct = shotPctAth === 3.3 ? 10 : shotPctAth === 6.6 ? 20 : 15
-  const targetPerShot = Math.round(portfolioAth * (totalReservePct / 300))
-  const totalTargetReserve = targetPerShot * 3
+  const targetShot1 = Math.round(portfolioAth * (PYRAMID_SHOT_PCTS.shot_10 / 100))
+  const targetShot2 = Math.round(portfolioAth * (PYRAMID_SHOT_PCTS.shot_20 / 100))
+  const targetShot3 = Math.round(portfolioAth * (PYRAMID_SHOT_PCTS.shot_30 / 100))
+  const totalTargetReserve = targetShot1 + targetShot2 + targetShot3
 
   const cashTrAmount = posByIsin['CASH_TR_EUR'] ?? 0
   const stormAmount = posByIsin['LU0840158819'] ?? 0
@@ -188,11 +191,12 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         id: 'shot_10',
         index: 1,
         triggerPct: 10,
-        phaseLabel: 'Corrección (-10%)',
+        shotPctAth: PYRAMID_SHOT_PCTS.shot_10,
+        phaseLabel: 'Corrección · 3% ATH',
         sourceIsin: 'CASH_TR_EUR',
         sourceName: 'Cuenta Remunerada TR',
         currentBalance: cashTrAmount,
-        targetAmount: targetPerShot,
+        targetAmount: targetShot1,
         targetLabel: 'Vanguard U.S. SP500 Index',
         targetIsin: 'IE0032126645',
         brokerLabel: 'MyInvestor',
@@ -205,12 +209,13 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         id: 'shot_20',
         index: 2,
         triggerPct: 20,
-        phaseLabel: 'Bear Market (-20%)',
+        shotPctAth: PYRAMID_SHOT_PCTS.shot_20,
+        phaseLabel: 'Bear Market · 5% ATH',
         sourceIsin: activeShot2Isin,
         sourceName:
           activeShot2Isin === 'ES0140794001' ? 'Gamma Global FI' : 'Storm Bond Fund',
         currentBalance: activeShot2Isin === 'ES0140794001' ? gammaAmount : stormAmount,
-        targetAmount: targetPerShot,
+        targetAmount: targetShot2,
         targetLabel: 'Vanguard U.S. SP500 Index',
         targetIsin: 'IE0032126645',
         brokerLabel: 'MyInvestor',
@@ -221,11 +226,12 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         id: 'shot_30',
         index: 3,
         triggerPct: 30,
-        phaseLabel: 'Pánico / Recesión (-30%)',
+        shotPctAth: PYRAMID_SHOT_PCTS.shot_30,
+        phaseLabel: 'Pánico / Recesión · 7% ATH',
         sourceIsin: 'ES0000012411',
         sourceName: 'Bonos Gobierno España Jul 32',
         currentBalance: bondAmount,
-        targetAmount: targetPerShot,
+        targetAmount: targetShot3,
         targetLabel: 'Vanguard U.S. SP500 Index',
         targetIsin: 'IE0032126645',
         brokerLabel: 'MyInvestor / Bróker',
@@ -239,7 +245,9 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
       gammaAmount,
       stormAmount,
       bondAmount,
-      targetPerShot,
+      targetShot1,
+      targetShot2,
+      targetShot3,
       state.shots.shot_10,
     ]
   )
@@ -261,7 +269,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         executedAmount:
           shotObj && shotObj.currentBalance > 0
             ? Math.round(shotObj.currentBalance)
-            : targetPerShot,
+            : (shotObj?.targetAmount ?? 0),
         pendingSettlement: false,
       }
     }
@@ -277,16 +285,12 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
     persistState({ ...state, shot2SourceIsin: isin })
   }
 
-  const setShotPctAth = (pct: ShotPctOption) => {
-    persistState({ ...state, shotPctAth: pct })
-  }
-
   const triggeredPendingShots = shots.filter(
     (s) => drawdownAbs >= s.triggerPct && !state.shots[s.id]?.executedAt
   )
   const executedCount = shots.filter((s) => Boolean(state.shots[s.id]?.executedAt)).length
 
-  // Total current balance across the 3 shelters & total recharge gap vs 3 × shotPctAth% of Portfolio ATH
+  // Total current balance across the 3 shelters & total recharge gap vs 3% + 5% + 7% (15% total) of Portfolio ATH
   const totalPreparedNow = shots.reduce((acc, s) => acc + s.currentBalance, 0)
   const rechargeItems = shots
     .map((s) => ({
@@ -337,7 +341,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
-                Objetivo ({shotPctAth}% ATH):{' '}
+                Objetivo ({nextShot.shotPctAth}% ATH):{' '}
                 <strong className="font-mono">{fmt.currency(deployAmount)}</strong> de{' '}
                 <strong>{nextShot.sourceName}</strong> → <strong>{nextShot.targetLabel}</strong> (
                 {nextShot.brokerLabel}).
@@ -383,9 +387,9 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 Reversión completada (S&P 500 a {drawdownPct.toFixed(1)}% de ATH) · Toca recargar refugio
               </span>
               <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
-                Desvía <strong className="font-mono">{fmt.currency(totalRechargeNeeded)}</strong> de
-                ahorro nuevo (~{rechargeMonthsEst.toFixed(1)} meses sin vender ni tributar) para
-                rellenar tus refugios al {shotPctAth}% ATH cada uno.
+                Desvía <strong className="font-mono">{fmt.currency(totalRechargeNeeded)}</strong> solo
+                con tus aportaciones mensuales (~{rechargeMonthsEst.toFixed(1)} meses, sin vender ni
+                traspasar bolsa) para rellenar tus refugios en pirámide (3% · 5% · 7% ATH).
               </p>
             </div>
           </div>
@@ -426,10 +430,10 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
-                  Protocolo Pólvora Seca · 3 Disparos S&P 500
+                  Protocolo Pólvora Seca · 15% Piramidal
                 </h3>
                 <span className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25">
-                  -10% · -20% · -30%
+                  -10% (3%) · -20% (5%) · -30% (7%)
                 </span>
                 {executedCount > 0 && !confirmingReset && (
                   <button
@@ -467,39 +471,14 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 max-w-[620px] leading-snug">
-                Auto-escalado al máximo histórico (ATH) de tu cartera: define cuánto tener listo en cada refugio y cuánto recargar tras cada rebote.
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 max-w-[680px] leading-snug">
+                Auto-escalado al máximo histórico (ATH) de tu cartera: dispara 3% / 5% / 7% en caídas y recarga los refugios solo con tus aportaciones mensuales al recuperar máximos.
               </p>
             </div>
           </div>
 
-          {/* Right: ATH sizing switcher + Live Summary Stats (side-by-side on desktop) */}
+          {/* Right: Live Summary Stats */}
           <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap shrink-0">
-            {/* Sizing % of Portfolio ATH selector */}
-            <div
-              title="Porcentaje del ATH de tu cartera asignado a cada uno de los 3 disparos (10% / 15% / 20% total)"
-              className="inline-flex items-center gap-0.5 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200/80 dark:border-white/[0.08] text-[11px]"
-            >
-              <span className="px-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Disparo:
-              </span>
-              {([3.3, 5, 6.6] as const).map((pct) => (
-                <button
-                  key={pct}
-                  type="button"
-                  onClick={() => setShotPctAth(pct)}
-                  className={cn(
-                    'px-2 py-1 rounded-lg font-mono font-bold transition-colors cursor-pointer',
-                    shotPctAth === pct
-                      ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-2xs'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  )}
-                >
-                  {pct}%
-                </button>
-              ))}
-            </div>
-
             <div
               data-private
               className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.08] flex items-center gap-3"
@@ -511,7 +490,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 <span className="text-xs sm:text-sm font-mono font-extrabold text-slate-900 dark:text-white mt-0.5 block">
                   {fmt.currency(portfolioAth)}{' '}
                   <span className="text-[10.5px] font-semibold text-blue-600 dark:text-blue-400">
-                    → {fmt.currency(targetPerShot)}/disp.
+                    → {TOTAL_RESERVE_PCT}% refugio
                   </span>
                 </span>
               </div>
@@ -608,18 +587,24 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
 
           <div className="relative h-4 mt-1 text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">
             <span className="absolute left-0">0% (ATH)</span>
-            {[10, 20, 30].map((level) => (
+            {(
+              [
+                { level: 10, pct: 3 },
+                { level: 20, pct: 5 },
+                { level: 30, pct: 7 },
+              ] as const
+            ).map(({ level, pct }) => (
               <span
                 key={level}
                 style={{ left: `${(level / thermometerMax) * 100}%` }}
                 className={cn(
-                  'absolute -translate-x-1/2',
+                  'absolute -translate-x-1/2 whitespace-nowrap',
                   drawdownAbs >= level
                     ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-500 dark:text-slate-400'
                 )}
               >
-                -{level}%
+                -{level}% ({pct}%)
               </span>
             ))}
           </div>
@@ -757,7 +742,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                   >
                     <div className="flex items-center justify-between gap-1 text-[10.5px]">
                       <span className="font-semibold text-slate-500 dark:text-slate-400">
-                        Refugio ({shotPctAth}% ATH):{' '}
+                        Refugio ({shot.shotPctAth}% ATH):{' '}
                         <strong className="font-mono text-slate-900 dark:text-white">
                           {fmt.currency(shot.targetAmount)}
                         </strong>
@@ -911,8 +896,8 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-extrabold text-slate-900 dark:text-white">
                     {isRechargeActionable
-                      ? 'Modo Recarga Activo · Reversión completada'
-                      : 'Plan de Recarga de Refugios (cuando el S&P 500 vuelva a máximos)'}
+                      ? 'Modo Recarga Activo · Solo con aportaciones mensuales'
+                      : 'Plan de Recarga · Solo con aportaciones mensuales (al volver a máximos)'}
                   </span>
                   <span
                     className={cn(
@@ -931,19 +916,21 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 <p className="text-[11.5px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
                   {isRechargeActionable ? (
                     <>
-                      El S&P 500 ya está cerca de máximos ({drawdownPct.toFixed(1)}%). Desvía tus
-                      próximas aportaciones nuevas (~<strong>{rechargeMonthsEst.toFixed(1)} meses</strong>{' '}
-                      a tu ritmo de {fmt.currency(monthlyPace)}/mes, <strong>0% IRPF sin vender</strong>)
-                      para rellenar:
+                      El S&P 500 ya está en máximos ({drawdownPct.toFixed(1)}%).{' '}
+                      <strong>Sin vender ni traspasar bolsa</strong>, redirige únicamente tus
+                      aportaciones mensuales nuevas (~<strong>{rechargeMonthsEst.toFixed(1)} meses</strong>{' '}
+                      a {fmt.currency(monthlyPace)}/mes, <strong>0% IRPF</strong>) en orden{' '}
+                      <strong className="font-mono">#1 → #2 → #3</strong> para rellenar:
                     </>
                   ) : (
                     <>
                       Mientras el S&P 500 siga por debajo de <strong>-3% desde ATH</strong>, sigue
-                      metiendo tus aportaciones mensuales en Renta Variable. En cuanto recupere
-                      máximos, desvía{' '}
+                      invirtiendo tus aportaciones mensuales en Renta Variable. Al recuperar máximos,
+                      recarga <strong>solo con aportaciones nuevas</strong> (sin vender ni traspasar
+                      bolsa, 0% IRPF) un total de{' '}
                       <strong className="font-mono">{fmt.currency(totalRechargeNeeded)}</strong> (~
-                      <strong>{rechargeMonthsEst.toFixed(1)} meses</strong> de ahorro, 0% IRPF) para
-                      recuperar tus refugios al {shotPctAth}% ATH:
+                      <strong>{rechargeMonthsEst.toFixed(1)} meses</strong>) en orden{' '}
+                      <strong className="font-mono">#1 → #2 → #3</strong>:
                     </>
                   )}
                 </p>
@@ -954,7 +941,9 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                       key={shot.id}
                       className="inline-flex items-center gap-1.5 text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-lg bg-white dark:bg-white/[0.05] text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-white/10"
                     >
-                      <span className="text-blue-600 dark:text-blue-400">#{shot.index}</span>
+                      <span className="text-blue-600 dark:text-blue-400">
+                        #{shot.index} ({shot.shotPctAth}%)
+                      </span>
                       <span className="font-sans font-semibold">{shot.sourceName}:</span>
                       <span className="text-emerald-700 dark:text-emerald-400">
                         +{fmt.currency(deficit)}
