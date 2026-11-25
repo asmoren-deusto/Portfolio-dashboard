@@ -11,9 +11,16 @@ import {
   Clock,
   TrendingDown,
   Flame,
+  RefreshCw,
+  PiggyBank,
 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
-import { usePositions, useSp500Chart } from '@/api/queries'
+import {
+  usePositions,
+  useSp500Chart,
+  usePerformance,
+  usePortfolioSummary,
+} from '@/api/queries'
 import { fmt, cn } from '@/lib/utils'
 
 interface ShotExecutionState {
@@ -26,9 +33,10 @@ interface ShotExecutionState {
 interface PlaybookStorageState {
   shots: Record<string, ShotExecutionState>
   shot2SourceIsin: 'LU0840158819' | 'ES0140794001'
+  shotPctAth: 4 | 5 | 6
 }
 
-const STORAGE_KEY = 'portfolio_dry_powder_playbook_v2'
+const STORAGE_KEY = 'portfolio_dry_powder_playbook_v3'
 
 const DEFAULT_STATE: PlaybookStorageState = {
   shots: {
@@ -39,6 +47,7 @@ const DEFAULT_STATE: PlaybookStorageState = {
     },
   },
   shot2SourceIsin: 'LU0840158819',
+  shotPctAth: 5,
 }
 
 function loadPlaybookState(): PlaybookStorageState {
@@ -46,10 +55,12 @@ function loadPlaybookState(): PlaybookStorageState {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_STATE
     const parsed = JSON.parse(raw)
+    const pct = parsed?.shotPctAth
     return {
       shots: parsed?.shots && typeof parsed.shots === 'object' ? parsed.shots : {},
       shot2SourceIsin:
         parsed?.shot2SourceIsin === 'ES0140794001' ? 'ES0140794001' : 'LU0840158819',
+      shotPctAth: pct === 4 || pct === 5 || pct === 6 ? pct : 5,
     }
   } catch {
     return DEFAULT_STATE
@@ -57,7 +68,7 @@ function loadPlaybookState(): PlaybookStorageState {
 }
 
 export interface DryPowderPlaybookCardProps {
-  /** 'full' = interactive dashboard card; 'alert-only' = compact top banner ONLY when a shot is actively triggered */
+  /** 'full' = interactive dashboard card; 'alert-only' = compact top banner ONLY when a shot is actively triggered or ready to recharge */
   variant?: 'full' | 'alert-only'
   className?: string
 }
@@ -69,7 +80,8 @@ interface ShotDefinition {
   phaseLabel: string
   sourceIsin: string
   sourceName: string
-  sourceAmount: number
+  currentBalance: number
+  targetAmount: number
   targetLabel: string
   targetIsin: string
   brokerLabel: string
@@ -83,10 +95,12 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
 }) => {
   const { data: spData, isLoading: spLoading } = useSp500Chart('1d')
   const { data: positions = [] } = usePositions()
+  const { data: perfHistory = [] } = usePerformance('all')
+  const { data: portfolioSummary } = usePortfolioSummary()
 
   const [state, setState] = useState<PlaybookStorageState>(() => loadPlaybookState())
 
-  // Keep multiple mounted instances (e.g. Overview / Market / Diversification) in sync
+  // Keep multiple mounted instances (Overview / Market / Diversification) in sync
   useEffect(() => {
     const onSync = () => setState(loadPlaybookState())
     window.addEventListener('dry-powder-playbook-updated', onSync)
@@ -119,7 +133,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         : 0
   const drawdownAbs = Math.abs(drawdownPct)
 
-  // Live portfolio amounts for the 3 defensive sleeves
+  // Live portfolio balances & true Portfolio ATH (auto-scales targets upward, never shrinks in bear markets)
   const posByIsin = useMemo(() => {
     const map: Record<string, number> = {}
     for (const p of positions) {
@@ -132,6 +146,22 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
     () => positions.reduce((acc, p) => acc + (p.current_value || 0), 0),
     [positions]
   )
+
+  const { portfolioAth, portfolioAthDate } = useMemo(() => {
+    let maxVal = totalPortfolioValue
+    let maxDate: string | null = null
+    for (const pt of perfHistory) {
+      if (typeof pt.value === 'number' && pt.value > maxVal) {
+        maxVal = pt.value
+        maxDate = pt.date
+      }
+    }
+    return { portfolioAth: maxVal, portfolioAthDate: maxDate }
+  }, [perfHistory, totalPortfolioValue])
+
+  const shotPctAth = state.shotPctAth
+  const targetPerShot = Math.round(portfolioAth * (shotPctAth / 100))
+  const totalTargetReserve = targetPerShot * 3
 
   const cashTrAmount = posByIsin['CASH_TR_EUR'] ?? 0
   const stormAmount = posByIsin['LU0840158819'] ?? 0
@@ -157,14 +187,15 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         phaseLabel: 'Corrección (-10%)',
         sourceIsin: 'CASH_TR_EUR',
         sourceName: 'Cuenta Remunerada TR',
-        sourceAmount: cashTrAmount > 0.01 ? cashTrAmount : (state.shots.shot_10?.executedAmount ?? 0),
+        currentBalance: cashTrAmount,
+        targetAmount: targetPerShot,
         targetLabel: 'Vanguard U.S. SP500 Index',
         targetIsin: 'IE0032126645',
         brokerLabel: 'MyInvestor',
         executionNote: state.shots.shot_10?.pendingSettlement
           ? 'Orden pendiente de liquidar (3.000 € desde TR) · TER 0,10%'
-          : 'Transferencia desde TR → suscripción fondo · TER 0,10%',
-        speedLabel: state.shots.shot_10?.pendingSettlement ? 'Pendiente liquidar' : 'Fondo indexado',
+          : 'Liquidez inmediata (TR) → suscripción S&P 500 · TER 0,10%',
+        speedLabel: state.shots.shot_10?.pendingSettlement ? 'Pendiente liquidar' : 'Refugio 1 · Caja',
       },
       {
         id: 'shot_20',
@@ -174,7 +205,8 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         sourceIsin: activeShot2Isin,
         sourceName:
           activeShot2Isin === 'ES0140794001' ? 'Gamma Global FI' : 'Storm Bond Fund',
-        sourceAmount: activeShot2Isin === 'ES0140794001' ? gammaAmount : stormAmount,
+        currentBalance: activeShot2Isin === 'ES0140794001' ? gammaAmount : stormAmount,
+        targetAmount: targetPerShot,
         targetLabel: 'Vanguard U.S. SP500 Index',
         targetIsin: 'IE0032126645',
         brokerLabel: 'MyInvestor',
@@ -188,7 +220,8 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         phaseLabel: 'Pánico / Recesión (-30%)',
         sourceIsin: 'ES0000012411',
         sourceName: 'Bonos Gobierno España Jul 32',
-        sourceAmount: bondAmount,
+        currentBalance: bondAmount,
+        targetAmount: targetPerShot,
         targetLabel: 'Vanguard U.S. SP500 Index',
         targetIsin: 'IE0032126645',
         brokerLabel: 'MyInvestor / Bróker',
@@ -196,7 +229,15 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         speedLabel: 'Búnker final',
       },
     ],
-    [cashTrAmount, activeShot2Isin, gammaAmount, stormAmount, bondAmount, state.shots.shot_10]
+    [
+      cashTrAmount,
+      activeShot2Isin,
+      gammaAmount,
+      stormAmount,
+      bondAmount,
+      targetPerShot,
+      state.shots.shot_10,
+    ]
   )
 
   const toggleShotExecuted = (shotId: ShotDefinition['id']) => {
@@ -205,6 +246,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
     if (existing?.executedAt) {
       delete nextShots[shotId]
     } else {
+      const shotObj = shots.find((s) => s.id === shotId)
       nextShots[shotId] = {
         executedAt: new Date().toLocaleDateString('es-ES', {
           day: '2-digit',
@@ -212,6 +254,11 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
           year: 'numeric',
         }),
         executedPrice: spPrice > 0 ? Math.round(spPrice * 100) / 100 : undefined,
+        executedAmount:
+          shotObj && shotObj.currentBalance > 0
+            ? Math.round(shotObj.currentBalance)
+            : targetPerShot,
+        pendingSettlement: false,
       }
     }
     persistState({ ...state, shots: nextShots })
@@ -225,68 +272,130 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
     persistState({ ...state, shot2SourceIsin: isin })
   }
 
+  const setShotPctAth = (pct: 4 | 5 | 6) => {
+    persistState({ ...state, shotPctAth: pct })
+  }
+
   const triggeredPendingShots = shots.filter(
     (s) => drawdownAbs >= s.triggerPct && !state.shots[s.id]?.executedAt
   )
   const executedCount = shots.filter((s) => Boolean(state.shots[s.id]?.executedAt)).length
-  const totalArmedAmount = shots.reduce(
-    (acc, s) => acc + (state.shots[s.id]?.executedAt ? 0 : s.sourceAmount),
-    0
-  )
-  const totalArmedPct =
-    totalPortfolioValue > 0 ? (totalArmedAmount / totalPortfolioValue) * 100 : 0
 
-  // ── Alert-only banner mode (for OverviewPage — zero clutter on normal days) ──
+  // Total current balance across the 3 shelters & total recharge gap vs 3 × shotPctAth% of Portfolio ATH
+  const totalPreparedNow = shots.reduce((acc, s) => acc + s.currentBalance, 0)
+  const rechargeItems = shots
+    .map((s) => ({
+      shot: s,
+      deficit: Math.max(0, s.targetAmount - s.currentBalance),
+      isExecuted: Boolean(state.shots[s.id]?.executedAt),
+    }))
+    .filter((item) => item.deficit >= 100)
+  const totalRechargeNeeded = rechargeItems.reduce((acc, it) => acc + it.deficit, 0)
+
+  const monthlyPace = portfolioSummary?.monthly_pace && portfolioSummary.monthly_pace > 100
+    ? portfolioSummary.monthly_pace
+    : 1500
+  const rechargeMonthsEst = totalRechargeNeeded > 0 ? totalRechargeNeeded / monthlyPace : 0
+  // Reversion / Recharge mode activates when S&P 500 recovers within 3% of ATH
+  const isReversionZone = spPrice > 0 && drawdownAbs < 3.0
+  const isRechargeActionable = isReversionZone && totalRechargeNeeded >= 250
+
+  // ── Alert-only banner mode (OverviewPage — zero clutter on normal days) ──────
   if (variant === 'alert-only') {
-    if (triggeredPendingShots.length === 0 || spPrice <= 0) return null
-    const nextShot = triggeredPendingShots[0]
-    return (
-      <div
-        className={cn(
-          'rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-rose-500/10 to-amber-500/5 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm',
-          className
-        )}
-      >
-        <div className="flex items-start sm:items-center gap-3">
-          <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 shrink-0 animate-pulse">
-            <Flame className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                ¡Disparo {nextShot.index} Activado! · S&P 500 en {drawdownPct.toFixed(1)}% desde ATH
-              </span>
-              <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25">
-                {spPrice.toLocaleString('es-ES', { maximumFractionDigits: 1 })} pts
-              </span>
+    if (spPrice <= 0) return null
+
+    // Priority 1: Active drawdown trigger (-10% / -20% / -30%)
+    if (triggeredPendingShots.length > 0) {
+      const nextShot = triggeredPendingShots[0]
+      const deployAmount =
+        nextShot.currentBalance > 0
+          ? Math.min(nextShot.currentBalance, nextShot.targetAmount * 1.15)
+          : nextShot.targetAmount
+      return (
+        <div
+          className={cn(
+            'rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-rose-500/10 to-amber-500/5 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm',
+            className
+          )}
+        >
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 shrink-0 animate-pulse">
+              <Flame className="w-5 h-5" />
             </div>
-            <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
-              Orden preparada: mover{' '}
-              <strong className="font-mono">{fmt.currency(nextShot.sourceAmount)}</strong> de{' '}
-              <strong>{nextShot.sourceName}</strong> → <strong>{nextShot.targetLabel}</strong> (
-              {nextShot.brokerLabel}).
-            </p>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                  ¡Disparo {nextShot.index} Activado! · S&P 500 en {drawdownPct.toFixed(1)}% desde ATH
+                </span>
+                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25">
+                  {spPrice.toLocaleString('es-ES', { maximumFractionDigits: 1 })} pts
+                </span>
+              </div>
+              <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
+                Objetivo ({shotPctAth}% ATH):{' '}
+                <strong className="font-mono">{fmt.currency(deployAmount)}</strong> de{' '}
+                <strong>{nextShot.sourceName}</strong> → <strong>{nextShot.targetLabel}</strong> (
+                {nextShot.brokerLabel}).
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => toggleShotExecuted(nextShot.id)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Marcar ejecutado</span>
+            </button>
+            <Link
+              to="/market"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/80 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/[0.12] text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 transition-colors"
+            >
+              <span>Ver plan</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => toggleShotExecuted(nextShot.id)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Marcar ejecutado</span>
-          </button>
+      )
+    }
+
+    // Priority 2: Reversion reached (S&P 500 recovered to ATH) & executed shot needs recharge
+    if (isReversionZone && executedCount > 0 && totalRechargeNeeded >= 250) {
+      return (
+        <div
+          className={cn(
+            'rounded-2xl border border-blue-500/35 bg-gradient-to-r from-blue-500/12 via-emerald-500/8 to-blue-500/5 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm',
+            className
+          )}
+        >
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="p-2 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/30 shrink-0">
+              <RefreshCw className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-blue-800 dark:text-blue-300">
+                Reversión completada (S&P 500 a {drawdownPct.toFixed(1)}% de ATH) · Toca recargar refugio
+              </span>
+              <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
+                Desvía <strong className="font-mono">{fmt.currency(totalRechargeNeeded)}</strong> de
+                ahorro nuevo (~{rechargeMonthsEst.toFixed(1)} meses sin vender ni tributar) para
+                rellenar tus refugios al {shotPctAth}% ATH cada uno.
+              </p>
+            </div>
+          </div>
           <Link
             to="/market"
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/80 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/[0.12] text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors shrink-0"
           >
-            <span>Ver plan</span>
+            <span>Plan de recarga</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-      </div>
-    )
+      )
+    }
+
+    return null
   }
 
   // ── Full Interactive Playbook Card ───────────────────────────────────────────
@@ -317,6 +426,9 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 <span className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25">
                   -10% · -20% · -30%
                 </span>
+                <span className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/25">
+                  {shotPctAth}% ATH / disparo ({shotPctAth * 3}% total)
+                </span>
                 {triggeredPendingShots.length > 0 && (
                   <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 animate-pulse">
                     ¡{triggeredPendingShots.length} disparo activo!
@@ -324,32 +436,69 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 )}
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Reglas mecánicas ante caídas del S&P 500 desde máximos históricos (ATH): 1 activo defensivo = 1 orden sin emociones.
+                Auto-escalado al máximo histórico (ATH) de tu cartera: define cuánto tener listo en cada refugio y cuánto recargar tras cada rebote.
               </p>
             </div>
           </div>
 
-          {/* Right: Live Summary Stats & Reset */}
-          <div className="flex items-center gap-2.5 flex-wrap">
+          {/* Right: ATH sizing switcher + Live Summary Stats + Reset */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Sizing % of Portfolio ATH selector */}
+            <div
+              title="Porcentaje del ATH de tu cartera asignado a cada uno de los 3 disparos"
+              className="inline-flex items-center gap-0.5 p-1 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200/80 dark:border-white/[0.08] text-[11px]"
+            >
+              <span className="px-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Disparo:
+              </span>
+              {([4, 5, 6] as const).map((pct) => (
+                <button
+                  key={pct}
+                  type="button"
+                  onClick={() => setShotPctAth(pct)}
+                  className={cn(
+                    'px-2 py-1 rounded-lg font-mono font-bold transition-colors cursor-pointer',
+                    shotPctAth === pct
+                      ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-2xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  )}
+                >
+                  {pct}%
+                </button>
+              ))}
+            </div>
+
             <div
               data-private
               className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.08] flex items-center gap-3"
             >
               <div>
                 <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block leading-none">
-                  Munición armada
+                  ATH Cartera {portfolioAthDate ? `(${portfolioAthDate.slice(5)})` : ''}
                 </span>
                 <span className="text-xs sm:text-sm font-mono font-extrabold text-slate-900 dark:text-white mt-0.5 block">
-                  {fmt.currency(totalArmedAmount)}{' '}
-                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                    ({totalArmedPct.toFixed(1)}%)
+                  {fmt.currency(portfolioAth)}{' '}
+                  <span className="text-[10.5px] font-semibold text-blue-600 dark:text-blue-400">
+                    → {fmt.currency(targetPerShot)}/disp.
                   </span>
                 </span>
               </div>
               <div className="h-6 w-px bg-slate-200 dark:bg-white/10" />
               <div>
                 <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block leading-none">
-                  Drawdown S&P 500
+                  Refugios hoy
+                </span>
+                <span className="text-xs sm:text-sm font-mono font-extrabold text-slate-900 dark:text-white mt-0.5 block">
+                  {fmt.currency(totalPreparedNow)}{' '}
+                  <span className="text-[10.5px] font-semibold text-slate-500 dark:text-slate-400">
+                    / {fmt.currency(totalTargetReserve)}
+                  </span>
+                </span>
+              </div>
+              <div className="h-6 w-px bg-slate-200 dark:bg-white/10" />
+              <div>
+                <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block leading-none">
+                  DD S&P 500
                 </span>
                 <span
                   className={cn(
@@ -370,11 +519,11 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
               <button
                 type="button"
                 onClick={resetCycle}
-                title="Reiniciar los 3 disparos cuando el S&P 500 recupere máximos"
+                title="Reiniciar los 3 disparos cuando el S&P 500 recupere máximos y hayas recargado los refugios"
                 className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] border border-slate-200/80 dark:border-white/[0.08] transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reiniciar ciclo</span>
+                <span>Rearmar ciclo</span>
               </button>
             )}
           </div>
@@ -392,7 +541,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
               </strong>
             </span>
             <span>
-              Máximo histórico (ATH):{' '}
+              Máximo histórico S&P 500 (ATH):{' '}
               <strong className="text-slate-900 dark:text-white">
                 {spAth > 0
                   ? `${spAth.toLocaleString('es-ES', { maximumFractionDigits: 2 })} pts`
@@ -403,7 +552,6 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
           </div>
 
           <div className="relative h-3 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-visible">
-            {/* Active drawdown fill */}
             <div
               className={cn(
                 'h-full rounded-full transition-all duration-700',
@@ -416,7 +564,6 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
               style={{ width: `${Math.max(2, needlePct)}%` }}
             />
 
-            {/* Trigger vertical ticks at -10%, -20%, -30% */}
             {[10, 20, 30].map((level) => {
               const leftPct = (level / thermometerMax) * 100
               const reached = drawdownAbs >= level
@@ -439,7 +586,6 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
             })}
           </div>
 
-          {/* Labels under ticks */}
           <div className="relative h-4 mt-1 text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">
             <span className="absolute left-0">0% (ATH)</span>
             {[10, 20, 30].map((level) => (
@@ -472,27 +618,38 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                 : -(shot.triggerPct - drawdownAbs)
             const remainingPts = spPrice > 0 && targetSpPrice > 0 ? targetSpPrice - spPrice : 0
 
+            const coveragePct =
+              shot.targetAmount > 0
+                ? Math.min(100, Math.round((shot.currentBalance / shot.targetAmount) * 100))
+                : 0
+            const shelterDelta = shot.currentBalance - shot.targetAmount
+            const isShelterFull = shot.targetAmount > 0 && shot.currentBalance >= shot.targetAmount * 0.95
+
             return (
               <div
                 key={shot.id}
                 className={cn(
                   'rounded-2xl border p-3.5 flex flex-col justify-between gap-3 transition-all',
                   isExecuted
-                    ? 'bg-emerald-500/[0.05] dark:bg-emerald-500/[0.07] border-emerald-500/30'
+                    ? execInfo?.pendingSettlement
+                      ? 'bg-blue-500/[0.05] dark:bg-blue-500/[0.07] border-blue-500/30'
+                      : 'bg-emerald-500/[0.05] dark:bg-emerald-500/[0.07] border-emerald-500/30'
                     : isTriggered
                       ? 'bg-amber-500/[0.08] dark:bg-amber-500/[0.10] border-amber-500/50 ring-1 ring-amber-500/25 shadow-sm'
                       : 'bg-slate-50/70 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/[0.08]'
                 )}
               >
-                {/* Top row: Shot number + trigger badge + live status */}
                 <div>
+                  {/* Top row: Shot badge + status */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
                           'w-6 h-6 rounded-lg font-mono text-xs font-extrabold flex items-center justify-center border shrink-0',
                           isExecuted
-                            ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                            ? execInfo?.pendingSettlement
+                              ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30'
+                              : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                             : isTriggered
                               ? 'bg-amber-500 text-white border-amber-500'
                               : 'bg-white dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/10'
@@ -543,7 +700,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                   <div className="mt-2.5 px-2.5 py-2 rounded-xl bg-white/90 dark:bg-white/[0.03] border border-slate-200/70 dark:border-white/[0.06] flex items-center justify-between gap-2 text-[11px]">
                     <div>
                       <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block leading-none">
-                        Nivel objetivo S&P 500
+                        Gatillo S&P 500
                       </span>
                       <span className="font-mono font-extrabold text-slate-900 dark:text-white mt-0.5 block">
                         {targetSpPrice > 0
@@ -553,10 +710,10 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                     </div>
                     <div className="text-right">
                       <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block leading-none">
-                        {isExecuted ? 'Ejecutado el' : isTriggered ? 'Estado' : 'Distancia'}
+                        {isExecuted ? 'Lanzado el' : isTriggered ? 'Estado' : 'Distancia'}
                       </span>
                       {isExecuted ? (
-                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+                        <span className="font-mono font-bold text-blue-600 dark:text-blue-400 mt-0.5 block">
                           {execInfo?.executedAt}
                         </span>
                       ) : isTriggered ? (
@@ -567,25 +724,64 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                         <span className="font-mono font-semibold text-slate-600 dark:text-slate-300 mt-0.5 flex items-center justify-end gap-0.5">
                           <TrendingDown className="w-3 h-3 text-slate-400" />
                           {remainingDropPct.toFixed(1)}%
-                          {remainingPts < 0
-                            ? ` (${Math.round(remainingPts)} pts)`
-                            : ''}
+                          {remainingPts < 0 ? ` (${Math.round(remainingPts)} pts)` : ''}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Order flow: Source -> Target */}
-                  <div className="mt-2.5 space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10.5px] font-semibold uppercase tracking-wider text-slate-400">
-                        Origen
+                  {/* Shelter Coverage Meter: Actual vs Optimal % ATH */}
+                  <div
+                    data-private
+                    className="mt-2.5 px-2.5 py-2 rounded-xl bg-white/75 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.06]"
+                  >
+                    <div className="flex items-center justify-between gap-1 text-[10.5px]">
+                      <span className="font-semibold text-slate-500 dark:text-slate-400">
+                        Refugio ({shotPctAth}% ATH):{' '}
+                        <strong className="font-mono text-slate-900 dark:text-white">
+                          {fmt.currency(shot.targetAmount)}
+                        </strong>
                       </span>
-                      <span data-private className="font-mono font-extrabold text-slate-900 dark:text-white">
-                        {shot.sourceAmount > 0 ? fmt.currency(shot.sourceAmount) : '0,00 €'}
+                      <span
+                        className={cn(
+                          'font-mono font-bold text-[10px]',
+                          isExecuted
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : isShelterFull
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-amber-600 dark:text-amber-400'
+                        )}
+                      >
+                        {isExecuted
+                          ? `Recargar ${fmt.currency(Math.max(0, shot.targetAmount - shot.currentBalance))}`
+                          : isShelterFull
+                            ? `Cubierto (+${fmt.currency(Math.max(0, shelterDelta))})`
+                            : `Faltan ${fmt.currency(Math.abs(shelterDelta))}`}
                       </span>
                     </div>
 
+                    <div className="w-full h-1.5 rounded-full bg-slate-200/80 dark:bg-white/[0.08] overflow-hidden mt-1.5">
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all duration-500',
+                          isExecuted
+                            ? 'bg-blue-500'
+                            : isShelterFull
+                              ? 'bg-emerald-500'
+                              : 'bg-amber-500'
+                        )}
+                        style={{ width: `${coveragePct}%` }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-1">
+                      <span>Preparado hoy: {fmt.currency(shot.currentBalance)}</span>
+                      <span>{coveragePct}%</span>
+                    </div>
+                  </div>
+
+                  {/* Order flow: Source -> Target */}
+                  <div className="mt-2.5 space-y-1 text-xs">
                     <div className="flex items-center justify-between gap-1.5">
                       <span className="font-bold text-slate-800 dark:text-slate-100 truncate">
                         {shot.sourceName}
@@ -620,18 +816,18 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 font-semibold pt-0.5">
+                    <div className="flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
                       <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                       <span className="truncate">{shot.targetLabel}</span>
                     </div>
 
-                    <div className="flex items-center justify-between gap-1 text-[10.5px] text-slate-500 dark:text-slate-400 pt-0.5">
-                      <span className="truncate">{shot.executionNote}</span>
-                    </div>
+                    <p className="text-[10.5px] text-slate-500 dark:text-slate-400 leading-snug">
+                      {shot.executionNote}
+                    </p>
                   </div>
                 </div>
 
-                {/* Action button */}
+                {/* Action footer */}
                 <div className="pt-2 border-t border-slate-200/60 dark:border-white/[0.06] flex items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                     {shot.index === 1 ? (
@@ -664,6 +860,92 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
             )
           })}
         </div>
+
+        {/* Automatic Reversion & Shelter Recharge Plan */}
+        {rechargeItems.length > 0 && (
+          <div
+            data-private
+            className={cn(
+              'mt-3.5 rounded-2xl border p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3',
+              isRechargeActionable
+                ? 'bg-blue-500/[0.07] dark:bg-blue-500/[0.10] border-blue-500/35'
+                : 'bg-slate-50/80 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/[0.08]'
+            )}
+          >
+            <div className="flex items-start gap-2.5">
+              <div
+                className={cn(
+                  'p-2 rounded-xl border shrink-0 mt-0.5',
+                  isRechargeActionable
+                    ? 'bg-blue-500/15 text-blue-600 dark:text-blue-300 border-blue-500/30'
+                    : 'bg-slate-200/70 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border-slate-300/70 dark:border-white/10'
+                )}
+              >
+                {isRechargeActionable ? (
+                  <RefreshCw className="w-4 h-4" />
+                ) : (
+                  <PiggyBank className="w-4 h-4" />
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                    {isRechargeActionable
+                      ? 'Modo Recarga Activo · Reversión completada'
+                      : 'Plan de Recarga de Refugios (cuando el S&P 500 vuelva a máximos)'}
+                  </span>
+                  <span
+                    className={cn(
+                      'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border',
+                      isRechargeActionable
+                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                        : 'bg-slate-200/80 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border-slate-300/60 dark:border-white/10'
+                    )}
+                  >
+                    {isRechargeActionable
+                      ? `Recargar ${fmt.currency(totalRechargeNeeded)}`
+                      : `En pausa (S&P 500 a ${drawdownPct.toFixed(1)}% ATH)`}
+                  </span>
+                </div>
+
+                <p className="text-[11.5px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                  {isRechargeActionable ? (
+                    <>
+                      El S&P 500 ya está cerca de máximos ({drawdownPct.toFixed(1)}%). Desvía tus
+                      próximas aportaciones nuevas (~<strong>{rechargeMonthsEst.toFixed(1)} meses</strong>{' '}
+                      a tu ritmo de {fmt.currency(monthlyPace)}/mes, <strong>0% IRPF sin vender</strong>)
+                      para rellenar:
+                    </>
+                  ) : (
+                    <>
+                      Mientras el S&P 500 siga por debajo de <strong>-3% desde ATH</strong>, sigue
+                      metiendo tus aportaciones mensuales en Renta Variable. En cuanto recupere
+                      máximos, desvía{' '}
+                      <strong className="font-mono">{fmt.currency(totalRechargeNeeded)}</strong> (~
+                      <strong>{rechargeMonthsEst.toFixed(1)} meses</strong> de ahorro, 0% IRPF) para
+                      recuperar tus refugios al {shotPctAth}% ATH:
+                    </>
+                  )}
+                </p>
+
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {rechargeItems.map(({ shot, deficit }) => (
+                    <span
+                      key={shot.id}
+                      className="inline-flex items-center gap-1.5 text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-lg bg-white dark:bg-white/[0.05] text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-white/10"
+                    >
+                      <span className="text-blue-600 dark:text-blue-400">#{shot.index}</span>
+                      <span className="font-sans font-semibold">{shot.sourceName}:</span>
+                      <span className="text-emerald-700 dark:text-emerald-400">
+                        +{fmt.currency(deficit)}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   )
