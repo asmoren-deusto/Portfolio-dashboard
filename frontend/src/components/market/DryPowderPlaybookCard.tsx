@@ -411,8 +411,8 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
     <Card className={cn('overflow-hidden border-amber-500/20', className)}>
       <div className="p-4 sm:p-5">
         {/* Header */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
-          <div className="flex items-start sm:items-center gap-3 min-w-0">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 xl:gap-4 pb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
+          <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
             <div
               className={cn(
                 'p-2.5 rounded-xl border shrink-0',
@@ -467,7 +467,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 max-w-[430px] leading-snug">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 max-w-[620px] leading-snug">
                 Auto-escalado al máximo histórico (ATH) de tu cartera: define cuánto tener listo en cada refugio y cuánto recargar tras cada rebote.
               </p>
             </div>
