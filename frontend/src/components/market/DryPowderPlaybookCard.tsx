@@ -447,39 +447,8 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
             </div>
           </div>
 
-          {/* Right: Gray Rearmar ciclo button + Live Summary Stats */}
+          {/* Right: Live Summary Stats */}
           <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap shrink-0">
-            {executedCount > 0 && !confirmingReset && (
-              <button
-                type="button"
-                onClick={() => setConfirmingReset(true)}
-                title="Reiniciar los 3 disparos cuando el S&P 500 recupere máximos y hayas recargado los refugios"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.10] text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.08] transition-colors cursor-pointer shrink-0"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Rearmar ciclo</span>
-              </button>
-            )}
-            {confirmingReset && (
-              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0">
-                <span>¿Reiniciar los 3 disparos?</span>
-                <button
-                  type="button"
-                  onClick={resetCycle}
-                  className="px-2 py-0.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold cursor-pointer transition-colors"
-                >
-                  Sí
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmingReset(false)}
-                  className="px-2 py-0.5 rounded-lg bg-slate-200/90 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 text-[11px] font-bold cursor-pointer transition-colors"
-                >
-                  No
-                </button>
-              </div>
-            )}
-
             <div
               data-private
               className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.08] flex items-center gap-3"
@@ -868,17 +837,17 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
         </div>
 
         {/* Automatic Reversion & Shelter Recharge Plan */}
-        {rechargeItems.length > 0 && (
+        {(rechargeItems.length > 0 || executedCount > 0) && (
           <div
             data-private
             className={cn(
-              'mt-3.5 rounded-2xl border p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3',
+              'mt-3.5 rounded-2xl border p-3.5',
               isRechargeActionable
                 ? 'bg-blue-500/[0.07] dark:bg-blue-500/[0.10] border-blue-500/35'
                 : 'bg-slate-50/80 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/[0.08]'
             )}
           >
-            <div className="flex items-start gap-2.5">
+            <div className="flex items-start gap-2.5 w-full">
               <div
                 className={cn(
                   'p-2 rounded-xl border shrink-0 mt-0.5',
@@ -893,64 +862,109 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                   <PiggyBank className="w-4 h-4" />
                 )}
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-extrabold text-slate-900 dark:text-white">
-                    {isRechargeActionable
-                      ? 'Modo Recarga Activo · Solo con aportaciones mensuales'
-                      : 'Plan de Recarga · Solo con aportaciones mensuales (al volver a máximos)'}
+                    {rechargeItems.length === 0
+                      ? 'Refugios cubiertos · Listo para rearmar ciclo'
+                      : isRechargeActionable
+                        ? 'Modo Recarga Activo · Solo con aportaciones mensuales'
+                        : 'Plan de Recarga · Solo con aportaciones mensuales (al volver a máximos)'}
                   </span>
-                  <span
-                    className={cn(
-                      'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border',
-                      isRechargeActionable
-                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                        : 'bg-slate-200/80 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border-slate-300/60 dark:border-white/10'
-                    )}
-                  >
-                    {isRechargeActionable
-                      ? `Recargar ${fmt.currency(totalRechargeNeeded)}`
-                      : `En pausa (S&P 500 a ${drawdownPct.toFixed(1)}% ATH)`}
-                  </span>
+                  {rechargeItems.length > 0 && (
+                    <span
+                      className={cn(
+                        'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border',
+                        isRechargeActionable
+                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                          : 'bg-slate-200/80 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border-slate-300/60 dark:border-white/10'
+                      )}
+                    >
+                      {isRechargeActionable
+                        ? `Recargar ${fmt.currency(totalRechargeNeeded)}`
+                        : `En pausa (S&P 500 a ${drawdownPct.toFixed(1)}% ATH)`}
+                    </span>
+                  )}
                 </div>
 
-                <p className="text-[11.5px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
-                  {isRechargeActionable ? (
-                    <>
-                      El S&P 500 ya está en máximos ({drawdownPct.toFixed(1)}%).{' '}
-                      <strong>Sin vender ni traspasar bolsa</strong>, redirige únicamente tus
-                      aportaciones mensuales nuevas (~<strong>{rechargeMonthsEst.toFixed(1)} meses</strong>{' '}
-                      a {fmt.currency(monthlyPace)}/mes, <strong>0% IRPF</strong>) en orden{' '}
-                      <strong className="font-mono">#1 → #2 → #3</strong> para rellenar:
-                    </>
-                  ) : (
-                    <>
-                      Mientras el S&P 500 siga por debajo de <strong>-3% desde ATH</strong>, sigue
-                      invirtiendo tus aportaciones mensuales en Renta Variable. Al recuperar máximos,
-                      recarga <strong>solo con aportaciones nuevas</strong> (sin vender ni traspasar
-                      bolsa, 0% IRPF) un total de{' '}
-                      <strong className="font-mono">{fmt.currency(totalRechargeNeeded)}</strong> (~
-                      <strong>{rechargeMonthsEst.toFixed(1)} meses</strong>) en orden{' '}
-                      <strong className="font-mono">#1 → #2 → #3</strong>:
-                    </>
-                  )}
-                </p>
+                {rechargeItems.length > 0 ? (
+                  <p className="text-[11.5px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                    {isRechargeActionable ? (
+                      <>
+                        El S&P 500 ya está en máximos ({drawdownPct.toFixed(1)}%).{' '}
+                        <strong>Sin vender ni traspasar bolsa</strong>, redirige únicamente tus
+                        aportaciones mensuales nuevas (~<strong>{rechargeMonthsEst.toFixed(1)} meses</strong>{' '}
+                        a {fmt.currency(monthlyPace)}/mes, <strong>0% IRPF</strong>) en orden{' '}
+                        <strong className="font-mono">#1 → #2 → #3</strong> para rellenar:
+                      </>
+                    ) : (
+                      <>
+                        Mientras el S&P 500 siga por debajo de <strong>-3% desde ATH</strong>, sigue
+                        invirtiendo tus aportaciones mensuales en Renta Variable. Al recuperar máximos,
+                        recarga <strong>solo con aportaciones nuevas</strong> (sin vender ni traspasar
+                        bolsa, 0% IRPF) un total de{' '}
+                        <strong className="font-mono">{fmt.currency(totalRechargeNeeded)}</strong> (~
+                        <strong>{rechargeMonthsEst.toFixed(1)} meses</strong>) en orden{' '}
+                        <strong className="font-mono">#1 → #2 → #3</strong>:
+                      </>
+                    )}
+                  </p>
+                ) : (
+                  <p className="text-[11.5px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                    Todos tus refugios cubren el objetivo piramidal del 15% ATH. Cuando quieras iniciar
+                    un nuevo ciclo de disparos, pulsa en Rearmar ciclo.
+                  </p>
+                )}
 
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {rechargeItems.map(({ shot, deficit }) => (
-                    <span
-                      key={shot.id}
-                      className="inline-flex items-center gap-1.5 text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-lg bg-white dark:bg-white/[0.05] text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-white/10"
+                <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+                  <div className="flex flex-wrap gap-1.5">
+                    {rechargeItems.map(({ shot, deficit }) => (
+                      <span
+                        key={shot.id}
+                        className="inline-flex items-center gap-1.5 text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-lg bg-white dark:bg-white/[0.05] text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-white/10"
+                      >
+                        <span className="text-blue-600 dark:text-blue-400">
+                          #{shot.index} ({shot.shotPctAth}%)
+                        </span>
+                        <span className="font-sans font-semibold">{shot.sourceName}:</span>
+                        <span className="text-emerald-700 dark:text-emerald-400">
+                          +{fmt.currency(deficit)}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+
+                  {executedCount > 0 && !confirmingReset && (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingReset(true)}
+                      title="Reiniciar los 3 disparos cuando el S&P 500 recupere máximos y hayas recargado los refugios"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold bg-slate-200/75 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-700 dark:text-slate-200 border border-slate-300/70 dark:border-white/10 transition-colors cursor-pointer shrink-0 ml-auto"
                     >
-                      <span className="text-blue-600 dark:text-blue-400">
-                        #{shot.index} ({shot.shotPctAth}%)
-                      </span>
-                      <span className="font-sans font-semibold">{shot.sourceName}:</span>
-                      <span className="text-emerald-700 dark:text-emerald-400">
-                        +{fmt.currency(deficit)}
-                      </span>
-                    </span>
-                  ))}
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Rearmar ciclo</span>
+                    </button>
+                  )}
+
+                  {confirmingReset && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0 ml-auto">
+                      <span>¿Reiniciar los 3 disparos?</span>
+                      <button
+                        type="button"
+                        onClick={resetCycle}
+                        className="px-2 py-0.5 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-[10.5px] font-extrabold cursor-pointer transition-colors"
+                      >
+                        Sí
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingReset(false)}
+                        className="px-2 py-0.5 rounded-md bg-slate-200/90 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 text-[10.5px] font-bold cursor-pointer transition-colors"
+                      >
+                        No
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
