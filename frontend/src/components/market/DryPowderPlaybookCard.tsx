@@ -411,8 +411,8 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
     <Card className={cn('overflow-hidden border-amber-500/20', className)}>
       <div className="p-4 sm:p-5">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
-          <div className="flex items-start sm:items-center gap-3">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 dark:border-white/[0.06]">
+          <div className="flex items-start sm:items-center gap-3 min-w-0">
             <div
               className={cn(
                 'p-2.5 rounded-xl border shrink-0',
@@ -423,7 +423,7 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
             >
               <Crosshair className="w-5 h-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
                   Protocolo Pólvora Seca · 3 Disparos S&P 500
@@ -467,14 +467,14 @@ export const DryPowderPlaybookCard: React.FC<DryPowderPlaybookCardProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 max-w-[430px] leading-snug">
                 Auto-escalado al máximo histórico (ATH) de tu cartera: define cuánto tener listo en cada refugio y cuánto recargar tras cada rebote.
               </p>
             </div>
           </div>
 
-          {/* Right: ATH sizing switcher + Live Summary Stats + Reset */}
-          <div className="flex items-center gap-2 flex-wrap">
+          {/* Right: ATH sizing switcher + Live Summary Stats (side-by-side on desktop) */}
+          <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap shrink-0">
             {/* Sizing % of Portfolio ATH selector */}
             <div
               title="Porcentaje del ATH de tu cartera asignado a cada uno de los 3 disparos (10% / 15% / 20% total)"
