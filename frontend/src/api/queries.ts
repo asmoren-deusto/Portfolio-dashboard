@@ -527,7 +527,7 @@ export interface Sp500ChartPoint {
   label: string
   time_ny?: string
   date?: string
-  phase?: 'PRE' | 'REGULAR' | 'POST'
+  phase?: 'PRE' | 'REGULAR' | 'POST' | 'FUTURES'
   price: number
   change_pct: number
   change_pts: number
