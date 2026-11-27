@@ -2034,28 +2034,28 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
 
     reg_p = _clean_float(q_gspc.get("regular_price") or q_gspc.get("price")) or 6900.0
     prev_c = _clean_float(q_gspc.get("prev_close")) or reg_p
-    m_state = q_gspc.get("market_state", "CLOSED")
+    m_state = get_market_session_for_ticker("^GSPC")
 
-    is_pre = (m_state == "PRE")
+    is_pre = m_state in ("PRE", "FUTURES", "POST")
 
-    # In PRE-market, the official baseline close is Friday's cash close (regular_price),
-    # NOT prev_close which still points to Thursday until Wall Street opens.
+    # Outside regular NYSE cash session (FUTURES / PRE / POST), baseline is the last completed cash close (reg_p),
+    # and live price is projected via ES=F futures using the exact same formula as /api/market/indices.
     ref_c = reg_p if is_pre else (prev_c if (prev_c and prev_c > 0) else reg_p)
 
     es_prev = _clean_float(q_es.get("prev_close")) or 6935.0
-    es_cur = _clean_float(q_es.get("price")) or es_prev
-    es_move = (es_cur - es_prev) / es_prev if es_prev and es_prev > 0 else 0.0
+    es_cur = _clean_float(q_es.get("price") or q_es.get("regular_price")) or es_prev
+    es_pct = round((es_cur - es_prev) / es_prev * 100.0, 2) if (es_prev and es_prev > 0) else 0.0
 
-    live_p = round(ref_c * (1.0 + es_move), 2) if is_pre else reg_p
+    live_p = round(ref_c * (1.0 + es_pct / 100.0), 2) if is_pre else reg_p
     cur_p = live_p or reg_p
     chg_pts = round(cur_p - ref_c, 2)
-    chg_pct = round((cur_p - ref_c) / ref_c * 100.0, 2)
+    chg_pct = es_pct if is_pre else round((cur_p - ref_c) / ref_c * 100.0, 2)
 
     interval = "5m" if p == "1d" else "15m" if p == "5d" else "1h"
-    dl_period = "2d" if p == "1d" else p
+    dl_period = "5d" if p == "1d" else p
     prepost = (p == "1d")
 
-    tickers = ["^GSPC", "ES=F"] if p == "1d" else ["^GSPC"]
+    tickers = ["^GSPC", "ES=F", "SPY", "CSPX.L", "1655.T"] if p == "1d" else ["^GSPC"]
     df = yf.download(tickers, period=dl_period, interval=interval, prepost=prepost, progress=False)
     closes = df["Close"] if "Close" in df else df
     if closes.index.tz is None:
@@ -2067,6 +2067,9 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
     if p == "1d":
         gspc_s = closes["^GSPC"] if (isinstance(closes, pd.DataFrame) and "^GSPC" in closes) else None
         es_s = closes["ES=F"] if (isinstance(closes, pd.DataFrame) and "ES=F" in closes) else None
+        spy_s = closes["SPY"] if (isinstance(closes, pd.DataFrame) and "SPY" in closes) else None
+        cspx_s = closes["CSPX.L"] if (isinstance(closes, pd.DataFrame) and "CSPX.L" in closes) else None
+        tky_s = closes["1655.T"] if (isinstance(closes, pd.DataFrame) and "1655.T" in closes) else None
 
         now_ny_d = now_ny.date()
         is_weekday = (now_madrid.weekday() < 5)
@@ -2077,7 +2080,7 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
             for idx in closes.index
             if idx.astimezone(madrid_tz).date() < now_madrid.date()
         )))
-        yesterday_madrid_date = past_dates[-1] if past_dates else None
+        yesterday_madrid_date = past_dates[-1] if past_dates else (now_madrid.date() - pd.Timedelta(days=1))
 
         today_idxs = [
             idx for idx in closes.index
@@ -2092,14 +2095,16 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
         is_active_today = is_weekday and (len(today_idxs) >= 2 or is_pre)
 
         if is_active_today and today_idxs:
-            # Anchor ES=F at yesterday's 22:00 Madrid close so overnight projection starts cleanly at ref_c (0.00%)
+            es_raw_in_win = es_s.loc[today_idxs].dropna() if es_s is not None else pd.Series(dtype=float)
+            has_live_es_bars = not es_raw_in_win.empty
+
+            # Anchor ES=F at yesterday's 22:00 Madrid close so overnight projection starts cleanly at ref_c
             es_anchor = _clean_float(q_es.get("prev_close"))
-            if es_s is not None:
-                es_in_window = es_s.loc[today_idxs].dropna()
-                if not es_in_window.empty and (not es_anchor or es_anchor <= 0):
-                    es_anchor = float(es_in_window.iloc[0])
-                elif not es_in_window.empty and yesterday_madrid_date:
-                    y_close_bars = es_in_window[es_in_window.index.map(
+            if has_live_es_bars:
+                if not es_anchor or es_anchor <= 0:
+                    es_anchor = float(es_raw_in_win.iloc[0])
+                elif yesterday_madrid_date:
+                    y_close_bars = es_raw_in_win[es_raw_in_win.index.map(
                         lambda x: x.astimezone(madrid_tz).date() == yesterday_madrid_date and x.astimezone(madrid_tz).hour == 22
                     )]
                     if not y_close_bars.empty:
@@ -2107,8 +2112,64 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
             if not es_anchor or es_anchor <= 0:
                 es_anchor = 1.0
 
-            es_ffill = es_s.loc[today_idxs].ffill().bfill() if es_s is not None else None
+            es_ffill = es_s.loc[today_idxs].ffill().bfill() if (es_s is not None and has_live_es_bars) else None
             gspc_win = gspc_s.loc[today_idxs] if gspc_s is not None else None
+
+            # Build fallback international S&P 500 intraday series (Tokyo 1655.T + London CSPX.L + US SPY)
+            # for post-holiday sessions where Yahoo's ES=F bar table has not rolled over yet
+            intl_proj: dict = {}
+            if not has_live_es_bars:
+                rel_moves = []
+                last_rel = 0.0
+                tky_win = tky_s.loc[today_idxs].dropna() if tky_s is not None else pd.Series(dtype=float)
+                tky_base = float(tky_win.iloc[0]) if not tky_win.empty else None
+                cspx_win = cspx_s.loc[today_idxs].dropna() if cspx_s is not None else pd.Series(dtype=float)
+                cspx_base = float(cspx_win.iloc[0]) if not cspx_win.empty else None
+                spy_win = spy_s.loc[today_idxs].dropna() if spy_s is not None else pd.Series(dtype=float)
+                spy_base = float(spy_win.iloc[0]) if not spy_win.empty else None
+
+                tky_end_rel = ((float(tky_win.iloc[-1]) - tky_base) / tky_base) if (tky_base and tky_base > 0) else 0.0
+
+                for idx in today_idxs:
+                    if spy_base and spy_base > 0 and idx in spy_win.index:
+                        last_rel = (float(spy_win.loc[idx]) - spy_base) / spy_base
+                    elif cspx_base and cspx_base > 0 and idx in cspx_win.index:
+                        last_rel = tky_end_rel + (float(cspx_win.loc[idx]) - cspx_base) / cspx_base
+                    elif tky_base and tky_base > 0 and idx in tky_win.index:
+                        last_rel = (float(tky_win.loc[idx]) - tky_base) / tky_base
+                    rel_moves.append(last_rel)
+
+                # Anchor start atyesterday 22:00 = ref_c and end at cur_p (ES=F live quote) while preserving real intraday swings
+                n_bars = len(today_idxs)
+                end_rel = rel_moves[-1] if rel_moves else 0.0
+                target_mv = (cur_p - ref_c) / ref_c if (ref_c and ref_c > 0) else 0.0
+                for i, idx in enumerate(today_idxs):
+                    frac = i / max(1, n_bars - 1)
+                    # Blend linear drift + actual intraday ETF deviations around the trend
+                    dev = (rel_moves[i] - (end_rel * frac)) if rel_moves else 0.0
+                    mv = (target_mv * frac) + dev
+                    intl_proj[idx] = round(ref_c * (1.0 + mv), 2)
+
+                # Prepend 22:00 yesterday close anchor point if today_idxs starts at 01:00 Tokyo
+                if yesterday_madrid_date:
+                    dt_y_close = datetime.combine(
+                        yesterday_madrid_date, datetime.min.time().replace(hour=22)
+                    ).replace(tzinfo=madrid_tz)
+                    y_unix = int(dt_y_close.timestamp())
+                    first_unix = int(today_idxs[0].timestamp())
+                    if first_unix > y_unix + 300:
+                        dt_y_ny = dt_y_close.astimezone(ny_tz)
+                        points.append({
+                            "time": dt_y_close.isoformat(),
+                            "time_unix": y_unix,
+                            "label": dt_y_close.strftime("%H:%M"),
+                            "time_ny": dt_y_ny.strftime("%H:%M"),
+                            "date": dt_y_close.strftime("%Y-%m-%d"),
+                            "phase": "POST",
+                            "price": round(ref_c, 2),
+                            "change_pct": 0.0,
+                            "change_pts": 0.0,
+                        })
 
             for idx in today_idxs:
                 dt_m = idx.astimezone(madrid_tz)
@@ -2117,6 +2178,7 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
                 is_today_ny = (dt_n.date() == now_ny_d)
                 is_regular_bar = is_today_ny and (9 * 60 + 30 <= mins_ny < 16 * 60)
                 is_post_bar = is_today_ny and (mins_ny >= 16 * 60)
+                is_pre_bar = is_today_ny and (4 * 60 <= mins_ny < 9 * 60 + 30)
 
                 p_val = None
                 if is_regular_bar and gspc_win is not None and not pd.isna(gspc_win.loc[idx]):
@@ -2125,6 +2187,8 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
                     ep_val = float(es_ffill.loc[idx])
                     es_mv = (ep_val - es_anchor) / es_anchor
                     p_val = round(ref_c * (1.0 + es_mv), 2)
+                elif idx in intl_proj:
+                    p_val = intl_proj[idx]
                 elif gspc_win is not None and not pd.isna(gspc_win.loc[idx]):
                     p_val = round(float(gspc_win.loc[idx]), 2)
 
@@ -2133,7 +2197,12 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
 
                 pt_chg_pts = round(p_val - ref_c, 2)
                 pt_chg_pct = round((p_val - ref_c) / ref_c * 100.0, 2)
-                phase = "REGULAR" if is_regular_bar else ("POST" if is_post_bar else "PRE")
+                phase = (
+                    "REGULAR" if is_regular_bar
+                    else "POST" if is_post_bar
+                    else "PRE" if is_pre_bar
+                    else "FUTURES"
+                )
                 points.append({
                     "time": dt_m.isoformat(),
                     "time_unix": int(idx.timestamp()),
@@ -2146,20 +2215,26 @@ def _fetch_sp500_chart_sync(period: str = "1d") -> dict:
                     "change_pts": pt_chg_pts,
                 })
 
-            # Ensure latest live quote point is present
+            # Always ensure the latest point reflects the exact live futures / index price (cur_p)
             now_unix = int(now_madrid.timestamp())
-            if not points or (now_unix - points[-1]["time_unix"] >= 120):
+            live_phase = m_state if m_state in ("REGULAR", "PRE", "POST", "FUTURES") else ("PRE" if is_pre else "REGULAR")
+            if not points or (now_unix - points[-1]["time_unix"] >= 60):
                 points.append({
                     "time": now_madrid.isoformat(),
                     "time_unix": now_unix,
                     "label": now_madrid.strftime("%H:%M"),
                     "time_ny": now_ny.strftime("%H:%M"),
                     "date": now_madrid.strftime("%Y-%m-%d"),
-                    "phase": "PRE" if is_pre else ("REGULAR" if m_state == "REGULAR" else "POST"),
+                    "phase": live_phase,
                     "price": cur_p,
                     "change_pct": chg_pct,
                     "change_pts": chg_pts,
                 })
+            else:
+                points[-1]["price"] = cur_p
+                points[-1]["change_pct"] = chg_pct
+                points[-1]["change_pts"] = chg_pts
+                points[-1]["phase"] = live_phase
 
             # Identical 6 international session markers as /simulated-portfolio (Madrid time)
             if yesterday_madrid_date:

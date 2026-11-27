@@ -464,7 +464,9 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                       ? 'REGULAR'
                       : hoveredPoint.phase === 'PRE'
                         ? 'PRE-MKT'
-                        : 'AFTER-HOURS'}
+                        : hoveredPoint.phase === 'FUTURES'
+                          ? 'FUTUROS'
+                          : 'AFTER-HOURS'}
                   </span>
                 )}
               </div>
@@ -495,12 +497,18 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
             </div>
           </div>
         ) : summary?.is_pre_market ? (
-          /* Pre-market live display matching SimulatedPortfolioCard reference */
+          /* Pre-market / Futures live display matching SimulatedPortfolioCard reference */
           <div>
             <div className="min-h-[18px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 flex-wrap text-slate-600 dark:text-slate-300">
               <span className="flex items-center gap-1.5">
                 <span className={cn('live-dot', changePct >= 0 ? 'emerald' : 'warn')} />
-                <span>Pre-mercado CME Futures</span>
+                <span>
+                  {summary.market_state === 'FUTURES'
+                    ? 'Futuros S&P 500 (CME Globex)'
+                    : summary.market_state === 'POST'
+                      ? 'After-Hours CME Futures'
+                      : 'Pre-mercado CME Futures'}
+                </span>
               </span>
               {summary.official_close_price && (
                 <>
@@ -761,7 +769,7 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                 'live-dot',
                 summary?.market_state === 'REGULAR'
                   ? 'emerald'
-                  : summary?.market_state === 'PRE'
+                  : summary?.market_state === 'PRE' || summary?.market_state === 'FUTURES' || summary?.market_state === 'POST'
                     ? 'warn'
                     : 'slate'
               )}
@@ -771,9 +779,11 @@ export const Sp500RealtimeChartCard: React.FC<Sp500RealtimeChartCardProps> = ({
                 ? 'ABIERTO'
                 : summary?.market_state === 'PRE'
                   ? 'PRE-MKT'
-                  : summary?.market_state === 'POST'
-                    ? 'AFTER-HOURS'
-                    : 'CERRADO'}
+                  : summary?.market_state === 'FUTURES'
+                    ? 'FUTUROS CME'
+                    : summary?.market_state === 'POST'
+                      ? 'AFTER-HOURS'
+                      : 'CERRADO'}
             </span>
           </div>
         </div>
